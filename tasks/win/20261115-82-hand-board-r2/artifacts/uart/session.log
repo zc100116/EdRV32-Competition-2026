@@ -1,0 +1,1366 @@
+[23:08:19.454][RX] 
+[23:08:19.454][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:08:19.454][RX]   E         D   D   R   R   V   V      3      2 
+[23:08:19.454][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:08:19.454][RX]   E         D   D   R  R     V V       3   2    
+[23:08:19.454][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:08:19.454][RX] 
+[23:08:19.454][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:08:19.454][RX] CHIP_ID: 0xed320001
+[23:08:19.454][RX] CLK_SYS_HZ: 125000000
+[23:08:19.454][RX] ROM bytes: 16384
+[23:08:19.454][RX] SRAM bytes: 65536
+[23:08:19.454][RX] I-cache bytes: 8192
+[23:08:19.454][RX] D-cache bytes: 8192
+[23:08:19.454][RX] MEM_READY: 1
+[23:08:19.454][RX] Build commit: 92b38fd2
+[23:08:19.454][RX] Compiler version: GCC 15.2.0
+[23:08:19.560][RX] Boot SRAM
+[23:08:19.560][RX] Monitor: EdRV32
+[23:08:19.560][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[23:18:26.782][RX] 
+[23:18:26.782][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:18:26.782][RX]   E         D   D   R   R   V   V      3      2 
+[23:18:26.782][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:18:26.782][RX]   E         D   D   R  R     V V       3   2    
+[23:18:26.782][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:18:26.782][RX] 
+[23:18:26.782][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:18:26.782][RX] CHIP_ID: 0xed320001
+[23:18:26.782][RX] CLK_SYS_HZ: 125000000
+[23:18:26.782][RX] ROM bytes: 16384
+[23:18:26.782][RX] SRAM bytes: 65536
+[23:18:26.782][RX] I-cache bytes: 8192
+[23:18:26.782][RX] D-cache bytes: 8192
+[23:18:26.782][RX] MEM_READY: 1
+[23:18:26.782][RX] Build commit: 92b38fd2
+[23:18:26.782][RX] Compiler version: GCC 15.2.0
+[23:18:26.885][RX] BIOS: EdRV32
+[23:18:26.885][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[23:18:29.939][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[23:18:29.946][RX] Input error: type 1-4 then Enter
+[23:18:29.946][SYS] Input error: type 1-4 then Enter
+[23:18:29.946][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[23:18:33.168][RX] ETH link: up
+[23:18:33.168][RX] ETH load ready 192.168.1.10:5000
+[23:18:33.715][SYS] 等待网卡 以太网 就绪 … 用时 0.5 s
+[23:18:33.928][RX] Load bytes: 19863208 segments: 5
+[23:18:33.928][RX] Load result: PASS
+[23:18:33.928][RX] Run: 0x90000000
+[23:18:35.456][RX] LVGL v9.6.0 DIRECT ARGB8888 1280x720 batch=32
+[23:18:35.456][RX] Showcase: EdRV32 showcase v2
+[23:18:35.515][RX] ETH peer IP: 0xc0a80102
+[23:18:35.525][RX] ETH peer port: 57050
+[23:18:35.535][RX] showcase first frame
+[23:18:35.986][RX] CPU%/max_us 2/1171 0/142 6/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:36.005][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:36.990][RX] CPU%/max_us 2/1196 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:37.009][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:38.009][RX] CPU%/max_us 2/1196 0/142 0/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:38.029][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:39.018][RX] CPU%/max_us 3/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:39.038][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:40.027][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:40.047][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:41.039][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:41.058][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:42.048][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:42.068][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:43.059][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:43.078][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:44.068][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:44.089][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:45.078][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:45.098][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:46.089][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:46.109][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:47.099][RX] CPU%/max_us 3/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:47.119][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:48.109][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:48.129][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:49.118][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:49.138][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:50.127][RX] CPU%/max_us 2/1306 0/142 0/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:50.147][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:51.139][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:51.159][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:52.148][RX] CPU%/max_us 2/1306 0/142 0/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:52.169][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:53.161][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:53.180][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:54.173][RX] CPU%/max_us 2/1306 0/142 0/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:54.193][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:55.187][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:55.207][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:56.198][RX] CPU%/max_us 2/1306 0/142 0/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:56.218][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:57.207][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:57.227][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:58.216][RX] CPU%/max_us 2/1306 0/142 0/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:58.236][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:18:59.229][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:18:59.249][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:00.238][RX] CPU%/max_us 2/1306 0/142 0/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:00.259][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:01.248][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:01.268][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:02.258][RX] CPU%/max_us 2/1306 0/142 0/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:02.278][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:03.269][RX] CPU%/max_us 2/1306 0/142 1/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:03.289][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:03.585][SYS] UDP 已监听 192.168.1.2:6000 · console
+[23:19:03.962][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[23:19:03.975][RX] ETH peer IP: 0xc0a80102
+[23:19:03.984][RX] ETH peer port: 6000
+[23:19:04.278][RX] CPU%/max_us 2/1306 0/142 7/48281 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:04.293][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:05.465][RX] CPU%/max_us 1/1306 0/142 31/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:05.486][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:06.473][RX] CPU%/max_us 3/1434 62/670 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:06.484][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:06.576][RX] hand fps=21 npu=38.5 wait=0.0 decode=19.9 kpt=0.0 gui=0.0 e2e=0.0 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=38% npu_gap=0.0
+[23:19:06.647][RX] hand_evt ms=39873 pinch=0 d=1.51 fingers=00100 rps=none size=284
+[23:19:06.686][RX] hand_evt ms=39911 pinch=0 d=1.38 fingers=00111 rps=none size=307
+[23:19:07.486][RX] CPU%/max_us 3/1653 61/1302 7/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:07.534][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:07.625][RX] hand fps=24 npu=38.6 wait=2.1 decode=20.0 kpt=0.7 gui=31.2 e2e=111.5 period=39.7 hands=1 size=251 d=1.07 fingers=00111 rps=none idle=26% npu_gap=1.1
+[23:19:08.492][RX] CPU%/max_us 3/1740 63/1302 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:08.541][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:08.633][RX] hand fps=24 npu=38.6 wait=2.4 decode=20.0 kpt=0.8 gui=38.4 e2e=111.4 period=40.1 hands=1 size=254 d=1.14 fingers=00111 rps=none idle=26% npu_gap=1.5
+[23:19:09.505][RX] CPU%/max_us 3/1740 64/1302 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:09.526][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:09.646][RX] hand fps=24 npu=38.5 wait=2.3 decode=20.0 kpt=0.8 gui=44.8 e2e=128.1 period=39.8 hands=1 size=258 d=1.11 fingers=00111 rps=none idle=26% npu_gap=1.2
+[23:19:10.516][RX] CPU%/max_us 3/1744 64/1302 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:10.564][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:10.649][RX] hand fps=24 npu=38.6 wait=2.3 decode=20.0 kpt=0.8 gui=38.4 e2e=111.3 period=39.8 hands=1 size=285 d=1.21 fingers=00111 rps=none idle=26% npu_gap=1.2
+[23:19:11.527][RX] CPU%/max_us 3/1744 64/1302 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:11.549][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:11.651][RX] hand fps=24 npu=38.6 wait=2.1 decode=20.0 kpt=0.8 gui=47.1 e2e=128.0 period=39.9 hands=1 size=295 d=1.18 fingers=00111 rps=none idle=26% npu_gap=1.3
+[23:19:12.538][RX] CPU%/max_us 3/1774 64/1302 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:12.591][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:12.681][RX] hand fps=24 npu=38.6 wait=2.2 decode=20.0 kpt=0.8 gui=38.0 e2e=111.2 period=39.7 hands=1 size=215 d=0.91 fingers=00111 rps=none idle=25% npu_gap=1.1
+[23:19:12.722][RX] hand_evt ms=45938 pinch=0 d=0.95 fingers=00110 rps=none size=209
+[23:19:12.776][RX] hand_evt ms=46003 pinch=0 d=2.16 fingers=01000 rps=none size=208
+[23:19:12.970][RX] hand_evt ms=46196 pinch=0 d=3.12 fingers=00000 rps=rock size=212
+[23:19:13.011][RX] hand_evt ms=46234 pinch=0 d=3.47 fingers=01000 rps=none size=214
+[23:19:13.146][RX] hand_evt ms=46350 pinch=0 d=2.82 fingers=00000 rps=rock size=218
+[23:19:13.182][RX] hand_evt ms=46399 pinch=0 d=4.93 fingers=01000 rps=none size=222
+[23:19:13.223][RX] hand_evt ms=46429 pinch=0 d=2.73 fingers=00000 rps=rock size=218
+[23:19:13.264][RX] hand_evt ms=46466 pinch=0 d=3.57 fingers=00001 rps=none size=219
+[23:19:13.306][RX] hand_evt ms=46505 pinch=0 d=4.68 fingers=01000 rps=none size=222
+[23:19:13.347][RX] hand_evt ms=46543 pinch=0 d=2.57 fingers=00000 rps=rock size=222
+[23:19:13.400][RX] hand_evt ms=46621 pinch=0 d=3.64 fingers=00001 rps=none size=221
+[23:19:13.443][RX] hand_evt ms=46659 pinch=0 d=3.39 fingers=00000 rps=rock size=219
+[23:19:13.517][RX] hand_evt ms=46736 pinch=0 d=2.45 fingers=00100 rps=none size=220
+[23:19:13.558][RX] CPU%/max_us 3/1774 65/1302 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:13.589][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:13.707][RX] hand fps=24 npu=38.5 wait=1.5 decode=20.0 kpt=0.9 gui=32.9 e2e=111.2 period=39.8 hands=1 size=219 d=3.39 fingers=00000 rps=rock idle=26% npu_gap=1.2
+[23:19:13.738][RX] hand_evt ms=46776 pinch=0 d=2.74 fingers=00000 rps=rock size=221
+[23:19:13.780][RX] hand_evt ms=46813 pinch=0 d=2.42 fingers=00100 rps=none size=221
+[23:19:13.812][RX] hand_evt ms=46907 pinch=0 d=3.46 fingers=00000 rps=rock size=220
+[23:19:13.852][RX] hand_evt ms=46937 pinch=0 d=2.76 fingers=00101 rps=none size=215
+[23:19:13.894][RX] hand_evt ms=46971 pinch=0 d=2.63 fingers=00100 rps=none size=211
+[23:19:13.935][RX] hand_evt ms=47113 pinch=0 d=2.76 fingers=00110 rps=none size=199
+[23:19:14.008][RX] hand_evt ms=47229 pinch=0 d=2.56 fingers=00100 rps=none size=179
+[23:19:14.254][RX] hand_evt ms=47473 pinch=0 d=2.85 fingers=00110 rps=none size=185
+[23:19:14.296][RX] hand_evt ms=47511 pinch=0 d=2.88 fingers=00100 rps=none size=188
+[23:19:14.339][RX] hand_evt ms=47550 pinch=0 d=3.12 fingers=00110 rps=none size=196
+[23:19:14.380][RX] hand_evt ms=47589 pinch=0 d=3.16 fingers=00100 rps=none size=195
+[23:19:14.420][RX] hand_evt ms=47627 pinch=0 d=3.08 fingers=00110 rps=none size=197
+[23:19:14.460][RX] hand_evt ms=47666 pinch=0 d=3.13 fingers=00100 rps=none size=198
+[23:19:14.522][RX] hand_evt ms=47743 pinch=0 d=4.25 fingers=00000 rps=rock size=209
+[23:19:14.605][RX] CPU%/max_us 3/1774 63/1302 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:14.625][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:14.717][RX] hand fps=24 npu=38.6 wait=2.6 decode=20.0 kpt=0.9 gui=43.2 e2e=111.2 period=40.2 hands=1 size=198 d=3.13 fingers=00100 rps=none idle=27% npu_gap=1.6
+[23:19:14.758][RX] hand_evt ms=47783 pinch=0 d=3.97 fingers=00001 rps=none size=215
+[23:19:14.800][RX] hand_evt ms=47820 pinch=0 d=4.56 fingers=00000 rps=rock size=219
+[23:19:14.830][RX] hand_evt ms=47878 pinch=0 d=4.12 fingers=00001 rps=none size=218
+[23:19:14.870][RX] hand_evt ms=48080 pinch=0 d=3.49 fingers=01000 rps=none size=219
+[23:19:15.553][RX] CPU%/max_us 3/1774 64/1302 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:15.588][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:15.697][RX] hand fps=24 npu=38.5 wait=1.8 decode=20.0 kpt=0.9 gui=45.7 e2e=127.8 period=39.7 hands=1 size=197 d=2.16 fingers=01000 rps=none idle=26% npu_gap=1.1
+[23:19:16.581][RX] CPU%/max_us 3/1774 65/1302 3/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:16.627][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:16.718][RX] hand fps=25 npu=38.5 wait=0.9 decode=20.0 kpt=0.8 gui=0.0 e2e=0.0 period=38.6 hands=1 size=175 d=1.59 fingers=01000 rps=none idle=25% npu_gap=0.0
+[23:19:17.589][RX] CPU%/max_us 3/1868 65/1302 3/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:17.632][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:17.719][RX] hand fps=24 npu=38.5 wait=1.2 decode=20.0 kpt=0.8 gui=37.4 e2e=111.0 period=39.5 hands=1 size=175 d=1.20 fingers=01000 rps=none idle=26% npu_gap=0.9
+[23:19:17.975][RX] hand_evt ms=51201 pinch=0 d=1.18 fingers=00000 rps=rock size=172
+[23:19:18.017][RX] hand_evt ms=51240 pinch=0 d=1.39 fingers=01000 rps=none size=186
+[23:19:18.599][RX] CPU%/max_us 3/1868 65/1302 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:18.647][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:18.739][RX] hand fps=25 npu=38.5 wait=1.5 decode=20.0 kpt=0.8 gui=31.3 e2e=111.0 period=38.8 hands=1 size=223 d=3.53 fingers=01000 rps=none idle=25% npu_gap=0.2
+[23:19:18.970][RX] hand_evt ms=52191 pinch=0 d=6.52 fingers=01001 rps=none size=223
+[23:19:19.081][RX] hand_evt ms=52306 pinch=0 d=6.21 fingers=01000 rps=none size=222
+[23:19:19.245][RX] hand_evt ms=52471 pinch=0 d=5.57 fingers=01001 rps=none size=218
+[23:19:19.286][RX] hand_evt ms=52506 pinch=0 d=5.32 fingers=01000 rps=none size=218
+[23:19:19.460][RX] hand_evt ms=52685 pinch=0 d=5.76 fingers=01001 rps=none size=220
+[23:19:19.502][RX] hand_evt ms=52724 pinch=0 d=7.16 fingers=01000 rps=none size=219
+[23:19:19.606][RX] CPU%/max_us 3/1868 61/1302 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:19.630][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:19.751][RX] hand fps=24 npu=38.5 wait=2.8 decode=19.9 kpt=0.9 gui=36.2 e2e=119.3 period=40.9 hands=1 size=220 d=5.76 fingers=01001 rps=none idle=27% npu_gap=2.3
+[23:19:19.858][RX] hand_evt ms=53075 pinch=0 d=3.59 fingers=01001 rps=none size=213
+[23:19:19.930][RX] hand_evt ms=53152 pinch=0 d=4.25 fingers=01000 rps=none size=212
+[23:19:20.282][RX] hand_evt ms=53501 pinch=0 d=2.53 fingers=00000 rps=rock size=178
+[23:19:20.323][RX] hand_evt ms=53541 pinch=0 d=2.22 fingers=01000 rps=none size=176
+[23:19:20.364][RX] hand_evt ms=53579 pinch=0 d=2.50 fingers=01001 rps=none size=174
+[23:19:20.405][RX] hand_evt ms=53617 pinch=0 d=2.25 fingers=01000 rps=none size=173
+[23:19:20.448][RX] hand_evt ms=53656 pinch=0 d=2.45 fingers=00001 rps=none size=175
+[23:19:20.487][RX] hand_evt ms=53695 pinch=0 d=2.53 fingers=01000 rps=none size=175
+[23:19:20.592][RX] hand_evt ms=53810 pinch=0 d=2.66 fingers=00000 rps=rock size=177
+[23:19:20.670][RX] CPU%/max_us 3/1868 65/1302 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:20.684][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:20.777][RX] hand fps=24 npu=38.6 wait=1.5 decode=20.0 kpt=0.9 gui=32.3 e2e=110.9 period=38.7 hands=1 size=175 d=2.45 fingers=00001 rps=none idle=24% npu_gap=0.1
+[23:19:20.815][RX] hand_evt ms=53849 pinch=0 d=2.97 fingers=01000 rps=none size=174
+[23:19:20.858][RX] hand_evt ms=54007 pinch=0 d=2.64 fingers=00001 rps=none size=176
+[23:19:20.889][RX] hand_evt ms=54070 pinch=0 d=2.64 fingers=01000 rps=none size=176
+[23:19:20.960][RX] hand_evt ms=54185 pinch=0 d=2.89 fingers=00001 rps=none size=177
+[23:19:21.003][RX] hand_evt ms=54224 pinch=0 d=2.37 fingers=01000 rps=none size=179
+[23:19:21.426][RX] hand_evt ms=54650 pinch=0 d=2.39 fingers=00001 rps=none size=174
+[23:19:21.468][RX] hand_evt ms=54688 pinch=0 d=2.53 fingers=01000 rps=none size=176
+[23:19:21.508][RX] hand_evt ms=54726 pinch=0 d=3.16 fingers=00000 rps=rock size=178
+[23:19:21.552][RX] hand_evt ms=54765 pinch=0 d=3.08 fingers=01000 rps=none size=174
+[23:19:21.623][RX] hand_evt ms=54842 pinch=0 d=3.45 fingers=00001 rps=none size=174
+[23:19:21.697][RX] CPU%/max_us 3/1868 64/1302 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:21.715][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:21.810][RX] hand fps=25 npu=38.5 wait=1.4 decode=20.0 kpt=0.9 gui=44.5 e2e=127.5 period=39.7 hands=1 size=176 d=2.53 fingers=01000 rps=none idle=26% npu_gap=1.1
+[23:19:21.848][RX] hand_evt ms=54880 pinch=0 d=2.99 fingers=01001 rps=none size=174
+[23:19:21.890][RX] hand_evt ms=54919 pinch=0 d=3.81 fingers=00001 rps=none size=174
+[23:19:21.921][RX] hand_evt ms=55036 pinch=0 d=4.13 fingers=01001 rps=none size=176
+[23:19:21.962][RX] hand_evt ms=55074 pinch=0 d=4.58 fingers=00001 rps=none size=176
+[23:19:22.004][RX] hand_evt ms=55112 pinch=0 d=5.00 fingers=01001 rps=none size=176
+[23:19:22.042][RX] hand_evt ms=55228 pinch=0 d=3.31 fingers=00001 rps=none size=174
+[23:19:22.391][RX] hand_evt ms=55614 pinch=0 d=3.98 fingers=01001 rps=none size=176
+[23:19:22.432][RX] hand_evt ms=55653 pinch=0 d=2.84 fingers=01000 rps=none size=175
+[23:19:22.474][RX] hand_evt ms=55692 pinch=0 d=3.93 fingers=01001 rps=none size=176
+[23:19:22.515][RX] hand_evt ms=55730 pinch=0 d=4.29 fingers=01000 rps=none size=187
+[23:19:22.588][RX] hand_evt ms=55807 pinch=0 d=4.59 fingers=01001 rps=none size=215
+[23:19:22.629][RX] hand_evt ms=55846 pinch=0 d=6.01 fingers=00001 rps=none size=213
+[23:19:22.698][RX] CPU%/max_us 3/1868 65/1302 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:22.720][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:22.813][RX] hand fps=24 npu=38.5 wait=0.9 decode=20.0 kpt=0.9 gui=0.0 e2e=0.0 period=38.6 hands=1 size=175 d=2.84 fingers=01000 rps=none idle=24% npu_gap=0.0
+[23:19:22.842][RX] hand_evt ms=55925 pinch=0 d=4.87 fingers=00000 rps=rock size=219
+[23:19:22.885][RX] hand_evt ms=55981 pinch=0 d=10.34 fingers=01000 rps=none size=218
+[23:19:22.926][RX] hand_evt ms=56011 pinch=0 d=10.01 fingers=01001 rps=none size=219
+[23:19:22.965][RX] hand_evt ms=56046 pinch=0 d=4.87 fingers=00000 rps=rock size=218
+[23:19:23.007][RX] hand_evt ms=56103 pinch=0 d=14.82 fingers=01000 rps=none size=219
+[23:19:23.050][RX] hand_evt ms=56219 pinch=0 d=7.75 fingers=00001 rps=none size=219
+[23:19:23.090][RX] hand_evt ms=56258 pinch=0 d=9.62 fingers=01000 rps=none size=216
+[23:19:23.132][RX] hand_evt ms=56296 pinch=0 d=4.76 fingers=00000 rps=rock size=217
+[23:19:23.193][RX] hand_evt ms=56334 pinch=0 d=13.98 fingers=01000 rps=none size=219
+[23:19:23.237][RX] hand_evt ms=56374 pinch=0 d=4.59 fingers=00000 rps=rock size=218
+[23:19:23.260][RX] hand_evt ms=56467 pinch=0 d=8.89 fingers=01000 rps=none size=218
+[23:19:23.347][RX] hand_evt ms=56570 pinch=0 d=5.87 fingers=00000 rps=rock size=217
+[23:19:23.388][RX] hand_evt ms=56609 pinch=0 d=10.12 fingers=01000 rps=none size=219
+[23:19:23.461][RX] hand_evt ms=56687 pinch=0 d=4.87 fingers=00000 rps=rock size=217
+[23:19:23.502][RX] hand_evt ms=56725 pinch=0 d=13.93 fingers=01000 rps=none size=215
+[23:19:23.583][RX] hand_evt ms=56802 pinch=0 d=6.08 fingers=01001 rps=none size=217
+[23:19:23.623][RX] hand_evt ms=56841 pinch=0 d=6.32 fingers=00001 rps=none size=219
+[23:19:23.705][RX] CPU%/max_us 3/1868 65/1302 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:23.726][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:23.818][RX] hand fps=25 npu=38.6 wait=2.0 decode=20.0 kpt=1.0 gui=37.1 e2e=110.7 period=39.7 hands=1 size=217 d=4.87 fingers=00000 rps=rock idle=25% npu_gap=1.1
+[23:19:23.854][RX] hand_evt ms=56879 pinch=0 d=9.85 fingers=01000 rps=none size=215
+[23:19:23.918][RX] hand_evt ms=57142 pinch=0 d=9.53 fingers=01001 rps=none size=215
+[23:19:23.959][RX] hand_evt ms=57181 pinch=0 d=14.32 fingers=01000 rps=none size=216
+[23:19:24.239][RX] hand_evt ms=57451 pinch=0 d=5.18 fingers=00000 rps=rock size=215
+[23:19:24.281][RX] hand_evt ms=57502 pinch=0 d=13.45 fingers=01000 rps=none size=216
+[23:19:24.342][RX] hand_evt ms=57567 pinch=0 d=5.18 fingers=00000 rps=rock size=216
+[23:19:24.384][RX] hand_evt ms=57606 pinch=0 d=5.14 fingers=00001 rps=none size=214
+[23:19:24.426][RX] hand_evt ms=57645 pinch=0 d=8.89 fingers=01000 rps=none size=217
+[23:19:24.612][RX] hand_evt ms=57837 pinch=0 d=6.25 fingers=01001 rps=none size=217
+[23:19:24.664][RX] CPU%/max_us 3/1868 65/1302 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:24.685][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:24.797][RX] hand fps=24 npu=38.5 wait=1.9 decode=20.0 kpt=0.9 gui=48.3 e2e=127.4 period=39.8 hands=1 size=221 d=7.16 fingers=01000 rps=none idle=26% npu_gap=1.2
+[23:19:24.839][RX] hand_evt ms=57915 pinch=0 d=5.21 fingers=00001 rps=none size=216
+[23:19:24.878][RX] hand_evt ms=57953 pinch=0 d=7.57 fingers=01000 rps=none size=217
+[23:19:24.910][RX] hand_evt ms=58012 pinch=0 d=4.87 fingers=00001 rps=none size=216
+[23:19:24.952][RX] hand_evt ms=58042 pinch=0 d=7.52 fingers=01001 rps=none size=214
+[23:19:24.988][RX] hand_evt ms=58076 pinch=0 d=6.55 fingers=00000 rps=rock size=214
+[23:19:25.029][RX] hand_evt ms=58137 pinch=0 d=6.14 fingers=01000 rps=none size=219
+[23:19:25.072][RX] hand_evt ms=58291 pinch=0 d=5.91 fingers=00000 rps=rock size=216
+[23:19:25.112][RX] hand_evt ms=58331 pinch=0 d=4.94 fingers=00001 rps=none size=217
+[23:19:25.209][RX] hand_evt ms=58407 pinch=0 d=3.42 fingers=01000 rps=none size=195
+[23:19:25.664][RX] CPU%/max_us 3/1868 63/1302 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:25.707][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:25.796][RX] hand fps=23 npu=38.5 wait=3.0 decode=20.0 kpt=0.9 gui=42.3 e2e=110.6 period=40.3 hands=1 size=171 d=2.77 fingers=01000 rps=none idle=26% npu_gap=1.7
+[23:19:26.078][RX] hand_evt ms=59297 pinch=0 d=3.00 fingers=01001 rps=none size=169
+[23:19:26.119][RX] hand_evt ms=59335 pinch=0 d=3.47 fingers=01000 rps=none size=171
+[23:19:26.282][RX] hand_evt ms=59501 pinch=0 d=3.92 fingers=00001 rps=none size=171
+[23:19:26.323][RX] hand_evt ms=59531 pinch=0 d=2.48 fingers=01000 rps=none size=170
+[23:19:26.495][RX] hand_evt ms=59721 pinch=0 d=4.47 fingers=01001 rps=none size=169
+[23:19:26.537][RX] hand_evt ms=59760 pinch=0 d=3.95 fingers=01000 rps=none size=170
+[23:19:26.578][RX] hand_evt ms=59800 pinch=0 d=3.76 fingers=00001 rps=none size=169
+[23:19:26.619][RX] hand_evt ms=59837 pinch=0 d=2.70 fingers=01000 rps=none size=171
+[23:19:26.671][RX] CPU%/max_us 3/1868 65/1302 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:26.690][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:26.803][RX] hand fps=25 npu=38.6 wait=1.8 decode=20.0 kpt=0.9 gui=43.0 e2e=127.3 period=39.6 hands=1 size=166 d=3.16 fingers=01000 rps=none idle=26% npu_gap=1.0
+[23:19:26.845][RX] hand_evt ms=60009 pinch=0 d=4.84 fingers=01001 rps=none size=210
+[23:19:26.885][RX] hand_evt ms=60039 pinch=0 d=4.30 fingers=00000 rps=rock size=218
+[23:19:26.989][RX] hand_evt ms=60214 pinch=0 d=5.77 fingers=01001 rps=none size=226
+[23:19:27.029][RX] hand_evt ms=60253 pinch=0 d=6.19 fingers=00001 rps=none size=225
+[23:19:27.070][RX] hand_evt ms=60291 pinch=0 d=6.36 fingers=00000 rps=rock size=222
+[23:19:27.143][RX] hand_evt ms=60369 pinch=0 d=6.33 fingers=01000 rps=none size=225
+[23:19:27.185][RX] hand_evt ms=60407 pinch=0 d=5.35 fingers=00000 rps=rock size=224
+[23:19:27.249][RX] hand_evt ms=60446 pinch=0 d=4.55 fingers=00001 rps=none size=222
+[23:19:27.287][RX] hand_evt ms=60501 pinch=0 d=4.94 fingers=00000 rps=rock size=224
+[23:19:27.330][RX] hand_evt ms=60531 pinch=0 d=4.21 fingers=00101 rps=none size=224
+[23:19:27.368][RX] hand_evt ms=60568 pinch=0 d=3.71 fingers=00000 rps=rock size=223
+[23:19:27.420][RX] hand_evt ms=60644 pinch=0 d=7.42 fingers=01000 rps=none size=225
+[23:19:27.462][RX] hand_evt ms=60683 pinch=0 d=4.33 fingers=00000 rps=rock size=225
+[23:19:27.536][RX] hand_evt ms=60761 pinch=0 d=4.15 fingers=00100 rps=none size=224
+[23:19:27.579][RX] hand_evt ms=60798 pinch=0 d=4.10 fingers=00000 rps=rock size=222
+[23:19:27.685][RX] CPU%/max_us 3/1868 64/1302 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:27.739][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:27.831][RX] hand fps=24 npu=38.6 wait=2.1 decode=20.0 kpt=1.0 gui=36.6 e2e=110.5 period=39.9 hands=1 size=225 d=4.33 fingers=00000 rps=rock idle=26% npu_gap=1.3
+[23:19:27.874][RX] hand_evt ms=60915 pinch=0 d=4.15 fingers=00101 rps=none size=224
+[23:19:27.915][RX] hand_evt ms=60952 pinch=0 d=6.83 fingers=01000 rps=none size=220
+[23:19:27.946][RX] hand_evt ms=61042 pinch=0 d=3.76 fingers=00100 rps=none size=221
+[23:19:27.988][RX] hand_evt ms=61077 pinch=0 d=3.64 fingers=00000 rps=rock size=224
+[23:19:28.030][RX] hand_evt ms=61138 pinch=0 d=7.34 fingers=01000 rps=none size=221
+[23:19:28.070][RX] hand_evt ms=61176 pinch=0 d=4.68 fingers=00001 rps=none size=223
+[23:19:28.112][RX] hand_evt ms=61253 pinch=0 d=5.05 fingers=00000 rps=rock size=219
+[23:19:28.153][RX] hand_evt ms=61293 pinch=0 d=4.46 fingers=01001 rps=none size=220
+[23:19:28.193][RX] hand_evt ms=61330 pinch=0 d=10.38 fingers=01000 rps=none size=222
+[23:19:28.225][RX] hand_evt ms=61368 pinch=0 d=5.11 fingers=00000 rps=rock size=220
+[23:19:28.284][RX] hand_evt ms=61407 pinch=0 d=3.86 fingers=00001 rps=none size=222
+[23:19:28.326][RX] hand_evt ms=61486 pinch=0 d=7.55 fingers=01000 rps=none size=222
+[23:19:28.366][RX] hand_evt ms=61537 pinch=0 d=4.34 fingers=00001 rps=none size=221
+[23:19:28.459][RX] hand_evt ms=61681 pinch=0 d=4.35 fingers=00101 rps=none size=221
+[23:19:28.500][RX] hand_evt ms=61719 pinch=0 d=6.09 fingers=00001 rps=none size=222
+[23:19:28.602][RX] hand_evt ms=61834 pinch=0 d=3.85 fingers=00000 rps=rock size=220
+[23:19:28.652][RX] hand_evt ms=61874 pinch=0 d=6.99 fingers=01000 rps=none size=225
+[23:19:28.704][RX] CPU%/max_us 3/1868 65/1350 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:28.725][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:28.847][RX] hand fps=24 npu=38.6 wait=2.2 decode=20.0 kpt=1.0 gui=46.7 e2e=127.2 period=39.8 hands=1 size=221 d=4.35 fingers=00101 rps=none idle=26% npu_gap=1.2
+[23:19:28.888][RX] hand_evt ms=61912 pinch=0 d=3.54 fingers=00101 rps=none size=221
+[23:19:28.919][RX] hand_evt ms=61950 pinch=0 d=4.35 fingers=00001 rps=none size=220
+[23:19:28.958][RX] hand_evt ms=61988 pinch=0 d=5.96 fingers=01001 rps=none size=221
+[23:19:29.001][RX] hand_evt ms=62046 pinch=0 d=4.68 fingers=00000 rps=rock size=221
+[23:19:29.043][RX] hand_evt ms=62077 pinch=0 d=4.84 fingers=00001 rps=none size=223
+[23:19:29.080][RX] hand_evt ms=62170 pinch=0 d=6.24 fingers=00000 rps=rock size=218
+[23:19:29.122][RX] hand_evt ms=62209 pinch=0 d=3.70 fingers=00001 rps=none size=218
+[23:19:29.164][RX] hand_evt ms=62286 pinch=0 d=4.21 fingers=00000 rps=rock size=219
+[23:19:29.193][RX] hand_evt ms=62325 pinch=0 d=5.07 fingers=01001 rps=none size=218
+[23:19:29.254][RX] hand_evt ms=62363 pinch=0 d=3.78 fingers=00001 rps=none size=221
+[23:19:29.417][RX] hand_evt ms=62637 pinch=0 d=4.63 fingers=01001 rps=none size=218
+[23:19:29.533][RX] hand_evt ms=62753 pinch=0 d=5.52 fingers=00001 rps=none size=217
+[23:19:29.605][RX] hand_evt ms=62830 pinch=0 d=4.40 fingers=00000 rps=rock size=220
+[23:19:29.644][RX] hand_evt ms=62869 pinch=0 d=4.26 fingers=00001 rps=none size=219
+[23:19:29.701][RX] CPU%/max_us 3/1868 60/1350 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:29.722][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:29.841][RX] hand fps=23 npu=38.5 wait=3.1 decode=19.9 kpt=1.0 gui=42.5 e2e=110.4 period=41.3 hands=1 size=222 d=6.77 fingers=01001 rps=none idle=28% npu_gap=2.7
+[23:19:29.878][RX] hand_evt ms=62985 pinch=0 d=5.46 fingers=01001 rps=none size=221
+[23:19:29.920][RX] hand_evt ms=63042 pinch=0 d=4.60 fingers=00001 rps=none size=219
+[23:19:29.952][RX] hand_evt ms=63072 pinch=0 d=4.10 fingers=00000 rps=rock size=218
+[23:19:29.988][RX] hand_evt ms=63106 pinch=0 d=5.39 fingers=01000 rps=none size=209
+[23:19:30.029][RX] hand_evt ms=63247 pinch=0 d=5.22 fingers=10001 rps=none size=169
+[23:19:30.072][RX] hand_evt ms=63286 pinch=0 d=3.45 fingers=00001 rps=none size=170
+[23:19:30.104][RX] hand_evt ms=63325 pinch=0 d=3.20 fingers=01000 rps=none size=173
+[23:19:30.334][RX] hand_evt ms=63560 pinch=0 d=4.44 fingers=01001 rps=none size=171
+[23:19:30.375][RX] hand_evt ms=63599 pinch=0 d=2.88 fingers=01000 rps=none size=176
+[23:19:30.417][RX] hand_evt ms=63638 pinch=0 d=4.96 fingers=01001 rps=none size=172
+[23:19:30.457][RX] hand_evt ms=63677 pinch=0 d=3.22 fingers=01000 rps=none size=171
+[23:19:30.609][RX] hand_evt ms=63831 pinch=0 d=3.99 fingers=01001 rps=none size=171
+[23:19:30.651][RX] hand_evt ms=63871 pinch=0 d=2.77 fingers=01000 rps=none size=170
+[23:19:30.701][RX] CPU%/max_us 3/1868 64/1350 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:30.722][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:30.836][RX] hand fps=24 npu=38.5 wait=2.0 decode=20.0 kpt=1.0 gui=37.0 e2e=110.4 period=40.0 hands=1 size=171 d=3.22 fingers=01000 rps=none idle=26% npu_gap=1.4
+[23:19:30.877][RX] hand_evt ms=63946 pinch=0 d=3.16 fingers=01001 rps=none size=173
+[23:19:30.915][RX] hand_evt ms=63985 pinch=0 d=3.65 fingers=01000 rps=none size=173
+[23:19:30.956][RX] hand_evt ms=64043 pinch=0 d=3.95 fingers=01001 rps=none size=171
+[23:19:30.989][RX] hand_evt ms=64072 pinch=0 d=2.72 fingers=01000 rps=none size=172
+[23:19:31.168][RX] hand_evt ms=64401 pinch=0 d=2.84 fingers=01001 rps=none size=173
+[23:19:31.220][RX] hand_evt ms=64442 pinch=0 d=3.70 fingers=01000 rps=none size=171
+[23:19:31.711][RX] CPU%/max_us 3/1868 65/1350 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:31.732][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:31.845][RX] hand fps=24 npu=38.5 wait=1.6 decode=20.0 kpt=0.9 gui=47.5 e2e=127.0 period=39.8 hands=1 size=173 d=2.80 fingers=01000 rps=none idle=26% npu_gap=1.2
+[23:19:31.887][RX] hand_evt ms=64982 pinch=0 d=3.49 fingers=01001 rps=none size=171
+[23:19:31.928][RX] hand_evt ms=65020 pinch=0 d=2.89 fingers=01000 rps=none size=173
+[23:19:32.717][RX] CPU%/max_us 3/1868 64/1350 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:32.736][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:32.848][RX] hand fps=24 npu=38.5 wait=1.6 decode=20.0 kpt=0.8 gui=0.0 e2e=0.0 period=39.8 hands=1 size=171 d=2.80 fingers=01000 rps=none idle=26% npu_gap=1.2
+[23:19:33.525][RX] hand_evt ms=66754 pinch=0 d=3.16 fingers=01001 rps=none size=172
+[23:19:33.568][RX] hand_evt ms=66792 pinch=0 d=3.47 fingers=01000 rps=none size=171
+[23:19:33.722][RX] CPU%/max_us 3/1868 65/1350 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:33.770][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:33.861][RX] hand fps=25 npu=38.5 wait=1.2 decode=20.0 kpt=0.8 gui=0.0 e2e=0.0 period=38.7 hands=1 size=172 d=3.48 fingers=01000 rps=none idle=24% npu_gap=0.1
+[23:19:34.220][RX] hand_evt ms=67441 pinch=0 d=5.69 fingers=00001 rps=none size=211
+[23:19:34.284][RX] hand_evt ms=67479 pinch=0 d=3.91 fingers=00000 rps=rock size=214
+[23:19:34.377][RX] hand_evt ms=67599 pinch=0 d=4.90 fingers=01001 rps=none size=218
+[23:19:34.415][RX] hand_evt ms=67634 pinch=0 d=5.97 fingers=00000 rps=rock size=219
+[23:19:34.456][RX] hand_evt ms=67672 pinch=0 d=5.59 fingers=01000 rps=none size=219
+[23:19:34.499][RX] hand_evt ms=67711 pinch=0 d=4.73 fingers=00000 rps=rock size=218
+[23:19:34.540][RX] hand_evt ms=67751 pinch=0 d=4.95 fingers=01001 rps=none size=218
+[23:19:34.581][RX] hand_evt ms=67789 pinch=0 d=5.10 fingers=01000 rps=none size=217
+[23:19:34.623][RX] hand_evt ms=67827 pinch=0 d=4.50 fingers=00000 rps=rock size=217
+[23:19:34.652][RX] hand_evt ms=67865 pinch=0 d=4.79 fingers=01001 rps=none size=218
+[23:19:34.695][RX] hand_evt ms=67904 pinch=0 d=4.08 fingers=00001 rps=none size=218
+[23:19:34.747][RX] CPU%/max_us 3/1877 65/1350 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:34.794][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:34.887][RX] hand fps=24 npu=38.5 wait=1.7 decode=20.0 kpt=0.9 gui=46.5 e2e=126.9 period=39.8 hands=1 size=219 d=5.59 fingers=01000 rps=none idle=26% npu_gap=1.2
+[23:19:34.928][RX] hand_evt ms=67945 pinch=0 d=5.46 fingers=00000 rps=rock size=217
+[23:19:34.968][RX] hand_evt ms=68077 pinch=0 d=6.02 fingers=01000 rps=none size=214
+[23:19:35.063][RX] hand_evt ms=68281 pinch=0 d=4.00 fingers=00001 rps=none size=215
+[23:19:35.134][RX] hand_evt ms=68358 pinch=0 d=4.74 fingers=01000 rps=none size=216
+[23:19:35.217][RX] hand_evt ms=68435 pinch=0 d=4.74 fingers=00001 rps=none size=214
+[23:19:35.315][RX] hand_evt ms=68513 pinch=0 d=5.77 fingers=01001 rps=none size=216
+[23:19:35.350][RX] hand_evt ms=68567 pinch=0 d=5.97 fingers=00000 rps=rock size=214
+[23:19:35.438][RX] hand_evt ms=68671 pinch=0 d=5.50 fingers=01001 rps=none size=213
+[23:19:35.491][RX] hand_evt ms=68710 pinch=0 d=4.95 fingers=00000 rps=rock size=214
+[23:19:35.532][RX] hand_evt ms=68748 pinch=0 d=5.63 fingers=01001 rps=none size=215
+[23:19:35.609][RX] hand_evt ms=68826 pinch=0 d=7.71 fingers=01000 rps=none size=216
+[23:19:35.650][RX] hand_evt ms=68865 pinch=0 d=5.69 fingers=01001 rps=none size=214
+[23:19:35.689][RX] hand_evt ms=68903 pinch=0 d=5.77 fingers=00000 rps=rock size=212
+[23:19:35.730][RX] hand_evt ms=68941 pinch=0 d=5.15 fingers=01000 rps=none size=210
+[23:19:35.807][RX] CPU%/max_us 3/1877 65/1350 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:35.838][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:35.914][RX] hand fps=24 npu=38.6 wait=2.1 decode=20.0 kpt=1.0 gui=36.5 e2e=110.2 period=39.9 hands=1 size=213 d=5.50 fingers=01001 rps=none idle=26% npu_gap=1.3
+[23:19:35.988][RX] hand_evt ms=69204 pinch=0 d=4.94 fingers=00000 rps=rock size=206
+[23:19:36.100][RX] hand_evt ms=69320 pinch=0 d=6.11 fingers=01000 rps=none size=206
+[23:19:36.139][RX] hand_evt ms=69359 pinch=0 d=7.21 fingers=00001 rps=none size=204
+[23:19:36.182][RX] hand_evt ms=69397 pinch=0 d=6.52 fingers=01000 rps=none size=206
+[23:19:36.386][RX] hand_evt ms=69602 pinch=0 d=1.35 fingers=00100 rps=none size=203
+[23:19:36.427][RX] hand_evt ms=69630 pinch=0 d=0.99 fingers=00110 rps=none size=215
+[23:19:36.465][RX] hand_evt ms=69668 pinch=0 d=0.89 fingers=00111 rps=none size=244
+[23:19:36.742][RX] CPU%/max_us 3/1877 65/1355 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:36.764][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:36.880][RX] hand fps=24 npu=38.6 wait=1.9 decode=20.0 kpt=1.0 gui=47.9 e2e=126.8 period=39.8 hands=1 size=244 d=0.89 fingers=00111 rps=none idle=26% npu_gap=1.2
+[23:19:37.058][RX] hand_evt ms=70276 pinch=0 d=1.44 fingers=00111 rps=none size=327
+[23:19:37.715][RX] hand_evt ms=70938 pinch=0 d=1.12 fingers=00111 rps=none size=342
+[23:19:37.768][RX] CPU%/max_us 3/1877 61/1355 3/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:37.788][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:37.913][RX] hand fps=24 npu=38.6 wait=2.3 decode=19.9 kpt=0.6 gui=43.4 e2e=110.1 period=40.0 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=28% npu_gap=1.3
+[23:19:38.749][RX] CPU%/max_us 3/1877 60/1355 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:38.771][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:38.887][RX] hand fps=24 npu=38.6 wait=3.0 decode=19.9 kpt=0.6 gui=0.0 e2e=0.0 period=41.3 hands=1 size=327 d=1.12 fingers=00111 rps=none idle=28% npu_gap=2.7
+[23:19:39.753][RX] CPU%/max_us 3/1877 63/1355 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:39.805][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:39.895][RX] hand fps=23 npu=38.6 wait=3.3 decode=19.9 kpt=0.8 gui=0.0 e2e=0.0 period=40.4 hands=1 size=327 d=1.20 fingers=00111 rps=none idle=28% npu_gap=1.7
+[23:19:40.761][RX] CPU%/max_us 3/1877 64/1355 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:40.806][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:40.891][RX] hand fps=24 npu=38.6 wait=2.1 decode=20.0 kpt=0.8 gui=48.2 e2e=126.6 period=40.0 hands=1 size=327 d=1.17 fingers=00111 rps=none idle=27% npu_gap=1.3
+[23:19:41.806][RX] CPU%/max_us 3/1877 64/1355 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:41.819][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:41.912][RX] hand fps=24 npu=38.6 wait=2.3 decode=20.0 kpt=0.8 gui=48.1 e2e=126.6 period=39.9 hands=1 size=327 d=1.19 fingers=00111 rps=none idle=26% npu_gap=1.3
+[23:19:42.816][RX] CPU%/max_us 3/2040 61/1355 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:42.836][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:42.929][RX] hand fps=24 npu=38.6 wait=2.9 decode=19.9 kpt=0.8 gui=46.1 e2e=126.5 period=41.2 hands=1 size=316 d=1.23 fingers=00111 rps=none idle=28% npu_gap=2.5
+[23:19:43.832][RX] CPU%/max_us 3/2040 60/1355 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:43.847][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:43.939][RX] hand fps=23 npu=38.6 wait=3.7 decode=19.9 kpt=0.8 gui=58.4 e2e=126.5 period=41.6 hands=1 size=329 d=1.05 fingers=00111 rps=none idle=29% npu_gap=3.0
+[23:19:44.248][RX] hand_evt ms=77474 pinch=0 d=1.14 fingers=00111 rps=none size=246
+[23:19:44.521][RX] hand_evt ms=77745 pinch=0 d=1.20 fingers=00100 rps=none size=210
+[23:19:44.833][RX] CPU%/max_us 3/2040 63/1355 3/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:44.850][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:44.943][RX] hand fps=23 npu=38.5 wait=2.7 decode=19.9 kpt=0.6 gui=58.6 e2e=126.4 period=40.2 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=29% npu_gap=1.6
+[23:19:45.104][RX] hand_evt ms=78324 pinch=0 d=1.02 fingers=00110 rps=none size=228
+[23:19:45.217][RX] hand_evt ms=78441 pinch=0 d=1.48 fingers=11111 rps=paper size=175
+[23:19:45.842][RX] CPU%/max_us 3/2040 62/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:45.859][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:45.953][RX] hand fps=25 npu=38.6 wait=1.5 decode=19.9 kpt=0.7 gui=0.0 e2e=0.0 period=39.7 hands=1 size=168 d=1.55 fingers=11111 rps=paper idle=26% npu_gap=1.1
+[23:19:46.859][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:46.880][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:46.967][RX] hand fps=24 npu=38.6 wait=1.7 decode=20.0 kpt=0.8 gui=31.7 e2e=109.6 period=38.8 hands=1 size=153 d=1.57 fingers=11111 rps=paper idle=25% npu_gap=0.2
+[23:19:47.860][RX] CPU%/max_us 3/2040 64/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:47.882][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:47.973][RX] hand fps=24 npu=38.5 wait=1.4 decode=20.0 kpt=0.8 gui=42.2 e2e=126.3 period=39.6 hands=1 size=151 d=1.38 fingers=11111 rps=paper idle=26% npu_gap=1.0
+[23:19:48.014][RX] hand_evt ms=81242 pinch=0 d=1.15 fingers=10000 rps=none size=136
+[23:19:48.098][RX] hand_evt ms=81320 pinch=1 d=0.07 fingers=00000 rps=rock size=110
+[23:19:48.288][RX] hand_evt ms=81513 pinch=1 d=0.18 fingers=00000 rps=rock size=106
+[23:19:48.878][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:48.899][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:48.989][RX] hand fps=25 npu=38.6 wait=0.5 decode=20.0 kpt=0.8 gui=0.0 e2e=0.0 period=38.6 hands=1 size=106 d=0.18 fingers=00000 rps=rock idle=25% npu_gap=0.0
+[23:19:49.564][RX] hand_evt ms=82787 pinch=1 d=0.18 fingers=10000 rps=none size=100
+[23:19:49.602][RX] hand_evt ms=82825 pinch=1 d=0.11 fingers=00001 rps=none size=99
+[23:19:49.644][RX] hand_evt ms=82863 pinch=0 d=0.62 fingers=10111 rps=none size=106
+[23:19:49.688][RX] hand_evt ms=82901 pinch=0 d=0.69 fingers=10110 rps=none size=103
+[23:19:49.715][RX] hand_evt ms=82940 pinch=0 d=0.26 fingers=11111 rps=paper size=126
+[23:19:49.798][RX] hand_evt ms=83017 pinch=1 d=0.17 fingers=11111 rps=paper size=130
+[23:19:49.880][RX] CPU%/max_us 3/2040 65/1858 3/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:49.902][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:49.992][RX] hand fps=25 npu=38.5 wait=0.5 decode=20.0 kpt=0.8 gui=0.0 e2e=0.0 period=38.5 hands=1 size=108 d=0.30 fingers=00000 rps=rock idle=25% npu_gap=0.0
+[23:19:50.045][RX] hand_evt ms=83271 pinch=0 d=0.69 fingers=11111 rps=paper size=132
+[23:19:50.128][RX] hand_evt ms=83349 pinch=0 d=0.28 fingers=10111 rps=none size=138
+[23:19:50.168][RX] hand_evt ms=83387 pinch=1 d=0.20 fingers=11111 rps=paper size=139
+[23:19:50.893][RX] CPU%/max_us 3/2040 63/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:50.913][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:51.005][RX] hand fps=24 npu=38.5 wait=0.7 decode=20.0 kpt=0.9 gui=19.7 e2e=92.8 period=39.5 hands=1 size=138 d=0.19 fingers=11111 rps=paper idle=26% npu_gap=0.9
+[23:19:51.170][RX] hand_evt ms=84392 pinch=0 d=0.40 fingers=11111 rps=paper size=142
+[23:19:51.209][RX] hand_evt ms=84432 pinch=1 d=0.19 fingers=11111 rps=paper size=140
+[23:19:51.663][RX] hand_evt ms=84894 pinch=1 d=0.22 fingers=11111 rps=paper size=137
+[23:19:51.829][RX] hand_evt ms=85048 pinch=1 d=0.21 fingers=11111 rps=paper size=138
+[23:19:51.902][RX] CPU%/max_us 3/2040 63/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:51.924][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:52.015][RX] hand fps=25 npu=38.5 wait=1.1 decode=20.0 kpt=0.8 gui=33.0 e2e=109.4 period=38.6 hands=1 size=138 d=0.13 fingers=11111 rps=paper idle=25% npu_gap=0.0
+[23:19:52.354][RX] hand_evt ms=85580 pinch=1 d=0.08 fingers=11111 rps=paper size=134
+[23:19:52.509][RX] hand_evt ms=85735 pinch=1 d=0.23 fingers=11111 rps=paper size=136
+[23:19:52.551][RX] hand_evt ms=85773 pinch=0 d=0.46 fingers=11111 rps=paper size=138
+[23:19:52.785][RX] hand_evt ms=86005 pinch=1 d=0.00 fingers=11111 rps=paper size=135
+[23:19:52.919][RX] CPU%/max_us 3/2040 63/1858 3/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:52.939][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:53.031][RX] hand fps=24 npu=38.5 wait=1.0 decode=19.9 kpt=0.6 gui=29.3 e2e=109.4 period=39.7 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=28% npu_gap=1.2
+[23:19:53.071][RX] hand_evt ms=86275 pinch=1 d=0.09 fingers=11111 rps=paper size=130
+[23:19:53.166][RX] hand_evt ms=86390 pinch=1 d=0.12 fingers=11111 rps=paper size=133
+[23:19:53.316][RX] hand_evt ms=86544 pinch=1 d=0.24 fingers=11111 rps=paper size=133
+[23:19:53.442][RX] hand_evt ms=86660 pinch=1 d=0.00 fingers=11111 rps=paper size=135
+[23:19:53.630][RX] hand_evt ms=86853 pinch=1 d=0.13 fingers=11111 rps=paper size=132
+[23:19:53.941][RX] CPU%/max_us 3/2040 64/1858 2/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:53.962][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:54.050][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.9 kpt=0.3 gui=0.0 e2e=0.0 period=38.5 hands=1 size=135 d=0.00 fingers=11111 rps=paper idle=29% npu_gap=0.0
+[23:19:54.090][RX] hand_evt ms=87239 pinch=1 d=0.10 fingers=11111 rps=paper size=135
+[23:19:54.334][RX] hand_evt ms=87548 pinch=1 d=0.09 fingers=11111 rps=paper size=136
+[23:19:54.625][RX] hand_evt ms=87844 pinch=1 d=0.13 fingers=11111 rps=paper size=136
+[23:19:54.782][RX] hand_evt ms=87999 pinch=1 d=0.17 fingers=11111 rps=paper size=137
+[23:19:54.909][RX] hand_evt ms=88129 pinch=0 d=0.35 fingers=11111 rps=paper size=144
+[23:19:54.951][RX] hand_evt ms=88159 pinch=1 d=0.09 fingers=11111 rps=paper size=132
+[23:19:54.993][RX] CPU%/max_us 3/2040 61/1858 3/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:55.024][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:55.109][RX] hand fps=25 npu=38.5 wait=0.5 decode=19.9 kpt=0.5 gui=0.0 e2e=0.0 period=38.6 hands=1 size=138 d=0.08 fingers=11111 rps=paper idle=27% npu_gap=0.0
+[23:19:55.142][RX] hand_evt ms=88233 pinch=1 d=0.14 fingers=11111 rps=paper size=139
+[23:19:55.204][RX] hand_evt ms=88425 pinch=1 d=0.25 fingers=11111 rps=paper size=137
+[23:19:55.433][RX] hand_evt ms=88657 pinch=1 d=0.09 fingers=11111 rps=paper size=139
+[23:19:55.819][RX] hand_evt ms=89042 pinch=1 d=0.15 fingers=11111 rps=paper size=138
+[23:19:55.965][RX] CPU%/max_us 3/2040 64/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:55.985][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:56.070][RX] hand fps=24 npu=38.5 wait=0.9 decode=19.9 kpt=0.6 gui=42.2 e2e=109.2 period=39.6 hands=1 size=139 d=0.09 fingers=11111 rps=paper idle=29% npu_gap=1.1
+[23:19:56.112][RX] hand_evt ms=89277 pinch=1 d=0.16 fingers=11111 rps=paper size=140
+[23:19:56.153][RX] hand_evt ms=89354 pinch=1 d=0.12 fingers=11111 rps=paper size=138
+[23:19:56.245][RX] hand_evt ms=89470 pinch=1 d=0.23 fingers=11111 rps=paper size=135
+[23:19:56.412][RX] hand_evt ms=89625 pinch=0 d=0.26 fingers=11111 rps=paper size=135
+[23:19:56.519][RX] hand_evt ms=89741 pinch=1 d=0.09 fingers=11111 rps=paper size=135
+[23:19:56.592][RX] hand_evt ms=89817 pinch=1 d=0.12 fingers=11111 rps=paper size=138
+[23:19:56.708][RX] hand_evt ms=89933 pinch=0 d=0.50 fingers=11111 rps=paper size=142
+[23:19:56.965][RX] CPU%/max_us 3/2040 64/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:56.985][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:57.073][RX] hand fps=25 npu=38.5 wait=0.7 decode=19.9 kpt=0.7 gui=0.0 e2e=0.0 period=38.6 hands=1 size=137 d=0.38 fingers=11111 rps=paper idle=26% npu_gap=0.1
+[23:19:57.247][RX] hand_evt ms=90466 pinch=0 d=1.00 fingers=11111 rps=paper size=150
+[23:19:57.668][RX] hand_evt ms=90889 pinch=1 d=0.23 fingers=11111 rps=paper size=144
+[23:19:57.709][RX] hand_evt ms=90928 pinch=0 d=0.50 fingers=11111 rps=paper size=142
+[23:19:57.781][RX] hand_evt ms=91005 pinch=0 d=0.55 fingers=11111 rps=paper size=145
+[23:19:57.969][RX] CPU%/max_us 3/2040 64/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:57.990][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:58.078][RX] hand fps=24 npu=38.5 wait=1.5 decode=19.9 kpt=0.8 gui=44.1 e2e=125.8 period=39.7 hands=1 size=150 d=0.81 fingers=11111 rps=paper idle=27% npu_gap=1.1
+[23:19:58.291][RX] hand_evt ms=91507 pinch=0 d=0.59 fingers=11111 rps=paper size=149
+[23:19:58.978][RX] CPU%/max_us 3/2040 65/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:19:59.000][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:19:59.091][RX] hand fps=25 npu=38.6 wait=0.8 decode=20.0 kpt=0.8 gui=0.0 e2e=0.0 period=38.6 hands=1 size=148 d=0.67 fingers=11111 rps=paper idle=25% npu_gap=0.0
+[23:19:59.469][RX] hand_evt ms=92692 pinch=0 d=0.71 fingers=11110 rps=none size=153
+[23:19:59.512][RX] hand_evt ms=92730 pinch=0 d=0.83 fingers=11111 rps=paper size=154
+[23:19:59.626][RX] hand_evt ms=92846 pinch=0 d=0.96 fingers=11011 rps=none size=137
+[23:19:59.667][RX] hand_evt ms=92884 pinch=0 d=0.91 fingers=11111 rps=paper size=131
+[23:19:59.701][RX] hand_evt ms=92922 pinch=0 d=1.45 fingers=10000 rps=none size=151
+[23:19:59.748][RX] hand_evt ms=92961 pinch=1 d=0.21 fingers=10000 rps=none size=162
+[23:19:59.785][RX] hand_evt ms=93001 pinch=0 d=0.47 fingers=00000 rps=rock size=161
+[23:19:59.851][RX] hand_evt ms=93077 pinch=0 d=0.77 fingers=10000 rps=none size=168
+[23:19:59.996][RX] CPU%/max_us 3/2040 64/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:00.017][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:00.105][RX] hand fps=25 npu=38.5 wait=1.0 decode=20.0 kpt=0.8 gui=36.0 e2e=109.0 period=39.6 hands=1 size=153 d=0.71 fingers=11110 rps=none idle=26% npu_gap=1.0
+[23:20:01.003][RX] CPU%/max_us 3/2040 64/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:01.023][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:01.115][RX] hand fps=24 npu=38.5 wait=1.2 decode=20.0 kpt=0.9 gui=31.2 e2e=109.0 period=38.7 hands=1 size=166 d=1.20 fingers=10000 rps=none idle=25% npu_gap=0.1
+[23:20:02.017][RX] CPU%/max_us 3/2040 65/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:02.037][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:02.132][RX] hand fps=24 npu=38.6 wait=0.8 decode=20.0 kpt=0.8 gui=43.4 e2e=125.6 period=39.7 hands=1 size=163 d=1.01 fingers=10000 rps=none idle=27% npu_gap=1.1
+[23:20:03.028][RX] CPU%/max_us 3/2040 64/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:03.049][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:03.134][RX] hand fps=25 npu=38.5 wait=0.9 decode=20.1 kpt=0.8 gui=0.0 e2e=0.0 period=38.6 hands=1 size=164 d=1.27 fingers=10000 rps=none idle=25% npu_gap=0.0
+[23:20:04.043][RX] CPU%/max_us 3/2040 65/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:04.064][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:04.153][RX] hand fps=25 npu=38.5 wait=1.2 decode=20.0 kpt=0.8 gui=35.6 e2e=108.8 period=39.6 hands=1 size=170 d=1.29 fingers=10000 rps=none idle=26% npu_gap=1.0
+[23:20:04.204][RX] hand_evt ms=97423 pinch=0 d=0.41 fingers=00000 rps=rock size=146
+[23:20:04.319][RX] hand_evt ms=97539 pinch=0 d=0.69 fingers=00111 rps=none size=152
+[23:20:04.392][RX] hand_evt ms=97616 pinch=0 d=0.69 fingers=11111 rps=paper size=166
+[23:20:04.453][RX] hand_evt ms=97656 pinch=0 d=0.98 fingers=10111 rps=none size=167
+[23:20:04.494][RX] hand_evt ms=97705 pinch=0 d=1.06 fingers=10011 rps=none size=167
+[23:20:04.526][RX] hand_evt ms=97734 pinch=0 d=1.78 fingers=00111 rps=none size=158
+[23:20:04.701][RX] hand_evt ms=97925 pinch=0 d=1.77 fingers=10000 rps=none size=148
+[23:20:04.787][RX] hand_evt ms=98003 pinch=0 d=2.72 fingers=00110 rps=none size=150
+[23:20:04.825][RX] hand_evt ms=98041 pinch=0 d=2.51 fingers=10000 rps=none size=149
+[23:20:04.864][RX] hand_evt ms=98079 pinch=0 d=2.88 fingers=00100 rps=none size=148
+[23:20:04.926][RX] hand_evt ms=98118 pinch=0 d=2.39 fingers=00000 rps=rock size=149
+[23:20:04.986][RX] hand_evt ms=98212 pinch=0 d=1.78 fingers=10000 rps=none size=147
+[23:20:05.049][RX] CPU%/max_us 3/2040 64/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:05.069][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:05.155][RX] hand fps=24 npu=38.5 wait=0.9 decode=20.0 kpt=0.8 gui=30.1 e2e=108.8 period=38.7 hands=1 size=167 d=0.98 fingers=10111 rps=none idle=25% npu_gap=0.1
+[23:20:05.196][RX] hand_evt ms=98339 pinch=0 d=1.97 fingers=00110 rps=none size=125
+[23:20:05.386][RX] hand_evt ms=98608 pinch=0 d=2.39 fingers=00110 rps=none size=136
+[23:20:05.427][RX] hand_evt ms=98647 pinch=0 d=6.21 fingers=00100 rps=none size=134
+[23:20:05.476][RX] hand_evt ms=98686 pinch=0 d=2.17 fingers=00110 rps=none size=136
+[23:20:06.009][RX] hand_evt ms=99237 pinch=0 d=3.25 fingers=10110 rps=none size=132
+[23:20:06.052][RX] hand_evt ms=99266 pinch=0 d=2.53 fingers=00110 rps=none size=132
+[23:20:06.093][RX] CPU%/max_us 3/2040 64/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:06.121][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:06.213][RX] hand fps=25 npu=38.5 wait=1.4 decode=19.9 kpt=0.9 gui=42.6 e2e=125.4 period=39.6 hands=1 size=136 d=2.17 fingers=00110 rps=none idle=27% npu_gap=1.0
+[23:20:06.253][RX] hand_evt ms=99381 pinch=0 d=2.76 fingers=00110 rps=none size=133
+[23:20:06.387][RX] hand_evt ms=99612 pinch=0 d=4.64 fingers=00100 rps=none size=136
+[23:20:06.429][RX] hand_evt ms=99652 pinch=0 d=12.04 fingers=00000 rps=rock size=138
+[23:20:06.483][RX] hand_evt ms=99690 pinch=0 d=3.53 fingers=00110 rps=none size=138
+[23:20:06.581][RX] hand_evt ms=99806 pinch=0 d=5.50 fingers=10000 rps=none size=138
+[23:20:06.623][RX] hand_evt ms=99845 pinch=0 d=2.55 fingers=00111 rps=none size=136
+[23:20:06.660][RX] hand_evt ms=99883 pinch=0 d=2.86 fingers=10000 rps=none size=137
+[23:20:07.047][RX] hand_evt ms=100270 pinch=0 d=3.14 fingers=10000 rps=none size=161
+[23:20:07.099][RX] CPU%/max_us 3/2040 64/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:07.116][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:07.211][RX] hand fps=25 npu=38.5 wait=0.6 decode=20.0 kpt=0.8 gui=0.0 e2e=0.0 period=38.6 hands=1 size=138 d=3.53 fingers=00110 rps=none idle=25% npu_gap=0.0
+[23:20:07.248][RX] hand_evt ms=100371 pinch=0 d=2.30 fingers=11000 rps=none size=160
+[23:20:07.302][RX] hand_evt ms=100526 pinch=0 d=2.41 fingers=11100 rps=none size=164
+[23:20:07.385][RX] hand_evt ms=100603 pinch=0 d=2.36 fingers=11100 rps=none size=163
+[23:20:07.447][RX] hand_evt ms=100642 pinch=0 d=2.40 fingers=11110 rps=none size=165
+[23:20:07.488][RX] hand_evt ms=100680 pinch=0 d=2.40 fingers=11100 rps=none size=167
+[23:20:07.531][RX] hand_evt ms=100730 pinch=0 d=2.66 fingers=11110 rps=none size=161
+[23:20:07.568][RX] hand_evt ms=100760 pinch=0 d=2.83 fingers=11100 rps=none size=165
+[23:20:07.610][RX] hand_evt ms=100835 pinch=0 d=3.40 fingers=11000 rps=none size=167
+[23:20:07.651][RX] hand_evt ms=100873 pinch=0 d=2.48 fingers=11100 rps=none size=163
+[23:20:07.691][RX] hand_evt ms=100912 pinch=0 d=2.50 fingers=10000 rps=none size=162
+[23:20:08.070][RX] CPU%/max_us 3/2040 63/1858 2/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:08.091][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:08.181][RX] hand fps=24 npu=38.5 wait=0.9 decode=19.9 kpt=0.7 gui=0.0 e2e=0.0 period=39.6 hands=1 size=167 d=2.40 fingers=11100 rps=none idle=27% npu_gap=1.0
+[23:20:08.223][RX] hand_evt ms=101414 pinch=0 d=2.91 fingers=10110 rps=none size=144
+[23:20:08.273][RX] hand_evt ms=101492 pinch=0 d=3.47 fingers=00000 rps=rock size=141
+[23:20:08.314][RX] hand_evt ms=101530 pinch=0 d=2.70 fingers=10000 rps=none size=140
+[23:20:08.732][RX] hand_evt ms=101949 pinch=0 d=1.72 fingers=00000 rps=rock size=126
+[23:20:08.805][RX] hand_evt ms=102026 pinch=0 d=1.00 fingers=10000 rps=none size=123
+[23:20:08.915][RX] hand_evt ms=102142 pinch=0 d=1.96 fingers=00000 rps=rock size=125
+[23:20:08.957][RX] hand_evt ms=102180 pinch=0 d=1.28 fingers=10000 rps=none size=128
+[23:20:09.082][RX] CPU%/max_us 3/2040 62/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:09.102][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:09.197][RX] hand fps=25 npu=38.5 wait=0.5 decode=19.9 kpt=0.5 gui=26.8 e2e=100.3 period=38.6 hands=1 size=134 d=1.93 fingers=10000 rps=none idle=27% npu_gap=0.0
+[23:20:09.238][RX] hand_evt ms=102374 pinch=0 d=1.17 fingers=00000 rps=rock size=123
+[23:20:09.272][RX] hand_evt ms=102414 pinch=0 d=1.39 fingers=10000 rps=none size=124
+[23:20:09.314][RX] hand_evt ms=102490 pinch=0 d=1.80 fingers=00000 rps=rock size=127
+[23:20:09.356][RX] hand_evt ms=102528 pinch=0 d=1.53 fingers=10000 rps=none size=131
+[23:20:09.387][RX] hand_evt ms=102567 pinch=0 d=1.60 fingers=00111 rps=none size=129
+[23:20:10.088][RX] CPU%/max_us 3/2040 61/1858 2/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:10.109][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:10.201][RX] hand fps=24 npu=38.5 wait=1.5 decode=19.9 kpt=0.8 gui=30.7 e2e=108.6 period=39.9 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=27% npu_gap=1.3
+[23:20:11.098][RX] CPU%/max_us 3/2040 61/1858 2/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:11.118][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:11.209][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.9 kpt=0.0 gui=0.0 e2e=0.0 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=30% npu_gap=0.0
+[23:20:11.354][RX] hand_evt ms=104573 pinch=0 d=1.59 fingers=11111 rps=paper size=175
+[23:20:12.106][RX] CPU%/max_us 3/2040 61/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:12.127][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:12.220][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.9 kpt=0.1 gui=12.9 e2e=91.8 period=38.5 hands=1 size=199 d=1.49 fingers=11111 rps=paper idle=30% npu_gap=0.0
+[23:20:13.114][RX] CPU%/max_us 3/2040 64/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:13.136][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:13.226][RX] hand fps=24 npu=38.5 wait=2.1 decode=19.9 kpt=0.8 gui=44.4 e2e=125.1 period=41.0 hands=1 size=198 d=1.34 fingers=11111 rps=paper idle=28% npu_gap=2.4
+[23:20:13.679][RX] hand_evt ms=106906 pinch=0 d=0.61 fingers=00000 rps=rock size=155
+[23:20:13.762][RX] hand_evt ms=106983 pinch=1 d=0.20 fingers=00000 rps=rock size=150
+[23:20:14.116][RX] CPU%/max_us 3/2040 61/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:14.137][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:14.229][RX] hand fps=25 npu=38.6 wait=1.6 decode=20.0 kpt=0.8 gui=31.0 e2e=108.4 period=38.8 hands=1 size=192 d=1.23 fingers=11111 rps=paper idle=25% npu_gap=0.2
+[23:20:14.724][RX] hand_evt ms=107950 pinch=1 d=0.16 fingers=00000 rps=rock size=129
+[23:20:15.128][RX] CPU%/max_us 3/2040 63/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:15.147][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:15.240][RX] hand fps=24 npu=38.5 wait=1.6 decode=19.9 kpt=0.8 gui=0.0 e2e=0.0 period=39.7 hands=1 size=126 d=0.20 fingers=00000 rps=rock idle=27% npu_gap=1.1
+[23:20:15.280][RX] hand_evt ms=108374 pinch=1 d=0.22 fingers=10000 rps=none size=127
+[23:20:15.322][RX] hand_evt ms=108439 pinch=1 d=0.19 fingers=00000 rps=rock size=128
+[23:20:15.414][RX] hand_evt ms=108632 pinch=1 d=0.16 fingers=00000 rps=rock size=129
+[23:20:15.546][RX] hand_evt ms=108747 pinch=1 d=0.28 fingers=10000 rps=none size=130
+[23:20:15.587][RX] hand_evt ms=108798 pinch=1 d=0.21 fingers=00000 rps=rock size=129
+[23:20:15.795][RX] hand_evt ms=109018 pinch=1 d=0.21 fingers=10000 rps=none size=125
+[23:20:15.838][RX] hand_evt ms=109057 pinch=1 d=0.21 fingers=00000 rps=rock size=128
+[23:20:15.947][RX] hand_evt ms=109172 pinch=1 d=0.24 fingers=10000 rps=none size=129
+[23:20:15.989][RX] hand_evt ms=109211 pinch=1 d=0.16 fingers=00000 rps=rock size=128
+[23:20:16.052][RX] hand_evt ms=109250 pinch=1 d=0.22 fingers=10000 rps=none size=126
+[23:20:16.088][RX] hand_evt ms=109303 pinch=1 d=0.20 fingers=00000 rps=rock size=126
+[23:20:16.129][RX] CPU%/max_us 3/2040 64/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:16.160][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:16.239][RX] hand fps=25 npu=38.5 wait=0.8 decode=19.9 kpt=0.8 gui=0.0 e2e=0.0 period=39.5 hands=1 size=130 d=0.28 fingers=10000 rps=none idle=27% npu_gap=0.9
+[23:20:16.279][RX] hand_evt ms=109484 pinch=1 d=0.25 fingers=10000 rps=none size=128
+[23:20:16.320][RX] hand_evt ms=109524 pinch=1 d=0.21 fingers=00000 rps=rock size=128
+[23:20:16.573][RX] hand_evt ms=109794 pinch=1 d=0.14 fingers=10000 rps=none size=127
+[23:20:16.616][RX] hand_evt ms=109832 pinch=1 d=0.16 fingers=00000 rps=rock size=128
+[23:20:16.760][RX] hand_evt ms=109986 pinch=1 d=0.16 fingers=00000 rps=rock size=127
+[23:20:16.883][RX] hand_evt ms=110101 pinch=1 d=0.17 fingers=00000 rps=rock size=126
+[23:20:17.113][RX] hand_evt ms=110337 pinch=1 d=0.22 fingers=00000 rps=rock size=126
+[23:20:17.165][RX] CPU%/max_us 3/2040 63/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:17.183][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:17.275][RX] hand fps=25 npu=38.5 wait=1.1 decode=20.0 kpt=0.9 gui=33.8 e2e=108.2 period=38.7 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=25% npu_gap=0.1
+[23:20:17.492][RX] hand_evt ms=110709 pinch=0 d=0.59 fingers=10000 rps=none size=155
+[23:20:17.614][RX] hand_evt ms=110834 pinch=0 d=1.01 fingers=10011 rps=none size=164
+[23:20:17.679][RX] hand_evt ms=110903 pinch=0 d=1.50 fingers=11110 rps=none size=167
+[23:20:17.792][RX] hand_evt ms=111018 pinch=0 d=1.76 fingers=11111 rps=paper size=167
+[23:20:17.834][RX] hand_evt ms=111057 pinch=0 d=1.41 fingers=11010 rps=none size=167
+[23:20:17.874][RX] hand_evt ms=111096 pinch=0 d=1.35 fingers=10110 rps=none size=169
+[23:20:17.917][RX] hand_evt ms=111134 pinch=0 d=1.40 fingers=10010 rps=none size=171
+[23:20:17.958][RX] hand_evt ms=111174 pinch=0 d=1.24 fingers=10100 rps=none size=171
+[23:20:17.997][RX] hand_evt ms=111211 pinch=0 d=1.37 fingers=10011 rps=none size=169
+[23:20:18.086][RX] hand_evt ms=111289 pinch=0 d=1.22 fingers=10000 rps=none size=169
+[23:20:18.153][RX] CPU%/max_us 3/2040 65/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:18.174][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:18.264][RX] hand fps=24 npu=38.5 wait=1.0 decode=19.9 kpt=0.8 gui=36.0 e2e=116.5 period=39.7 hands=1 size=160 d=0.84 fingers=10000 rps=none idle=28% npu_gap=1.1
+[23:20:18.306][RX] hand_evt ms=111520 pinch=0 d=1.11 fingers=10011 rps=none size=170
+[23:20:18.345][RX] hand_evt ms=111559 pinch=0 d=1.13 fingers=10000 rps=none size=172
+[23:20:18.386][RX] hand_evt ms=111597 pinch=0 d=1.13 fingers=10010 rps=none size=170
+[23:20:18.424][RX] hand_evt ms=111636 pinch=0 d=1.10 fingers=10011 rps=none size=170
+[23:20:18.489][RX] hand_evt ms=111713 pinch=0 d=1.00 fingers=10001 rps=none size=169
+[23:20:18.530][RX] hand_evt ms=111751 pinch=0 d=0.95 fingers=10000 rps=none size=170
+[23:20:18.615][RX] hand_evt ms=111836 pinch=0 d=1.13 fingers=10001 rps=none size=168
+[23:20:18.651][RX] hand_evt ms=111867 pinch=0 d=1.07 fingers=10011 rps=none size=162
+[23:20:18.692][RX] hand_evt ms=111907 pinch=0 d=0.93 fingers=10000 rps=none size=154
+[23:20:18.733][RX] hand_evt ms=111944 pinch=0 d=1.55 fingers=00111 rps=none size=149
+[23:20:18.775][RX] hand_evt ms=111984 pinch=0 d=1.34 fingers=10000 rps=none size=146
+[23:20:18.838][RX] hand_evt ms=112060 pinch=0 d=3.19 fingers=00111 rps=none size=138
+[23:20:18.877][RX] hand_evt ms=112099 pinch=0 d=3.84 fingers=00110 rps=none size=134
+[23:20:18.919][RX] hand_evt ms=112137 pinch=0 d=1.96 fingers=10000 rps=none size=136
+[23:20:19.030][RX] hand_evt ms=112254 pinch=0 d=2.99 fingers=00110 rps=none size=135
+[23:20:19.122][RX] hand_evt ms=112345 pinch=0 d=4.53 fingers=00000 rps=rock size=139
+[23:20:19.173][RX] CPU%/max_us 3/2040 64/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:19.195][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:19.283][RX] hand fps=25 npu=38.5 wait=0.9 decode=20.0 kpt=1.0 gui=0.0 e2e=0.0 period=38.6 hands=1 size=170 d=0.95 fingers=10000 rps=none idle=24% npu_gap=0.0
+[23:20:20.167][RX] CPU%/max_us 3/2040 62/1858 1/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:20.187][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:20.280][RX] hand fps=24 npu=38.5 wait=1.0 decode=19.9 kpt=0.6 gui=0.0 e2e=0.0 period=39.6 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=27% npu_gap=1.0
+[23:20:21.174][RX] CPU%/max_us 3/2040 61/1858 1/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:21.194][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:21.286][RX] hand fps=25 npu=38.5 wait=0.2 decode=19.8 kpt=0.0 gui=18.4 e2e=91.4 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=30% npu_gap=0.0
+[23:20:22.194][RX] CPU%/max_us 3/2040 61/1858 1/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:22.217][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:22.308][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.8 kpt=0.0 gui=15.3 e2e=91.3 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=31% npu_gap=0.0
+[23:20:23.197][RX] CPU%/max_us 3/2040 61/1858 1/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:23.217][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:23.306][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.9 kpt=0.0 gui=12.3 e2e=91.3 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=31% npu_gap=0.0
+[23:20:24.199][RX] CPU%/max_us 3/2040 62/1858 1/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:24.219][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:24.310][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.9 kpt=0.0 gui=10.0 e2e=91.2 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=31% npu_gap=0.0
+[23:20:24.886][RX] hand_evt ms=118104 pinch=0 d=2.41 fingers=11111 rps=paper size=195
+[23:20:25.201][RX] CPU%/max_us 3/2040 63/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:25.222][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:25.313][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.8 kpt=0.0 gui=15.5 e2e=99.5 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=31% npu_gap=0.0
+[23:20:25.782][RX] hand_evt ms=119007 pinch=0 d=0.94 fingers=10000 rps=none size=172
+[23:20:25.931][RX] hand_evt ms=119161 pinch=0 d=0.89 fingers=10110 rps=none size=160
+[23:20:25.984][RX] hand_evt ms=119200 pinch=0 d=0.85 fingers=10000 rps=none size=165
+[23:20:26.049][RX] hand_evt ms=119277 pinch=0 d=0.89 fingers=10100 rps=none size=163
+[23:20:26.103][RX] hand_evt ms=119316 pinch=0 d=0.76 fingers=10000 rps=none size=165
+[23:20:26.205][RX] CPU%/max_us 3/2040 64/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:26.225][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:26.316][RX] hand fps=25 npu=38.6 wait=1.1 decode=20.0 kpt=0.6 gui=27.9 e2e=116.1 period=38.8 hands=1 size=208 d=2.06 fingers=11111 rps=paper idle=27% npu_gap=0.2
+[23:20:26.984][RX] hand_evt ms=120204 pinch=0 d=1.39 fingers=00111 rps=none size=169
+[23:20:27.026][RX] hand_evt ms=120242 pinch=0 d=1.15 fingers=10010 rps=none size=176
+[23:20:27.123][RX] hand_evt ms=120319 pinch=0 d=1.32 fingers=10111 rps=none size=175
+[23:20:27.176][RX] hand_evt ms=120401 pinch=0 d=1.27 fingers=10000 rps=none size=178
+[23:20:27.219][RX] CPU%/max_us 3/2040 63/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:27.240][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:27.333][RX] hand fps=24 npu=38.5 wait=1.7 decode=19.9 kpt=0.6 gui=38.6 e2e=124.4 period=38.9 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=26% npu_gap=0.3
+[23:20:27.374][RX] hand_evt ms=120440 pinch=0 d=1.43 fingers=10110 rps=none size=174
+[23:20:27.414][RX] hand_evt ms=120479 pinch=0 d=1.21 fingers=10010 rps=none size=178
+[23:20:27.457][RX] hand_evt ms=120555 pinch=0 d=1.03 fingers=10000 rps=none size=180
+[23:20:27.498][RX] hand_evt ms=120594 pinch=0 d=1.12 fingers=10110 rps=none size=178
+[23:20:27.530][RX] hand_evt ms=120633 pinch=0 d=1.30 fingers=10001 rps=none size=184
+[23:20:27.597][RX] hand_evt ms=120671 pinch=0 d=1.26 fingers=10011 rps=none size=180
+[23:20:27.634][RX] hand_evt ms=120711 pinch=0 d=1.48 fingers=10010 rps=none size=178
+[23:20:27.677][RX] hand_evt ms=120748 pinch=0 d=1.29 fingers=10110 rps=none size=184
+[23:20:27.718][RX] hand_evt ms=120825 pinch=0 d=1.23 fingers=10010 rps=none size=180
+[23:20:27.756][RX] hand_evt ms=120880 pinch=0 d=1.15 fingers=10001 rps=none size=185
+[23:20:27.797][RX] hand_evt ms=120907 pinch=0 d=1.43 fingers=10011 rps=none size=178
+[23:20:27.839][RX] hand_evt ms=120944 pinch=0 d=1.27 fingers=10000 rps=none size=182
+[23:20:27.942][RX] hand_evt ms=121161 pinch=0 d=1.21 fingers=10011 rps=none size=174
+[23:20:27.983][RX] hand_evt ms=121200 pinch=0 d=0.96 fingers=10000 rps=none size=180
+[23:20:28.217][RX] CPU%/max_us 3/2040 61/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:28.238][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:28.329][RX] hand fps=25 npu=38.5 wait=0.9 decode=19.9 kpt=0.6 gui=23.2 e2e=99.4 period=38.7 hands=1 size=184 d=1.29 fingers=10110 rps=none idle=27% npu_gap=0.1
+[23:20:29.232][RX] CPU%/max_us 3/2040 61/1858 1/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:29.252][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:29.345][RX] hand fps=24 npu=38.5 wait=1.3 decode=19.9 kpt=0.6 gui=40.6 e2e=124.3 period=39.6 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=27% npu_gap=1.0
+[23:20:30.243][RX] CPU%/max_us 3/2040 62/1858 1/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:30.264][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:30.353][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.9 kpt=0.0 gui=0.0 e2e=0.0 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=30% npu_gap=0.0
+[23:20:31.248][RX] CPU%/max_us 3/2040 61/1858 1/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:31.269][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:31.362][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.9 kpt=0.0 gui=0.0 e2e=0.0 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=30% npu_gap=0.0
+[23:20:31.403][RX] hand_evt ms=124594 pinch=0 d=0.26 fingers=10000 rps=none size=171
+[23:20:31.446][RX] hand_evt ms=124671 pinch=1 d=0.21 fingers=10000 rps=none size=175
+[23:20:31.787][RX] hand_evt ms=125007 pinch=0 d=0.45 fingers=10000 rps=none size=178
+[23:20:32.052][RX] hand_evt ms=125276 pinch=1 d=0.24 fingers=10000 rps=none size=170
+[23:20:32.158][RX] hand_evt ms=125377 pinch=0 d=0.40 fingers=10000 rps=none size=171
+[23:20:32.259][RX] CPU%/max_us 3/2040 59/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:32.278][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:32.373][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.9 kpt=0.1 gui=0.0 e2e=0.0 period=38.5 hands=1 size=175 d=0.07 fingers=10000 rps=none idle=30% npu_gap=0.0
+[23:20:32.412][RX] hand_evt ms=125585 pinch=1 d=0.24 fingers=10000 rps=none size=167
+[23:20:32.452][RX] hand_evt ms=125623 pinch=0 d=0.57 fingers=10000 rps=none size=167
+[23:20:32.610][RX] hand_evt ms=125815 pinch=1 d=0.19 fingers=10000 rps=none size=172
+[23:20:32.942][RX] hand_evt ms=126161 pinch=0 d=0.37 fingers=10000 rps=none size=184
+[23:20:33.086][RX] hand_evt ms=126315 pinch=1 d=0.21 fingers=10000 rps=none size=213
+[23:20:33.215][RX] hand_evt ms=126432 pinch=1 d=0.08 fingers=10011 rps=none size=217
+[23:20:33.256][RX] hand_evt ms=126470 pinch=1 d=0.08 fingers=11111 rps=paper size=219
+[23:20:33.305][RX] CPU%/max_us 3/2040 64/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:33.325][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:33.417][RX] hand fps=23 npu=38.5 wait=2.8 decode=19.9 kpt=0.9 gui=45.1 e2e=124.1 period=41.2 hands=1 size=171 d=0.30 fingers=10000 rps=none idle=28% npu_gap=2.6
+[23:20:33.459][RX] hand_evt ms=126585 pinch=1 d=0.23 fingers=11111 rps=paper size=229
+[23:20:33.499][RX] hand_evt ms=126701 pinch=0 d=0.36 fingers=10000 rps=none size=219
+[23:20:33.554][RX] hand_evt ms=126779 pinch=0 d=0.47 fingers=10000 rps=none size=218
+[23:20:33.648][RX] hand_evt ms=126873 pinch=0 d=0.46 fingers=00000 rps=rock size=197
+[23:20:33.753][RX] hand_evt ms=126977 pinch=0 d=0.79 fingers=10000 rps=none size=212
+[23:20:33.873][RX] hand_evt ms=127093 pinch=0 d=0.73 fingers=10000 rps=none size=232
+[23:20:33.947][RX] hand_evt ms=127170 pinch=0 d=0.84 fingers=10000 rps=none size=237
+[23:20:34.068][RX] hand_evt ms=127286 pinch=0 d=1.25 fingers=10010 rps=none size=232
+[23:20:34.137][RX] hand_evt ms=127324 pinch=0 d=1.38 fingers=10111 rps=none size=225
+[23:20:34.231][RX] hand_evt ms=127451 pinch=0 d=1.31 fingers=10011 rps=none size=222
+[23:20:34.273][RX] hand_evt ms=127486 pinch=0 d=1.45 fingers=10111 rps=none size=222
+[23:20:34.323][RX] CPU%/max_us 3/2040 63/1858 6/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:34.345][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:34.435][RX] hand fps=24 npu=38.5 wait=2.3 decode=19.8 kpt=0.6 gui=50.9 e2e=124.1 period=40.0 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=28% npu_gap=1.5
+[23:20:34.477][RX] hand_evt ms=127564 pinch=0 d=1.44 fingers=10011 rps=none size=221
+[23:20:34.519][RX] hand_evt ms=127603 pinch=0 d=1.56 fingers=10111 rps=none size=217
+[23:20:34.559][RX] hand_evt ms=127680 pinch=0 d=1.38 fingers=10110 rps=none size=214
+[23:20:34.618][RX] hand_evt ms=127718 pinch=0 d=1.40 fingers=10011 rps=none size=221
+[23:20:34.659][RX] hand_evt ms=127795 pinch=0 d=1.38 fingers=10110 rps=none size=214
+[23:20:34.693][RX] hand_evt ms=127833 pinch=0 d=1.56 fingers=10111 rps=none size=213
+[23:20:34.816][RX] hand_evt ms=128032 pinch=0 d=0.90 fingers=10100 rps=none size=220
+[23:20:34.857][RX] hand_evt ms=128071 pinch=0 d=1.14 fingers=10000 rps=none size=220
+[23:20:34.899][RX] hand_evt ms=128110 pinch=0 d=1.87 fingers=11111 rps=paper size=275
+[23:20:34.940][RX] hand_evt ms=128148 pinch=0 d=2.32 fingers=01111 rps=none size=275
+[23:20:35.000][RX] hand_evt ms=128225 pinch=0 d=2.19 fingers=11111 rps=paper size=230
+[23:20:35.132][RX] hand_evt ms=128342 pinch=0 d=1.65 fingers=01111 rps=none size=223
+[23:20:35.174][RX] hand_evt ms=128392 pinch=0 d=1.38 fingers=11110 rps=none size=178
+[23:20:35.308][RX] CPU%/max_us 3/2040 64/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:35.328][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:35.419][RX] hand fps=25 npu=38.6 wait=2.1 decode=20.0 kpt=0.8 gui=33.3 e2e=107.4 period=39.0 hands=1 size=216 d=1.56 fingers=10011 rps=none idle=26% npu_gap=0.4
+[23:20:35.461][RX] hand_evt ms=128650 pinch=0 d=0.59 fingers=00111 rps=none size=241
+[23:20:35.503][RX] hand_evt ms=128727 pinch=0 d=1.13 fingers=00111 rps=none size=255
+[23:20:35.651][RX] hand_evt ms=128843 pinch=0 d=0.82 fingers=11111 rps=paper size=239
+[23:20:35.687][RX] hand_evt ms=128902 pinch=0 d=1.10 fingers=01111 rps=none size=238
+[23:20:35.780][RX] hand_evt ms=129006 pinch=0 d=1.09 fingers=00111 rps=none size=236
+[23:20:36.212][RX] hand_evt ms=129431 pinch=0 d=1.13 fingers=01111 rps=none size=238
+[23:20:36.291][RX] hand_evt ms=129508 pinch=0 d=0.82 fingers=00111 rps=none size=232
+[23:20:36.342][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:36.361][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:36.456][RX] hand fps=25 npu=38.6 wait=1.6 decode=19.9 kpt=0.7 gui=28.0 e2e=107.3 period=38.8 hands=1 size=253 d=1.14 fingers=00111 rps=none idle=25% npu_gap=0.2
+[23:20:36.496][RX] hand_evt ms=129547 pinch=0 d=0.79 fingers=01111 rps=none size=236
+[23:20:36.537][RX] hand_evt ms=129585 pinch=0 d=0.77 fingers=11111 rps=paper size=229
+[23:20:37.321][RX] hand_evt ms=130542 pinch=0 d=1.08 fingers=01111 rps=none size=229
+[23:20:37.373][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:37.390][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:37.484][RX] hand fps=24 npu=38.6 wait=1.7 decode=20.0 kpt=0.9 gui=34.4 e2e=107.3 period=38.9 hands=1 size=229 d=1.06 fingers=11111 rps=paper idle=25% npu_gap=0.3
+[23:20:37.718][RX] hand_evt ms=130943 pinch=0 d=0.91 fingers=11111 rps=paper size=221
+[23:20:38.118][RX] hand_evt ms=131343 pinch=0 d=0.44 fingers=11111 rps=paper size=202
+[23:20:38.168][RX] hand_evt ms=131385 pinch=0 d=0.50 fingers=01111 rps=none size=201
+[23:20:38.274][RX] hand_evt ms=131499 pinch=1 d=0.23 fingers=00111 rps=none size=199
+[23:20:38.333][RX] CPU%/max_us 3/2040 64/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:38.353][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:38.447][RX] hand fps=24 npu=38.6 wait=1.6 decode=20.0 kpt=0.9 gui=44.4 e2e=123.9 period=39.8 hands=1 size=225 d=1.16 fingers=01111 rps=none idle=26% npu_gap=1.2
+[23:20:38.489][RX] hand_evt ms=131614 pinch=0 d=0.35 fingers=00111 rps=none size=211
+[23:20:38.527][RX] hand_evt ms=131653 pinch=1 d=0.24 fingers=00111 rps=none size=194
+[23:20:38.717][RX] hand_evt ms=131938 pinch=0 d=0.75 fingers=00111 rps=none size=220
+[23:20:38.898][RX] hand_evt ms=132119 pinch=0 d=0.74 fingers=10111 rps=none size=224
+[23:20:38.942][RX] hand_evt ms=132157 pinch=0 d=0.54 fingers=00111 rps=none size=230
+[23:20:38.981][RX] hand_evt ms=132196 pinch=0 d=1.15 fingers=11111 rps=paper size=225
+[23:20:39.022][RX] hand_evt ms=132235 pinch=0 d=0.64 fingers=10111 rps=none size=228
+[23:20:39.063][RX] hand_evt ms=132273 pinch=0 d=0.49 fingers=00111 rps=none size=225
+[23:20:39.214][RX] hand_evt ms=132437 pinch=0 d=1.18 fingers=01111 rps=none size=229
+[23:20:39.287][RX] hand_evt ms=132505 pinch=0 d=0.93 fingers=00111 rps=none size=225
+[23:20:39.326][RX] hand_evt ms=132543 pinch=0 d=0.90 fingers=11111 rps=paper size=224
+[23:20:39.379][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:39.400][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:39.490][RX] hand fps=25 npu=38.6 wait=1.2 decode=19.9 kpt=0.7 gui=0.0 e2e=0.0 period=39.7 hands=1 size=191 d=0.32 fingers=00111 rps=none idle=27% npu_gap=1.1
+[23:20:39.531][RX] hand_evt ms=132582 pinch=0 d=0.82 fingers=00111 rps=none size=224
+[23:20:39.573][RX] hand_evt ms=132622 pinch=0 d=0.92 fingers=01111 rps=none size=223
+[23:20:39.613][RX] hand_evt ms=132660 pinch=0 d=0.81 fingers=11111 rps=paper size=221
+[23:20:40.091][RX] hand_evt ms=133316 pinch=0 d=0.78 fingers=01111 rps=none size=216
+[23:20:40.152][RX] hand_evt ms=133355 pinch=0 d=1.07 fingers=11111 rps=paper size=217
+[23:20:40.285][RX] hand_evt ms=133509 pinch=0 d=0.62 fingers=00111 rps=none size=218
+[23:20:40.325][RX] hand_evt ms=133549 pinch=0 d=1.08 fingers=11111 rps=paper size=216
+[23:20:40.377][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:40.398][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:40.490][RX] hand fps=24 npu=38.6 wait=1.2 decode=20.0 kpt=1.0 gui=0.0 e2e=0.0 period=38.7 hands=1 size=221 d=1.15 fingers=11111 rps=paper idle=24% npu_gap=0.0
+[23:20:41.280][RX] hand_evt ms=134505 pinch=0 d=1.08 fingers=01111 rps=none size=211
+[23:20:41.319][RX] hand_evt ms=134542 pinch=0 d=1.26 fingers=11111 rps=paper size=201
+[23:20:41.371][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:41.391][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:41.482][RX] hand fps=25 npu=38.5 wait=1.0 decode=20.0 kpt=0.9 gui=27.0 e2e=107.0 period=38.6 hands=1 size=216 d=1.12 fingers=11111 rps=paper idle=25% npu_gap=0.0
+[23:20:42.362][RX] CPU%/max_us 3/2040 61/1858 1/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:42.383][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:42.473][RX] hand fps=24 npu=38.6 wait=1.6 decode=19.9 kpt=0.7 gui=42.9 e2e=123.7 period=39.7 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=27% npu_gap=1.1
+[23:20:42.866][RX] hand_evt ms=136086 pinch=0 d=0.78 fingers=11111 rps=paper size=213
+[23:20:43.376][RX] CPU%/max_us 3/2040 60/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:43.397][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:43.487][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.9 kpt=0.0 gui=0.0 e2e=0.0 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=30% npu_gap=0.0
+[23:20:44.378][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:44.399][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:44.491][RX] hand fps=25 npu=38.5 wait=0.8 decode=19.9 kpt=0.6 gui=0.0 e2e=0.0 period=39.5 hands=1 size=214 d=0.83 fingers=11111 rps=paper idle=28% npu_gap=1.0
+[23:20:45.390][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:45.409][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:45.501][RX] hand fps=25 npu=38.6 wait=1.2 decode=20.0 kpt=0.8 gui=32.3 e2e=106.9 period=38.6 hands=1 size=217 d=0.86 fingers=11111 rps=paper idle=25% npu_gap=0.0
+[23:20:45.583][RX] hand_evt ms=138807 pinch=0 d=1.03 fingers=11111 rps=paper size=182
+[23:20:46.398][RX] CPU%/max_us 3/2040 64/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:46.417][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:46.510][RX] hand fps=24 npu=38.6 wait=1.6 decode=20.0 kpt=0.8 gui=45.8 e2e=123.5 period=39.9 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=27% npu_gap=1.3
+[23:20:47.011][RX] hand_evt ms=140231 pinch=0 d=1.36 fingers=11111 rps=paper size=209
+[23:20:47.408][RX] CPU%/max_us 3/2040 64/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:47.430][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:47.520][RX] hand fps=24 npu=38.6 wait=1.5 decode=20.0 kpt=0.8 gui=0.0 e2e=0.0 period=39.7 hands=1 size=242 d=1.31 fingers=11111 rps=paper idle=27% npu_gap=1.1
+[23:20:48.405][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:48.426][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:48.511][RX] hand fps=25 npu=38.6 wait=1.3 decode=20.0 kpt=0.8 gui=0.0 e2e=0.0 period=38.7 hands=1 size=226 d=1.01 fingers=11111 rps=paper idle=25% npu_gap=0.1
+[23:20:49.422][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:49.444][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:49.535][RX] hand fps=24 npu=38.5 wait=1.5 decode=20.0 kpt=0.8 gui=45.4 e2e=123.4 period=39.8 hands=1 size=223 d=1.06 fingers=11111 rps=paper idle=27% npu_gap=1.2
+[23:20:50.163][RX] hand_evt ms=143385 pinch=0 d=0.98 fingers=01111 rps=none size=210
+[23:20:50.253][RX] hand_evt ms=143473 pinch=0 d=0.95 fingers=11111 rps=paper size=192
+[23:20:50.398][RX] hand_evt ms=143618 pinch=0 d=0.92 fingers=01111 rps=none size=188
+[23:20:50.445][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:50.466][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:50.552][RX] hand fps=24 npu=38.5 wait=1.4 decode=20.0 kpt=0.8 gui=0.0 e2e=0.0 period=39.7 hands=1 size=224 d=1.00 fingers=11111 rps=paper idle=27% npu_gap=1.1
+[23:20:50.593][RX] hand_evt ms=143656 pinch=0 d=0.96 fingers=11111 rps=paper size=193
+[23:20:50.636][RX] hand_evt ms=143812 pinch=0 d=0.92 fingers=01111 rps=none size=187
+[23:20:50.696][RX] hand_evt ms=143887 pinch=0 d=0.88 fingers=11111 rps=paper size=189
+[23:20:50.738][RX] hand_evt ms=143926 pinch=0 d=0.86 fingers=01111 rps=none size=187
+[23:20:50.787][RX] hand_evt ms=144009 pinch=0 d=0.97 fingers=11111 rps=paper size=187
+[23:20:50.828][RX] hand_evt ms=144042 pinch=0 d=0.91 fingers=01111 rps=none size=190
+[23:20:51.006][RX] hand_evt ms=144223 pinch=0 d=0.91 fingers=11111 rps=paper size=189
+[23:20:51.044][RX] hand_evt ms=144262 pinch=0 d=0.92 fingers=01111 rps=none size=190
+[23:20:51.086][RX] hand_evt ms=144300 pinch=0 d=0.99 fingers=11111 rps=paper size=192
+[23:20:51.434][RX] CPU%/max_us 3/2040 64/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:51.454][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:51.545][RX] hand fps=25 npu=38.6 wait=1.3 decode=20.0 kpt=0.9 gui=0.0 e2e=0.0 period=38.7 hands=1 size=190 d=0.95 fingers=11111 rps=paper idle=24% npu_gap=0.1
+[23:20:51.658][RX] hand_evt ms=144879 pinch=0 d=0.78 fingers=01111 rps=none size=189
+[23:20:51.752][RX] hand_evt ms=144971 pinch=0 d=0.97 fingers=11111 rps=paper size=190
+[23:20:51.791][RX] hand_evt ms=144998 pinch=0 d=0.93 fingers=01111 rps=none size=190
+[23:20:51.833][RX] hand_evt ms=145036 pinch=0 d=0.85 fingers=11111 rps=paper size=188
+[23:20:52.090][RX] hand_evt ms=145308 pinch=0 d=0.89 fingers=01111 rps=none size=191
+[23:20:52.129][RX] hand_evt ms=145345 pinch=0 d=0.81 fingers=11111 rps=paper size=190
+[23:20:52.446][RX] CPU%/max_us 3/2040 64/1858 3/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:52.467][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:52.558][RX] hand fps=24 npu=38.5 wait=1.3 decode=20.0 kpt=0.9 gui=0.0 e2e=0.0 period=39.6 hands=1 size=190 d=0.88 fingers=11111 rps=paper idle=27% npu_gap=1.0
+[23:20:52.896][RX] hand_evt ms=146117 pinch=0 d=0.99 fingers=01111 rps=none size=193
+[23:20:52.938][RX] hand_evt ms=146156 pinch=0 d=0.84 fingers=11111 rps=paper size=192
+[23:20:53.455][RX] CPU%/max_us 3/2040 64/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:53.476][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:53.570][RX] hand fps=25 npu=38.5 wait=0.9 decode=20.0 kpt=0.9 gui=0.0 e2e=0.0 period=38.7 hands=1 size=187 d=0.79 fingers=11111 rps=paper idle=25% npu_gap=0.1
+[23:20:53.605][RX] hand_evt ms=146812 pinch=0 d=0.83 fingers=11111 rps=paper size=191
+[23:20:53.695][RX] hand_evt ms=146889 pinch=0 d=0.93 fingers=11111 rps=paper size=193
+[23:20:53.737][RX] hand_evt ms=146946 pinch=0 d=0.91 fingers=01111 rps=none size=193
+[23:20:53.772][RX] hand_evt ms=146975 pinch=0 d=0.79 fingers=11111 rps=paper size=193
+[23:20:53.897][RX] hand_evt ms=147114 pinch=0 d=0.93 fingers=11111 rps=paper size=189
+[23:20:54.085][RX] hand_evt ms=147306 pinch=0 d=0.81 fingers=11111 rps=paper size=191
+[23:20:54.313][RX] hand_evt ms=147537 pinch=0 d=0.79 fingers=11111 rps=paper size=189
+[23:20:54.393][RX] hand_evt ms=147614 pinch=0 d=0.81 fingers=01111 rps=none size=190
+[23:20:54.436][RX] hand_evt ms=147655 pinch=0 d=0.91 fingers=11111 rps=paper size=193
+[23:20:54.487][RX] CPU%/max_us 3/2040 64/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:54.502][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:54.596][RX] hand fps=25 npu=38.5 wait=1.0 decode=19.9 kpt=0.8 gui=27.9 e2e=106.4 period=38.6 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=25% npu_gap=0.0
+[23:20:54.741][RX] hand_evt ms=147962 pinch=0 d=0.83 fingers=11111 rps=paper size=191
+[23:20:55.195][RX] hand_evt ms=148387 pinch=0 d=0.87 fingers=11111 rps=paper size=191
+[23:20:55.481][RX] CPU%/max_us 3/2040 60/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:55.502][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:55.589][RX] hand fps=24 npu=38.5 wait=1.4 decode=19.8 kpt=0.8 gui=43.6 e2e=123.1 period=39.8 hands=1 size=190 d=0.98 fingers=11111 rps=paper idle=28% npu_gap=1.2
+[23:20:55.633][RX] hand_evt ms=148724 pinch=0 d=0.79 fingers=01111 rps=none size=189
+[23:20:55.695][RX] hand_evt ms=148762 pinch=0 d=0.77 fingers=11111 rps=paper size=191
+[23:20:55.736][RX] hand_evt ms=148839 pinch=0 d=0.76 fingers=01111 rps=none size=192
+[23:20:55.775][RX] hand_evt ms=148877 pinch=0 d=0.69 fingers=11111 rps=paper size=186
+[23:20:55.850][RX] hand_evt ms=149074 pinch=0 d=1.26 fingers=11111 rps=paper size=217
+[23:20:56.496][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:56.517][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:56.604][RX] hand fps=24 npu=38.5 wait=0.7 decode=19.9 kpt=0.8 gui=0.0 e2e=0.0 period=39.6 hands=1 size=191 d=0.77 fingers=11111 rps=paper idle=28% npu_gap=1.0
+[23:20:57.510][RX] CPU%/max_us 3/2040 64/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:57.530][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:57.619][RX] hand fps=24 npu=38.5 wait=2.5 decode=19.9 kpt=0.8 gui=55.0 e2e=123.0 period=40.3 hands=1 size=241 d=1.42 fingers=11111 rps=paper idle=27% npu_gap=1.7
+[23:20:58.512][RX] CPU%/max_us 3/2040 65/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:58.533][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:58.622][RX] hand fps=24 npu=38.6 wait=1.7 decode=20.0 kpt=0.8 gui=33.0 e2e=106.2 period=39.8 hands=1 size=237 d=1.13 fingers=11111 rps=paper idle=27% npu_gap=1.2
+[23:20:59.157][RX] hand_evt ms=152374 pinch=0 d=0.66 fingers=10000 rps=none size=183
+[23:20:59.250][RX] hand_evt ms=152453 pinch=0 d=0.45 fingers=00000 rps=rock size=168
+[23:20:59.292][RX] hand_evt ms=152503 pinch=0 d=0.42 fingers=10000 rps=none size=174
+[23:20:59.527][RX] CPU%/max_us 3/2040 65/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:20:59.548][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:20:59.641][RX] hand fps=24 npu=38.6 wait=2.3 decode=20.0 kpt=0.8 gui=45.5 e2e=122.9 period=39.9 hands=1 size=237 d=1.28 fingers=11111 rps=paper idle=26% npu_gap=1.3
+[23:21:00.072][RX] hand_evt ms=153302 pinch=0 d=0.30 fingers=00000 rps=rock size=168
+[23:21:00.124][RX] hand_evt ms=153341 pinch=0 d=0.36 fingers=10000 rps=none size=167
+[23:21:00.533][RX] CPU%/max_us 3/2040 65/1858 3/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:00.557][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:00.639][RX] hand fps=24 npu=38.6 wait=1.9 decode=20.0 kpt=0.9 gui=0.0 e2e=0.0 period=39.7 hands=1 size=169 d=0.39 fingers=10000 rps=none idle=26% npu_gap=1.1
+[23:21:00.675][RX] hand_evt ms=153881 pinch=1 d=0.24 fingers=10000 rps=none size=167
+[23:21:00.855][RX] hand_evt ms=154074 pinch=0 d=0.40 fingers=10000 rps=none size=167
+[23:21:01.534][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:01.555][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:01.648][RX] hand fps=25 npu=38.5 wait=0.8 decode=20.0 kpt=0.9 gui=0.0 e2e=0.0 period=38.6 hands=1 size=167 d=0.30 fingers=10000 rps=none idle=25% npu_gap=0.0
+[23:21:01.819][RX] hand_evt ms=155034 pinch=0 d=1.09 fingers=11111 rps=paper size=224
+[23:21:02.555][RX] CPU%/max_us 3/2040 64/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:02.575][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:02.668][RX] hand fps=24 npu=38.5 wait=1.1 decode=20.0 kpt=0.9 gui=0.0 e2e=0.0 period=39.6 hands=1 size=169 d=0.34 fingers=10000 rps=none idle=26% npu_gap=1.0
+[23:21:03.558][RX] CPU%/max_us 3/2040 64/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:03.579][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:03.669][RX] hand fps=25 npu=38.6 wait=1.1 decode=20.0 kpt=0.8 gui=0.0 e2e=0.0 period=38.6 hands=1 size=255 d=1.73 fingers=11111 rps=paper idle=25% npu_gap=0.0
+[23:21:04.117][RX] hand_evt ms=157335 pinch=0 d=0.95 fingers=10000 rps=none size=198
+[23:21:04.462][RX] hand_evt ms=157687 pinch=0 d=0.25 fingers=00000 rps=rock size=165
+[23:21:04.503][RX] hand_evt ms=157725 pinch=0 d=0.35 fingers=10000 rps=none size=168
+[23:21:04.567][RX] CPU%/max_us 3/2040 64/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:04.589][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:04.674][RX] hand fps=24 npu=38.6 wait=2.5 decode=20.0 kpt=0.9 gui=0.0 e2e=0.0 period=39.9 hands=1 size=166 d=0.29 fingers=10000 rps=none idle=26% npu_gap=1.3
+[23:21:05.044][RX] hand_evt ms=158266 pinch=0 d=0.31 fingers=00000 rps=rock size=162
+[23:21:05.086][RX] hand_evt ms=158304 pinch=0 d=0.32 fingers=10000 rps=none size=165
+[23:21:05.568][RX] CPU%/max_us 3/2040 65/1858 3/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:05.589][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:05.713][RX] hand fps=25 npu=38.6 wait=0.5 decode=20.0 kpt=0.9 gui=0.0 e2e=0.0 period=38.6 hands=1 size=205 d=0.87 fingers=10000 rps=none idle=25% npu_gap=0.0
+[23:21:05.754][RX] hand_evt ms=158807 pinch=0 d=1.14 fingers=11111 rps=paper size=225
+[23:21:06.577][RX] CPU%/max_us 3/2040 61/1858 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:06.598][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:06.688][RX] hand fps=23 npu=38.6 wait=2.7 decode=19.9 kpt=0.8 gui=42.6 e2e=122.5 period=41.1 hands=1 size=254 d=1.52 fingers=11111 rps=paper idle=28% npu_gap=2.5
+[23:21:07.587][RX] CPU%/max_us 3/2040 64/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:07.608][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:07.731][RX] hand fps=24 npu=38.6 wait=2.0 decode=20.0 kpt=0.8 gui=49.1 e2e=122.4 period=40.0 hands=1 size=233 d=1.55 fingers=11111 rps=paper idle=27% npu_gap=1.4
+[23:21:07.772][RX] hand_evt ms=160913 pinch=0 d=0.88 fingers=11100 rps=none size=227
+[23:21:07.813][RX] hand_evt ms=160953 pinch=0 d=1.08 fingers=11111 rps=paper size=224
+[23:21:07.854][RX] hand_evt ms=161013 pinch=0 d=0.87 fingers=10000 rps=none size=217
+[23:21:08.073][RX] hand_evt ms=161296 pinch=0 d=0.92 fingers=10111 rps=none size=233
+[23:21:08.107][RX] hand_evt ms=161336 pinch=0 d=0.81 fingers=10000 rps=none size=234
+[23:21:08.600][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:08.621][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:08.735][RX] hand fps=24 npu=38.6 wait=2.0 decode=20.0 kpt=0.9 gui=45.8 e2e=122.4 period=40.0 hands=1 size=233 d=0.65 fingers=10000 rps=none idle=26% npu_gap=1.4
+[23:21:08.776][RX] hand_evt ms=161953 pinch=0 d=0.98 fingers=10111 rps=none size=229
+[23:21:08.811][RX] hand_evt ms=162007 pinch=0 d=0.67 fingers=10000 rps=none size=232
+[23:21:08.853][RX] hand_evt ms=162037 pinch=0 d=0.91 fingers=10100 rps=none size=233
+[23:21:08.892][RX] hand_evt ms=162073 pinch=0 d=0.77 fingers=10000 rps=none size=233
+[23:21:09.610][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:09.631][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:09.748][RX] hand fps=25 npu=38.6 wait=1.2 decode=20.0 kpt=0.9 gui=27.0 e2e=105.6 period=38.7 hands=1 size=168 d=0.57 fingers=10000 rps=none idle=25% npu_gap=0.1
+[23:21:09.789][RX] hand_evt ms=162921 pinch=0 d=0.50 fingers=10110 rps=none size=159
+[23:21:09.827][RX] hand_evt ms=162960 pinch=0 d=0.53 fingers=10000 rps=none size=164
+[23:21:10.114][RX] hand_evt ms=163335 pinch=0 d=0.42 fingers=00000 rps=rock size=162
+[23:21:10.614][RX] CPU%/max_us 3/2040 65/1858 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:10.635][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:10.728][RX] hand fps=24 npu=38.5 wait=1.5 decode=20.0 kpt=0.9 gui=39.2 e2e=122.3 period=39.6 hands=1 size=154 d=0.33 fingers=00000 rps=rock idle=26% npu_gap=1.0
+[23:21:10.790][RX] hand_evt ms=163915 pinch=1 d=0.24 fingers=00000 rps=rock size=155
+[23:21:11.046][RX] hand_evt ms=164262 pinch=0 d=0.56 fingers=10000 rps=none size=138
+[23:21:11.379][RX] hand_evt ms=164609 pinch=0 d=0.45 fingers=00000 rps=rock size=129
+[23:21:11.496][RX] hand_evt ms=164724 pinch=1 d=0.25 fingers=00000 rps=rock size=142
+[23:21:11.581][RX] hand_evt ms=164802 pinch=0 d=0.46 fingers=10000 rps=none size=140
+[23:21:11.634][RX] CPU%/max_us 3/2040 63/1858 2/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:11.655][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:11.740][RX] hand fps=25 npu=38.5 wait=0.5 decode=20.0 kpt=0.6 gui=0.0 e2e=0.0 period=38.6 hands=1 size=145 d=0.24 fingers=00000 rps=rock idle=27% npu_gap=0.0
+[23:21:11.800][RX] hand_evt ms=164918 pinch=0 d=0.74 fingers=00000 rps=rock size=146
+[23:21:11.860][RX] hand_evt ms=165080 pinch=0 d=0.93 fingers=01000 rps=none size=130
+[23:21:12.307][RX] hand_evt ms=165485 pinch=0 d=0.28 fingers=00000 rps=rock size=144
+[23:21:12.399][RX] hand_evt ms=165624 pinch=1 d=0.25 fingers=00000 rps=rock size=143
+[23:21:12.490][RX] hand_evt ms=165714 pinch=1 d=0.29 fingers=10000 rps=none size=142
+[23:21:12.533][RX] hand_evt ms=165753 pinch=1 d=0.33 fingers=00000 rps=rock size=143
+[23:21:12.570][RX] hand_evt ms=165793 pinch=0 d=1.30 fingers=01000 rps=none size=117
+[23:21:12.613][RX] hand_evt ms=165831 pinch=0 d=0.27 fingers=00000 rps=rock size=143
+[23:21:12.655][RX] CPU%/max_us 3/2040 61/1918 8/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:12.676][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:12.795][RX] hand fps=23 npu=38.5 wait=3.7 decode=20.0 kpt=1.1 gui=47.6 e2e=122.2 period=41.2 hands=2 size=143 d=0.33 fingers=00000 rps=rock idle=25% npu_gap=2.6
+[23:21:12.836][RX] hand_evt ms=165946 pinch=1 d=0.25 fingers=00000 rps=rock size=140
+[23:21:12.880][RX] hand_evt ms=166077 pinch=1 d=0.29 fingers=10000 rps=none size=141
+[23:21:12.918][RX] hand_evt ms=166103 pinch=1 d=0.31 fingers=00000 rps=rock size=143
+[23:21:13.004][RX] hand_evt ms=166220 pinch=1 d=0.13 fingers=10000 rps=none size=142
+[23:21:13.045][RX] hand_evt ms=166259 pinch=1 d=0.21 fingers=00000 rps=rock size=140
+[23:21:13.078][RX] hand_evt ms=166297 pinch=1 d=0.34 fingers=10000 rps=none size=140
+[23:21:13.120][RX] hand_evt ms=166336 pinch=1 d=0.21 fingers=00000 rps=rock size=143
+[23:21:13.388][RX] hand_evt ms=166605 pinch=1 d=0.26 fingers=10000 rps=none size=145
+[23:21:13.430][RX] hand_evt ms=166644 pinch=1 d=0.24 fingers=00000 rps=rock size=142
+[23:21:13.615][RX] hand_evt ms=166837 pinch=1 d=0.20 fingers=10000 rps=none size=140
+[23:21:13.667][RX] CPU%/max_us 3/2040 65/1918 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:13.688][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:13.797][RX] hand fps=25 npu=38.6 wait=1.3 decode=20.0 kpt=1.1 gui=25.7 e2e=105.4 period=38.7 hands=1 size=142 d=0.19 fingers=00000 rps=rock idle=24% npu_gap=0.1
+[23:21:13.834][RX] hand_evt ms=166914 pinch=1 d=0.20 fingers=00000 rps=rock size=141
+[23:21:13.875][RX] hand_evt ms=167048 pinch=1 d=0.27 fingers=10000 rps=none size=143
+[23:21:13.914][RX] hand_evt ms=167078 pinch=1 d=0.23 fingers=00000 rps=rock size=141
+[23:21:14.068][RX] hand_evt ms=167291 pinch=1 d=0.27 fingers=10000 rps=none size=145
+[23:21:14.109][RX] hand_evt ms=167330 pinch=1 d=0.28 fingers=00000 rps=rock size=144
+[23:21:14.191][RX] hand_evt ms=167408 pinch=1 d=0.31 fingers=10000 rps=none size=144
+[23:21:14.232][RX] hand_evt ms=167445 pinch=1 d=0.22 fingers=00000 rps=rock size=143
+[23:21:14.311][RX] hand_evt ms=167523 pinch=1 d=0.23 fingers=00000 rps=rock size=143
+[23:21:14.570][RX] hand_evt ms=167793 pinch=1 d=0.17 fingers=10000 rps=none size=142
+[23:21:14.613][RX] hand_evt ms=167831 pinch=1 d=0.23 fingers=00000 rps=rock size=143
+[23:21:14.655][RX] CPU%/max_us 3/2040 65/1918 3/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:14.680][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:14.796][RX] hand fps=24 npu=38.5 wait=1.1 decode=20.0 kpt=0.9 gui=41.1 e2e=122.1 period=39.7 hands=1 size=141 d=0.15 fingers=00000 rps=rock idle=27% npu_gap=1.1
+[23:21:15.185][RX] hand_evt ms=168402 pinch=1 d=0.27 fingers=10000 rps=none size=144
+[23:21:15.226][RX] hand_evt ms=168440 pinch=1 d=0.23 fingers=00000 rps=rock size=146
+[23:21:15.348][RX] hand_evt ms=168567 pinch=1 d=0.33 fingers=10000 rps=none size=144
+[23:21:15.391][RX] hand_evt ms=168596 pinch=1 d=0.31 fingers=00000 rps=rock size=143
+[23:21:15.521][RX] hand_evt ms=168749 pinch=1 d=0.25 fingers=00000 rps=rock size=143
+[23:21:15.606][RX] hand_evt ms=168826 pinch=1 d=0.25 fingers=10000 rps=none size=143
+[23:21:15.644][RX] hand_evt ms=168866 pinch=1 d=0.27 fingers=00000 rps=rock size=141
+[23:21:15.696][RX] CPU%/max_us 3/2040 65/1918 4/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:15.717][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:15.848][RX] hand fps=24 npu=38.5 wait=1.3 decode=20.0 kpt=0.9 gui=32.0 e2e=105.3 period=39.8 hands=1 size=143 d=0.25 fingers=00000 rps=rock idle=26% npu_gap=1.2
+[23:21:15.890][RX] hand_evt ms=168942 pinch=0 d=0.28 fingers=00000 rps=rock size=143
+[23:21:15.931][RX] hand_evt ms=168980 pinch=1 d=0.24 fingers=00000 rps=rock size=142
+[23:21:15.972][RX] hand_evt ms=169091 pinch=1 d=0.29 fingers=10000 rps=none size=145
+[23:21:16.014][RX] hand_evt ms=169156 pinch=1 d=0.27 fingers=00000 rps=rock size=142
+[23:21:16.054][RX] hand_evt ms=169250 pinch=1 d=0.26 fingers=10000 rps=none size=142
+[23:21:16.105][RX] hand_evt ms=169325 pinch=1 d=0.25 fingers=00000 rps=rock size=144
+[23:21:16.301][RX] hand_evt ms=169519 pinch=0 d=0.93 fingers=10000 rps=none size=169
+[23:21:16.368][RX] hand_evt ms=169557 pinch=0 d=1.35 fingers=11111 rps=paper size=188
+[23:21:16.464][RX] hand_evt ms=169684 pinch=0 d=0.91 fingers=00111 rps=none size=223
+[23:21:16.638][RX] hand_evt ms=169859 pinch=0 d=1.90 fingers=11111 rps=paper size=214
+[23:21:16.691][RX] CPU%/max_us 3/2040 63/1925 6/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:16.712][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:16.846][RX] hand fps=23 npu=38.5 wait=3.9 decode=20.0 kpt=1.3 gui=45.3 e2e=122.0 period=41.3 hands=2 size=220 d=0.92 fingers=00111 rps=none idle=25% npu_gap=2.7
+[23:21:16.887][RX] hand_evt ms=169898 pinch=0 d=0.95 fingers=00111 rps=none size=221
+[23:21:16.928][RX] hand_evt ms=169936 pinch=0 d=1.93 fingers=11111 rps=paper size=214
+[23:21:16.971][RX] hand_evt ms=170013 pinch=0 d=0.88 fingers=00111 rps=none size=223
+[23:21:17.003][RX] hand_evt ms=170128 pinch=0 d=1.93 fingers=11111 rps=paper size=214
+[23:21:17.676][RX] CPU%/max_us 3/2040 62/1964 8/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:17.697][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:17.787][RX] hand fps=23 npu=38.6 wait=5.5 decode=20.2 kpt=1.5 gui=0.0 e2e=0.0 period=41.6 hands=2 size=215 d=1.53 fingers=11111 rps=paper idle=23% npu_gap=3.0
+[23:21:18.692][RX] CPU%/max_us 3/2040 61/1964 7/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:18.713][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:18.853][RX] hand fps=23 npu=38.6 wait=3.5 decode=20.1 kpt=1.5 gui=0.0 e2e=0.0 period=41.6 hands=2 size=232 d=1.62 fingers=11111 rps=paper idle=25% npu_gap=3.0
+[23:21:19.708][RX] CPU%/max_us 3/2040 62/1964 7/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:19.729][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:19.859][RX] hand fps=23 npu=38.6 wait=4.8 decode=20.1 kpt=1.4 gui=0.0 e2e=0.0 period=41.6 hands=2 size=239 d=1.73 fingers=11111 rps=paper idle=24% npu_gap=3.0
+[23:21:20.714][RX] CPU%/max_us 2/2040 63/1964 7/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:20.731][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:20.853][RX] hand fps=23 npu=38.6 wait=4.9 decode=20.1 kpt=1.5 gui=0.0 e2e=0.0 period=41.6 hands=2 size=246 d=1.67 fingers=11111 rps=paper idle=24% npu_gap=3.0
+[23:21:20.957][RX] hand_evt ms=174181 pinch=0 d=0.76 fingers=10000 rps=none size=202
+[23:21:21.522][RX] hand_evt ms=174743 pinch=0 d=0.71 fingers=11111 rps=paper size=190
+[23:21:21.720][RX] CPU%/max_us 3/2040 62/1964 6/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:21.740][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:21.871][RX] hand fps=23 npu=38.5 wait=3.0 decode=20.1 kpt=1.5 gui=0.0 e2e=0.0 period=41.6 hands=2 size=190 d=0.71 fingers=11111 rps=paper idle=25% npu_gap=3.0
+[23:21:22.211][RX] hand_evt ms=175436 pinch=0 d=0.67 fingers=11110 rps=none size=196
+[23:21:22.397][RX] hand_evt ms=175617 pinch=0 d=2.15 fingers=11111 rps=paper size=192
+[23:21:22.460][RX] hand_evt ms=175682 pinch=0 d=1.15 fingers=10110 rps=none size=189
+[23:21:22.523][RX] hand_evt ms=175744 pinch=0 d=1.00 fingers=10000 rps=none size=183
+[23:21:22.732][RX] CPU%/max_us 3/2040 61/1973 7/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:22.753][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:22.877][RX] hand fps=23 npu=38.6 wait=4.4 decode=20.1 kpt=1.5 gui=0.0 e2e=0.0 period=41.6 hands=2 size=183 d=1.00 fingers=10000 rps=none idle=24% npu_gap=3.0
+[23:21:23.066][RX] hand_evt ms=176283 pinch=0 d=0.93 fingers=11100 rps=none size=188
+[23:21:23.107][RX] hand_evt ms=176321 pinch=0 d=0.98 fingers=11111 rps=paper size=193
+[23:21:23.213][RX] hand_evt ms=176436 pinch=0 d=0.82 fingers=00111 rps=none size=185
+[23:21:23.252][RX] hand_evt ms=176476 pinch=0 d=0.89 fingers=11111 rps=paper size=202
+[23:21:23.294][RX] hand_evt ms=176513 pinch=0 d=0.79 fingers=00111 rps=none size=172
+[23:21:23.522][RX] hand_evt ms=176743 pinch=0 d=0.37 fingers=00000 rps=rock size=199
+[23:21:23.565][RX] hand_evt ms=176783 pinch=0 d=0.42 fingers=10000 rps=none size=201
+[23:21:23.741][RX] CPU%/max_us 3/2040 62/1973 6/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:23.762][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:23.882][RX] hand fps=23 npu=38.5 wait=3.7 decode=20.1 kpt=1.5 gui=0.0 e2e=0.0 period=41.6 hands=2 size=199 d=0.37 fingers=00000 rps=rock idle=25% npu_gap=3.0
+[23:21:24.175][RX] hand_evt ms=177398 pinch=0 d=1.02 fingers=11111 rps=paper size=182
+[23:21:24.603][RX] hand_evt ms=177821 pinch=1 d=0.22 fingers=10111 rps=none size=208
+[23:21:24.644][RX] hand_evt ms=177859 pinch=0 d=0.93 fingers=10000 rps=none size=200
+[23:21:24.717][RX] hand_evt ms=177938 pinch=0 d=1.28 fingers=10001 rps=none size=203
+[23:21:24.770][RX] CPU%/max_us 3/2040 62/1973 7/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:24.790][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:24.909][RX] hand fps=23 npu=38.6 wait=3.7 decode=20.1 kpt=1.5 gui=0.0 e2e=0.0 period=41.6 hands=2 size=207 d=0.71 fingers=11111 rps=paper idle=25% npu_gap=3.0
+[23:21:24.948][RX] hand_evt ms=177975 pinch=0 d=2.70 fingers=10000 rps=none size=197
+[23:21:24.991][RX] hand_evt ms=178013 pinch=0 d=3.16 fingers=00110 rps=none size=198
+[23:21:25.032][RX] hand_evt ms=178052 pinch=0 d=3.48 fingers=00111 rps=none size=195
+[23:21:25.073][RX] hand_evt ms=178139 pinch=0 d=1.10 fingers=10011 rps=none size=198
+[23:21:25.104][RX] hand_evt ms=178178 pinch=0 d=0.81 fingers=10000 rps=none size=198
+[23:21:25.338][RX] hand_evt ms=178526 pinch=0 d=0.99 fingers=11100 rps=none size=189
+[23:21:25.380][RX] hand_evt ms=178590 pinch=0 d=1.29 fingers=11111 rps=paper size=193
+[23:21:25.759][RX] CPU%/max_us 3/2040 64/1973 6/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:25.780][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:25.907][RX] hand fps=24 npu=38.6 wait=3.0 decode=20.1 kpt=1.5 gui=39.6 e2e=121.5 period=40.2 hands=2 size=218 d=1.64 fingers=11111 rps=paper idle=23% npu_gap=1.6
+[23:21:25.948][RX] hand_evt ms=178981 pinch=0 d=0.96 fingers=00111 rps=none size=201
+[23:21:26.216][RX] hand_evt ms=179435 pinch=0 d=0.37 fingers=11111 rps=paper size=175
+[23:21:26.770][RX] CPU%/max_us 3/2040 62/1973 7/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:26.791][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:26.924][RX] hand fps=23 npu=38.6 wait=4.7 decode=20.1 kpt=1.4 gui=47.3 e2e=121.5 period=41.4 hands=2 size=234 d=0.74 fingers=11111 rps=paper idle=24% npu_gap=2.8
+[23:21:27.757][RX] hand_evt ms=180975 pinch=0 d=1.02 fingers=10000 rps=none size=179
+[23:21:27.841][RX] CPU%/max_us 3/2040 62/1973 8/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:27.861][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:27.952][RX] hand fps=23 npu=38.6 wait=5.5 decode=20.1 kpt=1.4 gui=64.0 e2e=138.1 period=41.6 hands=2 size=221 d=1.78 fingers=11111 rps=paper idle=24% npu_gap=3.0
+[23:21:27.994][RX] hand_evt ms=181052 pinch=0 d=0.47 fingers=00000 rps=rock size=160
+[23:21:28.033][RX] hand_evt ms=181151 pinch=1 d=0.22 fingers=00000 rps=rock size=154
+[23:21:28.138][RX] hand_evt ms=181358 pinch=0 d=2.08 fingers=01000 rps=none size=125
+[23:21:28.180][RX] hand_evt ms=181399 pinch=0 d=0.30 fingers=00000 rps=rock size=149
+[23:21:28.323][RX] hand_evt ms=181514 pinch=0 d=1.26 fingers=01000 rps=none size=158
+[23:21:28.362][RX] hand_evt ms=181552 pinch=0 d=0.47 fingers=00000 rps=rock size=160
+[23:21:28.404][RX] hand_evt ms=181607 pinch=0 d=0.78 fingers=10000 rps=none size=178
+[23:21:28.445][RX] hand_evt ms=181635 pinch=0 d=1.07 fingers=00111 rps=none size=197
+[23:21:28.485][RX] hand_evt ms=181674 pinch=0 d=1.80 fingers=11111 rps=paper size=210
+[23:21:28.794][RX] CPU%/max_us 3/2040 67/1973 5/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:28.856][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:28.948][RX] hand fps=24 npu=38.6 wait=3.0 decode=20.1 kpt=1.5 gui=38.6 e2e=113.0 period=40.2 hands=2 size=232 d=1.70 fingers=11111 rps=paper idle=24% npu_gap=1.6
+[23:21:28.990][RX] hand_evt ms=182021 pinch=0 d=1.02 fingers=10000 rps=none size=191
+[23:21:29.031][RX] hand_evt ms=182059 pinch=0 d=0.79 fingers=00000 rps=rock size=182
+[23:21:29.069][RX] hand_evt ms=182194 pinch=1 d=0.19 fingers=00000 rps=rock size=164
+[23:21:29.214][RX] hand_evt ms=182435 pinch=0 d=2.26 fingers=01000 rps=none size=125
+[23:21:29.298][RX] hand_evt ms=182513 pinch=0 d=2.60 fingers=00001 rps=none size=125
+[23:21:29.366][RX] hand_evt ms=182553 pinch=0 d=0.27 fingers=00000 rps=rock size=148
+[23:21:29.460][RX] hand_evt ms=182678 pinch=0 d=1.54 fingers=01000 rps=none size=132
+[23:21:29.500][RX] hand_evt ms=182712 pinch=0 d=0.32 fingers=00000 rps=rock size=155
+[23:21:29.552][RX] hand_evt ms=182777 pinch=0 d=0.38 fingers=10000 rps=none size=156
+[23:21:29.634][RX] hand_evt ms=182853 pinch=0 d=0.89 fingers=00110 rps=none size=150
+[23:21:29.708][RX] hand_evt ms=182931 pinch=0 d=0.97 fingers=00111 rps=none size=164
+[23:21:29.798][RX] CPU%/max_us 3/2040 61/1973 6/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:29.819][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:29.934][RX] hand fps=24 npu=38.6 wait=3.2 decode=20.1 kpt=1.4 gui=56.6 e2e=138.0 period=41.1 hands=2 size=156 d=0.38 fingers=10000 rps=none idle=24% npu_gap=2.5
+[23:21:29.971][RX] hand_evt ms=183046 pinch=0 d=1.38 fingers=00110 rps=none size=168
+[23:21:30.012][RX] hand_evt ms=183085 pinch=0 d=1.80 fingers=00100 rps=none size=164
+[23:21:30.804][RX] CPU%/max_us 3/2040 62/1973 6/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:30.825][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:30.912][RX] hand fps=24 npu=38.5 wait=1.0 decode=19.9 kpt=0.3 gui=28.7 e2e=104.6 period=38.7 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=28% npu_gap=0.1
+[23:21:31.815][RX] CPU%/max_us 3/2040 61/1973 1/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:31.836][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:31.927][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.9 kpt=0.0 gui=23.3 e2e=104.6 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=29% npu_gap=0.0
+[23:21:32.824][RX] CPU%/max_us 3/2040 62/1973 1/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:32.848][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:32.933][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.9 kpt=0.0 gui=20.8 e2e=104.5 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=31% npu_gap=0.0
+[23:21:33.831][RX] CPU%/max_us 3/2040 62/1973 1/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:33.851][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:33.943][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.9 kpt=0.0 gui=18.1 e2e=104.5 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=31% npu_gap=0.0
+[23:21:34.840][RX] CPU%/max_us 3/2040 62/1973 1/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:34.869][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:34.959][RX] hand fps=25 npu=38.5 wait=0.0 decode=19.8 kpt=0.0 gui=12.9 e2e=104.4 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=31% npu_gap=0.0
+[23:21:35.412][RX] hand_evt ms=188605 pinch=0 d=0.73 fingers=00110 rps=none size=184
+[23:21:35.851][RX] CPU%/max_us 3/2040 61/1973 6/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:35.881][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:35.974][RX] hand fps=25 npu=38.5 wait=0.8 decode=19.8 kpt=0.0 gui=27.7 e2e=121.0 period=38.7 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=29% npu_gap=0.1
+[23:21:36.850][RX] CPU%/max_us 3/2040 61/1973 2/194812 overlay_cpu=0.00% max_us=0 rering=0
+[23:21:36.879][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[23:21:36.962][RX] hand fps=25 npu=38.5 wait=0.1 decode=19.9 kpt=0.0 gui=20.9 e2e=87.7 period=38.5 hands=0 size=0 d=0.00 fingers=00000 rps=none idle=30% npu_gap=0.0
+[23:21:37.384][RX] 
+[23:21:37.384][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:21:37.385][RX]   E         D   D   R   R   V   V      3      2 
+[23:21:37.385][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:21:37.385][RX]   E         D   D   R  R     V V       3   2    
+[23:21:37.385][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:21:37.385][RX] 
+[23:21:37.385][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:21:37.385][RX] CHIP_ID: 0xed320001
+[23:21:37.385][RX] CLK_SYS_HZ: 125000000
+[23:21:37.385][RX] ROM bytes: 16384
+[23:21:37.385][RX] SRAM bytes: 65536
+[23:21:37.385][RX] I-cache bytes: 8192
+[23:21:37.385][RX] D-cache bytes: 8192
+[23:21:37.385][RX] MEM_READY: 1
+[23:21:37.385][RX] Build commit: 92b38fd2
+[23:21:37.385][RX] Compiler version: GCC 15.2.0
+[23:21:37.484][RX] Boot SRAM
+[23:21:37.527][RX] 
+[23:21:37.527][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:21:37.527][RX]   E         D   D   R   R   V   V      3      2 
+[23:21:37.527][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:21:37.527][RX]   E         D   D   R  R     V V       3   2    
+[23:21:37.527][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:21:37.527][RX] 
+[23:21:37.527][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:21:37.527][RX] CHIP_ID: 0xed320001
+[23:21:37.527][RX] CLK_SYS_HZ: 125000000
+[23:21:37.527][RX] ROM bytes: 16384
+[23:21:37.527][RX] SRAM bytes: 65536
+[23:21:37.527][RX] I-cache bytes: 8192
+[23:21:37.527][RX] D-cache bytes: 8192
+[23:21:37.527][RX] MEM_READY: 1
+[23:21:37.527][RX] Build commit: 92b38fd2
+[23:21:37.527][RX] Compiler version: GCC 15.2.0
+[23:21:37.626][RX] Boot SRAM
+[23:21:37.669][RX] 
+[23:21:37.669][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:21:37.669][RX]   E         D   D   R   R   V   V      3      2 
+[23:21:37.669][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:21:37.669][RX]   E         D   D   R  R     V V       3   2    
+[23:21:37.669][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:21:37.669][RX] 
+[23:21:37.669][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:21:37.669][RX] CHIP_ID: 0xed320001
+[23:21:37.669][RX] CLK_SYS_HZ: 125000000
+[23:21:37.669][RX] ROM bytes: 16384
+[23:21:37.669][RX] SRAM bytes: 65536
+[23:21:37.669][RX] I-cache bytes: 8192
+[23:21:37.669][RX] D-cache bytes: 8192
+[23:21:37.669][RX] MEM_READY: 1
+[23:21:37.669][RX] Build commit: 92b38fd2
+[23:21:37.669][RX] Compiler version: GCC 15.2.0
+[23:21:37.769][RX] Boot SRAM
+[23:21:37.812][RX] 
+[23:21:37.812][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:21:37.812][RX]   E         D   D   R   R   V   V      3      2 
+[23:21:37.812][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:21:37.812][RX]   E         D   D   R  R     V V       3   2    
+[23:21:37.812][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:21:37.812][RX] 
+[23:21:37.812][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:21:37.812][RX] CHIP_ID: 0xed320001
+[23:21:37.812][RX] CLK_SYS_HZ: 125000000
+[23:21:37.812][RX] ROM bytes: 16384
+[23:21:37.812][RX] SRAM bytes: 65536
+[23:21:37.812][RX] I-cache bytes: 8192
+[23:21:37.812][RX] D-cache bytes: 8192
+[23:21:37.812][RX] MEM_READY: 1
+[23:21:37.812][RX] Build commit: 92b38fd2
+[23:21:37.812][RX] Compiler version: GCC 15.2.0
+[23:21:37.911][RX] Boot SRAM
+[23:21:37.954][RX] 
+[23:21:37.954][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:21:37.954][RX]   E         D   D   R   R   V   V      3      2 
+[23:21:37.954][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:21:37.954][RX]   E         D   D   R  R     V V       3   2    
+[23:21:37.954][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:21:37.954][RX] 
+[23:21:37.954][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:21:37.954][RX] CHIP_ID: 0xed320001
+[23:21:37.954][RX] CLK_SYS_HZ: 125000000
+[23:21:37.954][RX] ROM bytes: 16384
+[23:21:37.954][RX] SRAM bytes: 65536
+[23:21:37.954][RX] I-cache bytes: 8192
+[23:21:37.954][RX] D-cache bytes: 8192
+[23:21:37.954][RX] MEM_READY: 1
+[23:21:37.954][RX] Build commit: 92b38fd2
+[23:21:37.954][RX] Compiler version: GCC 15.2.0
+[23:21:38.053][RX] Boot SRAM
+[23:21:38.096][RX] 
+[23:21:38.096][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:21:38.096][RX]   E         D   D   R   R   V   V      3      2 
+[23:21:38.096][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:21:38.096][RX]   E         D   D   R  R     V V       3   2    
+[23:21:38.096][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:21:38.096][RX] 
+[23:21:38.096][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:21:38.096][RX] CHIP_ID: 0xed320001
+[23:21:38.097][RX] CLK_SYS_HZ: 125000000
+[23:21:38.097][RX] ROM bytes: 16384
+[23:21:38.097][RX] SRAM bytes: 65536
+[23:21:38.097][RX] I-cache bytes: 8192
+[23:21:38.097][RX] D-cache bytes: 8192
+[23:21:38.097][RX] MEM_READY: 1
+[23:21:38.097][RX] Build commit: 92b38fd2
+[23:21:38.097][RX] Compiler version: GCC 15.2.0
+[23:21:38.196][RX] Boot SRAM
+[23:21:38.239][RX] 
+[23:21:38.239][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:21:38.239][RX]   E         D   D   R   R   V   V      3      2 
+[23:21:38.239][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:21:38.239][RX]   E         D   D   R  R     V V       3   2    
+[23:21:38.239][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:21:38.239][RX] 
+[23:21:38.239][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:21:38.239][RX] CHIP_ID: 0xed320001
+[23:21:38.239][RX] CLK_SYS_HZ: 125000000
+[23:21:38.239][RX] ROM bytes: 16384
+[23:21:38.239][RX] SRAM bytes: 65536
+[23:21:38.239][RX] I-cache bytes: 8192
+[23:21:38.239][RX] D-cache bytes: 8192
+[23:21:38.239][RX] MEM_READY: 1
+[23:21:38.239][RX] Build commit: 92b38fd2
+[23:21:38.239][RX] Compiler version: GCC 15.2.0
+[23:21:38.338][RX] Boot SRAM
+[23:21:38.381][RX] 
+[23:21:38.381][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:21:38.381][RX]   E         D   D   R   R   V   V      3      2 
+[23:21:38.381][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:21:38.381][RX]   E         D   D   R  R     V V       3   2    
+[23:21:38.381][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:21:38.381][RX] 
+[23:21:38.381][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:21:38.381][RX] CHIP_ID: 0xed320001
+[23:21:38.381][RX] CLK_SYS_HZ: 125000000
+[23:21:38.381][RX] ROM bytes: 16384
+[23:21:38.381][RX] SRAM bytes: 65536
+[23:21:38.381][RX] I-cache bytes: 8192
+[23:21:38.381][RX] D-cache bytes: 8192
+[23:21:38.381][RX] MEM_READY: 1
+[23:21:38.381][RX] Build commit: 92b38fd2
+[23:21:38.381][RX] Compiler version: GCC 15.2.0
+[23:21:38.480][RX] Boot SRAM
+[23:21:38.523][RX] 
+[23:21:38.524][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:21:38.524][RX]   E         D   D   R   R   V   V      3      2 
+[23:21:38.524][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:21:38.524][RX]   E         D   D   R  R     V V       3   2    
+[23:21:38.524][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:21:38.524][RX] 
+[23:21:38.524][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:21:38.524][RX] CHIP_ID: 0xed320001
+[23:21:38.524][RX] CLK_SYS_HZ: 125000000
+[23:21:38.524][RX] ROM bytes: 16384
+[23:21:38.524][RX] SRAM bytes: 65536
+[23:21:38.524][RX] I-cache bytes: 8192
+[23:21:38.524][RX] D-cache bytes: 8192
+[23:21:38.524][RX] MEM_READY: 1
+[23:21:38.524][RX] Build commit: 92b38fd2
+[23:21:38.524][RX] Compiler version: GCC 15.2.0
+[23:21:57.905][SYS] 建立网口连接失败：等待网卡 以太网 就绪超时：local_ip=192.168.1.2，最后状态 OperStatus=Down, DAD=Deprecated，用时 10.0 s
