@@ -106,9 +106,16 @@ def measure(boxes, points, result):
     correct = dict(pinched=0, open=0)
     detected = dict(pinched=0, open=0)
     d_errors = []
+    collapsed = 0
+    undefined_truth = 0
     for j, truth in enumerate(points):
-        d = pinch(truth)
-        state = "pinched" if d < .25 else "open" if d > .6 else None
+        # The gesture ratio needs all four annotated reference points.
+        if np.all(truth[[0, 4, 8, 9], 2] > 0):
+            d = pinch(truth)
+            state = "pinched" if d < .25 else "open" if d > .6 else None
+        else:
+            undefined_truth += 1
+            state = None
         if state:
             counts[state] += 1
         if j not in matches:
@@ -120,14 +127,21 @@ def measure(boxes, points, result):
             visible = [i for i in indices if truth[i, 2] > 0]
             errors[name].extend(difference[visible].tolist())
             relative[name].extend((difference[visible] / size * 100).tolist())
+        is_collapsed = np.linalg.norm(prediction[0, :2] - prediction[9, :2]) == 0
+        collapsed += int(is_collapsed)
         if state:
-            predicted_d = pinch(prediction)
             detected[state] += 1
+            # Coordinator ruling: a collapsed reference length is a failed gesture,
+            # and has no defined d error; retain its box and point measurements.
+            if is_collapsed:
+                continue
+            predicted_d = pinch(prediction)
             correct[state] += int((predicted_d < .4) == (state == "pinched"))
             d_errors.append(float(abs(predicted_d - d)))
     return dict(hands=len(boxes), matched=len(matches), extra=len(available), errors=errors,
                 relative=relative, pinch_counts=counts, pinch_detected=detected,
-                pinch_correct=correct, d_errors=d_errors)
+                pinch_correct=correct, d_errors=d_errors, collapsed=collapsed,
+                undefined_truth=undefined_truth)
 
 
 def oks_stats(boxes, points, result):
@@ -149,7 +163,8 @@ def aggregate(rows, ap_rows):
     summary["points"] = {name: dict(
         pixels=distribution([v for r in rows for v in r["errors"][name]]),
         percent=distribution([v for r in rows for v in r["relative"][name]])) for name in GROUPS}
-    summary["pinch"] = {}
+    summary["pinch"] = dict(collapsed=sum(r["collapsed"] for r in rows),
+                            undefined_truth=sum(r["undefined_truth"] for r in rows))
     for state in ("pinched", "open"):
         count = sum(r["pinch_counts"][state] for r in rows)
         correct = sum(r["pinch_correct"][state] for r in rows)
