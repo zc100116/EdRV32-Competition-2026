@@ -494,3 +494,57 @@ NMS 后按全局 anchor 读取原始关键点，用官方 `kpts_decode` 公式
 包含 C16 尾块及关键点填充的实际计算，不计 DMA/控制/后处理开销。
 pose/detect 的 MAC 周期比乘板端实测 detect 35.0 ms@180 MHz、
 41.2 ms@150 MHz；这只给出估算，不代表 pose 上板测量。
+
+## 手部 21 点 INT8 离线评估（T-HAND-EVAL）
+
+`compile_yolo.py --task hand` 直接使用仓库中的卡 80 权重
+`tasks/win/20261115-80-hand-pose-train/artifacts/best.pt`；不重新训练。
+cv4 中间和输出逻辑宽度均为 63，补到 64；单类补到 80，通道 1–79 恒为 −128。
+OUTPUT 和 WORK 布局与 pose 相同；缓存为 `build/npu/quantized_hand/`。
+
+数据 URL 来自子模块 `ultralytics/cfg/datasets/hand-keypoints.yaml`：
+[Ultralytics hand-keypoints](https://github.com/ultralytics/assets/releases/download/v0.0.0/hand-keypoints.zip)。
+压缩包约 369 MB，根目录直接包含 images/labels，以下提取到指定目录；不入库。
+COCO 背景沿用前节下载到 `~/.local/share/edrv32/npu/val2017/` 的本地图片。
+
+```sh
+git submodule update --init third_party/ultralytics
+mkdir -p ~/.local/share/edrv32/npu/hand-keypoints
+curl -L --fail https://github.com/ultralytics/assets/releases/download/v0.0.0/hand-keypoints.zip \
+    -o ~/.local/share/edrv32/npu/hand-keypoints.zip
+python3 -m zipfile -e ~/.local/share/edrv32/npu/hand-keypoints.zip \
+    ~/.local/share/edrv32/npu/hand-keypoints
+export PYTHONPATH="$PWD/third_party/ultralytics" OPENBLAS_NUM_THREADS=1
+mkdir -p build/npu/hand_eval
+~/.local/opt/edrv32-py/bin/python tools/npu/compile_yolo.py --task hand \
+    --image ~/.local/share/edrv32/npu/hand-keypoints/images/val/$(ls ~/.local/share/edrv32/npu/hand-keypoints/images/val | sort | head -1) \
+    --out build/npu/hand_eval/compiled
+~/.local/opt/edrv32-py/bin/python tools/npu/hand_eval.py --out build/npu/hand_eval \
+    > build/npu/hand_eval/eval.log 2>&1
+~/.local/opt/edrv32-py/bin/python -m unittest discover -s tools/npu -p test_compile.py
+```
+
+标定用训练集按文件名排序前 96 张，手框长边依次循环 45/60/90/180 px，
+percentile 95、margin 1.05、torch 1 线程。评估用验证集按文件名排序前 300 张，
+通过 Ultralytics `verify_image_label` 跳过损坏图并在结果中列出；不补取后续图片。
+A 原图 letterbox 到 640×384，另跑 FP32 640×640 参照；B 缩放原图，
+使标注手框长边在 1280×720 中为 2S，贴到随机位置、完整保留手框。
+原图周围超出画面的部分裁去；COCO 背景等比缩放填满后居中裁成 1280×720。
+标定和评估分别用 `numpy.default_rng(0)`，每张依次处理 B45/B60/B90/B180，
+背景按文件名排序后随机抽取。B 按板端缩小一半、上下各补 12 行 114。
+所有路径 confidence>0.25、NMS IoU>0.45、最多 100 手；INT8 运行描述符参考模型，
+硬件整数后处理参考、规格 2.6 排序/NMS 后按 anchor 解码 21 点。
+
+框检出以预测分数降序、IoU≥0.5 一对一匹配真值，多余框单列。
+A 的 AP 使用 Ultralytics `kpt_iou`、`BaseValidator.match_predictions`、`ap_per_class`，
+sigma=1/21，真值框面积×0.53；不与浮点预测比较。
+分组点误差仅计已匹配手的真值可见点（不按预测可见性过滤），均值/P95 按点汇总。
+所有像素误差使用 640×384 输入坐标，640 方形参照也映射到此坐标；百分比除以真值框长边。
+捏合 d=拇指尖到食指尖距离/手腕到中指根距离，真值 d<0.25 为捏住、d>0.6 为张开，
+中间样本不参与；预测 d<0.4 判捏住，阈值固定。
+判对率以全部该类真值为分母、漏检计错；d 误差仅计已检出且真值属于两类的手。
+若某类没有样本，判对率和相应误差为 null（报告写“—”）。
+原始预测、每图测量、A 的 OKS 匹配和汇总分别在输出目录的
+`predictions.json`、`measurements.json`、`oks.json`、`summary.json`。
+四档示意图取同一首张验证图，真值/INT8 并排绘制全部 21 点，保存为 96 色 PNG。
+性能沿用 pose 的 MAC 日历周期比×detect 实测 35.0/41.2 ms，属于估算。

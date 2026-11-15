@@ -161,6 +161,61 @@ class PoseCompileTest(unittest.TestCase):
             self.assertTrue(any(r["output_zero_point"] != 0 for r in rows
                                 if r["name"].endswith("kpt.out")))
 
+    def test_detect_pose_bytes_and_hand_compile(self):
+        # Rebuild both existing tasks with the pre-hand compiler; compare bytes directly.
+        root = Path(__file__).resolve().parents[2]
+        build = root / "build/npu"
+        with tempfile.TemporaryDirectory(dir=build) as directory:
+            work = Path(directory)
+            old = work / "before"
+            old.mkdir()
+            for name in ("fixed_plan.py", "quantize.py", "compile_yolo.py",
+                         "checkpoint_audit.py", "format.py"):
+                (old / name).write_bytes(subprocess.check_output(
+                    ["git", "show", f"52857620:tools/npu/{name}"], cwd=root))
+            env = os.environ | {
+                "PYTHONPATH": str(root / "tools/npu") + os.pathsep +
+                              str(root / "third_party/ultralytics"),
+                "OPENBLAS_NUM_THREADS": "1",
+            }
+            image = Path.home() / (
+                ".local/share/edrv32/npu/coco128/images/train2017/000000000009.jpg")
+            for task in ("detect", "pose"):
+                for label, source in (("before", old), ("after", root / "tools/npu")):
+                    script = (
+                        "import sys; from pathlib import Path; "
+                        "sys.path.insert(0, sys.argv[1]); "
+                        "import quantize, compile_yolo; "
+                        "quantize.CACHE = Path(sys.argv[2]) / 'quantized'; "
+                        "sys.argv = ['compile_yolo', '--task', sys.argv[3], "
+                        "'--image', sys.argv[4], '--out', sys.argv[5]]; compile_yolo.main()"
+                    )
+                    subprocess.run([sys.executable, "-c", script, str(source),
+                                    str(work / label), task, str(image),
+                                    str(work / f"{label}_{task}")],
+                                   env=env, cwd=root, check=True, capture_output=True, text=True)
+                cache = "quantized_pose" if task == "pose" else "quantized"
+                for name in ("model.bin", "quantization.json"):
+                    self.assertEqual((work / "before" / cache / name).read_bytes(),
+                                     (work / "after" / cache / name).read_bytes(), (task, name))
+                for before in (work / f"before_{task}").iterdir():
+                    self.assertEqual(before.read_bytes(),
+                                     (work / f"after_{task}" / before.name).read_bytes(),
+                                     (task, before.name))
+            subprocess.run([sys.executable, str(root / "tools/npu/compile_yolo.py"),
+                            "--task", "hand", "--image", str(image),
+                            "--out", str(work / "hand")], env=env, cwd=root,
+                           check=True, capture_output=True, text=True)
+            from quantize import load_quantized
+            from format import BASES
+            plan = build_plan("hand")
+            model, rows = load_quantized(plan)
+            self.assertEqual(len(model), 3505408)
+            self.assertEqual(len(descriptors(plan, rows)), 77)
+            end = plan["tensors"]["D2.kpt"]
+            self.assertEqual(end["base"] + end["bytes"] - BASES["OUTPUT_BASE"], 1048320)
+            self.assertLess(end["base"] + end["bytes"] - BASES["OUTPUT_BASE"], 1024 * 1024)
+
 
 class WeightLayoutTest(unittest.TestCase):
     @staticmethod

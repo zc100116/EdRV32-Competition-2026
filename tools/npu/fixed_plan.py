@@ -160,7 +160,7 @@ class Planner:
         self.conv(f"D{scale}.cls.out", 22, cls1, cls, 1, 1,
                   f"{prefix}.2", activation=False)
 
-        if task == "pose":
+        if task in ("pose", "hand"):
             kpt0 = self.view(f"D{scale}.kpt0", self.head0_base, source, 64)
             kpt1 = self.view(f"D{scale}.kpt1", self.head1_base, source, 64)
             prefix = f"model.22.cv4.{scale}"
@@ -218,7 +218,7 @@ def build_plan(task: str = "detect") -> dict:
         plan.reserve_group([(f"D{scale}.box", width, height, 64),
                             (f"D{scale}.cls", width, height, 80)])
         plan.alias(f"D{scale}.logits", f"D{scale}.box", f"D{scale}.cls")
-    if task == "pose":
+    if task in ("pose", "hand"):
         for scale, width, height in [(0, 80, 48), (1, 40, 24), (2, 20, 12)]:
             plan.reserve(f"D{scale}.kpt", width, height, 64)
     plan.alias("L11", "L10", "L6")
@@ -255,7 +255,7 @@ def build_plan(task: str = "detect") -> dict:
     plan.detect(1, t["L18"], t["D1.box"], t["D1.cls"], task)
     plan.detect(2, t["L21"], t["D2.box"], t["D2.cls"], task)
     result = plan.finish()
-    if task == "pose":
+    if task in ("pose", "hand"):
         result["task"] = task
     return result
 

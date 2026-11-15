@@ -30,11 +30,11 @@ def audit(network: torch.nn.Module, plan: dict) -> dict:
         expected_cout = (command["output_blocks"] - 1) * 32 + (
             16 if command["last_c16_only"] else 32)
         expected_cin = command["cin_blocks"] * 16
-        if plan.get("task") == "pose" and command["layer"] == 22:
+        if plan.get("task") in ("pose", "hand") and command["layer"] == 22:
             if ".kpt." in command["name"]:
-                expected_cout = 51
+                expected_cout = 63 if plan.get("task") == "hand" else 51
                 if not command["name"].endswith("cv0"):
-                    expected_cin = 51
+                    expected_cin = expected_cout
             elif command["name"].endswith("cls.out"):
                 expected_cout = 1
         expected_kernel = 3 if command["kernel3"] else 1
@@ -87,7 +87,7 @@ def audit(network: torch.nn.Module, plan: dict) -> dict:
         "22.box2": [1, 64, 12, 20],
         "22.cls2": [1, 80, 12, 20],
     }
-    if plan.get("task") == "pose":
+    if plan.get("task") in ("pose", "hand"):
         for scale in range(3):
             expected_shapes[f"22.cls{scale}"][1] = 1
     if observed_shapes != expected_shapes:

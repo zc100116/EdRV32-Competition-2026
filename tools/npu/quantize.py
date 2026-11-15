@@ -57,7 +57,7 @@ def calibration_images(directory: Path, limit: int) -> list[Path]:
 
 
 def collect_ranges(network: torch.nn.Module, commands: list[dict],
-                   images: list[Path], percentile: float
+                   images: list[Path | torch.Tensor], percentile: float
                    ) -> tuple[dict, dict, dict, dict, dict]:
     pre_samples: dict[int, list[float]] = {}
     post_samples: dict[int, list[float]] = {}
@@ -98,7 +98,7 @@ def collect_ranges(network: torch.nn.Module, commands: list[dict],
     try:
         with torch.inference_mode():
             for path in images:
-                network(prepare_image(path))
+                network(path if isinstance(path, torch.Tensor) else prepare_image(path))
     finally:
         for hook in hooks:
             hook.remove()
@@ -262,13 +262,19 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
     # Calibration results depend on the torch thread count (float reduction order);
     # one thread makes every rebuild of the model image byte-identical.
     torch.set_num_threads(1)
-    images = calibration_images(DATA / "coco128/images/train2017", 96)
-    weights = DATA / "yolov8n-pose.pt" if plan.get("task") == "pose" else DEFAULT_WEIGHTS
+    if plan.get("task") == "hand":
+        from hand_data import WEIGHTS, calibration_samples
+        weights = WEIGHTS
+        images, samples = calibration_samples()
+    else:
+        images = calibration_images(DATA / "coco128/images/train2017", 96)
+        samples = images
+        weights = DATA / "yolov8n-pose.pt" if plan.get("task") == "pose" else DEFAULT_WEIGHTS
     network = YOLO(str(weights)).model.eval().fuse(verbose=False)
     checked = audit(network, plan)
     print(f"checkpoint: {checked['conv_count']} fused convolutions, output shapes checked")
     pre_max, post_max, add_max, linear_min, linear_max = collect_ranges(
-        network, plan["commands"], images, 95.0)
+        network, plan["commands"], samples, 95.0)
     flow = ScaleFlow(plan, post_max, add_max, 1.05)
     flow.build()
     image = bytearray(plan["image_bytes"])
@@ -282,7 +288,7 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
         bias = convolution.bias.detach().cpu().numpy()
         owner_scales = [flow.scale(owner) for owner in flow.sources[command["index"]]]
 
-        if plan.get("task") == "pose" and command["layer"] == 22:
+        if plan.get("task") in ("pose", "hand") and command["layer"] == 22:
             physical_cout = command["output_blocks"] * 32 - 16 * command["last_c16_only"]
             physical_cin = command["cin_blocks"] * 16
             weight = np.pad(weight, ((0, physical_cout - weight.shape[0]),
@@ -307,7 +313,7 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
             weight, bias, input_scales, pre_scale, post_scale,
             zero_point, command)
 
-        if plan.get("task") == "pose" and command["name"].endswith("cls.out"):
+        if plan.get("task") in ("pose", "hand") and command["name"].endswith("cls.out"):
             # Zero weights plus exact integer bias force dummy classes to -128.
             params = bytearray(params)
             for channel in range(1, 80):
@@ -333,7 +339,9 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
 
 
 def cache_directory(plan: dict) -> Path:
-    return CACHE.parent / "quantized_pose" if plan.get("task") == "pose" else CACHE
+    if plan.get("task") in ("pose", "hand"):
+        return CACHE.parent / f"quantized_{plan['task']}"
+    return CACHE
 
 
 def load_quantized(plan: dict) -> tuple[bytes, list[dict]]:
