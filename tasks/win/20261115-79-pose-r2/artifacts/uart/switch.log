@@ -1,0 +1,10 @@
+[10:32:50.946][RX] vision fps=23 npu=35.0 wait=0.0 decode=20.3 sort=0.0 nms=0.0 post_span=25.3 gui=9.3 e2e=90.3 period=35.0 copy=0.0 cpu_comm=3% cpu_app=67% cpu_gui=1% idle=34% npu_gap=0.0
+[10:32:51.961][RX] vision fps=27 npu=35.0 wait=5.0 decode=20.4 sort=0.0 nms=0.0 post_span=25.4 gui=20.5 e2e=102.2 period=36.0 copy=0.0 cpu_comm=2% cpu_app=65% cpu_gui=17% idle=12% npu_gap=0.9
+[10:32:53.026][RX] vision fps=24 npu=35.1 wait=10.0 decode=20.3 sort=0.0 nms=0.0 post_span=25.4 gui=26.3 e2e=109.5 period=39.5 copy=0.0 cpu_comm=3% cpu_app=62% cpu_gui=25% idle=7% npu_gap=4.4
+[10:32:54.070][RX] vision fps=23 npu=35.1 wait=16.9 decode=20.1 sort=0.0 nms=0.0 post_span=25.2 gui=24.9 e2e=111.0 period=41.8 copy=0.0 cpu_comm=2% cpu_app=59% cpu_gui=27% idle=8% npu_gap=6.6
+[10:32:55.054][RX] vision fps=23 npu=35.1 wait=18.9 decode=20.1 sort=0.0 nms=0.0 post_span=25.1 gui=28.8 e2e=119.3 period=41.5 copy=0.0 cpu_comm=2% cpu_app=59% cpu_gui=29% idle=7% npu_gap=6.3
+[10:33:02.513][RX] pose fps=13 npu=39.1 wait=48.3 decode=19.5 kpt=0.6 gui=56.2 e2e=174.8 period=58.1 persons=1 idle=33% npu_gap=19.0 jit_lw=0.0 jit_rw=0.0 jit_ls=17.2 jit_rs=18.7
+[10:33:03.453][RX] pose fps=17 npu=39.2 wait=38.7 decode=19.6 kpt=0.7 gui=50.1 e2e=159.0 period=55.8 persons=1 idle=23% npu_gap=16.5 jit_lw=47.6 jit_rw=78.8 jit_ls=55.4 jit_rs=81.6
+[10:33:04.582][RX] pose fps=18 npu=39.2 wait=40.5 decode=19.6 kpt=0.7 gui=54.9 e2e=167.5 period=55.5 persons=1 idle=20% npu_gap=16.3 jit_lw=59.1 jit_rw=27.2 jit_ls=23.9 jit_rs=18.6
+[10:33:05.578][RX] pose fps=16 npu=39.1 wait=49.0 decode=19.6 kpt=0.7 gui=56.8 e2e=180.7 period=59.7 persons=1 idle=19% npu_gap=20.5 jit_lw=45.3 jit_rw=37.8 jit_ls=21.5 jit_rs=6.3
+[10:33:06.661][RX] pose fps=15 npu=39.2 wait=47.0 decode=19.5 kpt=0.7 gui=63.8 e2e=178.0 period=63.2 persons=1 idle=18% npu_gap=24.0 jit_lw=82.3 jit_rw=39.8 jit_ls=22.1 jit_rs=6.1

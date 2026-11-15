@@ -1,0 +1,76 @@
+[10:30:30.391][SYS] connected COM7 @ 115200 8N1
+[10:31:32.775][RX]
+[10:31:32.775][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222
+[10:31:32.775][RX]   E         D   D   R   R   V   V      3      2
+[10:31:32.775][RX]   EEEE      D   D   RRRRR    V V    3333   2222
+[10:31:32.775][RX]   E         D   D   R  R     V V       3   2
+[10:31:32.776][RX]   EEEEEEE   DDDD    R    R    V     3333   2222
+[10:31:32.776][RX]
+[10:31:32.776][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[10:31:32.776][RX] CHIP_ID: 0xed320001
+[10:31:32.776][RX] CLK_SYS_HZ: 125000000
+[10:31:32.776][RX] ROM bytes: 16384
+[10:31:32.776][RX] SRAM bytes: 65536
+[10:31:32.776][RX] I-cache bytes: 8192
+[10:31:32.776][RX] D-cache bytes: 8192
+[10:31:32.776][RX] MEM_READY: 1
+[10:31:32.776][RX] Build commit: 92b38fd2
+[10:31:32.776][RX] Compiler version: GCC 15.2.0
+[10:31:32.881][RX] Boot SRAM
+[10:31:32.881][RX] Monitor: EdRV32
+[10:31:32.881][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[10:32:08.167][RX]
+[10:32:08.167][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222
+[10:32:08.167][RX]   E         D   D   R   R   V   V      3      2
+[10:32:08.167][RX]   EEEE      D   D   RRRRR    V V    3333   2222
+[10:32:08.167][RX]   E         D   D   R  R     V V       3   2
+[10:32:08.167][RX]   EEEEEEE   DDDD    R    R    V     3333   2222
+[10:32:08.167][RX]
+[10:32:08.167][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[10:32:08.167][RX] CHIP_ID: 0xed320001
+[10:32:08.167][RX] CLK_SYS_HZ: 125000000
+[10:32:08.167][RX] ROM bytes: 16384
+[10:32:08.168][RX] SRAM bytes: 65536
+[10:32:08.168][RX] I-cache bytes: 8192
+[10:32:08.168][RX] D-cache bytes: 8192
+[10:32:08.168][RX] MEM_READY: 1
+[10:32:08.168][RX] Build commit: 92b38fd2
+[10:32:08.168][RX] Compiler version: GCC 15.2.0
+[10:32:08.254][RX] BIOS: EdRV32
+[10:32:08.254][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[10:32:29.163][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[10:32:29.183][RX] Input error: type 1-4 then Enter
+[10:32:29.183][SYS] Input error: type 1-4 then Enter
+[10:32:29.183][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[10:32:32.333][RX] ETH link: up
+[10:32:32.333][RX] ETH load ready 192.168.1.10:5000
+[10:32:32.738][SYS] 等待网卡 以太网 就绪 … 用时 0.4 s
+[10:32:32.905][RX] Load bytes: 16327104 segments: 5
+[10:32:32.905][RX] Load result: PASS
+[10:32:32.905][RX] Run: 0x90000000
+[10:32:34.100][RX] LVGL v9.6.0 DIRECT ARGB8888 1280x720 batch=32
+[10:32:34.100][RX] Showcase: EdRV32 showcase v2
+[10:32:34.158][RX] ETH peer IP: 0xc0a80102
+[10:32:34.168][RX] ETH peer port: 53400
+[10:32:34.178][RX] showcase first frame
+[10:36:52.939][RX] CPU%/max_us 1/1899 38/1791 38/202671 overlay_cpu=0.
+[10:36:52.940][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222
+[10:36:52.940][RX]   E         D   D   R   R   V   V      3      2
+[10:36:52.940][RX]   EEEE      D   D   RRRRR    V V    3333   2222
+[10:36:52.940][RX]   E         D   D   R  R     V V       3   2
+[10:36:52.940][RX]   EEEEEEE   DDDD    R    R    V     3333   2222
+[10:36:52.940][RX]
+[10:36:52.940][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[10:36:52.940][RX] CHIP_ID: 0xed320001
+[10:36:52.940][RX] CLK_SYS_HZ: 125000000
+[10:36:52.940][RX] ROM bytes: 16384
+[10:36:52.940][RX] SRAM bytes: 65536
+[10:36:52.940][RX] I-cache bytes: 8192
+[10:36:52.940][RX] D-cache bytes: 8192
+[10:36:52.940][RX] MEM_READY: 1
+[10:36:52.940][RX] Build commit: 92b38fd2
+[10:36:52.940][RX] Compiler version: GCC 15.2.0
+[10:36:53.063][RX] BIOS: EdRV32
+[10:36:53.063][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[10:37:13.402][SYS] 网口未连接，虚拟设备不可用
+[10:37:13.402][SYS] 建立网口连接失败：等待网卡 以太网 就绪超时：local_ip=192.168.1.2，最后状态 OperStatus=Down, DAD=Deprecated，用时 10.0 s
