@@ -73,3 +73,55 @@ nohup setsid ~/.local/opt/edrv32-py/bin/python tools/train/quickdraw_synth.py \
 ```
 
 执行此命令前需先创建日志目录：`mkdir -p build/doodle`。
+
+## 安全帽检测：Hard Hat Workers（T-HELMET-DATA）
+
+原始来源为 andrewmvd 的 [Kaggle Hard Hat Workers](https://www.kaggle.com/datasets/andrewmvd/hard-hat-detection/data)，
+实际下载自免登录的 [Voxel51 Hugging Face 镜像](https://huggingface.co/datasets/Voxel51/hard-hat-detection)。
+镜像的 [数据卡](https://huggingface.co/datasets/Voxel51/hard-hat-detection/blob/main/README.md)
+和 `fiftyone.yml` 均声明许可证为 **CC0 1.0 Universal（CC0 1.0）Public Domain Dedication**，
+条款见 [Creative Commons](https://creativecommons.org/publicdomain/zero/1.0/)。
+镜像包含 5,000 张 PNG，实际标注为 FiftyOne `samples.json`，不是 VOC XML；
+原始框为归一化的左上角 `x, y, width, height`。
+
+曾核实 [SHWD LICENSE](https://github.com/njvisionpower/Safety-Helmet-Wearing-Dataset/blob/master/LICENSE)
+为 **MIT License**（Copyright 2019 njvisionpower）；
+但 README 的官方 Google Drive 下载返回 `Quota exceeded`，因此未使用 SHWD。
+经协调者确认，改用上述 CC0 镜像，并直接转换其 JSON 标注。
+
+在仓库根目录下载并转换：
+
+```sh
+python3 tools/train/hardhat_download.py
+python3 tools/train/hardhat_to_yolo.py
+~/.local/opt/edrv32-py/bin/python tools/train/hardhat_samples.py
+```
+
+下载目录为 `~/.local/share/edrv32/hardhat/`，不入库。
+下载脚本从同一镜像读取元数据，通过系统 `curl` 最多四个并发下载，
+跳过已存在的 PNG，不含重试循环；
+网络失败会直接报错，可手动重新运行同一条命令继续下载。
+下载结束核对 PNG 数量与 `samples.json` 的样本数一致。
+转换脚本仅使用 Python 标准库；可用唯一的位置参数指定其他本机源目录。
+样例脚本使用 `tools/requirements.txt` 已列出的 OpenCV。
+
+镜像没有官方 train/test 划分，样本 `tags` 均为空。
+先按 `filepath` 字典序排序，再用 `random.Random(0)` 打乱，前 90% 为 train，余下为 val。
+类别映射为 `helmet → 0`、`head → 1`，丢弃 `person` 框，保留图片。
+YOLO 框为归一化中心点 `x + width/2, y + height/2, width, height`。
+
+产物均不入库：
+
+- `build/helmet/yolo/{images,labels}/{train,val}/`。
+- `build/helmet/yolo/helmet.yaml`，图像路径相对该 YAML，便于解包后训练。
+- `build/helmet/helmet-yolo.tar`，内含完整 `yolo/` 目录。
+- `build/helmet/samples/` 中六张带类别名和框的 PNG，各取 train/val 字典序前三张。
+  绿色表示 helmet，红色表示 head，画框读取转换后的 YOLO 标签。
+
+统计（2026-11-15，固定种子 0）：
+
+| 划分 | 图片 | helmet 目标 | head 目标 | 丢弃 person 框 |
+|---|---:|---:|---:|---:|
+| train | 4,500 | 17,219 | 5,207 | 671 |
+| val | 500 | 1,747 | 578 | 80 |
+| 合计 | 5,000 | 18,966 | 5,785 | 751 |
