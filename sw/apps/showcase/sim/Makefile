@@ -64,3 +64,13 @@ $(BUILD)/showcase_sim.exe: main_windows.c sim_data.c process.c sim_data.h $(PROC
     $(UI_HEADERS) lv_conf.h $(ASSETS) $(GAMES) $(FONTS) $(DIGITS) $(WIN_LV)
 	$(WINCC) $(FLAGS) -Werror -DLV_USE_WINDOWS=1 main_windows.c $(COMMON) \
 	    $(WIN_LV) -static -Wl,--subsystem,windows -luser32 -lgdi32 -lkernel32 -o $@
+
+# Override only the pose page to measure a git-extracted baseline with this fixture.
+POSE_PAGE ?= ../ui/page_pose.c
+.PHONY: pose-bench $(BUILD)/showcase_pose_bench
+pose-bench: $(BUILD)/showcase_pose_bench
+	cd $(BUILD) && ./showcase_pose_bench
+
+$(BUILD)/showcase_pose_bench: main_pose_bench.c $(COMMON) $(POSE_PAGE) $(LINUX_LV)
+	$(CC) $(FLAGS) -Werror main_pose_bench.c \
+	    $(filter-out ../ui/page_pose.c,$(COMMON)) $(POSE_PAGE) $(LINUX_LV) -lm -o $@

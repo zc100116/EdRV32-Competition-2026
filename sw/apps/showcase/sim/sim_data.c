@@ -258,3 +258,26 @@ void ui_data_render_start(unsigned test)
     }
     ui_open(4);
 }
+
+/* T-POSE-GUI: deterministic people and two-pixel motion for host GUI measurement. */
+static ui_pose_t pose;
+const ui_pose_t *ui_data_pose(void) { return &pose; }
+void sim_data_pose(unsigned count, unsigned frame)
+{
+    static const int points[17][2] = {
+        {100,30},{90,20},{110,20},{80,30},{120,30},{60,100},{140,100},
+        {30,180},{170,180},{10,260},{190,70},{70,250},{130,250},
+        {60,350},{140,350},{50,450},{150,450}
+    };
+    memset(&pose, 0, sizeof pose);
+    pose.count = count;
+    pose.right_up = count != 0;
+    for (unsigned i = 0; i < count; ++i) {
+        int x = 100 + (int)i * 290 + (int)(frame % 3) - 1;
+        int y = 150 + (int)((frame + i) % 3) - 1;
+        pose.people[i] = (ui_detection_t){.confidence = 95 - i * 3,
+            .x = x, .y = y, .width = 200, .height = 470};
+        for (unsigned k = 0; k < 17; ++k)
+            pose.points[i][k] = (ui_pose_point_t){x + points[k][0], y + points[k][1], 1};
+    }
+}
