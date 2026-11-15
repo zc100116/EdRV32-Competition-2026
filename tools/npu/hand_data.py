@@ -19,7 +19,7 @@ SIZES = (45, 60, 90, 180)
 
 def selected(split, count):
     rows, skipped = [], []
-    for path in sorted((HANDS / "images" / split).glob("*.jpg"))[:count]:
+    for path in sorted((HANDS / "images" / split).glob("*.jpg")):
         label = HANDS / "labels" / split / (path.stem + ".txt")
         result = verify_image_label((str(path), str(label), "", True, 1, 21, 3, False))
         if result[0] is None:
@@ -32,7 +32,8 @@ def selected(split, count):
         points = points.astype(float)
         points[:, :, :2] *= [width, height]
         rows.append(dict(path=path, boxes=boxes, points=points))
-    return rows, skipped
+    indices = np.random.default_rng(0).choice(len(rows), size=count, replace=False)
+    return [rows[i] for i in indices], skipped
 
 
 def tensor(image):
@@ -83,9 +84,7 @@ def composite(row, size, rng, backgrounds):
 
 
 def calibration_samples():
-    rows, skipped = selected("train", 96)
-    if skipped:
-        raise ValueError("corrupt calibration images: " + "; ".join(skipped))
+    rows, _ = selected("train", 96)
     rng = np.random.default_rng(0)
     backgrounds = sorted((DATA / "val2017").glob("*.jpg"))
     return [r["path"] for r in rows], [

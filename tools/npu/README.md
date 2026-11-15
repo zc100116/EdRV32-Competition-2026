@@ -505,6 +505,7 @@ OUTPUT 和 WORK 布局与 pose 相同；缓存为 `build/npu/quantized_hand/`。
 数据 URL 来自子模块 `ultralytics/cfg/datasets/hand-keypoints.yaml`：
 [Ultralytics hand-keypoints](https://github.com/ultralytics/assets/releases/download/v0.0.0/hand-keypoints.zip)。
 压缩包约 369 MB，根目录直接包含 images/labels，以下提取到指定目录；不入库。
+已有旧版缓存时，先删除 `build/npu/quantized_hand/` 再执行编译以重新标定。
 COCO 背景沿用前节下载到 `~/.local/share/edrv32/npu/val2017/` 的本地图片。
 
 ```sh
@@ -515,22 +516,23 @@ curl -L --fail https://github.com/ultralytics/assets/releases/download/v0.0.0/ha
 python3 -m zipfile -e ~/.local/share/edrv32/npu/hand-keypoints.zip \
     ~/.local/share/edrv32/npu/hand-keypoints
 export PYTHONPATH="$PWD/third_party/ultralytics" OPENBLAS_NUM_THREADS=1
-mkdir -p build/npu/hand_eval
+mkdir -p build/npu/hand_eval_r2
 ~/.local/opt/edrv32-py/bin/python tools/npu/compile_yolo.py --task hand \
     --image ~/.local/share/edrv32/npu/hand-keypoints/images/val/$(ls ~/.local/share/edrv32/npu/hand-keypoints/images/val | sort | head -1) \
-    --out build/npu/hand_eval/compiled
-~/.local/opt/edrv32-py/bin/python tools/npu/hand_eval.py --out build/npu/hand_eval \
-    > build/npu/hand_eval/eval.log 2>&1
+    --out build/npu/hand_eval_r2/compiled
+~/.local/opt/edrv32-py/bin/python tools/npu/hand_eval.py --out build/npu/hand_eval_r2 \
+    > build/npu/hand_eval_r2/eval.log 2>&1
 ~/.local/opt/edrv32-py/bin/python -m unittest discover -s tools/npu -p test_compile.py
 ```
 
-标定用训练集按文件名排序前 96 张，手框长边依次循环 45/60/90/180 px，
-percentile 95、margin 1.05、torch 1 线程。评估用验证集按文件名排序前 300 张，
-通过 Ultralytics `verify_image_label` 跳过损坏图并在结果中列出；不补取后续图片。
+标定用训练集排除损坏图、按文件名排序后以 default_rng(0) 不放回抽取 96 张，
+手框长边依次循环 45/60/90/180 px，
+percentile 95、margin 1.05、torch 1 线程。评估用验证集通过 Ultralytics `verify_image_label` 排除损坏图、
+按文件名排序后以 default_rng(0) 不放回抽取 300 张；结果列出整个验证池跳过的损坏图。
 A 原图 letterbox 到 640×384，另跑 FP32 640×640 参照；B 缩放原图，
 使标注手框长边在 1280×720 中为 2S，贴到随机位置、完整保留手框。
 原图周围超出画面的部分裁去；COCO 背景等比缩放填满后居中裁成 1280×720。
-标定和评估分别用 `numpy.default_rng(0)`，每张依次处理 B45/B60/B90/B180，
+抽样、标定合成、评估合成分别用独立的 `numpy.default_rng(0)`，每张依次处理 B45/B60/B90/B120/B180，
 背景按文件名排序后随机抽取。B 按板端缩小一半、上下各补 12 行 114。
 所有路径 confidence>0.25、NMS IoU>0.45、最多 100 手；INT8 运行描述符参考模型，
 硬件整数后处理参考、规格 2.6 排序/NMS 后按 anchor 解码 21 点。
@@ -546,5 +548,5 @@ sigma=1/21，真值框面积×0.53；不与浮点预测比较。
 若某类没有样本，判对率和相应误差为 null（报告写“—”）。
 原始预测、每图测量、A 的 OKS 匹配和汇总分别在输出目录的
 `predictions.json`、`measurements.json`、`oks.json`、`summary.json`。
-四档示意图取同一首张验证图，真值/INT8 并排绘制全部 21 点，保存为 96 色 PNG。
+45/60/90/180 四档示意图取同一首张随机验证图，真值/INT8 并排绘制全部 21 点，保存为 96 色 PNG。
 性能沿用 pose 的 MAC 日历周期比×detect 实测 35.0/41.2 ms，属于估算。

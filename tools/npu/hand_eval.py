@@ -204,7 +204,7 @@ def main():
     rng = np.random.default_rng(0)
     backgrounds = sorted((DATA / "val2017").glob("*.jpg"))
     names = ("fp32_384", "int8_384", "fp32_640")
-    groups = ("A",) + tuple(f"B{s}" for s in SIZES)
+    groups = ("A",) + tuple(f"B{s}" for s in (45, 60, 90, 120, 180))
     raw = {g: {n: [] for n in (names if g == "A" else names[:2])} for g in groups}
     ap = {n: [] for n in names}
     predictions = []
@@ -241,7 +241,7 @@ def main():
                 predictions.append(dict(file=row["path"].name, group=group, path=name,
                     truth_boxes=boxes.tolist(), truth_points=points.tolist(),
                     boxes=result[0].tolist(), scores=result[1].tolist(), points=result[2].tolist()))
-            if index == 0 and size:
+            if index == 0 and size in SIZES:
                 illustrate(image, points, results["int8_384"], size,
                            assets / f"hand-eval-{size}.png")
         if (index + 1) % 25 == 0:
