@@ -1,0 +1,1592 @@
+[12:44:46.823][RX]
+[12:44:46.833][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222
+[12:44:46.834][RX]   E         D   D   R   R   V   V      3      2
+[12:44:46.834][RX]   EEEE      D   D   RRRRR    V V    3333   2222
+[12:44:46.834][RX]   E         D   D   R  R     V V       3   2
+[12:44:46.835][RX]   EEEEEEE   DDDD    R    R    V     3333   2222
+[12:44:46.835][RX]
+[12:44:46.835][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[12:44:46.835][RX] CHIP_ID: 0xed320001
+[12:44:46.835][RX] CLK_SYS_HZ: 125000000
+[12:44:46.835][RX] ROM bytes: 16384
+[12:44:46.835][RX] SRAM bytes: 65536
+[12:44:46.835][RX] I-cache bytes: 8192
+[12:44:46.835][RX] D-cache bytes: 8192
+[12:44:46.835][RX] MEM_READY: 1
+[12:44:46.835][RX] Build commit: 92b38fd2
+[12:44:46.835][RX] Compiler version: GCC 15.2.0
+[12:44:46.925][RX] BIOS: EdRV32
+[12:44:46.925][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[12:45:18.697][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[12:45:18.704][RX] Input error: type 1-4 then Enter
+[12:45:18.704][SYS] Input error: type 1-4 then Enter
+[12:45:18.704][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[12:45:21.889][RX] ETH link: up
+[12:45:21.889][RX] ETH load ready 192.168.1.10:5000
+[12:45:22.435][SYS] 等待网卡 以太网 就绪 … 用时 0.5 s
+[12:45:22.625][RX] Load bytes: 16328280 segments: 5
+[12:45:22.627][RX] Load result: PASS
+[12:45:22.627][RX] Run: 0x90000000
+[12:45:23.820][RX] LVGL v9.6.0 DIRECT ARGB8888 1280x720 batch=32
+[12:45:23.820][RX] Showcase: EdRV32 showcase v2
+[12:45:23.921][RX] ETH peer IP: 0xc0a80102
+[12:45:23.923][RX] ETH peer port: 63274
+[12:45:23.923][RX] showcase first frame
+[12:45:24.427][RX] CPU%/max_us 2/1181 0/138 6/47559 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:24.427][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:25.420][RX] CPU%/max_us 2/1188 0/138 1/47559 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:25.420][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:26.381][RX] CPU%/max_us 2/1192 0/138 1/47559 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:26.401][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:27.393][RX] CPU%/max_us 2/1250 0/138 1/47559 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:27.413][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:28.403][RX] CPU%/max_us 2/1250 0/138 1/47559 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:28.436][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:29.412][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[12:45:29.414][RX] CPU%/max_us 2/1250 0/138 1/47559 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:29.424][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:29.439][RX] ETH peer IP: 0xc0a80102
+[12:45:29.460][RX] ETH peer port: 6000
+[12:45:29.762][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[12:45:30.006][SYS] 等待网卡 以太网 就绪 … 用时 0.2 s
+[12:45:30.183][SYS] 等待网卡 以太网 就绪 … 用时 0.2 s
+[12:45:30.420][RX] CPU%/max_us 2/1250 0/138 1/47559 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:30.440][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:31.202][SYS] 等待网卡 以太网 就绪 … 用时 0.2 s
+[12:45:31.377][SYS] 等待网卡 以太网 就绪 … 用时 0.2 s
+[12:45:31.435][RX] CPU%/max_us 2/1250 0/138 2/47559 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:31.450][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:31.588][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[12:45:32.402][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[12:45:32.438][RX] CPU%/max_us 2/1250 0/138 3/47559 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:32.455][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:32.609][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[12:45:32.982][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[12:45:33.443][RX] CPU%/max_us 2/1274 0/138 3/47559 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:33.460][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:33.627][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[12:45:34.451][RX] CPU%/max_us 2/1274 0/138 3/47559 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:34.464][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:35.469][RX] CPU%/max_us 2/1274 0/138 1/47559 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:35.490][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:36.507][RX] CPU%/max_us 1/1274 10/790 46/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:36.555][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:37.491][RX] CPU%/max_us 2/1594 44/812 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:37.542][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:37.721][RX] pose fps=14 npu=39.3 wait=38.6 decode=19.7 kpt=0.7 gui=43.6 e2e=158.1 period=52.7 persons=1 idle=37% npu_gap=13.4 jit_lw=0.0 jit_rw=0.0 jit_ls=23.2 jit_rs=21.1
+[12:45:38.501][RX] CPU%/max_us 2/1594 53/833 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:38.535][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:38.688][RX] pose fps=16 npu=39.4 wait=49.4 decode=19.6 kpt=0.7 gui=41.6 e2e=171.4 period=58.1 persons=1 idle=26% npu_gap=18.7 jit_lw=0.0 jit_rw=0.0 jit_ls=61.4 jit_rs=73.6
+[12:45:39.537][RX] CPU%/max_us 2/1594 50/833 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:39.558][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:39.694][RX] pose fps=20 npu=39.2 wait=24.9 decode=19.9 kpt=0.6 gui=31.5 e2e=133.1 period=47.8 persons=1 idle=20% npu_gap=8.5 jit_lw=0.0 jit_rw=0.0 jit_ls=43.6 jit_rs=33.4
+[12:45:40.581][RX] CPU%/max_us 2/1716 51/833 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:40.601][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:40.749][RX] pose fps=19 npu=39.3 wait=30.9 decode=19.8 kpt=0.7 gui=28.6 e2e=135.8 period=49.7 persons=1 idle=21% npu_gap=10.3 jit_lw=0.0 jit_rw=0.0 jit_ls=14.3 jit_rs=8.2
+[12:45:41.544][RX] CPU%/max_us 1/1716 48/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:41.583][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:41.729][RX] pose fps=20 npu=39.3 wait=31.9 decode=19.8 kpt=0.7 gui=29.9 e2e=142.5 period=50.1 persons=2 idle=21% npu_gap=10.8 jit_lw=0.0 jit_rw=0.0 jit_ls=14.6 jit_rs=10.0
+[12:45:42.604][RX] CPU%/max_us 2/1716 48/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:42.653][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:42.771][RX] pose fps=21 npu=39.0 wait=16.2 decode=20.1 kpt=0.8 gui=36.2 e2e=129.9 period=45.8 persons=1 idle=19% npu_gap=6.8 jit_lw=20.2 jit_rw=0.0 jit_ls=18.7 jit_rs=13.5
+[12:45:43.618][RX] CPU%/max_us 2/1716 51/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:43.653][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:43.808][RX] pose fps=20 npu=39.2 wait=27.6 decode=19.8 kpt=0.7 gui=29.8 e2e=136.1 period=47.9 persons=1 idle=20% npu_gap=8.6 jit_lw=71.7 jit_rw=0.0 jit_ls=15.6 jit_rs=21.9
+[12:45:44.638][RX] CPU%/max_us 2/1716 50/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:44.651][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:44.779][RX] pose fps=20 npu=39.1 wait=27.0 decode=19.8 kpt=0.7 gui=30.3 e2e=133.9 period=47.9 persons=1 idle=20% npu_gap=8.7 jit_lw=38.5 jit_rw=0.0 jit_ls=36.7 jit_rs=37.9
+[12:45:45.672][RX] CPU%/max_us 2/1716 52/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:45.688][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:45.838][RX] pose fps=20 npu=39.2 wait=25.1 decode=19.9 kpt=0.6 gui=29.0 e2e=131.0 period=47.7 persons=1 idle=19% npu_gap=8.5 jit_lw=0.0 jit_rw=0.0 jit_ls=18.6 jit_rs=12.9
+[12:45:46.664][RX] CPU%/max_us 2/1716 51/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:46.685][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:46.837][RX] pose fps=20 npu=39.2 wait=24.5 decode=19.9 kpt=0.7 gui=30.7 e2e=130.5 period=47.2 persons=1 idle=21% npu_gap=8.0 jit_lw=0.0 jit_rw=0.0 jit_ls=12.0 jit_rs=9.1
+[12:45:47.691][RX] CPU%/max_us 2/1716 51/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:47.711][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:47.848][RX] pose fps=20 npu=39.3 wait=26.6 decode=19.8 kpt=0.7 gui=29.5 e2e=137.0 period=47.7 persons=1 idle=20% npu_gap=8.3 jit_lw=0.0 jit_rw=0.0 jit_ls=13.7 jit_rs=7.3
+[12:45:48.722][RX] CPU%/max_us 2/1716 52/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:48.761][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:48.907][RX] pose fps=20 npu=39.3 wait=31.0 decode=19.8 kpt=0.7 gui=29.2 e2e=138.7 period=50.0 persons=1 idle=21% npu_gap=10.5 jit_lw=0.0 jit_rw=0.0 jit_ls=11.0 jit_rs=7.3
+[12:45:49.755][RX] CPU%/max_us 2/1716 53/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:49.776][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:49.922][RX] pose fps=20 npu=39.3 wait=27.1 decode=19.8 kpt=0.7 gui=27.5 e2e=132.0 period=47.1 persons=1 idle=20% npu_gap=7.8 jit_lw=0.0 jit_rw=0.0 jit_ls=8.9 jit_rs=6.1
+[12:45:50.797][RX] CPU%/max_us 2/1716 51/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:50.836][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:50.982][RX] pose fps=20 npu=39.2 wait=22.7 decode=19.9 kpt=0.7 gui=31.9 e2e=129.5 period=47.3 persons=1 idle=21% npu_gap=8.1 jit_lw=0.0 jit_rw=0.0 jit_ls=9.8 jit_rs=8.7
+[12:45:51.835][RX] CPU%/max_us 1/1716 43/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:51.882][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:52.037][RX] pose fps=19 npu=39.4 wait=31.5 decode=19.7 kpt=0.7 gui=28.8 e2e=139.4 period=49.3 persons=1 idle=21% npu_gap=9.9 jit_lw=0.0 jit_rw=0.0 jit_ls=11.1 jit_rs=9.9
+[12:45:52.253][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[12:45:52.852][RX] CPU%/max_us 2/1716 47/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:52.906][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:53.104][RX] pose fps=18 npu=39.3 wait=41.1 decode=19.7 kpt=0.7 gui=37.5 e2e=157.0 period=54.3 persons=1 idle=24% npu_gap=15.0 jit_lw=0.0 jit_rw=0.0 jit_ls=74.7 jit_rs=91.7
+[12:45:53.881][RX] CPU%/max_us 2/1716 44/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:53.934][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:54.125][RX] pose fps=17 npu=39.4 wait=41.5 decode=19.7 kpt=0.6 gui=44.4 e2e=162.7 period=56.3 persons=1 idle=25% npu_gap=16.9 jit_lw=0.0 jit_rw=0.0 jit_ls=14.6 jit_rs=29.4
+[12:45:54.896][RX] CPU%/max_us 1/1716 44/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:54.955][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:55.131][RX] pose fps=17 npu=39.4 wait=42.7 decode=19.7 kpt=0.6 gui=44.5 e2e=165.5 period=55.8 persons=1 idle=27% npu_gap=16.4 jit_lw=0.0 jit_rw=0.0 jit_ls=26.3 jit_rs=35.3
+[12:45:55.938][RX] CPU%/max_us 2/1716 45/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:55.958][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:56.105][RX] pose fps=16 npu=39.3 wait=46.2 decode=19.6 kpt=0.7 gui=41.2 e2e=161.8 period=57.1 persons=1 idle=25% npu_gap=17.7 jit_lw=0.0 jit_rw=0.0 jit_ls=11.1 jit_rs=9.6
+[12:45:56.922][RX] CPU%/max_us 1/1716 41/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:56.962][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:57.128][RX] pose fps=18 npu=39.3 wait=39.6 decode=19.7 kpt=0.7 gui=40.1 e2e=157.0 period=54.4 persons=1 idle=24% npu_gap=15.1 jit_lw=0.0 jit_rw=0.0 jit_ls=11.4 jit_rs=12.3
+[12:45:57.302][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[12:45:57.967][RX] CPU%/max_us 2/1716 50/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:58.018][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:58.172][RX] pose fps=17 npu=39.3 wait=40.7 decode=19.7 kpt=0.6 gui=42.8 e2e=159.2 period=55.7 persons=1 idle=25% npu_gap=16.3 jit_lw=0.0 jit_rw=0.0 jit_ls=12.5 jit_rs=20.1
+[12:45:58.972][RX] CPU%/max_us 2/1716 47/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:45:58.993][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:45:59.169][RX] pose fps=19 npu=39.2 wait=31.2 decode=19.9 kpt=0.6 gui=42.8 e2e=154.6 period=50.4 persons=1 idle=23% npu_gap=11.2 jit_lw=0.0 jit_rw=0.0 jit_ls=13.3 jit_rs=13.4
+[12:45:59.991][RX] CPU%/max_us 2/1716 49/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:00.012][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:00.190][RX] pose fps=19 npu=39.2 wait=31.8 decode=19.8 kpt=0.6 gui=42.7 e2e=151.0 period=50.8 persons=1 idle=23% npu_gap=11.5 jit_lw=0.0 jit_rw=0.0 jit_ls=15.4 jit_rs=17.4
+[12:46:01.024][RX] CPU%/max_us 2/1716 45/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:01.041][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:01.193][RX] pose fps=19 npu=39.2 wait=32.9 decode=19.8 kpt=0.6 gui=44.6 e2e=153.3 period=51.7 persons=1 idle=23% npu_gap=12.4 jit_lw=0.0 jit_rw=0.0 jit_ls=13.5 jit_rs=14.8
+[12:46:02.018][RX] CPU%/max_us 1/1716 39/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:02.067][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:02.257][RX] pose fps=17 npu=39.3 wait=39.1 decode=19.7 kpt=0.6 gui=41.6 e2e=157.7 period=53.5 persons=1 idle=25% npu_gap=14.1 jit_lw=0.0 jit_rw=0.0 jit_ls=7.4 jit_rs=15.9
+[12:46:03.063][RX] CPU%/max_us 2/1716 54/1796 20/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:03.083][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:03.229][RX] pose fps=17 npu=39.4 wait=47.5 decode=19.6 kpt=0.6 gui=42.6 e2e=168.9 period=57.3 persons=1 idle=29% npu_gap=17.8 jit_lw=0.0 jit_rw=0.0 jit_ls=8.3 jit_rs=11.5
+[12:46:04.029][RX] CPU%/max_us 2/1716 50/1796 21/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:04.070][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:04.254][RX] pose fps=19 npu=39.2 wait=25.9 decode=19.9 kpt=0.6 gui=42.0 e2e=143.6 period=49.1 persons=1 idle=23% npu_gap=9.8 jit_lw=0.0 jit_rw=0.0 jit_ls=11.5 jit_rs=16.7
+[12:46:05.059][RX] CPU%/max_us 2/1716 48/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:05.111][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:05.273][RX] pose fps=18 npu=39.2 wait=32.5 decode=19.8 kpt=0.6 gui=42.4 e2e=151.9 period=51.8 persons=1 idle=25% npu_gap=12.5 jit_lw=0.0 jit_rw=0.0 jit_ls=11.8 jit_rs=12.1
+[12:46:06.114][RX] CPU%/max_us 2/1716 46/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:06.162][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:06.317][RX] pose fps=19 npu=39.4 wait=34.3 decode=19.8 kpt=0.6 gui=43.2 e2e=151.6 period=52.9 persons=1 idle=25% npu_gap=13.5 jit_lw=0.0 jit_rw=0.0 jit_ls=11.1 jit_rs=14.9
+[12:46:07.138][RX] CPU%/max_us 2/1716 48/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:07.184][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:07.344][RX] pose fps=17 npu=39.3 wait=35.6 decode=19.8 kpt=0.6 gui=42.3 e2e=152.1 period=52.6 persons=1 idle=24% npu_gap=13.3 jit_lw=0.0 jit_rw=0.0 jit_ls=17.1 jit_rs=47.3
+[12:46:08.199][RX] CPU%/max_us 1/1716 42/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:08.219][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:08.394][RX] pose fps=19 npu=39.2 wait=33.4 decode=19.8 kpt=0.6 gui=42.8 e2e=149.4 period=52.0 persons=1 idle=25% npu_gap=12.6 jit_lw=0.0 jit_rw=0.0 jit_ls=50.5 jit_rs=50.8
+[12:46:09.214][RX] CPU%/max_us 2/1830 44/1796 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:09.234][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:09.351][RX] pose fps=17 npu=39.3 wait=38.3 decode=19.8 kpt=0.9 gui=44.8 e2e=168.4 period=54.5 persons=3 idle=25% npu_gap=15.1 jit_lw=0.0 jit_rw=0.0 jit_ls=70.3 jit_rs=36.0
+[12:46:10.258][RX] CPU%/max_us 2/1830 57/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:10.271][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:10.415][RX] pose fps=17 npu=39.2 wait=42.4 decode=19.9 kpt=1.0 gui=39.3 e2e=155.3 period=55.9 persons=2 idle=19% npu_gap=16.7 jit_lw=0.0 jit_rw=0.0 jit_ls=242.7 jit_rs=116.6
+[12:46:11.251][RX] CPU%/max_us 2/1830 56/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:11.272][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:11.442][RX] pose fps=21 npu=38.9 wait=15.5 decode=20.1 kpt=0.9 gui=31.1 e2e=119.8 period=45.2 persons=2 idle=13% npu_gap=6.2 jit_lw=21.2 jit_rw=20.0 jit_ls=80.6 jit_rs=63.1
+[12:46:12.290][RX] CPU%/max_us 2/1830 59/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:12.319][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:12.453][RX] pose fps=22 npu=38.8 wait=11.0 decode=20.1 kpt=0.8 gui=25.3 e2e=109.6 period=44.1 persons=1 idle=13% npu_gap=5.3 jit_lw=282.4 jit_rw=167.7 jit_ls=37.0 jit_rs=29.1
+[12:46:13.274][RX] CPU%/max_us 2/1919 58/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:13.311][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:13.445][RX] pose fps=22 npu=38.8 wait=17.9 decode=20.0 kpt=0.8 gui=26.9 e2e=127.1 period=44.2 persons=1 idle=12% npu_gap=5.3 jit_lw=263.3 jit_rw=292.7 jit_ls=227.0 jit_rs=157.7
+[12:46:14.323][RX] CPU%/max_us 2/1919 55/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:14.344][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:14.488][RX] pose fps=22 npu=38.9 wait=14.7 decode=20.1 kpt=0.9 gui=31.7 e2e=120.7 period=44.3 persons=1 idle=11% npu_gap=5.4 jit_lw=15.1 jit_rw=225.8 jit_ls=7.9 jit_rs=7.4
+[12:46:15.333][RX] CPU%/max_us 2/1919 60/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:15.353][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:15.511][RX] pose fps=20 npu=38.8 wait=21.1 decode=20.0 kpt=0.8 gui=31.7 e2e=127.0 period=46.9 persons=1 idle=11% npu_gap=8.0 jit_lw=8.1 jit_rw=11.2 jit_ls=6.3 jit_rs=10.3
+[12:46:16.336][RX] CPU%/max_us 2/1919 59/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:16.374][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:16.515][RX] pose fps=23 npu=38.8 wait=13.5 decode=20.2 kpt=0.9 gui=28.2 e2e=119.7 period=42.3 persons=2 idle=10% npu_gap=3.4 jit_lw=17.2 jit_rw=67.7 jit_ls=21.5 jit_rs=18.3
+[12:46:17.369][RX] CPU%/max_us 2/1919 54/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:17.402][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:17.547][RX] pose fps=22 npu=38.9 wait=13.7 decode=20.2 kpt=1.0 gui=28.4 e2e=119.5 period=43.1 persons=2 idle=11% npu_gap=4.2 jit_lw=194.3 jit_rw=0.0 jit_ls=194.1 jit_rs=251.0
+[12:46:18.381][RX] CPU%/max_us 2/1919 55/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:18.411][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:18.556][RX] pose fps=21 npu=38.9 wait=15.6 decode=20.1 kpt=0.8 gui=29.7 e2e=123.4 period=44.7 persons=1 idle=11% npu_gap=5.8 jit_lw=72.9 jit_rw=119.7 jit_ls=11.7 jit_rs=27.7
+[12:46:19.430][RX] CPU%/max_us 2/1919 54/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:19.472][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:19.614][RX] pose fps=21 npu=38.8 wait=19.5 decode=20.0 kpt=0.8 gui=28.8 e2e=122.4 period=46.4 persons=2 idle=11% npu_gap=7.5 jit_lw=46.1 jit_rw=241.0 jit_ls=23.4 jit_rs=15.3
+[12:46:20.472][RX] CPU%/max_us 2/1919 54/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:20.508][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:20.621][RX] pose fps=20 npu=39.0 wait=21.7 decode=20.1 kpt=1.0 gui=34.3 e2e=130.2 period=48.4 persons=2 idle=14% npu_gap=9.4 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:21.518][RX] CPU%/max_us 2/1919 57/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:21.558][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:21.690][RX] pose fps=21 npu=38.9 wait=22.0 decode=20.1 kpt=1.0 gui=28.5 e2e=131.2 period=46.4 persons=2 idle=13% npu_gap=7.4 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:22.573][RX] CPU%/max_us 2/1919 59/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:22.614][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:22.743][RX] pose fps=20 npu=38.9 wait=23.7 decode=20.1 kpt=1.0 gui=29.6 e2e=131.7 period=46.8 persons=2 idle=12% npu_gap=7.8 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:23.603][RX] CPU%/max_us 2/1919 56/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:23.616][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:23.723][RX] pose fps=21 npu=38.9 wait=19.3 decode=20.2 kpt=1.0 gui=30.9 e2e=127.5 period=46.6 persons=2 idle=13% npu_gap=7.7 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:24.605][RX] CPU%/max_us 2/1919 61/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:24.626][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:24.761][RX] pose fps=22 npu=38.9 wait=14.1 decode=20.3 kpt=1.0 gui=35.8 e2e=126.8 period=43.5 persons=2 idle=11% npu_gap=4.6 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:25.635][RX] CPU%/max_us 2/1919 53/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:25.685][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:25.785][RX] pose fps=21 npu=38.8 wait=12.2 decode=20.3 kpt=1.0 gui=33.8 e2e=123.3 period=44.8 persons=2 idle=12% npu_gap=5.9 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:26.669][RX] CPU%/max_us 2/1919 54/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:26.717][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:26.814][RX] pose fps=21 npu=39.0 wait=23.3 decode=20.1 kpt=1.0 gui=34.7 e2e=132.6 period=47.2 persons=2 idle=13% npu_gap=8.2 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:27.727][RX] CPU%/max_us 2/1919 60/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:27.746][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:27.878][RX] pose fps=21 npu=38.9 wait=18.8 decode=20.2 kpt=1.0 gui=30.7 e2e=127.3 period=45.0 persons=2 idle=12% npu_gap=6.0 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:28.705][RX] CPU%/max_us 2/1919 56/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:28.729][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:28.888][RX] pose fps=21 npu=38.9 wait=16.9 decode=20.2 kpt=1.0 gui=30.6 e2e=125.5 period=44.8 persons=2 idle=13% npu_gap=5.9 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:29.770][RX] CPU%/max_us 2/1919 54/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:29.782][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:29.942][RX] pose fps=21 npu=38.9 wait=19.6 decode=20.2 kpt=1.1 gui=38.3 e2e=129.9 period=46.2 persons=2 idle=13% npu_gap=7.2 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:30.800][RX] CPU%/max_us 2/1919 61/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:30.821][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:30.987][RX] pose fps=19 npu=39.0 wait=28.7 decode=20.0 kpt=1.0 gui=32.4 e2e=138.5 period=50.0 persons=2 idle=14% npu_gap=10.9 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:31.822][RX] CPU%/max_us 2/1919 58/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:31.837][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:31.977][RX] pose fps=21 npu=38.9 wait=19.7 decode=20.1 kpt=1.0 gui=35.9 e2e=131.3 period=45.7 persons=2 idle=14% npu_gap=6.7 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:32.822][RX] CPU%/max_us 2/1919 53/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:32.866][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:32.989][RX] pose fps=21 npu=38.9 wait=16.1 decode=20.2 kpt=1.0 gui=32.7 e2e=126.1 period=45.3 persons=2 idle=12% npu_gap=6.4 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:33.877][RX] CPU%/max_us 2/1919 57/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:33.898][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:34.027][RX] pose fps=20 npu=38.9 wait=22.1 decode=20.1 kpt=1.0 gui=29.5 e2e=129.1 period=47.4 persons=2 idle=14% npu_gap=8.4 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:34.857][RX] CPU%/max_us 2/1919 56/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:34.895][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:35.049][RX] pose fps=21 npu=38.9 wait=19.0 decode=20.1 kpt=1.0 gui=34.6 e2e=128.5 period=45.9 persons=2 idle=13% npu_gap=7.0 jit_lw=0.0 jit_rw=3.5 jit_ls=0.0 jit_rs=0.0
+[12:46:35.894][RX] CPU%/max_us 2/1919 57/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:35.935][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:36.080][RX] pose fps=21 npu=38.9 wait=21.3 decode=20.1 kpt=1.0 gui=31.9 e2e=125.9 period=46.1 persons=2 idle=12% npu_gap=7.2 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:36.922][RX] CPU%/max_us 2/1919 57/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:36.943][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:37.097][RX] pose fps=20 npu=38.9 wait=23.1 decode=20.1 kpt=1.0 gui=32.9 e2e=131.5 period=48.1 persons=2 idle=13% npu_gap=9.2 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:37.949][RX] CPU%/max_us 2/1919 53/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:37.970][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:38.103][RX] pose fps=20 npu=38.9 wait=22.8 decode=20.0 kpt=1.0 gui=31.7 e2e=126.2 period=47.4 persons=2 idle=13% npu_gap=8.4 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:38.993][RX] CPU%/max_us 2/1919 54/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:39.014][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:39.148][RX] pose fps=20 npu=38.9 wait=20.3 decode=20.1 kpt=1.0 gui=34.3 e2e=130.4 period=47.8 persons=2 idle=12% npu_gap=8.8 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:40.006][RX] CPU%/max_us 2/1919 57/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:40.027][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:40.139][RX] pose fps=20 npu=38.9 wait=19.4 decode=20.1 kpt=1.0 gui=34.0 e2e=125.7 period=47.4 persons=2 idle=14% npu_gap=8.4 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:41.034][RX] CPU%/max_us 2/1919 55/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:41.055][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:41.189][RX] pose fps=21 npu=38.8 wait=15.3 decode=20.2 kpt=1.0 gui=34.2 e2e=124.7 period=45.6 persons=2 idle=12% npu_gap=6.7 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:42.054][RX] CPU%/max_us 2/1919 55/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:42.100][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:42.259][RX] pose fps=21 npu=38.9 wait=21.9 decode=20.1 kpt=1.1 gui=33.4 e2e=132.7 period=46.5 persons=2 idle=13% npu_gap=7.6 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:43.084][RX] CPU%/max_us 2/1919 56/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:43.104][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:43.255][RX] pose fps=19 npu=39.0 wait=27.6 decode=20.0 kpt=1.1 gui=35.2 e2e=139.0 period=48.5 persons=2 idle=14% npu_gap=9.5 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:44.087][RX] CPU%/max_us 2/1919 55/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:44.128][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:44.273][RX] pose fps=20 npu=38.9 wait=28.1 decode=20.0 kpt=1.0 gui=33.6 e2e=139.0 period=49.2 persons=2 idle=14% npu_gap=10.2 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:45.074][RX] CPU%/max_us 2/1919 51/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:45.110][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:45.237][RX] pose fps=20 npu=38.9 wait=24.4 decode=20.1 kpt=1.1 gui=34.9 e2e=135.9 period=48.7 persons=2 idle=13% npu_gap=9.7 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:46.115][RX] CPU%/max_us 2/1919 55/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:46.136][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:46.300][RX] pose fps=19 npu=38.9 wait=26.8 decode=20.0 kpt=1.1 gui=33.1 e2e=133.0 period=49.2 persons=2 idle=14% npu_gap=10.2 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:47.125][RX] CPU%/max_us 2/1919 56/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:47.162][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:47.306][RX] pose fps=20 npu=39.0 wait=26.1 decode=20.1 kpt=1.1 gui=32.2 e2e=132.7 period=48.6 persons=2 idle=14% npu_gap=9.6 jit_lw=0.0 jit_rw=14.4 jit_ls=0.0 jit_rs=0.0
+[12:46:48.164][RX] CPU%/max_us 2/1919 56/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:48.185][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:48.348][RX] pose fps=20 npu=38.9 wait=21.3 decode=20.2 kpt=1.0 gui=33.7 e2e=132.9 period=46.4 persons=2 idle=13% npu_gap=7.5 jit_lw=0.0 jit_rw=16.6 jit_ls=0.0 jit_rs=0.0
+[12:46:49.194][RX] CPU%/max_us 2/1919 57/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:49.215][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:49.343][RX] pose fps=20 npu=38.9 wait=23.5 decode=20.1 kpt=1.0 gui=34.4 e2e=137.8 period=47.0 persons=2 idle=13% npu_gap=8.0 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:46:50.203][RX] CPU%/max_us 2/1919 58/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:50.255][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:50.387][RX] pose fps=21 npu=38.9 wait=19.7 decode=20.2 kpt=1.0 gui=34.9 e2e=131.5 period=47.0 persons=2 idle=13% npu_gap=8.1 jit_lw=0.0 jit_rw=12.6 jit_ls=0.0 jit_rs=0.0
+[12:46:51.241][RX] CPU%/max_us 2/1919 54/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:51.277][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:51.433][RX] pose fps=22 npu=38.8 wait=14.9 decode=20.3 kpt=1.0 gui=33.1 e2e=122.2 period=44.3 persons=2 idle=12% npu_gap=5.4 jit_lw=0.0 jit_rw=7.5 jit_ls=0.0 jit_rs=0.0
+[12:46:52.280][RX] CPU%/max_us 2/1919 61/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:52.301][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:52.315][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[12:46:52.437][RX] pose fps=21 npu=38.9 wait=20.2 decode=20.2 kpt=1.0 gui=30.9 e2e=127.8 period=46.2 persons=2 idle=13% npu_gap=7.3 jit_lw=0.0 jit_rw=18.1 jit_ls=0.0 jit_rs=0.0
+[12:46:53.295][RX] CPU%/max_us 2/1919 61/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:53.310][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:53.471][RX] pose fps=22 npu=38.8 wait=11.8 decode=20.3 kpt=1.0 gui=34.8 e2e=118.8 period=44.0 persons=2 idle=11% npu_gap=5.1 jit_lw=0.0 jit_rw=9.0 jit_ls=0.0 jit_rs=0.0
+[12:46:54.314][RX] CPU%/max_us 2/1919 61/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:54.334][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:54.475][RX] pose fps=21 npu=38.8 wait=14.8 decode=20.2 kpt=1.0 gui=34.2 e2e=123.2 period=45.0 persons=1 idle=12% npu_gap=6.1 jit_lw=0.0 jit_rw=150.5 jit_ls=0.0 jit_rs=0.0
+[12:46:55.364][RX] CPU%/max_us 2/1919 54/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:55.385][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:55.451][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[12:46:55.523][RX] pose fps=22 npu=38.8 wait=12.4 decode=20.3 kpt=1.0 gui=33.9 e2e=118.7 period=43.4 persons=2 idle=11% npu_gap=4.5 jit_lw=0.0 jit_rw=13.5 jit_ls=0.0 jit_rs=0.0
+[12:46:56.378][RX] CPU%/max_us 2/1919 57/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:56.398][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:56.529][RX] pose fps=20 npu=38.9 wait=21.5 decode=20.2 kpt=1.0 gui=34.1 e2e=132.3 period=47.0 persons=2 idle=13% npu_gap=8.1 jit_lw=0.0 jit_rw=5.8 jit_ls=0.0 jit_rs=0.0
+[12:46:57.371][RX] CPU%/max_us 2/1919 55/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:57.392][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:57.553][RX] pose fps=21 npu=38.9 wait=21.3 decode=20.1 kpt=1.0 gui=34.1 e2e=136.4 period=46.5 persons=2 idle=13% npu_gap=7.5 jit_lw=0.0 jit_rw=10.7 jit_ls=0.0 jit_rs=0.0
+[12:46:58.402][RX] CPU%/max_us 2/1919 58/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:58.443][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:58.583][RX] pose fps=21 npu=38.9 wait=16.2 decode=20.2 kpt=1.0 gui=32.4 e2e=127.0 period=44.7 persons=2 idle=12% npu_gap=5.8 jit_lw=0.0 jit_rw=18.1 jit_ls=0.0 jit_rs=0.0
+[12:46:59.446][RX] CPU%/max_us 2/1919 54/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:46:59.486][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:46:59.654][RX] pose fps=22 npu=38.9 wait=13.7 decode=20.2 kpt=1.0 gui=32.6 e2e=118.5 period=44.6 persons=2 idle=13% npu_gap=5.7 jit_lw=0.0 jit_rw=11.6 jit_ls=0.0 jit_rs=0.0
+[12:47:00.463][RX] CPU%/max_us 2/1919 58/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:00.483][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:00.629][RX] pose fps=20 npu=38.9 wait=21.0 decode=20.1 kpt=1.0 gui=33.2 e2e=127.9 period=47.6 persons=2 idle=15% npu_gap=8.6 jit_lw=0.0 jit_rw=302.1 jit_ls=0.0 jit_rs=0.0
+[12:47:01.497][RX] CPU%/max_us 2/1919 49/1796 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:01.518][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:01.660][RX] pose fps=22 npu=38.9 wait=14.6 decode=20.2 kpt=1.0 gui=32.1 e2e=124.0 period=43.5 persons=2 idle=12% npu_gap=4.6 jit_lw=0.0 jit_rw=12.9 jit_ls=0.0 jit_rs=0.0
+[12:47:02.501][RX] CPU%/max_us 2/1919 61/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:02.537][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:02.670][RX] pose fps=20 npu=39.0 wait=27.2 decode=20.0 kpt=1.0 gui=33.5 e2e=141.7 period=48.2 persons=2 idle=14% npu_gap=9.1 jit_lw=0.0 jit_rw=9.5 jit_ls=0.0 jit_rs=0.0
+[12:47:03.549][RX] CPU%/max_us 2/1919 60/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:03.585][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:03.740][RX] pose fps=22 npu=38.8 wait=8.4 decode=20.3 kpt=1.0 gui=30.9 e2e=115.0 period=42.2 persons=2 idle=12% npu_gap=3.3 jit_lw=0.0 jit_rw=12.1 jit_ls=0.0 jit_rs=0.0
+[12:47:04.556][RX] CPU%/max_us 2/1919 54/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:04.597][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:04.738][RX] pose fps=21 npu=38.9 wait=17.6 decode=20.1 kpt=1.0 gui=32.0 e2e=125.3 period=46.0 persons=2 idle=13% npu_gap=7.0 jit_lw=0.0 jit_rw=6.2 jit_ls=0.0 jit_rs=0.0
+[12:47:05.628][RX] CPU%/max_us 2/1919 48/1796 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:05.649][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:05.808][RX] pose fps=21 npu=38.9 wait=20.0 decode=20.1 kpt=1.0 gui=33.9 e2e=130.8 period=45.7 persons=2 idle=14% npu_gap=6.7 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:47:06.624][RX] CPU%/max_us 2/1919 59/1796 21/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:06.645][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:06.811][RX] pose fps=19 npu=39.0 wait=26.9 decode=20.0 kpt=1.1 gui=39.1 e2e=138.1 period=50.2 persons=2 idle=16% npu_gap=11.2 jit_lw=17.8 jit_rw=19.1 jit_ls=15.8 jit_rs=5.0
+[12:47:07.660][RX] CPU%/max_us 2/1919 53/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:07.681][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:07.816][RX] pose fps=20 npu=39.0 wait=20.9 decode=20.1 kpt=1.0 gui=34.2 e2e=126.6 period=46.9 persons=2 idle=16% npu_gap=7.8 jit_lw=0.0 jit_rw=0.0 jit_ls=45.4 jit_rs=71.5
+[12:47:08.626][RX] CPU%/max_us 2/1919 57/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:08.669][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:08.793][RX] pose fps=20 npu=39.0 wait=25.1 decode=20.0 kpt=1.1 gui=34.4 e2e=139.0 period=48.1 persons=1 idle=14% npu_gap=9.1 jit_lw=13.4 jit_rw=8.9 jit_ls=8.2 jit_rs=4.7
+[12:47:09.663][RX] CPU%/max_us 3/1919 60/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:09.683][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:09.812][RX] pose fps=21 npu=38.9 wait=23.2 decode=20.0 kpt=0.9 gui=32.0 e2e=133.9 period=46.6 persons=2 idle=12% npu_gap=7.7 jit_lw=13.3 jit_rw=15.3 jit_ls=11.2 jit_rs=12.7
+[12:47:10.667][RX] CPU%/max_us 3/1919 63/1796 21/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:10.694][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:10.801][RX] pose fps=22 npu=38.8 wait=13.0 decode=20.1 kpt=0.8 gui=23.3 e2e=113.9 period=43.6 persons=1 idle=11% npu_gap=4.8 jit_lw=15.0 jit_rw=15.9 jit_ls=14.4 jit_rs=13.0
+[12:47:11.674][RX] CPU%/max_us 3/1919 65/1796 21/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:11.695][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:11.804][RX] pose fps=24 npu=38.6 wait=3.5 decode=20.2 kpt=0.7 gui=19.4 e2e=104.4 period=39.7 persons=1 idle=8% npu_gap=1.0 jit_lw=13.3 jit_rw=12.1 jit_ls=8.2 jit_rs=8.4
+[12:47:12.689][RX] CPU%/max_us 3/1919 66/1796 20/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:12.717][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:12.817][RX] pose fps=25 npu=38.6 wait=2.9 decode=20.3 kpt=0.7 gui=18.3 e2e=103.1 period=39.1 persons=1 idle=8% npu_gap=0.4 jit_lw=9.6 jit_rw=12.3 jit_ls=8.7 jit_rs=13.4
+[12:47:13.695][RX] CPU%/max_us 3/1919 66/1796 20/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:13.721][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:13.852][RX] pose fps=25 npu=38.6 wait=1.3 decode=20.4 kpt=0.7 gui=17.3 e2e=100.4 period=38.6 persons=1 idle=7% npu_gap=0.0 jit_lw=8.8 jit_rw=8.3 jit_ls=5.4 jit_rs=4.7
+[12:47:14.690][RX] CPU%/max_us 3/1919 66/1796 21/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:14.724][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:14.836][RX] pose fps=23 npu=38.7 wait=9.2 decode=20.2 kpt=0.8 gui=23.2 e2e=112.4 period=41.6 persons=1 idle=9% npu_gap=2.9 jit_lw=26.9 jit_rw=50.8 jit_ls=27.3 jit_rs=26.6
+[12:47:15.709][RX] CPU%/max_us 2/1919 58/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:15.742][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:15.913][RX] pose fps=22 npu=38.8 wait=13.6 decode=20.1 kpt=0.8 gui=25.4 e2e=117.3 period=43.5 persons=1 idle=10% npu_gap=4.7 jit_lw=47.1 jit_rw=53.0 jit_ls=19.1 jit_rs=14.2
+[12:47:16.723][RX] CPU%/max_us 2/1919 53/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:16.756][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:16.875][RX] pose fps=22 npu=38.8 wait=13.6 decode=20.1 kpt=0.8 gui=25.4 e2e=117.3 period=43.5 persons=1 idle=10% npu_gap=4.7 jit_lw=47.1 jit_rw=53.0 jit_ls=19.1 jit_rs=14.2
+[12:47:17.719][RX] CPU%/max_us 2/1919 56/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:17.743][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:17.859][RX] pose fps=21 npu=38.8 wait=14.8 decode=20.0 kpt=0.8 gui=24.6 e2e=114.0 period=45.3 persons=1 idle=13% npu_gap=6.4 jit_lw=29.1 jit_rw=88.7 jit_ls=24.6 jit_rs=15.1
+[12:47:18.738][RX] CPU%/max_us 2/1919 59/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:18.756][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:18.937][RX] pose fps=23 npu=38.8 wait=11.6 decode=20.1 kpt=0.8 gui=24.2 e2e=115.7 period=41.9 persons=1 idle=9% npu_gap=3.1 jit_lw=63.0 jit_rw=45.6 jit_ls=23.1 jit_rs=27.9
+[12:47:19.753][RX] CPU%/max_us 2/1919 55/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:19.786][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:19.917][RX] pose fps=21 npu=38.8 wait=17.2 decode=20.1 kpt=1.0 gui=28.6 e2e=123.9 period=45.1 persons=2 idle=11% npu_gap=6.2 jit_lw=40.2 jit_rw=16.8 jit_ls=15.9 jit_rs=18.1
+[12:47:20.797][RX] CPU%/max_us 2/1919 55/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:20.834][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:20.961][RX] pose fps=22 npu=38.8 wait=11.4 decode=20.2 kpt=1.0 gui=30.9 e2e=115.5 period=43.2 persons=3 idle=10% npu_gap=4.4 jit_lw=4.5 jit_rw=12.1 jit_ls=7.0 jit_rs=4.9
+[12:47:21.794][RX] CPU%/max_us 2/1919 54/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:21.831][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:21.966][RX] pose fps=20 npu=38.9 wait=23.6 decode=20.0 kpt=1.1 gui=35.8 e2e=140.4 period=47.8 persons=1 idle=12% npu_gap=8.9 jit_lw=47.1 jit_rw=51.4 jit_ls=19.2 jit_rs=16.3
+[12:47:22.834][RX] CPU%/max_us 2/1919 55/1796 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:22.869][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:23.019][RX] pose fps=20 npu=38.8 wait=18.7 decode=20.1 kpt=1.2 gui=35.0 e2e=127.4 period=47.1 persons=2 idle=11% npu_gap=8.2 jit_lw=13.0 jit_rw=8.4 jit_ls=9.1 jit_rs=9.2
+[12:47:23.848][RX] CPU%/max_us 2/1919 55/1796 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:23.890][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:24.042][RX] pose fps=20 npu=38.8 wait=23.2 decode=20.1 kpt=1.1 gui=35.1 e2e=132.2 period=48.6 persons=3 idle=11% npu_gap=9.7 jit_lw=28.1 jit_rw=36.7 jit_ls=4.6 jit_rs=8.4
+[12:47:24.891][RX] CPU%/max_us 2/1919 60/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:24.912][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:25.083][RX] pose fps=22 npu=38.8 wait=16.2 decode=20.1 kpt=1.1 gui=36.5 e2e=125.6 period=44.7 persons=1 idle=10% npu_gap=5.8 jit_lw=49.5 jit_rw=28.6 jit_ls=17.8 jit_rs=16.5
+[12:47:25.928][RX] CPU%/max_us 2/1919 60/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:25.948][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:26.101][RX] pose fps=20 npu=38.8 wait=20.7 decode=20.0 kpt=1.1 gui=34.4 e2e=131.1 period=45.7 persons=2 idle=10% npu_gap=6.8 jit_lw=40.3 jit_rw=26.1 jit_ls=28.2 jit_rs=28.6
+[12:47:26.937][RX] CPU%/max_us 2/1919 54/1796 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:26.958][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:27.084][RX] pose fps=21 npu=38.8 wait=19.3 decode=20.1 kpt=1.2 gui=36.5 e2e=129.9 period=45.9 persons=3 idle=10% npu_gap=7.0 jit_lw=5.0 jit_rw=5.0 jit_ls=3.6 jit_rs=3.6
+[12:47:27.939][RX] CPU%/max_us 2/1919 59/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:27.961][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:28.101][RX] pose fps=21 npu=38.8 wait=20.1 decode=20.2 kpt=1.2 gui=33.9 e2e=126.0 period=47.0 persons=3 idle=11% npu_gap=8.1 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:47:28.954][RX] CPU%/max_us 2/1919 49/1796 34/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:28.975][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:29.152][RX] pose fps=20 npu=38.8 wait=17.2 decode=20.2 kpt=1.3 gui=34.2 e2e=129.7 period=47.0 persons=3 idle=11% npu_gap=8.2 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:47:29.950][RX] CPU%/max_us 2/1919 51/1796 33/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:29.999][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:30.141][RX] pose fps=19 npu=38.9 wait=29.1 decode=19.9 kpt=1.1 gui=36.3 e2e=141.5 period=50.2 persons=2 idle=12% npu_gap=11.3 jit_lw=14.7 jit_rw=62.5 jit_ls=20.9 jit_rs=23.9
+[12:47:30.989][RX] CPU%/max_us 2/1919 56/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:31.023][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:31.192][RX] pose fps=21 npu=38.9 wait=19.7 decode=20.1 kpt=1.2 gui=33.4 e2e=124.8 period=46.3 persons=3 idle=11% npu_gap=7.4 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:47:32.019][RX] CPU%/max_us 2/1919 54/1796 31/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:32.050][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:32.168][RX] pose fps=20 npu=38.9 wait=27.7 decode=20.0 kpt=1.1 gui=32.3 e2e=138.7 period=48.6 persons=2 idle=12% npu_gap=9.7 jit_lw=26.8 jit_rw=9.5 jit_ls=45.4 jit_rs=13.4
+[12:47:33.063][RX] CPU%/max_us 2/1919 53/1796 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:33.102][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:33.226][RX] pose fps=21 npu=38.8 wait=15.3 decode=20.2 kpt=1.1 gui=31.0 e2e=123.9 period=43.6 persons=2 idle=9% npu_gap=4.8 jit_lw=34.1 jit_rw=36.0 jit_ls=26.2 jit_rs=23.7
+[12:47:34.079][RX] CPU%/max_us 1/1919 50/1796 34/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:34.100][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:34.240][RX] pose fps=20 npu=38.9 wait=24.8 decode=20.0 kpt=1.1 gui=34.4 e2e=131.7 period=49.5 persons=2 idle=13% npu_gap=10.6 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:47:35.083][RX] CPU%/max_us 2/1919 58/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:35.120][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:35.259][RX] pose fps=20 npu=38.9 wait=25.5 decode=20.0 kpt=1.2 gui=35.2 e2e=137.9 period=48.4 persons=2 idle=11% npu_gap=9.5 jit_lw=32.9 jit_rw=22.0 jit_ls=13.4 jit_rs=10.6
+[12:47:36.092][RX] CPU%/max_us 2/1919 60/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:36.113][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:36.271][RX] pose fps=21 npu=38.8 wait=16.7 decode=20.1 kpt=1.0 gui=29.3 e2e=120.8 period=45.1 persons=2 idle=9% npu_gap=6.3 jit_lw=18.5 jit_rw=35.1 jit_ls=13.0 jit_rs=17.8
+[12:47:37.114][RX] CPU%/max_us 2/1919 59/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:37.136][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:37.237][RX] pose fps=22 npu=38.7 wait=16.1 decode=20.0 kpt=0.8 gui=26.2 e2e=118.7 period=43.9 persons=1 idle=9% npu_gap=5.1 jit_lw=35.2 jit_rw=18.4 jit_ls=19.6 jit_rs=16.0
+[12:47:38.129][RX] CPU%/max_us 2/1919 61/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:38.161][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:38.275][RX] pose fps=22 npu=38.8 wait=12.1 decode=20.1 kpt=0.9 gui=27.3 e2e=116.9 period=42.5 persons=1 idle=9% npu_gap=3.7 jit_lw=58.3 jit_rw=48.5 jit_ls=15.9 jit_rs=12.9
+[12:47:39.173][RX] CPU%/max_us 2/1919 54/1796 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:39.198][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:39.313][RX] pose fps=23 npu=38.7 wait=11.8 decode=20.1 kpt=0.8 gui=28.1 e2e=116.8 period=43.9 persons=1 idle=10% npu_gap=5.1 jit_lw=69.3 jit_rw=78.8 jit_ls=21.7 jit_rs=21.2
+[12:47:40.190][RX] CPU%/max_us 3/1919 62/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:40.211][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:40.354][RX] pose fps=22 npu=38.7 wait=10.7 decode=20.2 kpt=0.7 gui=23.1 e2e=110.9 period=43.1 persons=1 idle=9% npu_gap=4.4 jit_lw=59.5 jit_rw=54.0 jit_ls=36.2 jit_rs=38.7
+[12:47:41.193][RX] CPU%/max_us 3/1919 64/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:41.218][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:41.342][RX] pose fps=22 npu=38.7 wait=10.5 decode=20.2 kpt=0.9 gui=27.5 e2e=114.9 period=42.4 persons=2 idle=9% npu_gap=3.6 jit_lw=49.3 jit_rw=46.9 jit_ls=48.9 jit_rs=50.1
+[12:47:42.216][RX] CPU%/max_us 3/1919 60/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:42.239][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:42.362][RX] pose fps=24 npu=38.6 wait=2.9 decode=20.3 kpt=0.7 gui=19.7 e2e=102.3 period=39.7 persons=1 idle=6% npu_gap=1.1 jit_lw=49.4 jit_rw=53.2 jit_ls=30.1 jit_rs=31.6
+[12:47:43.248][RX] CPU%/max_us 2/1919 58/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:43.269][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:43.388][RX] pose fps=24 npu=38.7 wait=5.0 decode=20.2 kpt=0.7 gui=19.9 e2e=105.4 period=40.8 persons=1 idle=10% npu_gap=2.1 jit_lw=79.4 jit_rw=76.1 jit_ls=26.3 jit_rs=25.9
+[12:47:44.245][RX] CPU%/max_us 3/1919 60/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:44.287][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:44.414][RX] pose fps=22 npu=38.7 wait=14.3 decode=20.1 kpt=0.8 gui=27.7 e2e=120.0 period=44.3 persons=1 idle=9% npu_gap=5.5 jit_lw=62.8 jit_rw=40.4 jit_ls=18.6 jit_rs=16.5
+[12:47:45.274][RX] CPU%/max_us 2/1919 60/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:45.294][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:45.439][RX] pose fps=24 npu=38.7 wait=6.8 decode=20.2 kpt=0.7 gui=23.9 e2e=106.1 period=39.7 persons=2 idle=7% npu_gap=0.9 jit_lw=25.3 jit_rw=96.0 jit_ls=34.8 jit_rs=51.4
+[12:47:46.290][RX] CPU%/max_us 2/1919 57/1796 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:46.310][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:46.455][RX] pose fps=22 npu=38.7 wait=16.0 decode=20.1 kpt=0.8 gui=31.8 e2e=124.7 period=43.9 persons=1 idle=9% npu_gap=5.1 jit_lw=27.7 jit_rw=77.8 jit_ls=13.8 jit_rs=12.6
+[12:47:47.367][RX] CPU%/max_us 2/1919 59/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:47.387][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:47.545][RX] pose fps=21 npu=38.8 wait=15.2 decode=20.1 kpt=0.8 gui=25.8 e2e=122.1 period=43.6 persons=2 idle=8% npu_gap=4.8 jit_lw=38.8 jit_rw=67.1 jit_ls=20.4 jit_rs=22.0
+[12:47:48.335][RX] CPU%/max_us 2/1919 58/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:48.359][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:48.498][RX] pose fps=22 npu=38.8 wait=17.2 decode=20.1 kpt=1.0 gui=30.1 e2e=123.2 period=45.3 persons=1 idle=10% npu_gap=6.4 jit_lw=20.6 jit_rw=42.3 jit_ls=14.6 jit_rs=16.6
+[12:47:49.403][RX] CPU%/max_us 2/1919 59/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:49.443][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:49.563][RX] pose fps=22 npu=38.8 wait=12.5 decode=20.0 kpt=0.8 gui=27.0 e2e=115.6 period=43.8 persons=1 idle=9% npu_gap=5.0 jit_lw=52.8 jit_rw=39.5 jit_ls=22.1 jit_rs=21.9
+[12:47:50.437][RX] CPU%/max_us 2/1919 61/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:50.458][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:50.627][RX] pose fps=22 npu=38.7 wait=13.5 decode=20.2 kpt=0.8 gui=25.6 e2e=117.2 period=43.9 persons=2 idle=9% npu_gap=5.1 jit_lw=79.4 jit_rw=59.4 jit_ls=26.2 jit_rs=23.7
+[12:47:51.409][RX] CPU%/max_us 2/1919 55/1796 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:51.428][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:51.595][RX] pose fps=21 npu=38.8 wait=16.7 decode=20.1 kpt=0.9 gui=28.8 e2e=124.2 period=44.4 persons=1 idle=9% npu_gap=5.5 jit_lw=46.1 jit_rw=24.8 jit_ls=24.9 jit_rs=27.2
+[12:47:52.430][RX] CPU%/max_us 2/1919 57/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:52.451][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:52.575][RX] pose fps=22 npu=38.7 wait=14.9 decode=20.1 kpt=0.9 gui=26.7 e2e=119.1 period=44.6 persons=1 idle=10% npu_gap=5.9 jit_lw=38.9 jit_rw=33.9 jit_ls=10.8 jit_rs=10.4
+[12:47:53.430][RX] CPU%/max_us 2/1919 52/1796 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:53.471][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:53.635][RX] pose fps=22 npu=38.7 wait=12.7 decode=20.1 kpt=0.8 gui=25.5 e2e=113.1 period=43.9 persons=1 idle=10% npu_gap=5.2 jit_lw=54.2 jit_rw=50.7 jit_ls=21.4 jit_rs=20.7
+[12:47:54.446][RX] CPU%/max_us 2/1919 57/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:54.478][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:54.640][RX] pose fps=20 npu=38.8 wait=21.8 decode=20.0 kpt=0.9 gui=30.2 e2e=129.5 period=46.3 persons=2 idle=11% npu_gap=7.5 jit_lw=10.1 jit_rw=61.3 jit_ls=13.2 jit_rs=8.1
+[12:47:55.440][RX] CPU%/max_us 2/1919 57/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:55.485][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:55.620][RX] pose fps=21 npu=38.8 wait=21.0 decode=20.1 kpt=0.9 gui=28.8 e2e=127.8 period=45.8 persons=2 idle=9% npu_gap=6.9 jit_lw=48.2 jit_rw=5.2 jit_ls=16.0 jit_rs=6.7
+[12:47:56.445][RX] CPU%/max_us 3/1919 61/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:56.473][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:56.609][RX] pose fps=22 npu=38.7 wait=10.5 decode=20.2 kpt=0.9 gui=29.3 e2e=113.2 period=43.2 persons=2 idle=10% npu_gap=4.4 jit_lw=26.0 jit_rw=22.7 jit_ls=16.5 jit_rs=23.8
+[12:47:57.472][RX] CPU%/max_us 3/1919 66/1796 19/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:57.500][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:57.609][RX] pose fps=23 npu=38.8 wait=7.2 decode=20.2 kpt=0.7 gui=24.8 e2e=109.9 period=41.5 persons=1 idle=9% npu_gap=2.7 jit_lw=34.6 jit_rw=27.3 jit_ls=21.8 jit_rs=30.4
+[12:47:58.492][RX] CPU%/max_us 3/1919 67/1796 18/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:58.525][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:58.657][RX] pose fps=24 npu=38.6 wait=3.1 decode=20.3 kpt=0.7 gui=19.4 e2e=103.6 period=40.3 persons=1 idle=11% npu_gap=1.6 jit_lw=21.0 jit_rw=19.4 jit_ls=24.4 jit_rs=21.1
+[12:47:59.492][RX] CPU%/max_us 3/1919 63/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:47:59.519][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:47:59.629][RX] pose fps=23 npu=38.7 wait=4.9 decode=20.3 kpt=0.8 gui=22.4 e2e=106.2 period=41.1 persons=1 idle=10% npu_gap=2.4 jit_lw=32.7 jit_rw=61.0 jit_ls=16.9 jit_rs=22.3
+[12:48:00.520][RX] CPU%/max_us 3/1919 63/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:00.547][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:00.678][RX] pose fps=25 npu=38.7 wait=6.5 decode=20.2 kpt=0.7 gui=21.5 e2e=107.7 period=39.2 persons=1 idle=7% npu_gap=0.4 jit_lw=36.3 jit_rw=29.9 jit_ls=14.5 jit_rs=19.6
+[12:48:01.511][RX] CPU%/max_us 3/1919 61/1796 19/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:01.536][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:01.685][RX] pose fps=23 npu=38.7 wait=8.1 decode=20.2 kpt=0.8 gui=21.9 e2e=111.1 period=41.4 persons=2 idle=10% npu_gap=2.7 jit_lw=34.9 jit_rw=33.2 jit_ls=5.6 jit_rs=9.7
+[12:48:02.528][RX] CPU%/max_us 3/1919 66/1796 19/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:02.550][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:02.690][RX] pose fps=23 npu=38.7 wait=6.3 decode=20.2 kpt=0.7 gui=21.8 e2e=104.5 period=41.8 persons=1 idle=13% npu_gap=3.1 jit_lw=0.0 jit_rw=0.0 jit_ls=12.5 jit_rs=13.9
+[12:48:03.542][RX] CPU%/max_us 2/1919 46/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:03.590][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:03.710][RX] pose fps=24 npu=38.7 wait=3.8 decode=20.3 kpt=0.7 gui=19.5 e2e=105.5 period=39.0 persons=2 idle=8% npu_gap=0.2 jit_lw=0.0 jit_rw=0.0 jit_ls=16.5 jit_rs=15.9
+[12:48:04.587][RX] CPU%/max_us 1/1919 48/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:04.608][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:04.770][RX] pose fps=20 npu=39.0 wait=21.8 decode=20.0 kpt=1.0 gui=39.3 e2e=134.5 period=49.1 persons=1 idle=20% npu_gap=10.0 jit_lw=0.0 jit_rw=81.1 jit_ls=155.2 jit_rs=148.8
+[12:48:05.554][RX] CPU%/max_us 2/1919 49/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:05.575][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:05.743][RX] pose fps=19 npu=39.3 wait=28.9 decode=19.9 kpt=0.6 gui=44.9 e2e=144.7 period=50.1 persons=1 idle=24% npu_gap=10.7 jit_lw=0.0 jit_rw=0.0 jit_ls=39.8 jit_rs=48.1
+[12:48:06.611][RX] CPU%/max_us 2/1919 49/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:06.658][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:06.858][RX] pose fps=20 npu=39.2 wait=22.1 decode=19.9 kpt=0.7 gui=45.9 e2e=140.1 period=47.0 persons=1 idle=22% npu_gap=7.7 jit_lw=0.0 jit_rw=0.0 jit_ls=18.4 jit_rs=29.1
+[12:48:07.658][RX] CPU%/max_us 2/1919 53/1796 20/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:07.674][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:07.867][RX] pose fps=18 npu=39.2 wait=29.6 decode=19.9 kpt=0.7 gui=43.6 e2e=149.8 period=51.9 persons=2 idle=26% npu_gap=12.6 jit_lw=0.0 jit_rw=0.0 jit_ls=14.4 jit_rs=45.1
+[12:48:08.649][RX] CPU%/max_us 2/1919 51/1796 21/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:08.702][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:08.865][RX] pose fps=19 npu=39.3 wait=32.6 decode=19.8 kpt=0.6 gui=43.6 e2e=156.9 period=51.2 persons=1 idle=24% npu_gap=11.8 jit_lw=0.0 jit_rw=0.0 jit_ls=27.1 jit_rs=34.5
+[12:48:09.695][RX] CPU%/max_us 2/1919 49/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:09.715][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:09.876][RX] pose fps=19 npu=39.2 wait=25.0 decode=20.0 kpt=0.6 gui=42.8 e2e=143.7 period=49.8 persons=1 idle=23% npu_gap=10.6 jit_lw=0.0 jit_rw=0.0 jit_ls=25.6 jit_rs=13.9
+[12:48:10.731][RX] CPU%/max_us 2/1919 51/1796 21/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:10.778][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:10.925][RX] pose fps=19 npu=39.1 wait=22.8 decode=20.0 kpt=0.6 gui=41.8 e2e=135.5 period=49.5 persons=1 idle=23% npu_gap=10.3 jit_lw=0.0 jit_rw=0.0 jit_ls=23.5 jit_rs=12.8
+[12:48:11.796][RX] CPU%/max_us 2/1919 53/1796 20/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:11.817][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:11.977][RX] pose fps=20 npu=39.2 wait=26.6 decode=19.9 kpt=0.6 gui=44.7 e2e=145.7 period=49.6 persons=1 idle=23% npu_gap=10.3 jit_lw=0.0 jit_rw=0.0 jit_ls=23.9 jit_rs=16.5
+[12:48:12.836][RX] CPU%/max_us 2/1919 53/1796 20/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:12.886][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:13.008][RX] pose fps=19 npu=39.2 wait=21.7 decode=20.0 kpt=0.6 gui=42.7 e2e=138.0 period=47.8 persons=1 idle=23% npu_gap=8.6 jit_lw=0.0 jit_rw=0.0 jit_ls=23.5 jit_rs=14.1
+[12:48:13.821][RX] CPU%/max_us 2/1919 49/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:13.866][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:14.049][RX] pose fps=20 npu=39.1 wait=23.0 decode=19.9 kpt=0.6 gui=42.5 e2e=134.1 period=49.0 persons=1 idle=23% npu_gap=9.8 jit_lw=0.0 jit_rw=0.0 jit_ls=21.3 jit_rs=20.2
+[12:48:14.898][RX] CPU%/max_us 2/1919 53/1796 20/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:14.920][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:15.064][RX] pose fps=19 npu=39.3 wait=27.2 decode=19.9 kpt=0.6 gui=43.2 e2e=139.9 period=49.6 persons=1 idle=23% npu_gap=10.3 jit_lw=0.0 jit_rw=0.0 jit_ls=19.6 jit_rs=14.6
+[12:48:15.903][RX] CPU%/max_us 2/1919 51/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:15.950][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:16.100][RX] pose fps=19 npu=39.2 wait=27.1 decode=19.9 kpt=0.6 gui=39.5 e2e=143.4 period=50.4 persons=1 idle=25% npu_gap=11.1 jit_lw=0.0 jit_rw=0.0 jit_ls=20.4 jit_rs=13.0
+[12:48:16.921][RX] CPU%/max_us 2/1919 48/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:16.942][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:17.090][RX] pose fps=20 npu=39.2 wait=21.7 decode=20.0 kpt=0.6 gui=40.1 e2e=137.4 period=47.6 persons=1 idle=21% npu_gap=8.4 jit_lw=0.0 jit_rw=0.0 jit_ls=21.1 jit_rs=13.9
+[12:48:17.938][RX] CPU%/max_us 2/1919 46/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:17.982][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:18.119][RX] pose fps=20 npu=39.2 wait=24.6 decode=20.0 kpt=0.6 gui=40.0 e2e=144.5 period=49.8 persons=1 idle=23% npu_gap=10.6 jit_lw=0.0 jit_rw=0.0 jit_ls=17.7 jit_rs=16.5
+[12:48:18.961][RX] CPU%/max_us 2/1919 46/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:18.982][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:19.141][RX] pose fps=18 npu=39.3 wait=34.1 decode=19.8 kpt=0.6 gui=43.2 e2e=149.2 period=52.2 persons=1 idle=25% npu_gap=12.8 jit_lw=0.0 jit_rw=0.0 jit_ls=18.7 jit_rs=17.0
+[12:48:19.974][RX] CPU%/max_us 2/1919 49/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:20.023][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:20.171][RX] pose fps=19 npu=39.3 wait=29.8 decode=19.9 kpt=0.8 gui=42.3 e2e=153.9 period=51.4 persons=1 idle=24% npu_gap=12.1 jit_lw=0.0 jit_rw=0.0 jit_ls=17.3 jit_rs=15.4
+[12:48:20.985][RX] CPU%/max_us 1/1919 40/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:21.037][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:21.231][RX] pose fps=19 npu=39.2 wait=27.9 decode=19.9 kpt=0.6 gui=40.9 e2e=143.2 period=49.9 persons=1 idle=24% npu_gap=10.6 jit_lw=0.0 jit_rw=0.0 jit_ls=16.8 jit_rs=18.0
+[12:48:21.999][RX] CPU%/max_us 2/1919 45/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:22.046][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:22.214][RX] pose fps=18 npu=39.4 wait=38.2 decode=19.7 kpt=0.6 gui=41.7 e2e=158.0 period=53.6 persons=1 idle=26% npu_gap=14.1 jit_lw=0.0 jit_rw=0.0 jit_ls=15.3 jit_rs=17.4
+[12:48:23.007][RX] CPU%/max_us 1/1919 44/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:23.028][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:23.182][RX] pose fps=18 npu=39.4 wait=37.4 decode=19.8 kpt=0.7 gui=41.9 e2e=153.5 period=53.6 persons=1 idle=25% npu_gap=14.2 jit_lw=0.0 jit_rw=0.0 jit_ls=14.7 jit_rs=19.5
+[12:48:24.016][RX] CPU%/max_us 2/1919 54/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:24.052][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:24.192][RX] pose fps=17 npu=39.4 wait=42.1 decode=19.7 kpt=0.6 gui=39.4 e2e=159.8 period=55.3 persons=1 idle=25% npu_gap=15.8 jit_lw=0.0 jit_rw=0.0 jit_ls=35.0 jit_rs=27.9
+[12:48:25.047][RX] CPU%/max_us 2/1919 57/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:25.080][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:25.215][RX] pose fps=19 npu=39.1 wait=27.1 decode=20.1 kpt=1.1 gui=41.2 e2e=142.5 period=51.1 persons=1 idle=19% npu_gap=11.9 jit_lw=91.1 jit_rw=151.0 jit_ls=123.8 jit_rs=198.6
+[12:48:26.058][RX] CPU%/max_us 3/1976 57/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:26.100][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:26.259][RX] pose fps=22 npu=38.8 wait=15.7 decode=20.0 kpt=0.7 gui=23.9 e2e=116.3 period=44.6 persons=1 idle=11% npu_gap=5.8 jit_lw=69.9 jit_rw=29.1 jit_ls=30.8 jit_rs=22.9
+[12:48:27.062][RX] CPU%/max_us 2/1976 58/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:27.082][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:27.242][RX] pose fps=22 npu=38.9 wait=15.0 decode=20.0 kpt=0.8 gui=31.5 e2e=121.3 period=44.1 persons=1 idle=14% npu_gap=5.2 jit_lw=57.6 jit_rw=72.1 jit_ls=32.1 jit_rs=35.5
+[12:48:28.097][RX] CPU%/max_us 2/1976 59/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:28.126][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:28.269][RX] pose fps=21 npu=38.8 wait=17.4 decode=20.0 kpt=0.8 gui=26.4 e2e=120.7 period=44.7 persons=1 idle=11% npu_gap=5.8 jit_lw=69.4 jit_rw=75.4 jit_ls=25.9 jit_rs=17.7
+[12:48:29.117][RX] CPU%/max_us 2/1976 54/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:29.139][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:29.294][RX] pose fps=20 npu=38.9 wait=20.7 decode=20.0 kpt=0.9 gui=33.8 e2e=128.1 period=47.2 persons=2 idle=13% npu_gap=8.3 jit_lw=52.1 jit_rw=32.1 jit_ls=142.7 jit_rs=231.9
+[12:48:30.144][RX] CPU%/max_us 2/1976 63/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:30.174][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:30.299][RX] pose fps=22 npu=38.8 wait=15.3 decode=20.1 kpt=0.9 gui=30.6 e2e=123.2 period=44.1 persons=2 idle=11% npu_gap=5.3 jit_lw=134.0 jit_rw=96.8 jit_ls=143.2 jit_rs=151.2
+[12:48:31.155][RX] CPU%/max_us 3/1976 61/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:31.190][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:31.331][RX] pose fps=24 npu=38.7 wait=4.7 decode=20.2 kpt=0.7 gui=20.4 e2e=107.3 period=40.8 persons=1 idle=8% npu_gap=2.0 jit_lw=71.9 jit_rw=84.1 jit_ls=34.3 jit_rs=32.3
+[12:48:32.165][RX] CPU%/max_us 2/1976 56/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:32.214][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:32.359][RX] pose fps=21 npu=38.8 wait=13.0 decode=20.1 kpt=0.8 gui=25.5 e2e=114.4 period=43.7 persons=1 idle=10% npu_gap=4.9 jit_lw=76.1 jit_rw=55.6 jit_ls=20.8 jit_rs=23.0
+[12:48:33.215][RX] CPU%/max_us 2/1976 59/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:33.244][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:33.377][RX] pose fps=21 npu=38.8 wait=15.2 decode=20.1 kpt=0.8 gui=31.6 e2e=119.3 period=44.1 persons=1 idle=13% npu_gap=5.3 jit_lw=154.8 jit_rw=114.2 jit_ls=49.4 jit_rs=15.9
+[12:48:34.232][RX] CPU%/max_us 2/1976 54/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:34.277][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:34.398][RX] pose fps=23 npu=38.8 wait=14.3 decode=20.0 kpt=0.7 gui=26.3 e2e=116.8 period=43.3 persons=1 idle=11% npu_gap=4.5 jit_lw=47.1 jit_rw=50.6 jit_ls=12.7 jit_rs=14.4
+[12:48:35.228][RX] CPU%/max_us 2/1976 62/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:35.259][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:35.389][RX] pose fps=22 npu=38.9 wait=16.3 decode=20.0 kpt=0.8 gui=27.5 e2e=122.6 period=43.3 persons=1 idle=11% npu_gap=4.4 jit_lw=208.7 jit_rw=246.8 jit_ls=35.1 jit_rs=22.2
+[12:48:36.231][RX] CPU%/max_us 3/1976 61/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:36.256][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:36.380][RX] pose fps=24 npu=38.7 wait=4.9 decode=20.2 kpt=0.7 gui=20.2 e2e=104.4 period=40.8 persons=1 idle=9% npu_gap=2.1 jit_lw=69.1 jit_rw=58.4 jit_ls=17.5 jit_rs=10.7
+[12:48:37.263][RX] CPU%/max_us 3/1976 64/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:37.283][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:37.392][RX] pose fps=24 npu=38.7 wait=3.4 decode=20.3 kpt=0.7 gui=20.1 e2e=104.6 period=39.8 persons=1 idle=6% npu_gap=1.0 jit_lw=32.0 jit_rw=25.0 jit_ls=11.4 jit_rs=12.9
+[12:48:38.286][RX] CPU%/max_us 3/1976 59/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:38.316][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:38.423][RX] pose fps=23 npu=38.7 wait=7.1 decode=20.2 kpt=0.7 gui=22.0 e2e=109.4 period=41.2 persons=1 idle=8% npu_gap=2.4 jit_lw=51.6 jit_rw=48.1 jit_ls=24.6 jit_rs=22.2
+[12:48:39.298][RX] CPU%/max_us 2/1976 52/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:39.346][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:39.460][RX] pose fps=22 npu=38.7 wait=11.2 decode=20.1 kpt=0.7 gui=24.4 e2e=109.9 period=42.9 persons=1 idle=11% npu_gap=4.2 jit_lw=176.7 jit_rw=215.7 jit_ls=30.0 jit_rs=21.0
+[12:48:40.291][RX] CPU%/max_us 3/1976 61/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:40.312][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:40.438][RX] pose fps=23 npu=38.7 wait=13.1 decode=20.0 kpt=0.7 gui=22.5 e2e=113.3 period=44.4 persons=1 idle=11% npu_gap=5.6 jit_lw=132.7 jit_rw=168.9 jit_ls=14.0 jit_rs=24.5
+[12:48:41.319][RX] CPU%/max_us 3/1976 63/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:41.340][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:41.518][RX] pose fps=23 npu=38.7 wait=4.3 decode=20.2 kpt=0.7 gui=20.4 e2e=103.2 period=40.0 persons=1 idle=10% npu_gap=1.2 jit_lw=36.8 jit_rw=46.0 jit_ls=25.0 jit_rs=26.9
+[12:48:42.319][RX] CPU%/max_us 2/1976 57/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:42.340][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:42.455][RX] pose fps=22 npu=38.8 wait=15.9 decode=20.1 kpt=0.8 gui=27.8 e2e=123.1 period=43.7 persons=1 idle=11% npu_gap=4.8 jit_lw=193.8 jit_rw=287.6 jit_ls=15.3 jit_rs=26.8
+[12:48:43.339][RX] CPU%/max_us 2/1976 62/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:43.378][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:43.506][RX] pose fps=22 npu=38.8 wait=13.7 decode=20.0 kpt=0.7 gui=24.3 e2e=116.1 period=43.4 persons=1 idle=9% npu_gap=4.6 jit_lw=159.3 jit_rw=174.6 jit_ls=22.0 jit_rs=23.2
+[12:48:44.342][RX] CPU%/max_us 3/1976 58/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:44.371][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:44.475][RX] pose fps=22 npu=38.7 wait=10.6 decode=20.0 kpt=0.8 gui=24.8 e2e=109.6 period=43.3 persons=2 idle=11% npu_gap=4.5 jit_lw=114.2 jit_rw=158.1 jit_ls=57.1 jit_rs=57.2
+[12:48:45.407][RX] CPU%/max_us 2/1976 56/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:45.455][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:45.594][RX] pose fps=23 npu=38.7 wait=8.3 decode=20.1 kpt=0.7 gui=24.3 e2e=110.6 period=43.3 persons=1 idle=10% npu_gap=4.5 jit_lw=103.7 jit_rw=118.8 jit_ls=31.4 jit_rs=21.0
+[12:48:46.439][RX] CPU%/max_us 2/1976 50/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:46.460][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:46.654][RX] pose fps=18 npu=39.0 wait=30.0 decode=20.0 kpt=1.1 gui=37.5 e2e=137.9 period=50.0 persons=2 idle=19% npu_gap=10.9 jit_lw=229.4 jit_rw=189.0 jit_ls=182.8 jit_rs=227.7
+[12:48:47.454][RX] CPU%/max_us 1/1976 47/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:47.474][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:47.665][RX] pose fps=19 npu=39.1 wait=28.3 decode=20.0 kpt=1.1 gui=43.4 e2e=147.8 period=50.0 persons=2 idle=19% npu_gap=10.8 jit_lw=11.2 jit_rw=20.9 jit_ls=105.9 jit_rs=0.0
+[12:48:48.462][RX] CPU%/max_us 2/1976 48/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:48.513][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:48.677][RX] pose fps=18 npu=39.2 wait=38.4 decode=19.9 kpt=1.1 gui=44.3 e2e=156.1 period=53.7 persons=2 idle=21% npu_gap=14.5 jit_lw=13.1 jit_rw=8.4 jit_ls=9.2 jit_rs=25.2
+[12:48:49.520][RX] CPU%/max_us 2/1976 48/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:49.541][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:49.691][RX] pose fps=18 npu=39.1 wait=35.2 decode=19.9 kpt=1.1 gui=42.0 e2e=152.5 period=53.5 persons=2 idle=21% npu_gap=14.3 jit_lw=14.6 jit_rw=20.4 jit_ls=177.2 jit_rs=219.3
+[12:48:50.542][RX] CPU%/max_us 2/1976 53/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:50.586][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:50.749][RX] pose fps=18 npu=39.1 wait=34.9 decode=19.9 kpt=1.1 gui=43.7 e2e=158.4 period=53.2 persons=2 idle=19% npu_gap=14.1 jit_lw=8.1 jit_rw=10.7 jit_ls=45.0 jit_rs=0.0
+[12:48:51.585][RX] CPU%/max_us 2/1976 46/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:51.643][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:51.814][RX] pose fps=20 npu=39.0 wait=25.5 decode=20.0 kpt=1.0 gui=40.9 e2e=141.2 period=48.3 persons=2 idle=20% npu_gap=9.2 jit_lw=11.1 jit_rw=21.0 jit_ls=0.0 jit_rs=0.0
+[12:48:52.625][RX] CPU%/max_us 1/1976 40/1796 31/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:52.646][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:52.809][RX] pose fps=17 npu=39.2 wait=40.4 decode=19.9 kpt=1.1 gui=43.6 e2e=165.5 period=55.8 persons=2 idle=21% npu_gap=16.6 jit_lw=23.9 jit_rw=172.0 jit_ls=164.1 jit_rs=0.0
+[12:48:53.657][RX] CPU%/max_us 2/1976 50/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:53.671][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:53.858][RX] pose fps=17 npu=39.3 wait=41.4 decode=19.8 kpt=0.9 gui=50.1 e2e=164.2 period=56.6 persons=1 idle=24% npu_gap=17.2 jit_lw=0.0 jit_rw=0.0 jit_ls=68.5 jit_rs=99.3
+[12:48:54.660][RX] CPU%/max_us 2/1976 46/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:54.680][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:54.852][RX] pose fps=18 npu=39.3 wait=34.5 decode=19.9 kpt=0.7 gui=42.7 e2e=154.6 period=53.0 persons=1 idle=23% npu_gap=13.7 jit_lw=106.5 jit_rw=81.3 jit_ls=34.1 jit_rs=102.9
+[12:48:55.663][RX] CPU%/max_us 2/1976 50/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:55.703][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:55.839][RX] pose fps=19 npu=39.2 wait=34.7 decode=19.8 kpt=0.7 gui=41.4 e2e=151.6 period=51.9 persons=1 idle=21% npu_gap=12.7 jit_lw=45.6 jit_rw=36.6 jit_ls=54.3 jit_rs=51.9
+[12:48:56.703][RX] CPU%/max_us 1/1976 39/1796 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:56.752][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:56.900][RX] pose fps=19 npu=39.1 wait=22.4 decode=19.9 kpt=0.7 gui=38.3 e2e=135.9 period=48.4 persons=2 idle=22% npu_gap=9.2 jit_lw=0.0 jit_rw=0.0 jit_ls=53.5 jit_rs=73.4
+[12:48:57.737][RX] CPU%/max_us 2/1976 54/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:57.788][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:57.941][RX] pose fps=17 npu=39.3 wait=41.5 decode=19.7 kpt=0.7 gui=41.2 e2e=161.9 period=55.3 persons=1 idle=25% npu_gap=15.9 jit_lw=0.0 jit_rw=0.0 jit_ls=32.9 jit_rs=33.8
+[12:48:58.760][RX] CPU%/max_us 1/1976 46/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:58.808][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:48:58.959][RX] pose fps=20 npu=39.2 wait=28.6 decode=19.9 kpt=0.8 gui=38.3 e2e=137.3 period=49.5 persons=1 idle=21% npu_gap=10.2 jit_lw=195.1 jit_rw=0.0 jit_ls=212.4 jit_rs=171.3
+[12:48:59.783][RX] CPU%/max_us 2/1976 54/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:48:59.833][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:00.017][RX] pose fps=18 npu=39.4 wait=38.1 decode=19.7 kpt=0.6 gui=39.7 e2e=151.4 period=52.9 persons=1 idle=23% npu_gap=13.6 jit_lw=12.8 jit_rw=0.0 jit_ls=31.4 jit_rs=45.7
+[12:49:00.811][RX] CPU%/max_us 1/1976 46/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:00.855][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:01.038][RX] pose fps=18 npu=39.2 wait=30.2 decode=19.9 kpt=0.6 gui=41.5 e2e=145.1 period=51.6 persons=1 idle=22% npu_gap=12.4 jit_lw=0.0 jit_rw=0.0 jit_ls=13.3 jit_rs=16.6
+[12:49:01.820][RX] CPU%/max_us 2/1976 47/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:01.871][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:02.058][RX] pose fps=17 npu=39.4 wait=45.7 decode=19.6 kpt=0.7 gui=39.6 e2e=162.8 period=56.7 persons=1 idle=25% npu_gap=17.3 jit_lw=29.6 jit_rw=0.0 jit_ls=27.8 jit_rs=21.5
+[12:49:02.872][RX] CPU%/max_us 2/1976 49/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:02.921][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:03.102][RX] pose fps=18 npu=39.3 wait=38.2 decode=19.7 kpt=0.7 gui=40.7 e2e=155.4 period=52.6 persons=1 idle=22% npu_gap=13.3 jit_lw=36.3 jit_rw=0.0 jit_ls=12.6 jit_rs=20.0
+[12:49:03.896][RX] CPU%/max_us 2/1976 46/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:03.943][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:04.095][RX] pose fps=18 npu=39.3 wait=36.7 decode=19.7 kpt=0.7 gui=39.4 e2e=152.6 period=53.1 persons=1 idle=23% npu_gap=13.8 jit_lw=15.8 jit_rw=0.0 jit_ls=14.8 jit_rs=18.7
+[12:49:04.936][RX] CPU%/max_us 1/1976 47/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:04.949][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:05.147][RX] pose fps=18 npu=39.3 wait=38.7 decode=19.8 kpt=0.7 gui=41.0 e2e=155.4 period=54.3 persons=1 idle=23% npu_gap=15.0 jit_lw=30.0 jit_rw=0.0 jit_ls=29.9 jit_rs=34.2
+[12:49:06.007][RX] CPU%/max_us 2/1976 47/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:06.019][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:06.213][RX] pose fps=17 npu=39.2 wait=33.8 decode=19.8 kpt=0.7 gui=40.9 e2e=148.0 period=52.5 persons=1 idle=23% npu_gap=13.2 jit_lw=12.5 jit_rw=0.0 jit_ls=18.2 jit_rs=39.6
+[12:49:07.006][RX] CPU%/max_us 1/1976 41/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:07.027][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:07.214][RX] pose fps=16 npu=39.4 wait=48.7 decode=19.6 kpt=0.7 gui=43.0 e2e=169.1 period=58.3 persons=1 idle=26% npu_gap=18.8 jit_lw=0.0 jit_rw=0.0 jit_ls=40.2 jit_rs=41.7
+[12:49:08.014][RX] CPU%/max_us 2/1976 47/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:08.062][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:08.242][RX] pose fps=17 npu=39.4 wait=45.6 decode=19.6 kpt=0.7 gui=42.0 e2e=162.5 period=56.3 persons=1 idle=25% npu_gap=16.8 jit_lw=0.0 jit_rw=0.0 jit_ls=13.4 jit_rs=17.2
+[12:49:09.035][RX] CPU%/max_us 1/1976 40/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:09.092][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:09.291][RX] pose fps=18 npu=39.2 wait=36.5 decode=19.8 kpt=0.7 gui=40.9 e2e=148.0 period=53.7 persons=1 idle=23% npu_gap=14.4 jit_lw=0.0 jit_rw=0.0 jit_ls=31.6 jit_rs=23.1
+[12:49:10.066][RX] CPU%/max_us 1/1976 47/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:10.115][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:10.320][RX] pose fps=15 npu=39.6 wait=56.2 decode=19.5 kpt=0.7 gui=42.4 e2e=178.2 period=61.2 persons=1 idle=29% npu_gap=21.5 jit_lw=0.0 jit_rw=0.0 jit_ls=33.9 jit_rs=33.7
+[12:49:11.135][RX] CPU%/max_us 2/1976 44/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:11.182][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:11.369][RX] pose fps=18 npu=39.4 wait=38.1 decode=19.8 kpt=0.6 gui=45.2 e2e=160.8 period=54.4 persons=1 idle=25% npu_gap=14.9 jit_lw=0.0 jit_rw=0.0 jit_ls=21.6 jit_rs=25.4
+[12:49:12.169][RX] CPU%/max_us 1/1976 41/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:12.209][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:12.396][RX] pose fps=17 npu=39.4 wait=44.5 decode=19.7 kpt=0.7 gui=40.8 e2e=164.4 period=55.7 persons=1 idle=24% npu_gap=16.2 jit_lw=0.0 jit_rw=0.0 jit_ls=55.6 jit_rs=46.9
+[12:49:13.212][RX] CPU%/max_us 1/1976 41/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:13.232][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:13.419][RX] pose fps=17 npu=39.4 wait=48.0 decode=19.6 kpt=0.7 gui=41.9 e2e=167.2 period=58.2 persons=1 idle=25% npu_gap=18.8 jit_lw=0.0 jit_rw=0.0 jit_ls=64.8 jit_rs=23.3
+[12:49:14.256][RX] CPU%/max_us 1/1976 40/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:14.309][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:14.460][RX] pose fps=16 npu=39.4 wait=48.4 decode=19.6 kpt=0.7 gui=40.6 e2e=164.2 period=57.7 persons=1 idle=25% npu_gap=18.2 jit_lw=0.0 jit_rw=0.0 jit_ls=20.1 jit_rs=12.3
+[12:49:15.311][RX] CPU%/max_us 1/1976 47/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:15.328][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:15.518][RX] pose fps=17 npu=39.4 wait=48.1 decode=19.6 kpt=0.7 gui=40.2 e2e=166.1 period=57.4 persons=1 idle=24% npu_gap=17.9 jit_lw=0.0 jit_rw=0.0 jit_ls=27.6 jit_rs=24.6
+[12:49:16.342][RX] CPU%/max_us 1/1976 41/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:16.363][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:16.562][RX] pose fps=18 npu=39.3 wait=34.0 decode=19.8 kpt=0.6 gui=46.7 e2e=155.5 period=51.9 persons=1 idle=24% npu_gap=12.6 jit_lw=0.0 jit_rw=0.0 jit_ls=22.3 jit_rs=37.8
+[12:49:17.381][RX] CPU%/max_us 1/1976 39/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:17.430][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:17.572][RX] pose fps=17 npu=39.4 wait=44.6 decode=19.7 kpt=0.6 gui=44.3 e2e=166.4 period=56.9 persons=1 idle=26% npu_gap=17.5 jit_lw=0.0 jit_rw=0.0 jit_ls=9.5 jit_rs=23.9
+[12:49:18.381][RX] CPU%/max_us 1/1976 43/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:18.429][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:18.620][RX] pose fps=16 npu=39.5 wait=49.7 decode=19.6 kpt=0.6 gui=45.6 e2e=173.5 period=58.2 persons=1 idle=27% npu_gap=18.7 jit_lw=0.0 jit_rw=0.0 jit_ls=19.0 jit_rs=13.1
+[12:49:19.419][RX] CPU%/max_us 1/1976 41/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:19.469][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:19.662][RX] pose fps=16 npu=39.4 wait=52.0 decode=19.6 kpt=0.7 gui=43.5 e2e=174.4 period=59.1 persons=1 idle=27% npu_gap=19.6 jit_lw=0.0 jit_rw=0.0 jit_ls=21.2 jit_rs=14.7
+[12:49:20.471][RX] CPU%/max_us 1/1976 43/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:20.491][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:20.665][RX] pose fps=16 npu=39.5 wait=56.1 decode=19.5 kpt=0.7 gui=41.8 e2e=179.6 period=60.8 persons=1 idle=28% npu_gap=21.3 jit_lw=0.0 jit_rw=0.0 jit_ls=15.8 jit_rs=10.4
+[12:49:21.502][RX] CPU%/max_us 1/1976 38/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:21.553][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:21.744][RX] pose fps=16 npu=39.4 wait=48.5 decode=19.6 kpt=0.7 gui=41.3 e2e=168.1 period=58.1 persons=1 idle=26% npu_gap=18.7 jit_lw=0.0 jit_rw=0.0 jit_ls=18.6 jit_rs=13.5
+[12:49:22.500][RX] CPU%/max_us 2/1976 42/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:22.546][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:22.727][RX] pose fps=16 npu=39.4 wait=51.1 decode=19.6 kpt=0.7 gui=41.3 e2e=174.6 period=58.6 persons=1 idle=26% npu_gap=19.1 jit_lw=0.0 jit_rw=0.0 jit_ls=13.4 jit_rs=12.6
+[12:49:23.575][RX] CPU%/max_us 1/1976 49/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:23.590][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:23.818][RX] pose fps=16 npu=39.5 wait=52.8 decode=19.6 kpt=0.7 gui=41.5 e2e=169.0 period=59.2 persons=1 idle=26% npu_gap=19.7 jit_lw=0.0 jit_rw=0.0 jit_ls=13.9 jit_rs=12.4
+[12:49:24.549][RX] CPU%/max_us 2/1976 44/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:24.598][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:24.749][RX] pose fps=17 npu=39.3 wait=38.3 decode=19.7 kpt=0.7 gui=40.3 e2e=156.0 period=54.8 persons=1 idle=25% npu_gap=15.4 jit_lw=0.0 jit_rw=0.0 jit_ls=12.5 jit_rs=12.5
+[12:49:25.580][RX] CPU%/max_us 1/1976 43/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:25.627][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:25.793][RX] pose fps=18 npu=39.3 wait=36.1 decode=19.8 kpt=0.6 gui=40.5 e2e=152.0 period=52.4 persons=1 idle=24% npu_gap=13.0 jit_lw=0.0 jit_rw=0.0 jit_ls=15.0 jit_rs=8.8
+[12:49:26.648][RX] CPU%/max_us 1/1976 38/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:26.698][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:26.883][RX] pose fps=17 npu=39.4 wait=46.3 decode=19.6 kpt=0.7 gui=42.4 e2e=162.6 period=57.3 persons=1 idle=27% npu_gap=17.9 jit_lw=0.0 jit_rw=0.0 jit_ls=16.4 jit_rs=11.6
+[12:49:27.658][RX] CPU%/max_us 2/1976 46/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:27.698][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:27.885][RX] pose fps=16 npu=39.4 wait=49.8 decode=19.6 kpt=0.7 gui=42.2 e2e=172.4 period=57.8 persons=1 idle=25% npu_gap=18.4 jit_lw=0.0 jit_rw=0.0 jit_ls=15.6 jit_rs=20.6
+[12:49:28.666][RX] CPU%/max_us 2/1976 46/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:28.717][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:28.895][RX] pose fps=19 npu=39.3 wait=35.0 decode=19.8 kpt=0.6 gui=39.0 e2e=149.2 period=52.4 persons=1 idle=22% npu_gap=13.0 jit_lw=0.0 jit_rw=0.0 jit_ls=15.7 jit_rs=18.0
+[12:49:29.713][RX] CPU%/max_us 2/1976 47/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:29.734][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:29.887][RX] pose fps=18 npu=39.3 wait=34.9 decode=19.8 kpt=0.6 gui=38.7 e2e=146.9 period=52.6 persons=1 idle=23% npu_gap=13.3 jit_lw=0.0 jit_rw=0.0 jit_ls=65.8 jit_rs=82.7
+[12:49:30.750][RX] CPU%/max_us 1/1976 49/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:30.794][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:30.965][RX] pose fps=19 npu=39.3 wait=32.3 decode=19.8 kpt=0.6 gui=39.8 e2e=144.6 period=50.9 persons=1 idle=23% npu_gap=11.6 jit_lw=65.1 jit_rw=0.0 jit_ls=309.3 jit_rs=245.1
+[12:49:31.774][RX] CPU%/max_us 2/1976 46/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:31.818][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:31.981][RX] pose fps=18 npu=39.3 wait=36.0 decode=19.7 kpt=0.7 gui=36.0 e2e=151.3 period=51.6 persons=1 idle=21% npu_gap=12.3 jit_lw=17.0 jit_rw=262.3 jit_ls=191.9 jit_rs=182.6
+[12:49:32.792][RX] CPU%/max_us 2/1976 53/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:32.813][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:32.959][RX] pose fps=18 npu=39.2 wait=43.1 decode=19.6 kpt=0.7 gui=35.3 e2e=155.9 period=54.4 persons=1 idle=22% npu_gap=15.2 jit_lw=124.4 jit_rw=40.9 jit_ls=59.7 jit_rs=45.3
+[12:49:33.812][RX] CPU%/max_us 2/1976 59/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:33.832][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:33.988][RX] pose fps=22 npu=38.9 wait=15.4 decode=20.0 kpt=0.6 gui=28.6 e2e=122.8 period=44.4 persons=1 idle=14% npu_gap=5.4 jit_lw=211.6 jit_rw=0.0 jit_ls=85.9 jit_rs=54.7
+[12:49:34.823][RX] CPU%/max_us 2/1976 54/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:34.845][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:35.027][RX] pose fps=22 npu=38.9 wait=16.8 decode=20.0 kpt=0.7 gui=25.0 e2e=119.8 period=43.6 persons=1 idle=11% npu_gap=4.6 jit_lw=0.0 jit_rw=0.0 jit_ls=32.1 jit_rs=18.8
+[12:49:35.837][RX] CPU%/max_us 2/1976 55/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:35.847][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:35.993][RX] pose fps=20 npu=39.0 wait=17.5 decode=20.0 kpt=0.7 gui=29.0 e2e=120.5 period=46.1 persons=1 idle=17% npu_gap=7.1 jit_lw=197.1 jit_rw=237.3 jit_ls=78.6 jit_rs=97.4
+[12:49:36.884][RX] CPU%/max_us 2/1976 53/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:36.921][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:37.068][RX] pose fps=21 npu=39.0 wait=22.9 decode=19.9 kpt=0.7 gui=29.4 e2e=131.4 period=46.4 persons=1 idle=17% npu_gap=7.3 jit_lw=215.1 jit_rw=139.7 jit_ls=99.3 jit_rs=67.9
+[12:49:37.897][RX] CPU%/max_us 2/1976 53/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:37.934][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:38.075][RX] pose fps=21 npu=39.0 wait=24.7 decode=19.9 kpt=0.6 gui=29.0 e2e=131.9 period=46.4 persons=1 idle=17% npu_gap=7.3 jit_lw=0.0 jit_rw=0.0 jit_ls=13.7 jit_rs=10.4
+[12:49:38.924][RX] CPU%/max_us 2/1976 52/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:38.963][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:39.126][RX] pose fps=21 npu=39.0 wait=21.3 decode=19.9 kpt=0.7 gui=27.0 e2e=126.2 period=45.9 persons=1 idle=18% npu_gap=6.8 jit_lw=0.0 jit_rw=8.8 jit_ls=10.5 jit_rs=12.2
+[12:49:39.951][RX] CPU%/max_us 2/1976 48/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:39.972][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:40.164][RX] pose fps=19 npu=39.1 wait=32.1 decode=19.8 kpt=0.7 gui=32.9 e2e=140.9 period=49.9 persons=1 idle=21% npu_gap=10.7 jit_lw=12.1 jit_rw=61.4 jit_ls=65.7 jit_rs=104.5
+[12:49:40.966][RX] CPU%/max_us 2/1976 50/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:41.009][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:41.179][RX] pose fps=19 npu=39.2 wait=31.2 decode=19.8 kpt=0.7 gui=35.4 e2e=143.4 period=50.9 persons=1 idle=21% npu_gap=11.6 jit_lw=11.2 jit_rw=0.0 jit_ls=13.4 jit_rs=17.0
+[12:49:41.973][RX] CPU%/max_us 2/1976 46/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:42.017][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:42.164][RX] pose fps=18 npu=39.3 wait=34.6 decode=19.8 kpt=0.7 gui=36.2 e2e=147.0 period=51.4 persons=1 idle=22% npu_gap=12.0 jit_lw=28.6 jit_rw=0.0 jit_ls=15.9 jit_rs=27.8
+[12:49:42.991][RX] CPU%/max_us 2/1976 48/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:43.012][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:43.191][RX] pose fps=19 npu=39.2 wait=32.4 decode=19.8 kpt=0.7 gui=36.2 e2e=143.2 period=52.0 persons=1 idle=21% npu_gap=12.7 jit_lw=131.1 jit_rw=60.0 jit_ls=74.4 jit_rs=55.3
+[12:49:44.048][RX] CPU%/max_us 2/1976 52/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:44.095][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:44.272][RX] pose fps=19 npu=39.2 wait=36.3 decode=19.7 kpt=0.7 gui=31.8 e2e=149.3 period=51.0 persons=1 idle=20% npu_gap=11.8 jit_lw=43.4 jit_rw=0.0 jit_ls=33.1 jit_rs=20.5
+[12:49:45.060][RX] CPU%/max_us 2/1976 46/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:45.076][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:45.242][RX] pose fps=19 npu=39.1 wait=28.7 decode=19.8 kpt=0.7 gui=34.5 e2e=139.2 period=50.0 persons=1 idle=19% npu_gap=10.8 jit_lw=65.6 jit_rw=151.0 jit_ls=55.7 jit_rs=53.1
+[12:49:46.070][RX] CPU%/max_us 2/1976 49/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:46.113][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:46.243][RX] pose fps=19 npu=39.0 wait=30.0 decode=19.8 kpt=0.7 gui=36.3 e2e=138.2 period=49.9 persons=1 idle=19% npu_gap=10.8 jit_lw=48.5 jit_rw=43.5 jit_ls=18.4 jit_rs=12.3
+[12:49:47.086][RX] CPU%/max_us 1/1976 47/1796 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:47.120][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:47.294][RX] pose fps=20 npu=38.9 wait=25.2 decode=19.9 kpt=0.7 gui=33.2 e2e=137.1 period=49.2 persons=1 idle=17% npu_gap=10.3 jit_lw=30.9 jit_rw=10.0 jit_ls=9.1 jit_rs=7.5
+[12:49:48.089][RX] CPU%/max_us 2/1976 50/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:48.137][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:48.306][RX] pose fps=17 npu=39.1 wait=40.2 decode=19.7 kpt=0.7 gui=36.6 e2e=152.0 period=53.5 persons=1 idle=19% npu_gap=14.4 jit_lw=38.1 jit_rw=15.5 jit_ls=11.7 jit_rs=8.7
+[12:49:49.101][RX] CPU%/max_us 1/1976 44/1796 31/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:49.122][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:49.259][RX] pose fps=20 npu=39.0 wait=30.9 decode=19.8 kpt=0.7 gui=36.0 e2e=145.9 period=49.5 persons=1 idle=19% npu_gap=10.4 jit_lw=28.9 jit_rw=39.3 jit_ls=10.4 jit_rs=8.1
+[12:49:50.124][RX] CPU%/max_us 2/1976 49/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:50.169][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:50.317][RX] pose fps=18 npu=39.0 wait=35.4 decode=19.7 kpt=0.7 gui=36.4 e2e=146.7 period=51.6 persons=1 idle=18% npu_gap=12.5 jit_lw=28.9 jit_rw=11.0 jit_ls=13.4 jit_rs=14.6
+[12:49:51.122][RX] CPU%/max_us 2/1976 49/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:51.143][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:51.283][RX] pose fps=21 npu=39.0 wait=23.6 decode=19.9 kpt=0.7 gui=36.3 e2e=138.1 period=48.3 persons=1 idle=17% npu_gap=9.2 jit_lw=120.4 jit_rw=27.3 jit_ls=10.1 jit_rs=11.2
+[12:49:52.157][RX] CPU%/max_us 2/1976 55/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:52.169][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:52.326][RX] pose fps=21 npu=38.9 wait=17.1 decode=20.1 kpt=0.7 gui=37.4 e2e=124.7 period=46.1 persons=1 idle=16% npu_gap=7.2 jit_lw=116.6 jit_rw=23.0 jit_ls=9.6 jit_rs=7.7
+[12:49:53.151][RX] CPU%/max_us 2/1976 53/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:53.172][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:53.330][RX] pose fps=20 npu=39.0 wait=21.9 decode=19.9 kpt=0.7 gui=34.1 e2e=128.0 period=46.8 persons=1 idle=17% npu_gap=7.8 jit_lw=63.6 jit_rw=26.6 jit_ls=8.7 jit_rs=11.2
+[12:49:54.144][RX] CPU%/max_us 2/1976 51/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:54.183][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:54.312][RX] pose fps=20 npu=39.0 wait=25.7 decode=19.9 kpt=0.7 gui=33.7 e2e=136.8 period=48.3 persons=1 idle=17% npu_gap=9.3 jit_lw=14.5 jit_rw=15.0 jit_ls=8.4 jit_rs=15.9
+[12:49:55.173][RX] CPU%/max_us 2/1976 53/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:55.194][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:55.380][RX] pose fps=20 npu=39.0 wait=28.8 decode=19.9 kpt=0.7 gui=35.5 e2e=142.5 period=48.7 persons=1 idle=16% npu_gap=9.6 jit_lw=70.3 jit_rw=55.7 jit_ls=13.4 jit_rs=19.4
+[12:49:56.216][RX] CPU%/max_us 2/1976 49/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:56.236][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:56.428][RX] pose fps=20 npu=39.0 wait=24.8 decode=19.9 kpt=0.7 gui=32.0 e2e=125.9 period=48.7 persons=1 idle=18% npu_gap=9.7 jit_lw=149.1 jit_rw=76.4 jit_ls=21.2 jit_rs=21.9
+[12:49:57.230][RX] CPU%/max_us 2/1976 55/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:57.250][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:57.406][RX] pose fps=18 npu=39.1 wait=34.7 decode=19.7 kpt=0.7 gui=34.3 e2e=143.6 period=51.4 persons=1 idle=19% npu_gap=12.3 jit_lw=70.1 jit_rw=88.1 jit_ls=33.5 jit_rs=31.2
+[12:49:58.227][RX] CPU%/max_us 2/1976 55/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:58.268][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:58.426][RX] pose fps=20 npu=39.0 wait=23.7 decode=19.9 kpt=0.7 gui=37.0 e2e=137.2 period=46.9 persons=2 idle=17% npu_gap=7.9 jit_lw=98.7 jit_rw=80.7 jit_ls=75.2 jit_rs=97.4
+[12:49:59.266][RX] CPU%/max_us 2/1976 47/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:49:59.293][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:49:59.439][RX] pose fps=21 npu=39.1 wait=23.0 decode=19.9 kpt=0.6 gui=36.9 e2e=135.5 period=47.2 persons=1 idle=21% npu_gap=8.0 jit_lw=160.3 jit_rw=0.0 jit_ls=201.7 jit_rs=0.0
+[12:50:00.268][RX] CPU%/max_us 2/1976 52/1796 21/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:00.294][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:00.386][RX] pose fps=19 npu=39.3 wait=27.4 decode=19.8 kpt=0.4 gui=42.5 e2e=139.6 period=50.1 persons=1 idle=25% npu_gap=10.7 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:50:01.301][RX] CPU%/max_us 3/1976 59/1796 11/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:01.351][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:01.463][RX] pose fps=22 npu=38.9 wait=12.4 decode=20.0 kpt=0.2 gui=41.1 e2e=138.8 period=44.3 persons=1 idle=24% npu_gap=5.4 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=11.3
+[12:50:02.345][RX] CPU%/max_us 2/1976 55/1796 19/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:02.365][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:02.518][RX] pose fps=21 npu=38.9 wait=14.0 decode=19.9 kpt=0.2 gui=38.8 e2e=130.9 period=45.3 persons=1 idle=25% npu_gap=6.3 jit_lw=0.0 jit_rw=0.0 jit_ls=8.0 jit_rs=0.0
+[12:50:03.322][RX] CPU%/max_us 2/1976 49/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:03.373][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:03.525][RX] pose fps=20 npu=39.2 wait=23.9 decode=19.9 kpt=0.5 gui=42.7 e2e=139.1 period=48.2 persons=1 idle=23% npu_gap=8.9 jit_lw=0.0 jit_rw=0.0 jit_ls=0.0 jit_rs=0.0
+[12:50:04.380][RX] CPU%/max_us 2/1976 49/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:04.402][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:04.591][RX] pose fps=18 npu=39.3 wait=30.7 decode=19.9 kpt=0.7 gui=41.2 e2e=147.7 period=50.5 persons=1 idle=24% npu_gap=11.2 jit_lw=130.8 jit_rw=173.4 jit_ls=124.9 jit_rs=105.1
+[12:50:05.435][RX] CPU%/max_us 1/1976 41/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:05.448][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:05.658][RX] pose fps=18 npu=39.3 wait=36.9 decode=19.7 kpt=0.7 gui=40.3 e2e=155.6 period=52.6 persons=1 idle=23% npu_gap=13.2 jit_lw=0.0 jit_rw=0.0 jit_ls=47.4 jit_rs=93.1
+[12:50:06.467][RX] CPU%/max_us 2/1976 46/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:06.515][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:06.703][RX] pose fps=16 npu=39.4 wait=54.2 decode=19.5 kpt=0.7 gui=43.1 e2e=178.4 period=59.8 persons=1 idle=27% npu_gap=20.3 jit_lw=0.0 jit_rw=0.0 jit_ls=39.7 jit_rs=53.6
+[12:50:07.525][RX] CPU%/max_us 1/1976 41/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:07.546][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:07.692][RX] pose fps=17 npu=39.4 wait=45.9 decode=19.6 kpt=0.7 gui=42.1 e2e=168.5 period=56.9 persons=1 idle=26% npu_gap=17.4 jit_lw=0.0 jit_rw=0.0 jit_ls=14.9 jit_rs=32.7
+[12:50:08.550][RX] CPU%/max_us 1/1976 46/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:08.597][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:08.751][RX] pose fps=17 npu=39.4 wait=44.9 decode=19.7 kpt=0.7 gui=41.5 e2e=171.1 period=56.5 persons=1 idle=25% npu_gap=17.0 jit_lw=0.0 jit_rw=0.0 jit_ls=15.0 jit_rs=13.8
+[12:50:09.569][RX] CPU%/max_us 2/1976 44/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:09.620][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:09.808][RX] pose fps=17 npu=39.3 wait=40.3 decode=19.7 kpt=0.7 gui=39.2 e2e=152.3 period=55.5 persons=1 idle=25% npu_gap=16.1 jit_lw=0.0 jit_rw=0.0 jit_ls=19.6 jit_rs=12.3
+[12:50:10.628][RX] CPU%/max_us 1/1976 42/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:10.677][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:10.857][RX] pose fps=16 npu=39.3 wait=44.6 decode=19.6 kpt=0.7 gui=41.6 e2e=160.5 period=56.8 persons=1 idle=26% npu_gap=17.4 jit_lw=0.0 jit_rw=0.0 jit_ls=9.1 jit_rs=8.9
+[12:50:11.676][RX] CPU%/max_us 1/1976 44/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:11.726][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:11.920][RX] pose fps=16 npu=39.4 wait=52.7 decode=19.5 kpt=0.7 gui=41.6 e2e=173.0 period=59.3 persons=1 idle=27% npu_gap=19.8 jit_lw=0.0 jit_rw=0.0 jit_ls=11.5 jit_rs=12.6
+[12:50:12.707][RX] CPU%/max_us 1/1976 38/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:12.755][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:12.913][RX] pose fps=16 npu=39.4 wait=50.0 decode=19.6 kpt=0.7 gui=40.7 e2e=172.2 period=58.1 persons=1 idle=27% npu_gap=18.6 jit_lw=0.0 jit_rw=0.0 jit_ls=12.1 jit_rs=9.8
+[12:50:13.737][RX] CPU%/max_us 1/1976 44/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:13.790][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:13.974][RX] pose fps=16 npu=39.5 wait=55.9 decode=19.5 kpt=0.7 gui=42.5 e2e=181.2 period=60.6 persons=1 idle=29% npu_gap=21.1 jit_lw=0.0 jit_rw=0.0 jit_ls=16.1 jit_rs=10.1
+[12:50:14.807][RX] CPU%/max_us 1/1976 43/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:14.828][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:15.044][RX] pose fps=18 npu=39.3 wait=40.5 decode=19.7 kpt=0.7 gui=41.0 e2e=158.3 period=54.2 persons=1 idle=24% npu_gap=14.8 jit_lw=0.0 jit_rw=0.0 jit_ls=13.1 jit_rs=10.8
+[12:50:15.795][RX] CPU%/max_us 2/1976 46/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:15.842][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:16.026][RX] pose fps=16 npu=39.5 wait=54.4 decode=19.5 kpt=0.7 gui=41.6 e2e=177.9 period=59.9 persons=1 idle=27% npu_gap=20.4 jit_lw=0.0 jit_rw=0.0 jit_ls=18.4 jit_rs=17.1
+[12:50:16.810][RX] CPU%/max_us 1/1976 40/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:16.857][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:17.049][RX] pose fps=18 npu=39.3 wait=39.4 decode=19.7 kpt=0.6 gui=39.9 e2e=159.3 period=54.0 persons=1 idle=24% npu_gap=14.6 jit_lw=0.0 jit_rw=0.0 jit_ls=20.7 jit_rs=20.8
+[12:50:17.841][RX] CPU%/max_us 1/1976 43/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:17.854][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:18.048][RX] pose fps=17 npu=39.4 wait=47.2 decode=19.6 kpt=0.7 gui=40.7 e2e=167.5 period=56.9 persons=1 idle=25% npu_gap=17.5 jit_lw=0.0 jit_rw=0.0 jit_ls=17.2 jit_rs=10.5
+[12:50:18.857][RX] CPU%/max_us 1/1976 39/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:18.909][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:19.103][RX] pose fps=17 npu=39.4 wait=45.7 decode=19.7 kpt=0.7 gui=43.1 e2e=166.4 period=57.3 persons=1 idle=25% npu_gap=17.8 jit_lw=0.0 jit_rw=0.0 jit_ls=16.0 jit_rs=24.2
+[12:50:19.881][RX] CPU%/max_us 1/1976 41/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:19.936][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:20.130][RX] pose fps=16 npu=39.3 wait=40.6 decode=19.7 kpt=0.7 gui=44.0 e2e=164.5 period=56.0 persons=1 idle=26% npu_gap=16.7 jit_lw=0.0 jit_rw=0.0 jit_ls=17.3 jit_rs=9.8
+[12:50:20.902][RX] CPU%/max_us 1/1976 41/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:20.956][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:21.142][RX] pose fps=16 npu=39.5 wait=54.5 decode=19.5 kpt=0.7 gui=43.2 e2e=181.2 period=60.3 persons=1 idle=28% npu_gap=20.8 jit_lw=0.0 jit_rw=0.0 jit_ls=19.6 jit_rs=20.1
+[12:50:21.907][RX] CPU%/max_us 1/1976 40/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:21.956][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:22.077][RX] pose fps=16 npu=39.5 wait=53.6 decode=19.5 kpt=0.7 gui=43.3 e2e=176.7 period=60.0 persons=1 idle=27% npu_gap=20.5 jit_lw=0.0 jit_rw=0.0 jit_ls=17.0 jit_rs=16.1
+[12:50:22.963][RX] CPU%/max_us 2/1976 48/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:23.014][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:23.202][RX] pose fps=16 npu=39.4 wait=52.4 decode=19.6 kpt=0.7 gui=44.5 e2e=175.6 period=60.3 persons=1 idle=26% npu_gap=20.8 jit_lw=0.0 jit_rw=0.0 jit_ls=14.5 jit_rs=13.4
+[12:50:24.032][RX] CPU%/max_us 1/1976 48/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:24.052][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:24.281][RX] pose fps=17 npu=39.4 wait=45.9 decode=19.7 kpt=0.7 gui=44.1 e2e=167.6 period=57.0 persons=1 idle=26% npu_gap=17.6 jit_lw=0.0 jit_rw=0.0 jit_ls=13.8 jit_rs=18.6
+[12:50:25.030][RX] CPU%/max_us 2/1976 43/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:25.088][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:25.278][RX] pose fps=16 npu=39.3 wait=43.2 decode=19.7 kpt=0.7 gui=41.7 e2e=160.9 period=57.4 persons=1 idle=26% npu_gap=18.1 jit_lw=0.0 jit_rw=0.0 jit_ls=11.8 jit_rs=15.6
+[12:50:26.071][RX] CPU%/max_us 1/1976 42/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:26.123][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:26.279][RX] pose fps=17 npu=39.3 wait=47.0 decode=19.6 kpt=0.7 gui=44.1 e2e=167.5 period=58.0 persons=1 idle=27% npu_gap=18.6 jit_lw=0.0 jit_rw=0.0 jit_ls=12.4 jit_rs=14.5
+[12:50:27.106][RX] CPU%/max_us 1/1976 43/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:27.157][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:27.352][RX] pose fps=18 npu=39.3 wait=40.5 decode=19.7 kpt=0.6 gui=42.5 e2e=164.2 period=54.3 persons=1 idle=25% npu_gap=14.9 jit_lw=0.0 jit_rw=0.0 jit_ls=13.8 jit_rs=13.1
+[12:50:28.138][RX] CPU%/max_us 2/1976 48/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:28.158][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:28.377][RX] pose fps=17 npu=39.3 wait=42.3 decode=19.7 kpt=0.7 gui=44.8 e2e=168.6 period=55.9 persons=1 idle=25% npu_gap=16.6 jit_lw=0.0 jit_rw=0.0 jit_ls=12.6 jit_rs=14.8
+[12:50:29.153][RX] CPU%/max_us 2/1976 46/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:29.202][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:29.360][RX] pose fps=17 npu=39.3 wait=41.0 decode=19.7 kpt=0.7 gui=42.3 e2e=158.5 period=56.1 persons=1 idle=26% npu_gap=16.8 jit_lw=0.0 jit_rw=0.0 jit_ls=11.8 jit_rs=14.4
+[12:50:30.184][RX] CPU%/max_us 1/1976 43/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:30.232][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:30.421][RX] pose fps=17 npu=39.4 wait=48.4 decode=19.6 kpt=0.6 gui=43.9 e2e=173.1 period=57.5 persons=1 idle=25% npu_gap=18.0 jit_lw=0.0 jit_rw=0.0 jit_ls=14.6 jit_rs=21.0
+[12:50:31.205][RX] CPU%/max_us 1/1976 39/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:31.255][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:31.441][RX] pose fps=16 npu=39.4 wait=50.2 decode=19.6 kpt=0.7 gui=41.8 e2e=173.1 period=58.2 persons=1 idle=27% npu_gap=18.7 jit_lw=0.0 jit_rw=0.0 jit_ls=11.7 jit_rs=13.9
+[12:50:32.253][RX] CPU%/max_us 2/1976 43/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:32.304][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:32.488][RX] pose fps=16 npu=39.4 wait=49.7 decode=19.6 kpt=0.7 gui=39.8 e2e=170.3 period=57.9 persons=1 idle=26% npu_gap=18.4 jit_lw=0.0 jit_rw=0.0 jit_ls=11.9 jit_rs=10.1
+[12:50:33.288][RX] CPU%/max_us 1/1976 43/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:33.309][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:33.460][RX] pose fps=16 npu=39.4 wait=52.2 decode=19.5 kpt=0.7 gui=42.3 e2e=172.8 period=59.3 persons=1 idle=28% npu_gap=19.8 jit_lw=0.0 jit_rw=0.0 jit_ls=14.9 jit_rs=12.2
+[12:50:34.304][RX] CPU%/max_us 1/1976 44/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:34.357][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:34.515][RX] pose fps=18 npu=39.3 wait=35.3 decode=19.8 kpt=0.7 gui=42.0 e2e=150.5 period=53.5 persons=1 idle=23% npu_gap=14.1 jit_lw=0.0 jit_rw=0.0 jit_ls=13.5 jit_rs=19.9
+[12:50:35.357][RX] CPU%/max_us 2/1976 42/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:35.407][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:35.600][RX] pose fps=17 npu=39.4 wait=44.4 decode=19.7 kpt=0.7 gui=43.6 e2e=163.8 period=56.1 persons=1 idle=27% npu_gap=16.7 jit_lw=0.0 jit_rw=22.6 jit_ls=17.8 jit_rs=30.0
+[12:50:36.353][RX] CPU%/max_us 2/1976 46/1796 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:36.400][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:36.559][RX] pose fps=16 npu=39.5 wait=53.5 decode=19.5 kpt=0.7 gui=43.4 e2e=177.0 period=60.1 persons=2 idle=27% npu_gap=20.5 jit_lw=0.0 jit_rw=13.8 jit_ls=12.9 jit_rs=39.4
+[12:50:37.407][RX] CPU%/max_us 1/1976 42/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:37.419][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:37.601][RX] pose fps=17 npu=39.4 wait=43.5 decode=19.7 kpt=0.7 gui=41.8 e2e=170.3 period=55.5 persons=1 idle=27% npu_gap=16.1 jit_lw=0.0 jit_rw=0.0 jit_ls=12.3 jit_rs=16.3
+[12:50:38.434][RX] CPU%/max_us 1/1976 38/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:38.483][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:38.674][RX] pose fps=16 npu=39.4 wait=52.2 decode=19.6 kpt=0.7 gui=43.4 e2e=176.9 period=59.2 persons=1 idle=27% npu_gap=19.7 jit_lw=0.0 jit_rw=0.0 jit_ls=17.3 jit_rs=23.8
+[12:50:39.475][RX] CPU%/max_us 1/1976 43/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:39.496][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:39.685][RX] pose fps=16 npu=39.4 wait=48.6 decode=19.6 kpt=0.7 gui=41.9 e2e=165.0 period=58.0 persons=1 idle=26% npu_gap=18.6 jit_lw=0.0 jit_rw=0.0 jit_ls=12.3 jit_rs=7.7
+[12:50:40.447][RX] CPU%/max_us 2/1976 44/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:40.498][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:40.683][RX] pose fps=16 npu=39.5 wait=51.2 decode=19.6 kpt=0.7 gui=41.8 e2e=171.6 period=58.6 persons=1 idle=27% npu_gap=19.1 jit_lw=39.8 jit_rw=0.0 jit_ls=13.3 jit_rs=12.7
+[12:50:41.469][RX] CPU%/max_us 1/1976 39/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:41.520][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:41.680][RX] pose fps=17 npu=39.4 wait=43.8 decode=19.6 kpt=0.7 gui=40.1 e2e=161.1 period=55.4 persons=1 idle=24% npu_gap=15.9 jit_lw=15.8 jit_rw=10.6 jit_ls=14.4 jit_rs=14.6
+[12:50:42.503][RX] CPU%/max_us 1/1976 43/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:42.552][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:42.733][RX] pose fps=17 npu=39.4 wait=45.1 decode=19.6 kpt=0.7 gui=42.0 e2e=166.3 period=56.2 persons=1 idle=26% npu_gap=16.8 jit_lw=0.0 jit_rw=0.0 jit_ls=18.7 jit_rs=21.3
+[12:50:43.547][RX] CPU%/max_us 1/1976 39/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:43.599][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:43.781][RX] pose fps=16 npu=39.5 wait=51.1 decode=19.6 kpt=0.7 gui=43.1 e2e=177.7 period=58.7 persons=1 idle=27% npu_gap=19.2 jit_lw=0.0 jit_rw=0.0 jit_ls=13.4 jit_rs=10.8
+[12:50:44.582][RX] CPU%/max_us 1/1976 38/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:44.630][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:44.822][RX] pose fps=16 npu=39.5 wait=55.4 decode=19.5 kpt=0.7 gui=42.2 e2e=176.6 period=60.7 persons=1 idle=29% npu_gap=21.2 jit_lw=0.0 jit_rw=0.0 jit_ls=19.2 jit_rs=14.4
+[12:50:45.604][RX] CPU%/max_us 1/1976 38/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:45.624][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:45.806][RX] pose fps=16 npu=39.5 wait=55.5 decode=19.5 kpt=0.7 gui=43.0 e2e=176.5 period=60.7 persons=1 idle=28% npu_gap=21.2 jit_lw=0.0 jit_rw=0.0 jit_ls=8.0 jit_rs=14.4
+[12:50:46.628][RX] CPU%/max_us 1/1976 43/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:46.673][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:46.859][RX] pose fps=16 npu=39.4 wait=49.5 decode=19.6 kpt=0.7 gui=41.4 e2e=168.2 period=58.5 persons=1 idle=27% npu_gap=19.0 jit_lw=0.0 jit_rw=0.0 jit_ls=15.1 jit_rs=11.9
+[12:50:47.675][RX] CPU%/max_us 1/1976 44/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:47.696][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:47.872][RX] pose fps=16 npu=39.4 wait=48.0 decode=19.6 kpt=0.7 gui=41.6 e2e=167.6 period=58.1 persons=1 idle=27% npu_gap=18.6 jit_lw=0.0 jit_rw=0.0 jit_ls=8.9 jit_rs=16.3
+[12:50:48.655][RX] CPU%/max_us 1/1976 39/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:48.676][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:48.856][RX] pose fps=17 npu=39.4 wait=46.1 decode=19.7 kpt=0.7 gui=41.8 e2e=170.9 period=56.8 persons=1 idle=26% npu_gap=17.4 jit_lw=0.0 jit_rw=0.0 jit_ls=11.1 jit_rs=14.6
+[12:50:49.656][RX] CPU%/max_us 1/1976 39/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:49.703][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:49.831][RX] pose fps=16 npu=39.4 wait=51.3 decode=19.5 kpt=0.7 gui=41.6 e2e=169.4 period=59.2 persons=1 idle=28% npu_gap=19.6 jit_lw=0.0 jit_rw=0.0 jit_ls=10.8 jit_rs=14.5
+[12:50:50.710][RX] CPU%/max_us 2/1976 48/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:50.730][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:50.918][RX] pose fps=18 npu=39.3 wait=34.9 decode=19.8 kpt=0.6 gui=42.8 e2e=158.6 period=52.2 persons=1 idle=24% npu_gap=12.9 jit_lw=0.0 jit_rw=0.0 jit_ls=13.5 jit_rs=18.3
+[12:50:51.732][RX] CPU%/max_us 2/1976 47/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:51.753][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:51.945][RX] pose fps=19 npu=39.2 wait=33.5 decode=19.8 kpt=0.6 gui=44.5 e2e=149.6 period=52.0 persons=1 idle=24% npu_gap=12.7 jit_lw=0.0 jit_rw=0.0 jit_ls=20.1 jit_rs=18.4
+[12:50:52.777][RX] CPU%/max_us 1/1976 48/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:52.794][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:52.953][RX] pose fps=18 npu=39.2 wait=33.8 decode=19.8 kpt=0.6 gui=42.2 e2e=149.6 period=52.3 persons=1 idle=24% npu_gap=13.0 jit_lw=0.0 jit_rw=0.0 jit_ls=13.9 jit_rs=11.9
+[12:50:53.776][RX] CPU%/max_us 2/1976 48/1796 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:53.797][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:53.981][RX] pose fps=18 npu=39.3 wait=39.8 decode=19.7 kpt=0.6 gui=43.1 e2e=153.7 period=54.4 persons=1 idle=25% npu_gap=15.1 jit_lw=0.0 jit_rw=0.0 jit_ls=12.4 jit_rs=11.1
+[12:50:54.822][RX] CPU%/max_us 2/1976 48/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:54.873][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:55.033][RX] pose fps=18 npu=39.3 wait=40.3 decode=19.7 kpt=0.6 gui=42.6 e2e=161.7 period=54.4 persons=1 idle=25% npu_gap=15.1 jit_lw=0.0 jit_rw=0.0 jit_ls=11.0 jit_rs=9.7
+[12:50:55.861][RX] CPU%/max_us 1/1976 38/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:55.911][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:56.096][RX] pose fps=18 npu=39.3 wait=39.7 decode=19.7 kpt=0.6 gui=43.1 e2e=163.9 period=54.4 persons=1 idle=24% npu_gap=15.0 jit_lw=0.0 jit_rw=0.0 jit_ls=12.1 jit_rs=10.3
+[12:50:56.892][RX] CPU%/max_us 1/1976 40/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:56.945][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:57.142][RX] pose fps=16 npu=39.4 wait=47.1 decode=19.6 kpt=0.7 gui=43.1 e2e=168.3 period=57.5 persons=1 idle=28% npu_gap=18.1 jit_lw=0.0 jit_rw=0.0 jit_ls=19.0 jit_rs=20.7
+[12:50:57.323][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[12:50:57.899][RX] CPU%/max_us 1/1976 41/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:57.947][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:58.133][RX] pose fps=15 npu=39.5 wait=58.3 decode=19.5 kpt=0.7 gui=44.1 e2e=180.1 period=62.3 persons=1 idle=29% npu_gap=22.7 jit_lw=0.0 jit_rw=0.0 jit_ls=23.0 jit_rs=13.7
+[12:50:58.908][RX] CPU%/max_us 2/1976 50/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:58.924][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:50:59.116][RX] pose fps=16 npu=39.4 wait=51.4 decode=19.6 kpt=0.7 gui=42.3 e2e=177.0 period=58.7 persons=1 idle=27% npu_gap=19.2 jit_lw=0.0 jit_rw=0.0 jit_ls=13.7 jit_rs=9.9
+[12:50:59.921][RX] CPU%/max_us 2/1976 50/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:50:59.942][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:00.118][RX] pose fps=18 npu=39.3 wait=34.6 decode=19.8 kpt=0.7 gui=41.7 e2e=150.4 period=51.7 persons=1 idle=23% npu_gap=12.4 jit_lw=0.0 jit_rw=0.0 jit_ls=14.7 jit_rs=19.0
+[12:51:00.933][RX] CPU%/max_us 2/1976 49/1796 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:00.954][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:01.148][RX] pose fps=18 npu=39.3 wait=35.3 decode=19.8 kpt=0.6 gui=40.6 e2e=148.6 period=53.2 persons=1 idle=25% npu_gap=13.9 jit_lw=0.0 jit_rw=0.0 jit_ls=11.1 jit_rs=14.9
+[12:51:01.979][RX] CPU%/max_us 1/1976 41/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:02.000][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:02.183][RX] pose fps=18 npu=39.3 wait=37.9 decode=19.8 kpt=0.6 gui=41.3 e2e=156.9 period=53.6 persons=1 idle=24% npu_gap=14.2 jit_lw=0.0 jit_rw=0.0 jit_ls=12.5 jit_rs=14.7
+[12:51:03.022][RX] CPU%/max_us 2/1976 44/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:03.037][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:03.212][RX] pose fps=16 npu=39.4 wait=48.4 decode=19.6 kpt=0.7 gui=41.6 e2e=170.8 period=58.0 persons=1 idle=26% npu_gap=18.6 jit_lw=0.0 jit_rw=0.0 jit_ls=9.6 jit_rs=17.1
+[12:51:04.019][RX] CPU%/max_us 1/1976 39/1796 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:04.040][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:04.197][RX] pose fps=17 npu=39.3 wait=42.1 decode=19.7 kpt=0.7 gui=43.1 e2e=160.2 period=56.5 persons=1 idle=26% npu_gap=17.1 jit_lw=0.0 jit_rw=0.0 jit_ls=12.6 jit_rs=16.4
+[12:51:05.055][RX] CPU%/max_us 1/1976 42/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:05.065][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:05.247][RX] pose fps=17 npu=39.3 wait=42.3 decode=19.7 kpt=0.6 gui=41.2 e2e=164.2 period=55.1 persons=1 idle=24% npu_gap=15.7 jit_lw=0.0 jit_rw=0.0 jit_ls=12.2 jit_rs=15.4
+[12:51:06.116][RX] CPU%/max_us 2/1976 51/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:06.167][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:06.365][RX] pose fps=17 npu=39.4 wait=45.8 decode=19.6 kpt=0.7 gui=43.5 e2e=172.3 period=57.5 persons=1 idle=27% npu_gap=18.0 jit_lw=0.0 jit_rw=0.0 jit_ls=14.5 jit_rs=18.9
+[12:51:07.128][RX] CPU%/max_us 1/1976 41/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:07.149][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:07.373][RX] pose fps=18 npu=39.3 wait=36.5 decode=19.8 kpt=0.6 gui=43.3 e2e=156.6 period=52.6 persons=1 idle=24% npu_gap=13.2 jit_lw=0.0 jit_rw=0.0 jit_ls=17.0 jit_rs=12.4
+[12:51:08.135][RX] CPU%/max_us 1/1976 41/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:08.187][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:08.342][RX] pose fps=16 npu=39.4 wait=53.2 decode=19.5 kpt=0.7 gui=43.1 e2e=174.4 period=59.7 persons=1 idle=28% npu_gap=20.2 jit_lw=0.0 jit_rw=0.0 jit_ls=14.5 jit_rs=12.5
+[12:51:09.167][RX] CPU%/max_us 1/1976 43/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:09.222][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:09.408][RX] pose fps=16 npu=39.5 wait=56.3 decode=19.5 kpt=0.7 gui=43.9 e2e=181.7 period=60.6 persons=1 idle=28% npu_gap=21.1 jit_lw=0.0 jit_rw=0.0 jit_ls=13.5 jit_rs=12.1
+[12:51:10.199][RX] CPU%/max_us 1/1976 41/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:10.249][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:10.445][RX] pose fps=16 npu=39.4 wait=50.5 decode=19.6 kpt=0.7 gui=43.2 e2e=171.2 period=59.1 persons=1 idle=28% npu_gap=19.6 jit_lw=0.0 jit_rw=0.0 jit_ls=12.7 jit_rs=11.0
+[12:51:11.213][RX] CPU%/max_us 1/1976 42/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:11.269][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:11.464][RX] pose fps=16 npu=39.4 wait=53.3 decode=19.5 kpt=0.7 gui=43.8 e2e=178.5 period=59.8 persons=1 idle=28% npu_gap=20.3 jit_lw=0.0 jit_rw=0.0 jit_ls=12.1 jit_rs=12.8
+[12:51:12.239][RX] CPU%/max_us 1/1976 43/1796 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:12.259][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:12.451][RX] pose fps=16 npu=39.4 wait=53.4 decode=19.5 kpt=0.7 gui=44.1 e2e=174.2 period=59.9 persons=1 idle=27% npu_gap=20.4 jit_lw=0.0 jit_rw=0.0 jit_ls=16.6 jit_rs=13.9
+[12:51:13.290][RX] CPU%/max_us 1/1976 38/1796 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:13.337][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:13.482][RX] pose fps=16 npu=39.4 wait=48.1 decode=19.6 kpt=0.7 gui=42.7 e2e=172.1 period=57.5 persons=1 idle=26% npu_gap=18.1 jit_lw=0.0 jit_rw=0.0 jit_ls=12.7 jit_rs=13.7
+[12:51:14.309][RX] CPU%/max_us 1/1976 43/1796 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:14.330][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:14.488][RX] pose fps=17 npu=39.4 wait=46.9 decode=19.6 kpt=0.7 gui=42.1 e2e=167.9 period=57.6 persons=1 idle=27% npu_gap=18.1 jit_lw=0.0 jit_rw=0.0 jit_ls=13.3 jit_rs=11.7
+[12:51:15.335][RX] CPU%/max_us 2/1976 53/1796 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:15.356][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:15.539][RX] pose fps=18 npu=39.3 wait=38.4 decode=19.8 kpt=0.6 gui=42.0 e2e=156.1 period=53.2 persons=1 idle=24% npu_gap=13.8 jit_lw=0.0 jit_rw=0.0 jit_ls=16.4 jit_rs=29.6
+[12:51:16.345][RX] CPU%/max_us 2/1976 62/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:16.365][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:16.533][RX] pose fps=18 npu=39.3 wait=32.9 decode=19.9 kpt=0.8 gui=46.9 e2e=153.5 period=53.5 persons=4 idle=23% npu_gap=14.2 jit_lw=0.0 jit_rw=0.0 jit_ls=72.2 jit_rs=48.0
+[12:51:17.387][RX] CPU%/max_us 2/1976 53/2100 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:17.408][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:17.585][RX] pose fps=22 npu=38.8 wait=12.2 decode=20.2 kpt=0.8 gui=27.0 e2e=117.6 period=42.6 persons=2 idle=10% npu_gap=3.7 jit_lw=23.4 jit_rw=281.8 jit_ls=11.7 jit_rs=61.1
+[12:51:18.365][RX] CPU%/max_us 1/1976 47/2100 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:18.412][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:18.599][RX] pose fps=20 npu=39.0 wait=26.2 decode=19.9 kpt=0.9 gui=34.8 e2e=136.4 period=49.5 persons=1 idle=18% npu_gap=10.5 jit_lw=118.2 jit_rw=306.6 jit_ls=93.9 jit_rs=125.2
+[12:51:19.405][RX] CPU%/max_us 2/1976 47/2100 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:19.453][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:19.638][RX] pose fps=18 npu=39.3 wait=39.4 decode=19.7 kpt=0.7 gui=40.4 e2e=157.2 period=53.4 persons=1 idle=23% npu_gap=14.1 jit_lw=60.8 jit_rw=0.0 jit_ls=36.2 jit_rs=19.4
+[12:51:20.462][RX] CPU%/max_us 1/1976 42/2100 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:20.511][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:20.694][RX] pose fps=17 npu=39.3 wait=43.1 decode=19.7 kpt=0.7 gui=39.7 e2e=164.5 period=55.3 persons=1 idle=24% npu_gap=15.9 jit_lw=0.0 jit_rw=0.0 jit_ls=16.4 jit_rs=11.1
+[12:51:21.491][RX] CPU%/max_us 2/1976 50/2100 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:21.508][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:21.699][RX] pose fps=16 npu=39.4 wait=51.2 decode=19.6 kpt=0.7 gui=40.4 e2e=168.9 period=58.4 persons=1 idle=26% npu_gap=18.9 jit_lw=0.0 jit_rw=0.0 jit_ls=24.6 jit_rs=10.9
+[12:51:22.529][RX] CPU%/max_us 2/1976 53/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:22.542][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:22.711][RX] pose fps=18 npu=39.3 wait=39.2 decode=19.8 kpt=0.9 gui=44.8 e2e=163.8 period=56.0 persons=1 idle=24% npu_gap=16.7 jit_lw=65.3 jit_rw=38.5 jit_ls=68.9 jit_rs=86.9
+[12:51:23.499][RX] CPU%/max_us 2/1976 50/2100 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:23.557][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:23.713][RX] pose fps=17 npu=39.3 wait=41.4 decode=19.9 kpt=1.0 gui=45.0 e2e=167.8 period=55.4 persons=1 idle=22% npu_gap=16.1 jit_lw=0.0 jit_rw=0.0 jit_ls=65.0 jit_rs=77.8
+[12:51:24.526][RX] CPU%/max_us 2/1976 51/2100 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:24.565][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:24.677][RX] pose fps=19 npu=39.2 wait=28.3 decode=20.0 kpt=0.9 gui=44.0 e2e=144.2 period=51.5 persons=2 idle=21% npu_gap=12.3 jit_lw=0.0 jit_rw=12.9 jit_ls=38.3 jit_rs=50.0
+[12:51:25.526][RX] CPU%/max_us 3/1976 63/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:25.547][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:25.692][RX] pose fps=20 npu=39.0 wait=22.6 decode=20.1 kpt=1.0 gui=32.9 e2e=133.4 period=48.2 persons=1 idle=12% npu_gap=9.2 jit_lw=54.5 jit_rw=58.9 jit_ls=150.8 jit_rs=141.4
+[12:51:26.570][RX] CPU%/max_us 2/1976 61/2100 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:26.591][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:26.734][RX] pose fps=24 npu=38.6 wait=2.7 decode=20.3 kpt=0.7 gui=20.7 e2e=102.7 period=40.1 persons=1 idle=8% npu_gap=1.4 jit_lw=80.7 jit_rw=78.7 jit_ls=72.0 jit_rs=78.6
+[12:51:27.559][RX] CPU%/max_us 2/1976 58/2100 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:27.590][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:27.714][RX] pose fps=22 npu=38.7 wait=12.7 decode=20.1 kpt=0.9 gui=26.2 e2e=115.2 period=43.3 persons=2 idle=7% npu_gap=4.5 jit_lw=60.1 jit_rw=56.6 jit_ls=34.7 jit_rs=30.3
+[12:51:28.561][RX] CPU%/max_us 2/1976 52/2100 34/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:28.602][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:28.738][RX] pose fps=22 npu=38.7 wait=13.9 decode=20.1 kpt=1.0 gui=29.0 e2e=119.1 period=43.5 persons=1 idle=8% npu_gap=4.7 jit_lw=90.7 jit_rw=61.6 jit_ls=40.0 jit_rs=36.9
+[12:51:29.594][RX] CPU%/max_us 2/1976 60/2100 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:29.624][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:29.746][RX] pose fps=22 npu=38.7 wait=14.7 decode=20.1 kpt=0.9 gui=24.1 e2e=118.1 period=43.9 persons=2 idle=8% npu_gap=5.1 jit_lw=65.9 jit_rw=83.2 jit_ls=37.0 jit_rs=44.8
+[12:51:30.607][RX] CPU%/max_us 3/1976 65/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:30.635][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:30.758][RX] pose fps=24 npu=38.7 wait=4.1 decode=20.3 kpt=0.7 gui=21.7 e2e=106.0 period=38.9 persons=1 idle=6% npu_gap=0.1 jit_lw=63.0 jit_rw=66.0 jit_ls=40.8 jit_rs=29.9
+[12:51:31.620][RX] CPU%/max_us 3/1976 63/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:31.630][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:31.751][RX] pose fps=24 npu=38.7 wait=8.0 decode=20.1 kpt=0.7 gui=19.9 e2e=108.6 period=39.9 persons=1 idle=7% npu_gap=1.1 jit_lw=56.0 jit_rw=116.2 jit_ls=35.4 jit_rs=46.6
+[12:51:32.625][RX] CPU%/max_us 3/1976 60/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:32.653][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:32.770][RX] pose fps=25 npu=38.7 wait=6.5 decode=20.1 kpt=0.7 gui=20.6 e2e=109.3 period=40.7 persons=1 idle=8% npu_gap=1.9 jit_lw=50.5 jit_rw=82.5 jit_ls=32.0 jit_rs=39.4
+[12:51:33.636][RX] CPU%/max_us 2/1976 61/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:33.657][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:33.771][RX] pose fps=23 npu=38.7 wait=6.9 decode=20.2 kpt=0.7 gui=22.7 e2e=106.5 period=40.4 persons=1 idle=10% npu_gap=1.6 jit_lw=76.1 jit_rw=114.4 jit_ls=29.6 jit_rs=30.0
+[12:51:34.648][RX] CPU%/max_us 3/1976 65/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:34.670][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:34.819][RX] pose fps=24 npu=38.7 wait=4.2 decode=20.2 kpt=0.7 gui=20.7 e2e=106.4 period=39.7 persons=1 idle=8% npu_gap=1.0 jit_lw=39.7 jit_rw=50.5 jit_ls=51.9 jit_rs=53.6
+[12:51:35.664][RX] CPU%/max_us 2/1976 59/2100 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:35.686][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:35.822][RX] pose fps=22 npu=38.8 wait=13.6 decode=20.0 kpt=0.8 gui=25.6 e2e=113.9 period=44.1 persons=1 idle=11% npu_gap=5.3 jit_lw=12.6 jit_rw=35.6 jit_ls=27.1 jit_rs=25.9
+[12:51:36.719][RX] CPU%/max_us 2/1976 56/2100 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:36.740][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:36.887][RX] pose fps=22 npu=38.7 wait=15.6 decode=20.1 kpt=0.9 gui=27.9 e2e=120.5 period=44.1 persons=2 idle=8% npu_gap=5.3 jit_lw=134.6 jit_rw=101.3 jit_ls=60.4 jit_rs=37.7
+[12:51:37.720][RX] CPU%/max_us 3/1976 61/2100 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:37.748][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:37.873][RX] pose fps=21 npu=38.7 wait=16.4 decode=20.0 kpt=1.0 gui=27.7 e2e=120.3 period=44.1 persons=1 idle=9% npu_gap=5.3 jit_lw=47.1 jit_rw=58.2 jit_ls=24.8 jit_rs=23.3
+[12:51:38.748][RX] CPU%/max_us 3/1976 59/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:38.774][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:38.888][RX] pose fps=24 npu=38.7 wait=5.8 decode=20.2 kpt=0.7 gui=21.4 e2e=107.0 period=41.7 persons=1 idle=9% npu_gap=3.0 jit_lw=94.8 jit_rw=106.8 jit_ls=37.0 jit_rs=43.7
+[12:51:39.772][RX] CPU%/max_us 2/1976 63/2100 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:39.797][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:39.914][RX] pose fps=23 npu=38.6 wait=4.8 decode=20.2 kpt=0.8 gui=21.2 e2e=106.2 period=40.7 persons=2 idle=8% npu_gap=2.0 jit_lw=66.1 jit_rw=47.0 jit_ls=43.1 jit_rs=36.3
+[12:51:40.774][RX] CPU%/max_us 2/1976 57/2100 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:40.795][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:40.910][RX] pose fps=24 npu=38.7 wait=7.8 decode=20.2 kpt=0.8 gui=23.9 e2e=109.9 period=41.4 persons=2 idle=8% npu_gap=2.6 jit_lw=94.9 jit_rw=112.0 jit_ls=41.0 jit_rs=42.8
+[12:51:41.790][RX] CPU%/max_us 2/1976 62/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:41.819][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:41.934][RX] pose fps=22 npu=38.9 wait=15.0 decode=20.0 kpt=0.7 gui=27.1 e2e=122.8 period=42.4 persons=1 idle=11% npu_gap=3.5 jit_lw=109.8 jit_rw=125.5 jit_ls=32.5 jit_rs=39.4
+[12:51:42.821][RX] CPU%/max_us 3/1976 65/2100 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:42.842][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:42.950][RX] pose fps=24 npu=38.8 wait=7.5 decode=20.1 kpt=0.7 gui=22.5 e2e=109.8 period=40.3 persons=1 idle=9% npu_gap=1.4 jit_lw=103.9 jit_rw=127.3 jit_ls=61.2 jit_rs=72.4
+[12:51:43.826][RX] CPU%/max_us 2/1976 56/2100 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:43.844][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:43.968][RX] pose fps=23 npu=38.8 wait=9.8 decode=20.1 kpt=0.8 gui=23.2 e2e=115.4 period=40.8 persons=1 idle=7% npu_gap=2.0 jit_lw=76.5 jit_rw=78.6 jit_ls=82.9 jit_rs=83.1
+[12:51:44.850][RX] CPU%/max_us 2/1976 61/2100 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:44.871][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:45.023][RX] pose fps=23 npu=38.7 wait=8.4 decode=20.1 kpt=0.8 gui=22.7 e2e=109.7 period=41.8 persons=2 idle=9% npu_gap=3.1 jit_lw=88.0 jit_rw=94.8 jit_ls=58.1 jit_rs=56.3
+[12:51:45.850][RX] CPU%/max_us 2/1976 65/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:45.883][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:46.000][RX] pose fps=23 npu=38.7 wait=11.6 decode=20.1 kpt=0.9 gui=24.9 e2e=115.1 period=41.6 persons=1 idle=7% npu_gap=2.8 jit_lw=79.4 jit_rw=117.6 jit_ls=42.3 jit_rs=44.1
+[12:51:46.859][RX] CPU%/max_us 3/1976 64/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:46.874][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:46.992][RX] pose fps=24 npu=38.7 wait=7.8 decode=20.1 kpt=0.7 gui=22.5 e2e=110.9 period=40.9 persons=1 idle=9% npu_gap=2.1 jit_lw=50.6 jit_rw=61.1 jit_ls=20.8 jit_rs=24.3
+[12:51:47.876][RX] CPU%/max_us 3/1976 62/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:47.897][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:48.042][RX] pose fps=24 npu=38.7 wait=5.3 decode=20.2 kpt=0.7 gui=20.3 e2e=107.1 period=38.9 persons=1 idle=6% npu_gap=0.1 jit_lw=78.3 jit_rw=151.8 jit_ls=50.3 jit_rs=84.4
+[12:51:48.875][RX] CPU%/max_us 2/1976 53/2100 32/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:48.903][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:49.037][RX] pose fps=22 npu=38.8 wait=15.4 decode=20.1 kpt=0.9 gui=29.3 e2e=122.4 period=44.6 persons=1 idle=10% npu_gap=5.8 jit_lw=61.7 jit_rw=36.4 jit_ls=32.0 jit_rs=31.9
+[12:51:49.912][RX] CPU%/max_us 2/1976 61/2100 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:49.932][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:50.061][RX] pose fps=23 npu=38.7 wait=9.1 decode=20.1 kpt=0.8 gui=24.7 e2e=110.7 period=42.0 persons=1 idle=7% npu_gap=3.2 jit_lw=68.2 jit_rw=110.0 jit_ls=34.5 jit_rs=39.3
+[12:51:50.921][RX] CPU%/max_us 2/1976 60/2100 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:50.948][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:51.069][RX] pose fps=23 npu=38.8 wait=8.2 decode=20.1 kpt=0.7 gui=22.6 e2e=109.5 period=42.2 persons=1 idle=11% npu_gap=3.4 jit_lw=43.2 jit_rw=76.9 jit_ls=22.6 jit_rs=23.0
+[12:51:51.932][RX] CPU%/max_us 2/1976 60/2100 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:51.952][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:52.150][RX] pose fps=22 npu=38.7 wait=11.3 decode=20.1 kpt=0.8 gui=24.4 e2e=114.7 period=41.9 persons=1 idle=7% npu_gap=3.2 jit_lw=80.9 jit_rw=56.2 jit_ls=26.6 jit_rs=26.8
+[12:51:52.941][RX] CPU%/max_us 2/1976 55/2100 31/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:52.956][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:53.090][RX] pose fps=22 npu=38.8 wait=21.1 decode=20.0 kpt=0.9 gui=28.4 e2e=131.9 period=45.2 persons=1 idle=9% npu_gap=6.4 jit_lw=119.7 jit_rw=106.8 jit_ls=39.5 jit_rs=47.4
+[12:51:53.958][RX] CPU%/max_us 2/1976 62/2100 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:53.991][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:54.113][RX] pose fps=22 npu=38.8 wait=15.3 decode=20.1 kpt=0.8 gui=23.0 e2e=119.9 period=43.4 persons=2 idle=8% npu_gap=4.6 jit_lw=53.5 jit_rw=49.6 jit_ls=33.1 jit_rs=37.7
+[12:51:54.969][RX] CPU%/max_us 2/1976 61/2100 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:54.998][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:55.115][RX] pose fps=24 npu=38.7 wait=6.9 decode=20.2 kpt=0.8 gui=22.6 e2e=110.5 period=41.0 persons=2 idle=7% npu_gap=2.2 jit_lw=57.8 jit_rw=53.6 jit_ls=18.7 jit_rs=11.1
+[12:51:55.984][RX] CPU%/max_us 3/1976 58/2100 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:56.012][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:56.127][RX] pose fps=23 npu=38.7 wait=4.4 decode=20.2 kpt=0.8 gui=21.8 e2e=103.9 period=40.0 persons=2 idle=9% npu_gap=1.2 jit_lw=75.7 jit_rw=84.2 jit_ls=27.1 jit_rs=26.1
+[12:51:56.987][RX] CPU%/max_us 2/1976 58/2100 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:57.017][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:57.143][RX] pose fps=24 npu=38.7 wait=8.6 decode=20.1 kpt=0.7 gui=22.8 e2e=109.7 period=40.7 persons=1 idle=8% npu_gap=2.0 jit_lw=21.4 jit_rw=108.0 jit_ls=18.4 jit_rs=13.5
+[12:51:57.327][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[12:51:58.010][RX] CPU%/max_us 3/1976 60/2100 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:58.041][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:58.156][RX] pose fps=21 npu=38.7 wait=13.8 decode=20.1 kpt=0.8 gui=27.1 e2e=117.8 period=44.8 persons=1 idle=10% npu_gap=6.0 jit_lw=74.4 jit_rw=14.1 jit_ls=17.4 jit_rs=8.4
+[12:51:59.039][RX] CPU%/max_us 2/1976 54/2100 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:51:59.058][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:51:59.181][RX] pose fps=24 npu=38.7 wait=7.6 decode=20.1 kpt=0.8 gui=22.9 e2e=106.1 period=40.7 persons=1 idle=10% npu_gap=1.9 jit_lw=51.9 jit_rw=47.6 jit_ls=23.4 jit_rs=29.4
+[12:52:00.025][RX] CPU%/max_us 2/1976 47/2100 32/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:00.057][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:00.199][RX] pose fps=22 npu=38.8 wait=10.8 decode=20.1 kpt=0.8 gui=27.7 e2e=112.6 period=43.1 persons=1 idle=11% npu_gap=4.3 jit_lw=75.4 jit_rw=75.6 jit_ls=30.1 jit_rs=50.5
+[12:52:01.046][RX] CPU%/max_us 3/1976 64/2100 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:01.067][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:01.186][RX] pose fps=22 npu=38.8 wait=17.1 decode=20.0 kpt=0.8 gui=25.9 e2e=124.6 period=44.5 persons=2 idle=10% npu_gap=5.6 jit_lw=32.2 jit_rw=41.1 jit_ls=37.3 jit_rs=37.3
+[12:52:02.076][RX] CPU%/max_us 2/1976 57/2100 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:02.098][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:02.228][RX] pose fps=22 npu=38.9 wait=14.9 decode=20.0 kpt=0.8 gui=27.7 e2e=120.0 period=43.4 persons=2 idle=12% npu_gap=4.4 jit_lw=101.6 jit_rw=108.2 jit_ls=30.5 jit_rs=31.2
+[12:52:03.078][RX] CPU%/max_us 3/1976 57/2100 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:03.104][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:03.217][RX] pose fps=22 npu=38.8 wait=10.6 decode=20.1 kpt=0.7 gui=24.0 e2e=110.9 period=43.9 persons=1 idle=13% npu_gap=5.1 jit_lw=70.9 jit_rw=39.0 jit_ls=22.2 jit_rs=29.1
+[12:52:04.100][RX] CPU%/max_us 2/1976 54/2100 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:04.133][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:04.254][RX] pose fps=22 npu=38.8 wait=10.4 decode=20.1 kpt=0.8 gui=24.9 e2e=110.9 period=43.0 persons=1 idle=13% npu_gap=4.2 jit_lw=91.1 jit_rw=67.2 jit_ls=12.4 jit_rs=15.6
+[12:52:05.127][RX] CPU%/max_us 3/1976 60/2100 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:05.171][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:05.306][RX] pose fps=22 npu=38.9 wait=12.9 decode=20.1 kpt=0.8 gui=26.1 e2e=117.3 period=42.9 persons=1 idle=12% npu_gap=4.0 jit_lw=127.9 jit_rw=64.3 jit_ls=11.9 jit_rs=21.4
+[12:52:06.131][RX] CPU%/max_us 2/1976 56/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:06.170][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:06.297][RX] pose fps=22 npu=38.8 wait=14.2 decode=20.1 kpt=0.9 gui=26.5 e2e=118.8 period=43.6 persons=1 idle=11% npu_gap=4.8 jit_lw=0.0 jit_rw=0.0 jit_ls=22.5 jit_rs=24.8
+[12:52:07.148][RX] CPU%/max_us 2/1976 55/2100 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:07.188][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:07.333][RX] pose fps=22 npu=38.8 wait=12.5 decode=20.1 kpt=0.8 gui=27.7 e2e=116.0 period=44.0 persons=1 idle=15% npu_gap=5.1 jit_lw=117.0 jit_rw=63.9 jit_ls=51.8 jit_rs=71.3
+[12:52:08.146][RX] CPU%/max_us 2/1976 58/2100 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:08.168][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:08.289][RX] pose fps=20 npu=38.9 wait=19.6 decode=19.9 kpt=0.7 gui=30.9 e2e=122.4 period=46.8 persons=1 idle=16% npu_gap=7.9 jit_lw=127.5 jit_rw=125.6 jit_ls=42.4 jit_rs=55.3
+[12:52:09.150][RX] CPU%/max_us 3/1976 64/2100 12/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:09.170][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:09.285][RX] pose fps=24 npu=38.8 wait=9.3 decode=20.0 kpt=0.3 gui=21.8 e2e=111.5 period=41.1 persons=0 idle=17% npu_gap=2.2 jit_lw=0.0 jit_rw=0.0 jit_ls=77.7 jit_rs=131.0
+[12:52:10.233][RX] CPU%/max_us 1/1976 42/2100 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:10.281][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:10.458][RX] pose fps=22 npu=38.8 wait=7.8 decode=20.1 kpt=0.3 gui=31.4 e2e=121.4 period=41.2 persons=1 idle=19% npu_gap=2.4 jit_lw=136.6 jit_rw=0.0 jit_ls=65.2 jit_rs=236.2
+[12:52:11.231][RX] CPU%/max_us 1/1976 41/2100 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:11.277][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:11.455][RX] pose fps=17 npu=39.5 wait=49.7 decode=19.6 kpt=0.7 gui=42.1 e2e=170.3 period=57.9 persons=1 idle=26% npu_gap=18.4 jit_lw=45.6 jit_rw=0.0 jit_ls=40.2 jit_rs=66.1
+[12:52:12.301][RX] CPU%/max_us 2/1976 47/2100 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:12.321][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:12.535][RX] pose fps=16 npu=39.4 wait=52.2 decode=19.5 kpt=0.7 gui=42.8 e2e=173.3 period=59.7 persons=1 idle=27% npu_gap=20.2 jit_lw=0.0 jit_rw=0.0 jit_ls=20.6 jit_rs=16.5
+[12:52:13.343][RX] CPU%/max_us 2/1976 48/2100 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:13.365][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:13.554][RX] pose fps=17 npu=39.4 wait=42.8 decode=19.7 kpt=0.7 gui=40.4 e2e=161.5 period=55.9 persons=1 idle=23% npu_gap=16.5 jit_lw=0.0 jit_rw=0.0 jit_ls=13.2 jit_rs=10.3
+[12:52:14.330][RX] CPU%/max_us 1/1976 44/2100 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:14.378][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:14.565][RX] pose fps=17 npu=39.3 wait=39.5 decode=19.7 kpt=0.6 gui=43.0 e2e=160.1 period=54.1 persons=1 idle=25% npu_gap=14.7 jit_lw=0.0 jit_rw=0.0 jit_ls=12.7 jit_rs=9.3
+[12:52:15.334][RX] CPU%/max_us 2/1976 57/2100 20/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:15.378][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:15.568][RX] pose fps=17 npu=39.4 wait=48.4 decode=19.6 kpt=0.7 gui=43.2 e2e=169.1 period=58.5 persons=1 idle=27% npu_gap=19.0 jit_lw=0.0 jit_rw=0.0 jit_ls=14.5 jit_rs=8.8
+[12:52:16.419][RX] CPU%/max_us 1/1976 46/2100 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:16.432][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:16.611][RX] pose fps=20 npu=39.2 wait=28.8 decode=19.9 kpt=0.6 gui=40.5 e2e=148.5 period=49.4 persons=1 idle=21% npu_gap=10.2 jit_lw=0.0 jit_rw=0.0 jit_ls=12.6 jit_rs=11.7
+[12:52:17.440][RX] CPU%/max_us 2/1976 51/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:17.489][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:17.640][RX] pose fps=18 npu=39.2 wait=32.3 decode=19.8 kpt=0.6 gui=41.4 e2e=143.3 period=53.6 persons=1 idle=24% npu_gap=14.3 jit_lw=0.0 jit_rw=0.0 jit_ls=17.6 jit_rs=13.0
+[12:52:18.449][RX] CPU%/max_us 2/1976 51/2100 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:18.495][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:18.679][RX] pose fps=19 npu=39.1 wait=25.6 decode=19.9 kpt=0.6 gui=40.1 e2e=142.4 period=49.2 persons=1 idle=22% npu_gap=10.0 jit_lw=0.0 jit_rw=0.0 jit_ls=11.6 jit_rs=8.5
+[12:52:19.465][RX] CPU%/max_us 1/1976 41/2100 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:19.516][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:19.674][RX] pose fps=18 npu=39.3 wait=34.9 decode=19.8 kpt=0.6 gui=40.7 e2e=147.0 period=52.1 persons=1 idle=23% npu_gap=12.8 jit_lw=0.0 jit_rw=0.0 jit_ls=16.8 jit_rs=23.5
+[12:52:20.509][RX] CPU%/max_us 2/1976 46/2100 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:20.526][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:20.756][RX] pose fps=17 npu=39.3 wait=46.3 decode=19.7 kpt=0.7 gui=42.5 e2e=168.7 period=57.9 persons=1 idle=26% npu_gap=18.5 jit_lw=0.0 jit_rw=0.0 jit_ls=15.1 jit_rs=14.6
+[12:52:21.455][RX] CPU%/max_us 1/1976 41/2100 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:21.501][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:21.695][RX] pose fps=17 npu=39.4 wait=44.1 decode=19.7 kpt=0.6 gui=44.4 e2e=166.4 period=56.4 persons=1 idle=25% npu_gap=16.9 jit_lw=0.0 jit_rw=0.0 jit_ls=11.2 jit_rs=15.1
+[12:52:22.509][RX] CPU%/max_us 1/1976 42/2100 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:22.530][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:22.756][RX] pose fps=16 npu=39.3 wait=45.3 decode=19.7 kpt=0.7 gui=43.1 e2e=166.7 period=57.6 persons=1 idle=27% npu_gap=18.2 jit_lw=0.0 jit_rw=0.0 jit_ls=23.6 jit_rs=22.1
+[12:52:23.568][RX] CPU%/max_us 1/1976 42/2100 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:23.618][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:23.815][RX] pose fps=17 npu=39.4 wait=45.2 decode=19.6 kpt=0.6 gui=42.9 e2e=162.4 period=56.6 persons=1 idle=26% npu_gap=17.2 jit_lw=8.2 jit_rw=39.3 jit_ls=12.0 jit_rs=15.8
+[12:52:24.589][RX] CPU%/max_us 1/1976 41/2100 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:24.642][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:24.839][RX] pose fps=16 npu=39.4 wait=49.0 decode=19.6 kpt=0.7 gui=44.3 e2e=170.7 period=58.0 persons=1 idle=26% npu_gap=18.6 jit_lw=20.3 jit_rw=5.8 jit_ls=17.1 jit_rs=13.3
+[12:52:25.612][RX] CPU%/max_us 1/1976 42/2100 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:25.666][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:25.865][RX] pose fps=16 npu=39.4 wait=54.1 decode=19.5 kpt=0.7 gui=46.1 e2e=177.3 period=60.3 persons=1 idle=28% npu_gap=20.8 jit_lw=18.3 jit_rw=14.9 jit_ls=12.7 jit_rs=11.4
+[12:52:26.601][RX] CPU%/max_us 1/1976 38/2100 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:26.650][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:26.805][RX] pose fps=16 npu=39.4 wait=52.0 decode=19.6 kpt=0.7 gui=42.8 e2e=171.7 period=60.2 persons=1 idle=28% npu_gap=20.7 jit_lw=15.4 jit_rw=37.4 jit_ls=27.6 jit_rs=23.3
+[12:52:27.650][RX] CPU%/max_us 1/1976 46/2275 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:27.670][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:27.851][RX] pose fps=16 npu=39.5 wait=51.5 decode=19.6 kpt=0.8 gui=45.9 e2e=182.8 period=59.6 persons=3 idle=25% npu_gap=20.1 jit_lw=0.0 jit_rw=0.0 jit_ls=21.4 jit_rs=64.0
+[12:52:28.661][RX] CPU%/max_us 1/1976 43/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:28.681][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:28.854][RX] pose fps=17 npu=39.1 wait=37.7 decode=20.1 kpt=1.7 gui=49.9 e2e=159.4 period=56.4 persons=4 idle=21% npu_gap=17.2 jit_lw=0.0 jit_rw=230.1 jit_ls=177.1 jit_rs=221.0
+[12:52:29.699][RX] CPU%/max_us 2/1976 51/2275 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:29.746][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:29.899][RX] pose fps=17 npu=39.3 wait=39.8 decode=19.8 kpt=0.7 gui=47.7 e2e=170.5 period=54.7 persons=1 idle=24% npu_gap=15.3 jit_lw=28.4 jit_rw=88.4 jit_ls=73.6 jit_rs=87.2
+[12:52:30.721][RX] CPU%/max_us 2/1976 49/2275 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:30.733][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:30.892][RX] pose fps=19 npu=39.1 wait=26.3 decode=19.8 kpt=0.7 gui=42.5 e2e=138.3 period=49.7 persons=1 idle=22% npu_gap=10.5 jit_lw=0.0 jit_rw=0.0 jit_ls=44.5 jit_rs=47.3
+[12:52:31.724][RX] CPU%/max_us 1/1976 38/2275 31/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:31.780][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:31.936][RX] pose fps=19 npu=39.2 wait=26.9 decode=19.9 kpt=0.7 gui=37.1 e2e=138.2 period=50.2 persons=1 idle=21% npu_gap=11.0 jit_lw=0.0 jit_rw=43.8 jit_ls=34.2 jit_rs=40.6
+[12:52:32.750][RX] CPU%/max_us 2/1976 53/2275 32/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:32.794][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:32.925][RX] pose fps=18 npu=39.3 wait=37.4 decode=19.8 kpt=0.9 gui=42.6 e2e=163.2 period=54.0 persons=3 idle=23% npu_gap=14.7 jit_lw=0.0 jit_rw=28.7 jit_ls=65.6 jit_rs=91.8
+[12:52:33.769][RX] CPU%/max_us 2/1976 57/2275 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:33.790][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:33.913][RX] pose fps=20 npu=38.9 wait=23.4 decode=20.0 kpt=1.2 gui=36.9 e2e=136.9 period=47.0 persons=1 idle=11% npu_gap=8.1 jit_lw=139.8 jit_rw=95.8 jit_ls=84.6 jit_rs=23.1
+[12:52:34.792][RX] CPU%/max_us 2/1976 63/2275 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:34.831][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:34.972][RX] pose fps=22 npu=38.7 wait=13.1 decode=20.0 kpt=0.9 gui=26.8 e2e=115.8 period=44.2 persons=1 idle=10% npu_gap=5.4 jit_lw=46.9 jit_rw=88.9 jit_ls=31.9 jit_rs=25.0
+[12:52:35.787][RX] CPU%/max_us 2/1976 59/2275 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:35.829][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:35.974][RX] pose fps=23 npu=38.7 wait=7.7 decode=20.2 kpt=0.8 gui=20.5 e2e=108.1 period=41.4 persons=2 idle=8% npu_gap=2.7 jit_lw=78.8 jit_rw=54.9 jit_ls=23.9 jit_rs=43.6
+[12:52:36.838][RX] CPU%/max_us 2/1976 60/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:36.858][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:37.019][RX] pose fps=21 npu=38.7 wait=18.7 decode=20.0 kpt=1.0 gui=29.6 e2e=123.1 period=45.1 persons=2 idle=8% npu_gap=6.3 jit_lw=107.7 jit_rw=85.6 jit_ls=26.7 jit_rs=35.2
+[12:52:37.834][RX] CPU%/max_us 3/1976 65/2275 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:37.854][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:37.991][RX] pose fps=21 npu=38.8 wait=17.7 decode=20.2 kpt=1.2 gui=33.7 e2e=127.4 period=45.8 persons=2 idle=9% npu_gap=7.0 jit_lw=63.0 jit_rw=192.9 jit_ls=21.5 jit_rs=19.0
+[12:52:38.859][RX] CPU%/max_us 2/1976 65/2275 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:38.891][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:39.038][RX] pose fps=22 npu=38.7 wait=15.6 decode=20.1 kpt=0.8 gui=26.8 e2e=122.3 period=43.8 persons=1 idle=8% npu_gap=5.0 jit_lw=83.6 jit_rw=104.4 jit_ls=52.5 jit_rs=49.2
+[12:52:39.861][RX] CPU%/max_us 3/1976 62/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:39.891][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:40.042][RX] pose fps=24 npu=38.6 wait=4.7 decode=20.3 kpt=0.9 gui=22.3 e2e=107.1 period=40.0 persons=2 idle=6% npu_gap=1.3 jit_lw=40.2 jit_rw=43.9 jit_ls=22.0 jit_rs=23.1
+[12:52:40.886][RX] CPU%/max_us 3/1976 66/2275 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:40.920][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:41.046][RX] pose fps=23 npu=38.7 wait=12.1 decode=20.2 kpt=1.1 gui=27.7 e2e=117.2 period=43.0 persons=2 idle=6% npu_gap=4.2 jit_lw=88.9 jit_rw=76.1 jit_ls=36.1 jit_rs=31.0
+[12:52:41.894][RX] CPU%/max_us 3/1976 66/2275 23/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:41.928][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:42.041][RX] pose fps=23 npu=38.7 wait=5.7 decode=20.2 kpt=0.7 gui=20.7 e2e=106.0 period=40.3 persons=1 idle=9% npu_gap=1.5 jit_lw=75.1 jit_rw=64.9 jit_ls=38.6 jit_rs=36.0
+[12:52:42.893][RX] CPU%/max_us 3/1976 61/2275 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:42.927][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:43.047][RX] pose fps=24 npu=38.7 wait=4.0 decode=20.2 kpt=0.7 gui=20.3 e2e=105.8 period=39.7 persons=1 idle=7% npu_gap=1.0 jit_lw=41.2 jit_rw=71.9 jit_ls=23.9 jit_rs=26.6
+[12:52:43.958][RX] CPU%/max_us 2/1976 58/2275 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:43.978][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:44.093][RX] pose fps=24 npu=38.7 wait=6.4 decode=20.2 kpt=0.7 gui=21.2 e2e=109.4 period=40.2 persons=1 idle=7% npu_gap=1.5 jit_lw=38.1 jit_rw=61.7 jit_ls=10.7 jit_rs=19.2
+[12:52:45.001][RX] CPU%/max_us 2/1976 57/2275 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:45.018][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:45.161][RX] pose fps=21 npu=38.7 wait=12.8 decode=20.1 kpt=1.0 gui=29.0 e2e=114.1 period=44.9 persons=2 idle=8% npu_gap=6.1 jit_lw=63.5 jit_rw=137.6 jit_ls=41.2 jit_rs=55.9
+[12:52:46.027][RX] CPU%/max_us 2/1976 59/2275 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:46.049][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:46.225][RX] pose fps=21 npu=38.7 wait=18.3 decode=20.1 kpt=1.4 gui=36.4 e2e=125.2 period=45.5 persons=2 idle=7% npu_gap=6.7 jit_lw=67.5 jit_rw=59.0 jit_ls=22.4 jit_rs=23.8
+[12:52:47.034][RX] CPU%/max_us 2/1976 57/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:47.080][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:47.198][RX] pose fps=21 npu=38.7 wait=19.6 decode=20.0 kpt=0.9 gui=29.7 e2e=127.5 period=47.5 persons=1 idle=9% npu_gap=8.7 jit_lw=89.5 jit_rw=131.4 jit_ls=37.8 jit_rs=57.9
+[12:52:48.053][RX] CPU%/max_us 2/1976 53/2275 33/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:48.091][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:48.232][RX] pose fps=20 npu=38.8 wait=16.3 decode=20.0 kpt=0.9 gui=27.7 e2e=116.9 period=44.4 persons=2 idle=11% npu_gap=5.6 jit_lw=34.8 jit_rw=29.2 jit_ls=45.2 jit_rs=37.2
+[12:52:49.041][RX] CPU%/max_us 2/1976 59/2275 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:49.064][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:49.186][RX] pose fps=22 npu=38.8 wait=18.2 decode=20.0 kpt=1.0 gui=29.4 e2e=120.4 period=44.8 persons=1 idle=8% npu_gap=6.0 jit_lw=73.0 jit_rw=42.0 jit_ls=42.0 jit_rs=31.6
+[12:52:50.054][RX] CPU%/max_us 2/1976 59/2275 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:50.080][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:50.208][RX] pose fps=22 npu=38.7 wait=8.3 decode=20.2 kpt=0.9 gui=31.2 e2e=113.2 period=43.5 persons=1 idle=7% npu_gap=4.7 jit_lw=97.5 jit_rw=122.5 jit_ls=28.4 jit_rs=40.1
+[12:52:51.087][RX] CPU%/max_us 3/1976 59/2275 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:51.122][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:51.275][RX] pose fps=23 npu=38.7 wait=7.7 decode=20.2 kpt=0.8 gui=22.6 e2e=109.3 period=41.4 persons=1 idle=7% npu_gap=2.7 jit_lw=52.9 jit_rw=28.0 jit_ls=22.3 jit_rs=17.6
+[12:52:52.106][RX] CPU%/max_us 2/1976 59/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:52.127][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:52.288][RX] pose fps=21 npu=38.7 wait=13.9 decode=20.1 kpt=1.1 gui=28.6 e2e=117.5 period=44.1 persons=2 idle=8% npu_gap=5.3 jit_lw=112.1 jit_rw=124.1 jit_ls=55.4 jit_rs=64.3
+[12:52:53.130][RX] CPU%/max_us 2/1976 57/2275 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:53.152][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:53.276][RX] pose fps=22 npu=38.7 wait=10.4 decode=20.1 kpt=0.9 gui=27.5 e2e=113.2 period=43.5 persons=1 idle=7% npu_gap=4.8 jit_lw=30.6 jit_rw=41.6 jit_ls=28.2 jit_rs=30.6
+[12:52:54.143][RX] CPU%/max_us 2/1976 56/2275 31/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:54.163][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:54.325][RX] pose fps=22 npu=38.8 wait=14.4 decode=20.1 kpt=1.0 gui=29.6 e2e=120.3 period=43.9 persons=2 idle=9% npu_gap=5.1 jit_lw=89.2 jit_rw=100.9 jit_ls=28.2 jit_rs=24.0
+[12:52:55.145][RX] CPU%/max_us 2/1976 59/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:55.179][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:55.321][RX] pose fps=20 npu=38.8 wait=23.7 decode=20.0 kpt=1.1 gui=32.8 e2e=130.3 period=48.6 persons=2 idle=10% npu_gap=9.8 jit_lw=101.1 jit_rw=131.4 jit_ls=42.8 jit_rs=48.5
+[12:52:56.183][RX] CPU%/max_us 2/1976 57/2275 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:56.203][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:56.341][RX] pose fps=21 npu=38.7 wait=12.7 decode=20.1 kpt=1.1 gui=29.5 e2e=118.2 period=45.1 persons=2 idle=8% npu_gap=6.4 jit_lw=83.3 jit_rw=99.1 jit_ls=50.2 jit_rs=57.5
+[12:52:57.211][RX] CPU%/max_us 2/1976 59/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:57.252][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:57.315][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[12:52:57.402][RX] pose fps=22 npu=38.7 wait=10.4 decode=20.1 kpt=1.0 gui=26.1 e2e=109.3 period=43.5 persons=2 idle=9% npu_gap=4.7 jit_lw=88.0 jit_rw=105.4 jit_ls=78.2 jit_rs=82.7
+[12:52:58.220][RX] CPU%/max_us 2/1976 57/2275 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:58.241][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:58.366][RX] pose fps=21 npu=38.7 wait=16.6 decode=20.1 kpt=0.9 gui=29.8 e2e=123.0 period=45.3 persons=1 idle=8% npu_gap=6.5 jit_lw=73.8 jit_rw=61.9 jit_ls=27.8 jit_rs=21.0
+[12:52:59.227][RX] CPU%/max_us 2/1976 62/2275 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:52:59.261][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:52:59.405][RX] pose fps=23 npu=38.7 wait=12.5 decode=20.1 kpt=0.8 gui=23.0 e2e=116.0 period=42.2 persons=1 idle=7% npu_gap=3.4 jit_lw=39.8 jit_rw=93.1 jit_ls=26.5 jit_rs=35.4
+[12:53:00.260][RX] CPU%/max_us 3/1976 65/2275 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:00.291][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:00.423][RX] pose fps=23 npu=38.7 wait=11.0 decode=20.1 kpt=0.8 gui=23.3 e2e=113.7 period=42.5 persons=0 idle=7% npu_gap=3.7 jit_lw=168.8 jit_rw=154.8 jit_ls=33.8 jit_rs=49.4
+[12:53:01.268][RX] CPU%/max_us 2/1976 56/2275 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:01.295][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:01.414][RX] pose fps=22 npu=38.7 wait=7.5 decode=20.1 kpt=0.7 gui=22.7 e2e=105.6 period=42.5 persons=1 idle=10% npu_gap=3.8 jit_lw=155.8 jit_rw=36.2 jit_ls=23.5 jit_rs=27.0
+[12:53:02.280][RX] CPU%/max_us 2/1976 57/2275 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:02.313][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:02.476][RX] pose fps=22 npu=38.7 wait=12.6 decode=20.1 kpt=0.8 gui=23.0 e2e=113.1 period=44.7 persons=2 idle=9% npu_gap=5.9 jit_lw=32.9 jit_rw=82.6 jit_ls=20.0 jit_rs=17.8
+[12:53:03.310][RX] CPU%/max_us 2/1976 58/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:03.331][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:03.503][RX] pose fps=22 npu=38.7 wait=13.9 decode=20.1 kpt=1.1 gui=31.0 e2e=119.9 period=43.1 persons=2 idle=8% npu_gap=4.3 jit_lw=56.7 jit_rw=96.0 jit_ls=22.8 jit_rs=23.1
+[12:53:04.327][RX] CPU%/max_us 2/1976 58/2275 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:04.367][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:04.504][RX] pose fps=22 npu=38.7 wait=14.5 decode=20.1 kpt=1.1 gui=28.0 e2e=118.8 period=44.1 persons=2 idle=8% npu_gap=5.3 jit_lw=46.2 jit_rw=43.7 jit_ls=18.9 jit_rs=36.1
+[12:53:05.334][RX] CPU%/max_us 3/1976 59/2275 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:05.354][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:05.501][RX] pose fps=22 npu=38.7 wait=13.1 decode=20.2 kpt=1.1 gui=26.9 e2e=115.8 period=44.7 persons=2 idle=8% npu_gap=5.9 jit_lw=93.5 jit_rw=79.2 jit_ls=44.6 jit_rs=37.7
+[12:53:06.365][RX] CPU%/max_us 2/1976 60/2275 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:06.386][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:06.518][RX] pose fps=21 npu=38.8 wait=13.9 decode=20.2 kpt=1.1 gui=26.8 e2e=115.9 period=43.5 persons=2 idle=9% npu_gap=4.7 jit_lw=99.2 jit_rw=80.1 jit_ls=31.4 jit_rs=34.7
+[12:53:07.354][RX] CPU%/max_us 2/1976 60/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:07.375][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:07.514][RX] pose fps=22 npu=38.8 wait=15.8 decode=20.1 kpt=1.1 gui=27.9 e2e=120.4 period=44.6 persons=2 idle=8% npu_gap=5.8 jit_lw=62.1 jit_rw=72.9 jit_ls=32.9 jit_rs=25.5
+[12:53:08.358][RX] CPU%/max_us 2/1976 61/2275 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:08.395][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:08.528][RX] pose fps=22 npu=38.8 wait=13.1 decode=20.2 kpt=1.1 gui=26.3 e2e=115.9 period=43.3 persons=2 idle=7% npu_gap=4.6 jit_lw=68.1 jit_rw=57.1 jit_ls=15.5 jit_rs=11.5
+[12:53:09.377][RX] CPU%/max_us 2/1976 59/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:09.398][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:09.529][RX] pose fps=21 npu=38.8 wait=13.9 decode=20.1 kpt=1.1 gui=24.4 e2e=114.1 period=45.0 persons=2 idle=9% npu_gap=6.1 jit_lw=67.7 jit_rw=80.3 jit_ls=23.5 jit_rs=22.1
+[12:53:10.396][RX] CPU%/max_us 2/1976 60/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:10.417][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:10.558][RX] pose fps=23 npu=38.7 wait=13.0 decode=20.1 kpt=1.1 gui=29.5 e2e=118.5 period=42.9 persons=2 idle=8% npu_gap=4.1 jit_lw=41.5 jit_rw=91.5 jit_ls=21.1 jit_rs=13.0
+[12:53:11.417][RX] CPU%/max_us 2/1976 60/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:11.450][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:11.599][RX] pose fps=21 npu=38.7 wait=11.2 decode=20.2 kpt=1.1 gui=25.6 e2e=111.9 period=44.5 persons=2 idle=8% npu_gap=5.7 jit_lw=83.6 jit_rw=40.1 jit_ls=14.8 jit_rs=16.1
+[12:53:12.446][RX] CPU%/max_us 2/1976 58/2275 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:12.459][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:12.589][RX] pose fps=22 npu=38.7 wait=14.8 decode=20.2 kpt=1.1 gui=27.6 e2e=121.0 period=43.9 persons=2 idle=8% npu_gap=5.1 jit_lw=47.8 jit_rw=56.6 jit_ls=25.3 jit_rs=58.3
+[12:53:13.434][RX] CPU%/max_us 2/1976 61/2275 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:13.455][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:13.576][RX] pose fps=21 npu=38.9 wait=13.9 decode=20.1 kpt=1.1 gui=27.8 e2e=115.5 period=44.4 persons=2 idle=10% npu_gap=5.5 jit_lw=56.8 jit_rw=67.3 jit_ls=34.1 jit_rs=49.1
+[12:53:14.459][RX] CPU%/max_us 2/1976 58/2275 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:14.481][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:14.642][RX] pose fps=23 npu=38.8 wait=11.1 decode=20.2 kpt=1.1 gui=27.5 e2e=114.3 period=42.3 persons=2 idle=10% npu_gap=3.4 jit_lw=0.0 jit_rw=35.2 jit_ls=23.9 jit_rs=21.9
+[12:53:15.466][RX] CPU%/max_us 2/1976 57/2275 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:15.487][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:15.614][RX] pose fps=22 npu=38.7 wait=12.2 decode=20.2 kpt=1.1 gui=31.2 e2e=118.2 period=44.0 persons=2 idle=10% npu_gap=5.1 jit_lw=138.0 jit_rw=122.8 jit_ls=18.4 jit_rs=18.7
+[12:53:16.479][RX] CPU%/max_us 2/1976 54/2275 30/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:16.499][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:16.635][RX] pose fps=21 npu=38.8 wait=15.6 decode=20.2 kpt=1.1 gui=31.4 e2e=124.1 period=45.4 persons=2 idle=10% npu_gap=6.5 jit_lw=83.2 jit_rw=53.5 jit_ls=13.4 jit_rs=14.3
+[12:53:17.509][RX] CPU%/max_us 2/1976 59/2275 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:17.529][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:17.665][RX] pose fps=21 npu=38.8 wait=17.5 decode=20.1 kpt=1.1 gui=32.6 e2e=126.9 period=45.2 persons=2 idle=10% npu_gap=6.3 jit_lw=47.2 jit_rw=55.2 jit_ls=10.3 jit_rs=10.2
+[12:53:18.520][RX] CPU%/max_us 2/1976 60/2275 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:18.552][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:18.692][RX] pose fps=22 npu=38.9 wait=14.9 decode=20.1 kpt=1.1 gui=29.0 e2e=123.0 period=43.4 persons=2 idle=11% npu_gap=4.5 jit_lw=0.0 jit_rw=14.1 jit_ls=16.4 jit_rs=17.6
+[12:53:19.538][RX] CPU%/max_us 2/1976 60/2275 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:19.559][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:19.692][RX] pose fps=22 npu=38.8 wait=11.8 decode=20.1 kpt=1.1 gui=27.9 e2e=117.1 period=43.3 persons=2 idle=10% npu_gap=4.4 jit_lw=0.0 jit_rw=16.7 jit_ls=45.6 jit_rs=48.0
+[12:53:20.617][RX] CPU%/max_us 1/1976 43/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:20.637][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:20.855][RX] pose fps=21 npu=38.8 wait=13.8 decode=20.1 kpt=1.1 gui=32.4 e2e=118.0 period=45.6 persons=1 idle=14% npu_gap=6.6 jit_lw=166.4 jit_rw=92.8 jit_ls=121.5 jit_rs=146.8
+[12:53:21.607][RX] CPU%/max_us 1/1976 46/2275 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:21.654][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:21.844][RX] pose fps=16 npu=39.5 wait=54.9 decode=19.5 kpt=0.7 gui=46.1 e2e=182.5 period=60.5 persons=1 idle=26% npu_gap=20.9 jit_lw=28.4 jit_rw=84.3 jit_ls=69.6 jit_rs=119.0
+[12:53:22.624][RX] CPU%/max_us 2/1976 48/2275 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:22.644][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:22.873][RX] pose fps=17 npu=39.3 wait=44.7 decode=19.6 kpt=0.7 gui=40.7 e2e=163.7 period=55.7 persons=1 idle=25% npu_gap=16.3 jit_lw=0.0 jit_rw=0.0 jit_ls=15.6 jit_rs=37.7
+[12:53:23.665][RX] CPU%/max_us 1/1976 38/2275 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:23.727][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:23.880][RX] pose fps=17 npu=39.4 wait=42.1 decode=19.7 kpt=0.6 gui=43.6 e2e=158.9 period=54.9 persons=1 idle=25% npu_gap=15.5 jit_lw=0.0 jit_rw=0.0 jit_ls=24.5 jit_rs=24.5
+[12:53:24.741][RX] CPU%/max_us 1/1976 47/2275 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:24.794][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:24.994][RX] pose fps=16 npu=39.5 wait=51.4 decode=19.6 kpt=0.7 gui=45.3 e2e=182.1 period=59.2 persons=1 idle=27% npu_gap=19.7 jit_lw=0.0 jit_rw=0.0 jit_ls=18.1 jit_rs=21.2
+[12:53:25.750][RX] CPU%/max_us 2/1976 44/2275 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:25.771][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:25.934][RX] pose fps=17 npu=39.5 wait=43.4 decode=19.7 kpt=0.6 gui=46.8 e2e=172.5 period=56.2 persons=1 idle=26% npu_gap=16.7 jit_lw=0.0 jit_rw=0.0 jit_ls=14.4 jit_rs=11.1
+[12:53:26.749][RX] CPU%/max_us 2/1976 45/2275 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:26.799][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:26.968][RX] pose fps=19 npu=39.3 wait=32.2 decode=19.8 kpt=0.6 gui=44.1 e2e=156.1 period=51.4 persons=1 idle=23% npu_gap=12.1 jit_lw=0.0 jit_rw=0.0 jit_ls=21.1 jit_rs=30.3
+[12:53:27.760][RX] CPU%/max_us 1/1976 44/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:27.818][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:27.980][RX] pose fps=17 npu=39.4 wait=39.0 decode=19.8 kpt=0.6 gui=45.3 e2e=158.1 period=55.8 persons=1 idle=25% npu_gap=16.3 jit_lw=0.0 jit_rw=0.0 jit_ls=17.7 jit_rs=19.5
+[12:53:28.866][RX] CPU%/max_us 1/1976 41/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:28.920][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:29.117][RX] pose fps=17 npu=39.3 wait=40.9 decode=19.8 kpt=0.9 gui=47.7 e2e=164.0 period=56.7 persons=1 idle=23% npu_gap=17.4 jit_lw=0.0 jit_rw=0.0 jit_ls=16.3 jit_rs=24.0
+[12:53:29.920][RX] CPU%/max_us 1/1976 42/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:29.972][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:30.121][RX] pose fps=16 npu=39.4 wait=51.3 decode=19.6 kpt=0.7 gui=43.8 e2e=173.1 period=59.2 persons=1 idle=28% npu_gap=19.6 jit_lw=0.0 jit_rw=0.0 jit_ls=17.4 jit_rs=18.8
+[12:53:30.974][RX] CPU%/max_us 1/1976 42/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:30.998][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:31.192][RX] pose fps=16 npu=39.4 wait=49.3 decode=19.6 kpt=0.7 gui=44.5 e2e=171.6 period=58.1 persons=1 idle=26% npu_gap=18.7 jit_lw=0.0 jit_rw=0.0 jit_ls=16.9 jit_rs=12.7
+[12:53:32.006][RX] CPU%/max_us 2/1976 48/2275 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:32.024][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:32.217][RX] pose fps=17 npu=39.4 wait=44.1 decode=19.7 kpt=0.6 gui=43.8 e2e=166.2 period=56.6 persons=1 idle=26% npu_gap=17.2 jit_lw=0.0 jit_rw=0.0 jit_ls=15.4 jit_rs=16.6
+[12:53:33.049][RX] CPU%/max_us 1/1976 45/2275 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:33.070][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:33.273][RX] pose fps=18 npu=39.2 wait=33.8 decode=19.8 kpt=0.6 gui=43.6 e2e=153.1 period=53.1 persons=1 idle=24% npu_gap=13.8 jit_lw=0.0 jit_rw=0.0 jit_ls=17.0 jit_rs=14.0
+[12:53:34.051][RX] CPU%/max_us 2/1976 47/2275 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:34.072][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:34.233][RX] pose fps=18 npu=39.3 wait=35.2 decode=19.9 kpt=0.6 gui=42.2 e2e=151.9 period=53.6 persons=1 idle=24% npu_gap=14.2 jit_lw=0.0 jit_rw=0.0 jit_ls=18.9 jit_rs=14.7
+[12:53:35.065][RX] CPU%/max_us 1/1976 39/2275 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:35.117][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:35.304][RX] pose fps=19 npu=39.2 wait=30.1 decode=19.9 kpt=0.6 gui=44.0 e2e=146.8 period=51.1 persons=1 idle=22% npu_gap=11.8 jit_lw=0.0 jit_rw=0.0 jit_ls=19.2 jit_rs=16.8
+[12:53:36.108][RX] CPU%/max_us 2/1976 46/2275 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:36.129][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:36.323][RX] pose fps=16 npu=39.4 wait=50.5 decode=19.6 kpt=0.7 gui=44.9 e2e=174.5 period=58.8 persons=1 idle=28% npu_gap=19.3 jit_lw=0.0 jit_rw=0.0 jit_ls=13.2 jit_rs=13.0
+[12:53:37.126][RX] CPU%/max_us 1/1976 42/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:37.147][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:37.333][RX] pose fps=17 npu=39.5 wait=47.9 decode=19.7 kpt=0.7 gui=46.4 e2e=175.0 period=58.8 persons=1 idle=26% npu_gap=19.3 jit_lw=0.0 jit_rw=0.0 jit_ls=16.7 jit_rs=16.7
+[12:53:38.164][RX] CPU%/max_us 1/1976 38/2275 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:38.215][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:38.408][RX] pose fps=16 npu=39.3 wait=43.5 decode=19.7 kpt=0.7 gui=44.4 e2e=160.5 period=56.5 persons=1 idle=26% npu_gap=17.1 jit_lw=0.0 jit_rw=0.0 jit_ls=23.8 jit_rs=38.4
+[12:53:39.178][RX] CPU%/max_us 1/1976 41/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:39.230][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:39.393][RX] pose fps=16 npu=39.5 wait=54.9 decode=19.5 kpt=0.7 gui=41.1 e2e=173.9 period=60.4 persons=1 idle=28% npu_gap=20.8 jit_lw=0.0 jit_rw=0.0 jit_ls=18.9 jit_rs=16.2
+[12:53:40.208][RX] CPU%/max_us 1/1976 41/2275 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:40.261][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:40.394][RX] pose fps=16 npu=39.5 wait=52.8 decode=19.5 kpt=0.7 gui=43.1 e2e=175.4 period=59.7 persons=1 idle=27% npu_gap=20.1 jit_lw=0.0 jit_rw=0.0 jit_ls=26.0 jit_rs=14.6
+[12:53:41.247][RX] CPU%/max_us 2/1976 43/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:41.268][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:41.460][RX] pose fps=17 npu=39.3 wait=45.6 decode=19.7 kpt=0.8 gui=43.7 e2e=169.2 period=57.1 persons=1 idle=25% npu_gap=17.7 jit_lw=46.5 jit_rw=0.0 jit_ls=39.4 jit_rs=29.5
+[12:53:42.274][RX] CPU%/max_us 1/1976 44/2275 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:42.331][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:42.493][RX] pose fps=18 npu=39.3 wait=32.4 decode=19.9 kpt=0.7 gui=45.1 e2e=161.0 period=51.8 persons=1 idle=23% npu_gap=12.5 jit_lw=27.5 jit_rw=0.0 jit_ls=29.6 jit_rs=20.2
+[12:53:43.280][RX] CPU%/max_us 2/1976 52/2275 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:43.300][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:43.496][RX] pose fps=17 npu=39.5 wait=45.6 decode=19.7 kpt=0.6 gui=44.3 e2e=166.9 period=56.5 persons=1 idle=25% npu_gap=17.0 jit_lw=7.1 jit_rw=37.5 jit_ls=43.1 jit_rs=46.9
+[12:53:44.365][RX] CPU%/max_us 2/1976 53/2275 22/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:44.385][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:44.547][RX] pose fps=18 npu=39.3 wait=31.3 decode=19.8 kpt=0.6 gui=47.5 e2e=153.7 period=53.0 persons=1 idle=23% npu_gap=13.6 jit_lw=0.0 jit_rw=37.8 jit_ls=21.6 jit_rs=44.3
+[12:53:45.340][RX] CPU%/max_us 1/1976 41/2275 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:45.389][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:45.575][RX] pose fps=20 npu=39.1 wait=22.4 decode=20.0 kpt=0.6 gui=42.7 e2e=137.6 period=49.4 persons=1 idle=22% npu_gap=10.3 jit_lw=0.0 jit_rw=79.6 jit_ls=19.2 jit_rs=19.6
+[12:53:46.378][RX] CPU%/max_us 1/1976 46/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:46.398][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:46.557][RX] pose fps=17 npu=39.4 wait=43.7 decode=19.6 kpt=0.7 gui=43.5 e2e=165.6 period=56.3 persons=1 idle=25% npu_gap=16.8 jit_lw=0.0 jit_rw=74.1 jit_ls=38.9 jit_rs=53.1
+[12:53:47.423][RX] CPU%/max_us 2/1976 45/2275 27/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:47.444][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:47.610][RX] pose fps=18 npu=39.2 wait=36.6 decode=19.8 kpt=0.6 gui=39.5 e2e=157.3 period=52.9 persons=1 idle=23% npu_gap=13.6 jit_lw=0.0 jit_rw=0.0 jit_ls=41.1 jit_rs=89.3
+[12:53:48.406][RX] CPU%/max_us 2/1976 51/2275 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:48.451][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:48.596][RX] pose fps=19 npu=39.2 wait=33.7 decode=19.8 kpt=0.7 gui=35.9 e2e=145.8 period=51.1 persons=1 idle=22% npu_gap=11.8 jit_lw=0.0 jit_rw=0.0 jit_ls=21.3 jit_rs=29.5
+[12:53:49.443][RX] CPU%/max_us 2/1976 48/2275 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:49.496][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:49.697][RX] pose fps=18 npu=39.1 wait=30.7 decode=19.8 kpt=0.6 gui=40.0 e2e=147.8 period=50.7 persons=1 idle=21% npu_gap=11.5 jit_lw=12.8 jit_rw=0.0 jit_ls=32.1 jit_rs=33.1
+[12:53:50.475][RX] CPU%/max_us 2/1976 47/2275 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:50.495][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:50.654][RX] pose fps=16 npu=39.5 wait=52.5 decode=19.6 kpt=0.6 gui=45.9 e2e=180.8 period=60.1 persons=1 idle=27% npu_gap=20.6 jit_lw=0.0 jit_rw=0.0 jit_ls=47.4 jit_rs=55.8
+[12:53:51.543][RX] CPU%/max_us 2/1976 47/2275 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:51.564][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:51.746][RX] pose fps=19 npu=39.3 wait=29.8 decode=19.9 kpt=0.6 gui=47.0 e2e=152.3 period=52.2 persons=1 idle=23% npu_gap=12.9 jit_lw=0.0 jit_rw=0.0 jit_ls=35.5 jit_rs=59.3
+[12:53:52.558][RX] CPU%/max_us 1/1976 46/2275 26/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:52.605][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:52.775][RX] pose fps=16 npu=39.4 wait=46.4 decode=19.6 kpt=0.7 gui=42.7 e2e=163.5 period=56.7 persons=1 idle=26% npu_gap=17.3 jit_lw=0.0 jit_rw=0.0 jit_ls=30.4 jit_rs=45.2
+[12:53:53.571][RX] CPU%/max_us 2/1976 53/2275 20/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:53.616][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:53.763][RX] pose fps=19 npu=39.3 wait=32.7 decode=19.8 kpt=0.6 gui=42.6 e2e=153.3 period=52.0 persons=1 idle=24% npu_gap=12.6 jit_lw=0.0 jit_rw=0.0 jit_ls=22.7 jit_rs=77.9
+[12:53:54.606][RX] CPU%/max_us 1/1976 45/2275 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:54.655][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:54.832][RX] pose fps=19 npu=39.3 wait=25.8 decode=19.9 kpt=0.6 gui=42.3 e2e=141.3 period=50.0 persons=1 idle=23% npu_gap=10.7 jit_lw=0.0 jit_rw=0.0 jit_ls=25.3 jit_rs=53.6
+[12:53:55.678][RX] CPU%/max_us 2/1976 43/2275 25/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:55.693][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:55.845][RX] pose fps=17 npu=39.3 wait=42.5 decode=19.7 kpt=0.7 gui=42.4 e2e=160.7 period=55.7 persons=1 idle=26% npu_gap=16.3 jit_lw=0.0 jit_rw=0.0 jit_ls=14.5 jit_rs=30.3
+[12:53:56.657][RX] CPU%/max_us 1/1976 45/2275 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:56.678][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:56.853][RX] pose fps=17 npu=39.3 wait=43.5 decode=19.7 kpt=0.6 gui=42.7 e2e=162.0 period=55.3 persons=1 idle=25% npu_gap=15.9 jit_lw=0.0 jit_rw=0.0 jit_ls=16.4 jit_rs=36.3
+[12:53:57.695][RX] CPU%/max_us 2/1976 44/2275 24/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:57.716][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:57.906][RX] pose fps=17 npu=39.4 wait=46.1 decode=19.6 kpt=0.7 gui=40.4 e2e=167.2 period=57.0 persons=1 idle=28% npu_gap=17.5 jit_lw=0.0 jit_rw=0.0 jit_ls=12.5 jit_rs=16.8
+[12:53:58.715][RX] CPU%/max_us 1/1976 41/2275 28/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:58.755][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:58.952][RX] pose fps=16 npu=39.5 wait=49.9 decode=19.6 kpt=0.7 gui=41.2 e2e=168.1 period=58.2 persons=1 idle=27% npu_gap=18.7 jit_lw=0.0 jit_rw=0.0 jit_ls=17.5 jit_rs=18.8
+[12:53:59.728][RX] CPU%/max_us 1/1976 39/2275 29/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:53:59.749][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:53:59.947][RX] pose fps=16 npu=39.4 wait=54.7 decode=19.5 kpt=0.7 gui=43.8 e2e=176.0 period=60.5 persons=1 idle=27% npu_gap=21.0 jit_lw=0.0 jit_rw=0.0 jit_ls=18.9 jit_rs=16.4
+[12:54:00.715][RX] CPU%/max_us 1/1976 23/2275 33/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:54:00.735][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:54:01.726][RX] CPU%/max_us 2/1976 0/2275 2/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:54:01.746][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:54:02.745][RX] CPU%/max_us 2/1976 0/2275 2/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:54:02.765][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:54:03.757][RX] CPU%/max_us 2/1976 0/2275 1/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:54:03.777][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:54:04.767][RX] CPU%/max_us 2/1976 0/2275 1/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:54:04.788][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:54:05.784][RX] CPU%/max_us 2/1976 0/2275 1/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:54:05.803][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:54:06.782][RX] CPU%/max_us 2/1976 0/2275 1/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:54:06.797][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[12:54:07.797][RX] CPU%/max_us 2/1976 0/2275 4/199937 overlay_cpu=0.00% max_us=0 rering=0
+[12:54:08.072][RX] NES input ETH
+[12:54:08.072][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222
+[12:54:08.072][RX]   E         D   D   R   R   V   V      3      2
+[12:54:08.072][RX]   EEEE      D   D   RRRRR    V V    3333   2222
+[12:54:08.072][RX]   E         D   D   R  R     V V       3   2
+[12:54:08.072][RX]   EEEEEEE   DDDD    R    R    V     3333   2222
+[12:54:08.072][RX]
+[12:54:08.072][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[12:54:08.072][RX] CHIP_ID: 0xed320001
+[12:54:08.072][RX] CLK_SYS_HZ: 125000000
+[12:54:08.072][RX] ROM bytes: 16384
+[12:54:08.072][RX] SRAM bytes: 65536
+[12:54:08.072][RX] I-cache bytes: 8192
+[12:54:08.072][RX] D-cache bytes: 8192
+[12:54:08.072][RX] MEM_READY: 1
+[12:54:08.072][RX] Build commit: 92b38fd2
+[12:54:08.072][RX] Compiler version: GCC 15.2.0
+[12:54:08.176][RX] BIOS: EdRV32
+[12:54:08.176][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[12:54:28.286][SYS] 网口未连接，虚拟设备不可用
+[12:54:28.286][SYS] 建立网口连接失败：等待网卡 以太网 就绪超时：local_ip=192.168.1.2，最后状态 OperStatus=Down, DAD=Deprecated，用时 10.0 s
