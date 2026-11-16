@@ -213,11 +213,13 @@ def evaluate(name, out):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("models", nargs="*", metavar="MODEL",
+                        help="models to evaluate (default: gesture doodle helmet face)")
     parser.add_argument("--out", type=Path, default=Path("build/npu/models_eval"))
     args = parser.parse_args()
     torch.set_num_threads(1)
     summary = {name: evaluate(name, args.out / name)
-               for name in ("gesture", "doodle", "helmet", "face")}
+               for name in (args.models or ("gesture", "doodle", "helmet", "face"))}
     summary["commit"] = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     (args.out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
 

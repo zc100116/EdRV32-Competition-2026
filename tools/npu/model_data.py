@@ -18,6 +18,8 @@ def weights_for(name):
         return DATA / "yolov8n-face.pt"
     if name == "gesture":
         return ARTIFACTS / "best.pt"
+    if name == "helmet":
+        return ROOT / "tasks/win/20261116-87-helmet-v2-train/artifacts/best.pt"
     return ARTIFACTS / "extra" / name / "best.pt"
 
 

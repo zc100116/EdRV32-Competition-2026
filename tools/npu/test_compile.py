@@ -13,12 +13,28 @@ from types import SimpleNamespace
 import struct
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
 from fixed_plan import build_plan, descriptors
 from gen_case import Case, configured
 from format import Descriptor, pack_c4, pack_c16, pack_quant, pack_weights, write_hex
+
+
+class ModelSelectionTest(unittest.TestCase):
+    def test_evaluation_models(self):
+        import models_eval
+        with tempfile.TemporaryDirectory() as directory:
+            for selected, expected in (
+                ([], ["gesture", "doodle", "helmet", "face"]),
+                (["helmet"], ["helmet"]),
+                (["helmet", "gesture"], ["helmet", "gesture"]),
+            ):
+                with patch.object(sys, "argv", ["models_eval", *selected, "--out", directory]), \
+                        patch.object(models_eval, "evaluate", return_value={}) as evaluate:
+                    models_eval.main()
+                self.assertEqual([call.args[0] for call in evaluate.call_args_list], expected)
 
 
 class DescriptorTest(unittest.TestCase):

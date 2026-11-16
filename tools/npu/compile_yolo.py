@@ -49,7 +49,14 @@ def main() -> None:
         shape = getattr(head, "kpt_shape", (0, 3))
         plan = build_plan(args.task, head.nc, shape[0] * shape[1])
         plan["weights"] = str(weights.resolve())
-        plan["dataset"] = args.task if args.task != "detect" else weights.parent.name
+        if args.task == "detect":
+            names = [name for name in ("doodle", "helmet")
+                     if weights.resolve() == weights_for(name).resolve()]
+            if not names:
+                parser.error("detect --weights only supports registered doodle/helmet weights")
+            plan["dataset"] = names[0]
+        else:
+            plan["dataset"] = args.task
     else:
         plan = build_plan(args.task)
     segments = {}

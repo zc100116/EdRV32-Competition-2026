@@ -555,7 +555,8 @@ sigma=1/21，真值框面积×0.53；不与浮点预测比较。
 
 ## 四个演示模型（T-NPU-MODELS）
 
-权重：`tasks/win/20261115-83-hagrid-train/artifacts/{best.pt,extra/{doodle,helmet}/best.pt}`。
+权重：手势/简笔画 `tasks/win/20261115-83-hagrid-train/artifacts/{best.pt,extra/doodle/best.pt}`；
+安全帽 v2 `tasks/win/20261116-87-helmet-v2-train/artifacts/best.pt`（`171fbd59`）。
 `compile_yolo.py --task gesture|face` 从模型读取 nc 和关键点维度；
 `--task detect --weights <pt>` 用于简笔画、安全帽。
 类别补 C80，关键点与其分支输入按 C16 补齐；旧 detect/pose/hand 的标定保持不变。
@@ -575,11 +576,12 @@ $P tools/npu/fetch_face.py
 $P tools/npu/compile_yolo.py --task gesture --image <image> --out build/npu/models_eval/gesture/compiled
 $P tools/npu/compile_yolo.py --task face --image <image> --out build/npu/models_eval/face/compiled
 $P tools/npu/compile_yolo.py --task detect --weights tasks/win/20261115-83-hagrid-train/artifacts/extra/doodle/best.pt --image <image> --out build/npu/models_eval/doodle/compiled
-$P tools/npu/compile_yolo.py --task detect --weights tasks/win/20261115-83-hagrid-train/artifacts/extra/helmet/best.pt --image <image> --out build/npu/models_eval/helmet/compiled
+$P tools/npu/compile_yolo.py --task detect --weights tasks/win/20261116-87-helmet-v2-train/artifacts/best.pt --image <image> --out build/npu/models_eval/helmet/compiled
 $P tools/npu/models_eval.py --out build/npu/models_eval > build/npu/models_eval/eval.log 2>&1
 $P -m unittest discover -s tools/npu -p test_compile.py
 ```
 
+`models_eval.py helmet` 只评估指定模型；可列出多个模型名，省略时仍评估四个。
 评估固定 confidence>0.25、同类 NMS IoU>0.45、最多 100 框，不调阈值。
 FP32 与 INT8 均使用 640×384 letterbox；INT8 执行 `npu_ref`、硬件后处理整数参考、
 排序与同类 NMS，再按 anchor 解码关键点。AP 使用 IoU=0.50:0.05:0.95，
