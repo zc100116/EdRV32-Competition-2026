@@ -16,6 +16,7 @@
 #include "../../ui/ui_data.h"
 #include "../../ui/grab.h"
 #include "../../ui/sling.h"
+#include "../../ui/sticker.h"
 #include "../../ui/detection.h"
 #include "port.h"
 #include "sched.h"
@@ -538,9 +539,9 @@ static void request_page(unsigned page)
         return;
     }
     v.state = PIPE_STARTING;
-    if (page == PAGE_GRAB) {
+    if (page == PAGE_GRAB || page == PAGE_FACE) {
         v.mirror_pending = true;
-        v.mirror_enabled = ui_page == 15 ? true : ui_grab.mirror;
+        v.mirror_enabled = page == PAGE_FACE || ui_page == 15 || ui_grab.mirror;
         if (ui_page == 15) {
             grab_init(&sling_cursor);
             sling_cursor.mode = 2;
@@ -1265,6 +1266,7 @@ int vision_service(void)
                                                             points[k].visibility};
                 }
             }
+            if (v.page == PAGE_FACE) ++sticker_revision;
             timing.kpt_ticks += platform_ticks() - start;
         }
         if (complete && v.page == PAGE_POSE && !timing.cancelled) {
@@ -1352,7 +1354,7 @@ int vision_service(void)
             if (v.page == PAGE_PROCESS) {
                 engine_control(ENGINE_PIX, 0); engine_control(ENGINE_GEO, 0);
             }
-            if (v.page == PAGE_GRAB) {
+            if (v.page == PAGE_GRAB || v.page == PAGE_FACE) {
                 set_sensor_mirror(false);
                 v.mirror_pending = false;
             }

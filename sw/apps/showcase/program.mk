@@ -132,3 +132,14 @@ $(ROOT)/build/showcase/sling_images.c: $(ROOT)/tools/sw/embed_showcase_images.py
     $(ROOT)/tools/sw/png2c.py $(wildcard $(ROOT)/sw/apps/showcase/assets/sling/*.png)
 	python3 $(ROOT)/tools/sw/embed_showcase_images.py \
 	    $(ROOT)/sw/apps/showcase/assets/sling $@ --prefix sling
+
+# T-FACE-STICKER-R2: offline rotations; RND scales immutable ARGB8888 art.
+SHOWCASE_STICKERS := $(ROOT)/sw/apps/showcase/assets/stickers
+PROGRAM_SOURCES += build/showcase/stickers.c
+$(ROOT)/build/showcase/stickers.c: $(wildcard $(SHOWCASE_STICKERS)/*.png) \
+    $(ROOT)/tools/sw/rotate_showcase_stickers.py $(ROOT)/tools/sw/embed_showcase_images.py \
+    $(ROOT)/tools/sw/png2c.py
+	python3 $(ROOT)/tools/sw/rotate_showcase_stickers.py $(SHOWCASE_STICKERS) \
+	    $(ROOT)/build/showcase/sticker-frames
+	python3 $(ROOT)/tools/sw/embed_showcase_images.py $(ROOT)/build/showcase/sticker-frames \
+	    $@ --prefix sticker

@@ -80,3 +80,10 @@ sling:
 	$(CC) $(FLAGS) -I$(ROOT)/sw/apps/showcase/ui \
 	    sling.c $(ROOT)/sw/apps/showcase/ui/sling.c -o $(BUILD)/sling
 	$(BUILD)/sling
+
+.PHONY: sticker
+sticker:
+	mkdir -p $(BUILD)
+	$(CC) $(FLAGS) -I$(ROOT)/sw/apps/showcase/ui sticker.c \
+	    $(ROOT)/sw/apps/showcase/ui/sticker.c -o $(BUILD)/sticker
+	$(BUILD)/sticker
