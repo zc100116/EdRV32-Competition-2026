@@ -382,6 +382,7 @@ static void flush(lv_display_t *disp, const lv_area_t *area, uint8_t *pixels)
     if (lv_display_flush_is_last(disp)) {
         if (clean_all_needed) cache_clean_all();
         pending_pixels = (const uint32_t *)pixels;
+        vision_gui_submitted();
         flush_pending = true;
         dirty_bytes = 0;
         clean_all_needed = false;
@@ -561,6 +562,8 @@ void showcase_gui_step(struct sched_task *task)
     }
     if(!ui_detection_settings && (ui_page==1 || ui_page==2)) ui_vision_frame(ui_page==2);
     else if(ui_page==9) ui_pose_update();
+    else if(ui_page==10) ui_hand_update();
+    else if(ui_page>=11 && ui_page<=13) ui_demo_update();
     else if(ui_page==3) ui_process_update();
     uint32_t delay = lv_timer_handler();
     sched_signal(&application_task,1);

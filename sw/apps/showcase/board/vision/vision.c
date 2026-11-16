@@ -31,7 +31,8 @@
 
 enum { REF_PAIR = 1, REF_JOB = 2, REF_READY = 4, REF_DISPLAY = 8,
        REF_NPU = 16, REF_GEO = 32 };
-enum { PAGE_NONE, PAGE_CAMERA, PAGE_IMAGE, PAGE_PROCESS, PAGE_POSE, PAGE_HAND };
+enum { PAGE_NONE, PAGE_CAMERA, PAGE_IMAGE, PAGE_PROCESS, PAGE_POSE, PAGE_HAND,
+       PAGE_FACE, PAGE_DOODLE, PAGE_HELMET, PAGE_COUNT };
 enum { JOB_IDLE, JOB_CH2, JOB_NPU, JOB_POST, JOB_SEND, JOB_TX };
 enum pipeline_state { PIPE_OFF, PIPE_STARTING, PIPE_LIVE, PIPE_PAUSING, PIPE_FROZEN,
                       PIPE_STOPPING, PIPE_CONFIGURE };
@@ -42,9 +43,12 @@ static struct vision_session {
     unsigned count;
     uint32_t frame;
     enum { UPLOAD_EMPTY, UPLOAD_READY } upload;
-} sessions[6];
+} sessions[PAGE_COUNT];
 static ui_hand_t hand;
-static bool hand_event_valid;
+static ui_demo_t demo;
+static unsigned doodle_threshold = 128;
+const ui_demo_t *ui_data_demo(void) { return &demo; }
+unsigned ui_data_doodle_threshold(void) { return doodle_threshold; }
 const ui_hand_t *ui_data_hand(void) { return &hand; }
 static ui_pose_t pose;
 const ui_pose_t *ui_data_pose(void) { return &pose; }
@@ -60,6 +64,10 @@ static struct {
     uint8_t gamma_table[256];
     int32_t matrix[6];
     unsigned capture;
+    unsigned memory_reading;
+    int memory_image;
+    uint32_t memory_frame;
+    uint64_t memory_tick;
     unsigned initialized;
     unsigned refs[8];
     int ready, current, pair_image, pair_input;
@@ -99,13 +107,58 @@ static struct {
     uint32_t upload_base, upload_bytes;
     unsigned model_pending;
     bool model_ready;
-    unsigned model; /* 0 detect, 1 pose, 2 hand. */
+    unsigned model; /* Index into models[]. */
     uint32_t model_base, model_bytes, model_offset;
     unsigned model_phase;
     uint32_t model_count, model_desc_bytes, model_weight_bytes;
 } v = {.ready = -1, .current = -1, .pair_image = -1, .pair_input = -1,
        .submitted = -1, .job_image = -1, .geo_source = -1, .geo_target = -1,
        .gamma_loaded = -1, .gamma_target = 10, .gamma_index = 256};
+/* Each row owns independent immutable DDR storage and quantization. */
+static const struct model {
+    uint32_t desc, weights, output, classes, points;
+    unsigned threshold; /* confidence percent, represented by heads' INT8 thresholds. */
+    const uint32_t *count, *desc_bytes, *weight_bytes;
+    const uint8_t *descriptor, *weight;
+    const yolo_head *heads;
+    const struct pose_head *keypoints;
+} models[] = {
+#define MODEL(name, address, bytes, nc, nk) {VISION_##address##_DESC_BASE, \
+    VISION_##address##_MODEL_BASE, bytes, nc, nk, 25, &showcase_##name##_count, \
+    &showcase_##name##_desc_bytes, &showcase_##name##_weights_bytes, \
+    showcase_##name##_desc, showcase_##name##_weights, showcase_##name##_heads, \
+    showcase_##name##_keypoints}
+    {VISION_DESC_BASE, VISION_MODEL_BASE, VISION_OUTPUT_BYTES, 80, 0, 25,
+     &showcase_model_count, &showcase_model_desc_bytes, &showcase_model_weights_bytes,
+     showcase_model_desc, showcase_model_weights, yolo_default_heads, NULL},
+    MODEL(pose, POSE, VISION_POSE_OUTPUT_BYTES, 1, 17),
+    MODEL(gesture, GESTURE, VISION_POSE_OUTPUT_BYTES, 14, 21),
+    MODEL(face, FACE, VISION_FACE_OUTPUT_BYTES, 1, 5),
+    {VISION_DOODLE_DESC_BASE, VISION_DOODLE_MODEL_BASE, VISION_OUTPUT_BYTES, 20, 0, 25,
+     &showcase_doodle_count, &showcase_doodle_desc_bytes, &showcase_doodle_weights_bytes,
+     showcase_doodle_desc, showcase_doodle_weights, showcase_doodle_heads, NULL},
+    {VISION_HELMET_DESC_BASE, VISION_HELMET_MODEL_BASE, VISION_OUTPUT_BYTES, 2, 0, 25,
+     &showcase_helmet_count, &showcase_helmet_desc_bytes, &showcase_helmet_weights_bytes,
+     showcase_helmet_desc, showcase_helmet_weights, showcase_helmet_heads, NULL}
+#undef MODEL
+};
+static const unsigned page_models[PAGE_COUNT] = {0, 0, 0, 0, 1, 2, 3, 4, 5};
+static bool live_page(void)
+{
+    return v.page == PAGE_CAMERA || v.page >= PAGE_POSE;
+}
+void ui_data_doodle_adjust(int delta)
+{
+    doodle_threshold = (unsigned)((int)doodle_threshold + delta);
+    if (doodle_threshold > 255) doodle_threshold = delta < 0 ? 0 : 255;
+    char line[48];
+    snprintf(line, sizeof line, "doodle thr=%u\r\n", doodle_threshold);
+    platform_puts(line);
+    uint32_t lock = sched_port_lock();
+    if (v.state == PIPE_LIVE) v.state = PIPE_CONFIGURE;
+    sched_port_unlock(lock);
+    app_wake_at(platform_ticks());
+}
 static volatile uint32_t irq_flags[ENGINE_NPU + 1];
 static volatile uint32_t irq_errors[ENGINE_NPU + 1];
 static volatile uint64_t vin_done_tick[3];
@@ -120,10 +173,13 @@ static struct {
     struct { double mean[2], m2[2]; unsigned count; } jitter[4];
     unsigned periods, gaps;
     bool gap_pending;
-    uint32_t samples, gui_samples;
+    uint32_t samples, gui_samples, shown, disp;
     bool await_gui, gui_taken, cancelled;
 } timing;
 static volatile unsigned gui_armed, gui_ready;
+static uint32_t result_revision, result_taken;
+static volatile uint32_t result_submitted, result_presented;
+void vision_gui_submitted(void) { result_submitted = result_taken; }
 static uint32_t detection_revision;
 static volatile uint32_t detection_armed, detection_applied;
 void vision_detection_changed(void) { ++detection_revision; }
@@ -131,22 +187,26 @@ bool vision_detection_applied(void) { return detection_applied == detection_revi
 static volatile uint64_t gui_done;
 void vision_gui_presented(uint64_t tick)
 {
+    if (result_submitted != result_presented) {
+        ++timing.shown;
+        result_presented = result_submitted;
+    }
     if (gui_armed) { gui_done = tick; gui_armed = 0; gui_ready = 1; }
     detection_applied = detection_armed;
 }
 static char report[512];
 /* Design P5 8.6 / card 54: one line per completed PC image, emitted once. */
-static char image_line[240];
+static char image_line[320];
 const char *vision_report(void)
 {
     static char taken[sizeof image_line];
-    if (v.page == PAGE_HAND && v.state == PIPE_LIVE) {
-        static char hand_taken[sizeof report];
-        memcpy(hand_taken, report, sizeof hand_taken);
+    if ((live_page() || (v.page == PAGE_IMAGE && !image_line[0])) &&
+        v.state == PIPE_LIVE) {
+        static char live_taken[sizeof report];
+        memcpy(live_taken, report, sizeof live_taken);
         report[0] = 0;
-        return hand_taken;
+        return live_taken;
     }
-    if ((v.page == PAGE_CAMERA || v.page == PAGE_POSE) && v.state == PIPE_LIVE) return report;
     memcpy(taken, image_line, sizeof taken);
     image_line[0] = 0;
     return taken;
@@ -283,7 +343,7 @@ void vision_irq(const struct engine_event *event, void *context)
         if (event->irq & EDRV32_VIN_IRQ_STAT_FRAME_MASK) vin_done_tick[0] = now;
         if (event->irq & EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK) vin_done_tick[2] = now;
         if (v.capture &&
-            (v.page == PAGE_CAMERA || v.page == PAGE_POSE || v.page == PAGE_HAND) &&
+            live_page() &&
             !event->error &&
             !(event->irq & EDRV32_VIN_IRQ_STAT_ERROR_MASK)) {
             if (event->irq & EDRV32_VIN_IRQ_STAT_FRAME_MASK) camera_frame(0);
@@ -309,7 +369,7 @@ void vision_irq(const struct engine_event *event, void *context)
         v.npu_busy = 0;
         timing.last_done = v.done[buffer].done;
         timing.gap_pending = true;
-        if ((v.page == PAGE_CAMERA || v.page == PAGE_POSE || v.page == PAGE_HAND)) {
+        if (live_page()) {
             reference(v.npu_image, REF_JOB, REF_NPU);
             v.input_busy &= ~(1u << v.npu_input);
             if (v.capture) vin_slots_busy(2, v.input_busy);
@@ -338,6 +398,7 @@ void vision_display_irq(uint32_t irq)
 {
     uint32_t lock = sched_port_lock();
     irq_flags[ENGINE_DISP] |= irq;
+    if (irq & EDRV32_DISP_IRQ_STAT_SWITCH1_MASK) ++timing.disp;
     sched_port_unlock(lock);
 }
 uint32_t vision_upload_base(void)
@@ -389,6 +450,7 @@ static const lv_image_dsc_t *take_image(void)
 }
 ui_vision_t ui_data_vision(void)
 {
+    result_taken = result_revision;
     if (timing.await_gui && !timing.gui_taken) {
         timing.gui_taken = true; gui_armed = 1;
     }
@@ -443,25 +505,18 @@ static void stop_capture(void)
 }
 static void select_model(unsigned model)
 {
-    struct npu_config config = {
-        model == 2 ? VISION_HAND_MODEL_BASE :
-            model == 1 ? VISION_POSE_MODEL_BASE : VISION_MODEL_BASE, VISION_WORK_BASE,
-        VISION_INPUT_BASE, VISION_OUTPUT_BASE,
-        model == 2 ? VISION_HAND_DESC_BASE :
-            model == 1 ? VISION_POSE_DESC_BASE : VISION_DESC_BASE,
-        model == 2 ? showcase_hand_count :
-            model == 1 ? showcase_pose_count : v.model_count};
+    const struct model *m = &models[model];
+    struct npu_config config = {m->weights, VISION_WORK_BASE, VISION_INPUT_BASE,
+        VISION_OUTPUT_BASE, m->desc, model ? *m->count : v.model_count};
     npu_configure(&config);
 #ifndef SHOWCASE_POST_CPU
     npu_post_configure();
-    if (model) {
-        const yolo_head *heads = model == 2 ? showcase_hand_heads : showcase_pose_heads;
-        const uint32_t offsets[] = {EDRV32_NPU_POST_INT8_TH0_OFFSET,
-            EDRV32_NPU_POST_INT8_TH1_OFFSET, EDRV32_NPU_POST_INT8_TH2_OFFSET};
-        for (unsigned h = 0; h < 3; ++h)
-            mmio_write32(EDRV32_NPU_BASE + offsets[h],
-                         (uint8_t)heads[h].class_threshold);
-    }
+    mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_POST_PROB_TH_OFFSET,
+                 m->threshold * (1u << 24) / 100);
+    const uint32_t offsets[] = {EDRV32_NPU_POST_INT8_TH0_OFFSET,
+        EDRV32_NPU_POST_INT8_TH1_OFFSET, EDRV32_NPU_POST_INT8_TH2_OFFSET};
+    for (unsigned h = 0; h < 3; ++h)
+        mmio_write32(EDRV32_NPU_BASE + offsets[h], (uint8_t)m->heads[h].class_threshold);
 #endif
     v.model = model;
 }
@@ -479,14 +534,22 @@ static void request_page(unsigned page)
     memset(&timing, 0, sizeof timing);
     timing.since = platform_ticks();
     timing.idle_since = sched_idle_ticks();
+    result_revision = result_taken = result_submitted = result_presented = 0;
     gui_armed = gui_ready = 0; report[0] = 0;
     sessions[page].data.boxes = boxes;
     if (page == PAGE_POSE) memset(&pose, 0, sizeof pose);
-    if (page == PAGE_HAND) { memset(&hand, 0, sizeof hand); hand_event_valid = false; }
+    if (page == PAGE_HAND) {
+        memset(&hand, 0, sizeof hand);
+        hand.state.cls = hand.state.candidate = -1;
+    }
+    memset(&demo, 0, sizeof demo);
     app_wake_at(platform_ticks());
     sched_port_unlock(lock);
 }
 static void enter_hand(void) { request_page(PAGE_HAND); }
+static void enter_face(void) { request_page(PAGE_FACE); }
+static void enter_doodle(void) { request_page(PAGE_DOODLE); }
+static void enter_helmet(void) { request_page(PAGE_HELMET); }
 static void enter_pose(void) { request_page(PAGE_POSE); }
 static void enter_camera(void) { request_page(PAGE_CAMERA); }
 static void enter_image(void) { request_page(PAGE_IMAGE); }
@@ -564,6 +627,13 @@ static void configure_capture(void)
         pix_mode();
         if (v.process_dirty) return;
     }
+    else if (v.page == PAGE_DOODLE) {
+        struct pix_config binary = {EDRV32_PIX_CFG_GRAY_EN_MASK | EDRV32_PIX_CFG_BIN_EN_MASK,
+            PIX_BYPASS, PIX_BYPASS, v.gamma_bank, 256, 0, doodle_threshold};
+        pix_configure(&binary);
+        engine_control(ENGINE_PIX, EDRV32_PIX_CTRL_ENABLE_MASK);
+        input.source = VIN_MEMORY;
+    }
     else if (platform_hardware() & APP_HW_PIX) {
         struct pix_config bypass = {0, PIX_BYPASS, PIX_BYPASS, v.gamma_bank, 256, 0, 128};
         pix_configure(&bypass);
@@ -598,12 +668,12 @@ static void start_inference(unsigned input, int image, uint32_t frame, uint64_t 
               VISION_OUTPUT_BASE + v.npu_buffer * VISION_OUTPUT_SPACING);
 #else
     uint32_t post = VISION_POST_BASE + v.npu_buffer * VISION_POST_SPACING;
-    if ((v.page == PAGE_CAMERA || v.page == PAGE_POSE || v.page == PAGE_HAND)) {
+    if (live_page()) {
         /* Task cleaned the whole block before releasing post_owned (SoC 7.4).
          * IRQ restart only selects registers; no cache operation or post work. */
         mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_POST_BASE_OFFSET, post);
         npu_start(VISION_INPUT_BASE + input * VISION_INPUT_SPACING,
-                  VISION_OUTPUT_BASE + ((v.page == PAGE_POSE || v.page == PAGE_HAND) ?
+                  VISION_OUTPUT_BASE + (models[v.model].points ?
                   v.npu_buffer * VISION_OUTPUT_SPACING : 0));
     } else {
         npu_post_start(VISION_INPUT_BASE + input * VISION_INPUT_SPACING,
@@ -619,8 +689,9 @@ static void camera_frame(unsigned channel)
         irq_errors[ENGINE_VIN] |= 1u;
         return;
     }
-    if (v.state != PIPE_LIVE || v.page == PAGE_IMAGE ||
-        ((v.page == PAGE_CAMERA || v.page == PAGE_POSE || v.page == PAGE_HAND) &&
+    if ((v.state != PIPE_LIVE && !(v.page == PAGE_DOODLE && channel == 2)) ||
+        v.page == PAGE_IMAGE ||
+        (live_page() &&
          !v.model_ready)) return;
     int slot = (int)vin_frame_slot(frame.info);
     if (v.page == PAGE_PROCESS) {
@@ -646,6 +717,31 @@ static void camera_frame(unsigned channel)
         }
         return;
     }
+    if (v.page == PAGE_DOODLE) {
+        if (channel == 0) {
+            queue_image(slot);
+            if (v.pair_input >= 0) return;
+            reference(v.pair_image, 0, REF_PAIR);
+            v.pair_image = slot;
+            v.image_id = frame.frame_id;
+            v.image_tick = vin_done_tick[0];
+            reference(slot, REF_PAIR, 0);
+        } else {
+            v.pair_input = slot;
+            v.input_busy |= 1u << slot;
+            vin_slots_busy(2, v.input_busy);
+            /* CH2 completion implies memory reads have completed. The source
+             * remains REF_PAIR until promoted to REF_NPU by camera_start. */
+            reference(v.pair_image, 0, REF_PAIR);
+            v.pair_image = v.memory_image;
+            v.image_id = v.memory_frame;
+            v.image_tick = v.memory_tick;
+            reference(v.memory_image, REF_PAIR, REF_GEO);
+            v.input_id = v.memory_frame;
+            v.memory_reading = 0;
+        }
+        return;
+    }
     if (channel == 0) queue_image(slot);
     if (channel == 0) {
         reference(v.pair_image, 0, REF_PAIR);
@@ -664,12 +760,24 @@ static void camera_frame(unsigned channel)
 /* Latest matched VIN pair is retained while NPU and the previous post overlap. */
 static void camera_start(void)
 {
-    if ((v.page != PAGE_CAMERA && v.page != PAGE_POSE && v.page != PAGE_HAND) ||
+    if (!live_page() ||
         v.state != PIPE_LIVE || v.npu_busy ||
         !v.model_ready || v.model_pending || (v.post_owned & (1u << v.npu_buffer)) ||
         irq_errors[ENGINE_VIN] || irq_errors[ENGINE_NPU] ||
         (irq_flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_ERROR_MASK) ||
         (irq_flags[ENGINE_NPU] & EDRV32_NPU_IRQ_STAT_ERROR_MASK)) return;
+    if (v.page == PAGE_DOODLE && v.pair_input < 0 && v.pair_image >= 0 &&
+        !v.memory_reading) {
+        v.memory_image = v.pair_image;
+        v.memory_frame = v.image_id;
+        v.memory_tick = v.image_tick;
+        reference(v.memory_image, REF_GEO, REF_PAIR);
+        v.pair_image = -1;
+        v.memory_reading = 1;
+        vin_memory_start(image_address((unsigned)v.memory_image), VISION_STRIDE,
+                         VISION_WIDTH, VISION_HEIGHT);
+        return;
+    }
     if (v.pair_image >= 0 && v.pair_input >= 0 && v.image_id == v.input_id) {
         reference(v.pair_image, REF_NPU, REF_PAIR);
         start_inference((unsigned)v.pair_input, v.pair_image, v.image_id, v.image_tick);
@@ -678,11 +786,16 @@ static void camera_start(void)
 }
 static void publish_result(void)
 {
+    ++result_revision;
     platform_gui_wake();
     sessions[v.page].count=v.post.kept;
     for(unsigned i=0;i<sessions[v.page].count;++i) {
         const yolo_detection *d=&v.detections[i];
-        sessions[v.page].raw[i]=(ui_detection_t){ui_coco_names[d->class_id],d->score/10,
+        sessions[v.page].raw[i]=(ui_detection_t){(v.page == PAGE_HAND ?
+             ui_gesture_names[d->class_id] :
+             v.page == PAGE_DOODLE ? ui_doodle_names[d->class_id] :
+             v.page == PAGE_FACE ? "人脸" : v.page == PAGE_HELMET ?
+             (d->class_id ? "未戴" : "安全帽") : ui_coco_names[d->class_id]),d->score/10,
             d->x0,d->y0,d->x1-d->x0,d->y1-d->y0,d->class_id};
     }
     timing.handoff = platform_ticks();
@@ -739,7 +852,7 @@ uint32_t vision_bulk_done(unsigned kind, uint32_t base, uint32_t bytes)
         sessions[PAGE_IMAGE].data.image_status = UI_IMAGE_DETECTING;
     }
     uint32_t lock = sched_port_lock();
-    if (kind == 1 && (v.page == PAGE_CAMERA || v.page == PAGE_POSE || v.page == PAGE_HAND) &&
+    if (kind == 1 && live_page() &&
         v.state == PIPE_LIVE) v.state = PIPE_CONFIGURE;
     sched_port_unlock(lock);
     app_wake_at(platform_ticks());
@@ -757,7 +870,7 @@ static void model_step(void)
     if (v.model_offset == length) {
         v.model_offset = 0;
         if (++v.model_phase == 2) {
-            select_model(v.page == PAGE_HAND ? 2 : v.page == PAGE_POSE ? 1 : 0);
+            select_model(page_models[v.page]);
             v.model_pending = 0;
             v.model_ready = true;
             /* Each upload owns its own window metadata; no global image_window. */
@@ -795,6 +908,8 @@ static void timing_step(void)
     uint64_t sums[10];
     lock = sched_port_lock();
     memcpy(sums, timing.sums, sizeof sums);
+    unsigned shown = timing.shown, disp = timing.disp;
+    timing.shown = timing.disp = 0;
     unsigned periods = timing.periods;
     unsigned gap = timing.gaps ? tenths(timing.gap_sum / timing.gaps) : 0;
     uint64_t idle_now = sched_idle_ticks();
@@ -817,16 +932,27 @@ static void timing_step(void)
     data->latency_tenths = a[7];
     if (v.page == PAGE_HAND && v.state == PIPE_LIVE) {
         unsigned kpt = timing.samples ? tenths(timing.kpt_ticks / timing.samples) : 0;
-        char bits[6];
-        ui_hand_bits(hand.state.fingers, bits);
         snprintf(report, sizeof report,
-            "hand fps=%u npu=%u.%u wait=%u.%u decode=%u.%u kpt=%u.%u gui=%u.%u "
-            "e2e=%u.%u period=%u.%u hands=%u size=%u d=%.2f fingers=%s rps=%s "
-            "idle=%u%% npu_gap=%u.%u\r\n",
-            data->fps, a[0]/10,a[0]%10,a[1]/10,a[1]%10,a[2]/10,a[2]%10,
-            kpt/10,kpt%10,a[6]/10,a[6]%10,a[7]/10,a[7]%10,a[8]/10,a[8]%10,
-            hand.count, hand.size/2, (double)hand.state.d, bits, ui_hand_rps(hand.state.rps),
-            idle, gap/10, gap%10);
+            "gesture fps=%u shown=%u disp=%u npu=%u.%u wait=%u.%u decode=%u.%u "
+            "kpt=%u.%u gui=%u.%u e2e=%u.%u hands=%u cls=%s conf=%u size=%u idle=%u%%\r\n",
+            data->fps, shown, disp,
+            a[0]/10,a[0]%10,a[1]/10,a[1]%10,a[2]/10,a[2]%10,
+            kpt/10,kpt%10,a[6]/10,a[6]%10,a[7]/10,a[7]%10,hand.count,
+            hand.state.cls < 0 ? "none" : ui_gesture_ids[hand.state.cls],
+            hand.confidence,hand.size/2,idle);
+    } else if (v.page >= PAGE_FACE && v.state == PIPE_LIVE) {
+        char detail[96];
+        if (v.page == PAGE_FACE)
+            snprintf(detail, sizeof detail, "faces=%u size=%u", demo.count, demo.size/2);
+        else if (v.page == PAGE_DOODLE)
+            snprintf(detail, sizeof detail, "objs=%u thr=%u", demo.count, doodle_threshold);
+        else snprintf(detail, sizeof detail, "helmet=%u head=%u", demo.helmet, demo.head);
+        static const char *const names[] = {"face", "doodle", "helmet"};
+        snprintf(report, sizeof report,
+            "%s fps=%u shown=%u disp=%u npu=%u.%u wait=%u.%u decode=%u.%u "
+            "gui=%u.%u e2e=%u.%u %s idle=%u%%\r\n", names[v.page-PAGE_FACE],
+            data->fps,shown,disp,a[0]/10,a[0]%10,a[1]/10,a[1]%10,
+            a[2]/10,a[2]%10,a[6]/10,a[6]%10,a[7]/10,a[7]%10,detail,idle);
     } else if (v.page == PAGE_POSE && v.state == PIPE_LIVE) {
         unsigned kpt = timing.samples ? tenths(timing.kpt_ticks / timing.samples) : 0;
         unsigned jitter[4];
@@ -836,27 +962,33 @@ static void timing_step(void)
                 timing.jitter[j].count) + .5) : 0;
         }
         snprintf(report, sizeof report,
-            "pose fps=%u npu=%u.%u wait=%u.%u decode=%u.%u kpt=%u.%u gui=%u.%u "
+            "pose fps=%u shown=%u disp=%u npu=%u.%u wait=%u.%u decode=%u.%u kpt=%u.%u gui=%u.%u "
             "e2e=%u.%u period=%u.%u persons=%u idle=%u%% npu_gap=%u.%u "
             "jit_lw=%u.%u jit_rw=%u.%u jit_ls=%u.%u jit_rs=%u.%u\r\n",
-            data->fps, a[0]/10,a[0]%10,a[1]/10,a[1]%10,a[2]/10,a[2]%10,
+            data->fps, shown, disp, a[0]/10,a[0]%10,a[1]/10,a[1]%10,a[2]/10,a[2]%10,
             kpt/10,kpt%10,a[6]/10,a[6]%10,a[7]/10,a[7]%10,a[8]/10,a[8]%10,
             pose.count,idle,gap/10,gap%10,jitter[0]/10,jitter[0]%10,
             jitter[1]/10,jitter[1]%10,jitter[2]/10,jitter[2]%10,jitter[3]/10,jitter[3]%10);
     } else if (v.page == PAGE_CAMERA && v.state == PIPE_LIVE) {
         ui_system_t sys = ui_data_system();
         snprintf(report, sizeof report,
-            "vision fps=%u npu=%u.%u wait=%u.%u decode=%u.%u sort=%u.%u nms=%u.%u "
+            "vision fps=%u shown=%u disp=%u npu=%u.%u wait=%u.%u decode=%u.%u sort=%u.%u nms=%u.%u "
             "post_span=%u.%u gui=%u.%u e2e=%u.%u period=%u.%u copy=%u.%u "
             "cpu_comm=%u%% cpu_app=%u%% cpu_gui=%u%% idle=%u%% npu_gap=%u.%u\r\n",
-            data->fps, a[0]/10,a[0]%10,a[1]/10,a[1]%10,a[2]/10,a[2]%10,
+            data->fps, shown, disp, a[0]/10,a[0]%10,a[1]/10,a[1]%10,a[2]/10,a[2]%10,
             a[3]/10,a[3]%10,a[4]/10,a[4]%10,a[5]/10,a[5]%10,a[6]/10,a[6]%10,
             a[7]/10,a[7]%10,a[8]/10,a[8]%10,a[9]/10,a[9]%10,
             sys.task_cpu[0],sys.task_cpu[1],sys.task_cpu[2],idle,gap/10,gap%10);
+    } else if (v.page == PAGE_IMAGE && v.state == PIPE_LIVE) {
+        snprintf(report, sizeof report,
+            "image fps=%u shown=%u disp=%u npu=%u.%u wait=%u.%u decode=%u.%u "
+            "gui=%u.%u e2e=%u.%u\r\n", data->fps,shown,disp,a[0]/10,a[0]%10,
+            a[1]/10,a[1]%10,a[2]/10,a[2]%10,a[6]/10,a[6]%10,a[7]/10,a[7]%10);
     } else report[0] = 0;
     timing.kpt_ticks = 0;
     memset(timing.jitter, 0, sizeof timing.jitter);
-    timing.samples = timing.gui_samples = 0; timing.since = now;
+    timing.samples = timing.gui_samples = 0;
+    timing.since = now;
 }
 bool vision_post_active(void) { return v.job == JOB_POST; }
 
@@ -892,7 +1024,7 @@ int vision_service(void)
         reference(v.geo_target, 0, REF_GEO);
         v.geo_source = v.geo_target = -1;
     }
-    if (v.capture && (v.page != PAGE_CAMERA && v.page != PAGE_POSE && v.page != PAGE_HAND)) {
+    if (v.capture && !live_page()) {
         if (flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_FRAME_MASK) camera_frame(0);
         if (flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK) camera_frame(2);
     }
@@ -919,16 +1051,15 @@ int vision_service(void)
 #ifdef SHOWCASE_POST_CPU
         uint32_t output = VISION_OUTPUT_BASE + v.post_buffer * VISION_OUTPUT_SPACING;
         engine_dma_invalidate(EDRV32_DDR_BASE + output,
-            (v.page == PAGE_POSE || v.page == PAGE_HAND) ?
-            VISION_POSE_OUTPUT_BYTES : VISION_OUTPUT_BYTES);
+            models[v.model].output);
         yolo_candidate *candidates = (void *)(uintptr_t)(EDRV32_DDR_BASE + post_base);
         timing.copy_ticks = 0;
         timing.post_start = acquire_start;
         memset(timing.cpu, 0, sizeof timing.cpu);
         vision_post_begin(&v.post, (void *)(uintptr_t)(EDRV32_DDR_BASE + output),
                           candidates, v.detections);
-        if (v.page == PAGE_POSE) v.post.heads = showcase_pose_heads;
-        if (v.page == PAGE_HAND) v.post.heads = showcase_hand_heads;
+        v.post.heads = models[v.model].heads;
+        v.post.classes = models[v.model].classes;
 #else
         if (post_count) engine_dma_invalidate(EDRV32_DDR_BASE + post_base,
             (post_count * 24u + 31u) & ~31u);
@@ -956,9 +1087,10 @@ int vision_service(void)
             unsigned t[8] = {tenths(v.receive_ticks), tenths(v.ch2_ticks)};
             for (unsigned i = 0; i < 6; ++i) t[2 + i] = tenths(timing.completed[i]);
             snprintf(image_line, sizeof image_line,
-                "image request=%lu receive=%u.%u ch2=%u.%u npu=%u.%u wait=%u.%u "
+                "image request=%lu shown=%u disp=%u receive=%u.%u ch2=%u.%u npu=%u.%u wait=%u.%u "
                 "decode=%u.%u sort=%u.%u nms=%u.%u post_span=%u.%u upload_to_done=%u\r\n",
-                (unsigned long)v.job_request, t[0]/10,t[0]%10, t[1]/10,t[1]%10,
+                (unsigned long)v.job_request, (unsigned)timing.shown, (unsigned)timing.disp,
+                t[0]/10,t[0]%10, t[1]/10,t[1]%10,
                 t[2]/10,t[2]%10, t[3]/10,t[3]%10, t[4]/10,t[4]%10, t[5]/10,t[5]%10,
                 t[6]/10,t[6]%10, t[7]/10,t[7]%10, sessions[PAGE_IMAGE].data.roundtrip_ms);
         }
@@ -1007,37 +1139,64 @@ int vision_service(void)
             for (unsigned i = 0; i < hand.count; ++i) {
                 pose_point points[21];
                 vision_keypoints_decode((const int8_t *)(uintptr_t)(EDRV32_DDR_BASE + output),
-                    v.post.anchors[i], showcase_hand_heads, showcase_hand_keypoints, 21, points);
+                    v.post.anchors[i], showcase_gesture_heads, showcase_gesture_keypoints,
+                    21, points);
                 for (unsigned k = 0; k < 21; ++k)
                     hand.points[i][k] = (ui_pose_point_t){points[k].x, points[k].y,
                                                          points[k].visibility};
                 const yolo_detection *d = &v.detections[i];
-                hand.people[i] = (ui_detection_t){"手", d->score / 10,
-                    d->x0, d->y0, d->x1 - d->x0, d->y1 - d->y0, 0};
+                hand.people[i] = (ui_detection_t){ui_gesture_names[d->class_id], d->score / 10,
+                    d->x0, d->y0, d->x1 - d->x0, d->y1 - d->y0, d->class_id};
                 int area = (d->x1 - d->x0) * (d->y1 - d->y0);
                 if (area > largest_area) { largest_area = area; largest = i; }
             }
             if (hand.count) {
-                ui_hand_state_t before = hand.state;
-                ui_hand_classify(hand.points[largest], &hand.state);
                 const ui_detection_t *box = &hand.people[largest];
                 hand.size = box->width > box->height ? box->width : box->height;
-                if (!hand_event_valid || before.pinch != hand.state.pinch ||
-                    before.fingers != hand.state.fingers || before.rps != hand.state.rps) {
-                    char line[180], bits[6];
-                    ui_hand_bits(hand.state.fingers, bits);
+                hand.confidence = box->confidence;
+                if (ui_gesture_debounce(&hand.state, (int)box->class_id)) {
+                    char line[160];
                     snprintf(line, sizeof line,
-                        "hand_evt ms=%llu pinch=%u d=%.2f fingers=%s rps=%s size=%u\r\n",
+                        "gesture_evt ms=%llu cls=%s conf=%u size=%u\r\n",
                         (unsigned long long)(platform_ticks() * 1000 / platform_clock_hz()),
-                        hand.state.pinch, (double)hand.state.d, bits,
-                        ui_hand_rps(hand.state.rps), hand.size / 2);
+                        ui_gesture_ids[hand.state.cls], hand.confidence, hand.size / 2);
                     platform_puts(line);
                 }
-                hand_event_valid = true;
             } else {
-                hand.size = 0;
-                memset(&hand.state, 0, sizeof hand.state);
-                hand_event_valid = false;
+                hand.size = hand.confidence = 0;
+                ui_gesture_debounce(&hand.state, -1);
+            }
+            timing.kpt_ticks += platform_ticks() - start;
+        }
+        if (complete && v.page >= PAGE_FACE && !timing.cancelled) {
+            uint64_t start = platform_ticks();
+            const struct model *m = &models[v.model];
+            demo.count = v.post.kept;
+            demo.size = demo.helmet = demo.head = 0;
+            uint32_t output = VISION_OUTPUT_BASE + v.post_buffer * VISION_OUTPUT_SPACING;
+#ifndef SHOWCASE_POST_CPU
+            if (m->points) engine_dma_invalidate(EDRV32_DDR_BASE + output, m->output);
+#endif
+            for (unsigned i = 0; i < demo.count; ++i) {
+                const yolo_detection *d = &v.detections[i];
+                const char *name = v.page == PAGE_FACE ? "人脸" : v.page == PAGE_DOODLE ?
+                    ui_doodle_names[d->class_id] : d->class_id ? "未戴" : "安全帽";
+                demo.objects[i] = (ui_detection_t){name, d->score / 10, d->x0, d->y0,
+                    d->x1 - d->x0, d->y1 - d->y0, d->class_id};
+                unsigned size = (unsigned)((d->x1 - d->x0) > (d->y1 - d->y0) ?
+                    d->x1 - d->x0 : d->y1 - d->y0);
+                if (size > demo.size) demo.size = size;
+                if (v.page == PAGE_HELMET) {
+                    if (d->class_id) ++demo.head; else ++demo.helmet;
+                }
+                if (m->points) {
+                    pose_point points[5];
+                    vision_keypoints_decode((const int8_t *)(uintptr_t)(EDRV32_DDR_BASE + output),
+                        v.post.anchors[i], m->heads, m->keypoints, m->points, points);
+                    for (unsigned k = 0; k < m->points; ++k)
+                        demo.points[i][k] = (ui_pose_point_t){points[k].x, points[k].y,
+                                                            points[k].visibility};
+                }
             }
             timing.kpt_ticks += platform_ticks() - start;
         }
@@ -1107,7 +1266,7 @@ int vision_service(void)
     }
     if ((v.state == PIPE_CONFIGURE || v.state == PIPE_PAUSING ||
          v.state == PIPE_STOPPING) && v.job == JOB_IDLE && !v.npu_busy &&
-        !v.done_mask && v.geo_source < 0) {
+        !v.done_mask && !v.memory_reading && v.geo_source < 0) {
         if (v.capture && !(engine_poll(ENGINE_VIN).status & EDRV32_VIN_STATUS_IDLE_MASK)) {
             sched_port_unlock(lock); return 1;
         }
@@ -1120,9 +1279,9 @@ int vision_service(void)
         if (v.state == PIPE_STOPPING) {
             if (v.display_owned) { sched_port_unlock(lock); return 1; }
             engine_control(ENGINE_VIN, 0);
-            if (v.page == PAGE_CAMERA || v.page == PAGE_POSE || v.page == PAGE_HAND ||
-                v.page == PAGE_IMAGE)
+            if (live_page() || v.page == PAGE_IMAGE)
                 engine_control(ENGINE_NPU, 0);
+            if (v.page == PAGE_DOODLE) engine_control(ENGINE_PIX, 0);
             if (v.page == PAGE_PROCESS) {
                 engine_control(ENGINE_PIX, 0); engine_control(ENGINE_GEO, 0);
             }
@@ -1136,7 +1295,7 @@ int vision_service(void)
         model_step(); sched_port_unlock(lock); return 1;
     }
     if (v.state == PIPE_STARTING) {
-        unsigned model = v.page == PAGE_HAND ? 2 : v.page == PAGE_POSE ? 1 : 0;
+        unsigned model = page_models[v.page];
         if (model != v.model) select_model(model);
         if (v.page == PAGE_PROCESS && v.gamma_index < 256) {
             sched_port_unlock(lock); return 1;
@@ -1186,7 +1345,13 @@ static void step(void)
                       UINT64_MAX);
 }
 const struct app vision_app_hand = {
-    "手部关键点", NULL, APP_HW_VIN | APP_HW_NPU, 0, enter_hand, step, leave};
+    "手势识别", NULL, APP_HW_VIN | APP_HW_NPU, 0, enter_hand, step, leave};
+const struct app vision_app_face = {
+    "人脸贴纸", NULL, APP_HW_VIN | APP_HW_NPU | APP_HW_RND, 0, enter_face, step, leave};
+const struct app vision_app_doodle = {
+    "简笔画识别", NULL, APP_HW_VIN | APP_HW_NPU | APP_HW_PIX, 0, enter_doodle, step, leave};
+const struct app vision_app_helmet = {
+    "安全帽检测", NULL, APP_HW_VIN | APP_HW_NPU, 0, enter_helmet, step, leave};
 const struct app vision_app_pose = {
     "人体姿态", NULL, APP_HW_VIN | APP_HW_NPU, 0, enter_pose, step, leave};
 const struct app vision_app_camera = {
@@ -1207,22 +1372,13 @@ void vision_init(void)
             engine_dma_clean(EDRV32_DDR_BASE + VISION_POST_BASE +
                              buffer * VISION_POST_SPACING, 120960u);
         /* SoC 7.4: destination uses only its uncached alias. */
-        memcpy(uncached(VISION_DESC_BASE), showcase_model_desc, showcase_model_desc_bytes);
-        memcpy(uncached(VISION_MODEL_BASE), showcase_model_weights,
-               showcase_model_weights_bytes);
-        memcpy(uncached(VISION_POSE_DESC_BASE), showcase_pose_desc, showcase_pose_desc_bytes);
-        memcpy(uncached(VISION_POSE_MODEL_BASE), showcase_pose_weights,
-               showcase_pose_weights_bytes);
-        memcpy(uncached(VISION_HAND_DESC_BASE), showcase_hand_desc, showcase_hand_desc_bytes);
-        memcpy(uncached(VISION_HAND_MODEL_BASE), showcase_hand_weights,
-               showcase_hand_weights_bytes);
+        for (unsigned i = 0; i < sizeof models / sizeof models[0]; ++i) {
+            const struct model *m = &models[i];
+            memcpy(uncached(m->desc), m->descriptor, *m->desc_bytes);
+            memcpy(uncached(m->weights), m->weight, *m->weight_bytes);
+        }
         v.model_count = showcase_model_count;
-        struct npu_config config = {VISION_MODEL_BASE, VISION_WORK_BASE,
-            VISION_INPUT_BASE, VISION_OUTPUT_BASE, VISION_DESC_BASE, showcase_model_count};
-        npu_configure(&config);
-#ifndef SHOWCASE_POST_CPU
-        npu_post_configure();
-#endif
+        select_model(0);
         v.model_ready = true;
     }
 }

@@ -74,3 +74,12 @@ pose-bench: $(BUILD)/showcase_pose_bench
 $(BUILD)/showcase_pose_bench: main_pose_bench.c $(COMMON) $(POSE_PAGE) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_pose_bench.c \
 	    $(filter-out ../ui/page_pose.c,$(COMMON)) $(POSE_PAGE) $(LINUX_LV) -lm -o $@
+
+.PHONY: demos
+demos: $(BUILD)/showcase_demo_shots
+	mkdir -p $(BUILD)/shots
+	cd $(BUILD) && ./showcase_demo_shots $(ROOT)/build/npu/demo_pages_test
+	$(foreach name,gesture face doodle helmet,python3 $(ROOT)/tools/sw/raw2png.py $(BUILD)/shots/demo-$(name).rgb565 $(BUILD)/shots/demo-$(name).png;)
+
+$(BUILD)/showcase_demo_shots: main_demo_shots.c $(COMMON) $(LINUX_LV)
+	$(CC) $(FLAGS) -Werror main_demo_shots.c $(COMMON) $(LINUX_LV) -lm -o $@

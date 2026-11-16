@@ -11,15 +11,28 @@
 /* Pose has independent descriptors/model; WORK and INPUT are exclusive scratch.
  * Detect [0x00080000,0x00090000), [0x00100000,0x00500000).
  * Pose   [0x00090000,0x000a0000), [0x00500000,0x00900000).
- * Hand   [0x000a0000,0x000b0000), [0x00900000,0x00d00000).
+ * Gesture[0x000a0000,0x000b0000), [0x00900000,0x00d00000).
+ * Face descriptors [0x000b0000,0x000c0000), model [0x0c000000,0x0c400000).
+ * Doodle descriptors [0x000c0000,0x000d0000), model [0x0c400000,0x0c800000).
+ * Helmet descriptors [0x000d0000,0x000e0000), model [0x0c800000,0x0cc00000).
+ * Checked against B2 software design 3.3 and board/ddr_map.h: these regions
+ * are free; coordinator approved moving the proposed models out of UPLOAD
+ * [0x0b000000,0x0b800000). No existing allocation moves.
  * WORK starts at 0x01000000; ELF window [0x10000000,0x18000000).
  * OUTPUT slots [0x05000000,0x050fff00), [0x05200000,0x052fff00)
  * leave POST [0x05100000,0x05160000) and IMAGE >=0x06000000 untouched.
  */
 #define VISION_POSE_DESC_BASE 0x00090000u
 #define VISION_POSE_MODEL_BASE 0x00500000u
-#define VISION_HAND_DESC_BASE 0x000a0000u
-#define VISION_HAND_MODEL_BASE 0x00900000u
+#define VISION_GESTURE_DESC_BASE 0x000a0000u
+#define VISION_GESTURE_MODEL_BASE 0x00900000u
+#define VISION_FACE_DESC_BASE 0x000b0000u
+#define VISION_FACE_MODEL_BASE 0x0c000000u
+#define VISION_DOODLE_DESC_BASE 0x000c0000u
+#define VISION_DOODLE_MODEL_BASE 0x0c400000u
+#define VISION_HELMET_DESC_BASE 0x000d0000u
+#define VISION_HELMET_MODEL_BASE 0x0c800000u
+#define VISION_FACE_OUTPUT_BYTES 806400u
 #define VISION_OUTPUT_SPACING 0x00200000u
 #define VISION_POSE_OUTPUT_BYTES 1048320u
 #define VISION_WORK_BASE 0x01000000u

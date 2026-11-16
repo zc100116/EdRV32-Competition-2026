@@ -10,6 +10,7 @@ struct vision_post {
     uint32_t head, cell, anchor_base;
 #endif
     const yolo_head *heads;
+    unsigned classes;
     uint16_t anchors[YOLO_MAX_DETECTIONS];
     yolo_candidate *workspace;
     yolo_detection *detections;

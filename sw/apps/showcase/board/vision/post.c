@@ -95,7 +95,7 @@ static int16_t display_coordinate(int32_t coordinate, int32_t padding, int32_t l
 void vision_post_begin(struct vision_post *p, const int8_t *output,
                        yolo_candidate *workspace, yolo_detection *detections)
 {
-    *p = (struct vision_post){.heads = yolo_default_heads, .output = output, .workspace = workspace,
+    *p = (struct vision_post){.heads = yolo_default_heads, .classes = 80, .output = output, .workspace = workspace,
                               .detections = detections};
 }
 
@@ -126,16 +126,11 @@ int vision_post_step(struct vision_post *p)
             int32_t best = -129;
             uint16_t class_id = 0;
             const int8_t *classes = p->output + head->class_offset + cell * 16;
-            for (uint32_t plane = 0; plane < 5; ++plane) {
-                for (uint32_t lane = 0; lane < 16; ++lane) {
-                    int32_t value = classes[plane * head->plane_stride + lane];
-                    if (value > best) {
-                        best = value;
-                        class_id = (uint16_t)(plane * 16 + lane);
-                    }
-                }
+            for (unsigned cls = 0; cls < p->classes; ++cls) {
+                int32_t value = classes[cls / 16 * head->plane_stride + cls % 16];
+                if (value > best) { best = value; class_id = (uint16_t)cls; }
             }
-            stats->class_comparisons += 81;
+            stats->class_comparisons += p->classes + 1;
             if (best < head->class_threshold) {
                 continue;
             }
