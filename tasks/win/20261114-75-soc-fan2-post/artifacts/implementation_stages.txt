@@ -1,0 +1,38 @@
+G:\codex_project\EdRV32-FPGA\EdRV32-B3F-POST\compile\run.log
+Action compile: Real time elapsed is 0h:3m:27s
+Action compile: CPU time elapsed is 0h:0m:19s
+Action compile: Process CPU time elapsed is 0h:0m:19s
+Current time: Sat Nov 14 17:26:18 2026
+
+G:\codex_project\EdRV32-FPGA\EdRV32-B3F-POST\synthesize\run.log
+Design 'edrv32_fpga_board_full_top' has been successfully synthesized to architecture-specific objects.
+Action synthesize: Real time elapsed is 0h:9m:58s
+Action synthesize: CPU time elapsed is 0h:1m:4s
+Action synthesize: Process CPU time elapsed is 0h:1m:11s
+Current time: Sat Nov 14 17:36:16 2026
+
+G:\codex_project\EdRV32-FPGA\EdRV32-B3F-POST\device_map\run.log
+Design 'edrv32_fpga_board_full_top' has been successfully mapped to architecture-specific objects.
+Action dev_map: Real time elapsed is 0h:2m:19s
+Action dev_map: CPU time elapsed is 0h:0m:21s
+Action dev_map: Process CPU time elapsed is 0h:0m:23s
+Current time: Sat Nov 14 17:38:39 2026
+
+G:\codex_project\EdRV32-FPGA\EdRV32-B3F-POST\place_route\run.log
+Total nets for routing: 168261.
+Total loads for routing: 726567.
+Detailed routing takes 130588.03 sec.
+Fix violation Finished.
+Fix violation Finished.
+Total routing takes 130918.07 sec.
+Design 'edrv32_fpga_board_full_top' has been placed and routed successfully.
+Action pnr: Real time elapsed is 36h:51m:1s
+Action pnr: CPU time elapsed is 4h:50m:41s
+Action pnr: Process CPU time elapsed is 5h:32m:27s
+Current time: Mon Nov 16 06:29:42 2026
+
+G:\codex_project\EdRV32-FPGA\EdRV32-B3F-POST\report_timing\run.log
+Action report_timing: Real time elapsed is 0h:2m:2s
+Action report_timing: CPU time elapsed is 0h:0m:12s
+Action report_timing: Process CPU time elapsed is 0h:0m:15s
+Current time: Mon Nov 16 06:31:48 2026

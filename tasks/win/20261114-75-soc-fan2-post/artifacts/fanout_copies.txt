@@ -1,0 +1,444 @@
+Source: G:\codex_project\EdRV32-FPGA\EdRV32-B3F-POST\synthesize\edrv32_fpga_board_full_top_syn.vm
+Source: G:\codex_project\EdRV32-FPGA\EdRV32-B3F-POST\device_map\edrv32_fpga_board_full_top.dmr
+Other High Fanout Signal lists 1000 nets; last fanout 64. Missing names are below the list threshold or are no longer listed under that name.
+ADS wire declarations corroborate synthesized names. A declaration does not imply each bit is independently driven.
+RND write abort: the ADS instance binding drives stop_w[7] and [0]; positions [6:1] are floating. Two named stop_w outputs are connected; abort_latch_w not found by name.
+2601051:            .\u_write/stop_w  ({\u_rnd/u_write/stop_w [7] , \u_rnd_u_write/stop_w[6]_floating , \u_rnd_u_write/stop_w[5]_floating , \u_rnd_u_write/stop_w[4]_floating , \u_rnd_u_write/stop_w[3]_floating , \u_rnd_u_write/stop_w[2]_floating , \u_rnd_u_write/stop_w[1]_floating , \u_rnd/u_write/stop_w [0] }),
+
+### RND write abort
+Original Device Map:
+u_rnd/cancel_region_w [6] | u_rnd/N327_1 | 152
+Original ADS wire declarations:
+None under this name.
+Copy Device Map:
+Below list threshold or name missing.
+Copy ADS wire declarations:
+2596846: wire [7:0] \u_rnd/u_write/stop_w ;
+
+### RND state
+Original Device Map:
+u_rnd/state_r_reg [11] | u_rnd/state_r_reg[11] | 191
+u_rnd/state_r_reg [5] | u_rnd/state_r_reg[5] | 73
+u_rnd/state_r_reg [12] | u_rnd/state_r_reg[12] | 66
+Original ADS wire declarations:
+None under this name.
+Copy Device Map:
+Below list threshold or name missing.
+Copy ADS wire declarations:
+None under this name.
+
+### RND alpha bank
+Original Device Map:
+Below list threshold or name missing.
+Original ADS wire declarations:
+None under this name.
+Copy Device Map:
+Below list threshold or name missing.
+Copy ADS wire declarations:
+None under this name.
+
+### RND alpha valid
+Original Device Map:
+Below list threshold or name missing.
+Original ADS wire declarations:
+None under this name.
+Copy Device Map:
+Below list threshold or name missing.
+Copy ADS wire declarations:
+None under this name.
+
+### RND blit bank
+Original Device Map:
+Below list threshold or name missing.
+Original ADS wire declarations:
+None under this name.
+Copy Device Map:
+Below list threshold or name missing.
+Copy ADS wire declarations:
+None under this name.
+
+### RND FILL control
+Original Device Map:
+Below list threshold or name missing.
+Original ADS wire declarations:
+None under this name.
+Copy Device Map:
+Below list threshold or name missing.
+Copy ADS wire declarations:
+None under this name.
+
+### MEM write port
+Original Device Map:
+Below list threshold or name missing.
+Original ADS wire declarations:
+2596790: wire [2:0] \u_mem/u_xbar/w_port_r ;
+Copy Device Map:
+Below list threshold or name missing.
+Copy ADS wire declarations:
+2596768: wire [2:0] \u_mem/u_xbar/g_w_select[0].w_port_copy_r ;
+2596769: wire [2:0] \u_mem/u_xbar/g_w_select[1].w_port_copy_r ;
+2596770: wire [2:0] \u_mem/u_xbar/g_w_select[2].w_port_copy_r ;
+2596771: wire [2:0] \u_mem/u_xbar/g_w_select[3].w_port_copy_r ;
+2596772: wire [2:0] \u_mem/u_xbar/g_w_select[8].w_port_copy_r ;
+
+### MEM skid valid
+Original Device Map:
+Below list threshold or name missing.
+Original ADS wire declarations:
+2596783: wire [6:0] \u_mem/u_xbar/u_rbuf/skid_valid_r ;
+Copy Device Map:
+u_mem/u_xbar/u_rbuf/g_output[6].g_data[0].skid_valid_copy_r | u_mem/u_xbar/u_rbuf/g_output[6].g_data[0].skid_valid_copy_r | 111
+u_mem/u_xbar/u_rbuf/g_output[6].g_data[1].skid_valid_copy_r | u_mem/u_xbar/u_rbuf/g_output[6].g_data[1].skid_valid_copy_r | 98
+Copy ADS wire declarations:
+2596773: wire \u_mem/u_xbar/u_rbuf/g_output[6].g_data[0].skid_valid_copy_r ;
+2596774: wire \u_mem/u_xbar/u_rbuf/g_output[6].g_data[1].skid_valid_copy_r ;
+2596775: wire \u_mem/u_xbar/u_rbuf/g_output[6].g_data[2].skid_valid_copy_r ;
+2596776: wire \u_mem/u_xbar/u_rbuf/g_output[6].g_data[3].skid_valid_copy_r ;
+
+### NPU weight segment
+Original Device Map:
+Below list threshold or name missing.
+Original ADS wire declarations:
+None under this name.
+Copy Device Map:
+Below list threshold or name missing.
+Copy ADS wire declarations:
+None under this name.
+
+### NPU result read address
+Original Device Map:
+u_npu/u_conv/dp_result_rd_index_w [5] | u_npu/u_conv/u_conv_write/result_rd_index_r[5] | 128
+u_npu/u_conv/dp_result_rd_index_w [3] | u_npu/u_conv/u_conv_write/result_rd_index_r[3] | 128
+u_npu/u_conv/dp_result_rd_index_w [2] | u_npu/u_conv/u_conv_write/result_rd_index_r[2] | 128
+u_npu/u_conv/dp_result_rd_index_w [4] | u_npu/u_conv/u_conv_write/result_rd_index_r[4] | 128
+u_npu/u_conv/dp_result_rd_index_w [1] | u_npu/u_conv/u_conv_write/result_rd_index_r[1] | 128
+u_npu/u_conv/dp_result_rd_index_w [0] | u_npu/u_conv/u_conv_write/result_rd_index_r[0] | 128
+u_npu/u_conv/dp_result_rd_index_w [6] | u_npu/u_conv/u_conv_write/result_rd_index_r[6] | 128
+u_npu/u_conv/dp_result_rd_index_w [9] | u_npu/u_conv/u_conv_write/result_rd_index_r[9] | 128
+u_npu/u_conv/dp_result_rd_index_w [8] | u_npu/u_conv/u_conv_write/result_rd_index_r[8] | 128
+u_npu/u_conv/dp_result_rd_index_w [7] | u_npu/u_conv/u_conv_write/result_rd_index_r[7] | 128
+Original ADS wire declarations:
+None under this name.
+Copy Device Map:
+u_npu/u_conv/dp_result_rd_index_w [5] | u_npu/u_conv/u_conv_write/result_rd_index_r[5] | 128
+u_npu/u_conv/dp_result_rd_index_w [3] | u_npu/u_conv/u_conv_write/result_rd_index_r[3] | 128
+u_npu/u_conv/dp_result_rd_index_w [2] | u_npu/u_conv/u_conv_write/result_rd_index_r[2] | 128
+u_npu/u_conv/dp_result_rd_index_w [4] | u_npu/u_conv/u_conv_write/result_rd_index_r[4] | 128
+u_npu/u_conv/dp_result_rd_index_w [1] | u_npu/u_conv/u_conv_write/result_rd_index_r[1] | 128
+u_npu/u_conv/dp_result_rd_index_w [0] | u_npu/u_conv/u_conv_write/result_rd_index_r[0] | 128
+u_npu/u_conv/dp_result_rd_index_w [6] | u_npu/u_conv/u_conv_write/result_rd_index_r[6] | 128
+u_npu/u_conv/dp_result_rd_index_w [9] | u_npu/u_conv/u_conv_write/result_rd_index_r[9] | 128
+u_npu/u_conv/dp_result_rd_index_w [8] | u_npu/u_conv/u_conv_write/result_rd_index_r[8] | 128
+u_npu/u_conv/dp_result_rd_index_w [7] | u_npu/u_conv/u_conv_write/result_rd_index_r[7] | 128
+Copy ADS wire declarations:
+None under this name.
+
+### NPU cls plane
+Original Device Map:
+Below list threshold or name missing.
+Original ADS wire declarations:
+None under this name.
+Copy Device Map:
+u_npu/u_conv/u_datapath/u_writeback/rd_plane_output_r [1] | u_npu/u_conv/u_datapath/u_writeback/rd_plane_output_r[1] | 64
+u_npu/u_conv/u_datapath/u_writeback/rd_plane_output_r [2] | u_npu/u_conv/u_datapath/u_writeback/rd_plane_output_r[2] | 64
+u_npu/u_conv/u_datapath/u_writeback/rd_plane_output_r [3] | u_npu/u_conv/u_datapath/u_writeback/rd_plane_output_r[3] | 64
+Copy ADS wire declarations:
+None under this name.
+
+### ADS preserved register instances
+Counts are DFF primitives, so a multi-bit copy can occupy several lines.
+
+RND state capture command: 40 named preserved DFF primitives
+2366744:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[0].capture_state_r[0]  */ #(
+2366754:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[0].capture_state_r[1]  */ #(
+2366764:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[0].capture_state_r[2]  */ #(
+2366774:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[0].capture_state_r[3]  */ #(
+2367125:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[1].capture_state_r[0]  */ #(
+2367135:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[1].capture_state_r[1]  */ #(
+2367145:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[1].capture_state_r[2]  */ #(
+2367155:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[1].capture_state_r[3]  */ #(
+2367506:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[2].capture_state_r[0]  */ #(
+2367516:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[2].capture_state_r[1]  */ #(
+2367526:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[2].capture_state_r[2]  */ #(
+2367536:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[2].capture_state_r[3]  */ #(
+2367887:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[3].capture_state_r[0]  */ #(
+2367897:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[3].capture_state_r[1]  */ #(
+2367907:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[3].capture_state_r[2]  */ #(
+2367917:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[3].capture_state_r[3]  */ #(
+2368268:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[4].capture_state_r[0]  */ #(
+2368278:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[4].capture_state_r[1]  */ #(
+2368288:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[4].capture_state_r[2]  */ #(
+2368298:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[4].capture_state_r[3]  */ #(
+2368649:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[5].capture_state_r[0]  */ #(
+2368659:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[5].capture_state_r[1]  */ #(
+2368669:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[5].capture_state_r[2]  */ #(
+2368679:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[5].capture_state_r[3]  */ #(
+2369030:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[6].capture_state_r[0]  */ #(
+2369040:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[6].capture_state_r[1]  */ #(
+2369050:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[6].capture_state_r[2]  */ #(
+2369060:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[6].capture_state_r[3]  */ #(
+2369411:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[7].capture_state_r[0]  */ #(
+2369421:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[7].capture_state_r[1]  */ #(
+2369431:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[7].capture_state_r[2]  */ #(
+2369441:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[7].capture_state_r[3]  */ #(
+2369792:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[8].capture_state_r[0]  */ #(
+2369802:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[8].capture_state_r[1]  */ #(
+2369812:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[8].capture_state_r[2]  */ #(
+2369822:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[8].capture_state_r[3]  */ #(
+2370173:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[9].capture_state_r[0]  */ #(
+2370183:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[9].capture_state_r[1]  */ #(
+2370193:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[9].capture_state_r[2]  */ #(
+2370203:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_command[9].capture_state_r[3]  */ #(
+
+RND state capture slice: 32 named preserved DFF primitives
+2366256:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[0].capture_state_r[0]  */ #(
+2366266:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[0].capture_state_r[1]  */ #(
+2366276:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[0].capture_state_r[2]  */ #(
+2366286:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[0].capture_state_r[3]  */ #(
+2366317:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[1].capture_state_r[0]  */ #(
+2366327:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[1].capture_state_r[1]  */ #(
+2366337:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[1].capture_state_r[2]  */ #(
+2366347:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[1].capture_state_r[3]  */ #(
+2366378:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[2].capture_state_r[0]  */ #(
+2366388:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[2].capture_state_r[1]  */ #(
+2366398:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[2].capture_state_r[2]  */ #(
+2366408:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[2].capture_state_r[3]  */ #(
+2366439:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[3].capture_state_r[0]  */ #(
+2366449:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[3].capture_state_r[1]  */ #(
+2366459:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[3].capture_state_r[2]  */ #(
+2366469:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[3].capture_state_r[3]  */ #(
+2366500:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[4].capture_state_r[0]  */ #(
+2366510:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[4].capture_state_r[1]  */ #(
+2366520:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[4].capture_state_r[2]  */ #(
+2366530:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[4].capture_state_r[3]  */ #(
+2366561:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[5].capture_state_r[0]  */ #(
+2366571:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[5].capture_state_r[1]  */ #(
+2366581:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[5].capture_state_r[2]  */ #(
+2366591:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[5].capture_state_r[3]  */ #(
+2366622:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[6].capture_state_r[0]  */ #(
+2366632:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[6].capture_state_r[1]  */ #(
+2366642:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[6].capture_state_r[2]  */ #(
+2366652:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[6].capture_state_r[3]  */ #(
+2366683:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[7].capture_state_r[0]  */ #(
+2366693:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[7].capture_state_r[1]  */ #(
+2366703:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[7].capture_state_r[2]  */ #(
+2366713:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_capture[7].capture_state_r[3]  */ #(
+
+RND result state: 32 named preserved DFF primitives
+2370554:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[0].result_state_r[0]  */ #(
+2370564:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[0].result_state_r[1]  */ #(
+2370574:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[0].result_state_r[2]  */ #(
+2370584:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[0].result_state_r[3]  */ #(
+2370594:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[1].result_state_r[0]  */ #(
+2370604:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[1].result_state_r[1]  */ #(
+2370614:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[1].result_state_r[2]  */ #(
+2370624:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[1].result_state_r[3]  */ #(
+2370634:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[2].result_state_r[0]  */ #(
+2370644:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[2].result_state_r[1]  */ #(
+2370654:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[2].result_state_r[2]  */ #(
+2370664:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[2].result_state_r[3]  */ #(
+2370674:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[3].result_state_r[0]  */ #(
+2370684:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[3].result_state_r[1]  */ #(
+2370694:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[3].result_state_r[2]  */ #(
+2370704:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[3].result_state_r[3]  */ #(
+2370714:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[4].result_state_r[0]  */ #(
+2370724:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[4].result_state_r[1]  */ #(
+2370734:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[4].result_state_r[2]  */ #(
+2370744:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[4].result_state_r[3]  */ #(
+2370754:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[5].result_state_r[0]  */ #(
+2370764:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[5].result_state_r[1]  */ #(
+2370774:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[5].result_state_r[2]  */ #(
+2370784:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[5].result_state_r[3]  */ #(
+2370794:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[6].result_state_r[0]  */ #(
+2370804:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[6].result_state_r[1]  */ #(
+2370814:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[6].result_state_r[2]  */ #(
+2370824:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[6].result_state_r[3]  */ #(
+2370834:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[7].result_state_r[0]  */ #(
+2370844:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[7].result_state_r[1]  */ #(
+2370854:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[7].result_state_r[2]  */ #(
+2370864:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_state[7].result_state_r[3]  */ #(
+
+RND alpha bank: 8 named preserved DFF primitives
+2055133:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_result_control[0].bank_r  */ #(
+2055152:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_result_control[1].bank_r  */ #(
+2055171:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_result_control[2].bank_r  */ #(
+2055190:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_result_control[3].bank_r  */ #(
+2055209:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_result_control[4].bank_r  */ #(
+2055228:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_result_control[5].bank_r  */ #(
+2055247:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_result_control[6].bank_r  */ #(
+2055266:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_result_control[7].bank_r  */ #(
+
+RND alpha valid: 8 named preserved DFF primitives
+2055142:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_control[0].slice_valid_r  */ #(
+2055161:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_control[1].slice_valid_r  */ #(
+2055180:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_control[2].slice_valid_r  */ #(
+2055199:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_control[3].slice_valid_r  */ #(
+2055218:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_control[4].slice_valid_r  */ #(
+2055237:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_control[5].slice_valid_r  */ #(
+2055256:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_control[6].slice_valid_r  */ #(
+2055275:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \g_result_control[7].slice_valid_r  */ #(
+
+RND blit bank: 8 named preserved DFF primitives
+2081898:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_render_select[0].bank_r  */ #(
+2081910:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_render_select[1].bank_r  */ #(
+2081922:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_render_select[2].bank_r  */ #(
+2081934:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_render_select[3].bank_r  */ #(
+2081946:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_render_select[4].bank_r  */ #(
+2081958:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_render_select[5].bank_r  */ #(
+2081970:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_render_select[6].bank_r  */ #(
+2081982:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_render_select[7].bank_r  */ #(
+
+RND FILL control bit 8: 4 named preserved DFF primitives
+2369150:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_E /* \g_command[6].control_r[8]  */ #(
+2369531:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_E /* \g_command[7].control_r[8]  */ #(
+2369912:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_E /* \g_command[8].control_r[8]  */ #(
+2370293:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_E /* \g_command[9].control_r[8]  */ #(
+
+MEM port: 27 named preserved DFF primitives
+1072672:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[0].w_port_copy_r[0]  */ #(
+1072683:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[0].w_port_copy_r[1]  */ #(
+1072694:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[0].w_port_copy_r[2]  */ #(
+1072705:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[1].w_port_copy_r[0]  */ #(
+1072716:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[1].w_port_copy_r[1]  */ #(
+1072727:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[1].w_port_copy_r[2]  */ #(
+1072738:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[2].w_port_copy_r[0]  */ #(
+1072749:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[2].w_port_copy_r[1]  */ #(
+1072760:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[2].w_port_copy_r[2]  */ #(
+1072771:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[3].w_port_copy_r[0]  */ #(
+1072782:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[3].w_port_copy_r[1]  */ #(
+1072793:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[3].w_port_copy_r[2]  */ #(
+1072804:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[4].w_port_copy_r[0]  */ #(
+1072815:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[4].w_port_copy_r[1]  */ #(
+1072826:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[4].w_port_copy_r[2]  */ #(
+1072837:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[5].w_port_copy_r[0]  */ #(
+1072848:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[5].w_port_copy_r[1]  */ #(
+1072859:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[5].w_port_copy_r[2]  */ #(
+1072870:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[6].w_port_copy_r[0]  */ #(
+1072881:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[6].w_port_copy_r[1]  */ #(
+1072892:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[6].w_port_copy_r[2]  */ #(
+1072903:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[7].w_port_copy_r[0]  */ #(
+1072914:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[7].w_port_copy_r[1]  */ #(
+1072925:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[7].w_port_copy_r[2]  */ #(
+1072936:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[8].w_port_copy_r[0]  */ #(
+1072947:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[8].w_port_copy_r[1]  */ #(
+1072958:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_w_select[8].w_port_copy_r[2]  */ #(
+
+MEM skid valid: 28 named preserved DFF primitives
+913177:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[0].g_data[0].skid_valid_copy_r  */ #(
+913189:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[0].g_data[1].skid_valid_copy_r  */ #(
+913201:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[0].g_data[2].skid_valid_copy_r  */ #(
+913213:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[0].g_data[3].skid_valid_copy_r  */ #(
+913225:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[1].g_data[0].skid_valid_copy_r  */ #(
+913237:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[1].g_data[1].skid_valid_copy_r  */ #(
+913249:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[1].g_data[2].skid_valid_copy_r  */ #(
+913261:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[1].g_data[3].skid_valid_copy_r  */ #(
+913273:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[2].g_data[0].skid_valid_copy_r  */ #(
+913285:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[2].g_data[1].skid_valid_copy_r  */ #(
+913297:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[2].g_data[2].skid_valid_copy_r  */ #(
+913309:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[2].g_data[3].skid_valid_copy_r  */ #(
+913321:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[3].g_data[0].skid_valid_copy_r  */ #(
+913333:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[3].g_data[1].skid_valid_copy_r  */ #(
+913345:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[3].g_data[2].skid_valid_copy_r  */ #(
+913357:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[3].g_data[3].skid_valid_copy_r  */ #(
+913369:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[4].g_data[0].skid_valid_copy_r  */ #(
+913381:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[4].g_data[1].skid_valid_copy_r  */ #(
+913393:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[4].g_data[2].skid_valid_copy_r  */ #(
+913405:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[4].g_data[3].skid_valid_copy_r  */ #(
+913417:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[5].g_data[0].skid_valid_copy_r  */ #(
+913429:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[5].g_data[1].skid_valid_copy_r  */ #(
+913441:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[5].g_data[2].skid_valid_copy_r  */ #(
+913453:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[5].g_data[3].skid_valid_copy_r  */ #(
+913465:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[6].g_data[0].skid_valid_copy_r  */ #(
+913477:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[6].g_data[1].skid_valid_copy_r  */ #(
+913489:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[6].g_data[2].skid_valid_copy_r  */ #(
+913501:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_CE /* \g_output[6].g_data[3].skid_valid_copy_r  */ #(
+
+NPU weight segment: 64 named preserved DFF primitives
+1537411:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[0].g_read_slice[0].rd_segment_output_r[0]  */ #(
+1537420:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[0].g_read_slice[0].rd_segment_output_r[1]  */ #(
+1537429:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[0].g_read_slice[1].rd_segment_output_r[0]  */ #(
+1537438:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[0].g_read_slice[1].rd_segment_output_r[1]  */ #(
+1537447:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[0].g_read_slice[2].rd_segment_output_r[0]  */ #(
+1537456:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[0].g_read_slice[2].rd_segment_output_r[1]  */ #(
+1537465:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[0].g_read_slice[3].rd_segment_output_r[0]  */ #(
+1537474:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[0].g_read_slice[3].rd_segment_output_r[1]  */ #(
+1540214:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[1].g_read_slice[0].rd_segment_output_r[0]  */ #(
+1540223:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[1].g_read_slice[0].rd_segment_output_r[1]  */ #(
+1540232:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[1].g_read_slice[1].rd_segment_output_r[0]  */ #(
+1540241:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[1].g_read_slice[1].rd_segment_output_r[1]  */ #(
+1540250:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[1].g_read_slice[2].rd_segment_output_r[0]  */ #(
+1540259:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[1].g_read_slice[2].rd_segment_output_r[1]  */ #(
+1540268:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[1].g_read_slice[3].rd_segment_output_r[0]  */ #(
+1540277:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[1].g_read_slice[3].rd_segment_output_r[1]  */ #(
+1543004:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[2].g_read_slice[0].rd_segment_output_r[0]  */ #(
+1543013:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[2].g_read_slice[0].rd_segment_output_r[1]  */ #(
+1543022:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[2].g_read_slice[1].rd_segment_output_r[0]  */ #(
+1543031:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[2].g_read_slice[1].rd_segment_output_r[1]  */ #(
+1543040:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[2].g_read_slice[2].rd_segment_output_r[0]  */ #(
+1543049:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[2].g_read_slice[2].rd_segment_output_r[1]  */ #(
+1543058:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[2].g_read_slice[3].rd_segment_output_r[0]  */ #(
+1543067:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[2].g_read_slice[3].rd_segment_output_r[1]  */ #(
+1545794:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[3].g_read_slice[0].rd_segment_output_r[0]  */ #(
+1545803:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[3].g_read_slice[0].rd_segment_output_r[1]  */ #(
+1545812:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[3].g_read_slice[1].rd_segment_output_r[0]  */ #(
+1545821:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[3].g_read_slice[1].rd_segment_output_r[1]  */ #(
+1545830:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[3].g_read_slice[2].rd_segment_output_r[0]  */ #(
+1545839:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[3].g_read_slice[2].rd_segment_output_r[1]  */ #(
+1545848:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[3].g_read_slice[3].rd_segment_output_r[0]  */ #(
+1545857:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[3].g_read_slice[3].rd_segment_output_r[1]  */ #(
+1548584:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[4].g_read_slice[0].rd_segment_output_r[0]  */ #(
+1548593:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[4].g_read_slice[0].rd_segment_output_r[1]  */ #(
+1548602:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[4].g_read_slice[1].rd_segment_output_r[0]  */ #(
+1548611:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[4].g_read_slice[1].rd_segment_output_r[1]  */ #(
+1548620:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[4].g_read_slice[2].rd_segment_output_r[0]  */ #(
+1548629:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[4].g_read_slice[2].rd_segment_output_r[1]  */ #(
+1548638:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[4].g_read_slice[3].rd_segment_output_r[0]  */ #(
+1548647:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[4].g_read_slice[3].rd_segment_output_r[1]  */ #(
+1551374:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[5].g_read_slice[0].rd_segment_output_r[0]  */ #(
+1551383:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[5].g_read_slice[0].rd_segment_output_r[1]  */ #(
+1551392:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[5].g_read_slice[1].rd_segment_output_r[0]  */ #(
+1551401:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[5].g_read_slice[1].rd_segment_output_r[1]  */ #(
+1551410:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[5].g_read_slice[2].rd_segment_output_r[0]  */ #(
+1551419:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[5].g_read_slice[2].rd_segment_output_r[1]  */ #(
+1551428:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[5].g_read_slice[3].rd_segment_output_r[0]  */ #(
+1551437:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[5].g_read_slice[3].rd_segment_output_r[1]  */ #(
+1554164:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[6].g_read_slice[0].rd_segment_output_r[0]  */ #(
+1554173:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[6].g_read_slice[0].rd_segment_output_r[1]  */ #(
+1554182:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[6].g_read_slice[1].rd_segment_output_r[0]  */ #(
+1554191:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[6].g_read_slice[1].rd_segment_output_r[1]  */ #(
+1554200:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[6].g_read_slice[2].rd_segment_output_r[0]  */ #(
+1554209:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[6].g_read_slice[2].rd_segment_output_r[1]  */ #(
+1554218:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[6].g_read_slice[3].rd_segment_output_r[0]  */ #(
+1554227:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[6].g_read_slice[3].rd_segment_output_r[1]  */ #(
+1556954:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[7].g_read_slice[0].rd_segment_output_r[0]  */ #(
+1556963:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[7].g_read_slice[0].rd_segment_output_r[1]  */ #(
+1556972:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[7].g_read_slice[1].rd_segment_output_r[0]  */ #(
+1556981:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[7].g_read_slice[1].rd_segment_output_r[1]  */ #(
+1556990:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[7].g_read_slice[2].rd_segment_output_r[0]  */ #(
+1556999:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[7].g_read_slice[2].rd_segment_output_r[1]  */ #(
+1557008:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[7].g_read_slice[3].rd_segment_output_r[0]  */ #(
+1557017:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \g_bank[7].g_read_slice[3].rd_segment_output_r[1]  */ #(
+
+NPU result read address: 10 named preserved DFF primitives
+1094893:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_E /* \result_rd_index_r[0]  */ #(
+1094903:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_E /* \result_rd_index_r[1]  */ #(
+1094913:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_E /* \result_rd_index_r[2]  */ #(
+1094923:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_E /* \result_rd_index_r[3]  */ #(
+1094933:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_E /* \result_rd_index_r[4]  */ #(
+1094943:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_E /* \result_rd_index_r[5]  */ #(
+1094953:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_E /* \result_rd_index_r[6]  */ #(
+1094963:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_E /* \result_rd_index_r[7]  */ #(
+1094973:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_E /* \result_rd_index_r[8]  */ #(
+1094983:(* PAP_PRESERVE="TRUE" *)    GTP_DFF_E /* \result_rd_index_r[9]  */ #(
+
+NPU class plane post: 1 named preserved DFF primitives
+1091933:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* cls_plane_r */ #(
+
+NPU class plane output: 4 named preserved DFF primitives
+1645319:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \rd_plane_output_r[0]  */ #(
+1645328:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \rd_plane_output_r[1]  */ #(
+1645337:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \rd_plane_output_r[2]  */ #(
+1645346:(* PAP_PRESERVE="TRUE" *)    GTP_DFF /* \rd_plane_output_r[3]  */ #(
+
+RND one-hot vector ADS port: [12:0], first occurrence at VM line 2033869.
+Fanout by bit in Other High Fanout Signal: [5] 73, [11] 191, [12] 66; [0:4], [6:10] below list threshold or absent by name.

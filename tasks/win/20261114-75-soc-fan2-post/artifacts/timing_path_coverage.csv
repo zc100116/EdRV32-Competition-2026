@@ -1,0 +1,6 @@
+corner,check,launch_clock,capture_clock,printed,le_0p5,violated
+slow,setup,clk_sys,clk_sys,3400,3400,479
+slow,setup,clk_npu,clk_npu,3564,3564,34
+slow,setup,clk_mem,clk_mem,3894,3894,52
+slow,setup,clk_mem,phy_dq_sysclk_1,29,29,0
+slow,setup,clk_rgmii_ref,clk_eth,5,5,0

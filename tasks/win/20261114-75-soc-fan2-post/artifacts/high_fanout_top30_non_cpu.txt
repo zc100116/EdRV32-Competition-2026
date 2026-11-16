@@ -1,0 +1,31 @@
+Net | Driver | Fanout
+clk_mem_w | u_ddr3/u_ddrphy_top/u_sysclk_bufg | 52071
+ntclkbufg_0 | clkbufg_2 | 43490
+ntclkbufg_1 | clkbufg_3 | 14388
+u_ddr3/u_ddrphy_top/ddrphy_calib_top/N10 | u_ddr3/u_ddrphy_top/ddrphy_calib_top/N10 | 2714
+ntclkbufg_2 | clkbufg_4 | 1996
+u_ddr3/u_ips_ddrc_top/mcdq_rdatapath/mcdq_prefetch_fifo/rst | u_ddr3/u_ips_ddrc_top/mcdq_apb_cross_v1_2/N28 | 1990
+u_ddr3/u_ddrphy_top/calib_done | u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_main_ctrl/calib_done | 539
+u_mem/u_xbar/N109 | u_mem/u_xbar/N109 | 459
+u_npu/u_regs/N7 | u_npu/u_regs/N7 | 440
+u_npu/u_conv/N1300 | u_npu/u_conv/N1300 | 418
+u_eth/u_regs/N192 | u_eth/u_regs/N192 | 364
+u_vin/u_regs/apb_paddr_r [2] | u_vin/u_regs/apb_paddr_r[2] | 354
+u_pix/advance_filter2_r [3] | u_pix/advance_filter2_r[3] | 344
+u_pix/advance_filter1_r [3] | u_pix/advance_filter1_r[3] | 344
+u_npu/u_conv/serial_valid_r | u_npu/u_conv/serial_valid_r | 320
+u_rnd/u_draw/N6336 | u_rnd/u_draw/N6336 | 318
+u_rnd/u_draw/N6364 | u_rnd/u_draw/N6364 | 318
+u_vin/u_regs/apb_paddr_r [3] | u_vin/u_regs/apb_paddr_r[3] | 309
+u_pix/advance_filter2_r [2] | u_pix/advance_filter2_r[2] | 308
+u_pix/advance_filter1_r [2] | u_pix/advance_filter1_r[2] | 308
+u_rnd/u_regs/N69 | u_rnd/u_regs/N69 | 305
+u_eth/u_rx_write/state_r_reg [3] | u_eth/u_rx_write/state_r_reg[3] | 301
+u_npu/u_nonconv/upsample_r | u_npu/u_nonconv/upsample_r | 296
+u_pix/advance_filter2_r [0] | u_pix/advance_filter2_r[0] | 296
+u_pix/advance_filter1_r [0] | u_pix/advance_filter1_r[0] | 296
+u_disp/u_scan/group_start_r | u_disp/u_scan/group_start_r | 296
+u_vin/g_channel[1].u_channel/u_write/write_hold_r | u_vin/g_channel[1].u_channel/u_write/write_hold_r | 290
+u_ddr3/u_ips_ddrc_top/mcdq_wdatapath/data_out [1] | u_ddr3/u_ips_ddrc_top/mcdq_wdatapath/data_out[1] | 290
+u_vin/u_ch2/u_write/write_hold_r | u_vin/u_ch2/u_write/write_hold_r | 290
+u_vin/g_channel[0].u_channel/u_write/write_hold_r | u_vin/g_channel[0].u_channel/u_write/write_hold_r | 290
