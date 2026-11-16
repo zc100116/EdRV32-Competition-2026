@@ -24,5 +24,10 @@ for path in sorted((ROOT / 'sw/apps/showcase/assets/stickers').glob('*.png')):
     width, height, rgba = decode_png(path.read_bytes())
     low = sum(1 <= a <= 39 for a in rgba[3::4])
     print(f'{path.name}: alpha 1..39 = {low}')
-    assert low <= 1000, f'{path.name}: {low} low-alpha pixels exceeds 1000'
-print('PASS sticker alpha: border connectivity, AA rim, enclosed detail, six PNG counts')
+    # R2's six 160 px assets retain their original haze bound. New eyeglasses
+    # contain enclosed translucent lens detail, preserved by the same cleanup.
+    if width == 160:
+        assert low <= 1000, f'{path.name}: {low} low-alpha pixels exceeds 1000'
+    assert 0 in rgba[3::4] and max(rgba[3::4]) >= 40, f'{path.name}: missing transparent/foreground art'
+    assert width == height and width in (48,64,96,112,160)
+print('PASS sticker alpha: border connectivity, AA rim, enclosed detail, all PNG transparency, sizes and original haze bounds')

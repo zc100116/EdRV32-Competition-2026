@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """rotate_showcase_stickers.py — T-FACE-STICKER-R2 offline angle frames.
 
-Standard-library PNG rotation; 160 px artwork centered on a 220 px canvas.
+Standard-library PNG rotation; artwork centered on an 11/8-width canvas.
 Positive angles turn clockwise in display coordinates. Host build domain.
 """
 import math
@@ -28,20 +28,30 @@ def main():
     total = 0
     for path in sorted(source.glob('*.png')):
         w, h, rgba = decode_png(path.read_bytes())
-        for angle, suffix in [(-24, 'm24'), (-12, 'm12'), (0, 'z0'),
-                              (12, 'p12'), (24, 'p24')]:
-            c, s = math.cos(math.radians(angle)), math.sin(math.radians(angle))
-            pixels = bytearray(220*220*4)
-            for y in range(220):
-                for x in range(220):
-                    dx, dy = x-109.5, y-109.5
-                    sx = round(c*dx+s*dy+(w-1)/2)
-                    sy = round(-s*dx+c*dy+(h-1)/2)
-                    if 0 <= sx < w and 0 <= sy < h:
-                        a, b = (y*220+x)*4, (sy*w+sx)*4
-                        pixels[a:a+4] = rgba[b:b+4]
-            write_png(output / f'{path.stem}_{suffix}.png', 220, 220, pixels)
-            total += len(pixels)
+        variants = [(path.stem, rgba)]
+        if path.stem == 'cat-whiskers':
+            mirrored = bytearray(len(rgba))
+            for y in range(h):
+                for x in range(w):
+                    dest, src = (y*w+x)*4, (y*w+w-1-x)*4
+                    mirrored[dest:dest+4] = rgba[src:src+4]
+            variants.append(('cat-whiskers-left', mirrored))
+        for name, rgba in variants:
+            canvas = w*11//8
+            for angle, suffix in [(-24, 'm24'), (-12, 'm12'), (0, 'z0'),
+                                  (12, 'p12'), (24, 'p24')]:
+                c, s = math.cos(math.radians(angle)), math.sin(math.radians(angle))
+                pixels = bytearray(canvas*canvas*4)
+                for y in range(canvas):
+                    for x in range(canvas):
+                        dx, dy = x-(canvas-1)/2, y-(canvas-1)/2
+                        sx = round(c*dx+s*dy+(w-1)/2)
+                        sy = round(-s*dx+c*dy+(h-1)/2)
+                        if 0 <= sx < w and 0 <= sy < h:
+                            a, b = (y*canvas+x)*4, (sy*w+sx)*4
+                            pixels[a:a+4] = rgba[b:b+4]
+                write_png(output / f'{name}_{suffix}.png', canvas, canvas, pixels)
+                total += len(pixels)
     print(f'sticker ARGB8888 bytes: {total}')
 
 

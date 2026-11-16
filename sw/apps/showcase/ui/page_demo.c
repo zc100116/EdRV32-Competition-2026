@@ -8,31 +8,40 @@ static lv_obj_t *surface, *tags[100], *metrics, *warning, *pause_label;
 static ui_demo_t shown;
 static bool points_enabled;
 static sticker_state_t stickers;
-static unsigned selected, revision, frame_tick;
+static int selected[STICKER_PARTS];
+static unsigned preset, revision, frame_tick;
 static lv_obj_t *sticker_name;
 #define ART(name) \
     extern const lv_image_dsc_t sticker_##name##_m24, sticker_##name##_m12, \
         sticker_##name##_z0, sticker_##name##_p12, sticker_##name##_p24
 ART(cat_ears); ART(bunny_ears); ART(sunglasses); ART(crown); ART(party_hat); ART(heart_headband);
+ART(heart_glasses); ART(star_eyes); ART(cartoon_eyes); ART(cat_nose); ART(clown_nose);
+ART(cat_whiskers_left);
+ART(dog_nose); ART(moustache); ART(red_lips); ART(tongue); ART(blush); ART(cat_whiskers);
 #define FRAMES(name) {&sticker_##name##_m24, &sticker_##name##_m12, &sticker_##name##_z0, \
     &sticker_##name##_p12, &sticker_##name##_p24}
-static const lv_image_dsc_t *const artwork[6][5] = {
+static const lv_image_dsc_t *const artwork[STICKER_SETS][5] = {
     FRAMES(cat_ears), FRAMES(bunny_ears), FRAMES(sunglasses), FRAMES(crown),
-    FRAMES(party_hat), FRAMES(heart_headband)
+    FRAMES(party_hat), FRAMES(heart_headband), FRAMES(heart_glasses), FRAMES(star_eyes),
+    FRAMES(cartoon_eyes), FRAMES(cat_nose), FRAMES(clown_nose), FRAMES(dog_nose),
+    FRAMES(moustache), FRAMES(red_lips), FRAMES(tongue), FRAMES(blush), FRAMES(cat_whiskers)
 };
-static lv_area_t sticker_area(const sticker_track_t *t, lv_draw_image_dsc_t *image)
+static const lv_image_dsc_t *const left_whiskers[5] = FRAMES(cat_whiskers_left);
+static lv_area_t sticker_area(const sticker_track_t *t, unsigned style, unsigned side,
+                              lv_draw_image_dsc_t *image)
 {
     sticker_placement_t p;
-    sticker_place(t, selected, &p);
-    const lv_image_dsc_t *art = artwork[selected][t->angle];
-    /* Rotated frames share a square 220 canvas and a 160 px source width. */
-    int size = p.width*220/160;
+    sticker_place_part(t, style, side, &p);
+    const lv_image_dsc_t *art = style == 16 && side == 0 ?
+        left_whiskers[t->angle] : artwork[style][t->angle];
+    int pixels = (int)sticker_styles[style].pixels;
+    int size = p.width*(int)art->header.w/pixels;
     lv_area_t area = {p.x-size/2, p.y-size/2, p.x+(size+1)/2-1, p.y+(size+1)/2-1};
     if (image) {
         lv_draw_image_dsc_init(image);
         image->src = art;
         image->opa = sticker_opacity(t);
-        image->scale_x = image->scale_y = p.width*256/160;
+        image->scale_x = image->scale_y = p.width*256/pixels;
         image->pivot = (lv_point_t){0,0};
         image->antialias = 0;
     }
@@ -61,15 +70,24 @@ static void draw(lv_event_t *event)
         for (unsigned i = 0; i < STICKER_FACES; ++i) {
             const sticker_track_t *t = &stickers.tracks[i];
             if (!sticker_opacity(t)) continue;
-            lv_draw_image_dsc_t image;
-            lv_area_t a = sticker_area(t, &image);
-            a.x2 = a.x1 + 219; a.y2 = a.y1 + 219;
-            lv_draw_image(layer, &image, &a);
-            if (points_enabled) {
-                sticker_placement_t p;
-                sticker_place(t, selected, &p);
-                shape(layer,p.anchor_x-3,p.anchor_y-3,7,7,0x00ff88,false,true);
-                shape(layer,p.x-3,p.y-3,7,7,0xff00ff,false,true);
+            for (unsigned part = 0; part < STICKER_PARTS; ++part) {
+                if (selected[part] < 0) continue;
+                unsigned style = (unsigned)selected[part];
+                unsigned sides = part == STICKER_CHEEKS ? 2 : 1;
+                for (unsigned side = 0; side < sides; ++side) {
+                    lv_draw_image_dsc_t image;
+                    lv_area_t a = sticker_area(t, style, side, &image);
+                    const lv_image_dsc_t *art = image.src;
+                    a.x2 = a.x1 + (int)art->header.w-1;
+                    a.y2 = a.y1 + (int)art->header.h-1;
+                    lv_draw_image(layer, &image, &a);
+                    if (points_enabled) {
+                        sticker_placement_t p;
+                        sticker_place_part(t, style, side, &p);
+                        shape(layer,p.anchor_x-3,p.anchor_y-3,7,7,0x00ff88,false,true);
+                        shape(layer,p.x-3,p.y-3,7,7,0xff00ff,false,true);
+                    }
+                }
             }
         }
         if (!points_enabled) return;
@@ -91,8 +109,13 @@ static void invalidate(void)
     if (ui_page == 11) {
         for (unsigned i = 0; i < STICKER_FACES; ++i) {
             if (!sticker_opacity(&stickers.tracks[i])) continue;
-            lv_area_t a = sticker_area(&stickers.tracks[i], NULL);
-            lv_obj_invalidate_area(surface, &a);
+            for (unsigned part = 0; part < STICKER_PARTS; ++part) {
+                if (selected[part] < 0) continue;
+                for (unsigned side = 0; side < (part == STICKER_CHEEKS ? 2u : 1u); ++side) {
+                    lv_area_t a = sticker_area(&stickers.tracks[i], selected[part], side, NULL);
+                    lv_obj_invalidate_area(surface, &a);
+                }
+            }
         }
         if (!points_enabled) return;
     }
@@ -104,16 +127,35 @@ static void invalidate(void)
         lv_obj_invalidate_area(surface, &a);
     }
 }
+static const char *const part_names[] = {"头饰", "眼睛", "鼻子", "嘴巴", "脸颊"};
+static const int presets[][STICKER_PARTS] = {
+    {0,-1,9,-1,16}, {4,7,-1,-1,15}, {-1,2,-1,12,-1}, {1,-1,-1,-1,15}
+};
+static const char *const preset_names[] = {"猫咪", "派对", "酷", "兔子"};
+static void selection_text(void)
+{
+    char text[256];
+    lv_snprintf(text, sizeof text, "套装：%s\n%s：%s\n%s：%s\n%s：%s\n%s：%s\n%s：%s",
+        preset < 4 ? preset_names[preset] : "自选",
+        part_names[0], selected[0] < 0 ? "无" : sticker_styles[selected[0]].name,
+        part_names[1], selected[1] < 0 ? "无" : sticker_styles[selected[1]].name,
+        part_names[2], selected[2] < 0 ? "无" : sticker_styles[selected[2]].name,
+        part_names[3], selected[3] < 0 ? "无" : sticker_styles[selected[3]].name,
+        part_names[4], selected[4] < 0 ? "无" : sticker_styles[selected[4]].name);
+    ui_text(sticker_name, text);
+}
 static void page(lv_obj_t *p, const char *title)
 {
     ui_video_surface(p);
     ui_label(p, title, 24, 12, &sim_font_28, TEXT);
     if (ui_page == 11) {
-        ui_button(p, "换贴纸", 400, 6, 160, 2);
+        ui_button(p, "套装", 400, 6, 160, 7);
+        for (unsigned part = 0; part < STICKER_PARTS; ++part)
+            ui_button(p, part_names[part], 24+148*part, 62, 132, 2+part);
         ui_button(p, "调试", 580, 6, 184, 1);
-        sticker_name = ui_label(p, sticker_styles[0].name, 220, 14, &sim_font_20, TEXT);
         memset(&stickers, 0, sizeof stickers);
-        selected = 0; revision = sticker_revision; frame_tick = lv_tick_get();
+        memcpy(selected, presets[0], sizeof selected);
+        preset = 0; revision = sticker_revision; frame_tick = lv_tick_get();
     }
     if (ui_page == 12) {
         ui_button(p, "阈值 -8", 400, 6, 160, 1);
@@ -135,11 +177,15 @@ static void page(lv_obj_t *p, const char *title)
     }
     lv_obj_t *side = ui_box(p, 992, 56, 272, 340, PANEL);
     metrics = ui_label(side, "", 16, 20, &sim_font_20, TEXT);
+    if (ui_page == 11) {
+        sticker_name = ui_label(p, "", 1008, 420, &sim_font_20, TEXT);
+        selection_text();
+    }
     warning = ui_box(p, 180, 550, 700, 56, 0xdc2626);
     ui_label(warning, "警示：有人未戴安全帽", 24, 12, &sim_font_28, PANEL);
     lv_obj_set_hidden(warning, true);
     ui_hint(ui_page == 12 ? "白底黑线 · 摄像头 → 灰度二值化 → 内存源 → NPU" :
-            ui_page == 11 ? "六款原创贴纸 · 镜像摄像头 · 调试显示关键点" :
+            ui_page == 11 ? "五个部位独立选贴纸 · 同步镜像画面 · 调试显示关键点" :
             "绿框 安全帽 · 红框 未戴 · 上板功能验证");
 }
 void ui_page_face(lv_obj_t *p) { page(p, "人脸贴纸"); }
@@ -151,8 +197,15 @@ void ui_demo_action(unsigned action)
     else if (ui_page == 11) {
         invalidate();
         if (action == 1) points_enabled = !points_enabled;
-        else { selected = (selected+1)%STICKER_SETS;
-               ui_text(sticker_name, sticker_styles[selected].name); }
+        else if (action == 7) {
+            preset = preset < 4 ? (preset+1)%4 : 0;
+            memcpy(selected, presets[preset], sizeof selected);
+        } else {
+            unsigned part = action-2;
+            selected[part] = sticker_next(part, selected[part]);
+            preset = 4;
+        }
+        selection_text();
         for (unsigned i = 0; i < shown.count; ++i)
             lv_obj_set_hidden(tags[i], !points_enabled);
         invalidate();

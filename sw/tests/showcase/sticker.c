@@ -38,7 +38,7 @@ int main(void)
         }
     }
     printf("static eye anchor peak-to-peak x/y = %d/%d Q8 px\n",hi-lo,hy-ly);
-    assert(hi-lo<=256 && hy-ly<=256);
+    assert(hi-lo<=384 && hy-ly<=384);
     memset(&s,0,sizeof s);
     int lag=0;
     for(int i=0;i<100;++i) {
@@ -47,7 +47,7 @@ int main(void)
         if(error>lag)lag=error;
     }
     printf("600 px/s lag = %d/256 px (%d/100 frames)\n",lag,lag*100000/(600*37*256));
-    assert(lag<=3*600*37*256/1000);
+    assert(lag<=600*37*256/1000);
     for(unsigned i=1;i<=6;++i) {
         sticker_step(&s,NULL,0,37); assert(sticker_opacity(&s.tracks[0])==255);
     }
@@ -84,5 +84,27 @@ int main(void)
                                face(500,100,80,0),face(700,100,80,0)};
     memset(&s,0,sizeof s); sticker_step(&s,four,4,37); sticker_step(&s,four,4,37);
     for(unsigned i=0;i<3;++i)assert(sticker_opacity(&s.tracks[i])==255);
+    memset(&s,0,sizeof s); f=face(400,300,80,0); sticker_step(&s,&f,1,37);
+    sticker_place(&s.tracks[0],6,&p);
+    assert(p.x==400 && p.y==300 && p.width==187);
+    sticker_place(&s.tracks[0],9,&p);
+    assert(p.x==400 && p.y==330 && p.width==50);
+    sticker_place(&s.tracks[0],12,&p);
+    assert(p.x==400 && p.y==360 && p.width==70);
+    sticker_place_part(&s.tracks[0],15,0,&p);
+    assert(p.x==370 && p.y==330 && p.width==45);
+    sticker_place_part(&s.tracks[0],15,1,&p);
+    assert(p.x==430 && p.y==330 && p.width==45);
+    f=face(400,300,80,36); memset(&s,0,sizeof s); sticker_step(&s,&f,1,37);
+    sticker_place_part(&s.tracks[0],16,0,&p);
+    assert(p.x==370 && p.y==321 && s.tracks[0].angle==4);
+    for (unsigned part=0;part<STICKER_PARTS;++part) {
+        int style=-1; unsigned options=0;
+        while ((style=sticker_next(part,style))>=0) {
+            assert(sticker_styles[style].part==part); ++options;
+        }
+        assert(options==(part==STICKER_HEAD?5u:part==STICKER_EYES?4u:
+                         part==STICKER_CHEEKS?2u:3u));
+    }
     puts("PASS sticker: confirmation, hold/fade, crossing, hysteresis, anchor geometry");
 }

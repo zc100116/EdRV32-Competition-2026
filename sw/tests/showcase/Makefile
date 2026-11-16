@@ -19,7 +19,7 @@ test: grab
 	    -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \
 	    -I$(ROOT)/sw/apps/showcase -I$(ROOT)/sw/drivers/include \
 	    -I$(ROOT)/sw/bsp/include -I$(ROOT)/sw/lib/sched -DLV_CONF_INCLUDE_SIMPLE \
-	    gui.c $(ROOT)/sw/apps/showcase/input.c -o $(BUILD)/gui
+	    sync.c $(ROOT)/sw/apps/showcase/input.c -o $(BUILD)/gui
 	$(BUILD)/gui
 	$(CC) $(FLAGS) -I$(ROOT)/sw/apps/showcase/ui hpm.c -o $(BUILD)/hpm
 	$(BUILD)/hpm
@@ -102,3 +102,14 @@ lobby:
 	mkdir -p $(BUILD)
 	$(CC) $(FLAGS) -I$(GAME_UI) motion.c $(GAME_RULES) -o $(BUILD)/lobby
 	$(BUILD)/lobby
+
+.PHONY: sync
+sync:
+	mkdir -p $(BUILD)
+	$(CC) $(FLAGS) -ffunction-sections -fdata-sections -Wl,--gc-sections \
+	    -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \
+	    -I$(ROOT)/sw/apps/showcase -I$(ROOT)/sw/drivers/include \
+	    -I$(ROOT)/sw/bsp/include -I$(ROOT)/sw/lib/sched -DLV_CONF_INCLUDE_SIMPLE \
+	    sync.c $(ROOT)/sw/apps/showcase/input.c -o $(BUILD)/sync
+	$(BUILD)/sync
+	$(MAKE) -C vision runtime

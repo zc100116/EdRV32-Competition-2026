@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """prepare_showcase_stickers.py — T-FACE-STICKER-R2 alpha crop and bilinear resize.
-Generated transparent artwork becomes 160-square RGBA8 noninterlaced PNG; host only.
+Generated transparent artwork becomes sized square RGBA8 PNG; host only.
 """
 from collections import deque
 import sys
@@ -41,7 +41,8 @@ def clear_edge_haze(pixels, width, height):
 
 
 def main():
-    source, output = map(Path, sys.argv[1:])
+    source, output = map(Path, sys.argv[1:3])
+    size = int(sys.argv[3]) if len(sys.argv) == 4 else 160
     output.mkdir(parents=True, exist_ok=True)
     for path in sorted(source.glob('*.png')):
         width, height, pixels = decode_png(path.read_bytes())
@@ -51,25 +52,25 @@ def main():
         x1 = max(x for x, y in coords)+1
         y0 = min(y for x, y in coords)
         y1 = max(y for x, y in coords)+1
-        ratio = 156/max(x1-x0, y1-y0)
+        ratio = (size-4)/max(x1-x0, y1-y0)
         new_width = round((x1-x0)*ratio)
         new_height = round((y1-y0)*ratio)
-        result = bytearray(160*160*4)
+        result = bytearray(size*size*4)
         for y in range(new_height):
             for x in range(new_width):
                 sx = x0+(x+.5)/ratio-.5
                 sy = y0+(y+.5)/ratio-.5
                 ix, iy = int(sx), int(sy)
                 fx, fy = sx-ix, sy-iy
-                pos = ((y+(160-new_height)//2)*160+x+(160-new_width)//2)*4
+                pos = ((y+(size-new_height)//2)*size+x+(size-new_width)//2)*4
                 for channel in range(4):
                     result[pos+channel] = round(sum(
                         pixels[((iy+dy)*width+ix+dx)*4+channel]*a*b
                         for dx, a in [(0, 1-fx), (1, fx)]
                         for dy, b in [(0, 1-fy), (1, fy)]))
-        clear_edge_haze(result, 160, 160)
-        write_png(output/path.name, 160, 160, result)
-        print(path.name, width, height, '->160x160')
+        clear_edge_haze(result, size, size)
+        write_png(output/path.name, size, size, result)
+        print(path.name, width, height, f'->{size}x{size}')
 
 
 if __name__ == '__main__':

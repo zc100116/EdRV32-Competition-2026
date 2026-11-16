@@ -362,6 +362,12 @@ static uint32_t dirty_bytes;
 static bool clean_all_needed;
 static volatile bool flush_pending;
 static volatile bool scan_started;
+static volatile bool sync_flush_waiting;
+static bool sync_camera(void)
+{
+    ui_app_t app = ui_data_session().app;
+    return app == UI_APP_FACE || app == UI_APP_GRAB;
+}
 static const uint32_t *pending_pixels;
 static volatile uint32_t display_events;
 
@@ -382,14 +388,15 @@ static void flush(lv_display_t *disp, const lv_area_t *area, uint8_t *pixels)
     if (lv_display_flush_is_last(disp)) {
         if (clean_all_needed) cache_clean_all();
         pending_pixels = (const uint32_t *)pixels;
-        vision_gui_submitted();
+        if (!sync_camera()) vision_gui_submitted();
         flush_pending = true;
         dirty_bytes = 0;
         clean_all_needed = false;
         /* Stride and geometry stay fixed; only the next base changes. The
          * SWITCH IRQ releases front and resumes this asynchronous flush. */
-        mmio_write32(EDRV32_DISP_BASE + EDRV32_DISP_L1_NEXT_BASE_OFFSET,
-                     rnd_physical(pending_pixels));
+        if (sync_camera()) sync_flush_waiting = true;
+        else mmio_write32(EDRV32_DISP_BASE + EDRV32_DISP_L1_NEXT_BASE_OFFSET,
+                          rnd_physical(pending_pixels));
     } else lv_display_flush_ready(disp);
 }
 void showcase_gui_disp_event(uint32_t irq)
@@ -397,6 +404,14 @@ void showcase_gui_disp_event(uint32_t irq)
     if (!scan_started && (irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK)) {
         scan_started = true;
         sched_signal(&gui_task, PLATFORM_FRAME);
+    }
+    if ((irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK) && sync_flush_waiting) {
+        /* DISP 2.4: this frame has latched. Write both NEXT_BASE registers
+         * together in the IRQ, a full frame before the next latch. */
+        vision_gui_submitted();
+        mmio_write32(EDRV32_DISP_BASE + EDRV32_DISP_L1_NEXT_BASE_OFFSET,
+                     rnd_physical(pending_pixels));
+        sync_flush_waiting = false;
     }
     if (!flush_pending || !(irq & EDRV32_DISP_IRQ_STAT_SWITCH1_MASK)) return;
     display_events |= irq;
@@ -531,6 +546,10 @@ void showcase_lvgl_init(void)
     lv_memzero((void *)front, sizeof(buffers[0]));
     lv_sysmon_hide_performance(display);
     showcase_gui_restore();
+    /* UI page timers are created later; keep engine/input/cursor timers out
+     * of the recognition-driven page refresh. */
+    for (lv_timer_t *t = lv_timer_get_next(NULL); t; t = lv_timer_get_next(t))
+        framework_timers[framework_timer_count++] = t;
     platform_puts("LVGL v9.6.0 DIRECT ARGB8888 1280x720 batch=32\r\n");
 }
 
@@ -549,6 +568,7 @@ void showcase_gui_step(struct sched_task *task)
         if (events & EDRV32_DISP_IRQ_STAT_SWITCH1_MASK) {
             front = pending_pixels;
             flush_pending = false;
+            sync_flush_waiting = false;
             ++flush_count;
             if (flush_count == 1) platform_puts("showcase first frame\r\n");
             lv_display_flush_ready(display);
@@ -566,7 +586,24 @@ void showcase_gui_step(struct sched_task *task)
     else if(ui_page==14) ui_grab_update();
     else if(ui_page>=11 && ui_page<=13) ui_demo_update();
     else if(ui_page==3) ui_process_update();
+    /* Motion pages consume inference in their timers; reserve the matching
+     * camera snapshot on every GUI pass, including unchanged overlays. */
+    if (sync_camera()) (void)ui_data_vision();
+    if (ui_data_session().app == UI_APP_GRAB) {
+        /* Grab/motion timers advance by elapsed ticks. Run their view update
+         * before rendering this result, even between periodic deadlines. */
+        for (lv_timer_t *t = lv_timer_get_next(NULL); t; t = lv_timer_get_next(t)) {
+            bool framework = false;
+            for (unsigned i = 0; i < framework_timer_count; ++i)
+                if (framework_timers[i] == t) framework = true;
+            if (!framework) lv_timer_ready(t);
+        }
+    }
     uint32_t delay = lv_timer_handler();
+    /* Invalidated overlays must render before deciding there was no redraw. */
+    if (sync_camera() && !flush_pending) lv_refr_now(display);
+    /* Unchanged overlays need no L1 flip; the recognized camera still advances. */
+    if (!flush_pending && sync_camera()) vision_gui_submitted();
     sched_signal(&application_task,1);
     if (!flush_pending && delay != LV_NO_TIMER_READY)
         sched_wake_at(task, platform_ticks() +
@@ -587,6 +624,7 @@ void showcase_gui_restore(void)
      * scan, the complete pending image becomes front even without SWITCH. */
     if (flush_pending) front = pending_pixels;
     flush_pending = false;
+    sync_flush_waiting = false;
     /* First enabled FRAME has no SWITCH; establish front before drawing back. */
     scan_started = false;
     display_events = 0;

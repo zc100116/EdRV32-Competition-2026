@@ -1,19 +1,39 @@
-/* sticker.c — T-FACE-STICKER-R2: One Euro tracking and AR anchor geometry.
+/* sticker.c — T-SYNC-STICKER-R3: One Euro tracking and AR anchor geometry.
  * Integer Q8 pose, Q16 filter alpha; GUI domain, no hardware dependencies.
  */
 #include "sticker.h"
 #include <string.h>
 #include <stdlib.h>
 unsigned sticker_revision;
-/* Hz in Q8; beta = 0.003 Hz per unit/s (Q16). Derivative cutoff 1 Hz.
+/* Hz in Q8; beta = 0.02 Hz per unit/s (Q16). Derivative cutoff 1 Hz.
  * Low static cutoff suppresses ±3 px noise; beta opens bandwidth during motion.
  */
-enum { MIN_CUTOFF = 26, BETA = 197, D_CUTOFF = 256 };
+enum { MIN_CUTOFF = 26, BETA = 1311, D_CUTOFF = 256 };
 const sticker_style_t sticker_styles[STICKER_SETS] = {
-    {"桃桃猫耳", 0, -256, 640}, {"软糖兔耳", 0, -320, 640},
-    {"海盐墨镜", 0, 0, 640}, {"宝石皇冠", 0, -300, 563},
-    {"彩带派对", 0, -384, 563}, {"心动发箍", 0, -307, 614}
+    {"猫耳", 0, -256, 640, STICKER_HEAD, 160},
+    {"兔耳", 0, -320, 640, STICKER_HEAD, 160},
+    {"墨镜", 0, 0, 640, STICKER_EYES, 160},
+    {"皇冠", 0, -300, 563, STICKER_HEAD, 160},
+    {"派对帽", 0, -384, 563, STICKER_HEAD, 160},
+    {"爱心发箍", 0, -307, 614, STICKER_HEAD, 160},
+    {"爱心眼镜", 0, 0, 600, STICKER_EYES, 112},
+    {"星星眼", 0, 0, 600, STICKER_EYES, 112},
+    {"卡通大眼", 0, 0, 600, STICKER_EYES, 112},
+    {"猫鼻", 0, 0, 160, STICKER_NOSE, 48},
+    {"小丑鼻", 0, 0, 144, STICKER_NOSE, 48},
+    {"小狗鼻", 0, 0, 176, STICKER_NOSE, 48},
+    {"八字胡", 0, 0, 448, STICKER_MOUTH, 96},
+    {"红唇", 0, 0, 320, STICKER_MOUTH, 96},
+    {"吐舌头", 0, 0, 320, STICKER_MOUTH, 96},
+    {"腮红", 0, 0, 144, STICKER_CHEEKS, 64},
+    {"猫胡须", 0, 0, 224, STICKER_CHEEKS, 64}
 };
+int sticker_next(unsigned part, int current)
+{
+    for (int i = current + 1; i < STICKER_SETS; ++i)
+        if (sticker_styles[i].part == part) return i;
+    return -1;
+}
 int sticker_distance(int x, int y)
 {
     uint32_t n = (uint32_t)(x*x + y*y), root = 0, bit = 1u << 30;
@@ -109,6 +129,10 @@ void sticker_step(sticker_state_t *s, const sticker_detection_t *d, unsigned cou
         t->lost = 0; ++t->seen;
         filter(&t->filter[0],cx[dj],ms); filter(&t->filter[1],cy[dj],ms);
         filter(&t->filter[2],distance[dj],ms); filter(&t->filter[3],tilt[dj],ms);
+        for (unsigned k = 0; k < 5; ++k) {
+            filter(&t->filter[4+2*k], d[dj].points[k].x*256, ms);
+            filter(&t->filter[5+2*k], d[dj].points[k].y*256, ms);
+        }
         t->angle = sticker_angle(t->angle,t->filter[3].value);
     }
     for (unsigned i = 0; i < STICKER_FACES; ++i) {
@@ -123,6 +147,10 @@ void sticker_step(sticker_state_t *s, const sticker_detection_t *d, unsigned cou
             memset(t,0,sizeof *t);
             int v[] = {cx[j],cy[j],distance[j],tilt[j]};
             for (unsigned k = 0; k < 4; ++k) t->filter[k].raw=t->filter[k].value=v[k];
+            for (unsigned k = 0; k < 5; ++k) {
+                t->filter[4+2*k].raw = t->filter[4+2*k].value = d[j].points[k].x*256;
+                t->filter[5+2*k].raw = t->filter[5+2*k].value = d[j].points[k].y*256;
+            }
             t->raw_x=cx[j]; t->raw_y=cy[j]; t->seen=1; t->active=true;
             int angle = (tilt[j]+30*256)/(12*256);
             t->angle = (unsigned)(angle < 0 ? 0 : angle > 4 ? 4 : angle);
@@ -131,7 +159,8 @@ void sticker_step(sticker_state_t *s, const sticker_detection_t *d, unsigned cou
     }
 }
 /* Rotation of offsets uses the continuous filtered angle, not the selected art frame. */
-void sticker_place(const sticker_track_t *t, unsigned style, sticker_placement_t *p)
+void sticker_place_part(const sticker_track_t *t, unsigned style, unsigned side,
+                        sticker_placement_t *p)
 {
     static const int atan_q8[] = {11520,6801,3593,1824,916,458,229,115,57,29,14};
     int c = 9949, sn = 0, z = t->filter[3].value;
@@ -142,9 +171,26 @@ void sticker_place(const sticker_track_t *t, unsigned style, sticker_placement_t
     }
     const sticker_style_t *a = &sticker_styles[style];
     int d = t->filter[2].value;
+    int x = t->filter[0].value, y = t->filter[1].value;
+    if (a->part == STICKER_NOSE) {
+        x = t->filter[8].value; y = t->filter[9].value;
+    } else if (a->part == STICKER_MOUTH) {
+        x = (t->filter[10].value+t->filter[12].value)/2;
+        y = (t->filter[11].value+t->filter[13].value)/2;
+        d = sticker_distance((t->filter[12].value-t->filter[10].value)/256,
+                             (t->filter[13].value-t->filter[11].value)/256)*256;
+    } else if (a->part == STICKER_CHEEKS) {
+        x = (t->filter[4+2*side].value+t->filter[10+2*side].value)/2;
+        y = (t->filter[5+2*side].value+t->filter[11+2*side].value)/2;
+    }
     int ox = a->offset_x*d/256, oy = a->offset_y*d/256;
-    p->anchor_x=t->filter[0].value/256; p->anchor_y=t->filter[1].value/256;
-    p->x=(t->filter[0].value+(int)((int64_t)ox*c/16384-(int64_t)oy*sn/16384))/256;
-    p->y=(t->filter[1].value+(int)((int64_t)ox*sn/16384+(int64_t)oy*c/16384))/256;
+    p->anchor_x=x/256; p->anchor_y=y/256;
+    p->x=(x+(int)((int64_t)ox*c/16384-(int64_t)oy*sn/16384))/256;
+    p->y=(y+(int)((int64_t)ox*sn/16384+(int64_t)oy*c/16384))/256;
     p->width=a->width*d/65536;
+}
+
+void sticker_place(const sticker_track_t *t, unsigned style, sticker_placement_t *p)
+{
+    sticker_place_part(t, style, 0, p);
 }

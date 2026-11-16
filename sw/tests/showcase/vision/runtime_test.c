@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+unsigned ui_page;
 static struct session model_session;
 void board_session_fail(unsigned error)
 {
@@ -63,6 +64,7 @@ static unsigned bulk_completions[3];
 static uint32_t geo_descriptor;
 static uint32_t display_current, display_next, display_released;
 static unsigned display_enabled, display_scanned, display_frames, memory_starts;
+static unsigned l0_submissions;
 static uint32_t memory_base;
 static unsigned gamma_loads, pix_busy;
 static struct pix_config last_pix;
@@ -105,7 +107,7 @@ void npu_post_start(uint32_t input, uint32_t output, uint32_t post)
 uint32_t platform_frames(void) { return display_frames; }
 void platform_put_u32(uint32_t value) { fprintf(stderr, "%u", value); }
 void disp_submit(enum disp_layer layer, uint32_t base, uint32_t stride)
-{ assert(layer == DISP_L0 && stride == VISION_STRIDE); display_next = base; }
+{ assert(layer == DISP_L0 && stride == VISION_STRIDE); display_next = base; ++l0_submissions; }
 void disp_layer_enable(enum disp_layer layer, unsigned enable)
 { assert(layer == DISP_L0); display_enabled = enable; }
 uint32_t disp_current(enum disp_layer layer) { assert(layer == DISP_L0); return display_current; }
@@ -823,6 +825,7 @@ static void demos_test(void)
         if (page == 0) assert(d->points[0][0].x >= 0 && d->size > 0);
         if (page == 2) assert(d->head == 1 && !d->helmet);
         ui_data_vision(); vision_gui_submitted();
+        if (page == 0) display_frame();
         vision_display_irq(EDRV32_DISP_IRQ_STAT_SWITCH1_MASK);
         vision_gui_presented(platform_ticks());
         /* Repeated scan of the same result counts flips but not shown results. */
@@ -842,6 +845,87 @@ static void demos_test(void)
         display_frame(); display_frame();
     }
     puts("PASS face/doodle/helmet models, camera-memory source ownership, threshold and shown/disp");
+}
+static void sync_test(void)
+{
+    const struct app *apps[] = {&vision_app_face, &vision_app_grab};
+    for (unsigned page = 0; page < 2; ++page) {
+        apps[page]->enter(); drain();
+        unsigned submits = l0_submissions;
+        camera_event(0,1000);
+        display_frame(); display_frame();
+        assert(l0_submissions == submits); /* CH0 alone never displays. */
+        event(ENGINE_NPU,EDRV32_NPU_IRQ_STAT_DONE_MASK); drain();
+        assert(busy[0] == 1);
+        ui_data_vision(); vision_gui_submitted();
+        assert(l0_submissions == ++submits);
+        display_frame();
+        assert(display_current == VISION_IMAGE_BASE);
+        ui_data_vision(); vision_gui_submitted(); display_frame();
+        assert(l0_submissions == submits); /* Each inferred frame at most once. */
+        camera(1,1001);
+        ui_data_vision(); vision_gui_submitted(); /* GUI pass with no L1 redraw. */
+        display_frame();
+        assert(l0_submissions == ++submits);
+        assert(display_current == VISION_IMAGE_BASE+VISION_IMAGE_SPACING);
+        assert(busy[0] == 2);
+        camera(2,1002);
+        camera(0,1003); /* Untaken result 1002 is skipped and released. */
+        assert(busy[0] == 3);
+        ui_data_vision();
+        camera(2,1004); /* Taken 1003 survives publication of 1004. */
+        assert(busy[0] == 7);
+        vision_gui_submitted(); display_frame();
+        assert(l0_submissions == ++submits && display_current == VISION_IMAGE_BASE);
+        assert(busy[0] == 5);
+        ui_data_vision(); vision_gui_submitted(); display_frame();
+        assert(l0_submissions == ++submits && busy[0] == 4);
+        camera(1,1005); ui_data_vision();
+        vision_pause(true); drain();
+        assert(vision_ready(UI_STATE_PAUSED) && busy[0] == 6);
+        vision_gui_submitted(); display_frame();
+        assert(l0_submissions == ++submits &&
+               display_current == VISION_IMAGE_BASE+VISION_IMAGE_SPACING);
+        vision_pause(false); drain();
+        assert(busy[0] == 2); /* Frozen VIN's busy register refreshes at configure. */
+        camera_event(0,1006);
+        apps[page]->exit(); /* Stop while NPU owns a frame. */
+        event(ENGINE_NPU,EDRV32_NPU_IRQ_STAT_DONE_MASK);
+        display_frame(); display_frame(); drain();
+        display_frame(); display_frame();
+        assert(vision_ready(UI_STATE_IDLE) && busy[0] == 0 && busy[2] == 0);
+    }
+    puts("PASS sync: CH0 withheld, once-only, no redraw, skipped/taken ownership, "
+         "pause/exit drain");
+}
+static void sync_timing_test(void)
+{
+    vision_app_face.enter(); drain();
+    camera(0,1100); ui_data_vision(); vision_gui_submitted();
+    ticks += platform_clock_hz()/10;
+    camera(1,1101); ui_data_vision();
+    /* FRAME presents R0, then the same IRQ stages R1 before task-side timing. */
+    display_current=display_next;
+    display_scanned=display_enabled;
+    vision_display_irq(EDRV32_DISP_IRQ_STAT_FRAME_MASK);
+    vision_gui_submitted();
+    vision_service();
+    ticks += platform_clock_hz(); vision_service();
+    const char *line=vision_report();
+    const char *e2e=strstr(line,"e2e=");
+    assert(e2e && strstr(line,"shown=1"));
+    unsigned milliseconds=(unsigned)strtoul(e2e+4,NULL,10);
+    assert(milliseconds>=100 && milliseconds<110);
+    vision_app_face.exit(); display_frame(); display_frame(); drain();
+    display_frame(); display_frame();
+    assert(vision_ready(UI_STATE_IDLE));
+    /* SLOT_BUSY is not rewritten while capture is off. Configure exposes the
+     * software references again, including the last surface released at IDLE. */
+    vision_app_camera.enter(); drain();
+    assert(busy[0]==0);
+    vision_app_camera.exit(); drain();
+    puts("PASS sync timing: presented frame keeps its own VIN/handoff timestamps "
+         "across next submit");
 }
 static void matrix_test(void)
 {
@@ -900,6 +984,8 @@ int main(void)
     hand_test();
     grab_test();
     demos_test();
+    sync_test();
+    sync_timing_test();
     assert(invalidates >= 3);
     return 0;
 }
