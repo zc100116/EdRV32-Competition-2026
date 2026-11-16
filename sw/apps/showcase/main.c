@@ -1,6 +1,7 @@
 /* main.c — P5 3.1/3.2/8.1; exclusive application manager and service scheduling.
  * The shell consumes backend sessions, never UI page globals; clk_sys. */
 #include "platform.h"
+#include "ui/game_loop.h"
 #include "board/vision/metrics.h"
 #include "runtime.h"
 #include "board/input.h"
@@ -159,6 +160,7 @@ static void application_step(struct sched_task *task)
     if (vision_service()) app_wake_at(platform_ticks());
     session_step(&media);
     board_games_step(); board_step();
+    game_loop_step();
     if (active && (media.state == UI_STATE_STARTING || media.state == UI_STATE_RUNNING))
         active->step();
     if (media.state == UI_STATE_STARTING || media.state == UI_STATE_STOPPING || media.pausing)

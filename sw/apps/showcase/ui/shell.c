@@ -5,6 +5,9 @@
 #include "detection.h"
 #include "renderer.h"
 #include "game_view.h"
+#include "tower.h"
+void ui_page_tower(lv_obj_t *parent);
+void ui_tower_action(unsigned action);
 unsigned ui_page;
 unsigned ui_tab;
 unsigned ui_mode;
@@ -177,7 +180,7 @@ void ui_open(unsigned page)
         static const ui_app_t apps[]={UI_APP_NONE,UI_APP_CAMERA,UI_APP_IMAGE,
             UI_APP_PROCESS,UI_APP_GRAPHICS,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,
             UI_APP_POSE, UI_APP_HAND, UI_APP_FACE, UI_APP_DOODLE, UI_APP_HELMET,
-            UI_APP_GRAB, UI_APP_GRAB, UI_APP_NONE};
+            UI_APP_GRAB, UI_APP_GRAB, UI_APP_NONE, UI_APP_GRAB};
         if(apps[old_page]!=UI_APP_NONE || game_active ||
            ui_data_session().app==UI_APP_COREMARK) ui_data_app_open(UI_APP_NONE,0);
         game_active=false;
@@ -210,7 +213,7 @@ void ui_open(unsigned page)
     ui_text_label(top,"EdRV32",&sim_font_20,ACCENT);
     const char *names[] = {"首页", "目标检测计数", "图片识别", "图像处理", "图形引擎",
         "经典游戏", "系统监控", "芯片信息", "调试助手", "人体姿态", "手势识别",
-        "人脸贴纸", "简笔画识别", "安全帽检测", "抓取测试", "体感互动", "设置"};
+        "人脸贴纸", "简笔画识别", "安全帽检测", "抓取测试", "体感互动", "设置", "积木塔"};
     ui_text_label(top,names[page],&sim_font_16,TEXT);
     status = ui_text_label(top,"",&sim_font_14,MUTED);
     lv_obj_set_flex_grow(status,1);
@@ -233,7 +236,7 @@ void ui_open(unsigned page)
         ui_page_process, ui_page_graphics, ui_page_games, NULL,
         ui_page_chip, ui_page_debug, ui_page_pose, ui_page_hand,
         ui_page_face, ui_page_doodle, ui_page_helmet, ui_page_grab, ui_page_motion,
-        ui_page_settings};
+        ui_page_settings, ui_page_tower};
     if(page==5) ui_data_games(&game_count);
     if(ui_detection_settings) ui_page_detection_settings(content);
     else pages[page](content);
@@ -287,6 +290,8 @@ static void activate(unsigned action)
         ui_detection_settings_action(action);
     } else if((ui_page==1 || ui_page==2) && action==2) {
         ui_detection_settings=true; ui_open(ui_page);
+    } else if(ui_page == 17) {
+        ui_tower_action(action);
     } else if(ui_page == 15) {
         ui_motion_action(action);
     } else if(ui_page == 14) {
@@ -361,7 +366,7 @@ void ui_back(void)
         }
         lv_group_set_editing(group,false); return;
     }
-    if(ui_page == MOTION_PAGE) {
+    if(ui_page == MOTION_PAGE || ui_page == 17) {
         ui_home_select_tab(1); ui_open(0); return;
     }
     if(ui_detection_settings) { ui_detection_settings=false; ui_open(ui_page); }

@@ -162,3 +162,10 @@ $(ROOT)/build/showcase/home_images.c: $(ROOT)/tools/sw/embed_showcase_images.py 
     $(ROOT)/tools/sw/png2c.py $(wildcard $(ROOT)/sw/apps/showcase/assets/icons/*.png)
 	python3 $(ROOT)/tools/sw/embed_showcase_images.py \
 	    $(ROOT)/sw/apps/showcase/assets/icons $@ --prefix home
+
+# T-TOWER-GAME: zero-degree art; CPU generates only selected rotation frames at entry.
+PROGRAM_SOURCES += build/showcase/tower_images.c
+$(ROOT)/build/showcase/tower_images.c: $(ROOT)/tools/sw/embed_showcase_images.py \
+    $(ROOT)/tools/sw/png2c.py $(wildcard $(ROOT)/sw/apps/showcase/assets/tower/*.png)
+	python3 $(ROOT)/tools/sw/embed_showcase_images.py \
+	    $(ROOT)/sw/apps/showcase/assets/tower $@ --prefix tower

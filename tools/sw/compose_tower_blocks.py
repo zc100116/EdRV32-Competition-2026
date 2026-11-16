@@ -4,6 +4,7 @@ Tile original material swatches through shared collision silhouettes, then add
 an inward 2 px outline and directional bevel. Host tool; no clock domain.
 """
 import argparse
+import random
 from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageOps
@@ -86,6 +87,17 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
     for material, opacity in MATERIALS.items():
         texture = Image.open(args.textures / f"{material}.png").convert("RGB")
+        if material == "rubber":
+            # Fine molded grain and a soft diagonal face highlight survive at 1:1 pixels.
+            grain = random.Random(20261116)
+            pixels = texture.load()
+            for y in range(texture.height):
+                for x in range(texture.width):
+                    red, green, blue = pixels[x, y]
+                    light = max(0, 14 - abs((x + y) % 128 - 40) // 2)
+                    noise = grain.randrange(-7, 8)
+                    pixels[x, y] = tuple(max(0, min(255, c + light + noise))
+                                         for c in (red, green, blue))
         for shape, geometry in SHAPES.items():
             output = args.output / f"block-{material}-{shape}.png"
             compose(texture, geometry, opacity).save(output)

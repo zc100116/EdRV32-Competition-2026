@@ -132,3 +132,15 @@ phys-perf:
 	    spike --isa=rv32im_zicsr_zicntr --disable-dtb $(BUILD)/phys-perf.elf' \
 	    > $(BUILD)/phys-perf.log 2>&1
 	cat $(BUILD)/phys-perf.log
+
+.PHONY: tower
+tower:
+	mkdir -p $(BUILD)
+	$(CC) $(FLAGS) -O2 -I$(GAME_UI) tower.c $(GAME_UI)/tower.c \
+	    $(GAME_UI)/phys.c $(GAME_UI)/sprite_rot.c -o $(BUILD)/tower
+	$(BUILD)/tower
+	$(CC) $(FLAGS) -O2 -I$(GAME_UI) -I$(ROOT)/sw/lib/sched \
+	    -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \
+	    -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/bsp/include -DLV_CONF_INCLUDE_SIMPLE \
+	    tower_loop.c $(GAME_UI)/game_loop.c -o $(BUILD)/tower_loop
+	$(BUILD)/tower_loop

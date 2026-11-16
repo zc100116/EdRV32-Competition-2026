@@ -16,6 +16,9 @@ PATH="$HOME/.local/opt/edrv32-py/bin:$PATH" python3 tools/sw/compose_tower_block
   --textures sw/apps/showcase/assets/tower/textures --output build/tower-art/blocks
 ```
 
+2026-11-16：橡胶合成时用固定种子 20261116 增加 ±5 级细颗粒和对角柔和高光，
+重新生成六张橡胶积木；保留原始纹理和几何。
+
 工具按原始像素尺度平铺纹理，以形状遮罩裁切，添加向内 2 px 深色描边、
 上左斜面高光和下右暗部，用 4 倍采样抗锯齿，输出 0° PNG。
 冰、玻璃的主体 alpha 为 179/255（约 0.702），其余主体完全不透明；
