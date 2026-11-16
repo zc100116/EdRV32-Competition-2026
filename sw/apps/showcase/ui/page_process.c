@@ -1,7 +1,7 @@
 /* page_process.c — P5 design 3.6/8.3; PIX → GEO stages and retained parameters.
  * L1 scroll panel; changes use the frozen backend contract on the UI thread.
  */
-#include "theme.h"
+#include "widgets.h"
 #include <stddef.h>
 static bool collapsed;
 static lv_obj_t *view_switch;
@@ -84,52 +84,43 @@ void ui_process_action(unsigned action)
 }
 void ui_page_process(lv_obj_t *p)
 {
-    ui_video_surface(p);
-    ui_label(p,"图像处理",24,12,&sim_font_28,TEXT);
-    ui_button(p,collapsed ? "展开参数" : "收起参数",660,6,156,0);
-    ui_label(p,"原图",842,17,&sim_font_16,TEXT);
-    view_switch=ui_switch(p,894,14);
+    lv_obj_t *header=ui_page_layout(p,"图像处理",true);
+    ui_action_button(header,collapsed ? "展开参数" : "收起参数",0);
+    view_switch=ui_flex_switch(header,"原图",false);
+    lv_obj_set_width(lv_obj_get_parent(view_switch),180);
     lv_obj_add_event_cb(view_switch,enabled_changed,LV_EVENT_VALUE_CHANGED,(void *)12);
-    ui_button(p,"全部恢复默认",982,6,282,2);
+    ui_action_button(header,"全部恢复默认",2);
     if(collapsed) return;
-    lv_obj_t *panel=ui_box(p,834,62,430,548,PANEL);
-    lv_obj_set_style_bg_opa(panel,LV_OPA_90,0);
+    lv_obj_t *body=ui_stack(p,LV_FLEX_FLOW_ROW,0);
+    lv_obj_set_flex_grow(body,1);
+    lv_obj_set_flex_align(body,LV_FLEX_ALIGN_END,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_START);
+    lv_obj_t *panel=ui_panel(body,430);
+    lv_obj_set_height(panel,LV_PCT(100));
     lv_obj_set_scrollable(panel,true); lv_obj_set_scroll_dir(panel,LV_DIR_VER);
-    lv_obj_set_style_width(panel,4,LV_PART_SCROLLBAR);
-    lv_obj_set_style_bg_color(panel,lv_color_hex(MUTED),LV_PART_SCROLLBAR);
-    lv_obj_set_style_bg_opa(panel,LV_OPA_40,LV_PART_SCROLLBAR);
-    lv_obj_set_style_pad_bottom(panel,20,0);
     const char *names[]={"亮度 / 对比度","伽马","第一级滤波 S1","第二级滤波 S2",
         "灰度","二值化","反色","旋转","缩放","平移","水平镜像","垂直镜像"};
-    ui_label(panel,"摄像头 → PIX → GEO → 显示",20,16,&sim_font_16,TEAL);
-    int y=54;
+    ui_text_label(panel,"摄像头 → PIX → GEO → 显示",&sim_font_16,TEAL);
     for(unsigned stage=0;stage<12;++stage) {
-        if(stage==0 || stage==7) {
-            ui_label(panel,stage==0 ? "PIX  ↓ 点运算 → S1 → S2 → 点运算" :
-                "GEO  ↓ 旋转 → 缩放 → 平移 → 镜像",20,y,&sim_font_14,ACCENT);
-            y+=34;
-        }
-        unsigned count=0;
-        for(unsigned i=0;i<10;++i) count+=parameters[i].stage==stage;
-        lv_obj_t *row=ui_box(panel,14,y,398,100+(int)count*62,PANEL);
-        enables[stage]=ui_switch(row,16,16);
+        if(stage==0 || stage==7)
+            ui_text_label(panel,stage==0 ? "PIX · 点运算 / 滤波" : "GEO · 几何变换",
+                          &sim_font_20,ACCENT);
+        lv_obj_t *row=ui_panel(panel,LV_PCT(100));
+        enables[stage]=ui_flex_switch(row,names[stage],false);
         lv_obj_add_event_cb(enables[stage],enabled_changed,LV_EVENT_VALUE_CHANGED,
-            (void *)(uintptr_t)stage);
-        ui_label(row,names[stage],74,16,&sim_font_20,TEXT);
-        int py=54;
+                            (void *)(uintptr_t)stage);
         for(unsigned i=0;i<10;++i) if(parameters[i].stage==stage) {
-            if(i==3 || i==4) {
-                controls[i]=ui_dropdown(row,18,py,360,"均值\n高斯\n锐化\nSobel\n腐蚀\n膨胀");
-            } else {
-                values[i]=ui_label(row,"",18,py,&sim_font_14,MUTED);
-                controls[i]=ui_slider(row,24,py+34,344,parameters[i].low,parameters[i].high);
+            if(i==3 || i==4) controls[i]=ui_select(row,"均值\n高斯\n锐化\nSobel\n腐蚀\n膨胀");
+            else {
+                values[i]=ui_text_label(row,"",&sim_font_14,MUTED);
+                controls[i]=lv_slider_create(row); ui_widget_style(controls[i]);
+                lv_obj_set_width(controls[i],LV_PCT(100));
+                lv_slider_set_range(controls[i],parameters[i].low,parameters[i].high);
+                ui_control(controls[i]);
             }
             lv_obj_add_event_cb(controls[i],parameter_changed,LV_EVENT_VALUE_CHANGED,
-                (void *)(uintptr_t)i);
-            py+=62;
+                                (void *)(uintptr_t)i);
         }
-        ui_button(row,"本项恢复默认",18,py,360,100+stage);
-        y+=112+(int)count*62;
+        ui_action_button(row,"本项恢复默认",100+stage);
     }
     ui_hint("前后键选择 · Enter 编辑 · 编辑时前后键调整 · Enter / Esc 退出编辑");
 }

@@ -241,6 +241,7 @@ void ui_open(unsigned page)
     if(ui_detection_settings) ui_page_detection_settings(content);
     else pages[page](content);
     session_box=ui_box(content,340,200,600,164,PANEL);
+    lv_obj_set_ignore_layout(session_box,true);
     session_text=ui_label(session_box,"",24,22,&sim_font_20,TEXT);
     lv_obj_set_width(session_text,552);
     ui_button(session_box,"重试",24,102,160,1002);

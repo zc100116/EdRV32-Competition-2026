@@ -1,16 +1,19 @@
 /* page_demo.c — T-DEMO-PAGES; face stickers, doodles and helmet validation.
  * RND-supported circles/rounded rectangles and horizontal strips; GUI domain.
  */
-#include "theme.h"
+#include "widgets.h"
 #include <string.h>
 #include "sticker.h"
 static lv_obj_t *surface, *tags[100], *metrics, *warning, *pause_label;
 static ui_demo_t shown;
-static bool points_enabled;
+#define points_enabled ui_debug_overlay
 static sticker_state_t stickers;
 static int selected[STICKER_PARTS];
 static unsigned preset, revision, frame_tick;
-static lv_obj_t *sticker_name;
+static lv_obj_t *sticker_name, *part_select[STICKER_PARTS], *preset_select;
+static int choices[STICKER_PARTS][STICKER_SETS+1];
+static unsigned choice_count[STICKER_PARTS];
+static lv_obj_t *result_name, *helmet_count, *head_count;
 #define ART(name) \
     extern const lv_image_dsc_t sticker_##name##_m24, sticker_##name##_m12, \
         sticker_##name##_z0, sticker_##name##_p12, sticker_##name##_p24
@@ -144,27 +147,36 @@ static void selection_text(void)
         part_names[4], selected[4] < 0 ? "无" : sticker_styles[selected[4]].name);
     ui_text(sticker_name, text);
 }
+static void selection_changed(lv_event_t *event)
+{
+    unsigned part=(unsigned)(uintptr_t)lv_event_get_user_data(event);
+    invalidate();
+    if(part==STICKER_PARTS) {
+        preset=lv_dropdown_get_selected(preset_select);
+        if(preset<4) memcpy(selected,presets[preset],sizeof selected);
+        for(unsigned p=0;p<STICKER_PARTS;++p)
+            for(unsigned i=0;i<choice_count[p];++i)
+                if(choices[p][i]==selected[p]) lv_dropdown_set_selected(part_select[p],i);
+    } else {
+        selected[part]=choices[part][lv_dropdown_get_selected(part_select[part])];
+        preset=4; lv_dropdown_set_selected(preset_select,4);
+    }
+    selection_text(); invalidate();
+}
 static void page(lv_obj_t *p, const char *title)
 {
-    ui_video_surface(p);
-    ui_label(p, title, 24, 12, &sim_font_28, TEXT);
-    if (ui_page == 11) {
-        ui_button(p, "套装", 400, 6, 160, 7);
-        for (unsigned part = 0; part < STICKER_PARTS; ++part)
-            ui_button(p, part_names[part], 24+148*part, 62, 132, 2+part);
-        ui_button(p, "调试", 580, 6, 184, 1);
-        memset(&stickers, 0, sizeof stickers);
-        memcpy(selected, presets[0], sizeof selected);
-        preset = 0; revision = sticker_revision; frame_tick = lv_tick_get();
+    lv_obj_t *header=ui_page_layout(p,title,true);
+    if(ui_page==12) {
+        ui_action_button(header,"阈值 -8",1); ui_action_button(header,"阈值 +8",2);
     }
-    if (ui_page == 12) {
-        ui_button(p, "阈值 -8", 400, 6, 160, 1);
-        ui_button(p, "阈值 +8", 580, 6, 160, 2);
+    lv_obj_t *pause=ui_action_button(header,"暂停画面",0);
+    pause_label=lv_obj_get_child(pause,0);
+    if(ui_page==11) {
+        memset(&stickers,0,sizeof stickers); memcpy(selected,presets[0],sizeof selected);
+        preset=0; revision=sticker_revision; frame_tick=lv_tick_get();
     }
-    ui_button(p, "暂停画面", 792, 6, 184, 0);
-    pause_label = lv_obj_get_child(lv_obj_get_child(p, -1), 0);
     memset(&shown, 0, sizeof shown);
-    points_enabled = false;
+
     surface = ui_box(lv_screen_active(), 0, 0, 1280, 720, BG);
     lv_obj_set_style_bg_opa(surface, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(surface, 0, 0);
@@ -175,15 +187,49 @@ static void page(lv_obj_t *p, const char *title)
         lv_obj_set_style_bg_opa(tags[i], LV_OPA_COVER, 0);
         lv_obj_set_hidden(tags[i], true);
     }
-    lv_obj_t *side = ui_box(p, 992, 56, 272, 340, PANEL);
-    metrics = ui_label(side, "", 16, 20, &sim_font_20, TEXT);
-    if (ui_page == 11) {
-        sticker_name = ui_label(p, "", 1008, 420, &sim_font_20, TEXT);
-        selection_text();
+    lv_obj_t *body=ui_stack(p,LV_FLEX_FLOW_ROW,UI_SPACE_MD);
+    lv_obj_set_flex_grow(body,1);
+    lv_obj_set_flex_align(body,LV_FLEX_ALIGN_END,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_START);
+    if(ui_page==11) {
+        lv_obj_t *picker=ui_panel(body,290);
+        lv_obj_set_height(picker,LV_PCT(100)); lv_obj_set_scrollable(picker,true);
+        preset_select=ui_select(picker,"猫咪\n派对\n酷\n兔子\n自选");
+        lv_obj_add_event_cb(preset_select,selection_changed,LV_EVENT_VALUE_CHANGED,
+                            (void *)STICKER_PARTS);
+        for(unsigned part=0;part<STICKER_PARTS;++part) {
+            ui_text_label(picker,part_names[part],&sim_font_14,MUTED);
+            char options[512]="无"; unsigned n=1; int style=sticker_next(part,-1);
+            choices[part][0]=-1;
+            while(style>=0) {
+                choices[part][n++]=style;
+                strcat(options,"\n"); strcat(options,sticker_styles[style].name);
+                style=sticker_next(part,style);
+            }
+            choice_count[part]=n; part_select[part]=ui_select(picker,options);
+            for(unsigned i=0;i<n;++i) if(choices[part][i]==selected[part])
+                lv_dropdown_set_selected(part_select[part],i);
+            lv_obj_add_event_cb(part_select[part],selection_changed,LV_EVENT_VALUE_CHANGED,
+                                (void *)(uintptr_t)part);
+        }
     }
-    warning = ui_box(p, 180, 550, 700, 56, 0xdc2626);
-    ui_label(warning, "警示：有人未戴安全帽", 24, 12, &sim_font_28, PANEL);
-    lv_obj_set_hidden(warning, true);
+    lv_obj_t *side=ui_panel(body,300);
+    metrics=ui_text_label(side,"",&sim_font_20,TEXT);
+    if(ui_page==11) {
+        sticker_name=ui_text_label(side,"",&sim_font_16,TEXT); selection_text();
+    }
+    if(ui_page==12) {
+        result_name=ui_text_label(side,"",&showcase_bold_32,ACCENT);
+        lv_obj_set_width(result_name,LV_PCT(100));
+    }
+    if(ui_page==13) {
+        ui_live_badge(side,"已戴安全帽",TEAL); helmet_count=ui_number(side,"0",false);
+        ui_live_badge(side,"未戴安全帽",0xdc2626); head_count=ui_number(side,"0",false);
+    }
+    warning=ui_live_badge(p,"警示：有人未戴安全帽",0xdc2626);
+    lv_obj_set_ignore_layout(warning,true);
+    lv_obj_set_width(warning,LV_PCT(65));
+    lv_obj_align(warning,LV_ALIGN_BOTTOM_LEFT,0,0);
+    lv_obj_set_hidden(warning,true);
     ui_hint(ui_page == 12 ? "白底黑线 · 摄像头 → 灰度二值化 → 内存源 → NPU" :
             ui_page == 11 ? "五个部位独立选贴纸 · 同步镜像画面 · 调试显示关键点" :
             "绿框 安全帽 · 红框 未戴 · 上板功能验证");
@@ -242,6 +288,11 @@ void ui_demo_update(void)
         lv_obj_update_layout(surface); invalidate();
     }
     char detail[80];
+    if(ui_page==13) {
+        lv_snprintf(detail,sizeof detail,"%u",d->helmet); ui_text(helmet_count,detail);
+        lv_snprintf(detail,sizeof detail,"%u",d->head); ui_text(head_count,detail);
+    }
+    if(ui_page==12) ui_text(result_name,d->count ? d->objects[0].category : "等待识别");
     if (ui_page == 13) lv_snprintf(detail, sizeof detail, "安全帽 %u 人\n未戴 %u 人",
                                   d->helmet, d->head);
     else if (ui_page == 12) lv_snprintf(detail, sizeof detail, "目标 %u\n阈值 %u",

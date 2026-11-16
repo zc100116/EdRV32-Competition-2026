@@ -23,4 +23,12 @@ lv_obj_t *ui_emphasis(lv_obj_t *parent, const char *text, bool large);
 lv_obj_t *ui_badge(lv_obj_t *parent, const char *text);
 lv_obj_t *ui_number(lv_obj_t *parent, const char *text, bool large);
 lv_obj_t *ui_hold_arc(lv_obj_t *parent, unsigned maximum);
+lv_obj_t *ui_page_layout(lv_obj_t *parent, const char *title, bool camera);
+lv_obj_t *ui_panel(lv_obj_t *parent, int width);
+lv_obj_t *ui_data_table(lv_obj_t *parent, unsigned columns, unsigned rows);
+lv_obj_t *ui_select(lv_obj_t *parent, const char *options);
+lv_obj_t *ui_live_badge(lv_obj_t *parent, const char *text, uint32_t color);
+lv_obj_t *ui_flex_switch(lv_obj_t *parent, const char *text, bool checked);
+lv_obj_t *ui_flex_number(lv_obj_t *parent, const char *text, int value);
+extern bool ui_debug_overlay;
 #endif

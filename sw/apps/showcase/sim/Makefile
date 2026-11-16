@@ -131,3 +131,13 @@ tower-shots: $(BUILD)/showcase_tower_shots
 	rm $(addprefix $(TOWER_OUTPUT)/,$(addsuffix .rgb565,start building glass result))
 $(BUILD)/showcase_tower_shots: main_tower_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_tower_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
+PAGES_SHOTS := vision image process graphics games chip debug pose hand face doodle helmet settings monitor vision-categories detection-settings debug-network graphics-renderers image-loading chip-running hand-debug face-debug helmet-warning session-failed
+PAGES_OUTPUT ?= $(ROOT)/build/sim/ui-pages
+.PHONY: pages-shots
+pages-shots: $(BUILD)/showcase_pages_shots
+	mkdir -p $(BUILD)/ui-pages $(PAGES_OUTPUT)
+	$(BUILD)/showcase_pages_shots $(BUILD)/ui-pages
+	$(foreach name,$(PAGES_SHOTS),python3 $(ROOT)/tools/sw/raw2png.py $(BUILD)/ui-pages/$(name).rgb565 $(PAGES_OUTPUT)/$(name).png;)
+	rm $(addprefix $(BUILD)/ui-pages/,$(addsuffix .rgb565,$(PAGES_SHOTS)))
+$(BUILD)/showcase_pages_shots: main_pages_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
+	$(CC) $(FLAGS) $(PAGES_FLAGS) -Werror main_pages_shots.c $(COMMON) $(LINUX_LV) -lm -o $@

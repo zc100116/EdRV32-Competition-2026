@@ -2,7 +2,7 @@
  * All retained hands are drawn; the largest controls the debounced model class.
  * Clock domain: cooperative GUI task.
  */
-#include "theme.h"
+#include "widgets.h"
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
@@ -15,8 +15,14 @@ static const unsigned bones[][2] = {
     {0,9},{9,10},{10,11},{11,12},{0,13},{13,14},{14,15},{15,16},
     {0,17},{17,18},{18,19},{19,20}
 };
-static bool keypoints = true;
-void ui_hand_toggle(void) { keypoints = !keypoints; lv_obj_invalidate(frame); }
+
+void ui_hand_toggle(void)
+{
+    ui_debug_overlay=!ui_debug_overlay;
+    for(unsigned i=0;i<100;++i)
+        lv_obj_set_hidden(tags[i],!ui_debug_overlay || i>=shown.count);
+    lv_obj_invalidate(frame);
+}
 static uint32_t class_color(unsigned cls)
 {
     static const uint32_t colors[] = {0x0d9488,0xdc2626,0x2563eb,0x9333ea,0xea580c,0xdb2777,
@@ -109,8 +115,8 @@ static void draw(lv_event_t *event)
         lv_area_t box = {person->x, person->y, person->x + person->width - 1,
                          person->y + person->height - 1};
         rect.border_color = lv_color_hex(class_color(person->class_id));
-        lv_draw_rect(layer, &rect, &box);
-        if (!keypoints) continue;
+        if (ui_debug_overlay) lv_draw_rect(layer, &rect, &box);
+        if (!ui_debug_overlay) continue;
         const ui_pose_point_t *points = shown.points[i];
         for (unsigned b = 0; b < sizeof bones / sizeof bones[0]; ++b) {
             const ui_pose_point_t *a = &points[bones[b][0]], *c = &points[bones[b][1]];
@@ -137,12 +143,9 @@ void ui_page_hand(lv_obj_t *p)
         line_unit->evaluate_cb = line_evaluate;
         line_unit->dispatch_cb = line_dispatch;
     }
-    ui_video_surface(p);
-    ui_label(p, "手势识别", 24, 12, &sim_font_28, TEXT);
-    ui_button(p, "关键点 开关", 580, 6, 184, 1);
-    ui_button(p, "暂停画面", 792, 6, 184, 0);
-    pause_label = lv_obj_get_child(lv_obj_get_child(p, -1), 0);
-    keypoints = true;
+    lv_obj_t *header=ui_page_layout(p,"手势识别",true);
+    lv_obj_t *pause=ui_action_button(header,"暂停画面",0);
+    pause_label=lv_obj_get_child(pause,0);
     memset(&shown, 0, sizeof shown);
     frame = ui_box(lv_screen_active(), 0, 0, 1280, 720, BG);
     lv_obj_set_style_bg_opa(frame, LV_OPA_TRANSP, 0);
@@ -155,12 +158,13 @@ void ui_page_hand(lv_obj_t *p)
         lv_obj_set_style_bg_opa(tags[i], LV_OPA_COVER, 0);
         lv_obj_set_hidden(tags[i], true);
     }
-    lv_obj_t *side = ui_box(p, 992, 56, 272, 540, PANEL);
-    lv_obj_set_style_bg_opa(side, LV_OPA_80, 0);
-    metrics = ui_label(side, "", 20, 20, &sim_font_20, TEXT);
-    hands = ui_label(side, "", 20, 245, &sim_font_28, ACCENT);
-    lv_obj_set_width(hands, 232);
-    ui_hint("最大手连续 3 帧确认 · 关键点默认开启 · 画面不镜像");
+    lv_obj_t *body=ui_stack(p,LV_FLEX_FLOW_ROW,0);
+    lv_obj_set_flex_grow(body,1);
+    lv_obj_set_flex_align(body,LV_FLEX_ALIGN_END,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_START);
+    lv_obj_t *side=ui_panel(body,300);
+    metrics=ui_text_label(side,"",&sim_font_20,TEXT);
+    hands=ui_live_badge(side,"",ACCENT);
+    ui_hint("最大手连续 3 帧确认 · 设置中控制调试叠加");
 }
 void ui_hand_update(void)
 {
@@ -171,7 +175,7 @@ void ui_hand_update(void)
         invalidate_people();
         shown = *data;
         for (unsigned i = 0; i < 100; ++i) {
-            lv_obj_set_hidden(tags[i], i >= shown.count);
+            lv_obj_set_hidden(tags[i], i >= shown.count || !ui_debug_overlay);
             if (i >= shown.count) continue;
             lv_snprintf(text, sizeof text, "%s %u%%",
                         shown.people[i].category, shown.people[i].confidence);
@@ -191,11 +195,12 @@ void ui_hand_update(void)
     ui_text(metrics, text);
     if (data->count && data->state.cls >= 0) {
         unsigned cls = (unsigned)data->state.cls;
-        lv_snprintf(text, sizeof text, "%s\n\n数字 %s\n\n猜拳 %s", ui_gesture_names[cls],
+        lv_snprintf(text, sizeof text, "%s %u%%\n数字 %s\n猜拳 %s", ui_gesture_names[cls],
+                    data->confidence,
                     ui_gesture_numbers[cls], ui_gesture_rps[cls]);
-        lv_obj_set_style_bg_color(hands, lv_color_hex(cls == 5 ? 0xdc2626 : PANEL), 0);
+        lv_obj_set_style_bg_color(hands, lv_color_hex(cls == 5 ? 0xdc2626 : ACCENT), 0);
         lv_obj_set_style_bg_opa(hands, LV_OPA_COVER, 0);
-        lv_obj_set_style_text_color(hands, lv_color_hex(cls == 5 ? PANEL : ACCENT), 0);
+        lv_obj_set_style_text_color(hands, lv_color_hex(PANEL), 0);
     } else lv_snprintf(text, sizeof text, "等待手势");
     ui_text(hands, text);
     ui_text(pause_label, ui_data_session().state == UI_STATE_PAUSED ? "继续画面" : "暂停画面");

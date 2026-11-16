@@ -1,15 +1,15 @@
 /* page_graphics.c — showcase 4.6.3; measured benchmark and paired renderer cases.
  * Results are backend measurements; the desktop backend marks scripted data.
  */
-#include "theme.h"
+#include "widgets.h"
 #include "renderer.h"
 static lv_obj_t *progress;
 static lv_obj_t *benchmark_back;
 void ui_benchmark_controls(bool show)
 {
     if(show) {
-        ui_button(lv_layer_sys(),"‹ 返回",8,8,124,1004);
-        benchmark_back=lv_obj_get_child(lv_layer_sys(),-1);
+        benchmark_back=ui_action_button(lv_layer_sys(),"‹ 返回",1004);
+        lv_obj_align(benchmark_back,LV_ALIGN_TOP_LEFT,UI_SPACE_XS,UI_SPACE_XS);
         lv_obj_set_height(benchmark_back,36);
     } else {
         lv_obj_delete(benchmark_back); benchmark_back=NULL;
@@ -27,80 +27,85 @@ void ui_graphics_action(unsigned action)
         ui_open(4);
     }
 }
+static void tabs_changed(lv_event_t *event)
+{
+    ui_graphics_action(lv_buttonmatrix_get_selected_button(lv_event_get_target_obj(event)));
+}
 static void result(lv_obj_t *p,unsigned test)
 {
     const ui_render_result_t *r=&ui_data_render_results()[test];
-    ui_label(p,r->name,42,162,&sim_font_28,TEXT);
+    ui_text_label(p,r->name,&sim_font_28,TEXT);
     if(test==TEST_LAYERS) {
-        ui_label(p,"L0 卷轴 · L1 移动 / 透明度",42,214,&sim_font_20,TEAL);
-        return;
+        ui_text_label(p,"L0 卷轴 · L1 移动 / 透明度",&sim_font_20,TEAL); return;
     }
+    lv_obj_t *row=ui_stack(p,LV_FLEX_FLOW_ROW,UI_SPACE_LG);
     for(unsigned side=0;side<2;++side) {
-        lv_obj_t *card=ui_box(p,40+(int)side*612,212,588,298,PANEL);
-        ui_label(card,side ? "LVGL 软件渲染" : "RND 硬件渲染",20,14,&sim_font_20,ACCENT);
+        lv_obj_t *card=ui_panel(row,LV_PCT(48));
+        ui_text_label(card,side ? "LVGL 软件渲染" : "RND 硬件渲染",&sim_font_20,ACCENT);
         if(r->complete) {
-            ui_picture(card,ui_data_render_image(side),20,60,384,192);
-            char s[64];
-            lv_snprintf(s,sizeof(s),"%u us",side ? r->software_us : r->hardware_us);
-            ui_label(card,s,20,267,&sim_font_16,TEXT);
+            lv_obj_t *image=lv_image_create(card);
+            lv_image_set_src(image,ui_data_render_image(side));
+            lv_obj_set_size(image,384,192);
+            char text[80];
+            lv_snprintf(text,sizeof text,"%u us",side ? r->software_us : r->hardware_us);
+            ui_text_label(card,text,&sim_font_20,TEXT);
         }
     }
-    char s[192];
+    char text[192];
     if(r->complete) {
         unsigned ratio=r->hardware_us ? r->software_us*100/r->hardware_us : 0;
         unsigned percent=r->equal*10000/r->total;
-        lv_snprintf(s,sizeof(s),"加速比 %u.%02u 倍    逐像素一致 %u / %u (%u.%02u%%)",
+        lv_snprintf(text,sizeof text,"加速比 %u.%02u 倍 · 一致 %u / %u (%u.%02u%%)",
             ratio/100,ratio%100,r->equal,r->total,percent/100,percent%100);
-    } else lv_snprintf(s,sizeof(s),"正在绘制与比较");
-    ui_label(p,s,42,530,&sim_font_20,TEAL);
-    ui_label(p,"圆角抗锯齿与混合舍入差异按实测显示",42,570,&sim_font_14,MUTED);
+    } else lv_snprintf(text,sizeof text,"正在绘制与比较");
+    ui_text_label(p,text,&sim_font_20,TEAL);
+    ui_text_label(p,"圆角抗锯齿与混合舍入差异按实测显示",&sim_font_14,MUTED);
 }
 void ui_page_graphics(lv_obj_t *p)
 {
-    ui_title(p,"图形引擎");
-    const char *tabs[]={"LVGL benchmark","渲染器功能测试"};
-    for(unsigned i=0;i<2;++i) {
-        ui_button(p,tabs[i],40+(int)i*280,104,260,i);
-        if(i==ui_tab) lv_obj_add_state(lv_obj_get_child(p,-1),LV_STATE_CHECKED);
-    }
+    lv_obj_t *header=ui_page_layout(p,"图形引擎",false);
+    static const char *const tabs[]={"LVGL benchmark","渲染器功能测试",""};
+    lv_obj_t *selector=ui_segment(header,tabs,ui_tab);
+    lv_obj_set_width(selector,480);
+    lv_obj_add_event_cb(selector,tabs_changed,LV_EVENT_VALUE_CHANGED,NULL);
     progress=NULL;
     if(ui_tab==1) {
         if(ui_mode) { result(p,ui_mode-1); return; }
-        ui_button(p,"全部运行",1020,104,220,3);
-        lv_obj_t *list=ui_box(p,40,163,1200,432,BG);
-        lv_obj_set_scrollable(list,true); lv_obj_set_scroll_dir(list,LV_DIR_VER);
+        ui_action_button(header,"全部运行",3);
+        lv_obj_t *list=ui_stack(p,LV_FLEX_FLOW_ROW_WRAP,UI_SPACE_SM);
+        lv_obj_set_flex_grow(list,1); lv_obj_set_scrollable(list,true);
         const ui_render_result_t *r=ui_data_render_results();
         for(unsigned i=0;i<RENDER_TEST_COUNT;++i) {
-            int x=(int)(i%2)*596,y=(int)(i/2)*52;
-            ui_button(list,ui_render_names[i],x,y,572,10+i);
+            lv_obj_t *button=ui_action_button(list,ui_render_names[i],10+i);
+            lv_obj_set_size(button,LV_PCT(48),64);
             if(r[i].complete) {
-                char s[80];
-                lv_snprintf(s,sizeof(s),"%u/%u  %u us / %u us",r[i].equal,r[i].total,
+                char text[80];
+                lv_snprintf(text,sizeof text,"%u/%u · %u / %u us",r[i].equal,r[i].total,
                     r[i].hardware_us,r[i].software_us);
-                ui_label(lv_obj_get_child(list,-1),s,240,12,&sim_font_14,TEAL);
+                ui_text_label(button,text,&sim_font_14,TEAL);
             }
         }
         return;
     }
+    ui_action_button(header,"开始测试",2);
+    lv_obj_t *row=ui_stack(p,LV_FLEX_FLOW_ROW,UI_SPACE_LG);
     const ui_benchmark_t *rows=ui_data_benchmark();
     for(unsigned col=0;col<2;++col) {
-        lv_obj_t *card=ui_box(p,40+(int)col*612,164,588,350,PANEL);
-        ui_label(card,"场景",16,12,&sim_font_16,MUTED);
-        ui_label(card,"每帧 ms",370,12,&sim_font_16,MUTED);
-        ui_label(card,"fps",500,12,&sim_font_16,MUTED);
-        for(unsigned r=0;r<8;++r) {
-            unsigned n=col*8+r;
-            int y=50+(int)r*36;
-            ui_label(card,rows[n].name,16,y,&sim_font_16,TEXT);
-            char s[40];
-            lv_snprintf(s,sizeof(s),"%u.%u",rows[n].ms_tenths/10,rows[n].ms_tenths%10);
-            ui_label(card,s,380,y,&sim_font_16,ACCENT);
-            lv_snprintf(s,sizeof(s),"%u.%u",rows[n].fps_tenths/10,rows[n].fps_tenths%10);
-            ui_label(card,s,500,y,&sim_font_16,TEXT);
+        lv_obj_t *table=ui_data_table(row,3,9); lv_obj_set_width(table,LV_PCT(48));
+        lv_table_set_column_width(table,0,310);
+        lv_table_set_column_width(table,1,130); lv_table_set_column_width(table,2,130);
+        lv_table_set_cell_value(table,0,0,"场景");
+        lv_table_set_cell_value(table,0,1,"每帧 ms"); lv_table_set_cell_value(table,0,2,"fps");
+        for(unsigned i=0;i<8;++i) {
+            unsigned n=col*8+i; char text[40];
+            lv_table_set_cell_value(table,i+1,0,rows[n].name);
+            lv_snprintf(text,sizeof text,"%u.%u",rows[n].ms_tenths/10,rows[n].ms_tenths%10);
+            lv_table_set_cell_value(table,i+1,1,text);
+            lv_snprintf(text,sizeof text,"%u.%u",rows[n].fps_tenths/10,rows[n].fps_tenths%10);
+            lv_table_set_cell_value(table,i+1,2,text);
         }
     }
-    ui_button(p,"开始测试",40,544,180,2);
-    progress=ui_label(p,"",244,555,&sim_font_16,MUTED);
+    progress=ui_text_label(p,"",&sim_font_16,MUTED);
 }
 void ui_graphics_update(void)
 {

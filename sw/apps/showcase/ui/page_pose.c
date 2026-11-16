@@ -2,7 +2,7 @@
  * All retained people are drawn; only the largest controls the hand indicators.
  * Clock domain: cooperative GUI task.
  */
-#include "theme.h"
+#include "widgets.h"
 #include <string.h>
 #include "src/draw/lv_draw_private.h"
 #include "src/misc/lv_area_private.h"
@@ -127,10 +127,9 @@ void ui_page_pose(lv_obj_t *p)
         line_unit->evaluate_cb = line_evaluate;
         line_unit->dispatch_cb = line_dispatch;
     }
-    ui_video_surface(p);
-    ui_label(p, "人体姿态", 24, 12, &sim_font_28, TEXT);
-    ui_button(p, "暂停画面", 792, 6, 184, 0);
-    pause_label = lv_obj_get_child(lv_obj_get_child(p, -1), 0);
+    lv_obj_t *header=ui_page_layout(p,"人体姿态",true);
+    lv_obj_t *pause=ui_action_button(header,"暂停画面",0);
+    pause_label=lv_obj_get_child(pause,0);
     memset(&shown, 0, sizeof shown);
     frame = ui_box(lv_screen_active(), 0, 0, 1280, 720, BG);
     lv_obj_set_style_bg_opa(frame, LV_OPA_TRANSP, 0);
@@ -143,10 +142,12 @@ void ui_page_pose(lv_obj_t *p)
         lv_obj_set_style_bg_opa(tags[i], LV_OPA_COVER, 0);
         lv_obj_set_hidden(tags[i], true);
     }
-    lv_obj_t *side = ui_box(p, 992, 56, 272, 440, PANEL);
-    lv_obj_set_style_bg_opa(side, LV_OPA_80, 0);
-    metrics = ui_label(side, "", 20, 20, &sim_font_20, TEXT);
-    hands = ui_label(side, "", 20, 270, &sim_font_20, ACCENT);
+    lv_obj_t *body=ui_stack(p,LV_FLEX_FLOW_ROW,0);
+    lv_obj_set_flex_grow(body,1);
+    lv_obj_set_flex_align(body,LV_FLEX_ALIGN_END,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_START);
+    lv_obj_t *side=ui_panel(body,300);
+    metrics=ui_text_label(side,"",&sim_font_20,TEXT);
+    hands=ui_live_badge(side,"",ACCENT);
     ui_hint("最大行人 · 手腕高于同侧肩膀且两点可见时，显示举手");
 }
 void ui_pose_update(void)
@@ -173,7 +174,12 @@ void ui_pose_update(void)
         data->count, stats.npu_tenths / 10, stats.npu_tenths % 10, stats.fps,
         stats.latency_tenths / 10, stats.latency_tenths % 10);
     ui_text(metrics, text);
-    lv_snprintf(text, sizeof text, "最大行人\n\n左手举起  %s\n右手举起  %s",
+    unsigned largest=0;
+    for(unsigned i=1;i<data->count;++i)
+        if(data->people[i].width*data->people[i].height >
+           data->people[largest].width*data->people[largest].height) largest=i;
+    lv_snprintf(text, sizeof text, "最大行人 %u%%\n\n左手举起  %s\n右手举起  %s",
+        data->people[largest].confidence,
         data->left_up ? "是" : "否", data->right_up ? "是" : "否");
     ui_text(hands, text);
     ui_text(pause_label, ui_data_session().state == UI_STATE_PAUSED ? "继续画面" : "暂停画面");

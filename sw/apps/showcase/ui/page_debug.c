@@ -1,7 +1,7 @@
 /* page_debug.c — showcase design §4.3; UART and network inspection.
  * Buttons call data actions; changed labels update on the 2 Hz UI timer.
  */
-#include "theme.h"
+#include "widgets.h"
 static lv_obj_t *data_text;
 static lv_obj_t *counters;
 static lv_obj_t *format;
@@ -17,32 +17,42 @@ static void baud_changed(lv_event_t *e)
     while(ui_data_debug().baud!=rates[target]) ui_data_debug_baud();
     ui_debug_update();
 }
+static void tab_changed(lv_event_t *event)
+{
+    ui_tab=lv_tabview_get_tab_active(lv_event_get_target_obj(event)); ui_open(8);
+}
 void ui_page_debug(lv_obj_t *p)
 {
-    ui_title(p, "调试助手");
-    ui_button(p, "串口", 40, 118, 190, 0);
-    ui_button(p, "网口", 250, 118, 190, 1);
-    lv_obj_add_state(lv_obj_get_child(p,ui_tab==0 ? 1 : 2),LV_STATE_CHECKED);
-    lv_obj_t *panel = ui_box(p, 40, 178, 816, 422, PANEL);
-    ui_label(panel, ui_tab ? "收到的 UDP 数据" : "收发数据", 24, 20, &sim_font_20, TEXT);
-    data_text = ui_label(panel, "", 24, 70, &sim_font_16, TEXT);
-    lv_obj_set_width(data_text, 768);
-    lv_obj_t *side = ui_box(p, 880, 178, 360, 422, PANEL);
-    ui_label(side, "通信状态", 24, 20, &sim_font_20, TEXT);
-    counters = ui_label(side, "", 24, 70, &sim_font_16, TEXT);
-    if(ui_tab == 0) {
-        ui_label(panel,"十六进制",24,356,&sim_font_16,TEXT);
-        format=ui_switch(panel,130,355);
+    ui_page_layout(p,"调试助手",false);
+    lv_obj_t *tabs=lv_tabview_create(p); ui_widget_style(tabs);
+    lv_obj_set_size(tabs,LV_PCT(100),LV_PCT(84));
+    lv_tabview_set_tab_bar_size(tabs,44);
+    lv_obj_t *serial=lv_tabview_add_tab(tabs,"串口");
+    lv_obj_t *net=lv_tabview_add_tab(tabs,"网口");
+    lv_tabview_set_active(tabs,ui_tab,LV_ANIM_OFF);
+    lv_obj_add_event_cb(tabs,tab_changed,LV_EVENT_VALUE_CHANGED,NULL);
+    ui_control(lv_tabview_get_tab_bar(tabs));
+    lv_obj_t *active=ui_tab ? net : serial;
+    lv_obj_set_flex_flow(active,LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_gap(active,UI_SPACE_LG,0);
+    lv_obj_t *panel=ui_panel(active,LV_PCT(65));
+    ui_text_label(panel,ui_tab ? "收到的 UDP 数据" : "收发数据",&sim_font_20,TEXT);
+    data_text=ui_text_label(panel,"",&sim_font_16,TEXT);
+    lv_obj_set_width(data_text,LV_PCT(100));
+    lv_obj_t *side=ui_panel(active,LV_PCT(32));
+    ui_text_label(side,"通信状态",&sim_font_20,TEXT);
+    counters=ui_text_label(side,"",&sim_font_16,TEXT);
+    if(ui_tab==0) {
+        format=ui_flex_switch(panel,"十六进制",false);
         lv_obj_add_event_cb(format,format_changed,LV_EVENT_VALUE_CHANGED,NULL);
-        baud=ui_dropdown(panel,240,348,240,"115200\n921600\n2000000");
+        baud=ui_select(panel,"115200\n921600\n2000000");
         lv_obj_add_event_cb(baud,baud_changed,LV_EVENT_VALUE_CHANGED,NULL);
-        ui_button(side, "发送预置测试串", 24, 292, 312, 4);
-        ui_button(side, "清空", 24, 348, 312, 5);
-        ui_label(side, "测试串：Hello EdRV32!", 24, 236, &sim_font_16, MUTED);
+        ui_text_label(side,"测试串：Hello EdRV32!",&sim_font_16,MUTED);
+        ui_action_button(side,"发送预置测试串",4); ui_action_button(side,"清空",5);
     } else {
-        network = ui_label(side, "", 24, 198, &sim_font_16, TEXT);
-        echo = ui_label(panel, "", 24, 238, &sim_font_16, MUTED);
-        ui_button(side, "清零回环统计", 24, 348, 312, 6);
+        network=ui_text_label(side,"",&sim_font_16,TEXT);
+        echo=ui_text_label(panel,"",&sim_font_16,MUTED);
+        ui_action_button(side,"清零回环统计",6);
     }
 }
 void ui_debug_update(void)

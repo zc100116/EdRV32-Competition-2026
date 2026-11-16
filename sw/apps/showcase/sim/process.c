@@ -121,7 +121,7 @@ const lv_image_dsc_t *sim_process_image(const ui_process_config_t *config)
 }
 const lv_image_dsc_t *sim_l0_image(void)
 {
-    if (ui_page == 1) return ui_data_vision().image;
+    if (ui_page == 1 || ui_page == 9) return ui_data_vision().image;
     if (ui_page == 2) return ui_data_vision().image;
     if (ui_page >= 10) return sim_data_demo_image();
     if (ui_page == 3) return ui_data_process(0);

@@ -7,6 +7,7 @@
 #include <stdio.h>
 /* R4 explicitly requires lv_menu, deprecated in the locked LVGL 9.6 API. */
 LV_DEPRECATIONS_IGNORE_BEGIN
+bool ui_debug_overlay;
 static unsigned mode;
 static int thresholds[] = {25,35,0,25};
 static bool keypoints;
@@ -72,6 +73,8 @@ static void switch_changed(lv_event_t *event)
         ui_data_grab_output(checked ? "grab mirror=1\r\n" : "grab mirror=0\r\n");
     } else if (setting == 1) {
         if (checked != ui_monitor_visible()) ui_monitor_toggle();
+    } else if (setting == 3) {
+        ui_debug_overlay = checked;
     } else {
         keypoints = checked;
         ui_grab.keypoints = checked;
@@ -100,6 +103,8 @@ static lv_obj_t *section(lv_obj_t *page, const char *name, int width)
     ui_emphasis(o,name,false);
     return o;
 }
+static void grab_test(lv_event_t *event)
+{ (void)event; ui_open(14); }
 void ui_page_settings(lv_obj_t *parent)
 {
     lv_obj_set_flex_flow(parent,LV_FLEX_FLOW_COLUMN);
@@ -120,6 +125,7 @@ void ui_page_settings(lv_obj_t *parent)
     lv_obj_t *display = section(page,"显示",36);
     switch_setting(display,"镜像",ui_grab.mirror,0);
     switch_setting(display,"性能窗",ui_monitor_visible(),1);
+    switch_setting(display,"调试叠加",ui_debug_overlay,3);
     ui_text_label(display,"摄像头显示与运行指标",&sim_font_16,MUTED);
     lv_obj_t *grab = section(page,"抓取判定",62);
     ui_text_label(grab,"模式",&sim_font_20,TEXT);
@@ -137,6 +143,12 @@ void ui_page_settings(lv_obj_t *parent)
     selector = ui_segment(grab,exposures,ui_data_exposure_short() ? 1 : 0);
     lv_obj_set_width(selector,LV_PCT(100));
     lv_obj_add_event_cb(selector,exposure_changed,LV_EVENT_VALUE_CHANGED,NULL);
+    lv_obj_t *test = lv_button_create(grab);
+    ui_widget_style(test);
+    lv_obj_set_flex_flow(test,LV_FLEX_FLOW_ROW);
+    ui_text_label(test,"抓取测试",&sim_font_16,TEXT);
+    ui_control(test);
+    lv_obj_add_event_cb(test,grab_test,LV_EVENT_CLICKED,NULL);
     lv_menu_set_page(menu,page);
     ui_hint("确认：切换开关 / 进入参数编辑    下一个 / 上一个：选择或调节    返回：退出编辑");
 }
