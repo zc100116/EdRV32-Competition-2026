@@ -20,6 +20,8 @@
 #include "monitor.h"
 #include "uart.h"
 #include <string.h>
+#include <stdio.h>
+#include <sched_policy.h>
 static ui_system_t system_data;
 static char report_line[2048];
 static unsigned report_length;
@@ -73,9 +75,11 @@ void showcase_cpu_report(void)
     system_data.fps=(unsigned)((uint64_t)rendered*platform_clock_hz()/elapsed);
     system_data.link=showcase_network_link()>0;
     for(unsigned i=0;i<3;++i) {
-        system_data.task_cpu[i]=(unsigned)((tasks[i]->busy_ticks-previous_busy[i])*100/elapsed);
-        system_data.task_max_us[i]=(unsigned)(tasks[i]->max_step_ticks*1000000/platform_clock_hz());
-        previous_busy[i]=tasks[i]->busy_ticks;
+        uint64_t busy=sched_counter_value(&tasks[i]->busy_ticks);
+        system_data.task_cpu[i]=(unsigned)((busy-previous_busy[i])*100/elapsed);
+        uint64_t maximum=sched_counter_value(&tasks[i]->max_step_ticks);
+        system_data.task_max_us[i]=(unsigned)(maximum*1000000/platform_clock_hz());
+        previous_busy[i]=busy;
     }
     previous_frames=frames; previous_idle=idle; report_time=now;
     static uint64_t last_log;
@@ -88,7 +92,7 @@ void showcase_cpu_report(void)
     overlay_before=overlay;
     unsigned eth_max,eth_avg;
     board_nes_latency(2,&eth_max,&eth_avg);
-    report_length=(unsigned)lv_snprintf(report_line,sizeof(report_line),
+    report_length=(unsigned)sched_report_format(report_line,sizeof(report_line),
         "CPU%%/max_us %u/%u %u/%u %u/%u overlay_cpu=%u.%02u%% max_us=%u rering=%u\r\n"
         "NES input ETH max_ms=%u.%03u avg_ms=%u.%03u\r\n",
         system_data.task_cpu[0],system_data.task_max_us[0],

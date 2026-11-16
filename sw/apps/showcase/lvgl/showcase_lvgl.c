@@ -4,6 +4,7 @@
  * Clock domain: clk_sys; CLINT tick, shared RND/DISP interrupt services.
  */
 #include "showcase_lvgl.h"
+#include <sched_policy.h>
 #include "../board/vision/metrics.h"
 #include "virtual_input.h"
 #include "draw_rnd.h"
@@ -550,6 +551,7 @@ void showcase_lvgl_init(void)
 uint32_t showcase_gui_frames(void) { return flush_count; }
 void showcase_gui_step(struct sched_task *task)
 {
+    sched_gui_service();
     uint32_t task_events = sched_take(task);
     if (task_events & PLATFORM_INPUT) input_pending = true;
     if (showcase_gui_paused() || !scan_started) return;

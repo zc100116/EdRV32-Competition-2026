@@ -5,6 +5,10 @@ SHOWCASE_POST ?= hw
 ifeq ($(SHOWCASE_POST),cpu)
 OUT := $(ROOT)/build/sw/showcase-cpupost
 endif
+SHOWCASE_SCHED ?= coop
+ifeq ($(SHOWCASE_SCHED),rtos)
+OUT := $(ROOT)/build/sw/showcase-rtos-$(SHOWCASE_POST)
+endif
 MEMORY := showcase
 PROGRAM_SOURCES := sw/apps/showcase/main.c sw/apps/showcase/platform.c sw/apps/showcase/input.c \
     sw/apps/showcase/layers.c $(patsubst $(ROOT)/%,%,$(wildcard $(ROOT)/sw/apps/showcase/board/*.c)) \
@@ -154,3 +158,24 @@ $(ROOT)/build/showcase/$(1)_images.c: $(ROOT)/tools/sw/embed_showcase_images.py 
 	    $(ROOT)/sw/apps/showcase/assets/$(1) $$@ --prefix $(1)
 endef
 $(foreach art,$(SHOWCASE_ARCADE_ART),$(eval $(call SHOWCASE_ARCADE_IMAGE_RULE,$(art))))
+
+# Card 93 scheduler evaluation; remove the losing variant after board A/B.
+ifeq ($(SHOWCASE_SCHED),rtos)
+FREERTOS := third_party/freertos-kernel
+FREERTOS_PORT := $(FREERTOS)/portable/GCC/RISC-V
+PROGRAM_SOURCES := $(filter-out sw/lib/sched/sched.c,$(PROGRAM_SOURCES))
+PROGRAM_SOURCES += sw/lib/sched/freertos/sched_freertos.c \
+    sw/lib/sched/freertos/gui_call.c sw/lib/sched/freertos/trap.S \
+    $(FREERTOS)/tasks.c $(FREERTOS)/list.c $(FREERTOS)/queue.c \
+    $(FREERTOS_PORT)/port.c $(FREERTOS_PORT)/portASM.S \
+    $(FREERTOS)/portable/MemMang/heap_4.c
+CFLAGS_EXTRA := -I$(ROOT)/sw/lib/sched/freertos $(CFLAGS_EXTRA) \
+    -I$(ROOT)/$(FREERTOS)/include -I$(ROOT)/$(FREERTOS_PORT) -DSHOWCASE_RTOS
+SHOWCASE_GUI_CALLS := showcase_gui_restore showcase_benchmark_start showcase_benchmark_stop \
+    ui_refresh board_overlay_enter board_overlay_step board_overlay_exit layers_enter layers_step \
+    layers_exit board_render_step ui_suspend ui_benchmark_controls ui_open ui_hint \
+    ui_restore_interface ui_show_app board_games_step board_game_append board_coremark_stack
+PROGRAM_LDLIBS += $(foreach call,$(SHOWCASE_GUI_CALLS),-Wl,--wrap=$(call))
+else ifneq ($(SHOWCASE_SCHED),coop)
+$(error SHOWCASE_SCHED must be coop or rtos)
+endif

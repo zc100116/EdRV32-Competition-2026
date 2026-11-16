@@ -1,6 +1,7 @@
 /* main.c — P5 3.1/3.2/8.1; exclusive application manager and service scheduling.
  * The shell consumes backend sessions, never UI page globals; clk_sys. */
 #include "platform.h"
+#include <sched_policy.h>
 #include "board/vision/metrics.h"
 #include "runtime.h"
 #include "board/input.h"
@@ -26,6 +27,9 @@ struct sched_task application_task = {
 struct sched_task gui_task = {"图形界面", showcase_gui_step, 2, 1, UINT64_MAX, 0, 0};
 void smooth_tasks(uint64_t busy[3], uint64_t maximum[3])
 {
+#ifdef SHOWCASE_RTOS
+    uint32_t state = sched_port_lock();
+#endif
     static uint64_t previous[3];
     struct sched_task *tasks[] = {&communication_task, &application_task, &gui_task};
     for (unsigned i = 0; i < 3; ++i) {
@@ -34,15 +38,19 @@ void smooth_tasks(uint64_t busy[3], uint64_t maximum[3])
         maximum[i] = tasks[i]->max_step_ticks;
         tasks[i]->max_step_ticks = 0;
     }
+#ifdef SHOWCASE_RTOS
+    sched_port_unlock(state);
+#endif
 }
 void app_wake_at(uint64_t t) { sched_wake_at(&application_task, t); }
 uint32_t app_events(void) { return step_events; }
-uint64_t app_busy_ticks(void) { return application_task.busy_ticks; }
+uint64_t app_busy_ticks(void) { return sched_counter_value(&application_task.busy_ticks); }
 uint8_t showcase_launcher_active(void) { return !gui_suspended; }
 uint8_t showcase_gui_paused(void) { return gui_suspended; }
 void app_gui_pause(uint8_t p)
 {
     gui_suspended = p;
+    if (p) sched_gui_barrier();
     if (p) sched_wake_at(&gui_task, UINT64_MAX);
     else showcase_gui_restore();
 }
@@ -117,7 +125,10 @@ static void start(ui_app_t app, unsigned arg)
     if (active && (active->needs & platform_hardware()) != active->needs) {
         active = NULL; board_session_fail(4); return;
     }
-    if (app == UI_APP_GAME) board_nes_select(arg);
+    if (app == UI_APP_GAME) {
+        board_nes_select(arg);
+        sched_exclusive(1);
+    }
     if (active && active->owns_display) {
         app_gui_pause(1); engine_control(ENGINE_DISP,0);
     }
@@ -143,6 +154,7 @@ static bool ready(ui_app_t app, ui_state_t target)
     else if (app == UI_APP_GAME) complete = board_nes_ready(target);
     else complete = !active || !active->owns_display || platform_display_idle();
     if (target == UI_STATE_IDLE && complete) {
+        if (app == UI_APP_GAME) sched_exclusive(0);
         active = NULL;
         showcase_input_owner(INPUT_GUI); showcase_lvgl_input(0);
         if (gui_suspended) app_gui_pause(0);
@@ -166,13 +178,17 @@ static void application_step(struct sched_task *task)
     if (!gui_suspended && !vision_post_active())
         sched_defer_for(task, &gui_task, platform_ticks(), platform_clock_hz() / 1000);
 }
+static inline __attribute__((always_inline)) void initialize_services(void)
+{
+    showcase_lvgl_init(); board_games_init();
+    ui_start(); vision_init(); board_init(); showcase_cpu_report_init();
+    board_serial_drain(true);
+}
 int main(void)
 {
     media.ops = (struct session_ops){start, stop, pause_app, ready};
     platform_init(); sched_add(&communication_task); sched_add(&application_task);
-    sched_add(&gui_task); showcase_lvgl_init(); board_games_init();
-    ui_start(); vision_init(); board_init(); showcase_cpu_report_init();
-    board_serial_drain(true);
+    sched_add(&gui_task); sched_initialize(initialize_services);
     sched_run();
     return 0;
 }

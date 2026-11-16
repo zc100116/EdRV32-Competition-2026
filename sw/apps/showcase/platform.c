@@ -4,6 +4,7 @@
  * Clock domain: clk_sys, media IRQs from clk_mem.
  */
 #include "platform.h"
+#include <sched_policy.h>
 #include "board/vision/metrics.h"
 #include "board/serial.h"
 #include "app.h"
@@ -121,8 +122,13 @@ uint32_t platform_milliseconds(void)
     return milliseconds;
 }
 uint64_t sched_port_time(void) { return platform_ticks(); }
+#ifdef SHOWCASE_RTOS
+uint32_t sched_port_lock(void) { return sched_critical_enter(); }
+void sched_port_unlock(uint32_t state) { sched_critical_leave(state); }
+#else
 uint32_t sched_port_lock(void) { return virtual_input_lock(); }
 void sched_port_unlock(uint32_t state) { virtual_input_unlock(state); }
+#endif
 void sched_port_compare(uint64_t deadline) { clint_set_compare(board_prof_deadline(deadline)); }
 void sched_port_wait(void) { __asm__ volatile ("wfi" ::: "memory"); }
 void *platform_uncached(void *storage)
@@ -145,8 +151,8 @@ static uint32_t sample_keys(void)
 }
 
 static volatile uint64_t rnd_cycles,npu_cycles;
-uint64_t board_rnd_cycles(void) { return rnd_cycles; }
-uint64_t board_npu_cycles(void) { return npu_cycles; }
+uint64_t board_rnd_cycles(void) { return sched_counter_value(&rnd_cycles); }
+uint64_t board_npu_cycles(void) { return sched_counter_value(&npu_cycles); }
 static void vision_event(const struct engine_event *event,void *context)
 {
     if((uintptr_t)context==ENGINE_NPU && (event->irq&EDRV32_NPU_IRQ_STAT_DONE_MASK))
@@ -168,6 +174,7 @@ static void rnd_event(const struct rnd_result *result, void *context)
         platform_stop();
     }
     rnd_done = 1;
+    sched_rnd_complete();
     if (app_rnd_callback) app_rnd_callback(result, app_context);
     if (showcase_gui_paused()) sched_signal(&application_task, PLATFORM_RND);
 }
@@ -205,6 +212,35 @@ void platform_media_callbacks(rnd_callback rnd, engine_irq_callback disp, void *
         EDRV32_DISP_IRQ_EN_SWITCH1_MASK, 1, disp_event, NULL);
     virtual_input_unlock(state);
 }
+static inline __attribute__((always_inline)) void external_interrupt(void)
+{
+    unsigned source = plic_claim();
+    uint64_t started = platform_ticks();
+    if (source == EDRV32_PLIC_SOURCE_RND) rnd_irq_handle();
+    else if (source == EDRV32_PLIC_SOURCE_DISP) engine_irq_handle(source);
+    else if (source == EDRV32_PLIC_SOURCE_UART0) {
+        mmio_write32(EDRV32_UART0_BASE + UART_IRQ_EN, 0);
+        sched_signal(&communication_task, 1);
+    } else if (source == EDRV32_PLIC_SOURCE_ETH) {
+        mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_IRQ_EN_OFFSET, 0);
+        sched_signal(&communication_task, 2);
+    } else if (source == EDRV32_PLIC_SOURCE_GPIO0) {
+        gpio_irq_clear(gpio_irq_status());
+        sched_signal(&communication_task, 4);
+    }
+    else if(source==EDRV32_PLIC_SOURCE_VIN || source==EDRV32_PLIC_SOURCE_NPU ||
+            source==EDRV32_PLIC_SOURCE_PIX || source==EDRV32_PLIC_SOURCE_GEO)
+        engine_irq_handle(source);
+    if (source != EDRV32_PLIC_SOURCE_NONE) plic_complete(source);
+    uint64_t elapsed = platform_ticks() - started;
+    for (unsigned i = 0; i < 7; ++i) if (source == irq_sources[i]) {
+        ++irq_totals[i].count;
+        irq_totals[i].ticks += elapsed;
+    }
+}
+#ifdef SHOWCASE_RTOS
+void showcase_external_interrupt(void) { external_interrupt(); }
+#endif
 static void __attribute__((interrupt("machine"), aligned(4))) interrupt_entry(void)
 {
     uint32_t cause;
@@ -220,29 +256,7 @@ static void __attribute__((interrupt("machine"), aligned(4))) interrupt_entry(vo
         board_prof_sample(pc);
         clint_set_compare(board_prof_deadline(UINT64_MAX));
     } else if (cause == 0x8000000bu) {
-        unsigned source = plic_claim();
-        uint64_t started = platform_ticks();
-        if (source == EDRV32_PLIC_SOURCE_RND) rnd_irq_handle();
-        else if (source == EDRV32_PLIC_SOURCE_DISP) engine_irq_handle(source);
-        else if (source == EDRV32_PLIC_SOURCE_UART0) {
-            mmio_write32(EDRV32_UART0_BASE + UART_IRQ_EN, 0);
-            sched_signal(&communication_task, 1);
-        } else if (source == EDRV32_PLIC_SOURCE_ETH) {
-            mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_IRQ_EN_OFFSET, 0);
-            sched_signal(&communication_task, 2);
-        } else if (source == EDRV32_PLIC_SOURCE_GPIO0) {
-            gpio_irq_clear(gpio_irq_status());
-            sched_signal(&communication_task, 4);
-        }
-        else if(source==EDRV32_PLIC_SOURCE_VIN || source==EDRV32_PLIC_SOURCE_NPU ||
-                source==EDRV32_PLIC_SOURCE_PIX || source==EDRV32_PLIC_SOURCE_GEO)
-            engine_irq_handle(source);
-        if (source != EDRV32_PLIC_SOURCE_NONE) plic_complete(source);
-        uint64_t elapsed = platform_ticks() - started;
-        for (unsigned i = 0; i < 7; ++i) if (source == irq_sources[i]) {
-            ++irq_totals[i].count;
-            irq_totals[i].ticks += elapsed;
-        }
+        external_interrupt();
     } else {
         uint32_t pc;
         __asm__ volatile ("csrr %0, mepc" : "=r"(pc));
@@ -394,9 +408,10 @@ void platform_init(void)
 void showcase_rnd_run(const struct rnd_batch *batch)
 {
     uint64_t begin = platform_ticks();
+    sched_rnd_prepare();
     rnd_done = 0;
     rnd_submit(batch);
-    sched_wait_flag(&rnd_done);
+    sched_rnd_wait(&rnd_done);
     rnd_elapsed = platform_ticks() - begin;
 }
 uint64_t showcase_rnd_elapsed_ticks(void) { return rnd_elapsed; }

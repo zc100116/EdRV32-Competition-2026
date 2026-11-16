@@ -21,6 +21,7 @@
 #include "../../ui/detection.h"
 #include "port.h"
 #include "sched.h"
+#include <sched_policy.h>
 #include "vin.h"
 #include "npu.h"
 #include "pix.h"
@@ -665,6 +666,7 @@ static void request_page(unsigned page)
     uint64_t busy[3], maximum[3];
     struct smooth_irq irqs[7];
     struct smooth_gui gui;
+    sched_measure_reset();
     smooth_tasks(busy, maximum);
     smooth_irqs(irqs);
     smooth_gui_take(&gui);
@@ -1230,13 +1232,14 @@ static void timing_step(void)
             used += snprintf(report+used, sizeof report-used,
                 " pace=1:%u,2:%u,3:%u,4:%u,5+:%u", histogram[0],histogram[1],
                 histogram[2],histogram[3],histogram[4]);
+        SCHED_REPORT_MEASURE();
         snprintf(report+used, sizeof report-used,
-            " gui_wait=%u render=%u rnd=%u sw=%u vsync=%u\r\n",
+            " gui_wait=%u render=%u rnd=%u sw=%u vsync=%u" SCHED_REPORT_FORMAT "\r\n",
             wait_count ? tenths(wait_sum/wait_count)/10 : 0,
             gui.frames ? tenths(gui.render/gui.frames)/10 : 0,
             gui.frames ? tenths(gui.rnd/gui.frames)/10 : 0,
             gui.frames ? tenths(gui.sw/gui.frames)/10 : 0,
-            gui.scans ? tenths(gui.vsync/gui.scans)/10 : 0);
+            gui.scans ? tenths(gui.vsync/gui.scans)/10 : 0 SCHED_REPORT_VALUES);
     }
     skipped = skip_now;
     wait_sum = 0;
