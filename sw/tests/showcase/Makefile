@@ -113,3 +113,22 @@ sync:
 	    sync.c $(ROOT)/sw/apps/showcase/input.c -o $(BUILD)/sync
 	$(BUILD)/sync
 	$(MAKE) -C vision runtime
+
+# T-TOWER-PHYS: no LVGL or hardware; one build/run at a time.
+.PHONY: phys phys-perf
+phys:
+	mkdir -p $(BUILD)
+	$(CC) $(FLAGS) -O2 -I$(GAME_UI) phys.c $(GAME_UI)/phys.c -lm -o $(BUILD)/phys
+	$(BUILD)/phys > $(BUILD)/phys.log
+	cat $(BUILD)/phys.log
+phys-perf:
+	mkdir -p $(BUILD)
+	bash -c '. ~/.local/opt/edrv32/env.sh && riscv-none-elf-gcc \
+	    -march=rv32im -mabi=ilp32 -O2 -std=c11 -Wall -Wextra -Werror \
+	    -DPHYS_PERF -I$(GAME_UI) -I$(ROOT)/sw/bsp/include -nostdlib \
+	    -T$(ROOT)/tools/cpu/eval/workloads/spike.ld \
+	    $(ROOT)/tools/cpu/eval/workloads/start.S phys.c $(GAME_UI)/phys.c \
+	    $(ROOT)/sw/bsp/host.c -lc -lgcc -o $(BUILD)/phys-perf.elf && \
+	    spike --isa=rv32im_zicsr_zicntr --disable-dtb $(BUILD)/phys-perf.elf' \
+	    > $(BUILD)/phys-perf.log 2>&1
+	cat $(BUILD)/phys-perf.log
