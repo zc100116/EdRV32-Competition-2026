@@ -143,3 +143,14 @@ $(ROOT)/build/showcase/stickers.c: $(wildcard $(SHOWCASE_STICKERS)/*.png) \
 	    $(ROOT)/build/showcase/sticker-frames
 	python3 $(ROOT)/tools/sw/embed_showcase_images.py $(ROOT)/build/showcase/sticker-frames \
 	    $@ --prefix sticker
+
+# T-GAMES-MORE: separate original alpha packs for each arcade game.
+SHOWCASE_ARCADE_ART := rps mole slice catch
+PROGRAM_SOURCES += $(addprefix build/showcase/,$(addsuffix _images.c,$(SHOWCASE_ARCADE_ART)))
+define SHOWCASE_ARCADE_IMAGE_RULE
+$(ROOT)/build/showcase/$(1)_images.c: $(ROOT)/tools/sw/embed_showcase_images.py \
+    $(ROOT)/tools/sw/png2c.py $(wildcard $(ROOT)/sw/apps/showcase/assets/$(1)/*.png)
+	python3 $(ROOT)/tools/sw/embed_showcase_images.py \
+	    $(ROOT)/sw/apps/showcase/assets/$(1) $$@ --prefix $(1)
+endef
+$(foreach art,$(SHOWCASE_ARCADE_ART),$(eval $(call SHOWCASE_ARCADE_IMAGE_RULE,$(art))))

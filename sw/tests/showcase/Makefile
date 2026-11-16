@@ -88,3 +88,17 @@ sticker:
 	    $(ROOT)/sw/apps/showcase/ui/sticker.c -o $(BUILD)/sticker
 	$(BUILD)/sticker
 	python3 sticker_alpha.py
+
+# T-GAMES-MORE: pure C rules, no camera, LVGL or simulator dependency.
+GAME_UI := $(ROOT)/sw/apps/showcase/ui
+GAME_RULES := $(addprefix $(GAME_UI)/,game_math.c rps.c mole.c slice.c catch.c motion.c sling.c)
+.PHONY: games rps mole slice catch lobby
+games: rps mole slice catch lobby
+rps mole slice catch:
+	mkdir -p $(BUILD)
+	$(CC) $(FLAGS) -I$(GAME_UI) $@.c $(GAME_UI)/$@.c $(GAME_UI)/game_math.c -o $(BUILD)/$@
+	$(BUILD)/$@
+lobby:
+	mkdir -p $(BUILD)
+	$(CC) $(FLAGS) -I$(GAME_UI) motion.c $(GAME_RULES) -o $(BUILD)/lobby
+	$(BUILD)/lobby

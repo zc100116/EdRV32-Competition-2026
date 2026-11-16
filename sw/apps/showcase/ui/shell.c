@@ -4,6 +4,7 @@
 #include "theme.h"
 #include "detection.h"
 #include "renderer.h"
+#include "game_view.h"
 unsigned ui_page;
 unsigned ui_tab;
 unsigned ui_mode;
@@ -199,7 +200,7 @@ void ui_open(unsigned page)
     ui_label(top, "EdRV32", 140, 9, &sim_font_20, ACCENT);
     const char *names[] = {"首页", "视觉识别", "图片识别", "图像处理", "图形引擎",
         "游戏", "系统监控", "芯片信息", "调试助手", "人体姿态", "手势识别",
-        "人脸贴纸", "简笔画识别", "安全帽检测", "抓取测试", "体感弹弓"};
+        "人脸贴纸", "简笔画识别", "安全帽检测", "抓取测试", "体感游戏"};
     ui_label(top, names[page], 260, 12, &sim_font_16, TEXT);
     status = ui_label(top, "", 420, 14, &sim_font_14, MUTED);
     ui_button(top,"‹ 返回",12,6,108,1000);
@@ -216,11 +217,11 @@ void ui_open(unsigned page)
     void (*pages[])(lv_obj_t *) = {ui_page_home, ui_page_vision, ui_page_image,
         ui_page_process, ui_page_graphics, ui_page_games, NULL,
         ui_page_chip, ui_page_debug, ui_page_pose, ui_page_hand,
-        ui_page_face, ui_page_doodle, ui_page_helmet, ui_page_grab, ui_page_sling};
+        ui_page_face, ui_page_doodle, ui_page_helmet, ui_page_grab, ui_page_motion};
     if(page==5) ui_data_games(&game_count);
     if(ui_detection_settings) ui_page_detection_settings(content);
     else pages[page](content);
-    if(page==0) ui_button(top,"体感弹弓",960,6,160,15);
+    if(page==0) ui_button(top,"体感游戏",960,6,160,15);
     session_box=ui_box(content,340,200,600,164,PANEL);
     session_text=ui_label(session_box,"",24,22,&sim_font_20,TEXT);
     lv_obj_set_width(session_text,552);
@@ -229,6 +230,7 @@ void ui_open(unsigned page)
     lv_obj_set_hidden(session_box,true);
     if(page!=5 || !game_active)
         lv_group_focus_obj(lv_group_get_obj_by_index(group,2));
+    if(page == MOTION_PAGE) lv_group_focus_obj(lv_group_get_obj_by_index(group,3));
     if(page == 0) lv_group_focus_obj(lv_group_get_obj_by_index(group, home_focus+2));
     if(page == 5 && !game_active)
         lv_group_focus_obj(lv_group_get_obj_by_index(group, game_focus+2));
@@ -273,7 +275,7 @@ static void activate(unsigned action)
     } else if((ui_page==1 || ui_page==2) && action==2) {
         ui_detection_settings=true; ui_open(ui_page);
     } else if(ui_page == 15) {
-        ui_sling_action(action);
+        ui_motion_action(action);
     } else if(ui_page == 14) {
         ui_grab_action(action);
     } else if(ui_page >= 11) {
@@ -344,6 +346,7 @@ void ui_back(void)
         }
         lv_group_set_editing(group,false); return;
     }
+    if(ui_page == MOTION_PAGE && ui_motion_back()) return;
     if(ui_detection_settings) { ui_detection_settings=false; ui_open(ui_page); }
     else if(game_active) { game_active=false; ui_data_app_open(UI_APP_NONE,0); ui_open(5); }
     else if(ui_page==4 && ui_data_benchmark_running()) {

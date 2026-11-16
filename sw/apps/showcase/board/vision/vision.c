@@ -15,7 +15,7 @@
 #include "../../platform.h"
 #include "../../ui/ui_data.h"
 #include "../../ui/grab.h"
-#include "../../ui/sling.h"
+#include "../../ui/motion.h"
 #include "../../ui/sticker.h"
 #include "../../ui/detection.h"
 #include "port.h"
@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 extern unsigned ui_page;
-static grab_state_t sling_cursor;
+static grab_state_t motion_cursor;
 #include "../../runtime.h"
 #include "../../lvgl/showcase_lvgl.h"
 
@@ -541,10 +541,11 @@ static void request_page(unsigned page)
     v.state = PIPE_STARTING;
     if (page == PAGE_GRAB || page == PAGE_FACE) {
         v.mirror_pending = true;
-        v.mirror_enabled = page == PAGE_FACE || ui_page == 15 || ui_grab.mirror;
-        if (ui_page == 15) {
-            grab_init(&sling_cursor);
-            sling_cursor.mode = 2;
+        v.mirror_enabled = page == PAGE_FACE || ui_page == MOTION_PAGE || ui_grab.mirror;
+        if (ui_page == MOTION_PAGE) {
+            grab_init(&motion_cursor);
+            motion_cursor.mode = 2;
+            motion_seed((uint32_t)platform_ticks());
         }
     }
     memset(&timing, 0, sizeof timing);
@@ -1216,13 +1217,26 @@ int vision_service(void)
                 hand.size = hand.confidence = 0;
                 ui_gesture_debounce(&hand.state, -1);
             }
-            if (v.page == PAGE_GRAB && ui_page == 15) {
-                grab_frame(&sling_cursor,hand.count ? hand.points[largest] : NULL,
+            if (v.page == PAGE_GRAB && ui_page == MOTION_PAGE) {
+                grab_frame(&motion_cursor,hand.count ? hand.points[largest] : NULL,
                            hand.state.cls);
-                sling_input(&ui_sling,(int)sling_cursor.x,(int)sling_cursor.y,
-                            sling_cursor.closed,sling_cursor.lost,hand.state.cls);
+                int raw_x = (int)motion_cursor.x;
+                int raw_y = (int)motion_cursor.y;
+                if (hand.count) {
+                    static const unsigned palm[] = {0,5,9,13,17};
+                    raw_x = raw_y = 0;
+                    for (unsigned k = 0; k < 5; ++k) {
+                        raw_x += (int)hand.points[largest][palm[k]].x;
+                        raw_y += (int)hand.points[largest][palm[k]].y;
+                    }
+                    raw_x /= 5;
+                    raw_y /= 5;
+                }
+                motion_input((int)motion_cursor.x,(int)motion_cursor.y,raw_x,raw_y,
+                    motion_cursor.closed,motion_cursor.lost,hand.state.cls,
+                    (uint32_t)(platform_ticks()*1000/platform_clock_hz()));
             }
-            if (v.page == PAGE_GRAB && ui_page != 15 && grab_frame(&ui_grab,
+            if (v.page == PAGE_GRAB && ui_page != MOTION_PAGE && grab_frame(&ui_grab,
                     hand.count ? hand.points[largest] : NULL, hand.state.cls)) {
                 char line[192];
                 char value[32];
