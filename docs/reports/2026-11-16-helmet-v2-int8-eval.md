@@ -10,7 +10,7 @@ export PYTHONPATH="$PWD/tools/npu:$PWD/third_party/ultralytics" OPENBLAS_NUM_THR
 P="$HOME/.local/opt/edrv32-py/bin/python"
 $P tools/npu/compile_yolo.py --task detect --weights tasks/win/20261116-87-helmet-v2-train/artifacts/best.pt --image ../task-helmet-data/build/helmet/yolo/images/val/hard_hat_workers0.png --out build/npu/models_eval/helmet/compiled
 $P tools/npu/models_eval.py helmet --out build/npu/models_eval
-$P build/npu/helmet_v2/coco_eval.py
+$P tasks/win/20261116-87-helmet-v2-train/src/coco_int8.py
 $P -m unittest discover -s tools/npu -p 'test_compile.py'
 make -C sw -j2 PROGRAM=showcase
 make -C sw -j2 PROGRAM=showcase SHOWCASE_POST=cpu
@@ -35,6 +35,6 @@ v1 数字引用 [原报告](2026-11-16-npu-models-int8-eval.md) `88b390c9`，其
 | 模型镜像 / OUTPUT / B | 3,115,264 / 725,760 | 3,115,264 / 725,760 |
 | 描述符条数 | 68 | 68 |
 
-结构相同，镜像、OUTPUT、描述符条数均相同；WORK 均 5,867,520 B。原始数据为 `build/npu/models_eval/helmet/{predictions,summary}.json`、`build/npu/helmet_v2/{compile,eval,coco,unittest,build-hw,build-cpu}.log`、`coco-int8.json`、`coco_eval.py`；评估耗时 396.10 s。
+结构相同，镜像、OUTPUT、描述符条数均相同；WORK 均 5,867,520 B。原始数据为 `build/npu/models_eval/helmet/{predictions,summary}.json`、`build/npu/helmet_v2/{compile,eval,coco,unittest,build-hw,build-cpu}.log`、`coco-int8.json`；脚本已移入 `tasks/win/20261116-87-helmet-v2-train/src/coco_int8.py`；评估耗时 396.10 s。
 
 验证：unittest 单次 16/16 通过（386.55 s）；两次构建按上述顺序各运行一次、均通过且无警告；CPU ELF 为 `build/sw/showcase-cpupost/showcase.elf`（29,593,568 B）。`py_compile`、`git diff --check` 通过；Verilog 风格 0 文件/0 告警，未改 RTL，lint 不适用。
