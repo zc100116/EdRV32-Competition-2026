@@ -85,12 +85,14 @@ int main(void)
     memset(&s,0,sizeof s); sticker_step(&s,four,4,37); sticker_step(&s,four,4,37);
     for(unsigned i=0;i<3;++i)assert(sticker_opacity(&s.tracks[i])==255);
     memset(&s,0,sizeof s); f=face(400,300,80,0); sticker_step(&s,&f,1,37);
+    sticker_place(&s.tracks[0],5,&p);
+    assert(p.width==249); /* 798/614 = 1.30; other head styles stay unchanged. */
     sticker_place(&s.tracks[0],6,&p);
     assert(p.x==400 && p.y==300 && p.width==187);
     sticker_place(&s.tracks[0],9,&p);
     assert(p.x==400 && p.y==330 && p.width==50);
     sticker_place(&s.tracks[0],12,&p);
-    assert(p.x==400 && p.y==360 && p.width==70);
+    assert(p.x==400 && p.y==346 && p.width==70);
     sticker_place_part(&s.tracks[0],15,0,&p);
     assert(p.x==346 && p.y==330 && p.width==45);
     sticker_place_part(&s.tracks[0],15,1,&p);

@@ -32,6 +32,7 @@ void smooth_gui_take(struct smooth_gui *out) { *out = (struct smooth_gui){0}; }
 int ov5640_exposure_limit(unsigned camera, uint32_t hz, int short_exposure)
 { (void)camera; (void)hz; (void)short_exposure; return 0; }
 unsigned ui_page;
+bool showcase_pace_even;
 static struct session model_session;
 void board_session_fail(unsigned error)
 {
@@ -936,6 +937,85 @@ static void sync_test(void)
     puts("PASS sync six-buffer pool: address-before-unbusy, spare buffers, pool exhaustion, "
          "L0 ownership, untaken/taken results and pause/exit drain");
 }
+/* Exit consumes a FRAME latched before GUI wrote NEXT_BASE. The pending
+ * surface has never been scanned, so disabling L0 now cannot release it. */
+static void sync_stop_pending_test(void)
+{
+    const struct app *apps[] = {&vision_app_face, &vision_app_grab};
+    for (unsigned page = 0; page < 2; ++page) {
+        for (unsigned scenario = 0; scenario < 4; ++scenario) {
+            bool scanned = scenario & 1;
+            apps[page]->enter(); drain();
+            if (scanned) {
+                camera(0,1100); ui_data_vision(); vision_gui_submitted(); display_frame();
+            }
+            if (!scanned) {
+                assert(!display_scanned);
+                display_current = capture_bases[1]; /* CUR_BASE retained after prior disable. */
+            }
+            camera(1,1101); ui_data_vision();
+            if (scenario & 2) {
+                vision_pause(true); drain();
+                assert(vision_ready(UI_STATE_PAUSED));
+            }
+            /* IRQ runs, then GUI submits, then pointer/key back requests stop
+             * before application task consumes the old FRAME event. */
+            vision_display_irq(EDRV32_DISP_IRQ_STAT_FRAME_MASK);
+            vision_gui_submitted();
+            uint32_t pending = display_next;
+            assert(display_enabled);
+            apps[page]->exit();
+            ui_page = 0;
+            vision_service();
+            assert(display_enabled); /* Keep pending submission eligible to latch. */
+            display_frame();
+            assert(display_current == pending && !display_enabled);
+            display_frame(); drain();
+            assert(vision_ready(UI_STATE_IDLE) && busy[0] == 0 && busy[2] == 0);
+            display_frame();
+        }
+    }
+    puts("PASS sync stop before first/pending latch: FACE/GRAB, stale CUR_BASE, pause, home return");
+}
+static void even_pace_test(void)
+{
+    const struct app *apps[] = {&vision_app_face, &vision_app_grab};
+    showcase_pace_even = true;
+    for (unsigned page = 0; page < 2; ++page) {
+        apps[page]->enter(); drain();
+        camera(0,1200); assert(vision_result_pending());
+        ui_data_vision(); vision_gui_submitted(); display_frame();
+        unsigned first_frame = display_frames;
+        uint32_t old = capture_bases[1];
+        camera(1,1201);
+        assert(!vision_result_pending());
+        ui_data_vision(); vision_gui_submitted(); /* Input redraw cannot take it early. */
+        assert(display_next == display_current);
+        uint32_t newest = capture_bases[2];
+        camera(2,1202); /* Replaces and releases the untaken result 1201. */
+        display_frame(); assert(!vision_result_pending());
+        display_frame(); assert(vision_result_pending());
+        ui_data_vision(); vision_gui_submitted();
+        assert(display_next == newest && display_next != old);
+        display_frame();
+        assert(display_frames - first_frame == 3 && display_current == newest);
+        first_frame = display_frames;
+        /* A late result uses the next available latch rather than waiting three more. */
+        display_frame(); display_frame(); display_frame(); display_frame();
+        unsigned slot = 0;
+        while (busy[0] & (1u << slot)) ++slot;
+        uint32_t late = capture_bases[slot];
+        camera(slot,1203); assert(vision_result_pending());
+        ui_data_vision(); vision_gui_submitted(); display_frame();
+        assert(display_current == late && display_frames - first_frame == 5);
+        apps[page]->exit(); display_frame(); display_frame(); drain();
+        assert(vision_ready(UI_STATE_IDLE) && showcase_pace_even);
+        display_frame();
+    }
+    showcase_pace_even = false;
+    puts("PASS even pace: first enable, third-frame latch, latest replacement, late result, "
+         "mode persists across FACE/GRAB");
+}
 static void sync_timing_test(void)
 {
     vision_app_face.enter(); drain();
@@ -1028,6 +1108,8 @@ int main(void)
     grab_test();
     demos_test();
     sync_test();
+    sync_stop_pending_test();
+    even_pace_test();
     sync_timing_test();
     assert(invalidates >= 3);
     return 0;

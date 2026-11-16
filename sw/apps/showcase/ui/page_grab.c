@@ -8,6 +8,8 @@
 #include "src/misc/lv_area_private.h"
 #include <stdio.h>
 #include <string.h>
+bool showcase_pace_even;
+static lv_obj_t *pace_label;
 static lv_obj_t *frame;
 static lv_obj_t *status;
 static lv_timer_t *animation;
@@ -146,6 +148,12 @@ static void deleted(lv_event_t *event)
 void ui_grab_action(unsigned action)
 {
     if (action == 5) grab_reset_objects(&ui_grab);
+    if (action == 6) {
+        showcase_pace_even = !showcase_pace_even;
+        ui_data_grab_output(showcase_pace_even ? "display pace=even\r\n" :
+                                                "display pace=adaptive\r\n");
+        ui_text(pace_label,showcase_pace_even ? "节奏 均匀" : "节奏 自适应");
+    }
     ui_grab_update();
 }
 void ui_page_grab(lv_obj_t *p)
@@ -156,6 +164,8 @@ void ui_page_grab(lv_obj_t *p)
     have_points = false;
     ui_video_surface(p);
     ui_label(p,"抓取测试",24,10,&sim_font_28,TEXT);
+    ui_button(p,showcase_pace_even ? "节奏 均匀" : "节奏 自适应",800,6,240,6);
+    pace_label = lv_obj_get_child(lv_obj_get_child(p,-1),0);
     ui_button(p,"物体复位",1060,6,180,5);
     frame = ui_box(lv_screen_active(),0,0,1280,720,BG);
     lv_obj_set_style_bg_opa(frame,LV_OPA_TRANSP,0);

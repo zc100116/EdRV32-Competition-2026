@@ -15,7 +15,7 @@ const sticker_style_t sticker_styles[STICKER_SETS] = {
     {"墨镜", 0, 0, 640, STICKER_EYES, 160},
     {"皇冠", 0, -300, 563, STICKER_HEAD, 160},
     {"派对帽", 0, -384, 563, STICKER_HEAD, 160},
-    {"爱心发箍", 0, -307, 614, STICKER_HEAD, 160},
+    {"爱心发箍", 0, -307, 798, STICKER_HEAD, 160},
     {"爱心眼镜", 0, 0, 600, STICKER_EYES, 112},
     {"星星眼", 0, 0, 600, STICKER_EYES, 112},
     {"卡通大眼", 0, 0, 600, STICKER_EYES, 112},
@@ -177,6 +177,11 @@ void sticker_place_part(const sticker_track_t *t, unsigned style, unsigned side,
     } else if (a->part == STICKER_MOUTH) {
         x = (t->filter[10].value+t->filter[12].value)/2;
         y = (t->filter[11].value+t->filter[13].value)/2;
+        /* Mustache sits 55% from nose tip toward the mouth midpoint. */
+        if (style == 12) {
+            x = t->filter[8].value + (x-t->filter[8].value)*55/100;
+            y = t->filter[9].value + (y-t->filter[9].value)*55/100;
+        }
         d = sticker_distance((t->filter[12].value-t->filter[10].value)/256,
                              (t->filter[13].value-t->filter[11].value)/256)*256;
     } else if (a->part == STICKER_CHEEKS) {

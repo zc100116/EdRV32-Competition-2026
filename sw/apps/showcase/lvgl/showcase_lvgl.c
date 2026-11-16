@@ -343,6 +343,11 @@ static bool clean_all_needed;
 static volatile bool flush_pending;
 static volatile bool scan_started;
 static volatile bool sync_flush_waiting;
+static bool sync_timers_paused;
+static uint64_t last_frame_tick;
+/* DISP 2.4: FRAME is the latch edge; the next edge is 16.683 ms later.
+ * 15 ms leaves 1.683 ms for IRQ entry and the paired register writes. */
+enum { SYNC_SUBMIT_WINDOW_US = 15000 };
 static bool sync_camera(void)
 {
     ui_app_t app = ui_data_session().app;
@@ -350,6 +355,15 @@ static bool sync_camera(void)
 }
 static const uint32_t *pending_pixels;
 static volatile uint32_t display_events;
+
+/* Caller holds the input/IRQ lock, or is already in the DISP IRQ. */
+static void submit_sync_flush(void)
+{
+    vision_gui_submitted();
+    mmio_write32(EDRV32_DISP_BASE + EDRV32_DISP_L1_NEXT_BASE_OFFSET,
+                 rnd_physical(pending_pixels));
+    sync_flush_waiting = false;
+}
 
 static void flush(lv_display_t *disp, const lv_area_t *area, uint8_t *pixels)
 {
@@ -378,30 +392,36 @@ static void flush(lv_display_t *disp, const lv_area_t *area, uint8_t *pixels)
                 rendering_result = false;
             }
         }
+        uint32_t state = virtual_input_lock();
         if (!sync_camera()) vision_gui_submitted();
         flush_pending = true;
         dirty_bytes = 0;
         clean_all_needed = false;
         /* Stride and geometry stay fixed; only the next base changes. The
          * SWITCH IRQ releases front and resumes this asynchronous flush. */
-        if (sync_camera()) sync_flush_waiting = true;
-        else mmio_write32(EDRV32_DISP_BASE + EDRV32_DISP_L1_NEXT_BASE_OFFSET,
-                          rnd_physical(pending_pixels));
+        if (sync_camera()) {
+            sync_flush_waiting = true;
+            uint64_t window = (uint64_t)platform_clock_hz() * SYNC_SUBMIT_WINDOW_US / 1000000u;
+            if (scan_started && platform_ticks() - last_frame_tick < window)
+                submit_sync_flush();
+        } else mmio_write32(EDRV32_DISP_BASE + EDRV32_DISP_L1_NEXT_BASE_OFFSET,
+                            rnd_physical(pending_pixels));
+        virtual_input_unlock(state);
     } else lv_display_flush_ready(disp);
 }
 void showcase_gui_disp_event(uint32_t irq)
 {
+    if (irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK) {
+        last_frame_tick = platform_ticks();
+        if (vision_result_pending()) sched_signal(&gui_task, PLATFORM_FRAME);
+    }
     if (!scan_started && (irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK)) {
         scan_started = true;
         sched_signal(&gui_task, PLATFORM_FRAME);
     }
     if ((irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK) && sync_flush_waiting) {
-        /* DISP 2.4: this frame has latched. Write both NEXT_BASE registers
-         * together in the IRQ, a full frame before the next latch. */
-        vision_gui_submitted();
-        mmio_write32(EDRV32_DISP_BASE + EDRV32_DISP_L1_NEXT_BASE_OFFSET,
-                     rnd_physical(pending_pixels));
-        sync_flush_waiting = false;
+        /* Outside the submission window, start immediately after a latch. */
+        submit_sync_flush();
     }
     if (!flush_pending || !(irq & EDRV32_DISP_IRQ_STAT_SWITCH1_MASK)) return;
     if (visual_page()) {
@@ -571,6 +591,16 @@ void showcase_gui_step(struct sched_task *task)
     bool input_redraw = input_pending;
     bool result = vision_result_pending();
     bool synchronized = sync_camera();
+    if (sync_timers_paused && !synchronized) {
+        /* The sync path owns these pauses; return timer ownership on exit. */
+        for (lv_timer_t *t = lv_timer_get_next(NULL); t; t = lv_timer_get_next(t)) {
+            bool framework = false;
+            for (unsigned i = 0; i < framework_timer_count; ++i)
+                if (framework_timers[i] == t) framework = true;
+            if (!framework) lv_timer_resume(t);
+        }
+        sync_timers_paused = false;
+    }
     if (synchronized && !result && !input_redraw) return;
     rendering_result = result;
     if (result) result_render_start = vision_result_taken();
@@ -620,6 +650,7 @@ void showcase_gui_step(struct sched_task *task)
             if (!framework) lv_timer_pause(t);
         }
     }
+    if (synchronized) sync_timers_paused = true;
     /* Invalidated overlays must render before deciding there was no redraw. */
     if (sync_camera() && !flush_pending) lv_refr_now(display);
     /* Unchanged overlays need no L1 flip; the recognized camera still advances. */

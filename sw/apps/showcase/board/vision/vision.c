@@ -97,6 +97,7 @@ static struct {
     uint32_t receive_base, receive_bytes;
     uint64_t ch2_start, ch2_ticks, send_start, receive_start, receive_ticks;
     int submitted;
+    uint32_t submitted_frame;
     unsigned display_owned;
     uint32_t next_frame;
     uint64_t npu_start, upload_complete, post_ticks;
@@ -199,6 +200,13 @@ static void reference(int slot, unsigned add, unsigned remove);
 static uint32_t image_address(unsigned slot);
 static _Noreturn void fail(const char *message);
 static uint64_t gui_vin, gui_handoff;
+static volatile uint32_t pace[5], display_frame, previous_switch;
+static bool submitted_latched(void)
+{
+    /* CUR_BASE survives layer disable; also require a FRAME after submission. */
+    return display_frame != v.submitted_frame &&
+           disp_current(DISP_L0) == image_address(v.submitted);
+}
 void vision_gui_submitted(void)
 {
     uint32_t lock = sched_port_lock();
@@ -208,7 +216,7 @@ void vision_gui_submitted(void)
             return;
         }
         /* A no-redraw submission may still be waiting for the next scan. */
-        if (v.submitted >= 0 && disp_current(DISP_L0) != image_address(v.submitted)) {
+        if (v.submitted >= 0 && !submitted_latched()) {
             sched_port_unlock(lock);
             return;
         }
@@ -217,6 +225,7 @@ void vision_gui_submitted(void)
         v.taken_image = -1;
         v.display_owned = 1;
         disp_submit(DISP_L0, image_address(v.current), VISION_STRIDE);
+        v.submitted_frame = display_frame;
         disp_layer_enable(DISP_L0, 1);
         gui_vin = v.taken_vin;
         gui_handoff = v.taken_handoff;
@@ -232,8 +241,7 @@ bool vision_detection_applied(void) { return detection_applied == detection_revi
 static volatile uint64_t gui_done, gui_done_vin, gui_done_handoff;
 void vision_gui_presented(uint64_t tick)
 {
-    if (sync_page() && v.submitted >= 0 &&
-        disp_current(DISP_L0) != image_address(v.submitted)) return;
+    if (sync_page() && v.submitted >= 0 && !submitted_latched()) return;
     if (result_submitted != result_presented) {
         ++timing.shown;
         result_presented = result_submitted;
@@ -252,8 +260,14 @@ static uint64_t result_ready_at;
 static uint64_t wait_sum;
 static unsigned skipped;
 static unsigned wait_count;
-static volatile uint32_t pace[5], display_frame, previous_switch;
-bool vision_result_pending(void) { return result_taken != result_revision; }
+bool vision_result_pending(void)
+{
+    /* Take the latest result one frame before the third latch. Untaken results
+     * keep replacing REF_RESULT; a taken result completes its render/submit. */
+    return result_taken != result_revision &&
+           (!sync_page() || !showcase_pace_even || !previous_switch ||
+            display_frame - previous_switch >= 2);
+}
 uint64_t vision_result_taken(void)
 {
     uint64_t tick = platform_ticks();
@@ -509,8 +523,11 @@ void vision_display_irq(uint32_t irq)
     /* No L1 redraw means no SWITCH1. L0's scan still completes this result. */
     if (sync_page() && v.submitted >= 0 &&
         (irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK) &&
-        disp_current(DISP_L0) == image_address(v.submitted))
+        submitted_latched()) {
+        /* First L0 enable does not generate SWITCH (DISP 2.4). */
+        if (!previous_switch) previous_switch = display_frame;
         vision_gui_presented(platform_ticks());
+    }
     sched_port_unlock(lock);
 }
 uint32_t vision_upload_base(void)
@@ -537,9 +554,12 @@ static void display_step(uint32_t flags)
             if (image_address(i) == released) reference((int)i, 0, REF_DISPLAY);
     }
     if (!(flags & EDRV32_DISP_IRQ_STAT_FRAME_MASK)) return;
-    if (v.submitted >= 0 && disp_current(DISP_L0) == image_address((unsigned)v.submitted))
+    if (v.submitted >= 0 && submitted_latched())
         v.submitted = -1;
     if (v.state == PIPE_STOPPING && v.display_owned) {
+        /* Do not cancel an unlatched NEXT_BASE: it already owns REF_DISPLAY,
+         * but only a scanned surface can later be released by SWITCH. */
+        if (v.submitted >= 0) return;
         disp_layer_enable(DISP_L0, 0);
         reference(v.ready, 0, REF_READY);
         v.ready = -1;
@@ -553,6 +573,7 @@ static void display_step(uint32_t flags)
         v.submitted = v.current;
         v.display_owned = 1;
         disp_submit(DISP_L0, image_address((unsigned)v.current), VISION_STRIDE);
+        v.submitted_frame = display_frame;
         disp_layer_enable(DISP_L0, 1);
     }
 }
@@ -563,15 +584,16 @@ static const lv_image_dsc_t *take_image(void)
 ui_vision_t ui_data_vision(void)
 {
     uint32_t lock = sched_port_lock();
-    if (sync_page() && result_taken != result_revision) {
+    if (sync_page() && vision_result_pending()) {
         reference(v.taken_image, 0, REF_TAKEN);
         v.taken_image = v.result_image;
         reference(v.taken_image, REF_TAKEN, REF_RESULT);
         v.result_image = -1;
         v.taken_vin = v.result_vin;
         v.taken_handoff = v.result_handoff;
+        result_taken = result_revision;
     }
-    result_taken = result_revision;
+    if (!sync_page()) result_taken = result_revision;
     if (!sync_page() && timing.await_gui && !timing.gui_taken) {
         timing.gui_taken = true; gui_armed = 1;
     }

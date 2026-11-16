@@ -25,7 +25,8 @@ static struct session fresh(ui_app_t app)
 }
 int main(void)
 {
-    for(ui_app_t a=1;a<=6;++a) for(ui_app_t b=1;b<=6;++b) {
+    for(ui_app_t a=UI_APP_CAMERA;a<=UI_APP_GRAB;++a)
+        for(ui_app_t b=UI_APP_CAMERA;b<=UI_APP_GRAB;++b) {
         for(unsigned paused=0;paused<2;++paused) {
             struct session s=fresh(a);
             if(paused) {
@@ -52,5 +53,5 @@ int main(void)
     for(ui_app_t app=UI_APP_GAME;app<=UI_APP_COREMARK;++app) {
         s=fresh(app); session_complete(&s); assert(s.state==UI_STATE_IDLE && s.app==app);
     }
-    puts("PASS six-by-six RUNNING/PAUSED/STOPPING switch matrix, resume, retry, completion");
+    puts("PASS all-app RUNNING/PAUSED/STOPPING switch matrix, resume, retry, completion");
 }

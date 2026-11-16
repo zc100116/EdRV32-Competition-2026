@@ -112,6 +112,10 @@ sync:
 	    -I$(ROOT)/sw/bsp/include -I$(ROOT)/sw/lib/sched -DLV_CONF_INCLUDE_SIMPLE \
 	    sync.c $(ROOT)/sw/apps/showcase/input.c -o $(BUILD)/sync
 	$(BUILD)/sync
+	$(CC) $(FLAGS) -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \
+	    -DLV_CONF_INCLUDE_SIMPLE session.c $(ROOT)/sw/apps/showcase/board/session.c \
+	    -o $(BUILD)/session
+	$(BUILD)/session
 	$(MAKE) -C vision runtime
 
 # T-TOWER-PHYS: no LVGL or hardware; one build/run at a time.
