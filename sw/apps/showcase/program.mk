@@ -90,14 +90,38 @@ $(ROOT)/build/showcase/pose_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
 	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(SHOWCASE_POSE_DIR) $@ \
 	    --pose-quantization $(SHOWCASE_POSE_SOURCE)/quantization.json
 
-# T-HAND-BOARD: immutable hand snapshot, rebuilt without torch.
-SHOWCASE_HAND_SOURCE := $(ROOT)/sw/apps/showcase/models/yolov8n-hand
-SHOWCASE_HAND_DIR := $(ROOT)/build/npu/software_hand
-PROGRAM_SOURCES += build/showcase/hand_model.c
-$(ROOT)/build/showcase/hand_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
-    $(wildcard $(ROOT)/tools/npu/*.py) \
-    $(addprefix $(SHOWCASE_HAND_SOURCE)/,mem_model.hex quantization.json)
-	python3 $(ROOT)/tools/npu/compile_yolo.py --task hand \
-	    --model-source $(SHOWCASE_HAND_SOURCE) --out $(SHOWCASE_HAND_DIR)
-	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(SHOWCASE_HAND_DIR) $@ \
-	    --hand-quantization $(SHOWCASE_HAND_SOURCE)/quantization.json
+# T-DEMO-PAGES: immutable gesture compiler snapshot.
+PROGRAM_SOURCES += build/showcase/gesture_model.c
+$(ROOT)/build/showcase/gesture_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/sw/apps/showcase/models/gesture/*)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py \
+	    $(ROOT)/sw/apps/showcase/models/gesture $@ --name gesture \
+	    --quantization $(ROOT)/sw/apps/showcase/models/gesture/quantization.json \
+	    --classes 14 --points 21
+
+# T-DEMO-PAGES: immutable face compiler snapshot.
+PROGRAM_SOURCES += build/showcase/face_model.c
+$(ROOT)/build/showcase/face_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/sw/apps/showcase/models/face/*)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py \
+	    $(ROOT)/sw/apps/showcase/models/face $@ --name face \
+	    --quantization $(ROOT)/sw/apps/showcase/models/face/quantization.json \
+	    --classes 1 --points 5
+
+# T-DEMO-PAGES: immutable doodle compiler snapshot.
+PROGRAM_SOURCES += build/showcase/doodle_model.c
+$(ROOT)/build/showcase/doodle_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/sw/apps/showcase/models/doodle/*)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py \
+	    $(ROOT)/sw/apps/showcase/models/doodle $@ --name doodle \
+	    --quantization $(ROOT)/sw/apps/showcase/models/doodle/quantization.json \
+	    --classes 20 --points 0
+
+# T-DEMO-PAGES: immutable helmet compiler snapshot.
+PROGRAM_SOURCES += build/showcase/helmet_model.c
+$(ROOT)/build/showcase/helmet_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/sw/apps/showcase/models/helmet/*)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py \
+	    $(ROOT)/sw/apps/showcase/models/helmet $@ --name helmet \
+	    --quantization $(ROOT)/sw/apps/showcase/models/helmet/quantization.json \
+	    --classes 2 --points 0
