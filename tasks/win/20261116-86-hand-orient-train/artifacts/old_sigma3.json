@@ -1,0 +1,34 @@
+{
+  "all": {
+    "hands": 131,
+    "detected": 21,
+    "pck_hits": 326,
+    "labeled_points": 2751,
+    "detection_rate": 0.16030534351145037,
+    "pck": 0.11850236277717194
+  },
+  "palm": {
+    "hands": 105,
+    "detected": 20,
+    "pck_hits": 322,
+    "labeled_points": 2205,
+    "detection_rate": 0.19047619047619047,
+    "pck": 0.14603174603174604
+  },
+  "side": {
+    "hands": 14,
+    "detected": 1,
+    "pck_hits": 4,
+    "labeled_points": 294,
+    "detection_rate": 0.07142857142857142,
+    "pck": 0.013605442176870748
+  },
+  "back": {
+    "hands": 12,
+    "detected": 0,
+    "pck_hits": 0,
+    "labeled_points": 252,
+    "detection_rate": 0.0,
+    "pck": 0.0
+  }
+}

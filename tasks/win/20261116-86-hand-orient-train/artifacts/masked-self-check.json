@@ -1,0 +1,19 @@
+{
+  "ignored_anchors": 386,
+  "known_anchors": 385,
+  "ignored_target_sum": 0.0,
+  "ignored_cls_loss": 0.0,
+  "known_cls_loss": 152.56921768188477,
+  "losses": {
+    "box_loss": 0.5049602389335632,
+    "pose_loss": 2.0360658168792725,
+    "kobj_loss": 0.07304848730564117,
+    "cls_loss": 0.29190295934677124,
+    "dfl_loss": 0.7813460826873779
+  },
+  "nc": 14,
+  "kpt_shape": [
+    21,
+    3
+  ]
+}

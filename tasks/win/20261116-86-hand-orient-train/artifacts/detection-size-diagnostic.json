@@ -1,0 +1,32 @@
+{
+  "all": {
+    "hands": 478,
+    "matched_conf_0.001": 189,
+    "matched_conf_0.25": 76,
+    "near_iou_0.25_conf_0.25": 78
+  },
+  ">=128": {
+    "hands": 178,
+    "matched_conf_0.001": 90,
+    "matched_conf_0.25": 43,
+    "near_iou_0.25_conf_0.25": 44
+  },
+  "80-128": {
+    "hands": 172,
+    "matched_conf_0.001": 81,
+    "matched_conf_0.25": 27,
+    "near_iou_0.25_conf_0.25": 28
+  },
+  "48-80": {
+    "hands": 120,
+    "matched_conf_0.001": 18,
+    "matched_conf_0.25": 6,
+    "near_iou_0.25_conf_0.25": 6
+  },
+  "<48": {
+    "hands": 8,
+    "matched_conf_0.001": 0,
+    "matched_conf_0.25": 0,
+    "near_iou_0.25_conf_0.25": 0
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "interior_3px": {
+    "pixels": 8335071,
+    "colored_pixels": 8161931,
+    "before_bgr_mean": [
+      115.84070789558962,
+      117.66990131217838,
+      156.68256095239022
+    ],
+    "after_bgr_mean": [
+      114.78491652920533,
+      116.59360982048024,
+      155.63791406215975
+    ],
+    "before_mean_colour_hsv": [
+      2.6872291564941406,
+      0.260666161775589,
+      0.6144413948059082
+    ],
+    "after_mean_colour_hsv": [
+      2.656393527984619,
+      0.26248738169670105,
+      0.6103447675704956
+    ],
+    "mean_colour_hue_shift_degrees": 0.0308380126953125,
+    "before_hue_degrees": 5.067694193001623,
+    "after_hue_degrees": 5.023721607317618,
+    "signed_hue_shift_median_degrees": 0.0,
+    "absolute_hue_shift_mean_degrees": 0.31223076989991705,
+    "absolute_hue_shift_median_degrees": 0.0,
+    "absolute_hue_shift_p95_degrees": 2.0,
+    "before_purple_fraction": 0.2254539883343525,
+    "after_purple_fraction": 0.22377817777437048
+  },
+  "opaque_core": {
+    "pixels": 6197767,
+    "colored_pixels": 6086229,
+    "before_bgr_mean": [
+      114.82611382454358,
+      116.6832818981417,
+      156.02985672097708
+    ],
+    "after_bgr_mean": [
+      113.79250897944372,
+      115.62530553342842,
+      155.01876692040858
+    ],
+    "before_mean_colour_hsv": [
+      2.704362392425537,
+      0.26407596468925476,
+      0.6118817925453186
+    ],
+    "after_mean_colour_hsv": [
+      2.6674153804779053,
+      0.26594358682632446,
+      0.6079167127609253
+    ],
+    "mean_colour_hue_shift_degrees": 0.0369415283203125,
+    "before_hue_degrees": 4.9656806280911665,
+    "after_hue_degrees": 4.916124212875495,
+    "signed_hue_shift_median_degrees": 0.0,
+    "absolute_hue_shift_mean_degrees": 0.3124407576514127,
+    "absolute_hue_shift_median_degrees": 0.0,
+    "absolute_hue_shift_p95_degrees": 2.0,
+    "before_purple_fraction": 0.21749962526826194,
+    "after_purple_fraction": 0.21583612291330087
+  },
+  "geometry": {
+    "hands": 2210,
+    "scale_min": 0.3277957694827133,
+    "scale_median": 1.0122852063684902,
+    "scale_max": 1.4998436128612513,
+    "maximum_hand_box_aspect_ratio": 2.9455284702031204,
+    "maximum_aspect_stretch_ratio": 1.0000000000114557
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "source/train/input": 30932,
+  "source/train/retained/side": 14923,
+  "source/train/retained/back": 8060,
+  "source/train/retained/palm": 7870,
+  "source/train/aspect_gt3": 73,
+  "source/train/outside_image": 6,
+  "source/val/input": 1628,
+  "source/val/retained/side": 752,
+  "source/val/retained/palm": 438,
+  "source/val/retained/back": 434,
+  "source/val/outside_image": 1,
+  "source/val/aspect_gt3": 3,
+  "val/background_pool": 10600,
+  "val/ignore_class/side": 1011,
+  "val/images": 1500,
+  "val/ignore_class/palm": 607,
+  "val/ignore_class/back": 592,
+  "val/no_space": 32,
+  "val/transformed_aspect_gt3": 9,
+  "val/empty_composite": 10,
+  "val/scale_infeasible": 3
+}

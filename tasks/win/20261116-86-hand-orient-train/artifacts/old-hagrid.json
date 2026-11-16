@@ -1,0 +1,22 @@
+{
+  "all": {
+    "hands": 13247,
+    "detected": 13162,
+    "class_correct": 13124,
+    "pck_hits": 257032,
+    "labeled_points": 267351,
+    "detection_rate": 0.9935834528572507,
+    "class_accuracy": 0.9971129007749582,
+    "pck": 0.9614028000643349
+  },
+  "unknown": {
+    "hands": 13247,
+    "detected": 13162,
+    "class_correct": 13124,
+    "pck_hits": 257032,
+    "labeled_points": 267351,
+    "detection_rate": 0.9935834528572507,
+    "class_accuracy": 0.9971129007749582,
+    "pck": 0.9614028000643349
+  }
+}
