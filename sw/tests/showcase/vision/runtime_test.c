@@ -48,6 +48,7 @@ static bool model_ready(ui_app_t app, ui_state_t target)
 static uint32_t hardware = APP_HW_VIN | APP_HW_NPU | APP_HW_ETH;
 static uint64_t ticks;
 static uint32_t busy[3];
+static enum vin_source sources[3];
 static struct vin_frame frames[3];
 static uint32_t last_input;
 static unsigned npu_runs, submitted, done_count, window_reopened;
@@ -80,7 +81,7 @@ void showcase_rnd_run(const struct rnd_batch *batch)
 { (void)batch; assert(0); }
 void engine_dma_invalidate(uintptr_t address, uint32_t bytes)
 {
-    if (bytes == VISION_POSE_OUTPUT_BYTES) {
+    if (bytes == VISION_POSE_OUTPUT_BYTES || bytes == VISION_FACE_OUTPUT_BYTES) {
         assert(address == EDRV32_DDR_BASE + VISION_OUTPUT_BASE ||
                address == EDRV32_DDR_BASE + VISION_OUTPUT_BASE + VISION_OUTPUT_SPACING);
     } else {
@@ -149,7 +150,7 @@ struct engine_event engine_poll(enum engine_id engine)
 void vin_camera_size(unsigned camera, unsigned width, unsigned height)
 { assert(camera == 0 && width == 1280 && height == 720); }
 void vin_channel_configure(unsigned channel, const struct vin_channel *c)
-{ assert(channel == 0 || channel == 2); busy[channel] = c->busy_slots; }
+{ assert(channel == 0 || channel == 2); busy[channel] = c->busy_slots; sources[channel] = c->source; }
 void vin_channel_enable(unsigned channel, unsigned enabled)
 { assert(channel == 0 || channel == 2); assert(!enabled); }
 void vin_slots_busy(unsigned channel, uint32_t slots) { busy[channel] = slots; }
@@ -163,8 +164,14 @@ void npu_configure(const struct npu_config *c)
             c->descriptors == VISION_DESC_BASE) ||
            (c->count == 77 && c->model == VISION_POSE_MODEL_BASE &&
             c->descriptors == VISION_POSE_DESC_BASE) ||
-           (c->count == 77 && c->model == VISION_HAND_MODEL_BASE &&
-            c->descriptors == VISION_HAND_DESC_BASE));
+           (c->count == 77 && c->model == VISION_GESTURE_MODEL_BASE &&
+            c->descriptors == VISION_GESTURE_DESC_BASE) ||
+           (c->count == 77 && c->model == VISION_FACE_MODEL_BASE &&
+            c->descriptors == VISION_FACE_DESC_BASE) ||
+           (c->count == 68 && c->model == VISION_DOODLE_MODEL_BASE &&
+            c->descriptors == VISION_DOODLE_DESC_BASE) ||
+           (c->count == 68 && c->model == VISION_HELMET_MODEL_BASE &&
+            c->descriptors == VISION_HELMET_DESC_BASE));
     last_npu = *c;
     ++npu_configurations;
 }
@@ -669,17 +676,17 @@ static void pose_test(void)
 }
 static void hand_test(void)
 {
-    assert(memcmp(physical(VISION_HAND_DESC_BASE), showcase_hand_desc,
-                  showcase_hand_desc_bytes) == 0);
-    assert(memcmp(physical(VISION_HAND_MODEL_BASE), showcase_hand_weights,
-                  showcase_hand_weights_bytes) == 0);
+    assert(memcmp(physical(VISION_GESTURE_DESC_BASE), showcase_gesture_desc,
+                  showcase_gesture_desc_bytes) == 0);
+    assert(memcmp(physical(VISION_GESTURE_MODEL_BASE), showcase_gesture_weights,
+                  showcase_gesture_weights_bytes) == 0);
     vision_app_hand.enter(); drain();
-    assert(last_npu.model == VISION_HAND_MODEL_BASE);
+    assert(last_npu.model == VISION_GESTURE_MODEL_BASE);
     camera_event(0, 800);
     uint32_t first_output = last_output;
     int8_t *raw = (void *)(uintptr_t)(EDRV32_DDR_BASE + last_output);
-    const yolo_head *head = &showcase_hand_heads[0];
-    const struct pose_head *quant = &showcase_hand_keypoints[0];
+    const yolo_head *head = &showcase_gesture_heads[0];
+    const struct pose_head *quant = &showcase_gesture_keypoints[0];
     for (unsigned k = 0; k < 21; ++k) {
         unsigned channel = k * 3;
         raw[quant->offset + channel / 16 * head->plane_stride + 100 * 16 +
@@ -692,17 +699,75 @@ static void hand_test(void)
     assert(hand->points[0][20].x > hand->points[0][0].x);
     ticks += platform_clock_hz();
     vision_service();
-    assert(!strncmp(vision_report(), "hand fps=", 9));
+    assert(!strncmp(vision_report(), "gesture fps=", 12));
     assert(!*vision_report()); /* Half-second CPU reports consume each hand line once. */
     camera_event(1, 801);
     assert(last_output != first_output);
     vision_app_hand.exit(); vision_service();
-    assert(last_npu.model == VISION_HAND_MODEL_BASE);
+    assert(last_npu.model == VISION_GESTURE_MODEL_BASE);
     event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
     display_frame(); display_frame(); drain();
     assert(vision_ready(UI_STATE_IDLE) && last_npu.model == VISION_MODEL_BASE);
     display_frame(); display_frame();
     puts("PASS hand snapshot/model/21 points/OUTPUT alternation, drain and detect restore");
+}
+static void demos_test(void)
+{
+    const struct app *apps[] = {&vision_app_face, &vision_app_doodle, &vision_app_helmet};
+    const uint32_t bases[] = {VISION_FACE_MODEL_BASE,VISION_DOODLE_MODEL_BASE,
+                              VISION_HELMET_MODEL_BASE};
+    const uint8_t *weights[] = {showcase_face_weights,showcase_doodle_weights,
+                                showcase_helmet_weights};
+    const uint32_t bytes[] = {showcase_face_weights_bytes,showcase_doodle_weights_bytes,
+                              showcase_helmet_weights_bytes};
+    hardware |= APP_HW_PIX | APP_HW_GEO | APP_HW_RND;
+    for (unsigned page = 0; page < 3; ++page) {
+        assert(!memcmp(physical(bases[page]),weights[page],bytes[page]));
+        apps[page]->enter(); drain();
+        assert(last_npu.model == bases[page]);
+        unsigned runs = npu_runs;
+        if (page == 1) {
+            assert(sources[0] == VIN_CAM0 && sources[2] == VIN_MEMORY);
+            assert(last_pix.flags == (EDRV32_PIX_CFG_GRAY_EN_MASK | EDRV32_PIX_CFG_BIN_EN_MASK));
+            assert(last_pix.threshold == 128);
+            frames[0] = (struct vin_frame){0,900};
+            event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_FRAME_MASK);
+            assert(memory_base == VISION_IMAGE_BASE && busy[0] & 1);
+            assert(npu_runs == runs);
+            /* Camera may complete another slot while memory source reads slot 0. */
+            frames[0] = (struct vin_frame){1u << EDRV32_VIN_CH_DONE_INFO_SLOT_POS,901};
+            event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_FRAME_MASK);
+            assert(busy[0] & 1);
+            frames[2] = (struct vin_frame){0,12}; /* memory IDs are independent */
+            event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
+            assert(npu_runs == runs+1 && busy[0] & 1);
+        } else camera_event(0,900+page);
+        output_class(page == 2 ? 1 : 0);
+        event(ENGINE_NPU,EDRV32_NPU_IRQ_STAT_DONE_MASK); drain();
+        const ui_demo_t *d = ui_data_demo();
+        assert(d->count == 1);
+        if (page == 0) assert(d->points[0][0].x >= 0 && d->size > 0);
+        if (page == 2) assert(d->head == 1 && !d->helmet);
+        ui_data_vision(); vision_gui_submitted();
+        vision_display_irq(EDRV32_DISP_IRQ_STAT_SWITCH1_MASK);
+        vision_gui_presented(platform_ticks());
+        /* Repeated scan of the same result counts flips but not shown results. */
+        vision_display_irq(EDRV32_DISP_IRQ_STAT_SWITCH1_MASK);
+        vision_gui_presented(platform_ticks());
+        ticks += platform_clock_hz(); vision_service();
+        const char *line = vision_report();
+        assert(strstr(line,"shown=1 disp=2"));
+        if (page == 1) {
+            ui_data_doodle_adjust(8); drain();
+            assert(ui_data_doodle_threshold() == 136 && last_pix.threshold == 136);
+            ui_data_doodle_adjust(-8); drain();
+            assert(last_pix.threshold == 128);
+        }
+        apps[page]->exit(); display_frame(); display_frame(); drain();
+        assert(vision_ready(UI_STATE_IDLE) && last_npu.model == VISION_MODEL_BASE);
+        display_frame(); display_frame();
+    }
+    puts("PASS face/doodle/helmet models, camera-memory source ownership, threshold and shown/disp");
 }
 static void matrix_test(void)
 {
@@ -740,7 +805,7 @@ int main(void)
     assert(mmap((void *)(uintptr_t)(EDRV32_DDR_BASE+VISION_OUTPUT_BASE), 0x00300000,
                 PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
            != MAP_FAILED);
-    assert(mmap((void *)(uintptr_t)EDRV32_DDR_UNCACHED_BASE, 0x0b000000,
+    assert(mmap((void *)(uintptr_t)EDRV32_DDR_UNCACHED_BASE, 0x0cc00000,
                 PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
            != MAP_FAILED);
     memset(physical(VISION_OUTPUT_BASE), 0x80, VISION_OUTPUT_BYTES);
@@ -759,6 +824,7 @@ int main(void)
     model_test();
     pose_test();
     hand_test();
+    demos_test();
     assert(invalidates >= 3);
     return 0;
 }

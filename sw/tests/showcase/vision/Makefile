@@ -24,7 +24,7 @@ RUNTIME_TEST ?= runtime_test
 network:
 	$(MAKE) runtime RUNTIME_TEST=network_test
 runtime: $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c \
-    $(ROOT)/build/showcase/hand_model.c
+    $(addprefix $(ROOT)/build/showcase/,$(addsuffix _model.c,gesture face doodle helmet))
 	mkdir -p $(OUT)
 	$(CC) $(CFLAGS) -DLV_CONF_INCLUDE_SIMPLE -I$(LVGL_ROOT) \
 	    -I$(ROOT)/sw/apps/showcase/lvgl -I$(ROOT)/sw/apps/showcase -I$(ROOT)/sw/bsp/include \
@@ -33,7 +33,7 @@ runtime: $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c \
 	    $(VISION)/wire.c $(VISION)/pose.c $(ROOT)/sw/lib/yolo_tables.c $(ROOT)/sw/drivers/rnd.c \
 	    $(ROOT)/sw/apps/showcase/ui/detection.c $(ROOT)/sw/lib/geo_matrix.c \
 	    $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c \
-	    $(ROOT)/build/showcase/hand_model.c $(ROOT)/sw/apps/showcase/ui/page_hand.c \
+	    $(addprefix $(ROOT)/build/showcase/,$(addsuffix _model.c,gesture face doodle helmet)) $(ROOT)/sw/apps/showcase/ui/gesture.c \
 	    $(ROOT)/sw/apps/showcase/board/session.c \
 	    $(ROOT)/sw/apps/showcase/board/protocol.c $(ROOT)/sw/apps/showcase/board/records.c \
 	    $(ROOT)/sw/apps/showcase/board/state.c -lm \
@@ -67,23 +67,43 @@ pose: $(ROOT)/build/showcase/pose_model.c
 	PYTHONPATH=$(ROOT)/third_party/ultralytics OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
 	    $(HOME)/.local/opt/edrv32-py/bin/python pose_fixture.py $(OUT)/pose_test
 
-SHOWCASE_HAND_SOURCE := $(ROOT)/sw/apps/showcase/models/yolov8n-hand
-$(ROOT)/build/showcase/hand_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
-    $(wildcard $(ROOT)/tools/npu/*.py) \
-    $(addprefix $(SHOWCASE_HAND_SOURCE)/,mem_model.hex quantization.json)
-	python3 $(ROOT)/tools/npu/compile_yolo.py --task hand \
-	    --model-source $(SHOWCASE_HAND_SOURCE) --out $(ROOT)/build/npu/software_hand
-	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(ROOT)/build/npu/software_hand $@ \
-	    --hand-quantization $(SHOWCASE_HAND_SOURCE)/quantization.json
+$(ROOT)/build/showcase/gesture_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/sw/apps/showcase/models/gesture/*)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py \
+	    $(ROOT)/sw/apps/showcase/models/gesture $@ --name gesture \
+	    --quantization $(ROOT)/sw/apps/showcase/models/gesture/quantization.json \
+	    --classes 14 --points 21
 
-.PHONY: hand
-hand: $(ROOT)/build/showcase/hand_model.c
+$(ROOT)/build/showcase/face_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/sw/apps/showcase/models/face/*)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py \
+	    $(ROOT)/sw/apps/showcase/models/face $@ --name face \
+	    --quantization $(ROOT)/sw/apps/showcase/models/face/quantization.json \
+	    --classes 1 --points 5
+
+$(ROOT)/build/showcase/doodle_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/sw/apps/showcase/models/doodle/*)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py \
+	    $(ROOT)/sw/apps/showcase/models/doodle $@ --name doodle \
+	    --quantization $(ROOT)/sw/apps/showcase/models/doodle/quantization.json \
+	    --classes 20 --points 0
+
+$(ROOT)/build/showcase/helmet_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/sw/apps/showcase/models/helmet/*)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py \
+	    $(ROOT)/sw/apps/showcase/models/helmet $@ --name helmet \
+	    --quantization $(ROOT)/sw/apps/showcase/models/helmet/quantization.json \
+	    --classes 2 --points 0
+
+NEW_MODELS := $(addprefix $(ROOT)/build/showcase/,$(addsuffix _model.c,gesture face doodle helmet))
+.PHONY: models
+models: $(NEW_MODELS)
 	mkdir -p $(OUT)
 	$(CC) $(CFLAGS) -DSHOWCASE_POST_CPU -ffunction-sections -fdata-sections \
 	    -DLV_CONF_INCLUDE_SIMPLE -DLV_LVGL_H_INCLUDE_SIMPLE -I$(LVGL_ROOT) \
 	    -I$(ROOT)/sw/apps/showcase/lvgl -I$(ROOT)/sw/apps/showcase \
-	    hand_test.c $(VISION)/post.c $(VISION)/pose.c $(ROOT)/sw/lib/yolo_tables.c \
-	    $(ROOT)/sw/apps/showcase/ui/page_hand.c $(ROOT)/build/showcase/hand_model.c \
-	    -Wl,--gc-sections -lm -o $(OUT)/hand_test
+	    models_test.c $(VISION)/post.c $(VISION)/pose.c $(ROOT)/sw/lib/yolo_tables.c \
+	    $(ROOT)/sw/apps/showcase/ui/gesture.c $(NEW_MODELS) \
+	    -Wl,--gc-sections -lm -o $(OUT)/models_test
 	PYTHONPATH=$(ROOT)/third_party/ultralytics OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
-	    $(HOME)/.local/opt/edrv32-py/bin/python hand_fixture.py $(OUT)/hand_test
+	    $(HOME)/.local/opt/edrv32-py/bin/python models_fixture.py $(OUT)/models_test
