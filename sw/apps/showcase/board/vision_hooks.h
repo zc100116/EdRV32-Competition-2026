@@ -35,6 +35,7 @@ void vision_gui_submitted(void);
 void vision_gui_presented(uint64_t tick);
 extern const struct app vision_app_pose;
 extern const struct app vision_app_hand;
+extern const struct app vision_app_grab;
 extern const struct app vision_app_face;
 extern const struct app vision_app_doodle;
 extern const struct app vision_app_helmet;

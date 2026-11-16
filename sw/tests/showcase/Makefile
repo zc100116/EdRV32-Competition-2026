@@ -3,7 +3,7 @@ ROOT := ../../..
 BUILD := $(ROOT)/build/sw/tests/showcase
 FLAGS := -std=c11 -Wall -Wextra -Werror -I$(ROOT)/sw/apps/showcase/board -I$(ROOT)/sw/lib
 .PHONY: test
-test:
+test: grab
 	mkdir -p $(BUILD)
 	$(CC) $(FLAGS) main.c $(ROOT)/sw/apps/showcase/board/records.c \
 	    $(ROOT)/sw/apps/showcase/board/protocol.c $(ROOT)/sw/lib/virtual_input.c -o $(BUILD)/protocol
@@ -64,3 +64,12 @@ test:
 	$(CC) $(FLAGS) -I$(ROOT)/sw/bsp/include -I$(ROOT)/sw/drivers/include \
 	    fabric.c $(ROOT)/sw/apps/showcase/board/fabric.c -o $(BUILD)/fabric
 	$(BUILD)/fabric
+
+.PHONY: grab
+grab:
+	mkdir -p $(BUILD)
+	$(CC) $(FLAGS) -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \
+	    -I$(ROOT)/sw/apps/showcase/ui -DLV_CONF_INCLUDE_SIMPLE \
+	    grab.c $(ROOT)/sw/apps/showcase/ui/grab.c $(ROOT)/sw/apps/showcase/ui/gesture.c \
+	    -lm -o $(BUILD)/grab
+	$(BUILD)/grab

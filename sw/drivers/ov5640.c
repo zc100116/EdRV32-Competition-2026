@@ -323,3 +323,10 @@ int ov5640_chip_id(unsigned int camera, uint32_t clock_hz, uint16_t *chip_id)
     *chip_id = (uint16_t)(((uint16_t)high << 8) | low);
     return 0;
 }
+
+/* T-GRAB-TEST: mirror display, NPU input and decoded keypoints together. */
+int ov5640_mirror(unsigned int camera, uint32_t clock_hz, int enabled)
+{
+    i2c_init(camera, clock_hz, 100000u);
+    return i2c_sccb_write(0x3cu, 0x3821u, enabled ? 0x07u : 0x01u);
+}

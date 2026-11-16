@@ -16,6 +16,7 @@
 #include "pix.h"
 #include "geo.h"
 #include "ov5640.h"
+#include "ui/grab.h"
 #include "eth.h"
 #include "rnd.h"
 #include <assert.h>
@@ -129,6 +130,13 @@ int ov5640_init(unsigned camera, uint32_t hz)
 {
     assert(camera == 0 && hz == 125000000);
     ++sensor_initializations;
+    return 0;
+}
+static int sensor_mirror;
+int ov5640_mirror(unsigned camera, uint32_t hz, int enabled)
+{
+    assert(camera == 0 && hz == 125000000);
+    sensor_mirror = enabled;
     return 0;
 }
 void engine_control(enum engine_id engine, uint32_t ctrl)
@@ -711,6 +719,34 @@ static void hand_test(void)
     display_frame(); display_frame();
     puts("PASS hand snapshot/model/21 points/OUTPUT alternation, drain and detect restore");
 }
+static void grab_test(void)
+{
+    ui_grab.mirror = true;
+    grab_init(&ui_grab);
+    ui_grab.mode = 2;
+    vision_app_grab.enter(); drain();
+    assert(sensor_mirror && last_npu.model == VISION_GESTURE_MODEL_BASE);
+    camera_event(0, 850);
+    output_class(5);
+    event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK); drain();
+    assert(ui_data_hand()->count == 1);
+    ticks += platform_clock_hz();
+    vision_service();
+    const char *line = vision_report();
+    assert(!strncmp(line, "grab fps=", 9) && strstr(line, "mode=C param=none"));
+    assert(strstr(line, "held=-1 picks=0 drops=0 mirror=1"));
+    ui_data_grab_mirror(false);
+    assert(!sensor_mirror);
+    ui_data_grab_mirror(true);
+    assert(sensor_mirror);
+    vision_app_grab.exit();
+    display_frame(); display_frame(); drain();
+    assert(vision_ready(UI_STATE_IDLE) && last_npu.model == VISION_MODEL_BASE);
+    assert(!sensor_mirror);
+    display_frame(); display_frame();
+    puts("PASS grab gesture pipeline, 21 points, serial mode/held/counters, "
+         "sensor mirror switch/restore and detect restore");
+}
 static void demos_test(void)
 {
     const struct app *apps[] = {&vision_app_face, &vision_app_doodle, &vision_app_helmet};
@@ -824,6 +860,7 @@ int main(void)
     model_test();
     pose_test();
     hand_test();
+    grab_test();
     demos_test();
     assert(invalidates >= 3);
     return 0;

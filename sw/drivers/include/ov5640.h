@@ -17,4 +17,6 @@ const struct ov5640_register *ov5640_table(size_t *count);
 int ov5640_init(unsigned int camera, uint32_t clock_hz);
 /* Design 3.2: select camera port and read 0x300a/0x300b; NACK = -1, no retry. */
 int ov5640_chip_id(unsigned int camera, uint32_t clock_hz, uint16_t *chip_id);
+/* T-GRAB-TEST: sensor horizontal mirror, SCCB NACK returns -1. */
+int ov5640_mirror(unsigned int camera, uint32_t clock_hz, int enabled);
 #endif

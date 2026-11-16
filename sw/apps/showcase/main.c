@@ -96,6 +96,7 @@ static void start(ui_app_t app, unsigned arg)
     active = app == UI_APP_CAMERA ? &vision_app_camera :
         app == UI_APP_POSE ? &vision_app_pose :
         app == UI_APP_HAND ? &vision_app_hand :
+        app == UI_APP_GRAB ? &vision_app_grab :
         app == UI_APP_FACE ? &vision_app_face :
         app == UI_APP_DOODLE ? &vision_app_doodle :
         app == UI_APP_HELMET ? &vision_app_helmet :

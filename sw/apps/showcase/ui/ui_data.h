@@ -24,7 +24,7 @@ typedef struct { unsigned threshold; uint32_t classes[3]; } ui_detection_config_
  * Values equal the EDSC `app` and `state` fields. */
 typedef enum { UI_APP_NONE, UI_APP_CAMERA, UI_APP_IMAGE, UI_APP_PROCESS,
                UI_APP_GRAPHICS, UI_APP_GAME, UI_APP_COREMARK, UI_APP_POSE, UI_APP_HAND = 8,
-               UI_APP_FACE, UI_APP_DOODLE, UI_APP_HELMET } ui_app_t;
+               UI_APP_FACE, UI_APP_DOODLE, UI_APP_HELMET, UI_APP_GRAB } ui_app_t;
 typedef enum { UI_STATE_IDLE, UI_STATE_STARTING, UI_STATE_RUNNING, UI_STATE_PAUSED,
                UI_STATE_STOPPING, UI_STATE_FAILED } ui_state_t;
 typedef struct {

@@ -83,3 +83,14 @@ demos: $(BUILD)/showcase_demo_shots
 
 $(BUILD)/showcase_demo_shots: main_demo_shots.c $(COMMON) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_demo_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
+
+.PHONY: grab-shot
+GRAB_FIXTURE ?= $(ROOT)/build/npu/demo_pages_test
+grab-shot: $(BUILD)/showcase_grab_shot
+	mkdir -p $(BUILD)/shots
+	cd $(BUILD) && ./showcase_grab_shot $(GRAB_FIXTURE)
+	python3 $(ROOT)/tools/sw/raw2png.py $(BUILD)/shots/demo-grab.rgb565 \
+	    $(ROOT)/docs/reports/assets/demo-grab.png
+
+$(BUILD)/showcase_grab_shot: main_grab_shot.c $(COMMON) $(LINUX_LV)
+	$(CC) $(FLAGS) -Werror main_grab_shot.c $(COMMON) $(LINUX_LV) -lm -o $@

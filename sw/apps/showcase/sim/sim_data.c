@@ -6,6 +6,7 @@
 #include "renderer.h"
 #include "theme.h"
 #include <string.h>
+#include <stdio.h>
 #include "src/misc/cache/instance/lv_image_cache.h"
 extern const lv_image_dsc_t sim_street;
 extern const lv_image_dsc_t sim_indoor;
@@ -299,3 +300,7 @@ void sim_data_demo(const ui_demo_t *data, const ui_hand_t *gesture, const lv_ima
     demo = *data; hand = *gesture; demo_image = image;
 }
 const lv_image_dsc_t *sim_data_demo_image(void) { return demo_image; }
+
+/* T-GRAB-TEST: native simulator has no sensor bus. */
+void ui_data_grab_mirror(bool enabled) { (void)enabled; }
+void ui_data_grab_output(const char *text) { fputs(text, stdout); }

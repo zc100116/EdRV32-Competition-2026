@@ -14,6 +14,7 @@
 #include "geo_matrix.h"
 #include "../../platform.h"
 #include "../../ui/ui_data.h"
+#include "../../ui/grab.h"
 #include "../../ui/detection.h"
 #include "port.h"
 #include "sched.h"
@@ -26,13 +27,14 @@
 #include "board.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "../../runtime.h"
 #include "../../lvgl/showcase_lvgl.h"
 
 enum { REF_PAIR = 1, REF_JOB = 2, REF_READY = 4, REF_DISPLAY = 8,
        REF_NPU = 16, REF_GEO = 32 };
 enum { PAGE_NONE, PAGE_CAMERA, PAGE_IMAGE, PAGE_PROCESS, PAGE_POSE, PAGE_HAND,
-       PAGE_FACE, PAGE_DOODLE, PAGE_HELMET, PAGE_COUNT };
+       PAGE_FACE, PAGE_DOODLE, PAGE_HELMET, PAGE_GRAB, PAGE_COUNT };
 enum { JOB_IDLE, JOB_CH2, JOB_NPU, JOB_POST, JOB_SEND, JOB_TX };
 enum pipeline_state { PIPE_OFF, PIPE_STARTING, PIPE_LIVE, PIPE_PAUSING, PIPE_FROZEN,
                       PIPE_STOPPING, PIPE_CONFIGURE };
@@ -142,7 +144,7 @@ static const struct model {
      showcase_helmet_desc, showcase_helmet_weights, showcase_helmet_heads, NULL}
 #undef MODEL
 };
-static const unsigned page_models[PAGE_COUNT] = {0, 0, 0, 0, 1, 2, 3, 4, 5};
+static const unsigned page_models[PAGE_COUNT] = {0, 0, 0, 0, 1, 2, 3, 4, 5, 2};
 static bool live_page(void)
 {
     return v.page == PAGE_CAMERA || v.page >= PAGE_POSE;
@@ -538,13 +540,23 @@ static void request_page(unsigned page)
     gui_armed = gui_ready = 0; report[0] = 0;
     sessions[page].data.boxes = boxes;
     if (page == PAGE_POSE) memset(&pose, 0, sizeof pose);
-    if (page == PAGE_HAND) {
+    if (page == PAGE_HAND || page == PAGE_GRAB) {
         memset(&hand, 0, sizeof hand);
         hand.state.cls = hand.state.candidate = -1;
     }
     memset(&demo, 0, sizeof demo);
     app_wake_at(platform_ticks());
     sched_port_unlock(lock);
+}
+void ui_data_grab_output(const char *text) { platform_puts(text); }
+void ui_data_grab_mirror(bool enabled)
+{
+    if (ov5640_mirror(0, platform_clock_hz(), enabled)) fail("OV5640 horizontal mirror");
+}
+static void enter_grab(void)
+{
+    ui_data_grab_mirror(ui_grab.mirror);
+    request_page(PAGE_GRAB);
 }
 static void enter_hand(void) { request_page(PAGE_HAND); }
 static void enter_face(void) { request_page(PAGE_FACE); }
@@ -791,7 +803,7 @@ static void publish_result(void)
     sessions[v.page].count=v.post.kept;
     for(unsigned i=0;i<sessions[v.page].count;++i) {
         const yolo_detection *d=&v.detections[i];
-        sessions[v.page].raw[i]=(ui_detection_t){(v.page == PAGE_HAND ?
+        sessions[v.page].raw[i]=(ui_detection_t){((v.page == PAGE_HAND || v.page == PAGE_GRAB) ?
              ui_gesture_names[d->class_id] :
              v.page == PAGE_DOODLE ? ui_doodle_names[d->class_id] :
              v.page == PAGE_FACE ? "人脸" : v.page == PAGE_HELMET ?
@@ -930,7 +942,26 @@ static void timing_step(void)
                            (now - timing.since));
     data->npu_tenths = a[0]; data->post_tenths = a[2] + a[3] + a[4];
     data->latency_tenths = a[7];
-    if (v.page == PAGE_HAND && v.state == PIPE_LIVE) {
+    if (v.page == PAGE_GRAB && v.state == PIPE_LIVE) {
+        unsigned kpt = timing.samples ? tenths(timing.kpt_ticks / timing.samples) : 0;
+        char value[32];
+        char param[32];
+        grab_value(&ui_grab, value, sizeof value);
+        int t = ui_grab.thresholds[ui_grab.mode];
+        if (ui_grab.mode < 2)
+            snprintf(param, sizeof param, "%s%d.%02d", t < 0 ? "-" : "",
+                     abs(t)/100, abs(t)%100);
+        else if (ui_grab.mode == 2) snprintf(param, sizeof param, "none");
+        else snprintf(param, sizeof param, "%d", t);
+        snprintf(report, sizeof report,
+            "grab fps=%u shown=%u disp=%u npu=%u.%u wait=%u.%u decode=%u.%u "
+            "kpt=%u.%u gui=%u.%u e2e=%u.%u hands=%u mode=%c param=%s d=%s "
+            "state=%s held=%d picks=%u drops=%u mirror=%u idle=%u%%\r\n",
+            data->fps, shown, disp, a[0]/10,a[0]%10,a[1]/10,a[1]%10,a[2]/10,a[2]%10,
+            kpt/10,kpt%10,a[6]/10,a[6]%10,a[7]/10,a[7]%10,hand.count,
+            'A'+ui_grab.mode,param,value,ui_grab.closed ? "grab" : "open",ui_grab.held,
+            ui_grab.picks,ui_grab.drops,ui_grab.mirror,idle);
+    } else if (v.page == PAGE_HAND && v.state == PIPE_LIVE) {
         unsigned kpt = timing.samples ? tenths(timing.kpt_ticks / timing.samples) : 0;
         snprintf(report, sizeof report,
             "gesture fps=%u shown=%u disp=%u npu=%u.%u wait=%u.%u decode=%u.%u "
@@ -940,7 +971,7 @@ static void timing_step(void)
             kpt/10,kpt%10,a[6]/10,a[6]%10,a[7]/10,a[7]%10,hand.count,
             hand.state.cls < 0 ? "none" : ui_gesture_ids[hand.state.cls],
             hand.confidence,hand.size/2,idle);
-    } else if (v.page >= PAGE_FACE && v.state == PIPE_LIVE) {
+    } else if (v.page >= PAGE_FACE && v.page <= PAGE_HELMET && v.state == PIPE_LIVE) {
         char detail[96];
         if (v.page == PAGE_FACE)
             snprintf(detail, sizeof detail, "faces=%u size=%u", demo.count, demo.size/2);
@@ -1127,7 +1158,7 @@ int vision_service(void)
         if (complete) timing.nms_end = end;
         timing.cpu[phase] += elapsed;
         v.post_ticks += elapsed;
-        if (complete && v.page == PAGE_HAND && !timing.cancelled) {
+        if (complete && (v.page == PAGE_HAND || v.page == PAGE_GRAB) && !timing.cancelled) {
             uint64_t start = platform_ticks();
             uint32_t output = VISION_OUTPUT_BASE + v.post_buffer * VISION_OUTPUT_SPACING;
 #ifndef SHOWCASE_POST_CPU
@@ -1154,7 +1185,7 @@ int vision_service(void)
                 const ui_detection_t *box = &hand.people[largest];
                 hand.size = box->width > box->height ? box->width : box->height;
                 hand.confidence = box->confidence;
-                if (ui_gesture_debounce(&hand.state, (int)box->class_id)) {
+                if (ui_gesture_debounce(&hand.state, (int)box->class_id) && v.page == PAGE_HAND) {
                     char line[160];
                     snprintf(line, sizeof line,
                         "gesture_evt ms=%llu cls=%s conf=%u size=%u\r\n",
@@ -1166,9 +1197,21 @@ int vision_service(void)
                 hand.size = hand.confidence = 0;
                 ui_gesture_debounce(&hand.state, -1);
             }
+            if (v.page == PAGE_GRAB && grab_frame(&ui_grab,
+                    hand.count ? hand.points[largest] : NULL, hand.state.cls)) {
+                char line[192];
+                char value[32];
+                grab_value(&ui_grab, value, sizeof value);
+                snprintf(line, sizeof line,
+                    "grab_evt ms=%llu mode=%c state=%s d=%s obj=%d x=%d y=%d\r\n",
+                    (unsigned long long)(platform_ticks() * 1000 / platform_clock_hz()),
+                    'A' + ui_grab.mode, ui_grab.closed ? "grab" : "release", value,
+                    ui_grab.event_object, (int)ui_grab.x, (int)ui_grab.y);
+                platform_puts(line);
+            }
             timing.kpt_ticks += platform_ticks() - start;
         }
-        if (complete && v.page >= PAGE_FACE && !timing.cancelled) {
+        if (complete && v.page >= PAGE_FACE && v.page <= PAGE_HELMET && !timing.cancelled) {
             uint64_t start = platform_ticks();
             const struct model *m = &models[v.model];
             demo.count = v.post.kept;
@@ -1285,6 +1328,7 @@ int vision_service(void)
             if (v.page == PAGE_PROCESS) {
                 engine_control(ENGINE_PIX, 0); engine_control(ENGINE_GEO, 0);
             }
+            if (v.page == PAGE_GRAB) ui_data_grab_mirror(false);
             if (v.model) select_model(0);
             v.current = -1; v.page = PAGE_NONE; v.state = PIPE_OFF;
         } else if (v.state == PIPE_PAUSING) v.state = PIPE_FROZEN;
@@ -1344,6 +1388,8 @@ static void step(void)
     app_wake_at(busy ? platform_ticks() + (cpu ? 0 : platform_clock_hz() / 1000) :
                       UINT64_MAX);
 }
+const struct app vision_app_grab = {
+    "抓取测试", NULL, APP_HW_VIN | APP_HW_NPU | APP_HW_RND, 0, enter_grab, step, leave};
 const struct app vision_app_hand = {
     "手势识别", NULL, APP_HW_VIN | APP_HW_NPU, 0, enter_hand, step, leave};
 const struct app vision_app_face = {

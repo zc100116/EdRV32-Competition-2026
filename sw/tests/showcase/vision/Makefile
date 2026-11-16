@@ -33,7 +33,8 @@ runtime: $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c \
 	    $(VISION)/wire.c $(VISION)/pose.c $(ROOT)/sw/lib/yolo_tables.c $(ROOT)/sw/drivers/rnd.c \
 	    $(ROOT)/sw/apps/showcase/ui/detection.c $(ROOT)/sw/lib/geo_matrix.c \
 	    $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c \
-	    $(addprefix $(ROOT)/build/showcase/,$(addsuffix _model.c,gesture face doodle helmet)) $(ROOT)/sw/apps/showcase/ui/gesture.c \
+	    $(addprefix $(ROOT)/build/showcase/,$(addsuffix _model.c,gesture face doodle helmet)) \
+	    $(ROOT)/sw/apps/showcase/ui/gesture.c $(ROOT)/sw/apps/showcase/ui/grab.c \
 	    $(ROOT)/sw/apps/showcase/board/session.c \
 	    $(ROOT)/sw/apps/showcase/board/protocol.c $(ROOT)/sw/apps/showcase/board/records.c \
 	    $(ROOT)/sw/apps/showcase/board/state.c -lm \
