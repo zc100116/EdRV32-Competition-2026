@@ -2,7 +2,9 @@
 
 2026-11-16 用内置 imagegen 生成，未使用网络图片。每套一个组合元素。
 保留透明 alpha，后处理裁切 alpha>32 的包围框、双线性缩至 156 px 长边，
-居中到 160×160 RGBA8 非隔行 PNG；没有不透明底色。
+居中到 160×160 RGBA8 非隔行 PNG，再从四边洪泛 alpha<40 的四邻域连通区域。
+清除连通区域内的低 alpha 底色，保留紧邻 alpha≥40 主体的八邻域一像素抗锯齿边缘，
+以及与边界不连通的元素细节。六张图均采用该规则。
 
 每张图片使用相同完整模板，将 `<subject>` 替换为下表文字：
 
@@ -21,7 +23,7 @@
 | party-hat.png | coral and turquoise striped party cone hat with golden pompom and short curled ribbons | 帽子彩带 |
 | heart-headband.png | rose pink headband with two heart shaped antennae | 爱心发箍 |
 
-生成原图以表中名字保存到 `build/showcase/sticker-source/` 后，后处理命令：
+生成原图以表中名字保存到 `build/showcase/sticker-source/` 后，统一清理残留底色并重新生成六张 PNG 的命令：
 
 ```sh
 python3 tools/sw/prepare_showcase_stickers.py build/showcase/sticker-source \
