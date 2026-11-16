@@ -179,3 +179,11 @@ PROGRAM_LDLIBS += $(foreach call,$(SHOWCASE_GUI_CALLS),-Wl,--wrap=$(call))
 else ifneq ($(SHOWCASE_SCHED),coop)
 $(error SHOWCASE_SCHED must be coop or rtos)
 endif
+
+# T-UI-FRAME: checked-in Bold subsets and original 96px application artwork.
+PROGRAM_SOURCES += $(patsubst $(ROOT)/%,%,$(wildcard $(ROOT)/sw/apps/showcase/fonts/showcase_*.c))
+PROGRAM_SOURCES += build/showcase/home_images.c
+$(ROOT)/build/showcase/home_images.c: $(ROOT)/tools/sw/embed_showcase_images.py \
+    $(ROOT)/tools/sw/png2c.py $(wildcard $(ROOT)/sw/apps/showcase/assets/icons/*.png)
+	python3 $(ROOT)/tools/sw/embed_showcase_images.py \
+	    $(ROOT)/sw/apps/showcase/assets/icons $@ --prefix home

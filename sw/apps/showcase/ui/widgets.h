@@ -1,0 +1,26 @@
+/* widgets.h — R4 design §5; thin LVGL style/layout components, GUI clock.
+ * Cards and gradient badges are for static areas. Dynamic controls have no
+ * shadows, blur or translucent layers and can be used over live camera video.
+ */
+#ifndef SHOWCASE_WIDGETS_H
+#define SHOWCASE_WIDGETS_H
+#include "theme.h"
+void ui_widget_style(lv_obj_t *object);
+lv_obj_t *ui_stack(lv_obj_t *parent, lv_flex_flow_t flow, int gap);
+lv_obj_t *ui_text_label(lv_obj_t *parent, const char *text,
+                        const lv_font_t *font, uint32_t color);
+lv_obj_t *ui_action_button(lv_obj_t *parent, const char *text, unsigned action);
+lv_obj_t *ui_app_card(lv_obj_t *parent, const lv_image_dsc_t *icon,
+                      const char *name, const char *description,
+                      unsigned required, unsigned action);
+lv_obj_t *ui_scene_card(lv_obj_t *parent, const lv_image_dsc_t *art,
+                        const char *title, const char *description,
+                        unsigned required, unsigned action);
+lv_obj_t *ui_segment(lv_obj_t *parent, const char *const *map, unsigned selected);
+lv_obj_t *ui_switch_row(lv_obj_t *parent, const char *text, bool checked);
+lv_obj_t *ui_number_row(lv_obj_t *parent, const char *text, int value);
+lv_obj_t *ui_emphasis(lv_obj_t *parent, const char *text, bool large);
+lv_obj_t *ui_badge(lv_obj_t *parent, const char *text);
+lv_obj_t *ui_number(lv_obj_t *parent, const char *text, bool large);
+lv_obj_t *ui_hold_arc(lv_obj_t *parent, unsigned maximum);
+#endif

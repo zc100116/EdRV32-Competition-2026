@@ -1,4 +1,4 @@
-/* page_motion.c — T-GAMES-MORE; persistent AR lobby, shared HUD and result controls.
+/* page_motion.c — T-GAMES-MORE; direct game entries, shared HUD and result controls.
  * GUI clock; one 30 Hz simulation timer and locally invalidated cursor/keypoint overlay.
  */
 #include "game_view.h"
@@ -6,24 +6,19 @@
 #include "grab.h"
 #include "src/draw/lv_draw_private.h"
 #include <stdio.h>
-LV_IMAGE_DECLARE(sling_slingshot);
 LV_IMAGE_DECLARE(sling_star);
-LV_IMAGE_DECLARE(rps_player_rock);
-LV_IMAGE_DECLARE(mole_monster);
-LV_IMAGE_DECLARE(slice_ruby);
-LV_IMAGE_DECLARE(catch_basket);
 static const char *const names[] = {
-    "体感游戏", "弹弓打靶", "石头剪刀布", "打地鼠", "切图形", "接物篮"};
+    "", "弹弓打靶", "石头剪刀布", "打地鼠", "切图形", "接物篮"};
 static const char *const instructions[] = {
-    "光标停在卡片上，握拳保持 1 秒进入；也可点卡片或使用按键",
+    "",
     "弹丸附近握拳抓起，后拉瞄准，张开发射；手丢失会取消",
     "看倒数，看到出后亮出石头、剪刀或布；五局三胜",
     "对准冒出的怪物，张开再握拳击打；金色加分，炸弹扣分",
     "快速挥手切开宝石；避开炸弹，别漏掉三个",
     "左右移动手掌接住水果；避开炸弹，篮子只跟随横向位置"};
-static lv_obj_t *frame, *scene, *overlay, *cards, *labels;
+static lv_obj_t *frame, *scene, *overlay, *labels;
 static lv_obj_t *hud, *title, *prompt, *perf, *key_button, *result, *result_text;
-static lv_obj_t *stars[3], *rings[MOTION_GAMES], *card_buttons[MOTION_GAMES];
+static lv_obj_t *stars[3];
 static lv_timer_t *timer;
 static uint32_t clock_at, accumulator, shown_revision, points_revision, fps_at;
 static unsigned frames;
@@ -115,20 +110,16 @@ static void build_game(void)
 {
     lv_obj_clean(scene);
     lv_obj_clean(labels);
-    lv_obj_set_hidden(cards,ui_motion.game != MOTION_HALL);
     lv_obj_set_hidden(result,true);
     ui_text(title,names[ui_motion.game]);
     ui_text(prompt,instructions[ui_motion.game]);
-    ui_hint(ui_motion.game == MOTION_HALL ?
-        "握拳停留 1 秒选择 · ← → 选择卡片，Enter 进入 · Esc 回首页" :
-        "Esc / 返回：游戏大厅 · 结算后握拳 1 秒或点再来一局 · 关键点开关用于调试");
+    ui_hint("Esc / 返回：首页体感互动 · 结算后握拳 1 秒或点再来一局 · 关键点开关用于调试");
     if (ui_motion.game == MOTION_SLING) ui_sling_build(scene);
-    else if (ui_motion.game != MOTION_HALL) ui_arcade_build(scene,labels);
+    else ui_arcade_build(scene,labels);
     last_segments = last_fast = last_hits = last_near = 0;
     frames = 0;
     fps_at = lv_tick_get();
     shown_revision = ui_motion.revision;
-    if (ui_motion.game == MOTION_HALL) lv_group_focus_obj(card_buttons[0]);
     lv_obj_set_hidden(setup,!ui_motion.waiting);
     if (ui_motion.waiting) lv_group_focus_obj(speed_buttons[ui_motion.speed-GAME_SLOW]);
     lv_obj_update_layout(scene);
@@ -138,9 +129,6 @@ static void hud_sync(void)
     char text[180];
     int score = motion_score();
     switch (ui_motion.game) {
-        case MOTION_HALL:
-            snprintf(text,sizeof text,"5 个游戏 · 用手来挑战");
-            break;
         case MOTION_SLING:
             snprintf(text,sizeof text,"分数 %d   弹丸 %u / %u",score,ui_sling.shots,SLING_SHOTS);
             break;
@@ -180,13 +168,7 @@ static void hud_sync(void)
 static void refresh(void)
 {
     if (shown_revision != ui_motion.revision) build_game();
-    if (ui_motion.game == MOTION_HALL) {
-        for (unsigned i = 0; i < MOTION_GAMES; ++i) {
-            bool active = ui_motion.hovered == (int)i;
-            lv_obj_set_hidden(rings[i],!active);
-            if (active) lv_arc_set_value(rings[i],ui_motion.hold);
-        }
-    } else if (ui_motion.game == MOTION_SLING) ui_sling_sync();
+    if (ui_motion.game == MOTION_SLING) ui_sling_sync();
     else ui_arcade_sync();
     lv_obj_set_hidden(setup,!ui_motion.waiting);
     lv_obj_set_hidden(scene,ui_motion.waiting);
@@ -261,19 +243,12 @@ void ui_motion_action(unsigned action)
     } else if (action >= 20 && action <= 22) motion_speed(GAME_SLOW+action-20);
     else if (action == 23) motion_start();
     else if (action == 1) motion_select(ui_motion.game);
-    else motion_select((motion_game_t)(action-9));
     refresh();
-}
-bool ui_motion_back(void)
-{
-    if (ui_motion.game == MOTION_HALL) return false;
-    motion_select(MOTION_HALL);
-    refresh();
-    return true;
 }
 void ui_page_motion(lv_obj_t *p)
 {
     motion_init();
+    motion_select((motion_game_t)ui_motion_entry);
     ui_video_surface(p);
     title = ui_label(p,names[0],24,10,&sim_font_28,TEXT);
     hud = ui_label(p,"",220,15,&sim_font_20,TEXT);
@@ -288,40 +263,6 @@ void ui_page_motion(lv_obj_t *p)
     scene = surface(frame,720);
     lv_obj_add_event_cb(frame,draw_scene,LV_EVENT_DRAW_MAIN,NULL);
     labels = surface(p,632);
-    cards = surface(p,632);
-    static const lv_image_dsc_t *const icons[] = {
-        &sling_slingshot,&rps_player_rock,&mole_monster,&slice_ruby,&catch_basket};
-    static const char *const summaries[] = {
-        "抓起后拉，松开发射", "倒数出招，与开发板对战", "对准怪物，张开再握拳",
-        "快速挥手，避开炸弹", "左右移篮，接住水果"};
-    for (unsigned i = 0; i < MOTION_GAMES; ++i) {
-        int x, y;
-        motion_card(i,&x,&y);
-        ui_button(cards,"",x,y-48,MOTION_CARD_W,10+i);
-        lv_obj_t *card = lv_obj_get_child(cards,-1);
-        card_buttons[i] = card;
-        lv_obj_set_height(card,MOTION_CARD_H);
-        lv_obj_set_style_bg_opa(card,LV_OPA_90,0);
-        lv_obj_t *icon = game_sprite(card,icons[i],60,75);
-        lv_obj_set_size(icon,i == 0 ? 58 : 88,i == 0 ? 100 : 88);
-        lv_obj_set_pos(icon,i == 0 ? 31 : 16,i == 0 ? 25 : 31);
-        lv_image_set_inner_align(icon,LV_IMAGE_ALIGN_STRETCH);
-        ui_label(card,names[i+1],105,34,&sim_font_20,TEXT);
-        lv_obj_t *desc = ui_label(card,summaries[i],105,74,&sim_font_16,MUTED);
-        lv_obj_set_width(desc,160);
-        rings[i] = lv_arc_create(card);
-        lv_obj_set_pos(rings[i],220,110);
-        lv_obj_set_size(rings[i],52,52);
-        lv_arc_set_range(rings[i],0,MOTION_HOLD);
-        lv_arc_set_bg_angles(rings[i],0,360);
-        lv_arc_set_rotation(rings[i],270);
-        lv_obj_remove_style(rings[i],NULL,LV_PART_KNOB);
-        lv_obj_set_style_arc_width(rings[i],5,LV_PART_MAIN);
-        lv_obj_set_style_arc_width(rings[i],5,LV_PART_INDICATOR);
-        lv_obj_set_style_arc_color(rings[i],lv_color_hex(TEAL),LV_PART_INDICATOR);
-        lv_obj_set_clickable(rings[i],false);
-        lv_obj_set_hidden(rings[i],true);
-    }
     result = ui_box(p,420,180,440,250,PANEL);
     lv_obj_set_style_bg_opa(result,LV_OPA_90,0);
     result_text = ui_label(result,"",30,20,&sim_font_20,TEXT);

@@ -17,7 +17,10 @@ WINCC := zig cc -target x86_64-windows-gnu
 LINUX_LV := $(patsubst $(LVGL)/%.c,$(BUILD)/linux/%.o,$(LV_SOURCES))
 WIN_LV := $(patsubst $(LVGL)/%.c,$(BUILD)/win/%.o,$(LV_SOURCES))
 PROCESS_HELPERS := $(ROOT)/sw/lib/geo_matrix.c $(ROOT)/sw/lib/geo_matrix.h
-COMMON := $(UI) sim_data.c process.c $(ROOT)/sw/lib/geo_matrix.c $(ASSETS) $(GAMES) $(FONTS) $(DIGITS)
+BOLD_FONTS := $(wildcard ../fonts/showcase_*.c)
+ART_NAMES := sling rps mole slice catch home
+ART := $(addprefix $(BUILD)/,$(addsuffix _images.c,$(ART_NAMES))) $(BUILD)/stickers.c
+COMMON := $(BOLD_FONTS) $(ART) $(UI) sim_data.c process.c $(ROOT)/sw/lib/geo_matrix.c $(ASSETS) $(GAMES) $(FONTS) $(DIGITS)
 SHOTS := home home-vrn vision image process graphics games chip debug \
     game-running renderer-list renderer-result benchmark-results overlay-home chip-coremark \
     coremark-counters games-last-row detection-settings process-collapsed \
@@ -50,7 +53,7 @@ $(BUILD)/win/%.o: $(LVGL)/%.c lv_conf.h
 	$(WINCC) $(FLAGS) -DLV_USE_WINDOWS=1 -c $< -o $@
 
 $(BUILD)/showcase_shots: main_shots.c sim_data.c process.c sim_data.h $(PROCESS_HELPERS) $(UI) $(UI_HEADERS) \
-    lv_conf.h $(ASSETS) $(GAMES) $(FONTS) $(DIGITS) $(LINUX_LV)
+    lv_conf.h $(ASSETS) $(GAMES) $(FONTS) $(DIGITS) $(ART) $(BOLD_FONTS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
 
 $(BUILD)/shots/%.png: $(BUILD)/shots/%.rgb565 $(ROOT)/tools/sw/raw2png.py
@@ -61,7 +64,7 @@ $(addprefix $(BUILD)/shots/,$(addsuffix .rgb565,$(SHOTS))) &: $(BUILD)/showcase_
 	cd $(BUILD) && ./showcase_shots
 
 $(BUILD)/showcase_sim.exe: main_windows.c sim_data.c process.c sim_data.h $(PROCESS_HELPERS) $(UI) \
-    $(UI_HEADERS) lv_conf.h $(ASSETS) $(GAMES) $(FONTS) $(DIGITS) $(WIN_LV)
+    $(UI_HEADERS) lv_conf.h $(ASSETS) $(GAMES) $(FONTS) $(DIGITS) $(ART) $(BOLD_FONTS) $(WIN_LV)
 	$(WINCC) $(FLAGS) -Werror -DLV_USE_WINDOWS=1 main_windows.c $(COMMON) \
 	    $(WIN_LV) -static -Wl,--subsystem,windows -luser32 -lgdi32 -lkernel32 -o $@
 
@@ -94,3 +97,26 @@ grab-shot: $(BUILD)/showcase_grab_shot
 
 $(BUILD)/showcase_grab_shot: main_grab_shot.c $(COMMON) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_grab_shot.c $(COMMON) $(LINUX_LV) -lm -o $@
+
+# Original game sprites are shared with the board UI (no simulated replacement art).
+define SIM_ART_RULE
+$(BUILD)/$(1)_images.c: $(ROOT)/tools/sw/embed_showcase_images.py \
+    $$(wildcard ../assets/$(2)/*.png)
+	python3 $(ROOT)/tools/sw/embed_showcase_images.py ../assets/$(2) $$@ --prefix $(1)
+endef
+$(foreach art,sling rps mole slice catch,$(eval $(call SIM_ART_RULE,$(art),$(art))))
+$(eval $(call SIM_ART_RULE,home,icons))
+$(BUILD)/stickers.c: $(wildcard ../assets/stickers/*.png)
+	python3 $(ROOT)/tools/sw/rotate_showcase_stickers.py ../assets/stickers $(BUILD)/sticker-frames
+	python3 $(ROOT)/tools/sw/embed_showcase_images.py $(BUILD)/sticker-frames $@ --prefix sticker
+
+FRAME_SHOTS := home-ai home-motion home-media home-system settings game-start
+FRAME_OUTPUT ?= $(ROOT)/build/sim/ui-frame
+.PHONY: frame-shots
+frame-shots: $(BUILD)/showcase_frame_shots
+	mkdir -p $(BUILD)/ui-frame $(FRAME_OUTPUT)
+	$(BUILD)/showcase_frame_shots $(BUILD)/ui-frame
+	$(foreach name,$(FRAME_SHOTS),python3 $(ROOT)/tools/sw/raw2png.py $(BUILD)/ui-frame/$(name).rgb565 $(FRAME_OUTPUT)/$(name).png;)
+	rm $(addprefix $(BUILD)/ui-frame/,$(addsuffix .rgb565,$(FRAME_SHOTS)))
+$(BUILD)/showcase_frame_shots: main_frame_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
+	$(CC) $(FLAGS) -Werror main_frame_shots.c $(COMMON) $(LINUX_LV) -lm -o $@

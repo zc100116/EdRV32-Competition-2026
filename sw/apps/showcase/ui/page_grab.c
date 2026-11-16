@@ -10,7 +10,6 @@
 #include <string.h>
 static lv_obj_t *frame;
 static lv_obj_t *status;
-static lv_obj_t *exposure_label;
 static lv_timer_t *animation;
 static uint32_t animated_at;
 static grab_state_t shown;
@@ -146,48 +145,18 @@ static void deleted(lv_event_t *event)
 }
 void ui_grab_action(unsigned action)
 {
-    if (action == 0) {
-        ui_grab.mode = (ui_grab.mode + 1) % 4;
-        ui_grab.pending_frames = 0;
-        /* Start cursor and decision-value smoothing from the new mode's first frame. */
-        ui_grab.smooth = false;
-    } else if (action == 1 || action == 2) {
-        if (ui_grab.mode == 2) return;
-        ui_grab.thresholds[ui_grab.mode] += action == 1 ? -5 : 5;
-        char text[80];
-        int t = ui_grab.thresholds[ui_grab.mode];
-        if (ui_grab.mode < 2)
-            snprintf(text,sizeof text,"grab param mode=%c value=%s%d.%02d\r\n",
-                     'A'+ui_grab.mode,t < 0 ? "-" : "",LV_ABS(t)/100,LV_ABS(t)%100);
-        else snprintf(text,sizeof text,"grab param mode=D value=%d\r\n",t);
-        ui_data_grab_output(text);
-        ui_grab.pending_frames = 0;
-    } else if (action == 3) ui_grab.keypoints = !ui_grab.keypoints;
-    else if (action == 4) {
-        ui_grab.mirror = !ui_grab.mirror;
-        ui_data_grab_mirror(ui_grab.mirror);
-    } else if (action == 5) grab_reset_objects(&ui_grab);
-    else if (action == 6) {
-        ui_data_exposure_toggle();
-        ui_text(exposure_label, ui_data_exposure_short() ? "曝光 短" : "曝光 标准");
-    }
+    if (action == 5) grab_reset_objects(&ui_grab);
     ui_grab_update();
 }
 void ui_page_grab(lv_obj_t *p)
 {
     grab_init(&ui_grab);
+    ui_settings_apply_grab();
     shown = ui_grab;
     have_points = false;
     ui_video_surface(p);
     ui_label(p,"抓取测试",24,10,&sim_font_28,TEXT);
-    static const char *const labels[] = {
-        "模式", "参数 −", "参数 +", "关键点 开关", "镜像 开关", "物体复位"
-    };
-    for (unsigned i = 0; i < 6; ++i)
-        ui_button(p,labels[i],200+145*(int)i,6,135,i);
-    ui_button(p,ui_data_exposure_short() ? "曝光 短" : "曝光 标准",
-                                   1080,6,180,6);
-    exposure_label = lv_obj_get_child(lv_obj_get_child(p,-1),0);
+    ui_button(p,"物体复位",1060,6,180,5);
     frame = ui_box(lv_screen_active(),0,0,1280,720,BG);
     lv_obj_set_style_bg_opa(frame,LV_OPA_TRANSP,0);
     lv_obj_set_style_border_width(frame,0,0);
@@ -199,5 +168,5 @@ void ui_page_grab(lv_obj_t *p)
     status = ui_label(panel,"",12,8,&sim_font_16,TEXT);
     animated_at = lv_tick_get();
     animation = lv_timer_create(tick,33,NULL);
-    ui_hint("选择模式和参数 · 捏起、拖动、松手自由下落 · 只跟踪最大的手");
+    ui_hint("设置页调参 · 捏起、拖动、松手自由下落 · 只跟踪最大的手");
 }

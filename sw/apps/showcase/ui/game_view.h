@@ -10,7 +10,6 @@ void game_image(lv_obj_t *o, const lv_image_dsc_t *src, int x, int y, bool show,
 void game_dirty(lv_obj_t *frame, int x, int y, int nx, int ny, int radius);
 void ui_page_motion(lv_obj_t *p);
 void ui_motion_action(unsigned action);
-bool ui_motion_back(void);
 void ui_sling_build(lv_obj_t *parent);
 void ui_sling_sync(void);
 void ui_sling_draw(lv_layer_t *layer);

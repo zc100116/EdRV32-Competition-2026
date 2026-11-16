@@ -1,7 +1,7 @@
 /* shell.c — showcase design §4.2; page lifetime, linear focus and four keys.
  * One group per active page; 2 Hz counters and 1 Hz monitoring curves.
  */
-#include "theme.h"
+#include "widgets.h"
 #include "detection.h"
 #include "renderer.h"
 #include "game_view.h"
@@ -11,7 +11,7 @@ unsigned ui_mode;
 static bool game_active;
 bool ui_game_active(void) { return game_active; }
 bool ui_detection_settings;
-static unsigned home_focus;
+unsigned ui_motion_entry = MOTION_SLING;
 static unsigned game_focus;
 static unsigned game_count;
 
@@ -62,7 +62,8 @@ static void clicked(lv_event_t *e)
 enum { KEY_EDIT=0x100, KEY_BACK=0x101 };
 static bool editable(lv_obj_t *o)
 {
-    return lv_obj_check_type(o,&lv_slider_class) || lv_obj_check_type(o,&lv_dropdown_class);
+    return lv_obj_check_type(o,&lv_slider_class) || lv_obj_check_type(o,&lv_dropdown_class) ||
+        lv_obj_check_type(o,&lv_spinbox_class) || lv_obj_check_type(o,&lv_buttonmatrix_class);
 }
 static lv_key_t remap(lv_indev_t *input,lv_key_t key)
 {
@@ -73,8 +74,12 @@ static lv_key_t remap(lv_indev_t *input,lv_key_t key)
     if(key==LV_KEY_ESC) return (lv_key_t)KEY_BACK;
     if(key==LV_KEY_ENTER && o && editable(o)) return (lv_key_t)KEY_EDIT;
     bool editing=lv_group_get_editing(group);
-    if(key==LV_KEY_NEXT || key==LV_KEY_RIGHT) return editing ? LV_KEY_RIGHT : LV_KEY_NEXT;
-    if(key==LV_KEY_PREV || key==LV_KEY_LEFT) return editing ? LV_KEY_LEFT : LV_KEY_PREV;
+    if(key==LV_KEY_NEXT || key==LV_KEY_RIGHT)
+        return editing ? (lv_obj_check_type(o,&lv_spinbox_class) ? LV_KEY_UP : LV_KEY_RIGHT) :
+            LV_KEY_NEXT;
+    if(key==LV_KEY_PREV || key==LV_KEY_LEFT)
+        return editing ? (lv_obj_check_type(o,&lv_spinbox_class) ? LV_KEY_DOWN : LV_KEY_LEFT) :
+            LV_KEY_PREV;
     return key;
 }
 static void key_event(lv_event_t *e)
@@ -172,7 +177,7 @@ void ui_open(unsigned page)
         static const ui_app_t apps[]={UI_APP_NONE,UI_APP_CAMERA,UI_APP_IMAGE,
             UI_APP_PROCESS,UI_APP_GRAPHICS,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,
             UI_APP_POSE, UI_APP_HAND, UI_APP_FACE, UI_APP_DOODLE, UI_APP_HELMET,
-            UI_APP_GRAB, UI_APP_GRAB};
+            UI_APP_GRAB, UI_APP_GRAB, UI_APP_NONE};
         if(apps[old_page]!=UI_APP_NONE || game_active ||
            ui_data_session().app==UI_APP_COREMARK) ui_data_app_open(UI_APP_NONE,0);
         game_active=false;
@@ -195,29 +200,40 @@ void ui_open(unsigned page)
     lv_obj_set_style_bg_color(screen, lv_color_hex(BG), 0);
     lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
     lv_obj_set_scrollable(screen, false);
-    top = ui_box(screen, 0, 0, 1280, 48, PANEL);
-    lv_obj_set_style_radius(top, 0, 0);
-    ui_label(top, "EdRV32", 140, 9, &sim_font_20, ACCENT);
-    const char *names[] = {"首页", "视觉识别", "图片识别", "图像处理", "图形引擎",
-        "游戏", "系统监控", "芯片信息", "调试助手", "人体姿态", "手势识别",
-        "人脸贴纸", "简笔画识别", "安全帽检测", "抓取测试", "体感游戏"};
-    ui_label(top, names[page], 260, 12, &sim_font_16, TEXT);
-    status = ui_label(top, "", 420, 14, &sim_font_14, MUTED);
-    ui_button(top,"‹ 返回",12,6,108,1000);
-    lv_obj_set_height(lv_obj_get_child(top,-1),36);
-    ui_button(top,"性能浮窗",1140,6,124,1001);
-    lv_obj_set_height(lv_obj_get_child(top,-1),36);
-    bottom = ui_box(screen, 0, 680, 1280, 40, PANEL);
-    lv_obj_set_style_radius(bottom, 0, 0);
-    hint = ui_label(bottom, "← → 选择    Enter 确认    Esc 返回上一级", 40, 10,
-                    &sim_font_14, MUTED);
-    content = ui_box(screen, 0, 48, 1280, 632, BG);
-    lv_obj_set_style_border_width(content, 0, 0);
-    lv_obj_set_style_radius(content, 0, 0);
+    top = ui_stack(screen,LV_FLEX_FLOW_ROW,UI_SPACE_MD);
+    lv_obj_set_size(top,1280,48);
+    lv_obj_set_style_pad_hor(top,UI_SPACE_SM,0);
+    lv_obj_set_style_bg_color(top,lv_color_hex(PANEL),0);
+    lv_obj_set_style_bg_opa(top,LV_OPA_COVER,0);
+    lv_obj_set_flex_align(top,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_CENTER,LV_FLEX_ALIGN_CENTER);
+    ui_action_button(top,"‹ 返回",1000);
+    ui_text_label(top,"EdRV32",&sim_font_20,ACCENT);
+    const char *names[] = {"首页", "目标检测计数", "图片识别", "图像处理", "图形引擎",
+        "经典游戏", "系统监控", "芯片信息", "调试助手", "人体姿态", "手势识别",
+        "人脸贴纸", "简笔画识别", "安全帽检测", "抓取测试", "体感互动", "设置"};
+    ui_text_label(top,names[page],&sim_font_16,TEXT);
+    status = ui_text_label(top,"",&sim_font_14,MUTED);
+    lv_obj_set_flex_grow(status,1);
+    ui_action_button(top,"性能浮窗",1001);
+    bottom = ui_stack(screen,LV_FLEX_FLOW_ROW,UI_SPACE_MD);
+    lv_obj_set_size(bottom,1280,40);
+    lv_obj_align(bottom,LV_ALIGN_BOTTOM_MID,0,0);
+    lv_obj_set_style_pad_hor(bottom,40,0);
+    lv_obj_set_style_bg_color(bottom,lv_color_hex(PANEL),0);
+    lv_obj_set_style_bg_opa(bottom,LV_OPA_COVER,0);
+    lv_obj_set_flex_align(bottom,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_CENTER,LV_FLEX_ALIGN_CENTER);
+    hint = ui_text_label(bottom,"← → 选择    Enter 确认    Esc 返回上一级",&sim_font_14,MUTED);
+    lv_obj_set_flex_grow(hint,1);
+    content = ui_stack(screen,LV_FLEX_FLOW_COLUMN,0);
+    lv_obj_set_size(content,1280,632);
+    lv_obj_align(content,LV_ALIGN_TOP_MID,0,48);
+    /* Legacy pages still position their own children; only new pages opt into flex. */
+    lv_obj_set_layout(content,LV_LAYOUT_NONE);
     void (*pages[])(lv_obj_t *) = {ui_page_home, ui_page_vision, ui_page_image,
         ui_page_process, ui_page_graphics, ui_page_games, NULL,
         ui_page_chip, ui_page_debug, ui_page_pose, ui_page_hand,
-        ui_page_face, ui_page_doodle, ui_page_helmet, ui_page_grab, ui_page_motion};
+        ui_page_face, ui_page_doodle, ui_page_helmet, ui_page_grab, ui_page_motion,
+        ui_page_settings};
     if(page==5) ui_data_games(&game_count);
     if(ui_detection_settings) ui_page_detection_settings(content);
     else pages[page](content);
@@ -227,16 +243,17 @@ void ui_open(unsigned page)
     ui_button(session_box,"重试",24,102,160,1002);
     retry=lv_obj_get_child(session_box,-1);
     lv_obj_set_hidden(session_box,true);
-    if(page!=5 || !game_active)
+    if(page!=0 && page!=MOTION_PAGE && (page!=5 || !game_active))
         lv_group_focus_obj(lv_group_get_obj_by_index(group,2));
-    if(page == MOTION_PAGE) lv_group_focus_obj(lv_group_get_obj_by_index(group,3));
-    if(page == 0) lv_group_focus_obj(lv_group_get_obj_by_index(group, home_focus+2));
+    if(page == 0) ui_home_focus();
+    if(page == MOTION_PAGE && !ui_motion.waiting)
+        lv_group_focus_obj(lv_group_get_obj_by_index(group,2));
     if(page == 5 && !game_active)
         lv_group_focus_obj(lv_group_get_obj_by_index(group, game_focus+2));
     if(page == 3) lv_group_focus_obj(lv_group_get_obj_by_index(group, ui_mode+2));
     if(page == 4 || page == 8)
         lv_group_focus_obj(lv_group_get_obj_by_index(group, ui_tab+2));
-    if((page>=1 && page<=3) || page>=9) {
+    if((page>=1 && page<=3) || (page>=9 && page<=15)) {
         ui_button(bottom,"隐藏界面",1104,0,160,1005);
         lv_obj_set_height(lv_obj_get_child(bottom,-1),36);
         restore_surface=ui_box(screen,0,0,1280,720,0);
@@ -258,17 +275,14 @@ static void activate(unsigned action)
     if(action==1004) { ui_data_benchmark_stop(); return; }
     if(action==1002) { ui_data_app_retry(); ui_refresh(); return; }
     if(ui_page == 0) {
-        home_focus = action - 1;
-        const unsigned required[]={0,UI_VIN|UI_NPU,UI_VIN|UI_NPU|UI_ETH,
-            UI_VIN|UI_PIX|UI_GEO,UI_RND|UI_DISP,UI_RND|UI_DISP,0,0,0,UI_VIN|UI_NPU,UI_VIN|UI_NPU,
-            UI_VIN|UI_NPU|UI_RND,UI_VIN|UI_NPU|UI_PIX,UI_VIN|UI_NPU,
-            UI_VIN|UI_NPU|UI_RND,UI_VIN|UI_NPU|UI_RND};
-        if((ui_data_hardware()&required[action])!=required[action]) return;
         ui_tab = 0;
         ui_mode = 0;
         game_focus = 0;
         if(action==6) ui_monitor_toggle();
-        else ui_open(action);
+        else if(action>=101 && action<=105) {
+            ui_motion_entry = action-100;
+            ui_open(MOTION_PAGE);
+        } else ui_open(action);
     } else if((ui_page==1 || ui_page==2) && ui_detection_settings) {
         ui_detection_settings_action(action);
     } else if((ui_page==1 || ui_page==2) && action==2) {
@@ -313,11 +327,13 @@ static void activate(unsigned action)
         }
     }
 }
+void ui_activate(unsigned action) { activate(action); }
 void ui_key(uint32_t key)
 {
     if(ui_restore_interface()) return;
     key=remap(NULL,key);
     if(key==KEY_BACK) { ui_back(); return; }
+    if(ui_page==0 && ui_home_key(key)) return;
     if(key==LV_KEY_NEXT) lv_group_focus_next(group);
     else if(key==LV_KEY_PREV) lv_group_focus_prev(group);
     else {
@@ -345,7 +361,9 @@ void ui_back(void)
         }
         lv_group_set_editing(group,false); return;
     }
-    if(ui_page == MOTION_PAGE && ui_motion_back()) return;
+    if(ui_page == MOTION_PAGE) {
+        ui_home_select_tab(1); ui_open(0); return;
+    }
     if(ui_detection_settings) { ui_detection_settings=false; ui_open(ui_page); }
     else if(game_active) { game_active=false; ui_data_app_open(UI_APP_NONE,0); ui_open(5); }
     else if(ui_page==4 && ui_data_benchmark_running()) {
