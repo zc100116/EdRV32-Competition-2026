@@ -64,7 +64,7 @@ static lv_obj_t *hidden_sprite(lv_obj_t *p, const lv_image_dsc_t *src)
 void ui_arcade_build(lv_obj_t *parent, lv_obj_t *labels)
 {
     frame = parent;
-    switch (ui_motion.game) {
+    switch (ui_motion_view.state.game) {
         case MOTION_RPS:
             actors[0] = hidden_sprite(frame,&rps_player_rock);
             actors[1] = hidden_sprite(frame,&rps_board_rock);
@@ -107,7 +107,7 @@ void ui_arcade_build(lv_obj_t *parent, lv_obj_t *labels)
 }
 static void rps_sync(void)
 {
-    const rps_state_t *s = &ui_motion.rps;
+    const rps_state_t *s = &ui_motion_view.state.rps;
     bool show = s->phase == RPS_SHOW || s->phase == RPS_DONE;
     game_image(actors[0],s->player >= 0 ? player_signs[s->player] : &rps_player_rock,
                420,390,show && s->player >= 0,255);
@@ -115,7 +115,7 @@ static void rps_sync(void)
                860,390,show && s->player >= 0,255);
     char text[64];
     if (s->phase == RPS_COUNTDOWN)
-        snprintf(text,sizeof text,"%u",RPS_COUNT/GAME_HZ-s->ticks/GAME_HZ);
+        snprintf(text,sizeof text,"%u",RPS_COUNT/GAME_HZ-s->ticks/GAME_STEP_HZ);
     else snprintf(text,sizeof text,"%s",s->phase == RPS_CAST ? "出！" : "");
     ui_text(countdown,text);
     ui_text(outcome,!show ? "" : s->player < 0 ? "没看清，再来一次" :
@@ -125,7 +125,7 @@ static void rps_sync(void)
 }
 static void mole_sync(void)
 {
-    const mole_state_t *s = &ui_motion.mole;
+    const mole_state_t *s = &ui_motion_view.state.mole;
     for (unsigned i = 0; i < MOLE_HOLES; ++i) {
         const mole_hole_t *h = &s->holes[i];
         int x, y;
@@ -133,8 +133,9 @@ static void mole_sync(void)
         const lv_image_dsc_t *src = h->kind == 2 ? &mole_bomb :
             h->flash ? &mole_monster_hit : h->kind == 1 ? &mole_gold : &mole_monster;
         game_image(actors[i],src,x,y,h->life || h->flash,
-                   h->flash ? h->flash*255/MOLE_FLASH : 255);
-        game_image(effects[i],&mole_impact,x,y-25,h->flash != 0,h->flash*255/MOLE_FLASH);
+                   h->flash ? h->flash*255/(MOLE_FLASH*GAME_SUBSTEPS) : 255);
+        game_image(effects[i],&mole_impact,x,y-25,h->flash != 0,
+                   h->flash*255/(MOLE_FLASH*GAME_SUBSTEPS));
     }
 }
 static void trail_dirty(const int points[][2], unsigned count)
@@ -144,7 +145,7 @@ static void trail_dirty(const int points[][2], unsigned count)
 }
 static void slice_sync(void)
 {
-    const slice_state_t *s = &ui_motion.slice;
+    const slice_state_t *s = &ui_motion_view.state.slice;
     for (unsigned i = 0; i < SLICE_OBJECTS; ++i) {
         const slice_object_t *o = &s->objects[i];
         game_image(actors[i],o->bomb ? &slice_bomb : shapes[o->kind],
@@ -153,9 +154,10 @@ static void slice_sync(void)
     for (unsigned i = 0; i < SLICE_HALVES; ++i) {
         const slice_half_t *h = &s->halves[i];
         game_image(pieces[i],halves[h->kind][h->side],h->body.x/GAME_Q,h->body.y/GAME_Q,
-                   h->life != 0,h->life*255/SLICE_FADE);
+                   h->life != 0,h->life*255/(SLICE_FADE*GAME_SUBSTEPS));
     }
-    game_image(effects[0],&slice_spark,s->flash_x,s->flash_y,s->flash != 0,s->flash*255/SLICE_FLASH);
+    game_image(effects[0],&slice_spark,s->flash_x,s->flash_y,s->flash != 0,
+               s->flash*255/(SLICE_FLASH*GAME_SUBSTEPS));
     bool changed = old_trail_count != s->trail_count;
     for (unsigned i = 0; i < s->trail_count; ++i)
         if (old_trail[i][0] != s->trail[i][0] || old_trail[i][1] != s->trail[i][1])
@@ -174,18 +176,18 @@ static void slice_sync(void)
 }
 static void catch_sync(void)
 {
-    const catch_state_t *s = &ui_motion.basket;
+    const catch_state_t *s = &ui_motion_view.state.basket;
     for (unsigned i = 0; i < CATCH_OBJECTS; ++i) {
         const catch_fruit_t *f = &s->fruit[i];
         game_image(actors[i],f->bomb ? &catch_bomb : fruits[f->kind],
                    f->x/GAME_Q,f->y/GAME_Q,f->active,255);
     }
     game_image(basket,&catch_basket,s->basket_x/GAME_Q,CATCH_Y,true,
-               s->flash && (s->flash/2)%2 ? 60 : 255);
+               s->flash && (s->flash/(2*GAME_SUBSTEPS))%2 ? 60 : 255);
 }
 void ui_arcade_sync(void)
 {
-    switch (ui_motion.game) {
+    switch (ui_motion_view.state.game) {
         case MOTION_RPS: rps_sync(); break;
         case MOTION_MOLE: mole_sync(); break;
         case MOTION_SLICE: slice_sync(); break;
@@ -195,8 +197,8 @@ void ui_arcade_sync(void)
 }
 void ui_arcade_draw(lv_layer_t *layer)
 {
-    if (ui_motion.game != MOTION_SLICE) return;
-    const slice_state_t *s = &ui_motion.slice;
+    if (ui_motion_view.state.game != MOTION_SLICE) return;
+    const slice_state_t *s = &ui_motion_view.state.slice;
     lv_draw_line_dsc_t line;
     lv_draw_line_dsc_init(&line);
     line.color = lv_color_hex(0x56ffd6);

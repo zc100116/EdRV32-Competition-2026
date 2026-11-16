@@ -19,6 +19,7 @@
 #else
 #include <stdlib.h>
 #endif
+LV_IMAGE_DECLARE(sling_star);
 LV_IMAGE_DECLARE(tower_block_wood_square);
 LV_IMAGE_DECLARE(tower_block_wood_plank);
 LV_IMAGE_DECLARE(tower_block_wood_brick);
@@ -91,7 +92,7 @@ static void *geo_scratch;
 static uint64_t atlas_started, atlas_geo_ticks, atlas_cpu_ticks;
 static lv_obj_t *frame, *menu, *choices, *load_panel, *load_bar, *hud, *height_label;
 static lv_obj_t *level_label, *prompt, *countdown, *hold_arc, *result, *result_text;
-static lv_obj_t *record_label;
+static lv_obj_t *record_label, *result_stars[3], *result_record, *result_time;
 static lv_timer_t *timer;
 static unsigned command, record_height;
 static tower_mode selected;
@@ -456,9 +457,16 @@ void ui_tower_update(void)
         ui_text(prompt,text);
     }
     if (shown.phase == TOWER_RESULT) {
-        snprintf(text,sizeof text,"高度 %d cm   用时 %u s\n星级 %u / 3%s",
-            shown.height/10,seconds,shown.stars,shown.new_record ? "   新纪录" : "");
+        snprintf(text,sizeof text,"%d",shown.height/10);
         ui_text(result_text,text);
+        snprintf(text,sizeof text,"cm · %u s",seconds);
+        ui_text(result_time,text);
+        for (unsigned i = 0; i < 3; ++i) {
+            unsigned opacity = i < shown.stars ? 255 : 50;
+            if (lv_obj_get_style_image_opa(result_stars[i],0) != opacity)
+                lv_obj_set_style_image_opa(result_stars[i],opacity,0);
+        }
+        lv_obj_set_hidden(result_record,!shown.new_record);
         lv_obj_set_hidden(result,false);
     }
 }
@@ -527,18 +535,20 @@ void ui_page_tower(lv_obj_t *p)
     lv_obj_set_hidden(record_label,true);
     hold_arc = ui_hold_arc(lv_screen_active(),TOWER_HOLD);
     lv_obj_set_hidden(hold_arc,true);
-    menu = ui_box(p,250,190,780,280,0x142b40);
+    menu = ui_box(p,250,190,780,280,PANEL);
     lv_obj_set_style_bg_opa(menu,245,0);
-    ui_label(menu,"积木塔",40,24,&sim_font_40,0xffffff);
-    ui_label(menu,"把创意一块块搭起来",40,80,&sim_font_20,0xb9d8e9);
-    ui_button(menu,"教学",30,140,220,1);
-    ui_button(menu,"挑战",270,140,220,2);
-    ui_button(menu,"自由搭建",510,140,220,3);
-    ui_label(menu,"握拳抓起   剪刀手旋转   张手放下",40,210,&sim_font_16,0xffd880);
-    choices = ui_box(p,300,220,680,220,0x142b40);
-    ui_label(choices,"选择挑战",30,20,&sim_font_28,0xffffff);
-    ui_button(choices,"盖高楼 · 90 秒",30,100,290,5);
-    ui_button(choices,"地震测试 · 60 秒",350,100,290,6);
+    ui_label(menu,"积木塔",40,24,&showcase_bold_32,TEXT);
+    ui_label(menu,"把创意一块块搭起来",40,80,&sim_font_20,MUTED);
+    ui_game_button(menu,"教学",30,140,220,1);
+    ui_game_button(menu,"挑战",270,140,220,2);
+    ui_game_button(menu,"自由搭建",510,140,220,3);
+    ui_game_instruction(menu,&tower_hand_fist,"握拳抓起",30,212,230);
+    ui_game_instruction(menu,&tower_rotate_hint,"剪刀手旋转",270,212,230);
+    ui_game_instruction(menu,&tower_hand_open,"张手放下",510,212,230);
+    choices = ui_box(p,300,220,680,220,PANEL);
+    ui_label(choices,"选择挑战",30,20,&showcase_bold_32,TEXT);
+    ui_game_button(choices,"盖高楼 · 90 秒",30,100,290,5);
+    ui_game_button(choices,"地震测试 · 60 秒",350,100,290,6);
     lv_obj_set_hidden(choices,true);
     load_panel = ui_box(p,360,250,560,160,0x142b40);
     ui_label(load_panel,"正在生成积木旋转帧",30,24,&sim_font_28,0xffffff);
@@ -546,11 +556,23 @@ void ui_page_tower(lv_obj_t *p)
     lv_obj_set_pos(load_bar,30,90);
     lv_obj_set_size(load_bar,500,20);
     lv_obj_set_hidden(load_panel,true);
-    result = ui_box(p,340,190,600,280,0x142b40);
-    ui_label(result,"搭建完成",30,20,&sim_font_40,0xffffff);
-    result_text = ui_label(result,"",30,90,&sim_font_28,0xffd880);
-    ui_button(result,"再来一局",30,210,240,7);
-    ui_button(result,"返回",320,210,240,1000);
+    result = ui_box(p,340,155,600,345,PANEL);
+    lv_obj_center(result);
+    lv_obj_t *heading = ui_emphasis(result,"搭建完成",false);
+    lv_obj_align(heading,LV_ALIGN_TOP_MID,0,18);
+    result_text = ui_number(result,"0",false);
+    lv_obj_align(result_text,LV_ALIGN_TOP_MID,0,70);
+    result_time = ui_text_label(result,"cm",&sim_font_16,MUTED);
+    lv_obj_align(result_time,LV_ALIGN_TOP_MID,0,140);
+    for (unsigned i = 0; i < 3; ++i) {
+        result_stars[i] = lv_image_create(result);
+        lv_image_set_src(result_stars[i],&sling_star);
+        lv_obj_align(result_stars[i],LV_ALIGN_TOP_MID,((int)i-1)*70,160);
+    }
+    result_record = ui_badge(result,"新纪录");
+    lv_obj_align(result_record,LV_ALIGN_TOP_MID,0,218);
+    ui_game_button(result,"再来一局",30,267,240,7);
+    ui_game_button(result,"返回",330,267,240,1000);
     lv_obj_set_hidden(result,true);
     ui_button(p,"清空",40,550,160,8);
     clear_button = lv_obj_get_child(p,-1);

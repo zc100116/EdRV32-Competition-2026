@@ -42,7 +42,7 @@ static void cut(slice_state_t *s, unsigned i)
     slice_object_t *o = &s->objects[i];
     o->active = false;
     ++s->hits;
-    s->flash = SLICE_FLASH;
+    s->flash = SLICE_FLASH*GAME_SUBSTEPS;
     s->flash_x = o->body.x/GAME_Q;
     s->flash_y = o->body.y/GAME_Q;
     if (o->bomb) { s->done = true; return; }
@@ -55,7 +55,7 @@ static void cut(slice_state_t *s, unsigned i)
         h->body.vy -= SLICE_HALF_VY;
         h->kind = o->kind;
         h->side = side;
-        h->life = SLICE_FADE;
+        h->life = SLICE_FADE*GAME_SUBSTEPS;
     }
 }
 void slice_input(slice_state_t *s, int x, int y, bool present, uint32_t stamp)
@@ -142,6 +142,6 @@ void slice_step(slice_state_t *s)
             if (!o->bomb) ++s->misses;
         }
     }
-    if (s->misses >= SLICE_MISSES || s->ticks == SLICE_SECONDS*GAME_HZ) s->done = true;
-    if (!s->done && s->ticks % (SLICE_WAVE*4/s->speed) == 1) wave(s);
+    if (s->misses >= SLICE_MISSES || s->ticks == SLICE_SECONDS*GAME_STEP_HZ) s->done = true;
+    if (!s->done && s->ticks % ((SLICE_WAVE*4/s->speed)*GAME_SUBSTEPS) == 1) wave(s);
 }

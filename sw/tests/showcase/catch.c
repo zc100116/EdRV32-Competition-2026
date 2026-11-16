@@ -8,12 +8,12 @@ int main(void)
     catch_init(&s,21);
     catch_input(&s,1000,true);
     catch_step(&s);
-    assert(s.basket_x == 670*GAME_Q);
-    for (unsigned i = 0; i < 20; ++i) catch_step(&s);
+    assert(s.basket_x == 655*GAME_Q);
+    for (unsigned i = 0; i < 40; ++i) catch_step(&s);
     assert(s.basket_x == 1000*GAME_Q);
     catch_input(&s,0,true);
     catch_step(&s);
-    assert(s.basket_x == 970*GAME_Q && s.target_x == GAME_SAFE_LEFT*GAME_Q);
+    assert(s.basket_x == 985*GAME_Q && s.target_x == GAME_SAFE_LEFT*GAME_Q);
     catch_input(&s,1280,false);
     assert(s.target_x == GAME_SAFE_LEFT*GAME_Q);
     catch_init(&s,21);
@@ -26,8 +26,8 @@ int main(void)
     assert(s.score == 10); /* Rim crossing is scored once. */
     s.fruit[0] = (catch_fruit_t){640*GAME_Q,539*GAME_Q,5*GAME_Q,0,true,true};
     catch_step(&s);
-    assert(s.score == -20 && s.flash == CATCH_FLASH);
-    s.ticks = CATCH_SECONDS*GAME_HZ-1;
+    assert(s.score == -20 && s.flash == CATCH_FLASH*GAME_SUBSTEPS);
+    s.ticks = CATCH_SECONDS*GAME_STEP_HZ-1;
     catch_step(&s);
     assert(s.done);
     int before = s.basket_x;
@@ -39,7 +39,7 @@ int main(void)
         s.speed = speed;
         catch_step(&s);
         assert(s.fruit[0].vy == CATCH_FALL_START*GAME_Q*(int)speed/4);
-        for (unsigned t = 1; t < CATCH_SPAWN*4/speed; ++t) catch_step(&s);
+        for (unsigned t = 1; t < (CATCH_SPAWN*4/speed)*GAME_SUBSTEPS; ++t) catch_step(&s);
         assert(!s.fruit[1].active);
         catch_step(&s);
         assert(s.fruit[1].active);

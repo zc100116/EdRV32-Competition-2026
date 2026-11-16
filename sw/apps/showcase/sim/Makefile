@@ -141,3 +141,16 @@ pages-shots: $(BUILD)/showcase_pages_shots
 	rm $(addprefix $(BUILD)/ui-pages/,$(addsuffix .rgb565,$(PAGES_SHOTS)))
 $(BUILD)/showcase_pages_shots: main_pages_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
 	$(CC) $(FLAGS) $(PAGES_FLAGS) -Werror main_pages_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
+
+# T-GAMES-LOOP: all six games, three states each, using application snapshots.
+GAMES_OUTPUT ?= $(ROOT)/build/sim/games-loop
+GAMES_SHOTS := $(foreach game,sling rps mole slice catch tower,\
+    $(addprefix $(game)-,start playing result))
+.PHONY: games-shots
+games-shots: $(BUILD)/showcase_games_shots
+	mkdir -p $(GAMES_OUTPUT)
+	$(BUILD)/showcase_games_shots $(GAMES_OUTPUT)
+	$(foreach name,$(GAMES_SHOTS),python3 $(ROOT)/tools/sw/raw2png.py $(GAMES_OUTPUT)/$(name).rgb565 $(GAMES_OUTPUT)/$(name).png;)
+	rm $(addprefix $(GAMES_OUTPUT)/,$(addsuffix .rgb565,$(GAMES_SHOTS)))
+$(BUILD)/showcase_games_shots: main_games_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
+	$(CC) $(FLAGS) -Werror main_games_shots.c $(COMMON) $(LINUX_LV) -lm -o $@

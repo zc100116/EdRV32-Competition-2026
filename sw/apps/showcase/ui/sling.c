@@ -1,5 +1,5 @@
-/* sling.c — T-GAME-SLING gameplay; 30 Hz Q8 ballistics, circle/AABB targets.
- * CPU/GUI cooperative domain; no floating point or runtime art transforms.
+/* sling.c — T-GAME-SLING; 60 Hz ballistics, 30 Hz Q8 reference units, circle/AABB targets.
+ * Application task; no floating point or runtime art transforms.
  */
 #include "sling.h"
 #include <string.h>
@@ -94,9 +94,23 @@ void sling_input(sling_state_t *s, int x, int y, bool closed, unsigned lost, int
 }
 void sling_integrate(sling_body_t *b)
 {
-    b->x += b->vx;
-    b->y += b->vy + SLING_GRAVITY / 2;
-    b->vy += SLING_GRAVITY;
+    b->x += b->vx/2;
+    b->y += b->vy/2 + SLING_GRAVITY/8;
+    b->vy += SLING_GRAVITY/2;
+}
+/* The view receives the aim curve as pixels, without advancing any rules. */
+void sling_snapshot_copy(const sling_state_t *s, sling_state_t *destination)
+{
+    *destination = *s;
+    if (s->phase != SLING_AIM) return;
+    sling_body_t ball = s->ball;
+    sling_launch_velocity(&ball,&ball.vx,&ball.vy);
+    for (unsigned i = 0; i < SLING_PREVIEW; ++i) {
+        sling_integrate(&ball);
+        sling_integrate(&ball);
+        destination->preview[i][0] = ball.x/SLING_Q;
+        destination->preview[i][1] = ball.y/SLING_Q;
+    }
 }
 static bool hit(const sling_body_t *b, const sling_target_t *t)
 {
@@ -120,7 +134,7 @@ static void shatter(sling_state_t *s, unsigned target)
         sling_particle_t *p = &s->particles[target * SLING_CHIPS + i];
         p->body = (sling_body_t){t->x * SLING_Q, t->y * SLING_Q,
             ((int)i * 2 - 7) * 200, -(int)(4 + i % 3) * 400};
-        p->life = SLING_FADE;
+        p->life = SLING_FADE*GAME_SUBSTEPS;
         p->balloon = t->balloon;
     }
 }
@@ -134,7 +148,7 @@ void sling_step(sling_state_t *s)
         s->restart_ticks = s->present && s->cls == 1 &&
             s->cursor_x >= 420 && s->cursor_x <= 860 &&
             s->cursor_y >= 228 && s->cursor_y <= 478 ? s->restart_ticks + 1 : 0;
-        if (s->restart_ticks == SLING_RESTART) sling_init(s);
+        if (s->restart_ticks == SLING_RESTART*GAME_SUBSTEPS) sling_init(s);
         return;
     }
     if (s->phase != SLING_FLY) return;

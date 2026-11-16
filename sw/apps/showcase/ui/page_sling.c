@@ -1,5 +1,5 @@
 /* page_sling.c — T-GAME-SLING; AR sprites and clipped moving overlays on L1.
- * GUI clock; fixed 30 Hz physics, image positions invalidate only old/new bounds.
+ * GUI clock; immutable 60 Hz snapshots, image positions invalidate only old/new bounds.
  */
 #include "game_view.h"
 #include "sling.h"
@@ -26,11 +26,6 @@ static void dirty(int x, int y, int nx, int ny, int radius)
     lv_area_join(&a,&a,&b);
     lv_obj_invalidate_area(frame,&a);
 }
-static void trajectory(const sling_state_t *s, sling_body_t *p)
-{
-    *p = s->ball;
-    sling_launch_velocity(p,&p->vx,&p->vy);
-}
 static void invalidate_aim(const sling_state_t *s)
 {
     if (s->phase != SLING_AIM && s->phase != SLING_READY) return;
@@ -39,11 +34,8 @@ static void invalidate_aim(const sling_state_t *s)
     dirty(SLING_X-38,SLING_Y,x,y,5);
     dirty(SLING_X+38,SLING_Y,x,y,5);
     if (s->phase != SLING_AIM) return;
-    sling_body_t p;
-    trajectory(s,&p);
     for (unsigned i = 0; i < SLING_PREVIEW; ++i) {
-        sling_integrate(&p);
-        lv_area_t a = around(p.x/SLING_Q,p.y/SLING_Q,5);
+        lv_area_t a = around(s->preview[i][0],s->preview[i][1],5);
         lv_obj_invalidate_area(frame,&a);
     }
 }
@@ -65,18 +57,15 @@ void ui_sling_draw(lv_layer_t *layer)
     dot.radius = LV_RADIUS_CIRCLE;
     dot.bg_color = lv_color_hex(0xfff1ab);
     if (shown.phase == SLING_AIM) {
-        sling_body_t p;
-        trajectory(&shown,&p);
         for (unsigned i = 0; i < SLING_PREVIEW; ++i) {
-            sling_integrate(&p);
-            lv_area_t a = around(p.x/SLING_Q,p.y/SLING_Q,3);
+            lv_area_t a = around(shown.preview[i][0],shown.preview[i][1],3);
             lv_draw_rect(layer,&dot,&a);
         }
     }
 }
 void ui_sling_sync(void)
 {
-    sling_state_t *s = &ui_sling;
+    const sling_state_t *s = &ui_motion_view.sling;
     if (shown.ball.x != s->ball.x || shown.ball.y != s->ball.y || shown.phase != s->phase) {
         invalidate_aim(&shown);
         invalidate_aim(s);
@@ -86,16 +75,17 @@ void ui_sling_sync(void)
     for (unsigned i = 0; i < SLING_TARGETS; ++i)
         lv_obj_set_hidden(targets[i],!s->targets[i].alive);
     for (unsigned i = 0; i < SLING_PARTICLES; ++i) {
-        sling_particle_t *p = &s->particles[i];
+        const sling_particle_t *p = &s->particles[i];
         game_image(chips[i],p->balloon ? &sling_balloon_chip : &sling_wood_chip,
-                   p->body.x/SLING_Q,p->body.y/SLING_Q,p->life != 0,p->life*255/SLING_FADE);
+                   p->body.x/SLING_Q,p->body.y/SLING_Q,p->life != 0,
+                   p->life*255/(SLING_FADE*GAME_SUBSTEPS));
     }
     shown = *s;
 }
 void ui_sling_build(lv_obj_t *parent)
 {
     frame = parent;
-    shown = ui_sling;
+    shown = ui_motion_view.sling;
     game_sprite(frame,&sling_slingshot,SLING_X,SLING_Y+85);
     for (unsigned i = 0; i < 3; ++i)
         game_sprite(frame,&sling_platform,890+140*(int)i,614-160*(int)i);

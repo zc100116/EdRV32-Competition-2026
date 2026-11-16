@@ -1,5 +1,5 @@
 /* rps.h — T-GAMES-MORE rock/scissors/paper; five rounds, first to three wins.
- * CPU domain; only inference frames vote during the 18-tick cast window.
+ * CPU domain; only inference frames vote during the 18-reference-tick (0.6 s) cast window.
  */
 #ifndef SHOWCASE_RPS_H
 #define SHOWCASE_RPS_H

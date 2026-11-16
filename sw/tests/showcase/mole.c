@@ -16,7 +16,7 @@ int main(void)
     assert(s.score == 0); /* Moving while held is not a new hit. */
     mole_input(&s,x,y,false,true);
     mole_input(&s,x+70,y,true,true);
-    assert(s.score == 10 && !s.holes[0].life && s.holes[0].flash == MOLE_FLASH);
+    assert(s.score == 10 && !s.holes[0].life && s.holes[0].flash == MOLE_FLASH*GAME_SUBSTEPS);
     mole_input(&s,x,y,true,true);
     assert(s.score == 10);
     s.holes[0] = (mole_hole_t){1,0,1};
@@ -34,9 +34,10 @@ int main(void)
     mole_input(&s,x,y,false,true);
     mole_input(&s,x,y,true,true);
     assert(s.score == 20);
-    for (unsigned i = s.ticks; i < MOLE_SECONDS*GAME_HZ; ++i) {
+    for (unsigned i = s.ticks; i < MOLE_SECONDS*GAME_STEP_HZ; ++i) {
         mole_step(&s);
-        for (unsigned h = 0; h < MOLE_HOLES; ++h) assert(s.holes[h].life <= MOLE_LIFE_MAX*2);
+        for (unsigned h = 0; h < MOLE_HOLES; ++h)
+            assert(s.holes[h].life <= MOLE_LIFE_MAX*2*GAME_SUBSTEPS);
     }
     assert(s.done);
     int score = s.score;
@@ -46,7 +47,7 @@ int main(void)
     for (unsigned speed = GAME_SLOW; speed <= GAME_FAST; ++speed) {
         mole_init(&s,7);
         s.speed = speed;
-        for (unsigned t = 1; t < MOLE_SPAWN*4/speed; ++t) {
+        for (unsigned t = 1; t < (MOLE_SPAWN*4/speed)*GAME_SUBSTEPS; ++t) {
             mole_step(&s);
             for (unsigned h = 0; h < MOLE_HOLES; ++h) assert(!s.holes[h].life);
         }
@@ -54,8 +55,8 @@ int main(void)
         unsigned active = 0;
         for (unsigned h = 0; h < MOLE_HOLES; ++h) if (s.holes[h].life) {
             ++active;
-            assert(s.holes[h].life >= MOLE_LIFE_MIN*4/speed);
-            assert(s.holes[h].life <= MOLE_LIFE_MAX*4/speed);
+            assert(s.holes[h].life >= MOLE_LIFE_MIN*4/speed*GAME_SUBSTEPS);
+            assert(s.holes[h].life <= MOLE_LIFE_MAX*4/speed*GAME_SUBSTEPS);
         }
         assert(active == 1);
     }

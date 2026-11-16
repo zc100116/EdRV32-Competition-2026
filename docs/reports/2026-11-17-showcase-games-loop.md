@@ -1,0 +1,28 @@
+# 六个体感游戏：固定步长与新部件
+
+- 复现提交：本报告所在提交；开发基线 `4ec7fea71`（先后两次 rebase 到 `origin/zc100116/b3`）。
+- 工具：xPack RV32 GCC 15.2.0、主机 GCC 13.3.0、LVGL 9.6；Linux 原生截图，无 SoC 仿真。
+- 公共结构：沿用 `main.c` 的应用任务挂钩和 `game_loop` 60 Hz 截止时间、最多补两步、三缓冲发布。
+- `motion_input` 只发布带序号的视觉样本；按钮通过命令邮箱提交，应用步进消费；锁内只交换输入。
+- 弹弓：60 Hz 半步弹道、碰撞、粒子、重开；瞄准预览在应用快照中计算，GUI 不做积分。
+- 石头剪刀布：60 Hz 倒数/出拳/揭晓状态机；每个新视觉样本投票一次，出拳窗口仍为 0.6 s。
+- 打地鼠：60 Hz 生命周期、命中动画、生成和终局；握拳边沿命中仍在消费新输入时判定。
+- 切图形：60 Hz 宝石/切片运动；原始手坐标、推理时间戳仍驱动挥速、相对扫掠和断轨判定。
+- 接物篮：60 Hz 横移与果物下落，原横向上限 900 px/s、篮沿穿越判分及速度档不变。
+- 原 30 Hz 常量数值、Q8 参考速度单位、速度档、计分/星级阈值和串口行格式均保留；时间换算为 60 Hz。
+- GUI 16 ms 定时器仅取快照和绘制；删除原 LVGL 累加器与逻辑步进路径。
+- 三份快照含游戏状态、弹丸/目标/粒子及预览点、猜拳阶段、地鼠、宝石/切片/轨迹、篮子/果物。
+- 快照还含手位置/类别/丢失状态、21 关键点、速度/停留/时长、分数/星级/纪录/结算信息。
+- 图像、轨迹、光标和关键点按变化更新新旧边界；动态区域无阴影、模糊、整层半透明或渐变。
+- 新部件：粗体标题、手势图标说明、居中 `lv_button`、慢/中/快 `lv_buttonmatrix`、`lv_arc` 停留环。
+- HUD 使用 64 号分数、`lv_bar` 进度/倒计时、关卡徽章；结算居中显示 64 号数字、星形图标及两个按钮。
+- 新纪录使用胶囊徽章；复用现有原创星形/手势素材，无新增图片；积木塔只改开始/挑战选择/结算画面。
+- 经协调者允许，只扩展 `showcase_bold_32.c` 字形；保留全部旧字符，生成命令及完整字符集在文件头。
+- 构建：`flock /tmp/edrv32-sw-build.lock make -C sw -j2 PROGRAM=showcase`，PASS、0 告警。
+- CPU 后处理：同一命令追加 `SHOWCASE_POST=cpu`，PASS、0 告警。
+- 规则验收：同一 flock 下 `make -C sw/tests/showcase games sling tower`，8 项 PASS、0 告警；均按 60 Hz 驱动。
+- 默认构建首次遭外部 SIGTERM，经协调者允许恢复后通过；成功的构建、测试和截图均未重复运行。
+- 原始日志：`build/games-loop/{showcase-hw,showcase-cpu,tests,shots}.log`，生成物不入库。
+- 截图命令：同一 flock 下 `make -C sw/apps/showcase/sim -j2 games-shots GAMES_OUTPUT=<下述目录>`。
+- 截图目录：`/home/workspace/orca/workspaces/EdRV32-Competition-2026/SOC系统设计/outputs/games-loop/`。
+- 每个游戏 `{sling,rps,mole,slice,catch,tower}-{start,playing,result}.png`，共 18 张；均由共享页面/规则快照生成。

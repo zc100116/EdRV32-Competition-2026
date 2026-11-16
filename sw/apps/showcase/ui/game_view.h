@@ -5,6 +5,8 @@
 #define SHOWCASE_GAME_VIEW_H
 #include "theme.h"
 #include "motion.h"
+extern motion_snapshot_t ui_motion_view;
+void ui_motion_update(void);
 lv_obj_t *game_sprite(lv_obj_t *parent, const lv_image_dsc_t *src, int x, int y);
 void game_image(lv_obj_t *o, const lv_image_dsc_t *src, int x, int y, bool show, unsigned opa);
 void game_dirty(lv_obj_t *frame, int x, int y, int nx, int ny, int radius);

@@ -9,14 +9,14 @@ uint32_t game_random(uint32_t *state)
 }
 void game_integrate(game_body_t *b, int gravity)
 {
-    b->x += b->vx;
-    b->y += b->vy + gravity / 2;
-    b->vy += gravity;
+    b->x += b->vx/2;
+    b->y += b->vy/2 + gravity/8;
+    b->vy += gravity/2;
 }
 
 void game_integrate_speed(game_body_t *b, int gravity, unsigned speed)
 {
-    b->x += b->vx*(int)speed/4;
-    b->y += b->vy*(int)speed/4 + gravity*(int)(speed*speed)/32;
-    b->vy += gravity*(int)speed/4;
+    b->x += b->vx*(int)speed/8;
+    b->y += b->vy*(int)speed/8 + gravity*(int)(speed*speed)/128;
+    b->vy += gravity*(int)speed/8;
 }

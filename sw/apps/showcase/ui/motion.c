@@ -1,11 +1,39 @@
 /* motion.c — T-GAMES-MORE; lobby dwell, inference-frame routing and common restart.
- * CPU/GUI cooperative domain; switching games never requests a new vision session.
+ * Application task; switching games never requests a new vision session.
  */
 #include "motion.h"
 #include "sling.h"
 #include <string.h>
 #include <stdio.h>
+#include <port.h>
 void ui_data_grab_output(const char *text);
+/* Vision publishes one inference sample; only the application consumes it.
+ * Copying and command exchange are protected against task preemption.
+ */
+static struct {
+    int x, y, raw_x, raw_y, cls;
+    bool closed;
+    unsigned lost, sequence;
+    uint32_t stamp, seed;
+} input;
+static unsigned consumed, command;
+static int records[MOTION_GAMES+1];
+void motion_command(unsigned action)
+{
+    uint32_t lock = sched_port_lock();
+    command = action;
+    sched_port_unlock(lock);
+}
+void motion_input(int x, int y, int raw_x, int raw_y, bool closed,
+                  unsigned lost, int cls, uint32_t stamp)
+{
+    uint32_t lock = sched_port_lock();
+    input.x = x; input.y = y;
+    input.raw_x = raw_x; input.raw_y = raw_y;
+    input.closed = closed; input.lost = lost; input.cls = cls; input.stamp = stamp;
+    ++input.sequence;
+    sched_port_unlock(lock);
+}
 static unsigned speeds[] = {GAME_FAST,GAME_FAST,GAME_FAST,
                             GAME_SLOW,GAME_SLOW,GAME_SLOW};
 static const char *const names[] = {"hall","sling","rps","mole","slice","catch"};
@@ -20,12 +48,19 @@ static void event(const char *kind)
     char text[160];
     snprintf(text,sizeof text,"game name=%s event=%s speed=%s score=%d dur_ms=%u\r\n",
              motion_name(),kind,motion_speed_name(),motion_score(),
-             ui_motion.duration*1000/GAME_HZ);
+             ui_motion.duration*1000/GAME_STEP_HZ);
     ui_data_grab_output(text);
 }
 void motion_finish(void)
 {
-    if (ui_motion.running) { event("end"); ui_motion.running = false; }
+    if (ui_motion.running) {
+        if (motion_done() && motion_score() > records[ui_motion.game]) {
+            records[ui_motion.game] = motion_score();
+            ui_motion.new_record = true;
+        }
+        event("end");
+        ui_motion.running = false;
+    }
 }
 void motion_start(void)
 {
@@ -34,6 +69,7 @@ void motion_start(void)
     ui_motion.hold = 0;
     ui_motion.hovered = -1;
     ui_motion.duration = 0;
+    ui_motion.new_record = false;
     event("start");
 }
 void motion_speed(unsigned speed)
@@ -54,6 +90,8 @@ motion_state_t ui_motion;
 void motion_init(void)
 {
     memset(&ui_motion,0,sizeof ui_motion);
+    memset(&input,0,sizeof input);
+    consumed = command = 0;
     ui_motion.rng = 1;
     ui_motion.hovered = -1;
     ui_motion.hand.cls = -1;
@@ -61,12 +99,18 @@ void motion_init(void)
     ui_motion.hand.y = 360;
     ui_motion.hand.lost = SLING_LOST;
 }
-void motion_seed(uint32_t mtime) { ui_motion.rng = mtime | 1u; }
+void motion_seed(uint32_t mtime)
+{
+    uint32_t lock = sched_port_lock();
+    input.seed = mtime | 1u;
+    sched_port_unlock(lock);
+}
 void motion_select(motion_game_t game)
 {
     motion_finish();
     ui_motion.game = game;
-    ui_motion.waiting = game >= MOTION_MOLE;
+    ui_motion.waiting = game != MOTION_HALL;
+    ui_motion.new_record = false;
     ui_motion.duration = 0;
     ui_motion.hold = ui_motion.restart = 0;
     ui_motion.hovered = -1;
@@ -98,7 +142,7 @@ int motion_hover(int x, int y)
     }
     return -1;
 }
-void motion_input(int x, int y, int raw_x, int raw_y, bool closed,
+static void apply_input(int x, int y, int raw_x, int raw_y, bool closed,
                   unsigned lost, int cls, uint32_t stamp)
 {
     ++ui_motion.sample;
@@ -171,8 +215,36 @@ unsigned motion_stars(void)
         default: return 1;
     }
 }
+void motion_snapshot_copy(motion_snapshot_t *destination)
+{
+    destination->state = ui_motion;
+    sling_snapshot_copy(&ui_sling,&destination->sling);
+    destination->score = motion_score();
+    destination->stars = motion_stars();
+    destination->done = motion_done();
+    destination->points_present = false;
+}
 void motion_step(void)
 {
+    uint32_t lock = sched_port_lock();
+    unsigned action = command;
+    command = 0;
+    unsigned sequence = input.sequence;
+    int x = input.x, y = input.y, raw_x = input.raw_x, raw_y = input.raw_y;
+    int cls = input.cls;
+    bool closed = input.closed;
+    unsigned lost = input.lost;
+    uint32_t stamp = input.stamp, seed = input.seed;
+    input.seed = 0;
+    sched_port_unlock(lock);
+    if (seed) ui_motion.rng = seed;
+    if (action == 1) motion_select(ui_motion.game);
+    else if (action >= 20 && action <= 22) motion_speed(GAME_SLOW+action-20);
+    else if (action == 23) motion_start();
+    if (sequence != consumed) {
+        consumed = sequence;
+        apply_input(x,y,raw_x,raw_y,closed,lost,cls,stamp);
+    }
     const motion_hand_t *h = &ui_motion.hand;
     if (ui_motion.game == MOTION_HALL) {
         int hovered = h->present && h->cls == 1 ? motion_hover(h->x,h->y) : -1;
@@ -189,7 +261,7 @@ void motion_step(void)
         if (hovered >= 0 && ui_motion.hold < MOTION_HOLD &&
             ++ui_motion.hold == MOTION_HOLD) {
             if (hovered == 3) motion_start();
-            else motion_speed(GAME_SLOW+(unsigned)hovered);
+            else if (ui_motion.game >= MOTION_MOLE) motion_speed(GAME_SLOW+(unsigned)hovered);
         }
         return;
     }

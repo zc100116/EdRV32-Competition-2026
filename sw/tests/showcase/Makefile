@@ -100,7 +100,7 @@ rps mole slice catch:
 	$(BUILD)/$@
 lobby:
 	mkdir -p $(BUILD)
-	$(CC) $(FLAGS) -I$(GAME_UI) motion.c $(GAME_RULES) -o $(BUILD)/lobby
+	$(CC) $(FLAGS) -I$(GAME_UI) -I$(ROOT)/sw/lib/sched motion.c $(GAME_RULES) -o $(BUILD)/lobby
 	$(BUILD)/lobby
 
 .PHONY: sync

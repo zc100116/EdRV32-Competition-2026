@@ -34,12 +34,12 @@ void rps_step(rps_state_t *s)
 {
     if (s->phase == RPS_DONE) return;
     ++s->ticks;
-    if (s->phase == RPS_COUNTDOWN && s->ticks == RPS_COUNT) {
+    if (s->phase == RPS_COUNTDOWN && s->ticks == RPS_COUNT*GAME_SUBSTEPS) {
         s->phase = RPS_CAST;
         s->ticks = 0;
         memset(s->votes,0,sizeof s->votes);
         s->board = (int)(game_random(&s->rng) % 3);
-    } else if (s->phase == RPS_CAST && s->ticks == RPS_WINDOW) {
+    } else if (s->phase == RPS_CAST && s->ticks == RPS_WINDOW*GAME_SUBSTEPS) {
         s->player = rps_majority(s->votes);
         if (s->player >= 0) {
             s->outcome = rps_outcome(s->player,s->board);
@@ -50,7 +50,7 @@ void rps_step(rps_state_t *s)
         }
         s->phase = RPS_SHOW;
         s->ticks = 0;
-    } else if (s->phase == RPS_SHOW && s->ticks == RPS_REVEAL) {
+    } else if (s->phase == RPS_SHOW && s->ticks == RPS_REVEAL*GAME_SUBSTEPS) {
         s->phase = s->wins == RPS_WINS || s->losses == RPS_WINS ||
                    s->rounds == RPS_ROUNDS ? RPS_DONE : RPS_COUNTDOWN;
         s->ticks = 0;

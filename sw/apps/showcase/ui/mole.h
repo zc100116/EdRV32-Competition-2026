@@ -1,5 +1,5 @@
 /* mole.h — T-GAMES-MORE; six-hole gesture-edge hit game and tunable constants.
- * CPU domain; lifetime and hit animation advance at 30 Hz.
+ * CPU domain; lifetime and hit animation advance at 60 Hz (constants retain 30 Hz units).
  */
 #ifndef SHOWCASE_MOLE_H
 #define SHOWCASE_MOLE_H

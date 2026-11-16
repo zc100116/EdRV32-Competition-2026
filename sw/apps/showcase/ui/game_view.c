@@ -3,6 +3,7 @@
  */
 #include "game_view.h"
 #include "src/misc/lv_area_private.h"
+motion_snapshot_t ui_motion_view;
 void game_dirty(lv_obj_t *frame, int x, int y, int nx, int ny, int radius)
 {
     lv_area_t old = {x-radius,y-radius,x+radius,y+radius};

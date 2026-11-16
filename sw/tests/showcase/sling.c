@@ -17,12 +17,21 @@ static void pull(void)
 int main(void)
 {
     sling_body_t b = {25600, 76800, 7000, -8000};
-    for (int t = 1; t <= 60; ++t) {
+    for (int t = 1; t <= 120; ++t) {
         sling_integrate(&b);
-        int x = 25600 + t * 7000;
-        int y = 76800 - t * 8000 + SLING_GRAVITY * t * t / 2;
+        int x = 25600 + t * 7000/2;
+        int y = 76800 - t * 8000/2 + SLING_GRAVITY * t * t / 8;
         assert(b.x == x && b.y == y); /* Exact analytic solution in Q8: 0 px error. */
     }
+    pull();
+    sling_state_t view;
+    sling_snapshot_copy(&s,&view);
+    sling_body_t forecast = s.ball;
+    sling_launch_velocity(&forecast,&forecast.vx,&forecast.vy);
+    sling_integrate(&forecast);
+    sling_integrate(&forecast);
+    assert(view.preview[0][0] == forecast.x/SLING_Q);
+    assert(view.preview[0][1] == forecast.y/SLING_Q);
     sling_init(&s);
     input(SLING_X+91, SLING_Y, true);
     assert(s.phase == SLING_READY);
@@ -54,11 +63,11 @@ int main(void)
     s.ball = (sling_body_t){s.targets[1].x * SLING_Q, s.targets[1].y * SLING_Q, 0, 0};
     sling_step(&s);
     assert(s.score == 50 && s.remaining == 5 && s.phase == SLING_FLY);
-    assert(s.particles[SLING_CHIPS].life == SLING_FADE);
+    assert(s.particles[SLING_CHIPS].life == SLING_FADE*GAME_SUBSTEPS);
     s.ball = (sling_body_t){s.targets[0].x * SLING_Q, s.targets[0].y * SLING_Q, 0, 0};
     sling_step(&s);
     assert(s.score == 150 && s.phase == SLING_READY);
-    for (unsigned i = 0; i < SLING_FADE; ++i) sling_step(&s);
+    for (unsigned i = 0; i < SLING_FADE*GAME_SUBSTEPS; ++i) sling_step(&s);
     assert(!s.particles[0].life);
     s.phase = SLING_FLY;
     s.shots = 0;
@@ -70,7 +79,7 @@ int main(void)
     s.score = 450;
     assert(sling_stars(&s) == 3);
     input(640, 360, true);
-    for (unsigned i = 0; i < SLING_RESTART - 1; ++i) sling_step(&s);
+    for (unsigned i = 0; i < SLING_RESTART*GAME_SUBSTEPS - 1; ++i) sling_step(&s);
     assert(s.phase == SLING_DONE);
     sling_step(&s);
     assert(s.phase == SLING_READY && s.shots == 5 && s.score == 0 && s.remaining == 6);

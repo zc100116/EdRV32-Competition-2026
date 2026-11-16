@@ -290,3 +290,27 @@ lv_obj_t *ui_flex_number(lv_obj_t *parent, const char *text, int value)
     lv_obj_add_event_cb(plus,step,LV_EVENT_CLICKED,spin);
     return spin;
 }
+
+/* Fixed camera-overlay coordinates, with centered labels inside real buttons. */
+lv_obj_t *ui_game_button(lv_obj_t *parent, const char *text,
+                         int x, int y, int width, unsigned action)
+{
+    lv_obj_t *button = ui_action_button(parent,text,action);
+    lv_obj_set_pos(button,x,y);
+    lv_obj_set_size(button,width,60);
+    return button;
+}
+void ui_game_instruction(lv_obj_t *parent, const lv_image_dsc_t *icon,
+                         const char *text, int x, int y, int width)
+{
+    lv_obj_t *row = ui_stack(parent,LV_FLEX_FLOW_ROW,12);
+    lv_obj_set_pos(row,x,y);
+    lv_obj_set_size(row,width,LV_SIZE_CONTENT);
+    lv_obj_set_flex_align(row,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_CENTER,LV_FLEX_ALIGN_CENTER);
+    lv_obj_t *image = lv_image_create(row);
+    lv_image_set_src(image,icon);
+    lv_obj_set_size(image,40,40);
+    lv_image_set_inner_align(image,LV_IMAGE_ALIGN_CONTAIN);
+    lv_obj_t *label = ui_text_label(row,text,&sim_font_16,TEXT);
+    lv_obj_set_width(label,width-52);
+}

@@ -1,5 +1,5 @@
 /* catch.h — T-GAMES-MORE; capped horizontal basket motion and falling fruit.
- * CPU domain; 30 Hz Q8 motion, scores and flash duration are tunable constants.
+ * CPU domain; 60 Hz motion in 30 Hz Q8 reference units; constants retain their values.
  */
 #ifndef SHOWCASE_CATCH_H
 #define SHOWCASE_CATCH_H

@@ -1,5 +1,5 @@
 /* motion.h — T-GAMES-MORE; one persistent hand session for a five-game arcade.
- * CPU/GUI cooperative domain; the lobby and restart timers use 30 Hz steps.
+ * Application task owns rules; vision and GUI submit input/commands via mailboxes.
  */
 #ifndef SHOWCASE_MOTION_H
 #define SHOWCASE_MOTION_H
@@ -8,7 +8,8 @@
 #include "mole.h"
 #include "slice.h"
 #include "catch.h"
-enum { MOTION_PAGE = 15, MOTION_GAMES = 5, MOTION_HOLD = GAME_HZ,
+#include "sling.h"
+enum { MOTION_PAGE = 15, MOTION_GAMES = 5, MOTION_HOLD = GAME_STEP_HZ,
        MOTION_LOST_MS = 200, MOTION_CARD_W = 280, MOTION_CARD_H = 170 };
 typedef enum { MOTION_HALL, MOTION_SLING, MOTION_RPS, MOTION_MOLE,
                MOTION_SLICE, MOTION_CATCH } motion_game_t;
@@ -22,7 +23,7 @@ typedef struct {
     motion_hand_t hand;
     int hovered;
     unsigned hold, restart, speed, duration;
-    bool waiting, running;
+    bool waiting, running, new_record;
     uint32_t rng, revision, sample, seen_at;
     int seen_x, seen_y;
     int velocity_x, velocity_y;
@@ -32,7 +33,17 @@ typedef struct {
     slice_state_t slice;
     catch_state_t basket;
 } motion_state_t;
+typedef struct {
+    motion_state_t state;
+    sling_state_t sling;
+    int score;
+    unsigned stars;
+    bool done, points_present;
+    int points[21][2];
+} motion_snapshot_t;
 extern motion_state_t ui_motion;
+void motion_command(unsigned action);
+void motion_snapshot_copy(motion_snapshot_t *destination);
 void motion_init(void);
 void motion_seed(uint32_t mtime);
 void motion_select(motion_game_t game);

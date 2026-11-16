@@ -30,5 +30,9 @@ lv_obj_t *ui_select(lv_obj_t *parent, const char *options);
 lv_obj_t *ui_live_badge(lv_obj_t *parent, const char *text, uint32_t color);
 lv_obj_t *ui_flex_switch(lv_obj_t *parent, const char *text, bool checked);
 lv_obj_t *ui_flex_number(lv_obj_t *parent, const char *text, int value);
+lv_obj_t *ui_game_button(lv_obj_t *parent, const char *text,
+                         int x, int y, int width, unsigned action);
+void ui_game_instruction(lv_obj_t *parent, const lv_image_dsc_t *icon,
+                         const char *text, int x, int y, int width);
 extern bool ui_debug_overlay;
 #endif

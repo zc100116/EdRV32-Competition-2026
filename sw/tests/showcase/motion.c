@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+uint32_t sched_port_lock(void) { return 0; }
+void sched_port_unlock(uint32_t lock) { (void)lock; }
 static unsigned starts, ends;
 static char log_line[200];
 void ui_data_grab_output(const char *text)
@@ -45,7 +47,7 @@ int main(void)
     assert(ui_motion.game == MOTION_HALL);
     motion_select(MOTION_MOLE);
     assert(ui_motion.waiting && ui_motion.speed == GAME_SLOW);
-    for (unsigned i = 0; i < GAME_HZ; ++i) motion_step();
+    for (unsigned i = 0; i < GAME_STEP_HZ; ++i) motion_step();
     assert(!ui_motion.mole.ticks);
     motion_start();
     ui_motion.mole.done = true;
@@ -62,7 +64,7 @@ int main(void)
     for (unsigned i = 0; i < MOTION_HOLD; ++i) motion_step();
     assert(!ui_motion.waiting && ui_motion.running);
     assert(strstr(log_line,"name=mole event=start speed=快 score=0 dur_ms=0"));
-    for (unsigned i = 0; i < GAME_HZ; ++i) motion_step();
+    for (unsigned i = 0; i < GAME_STEP_HZ; ++i) motion_step();
     motion_select(MOTION_HALL);
     assert(strstr(log_line,"event=end speed=快") && strstr(log_line,"dur_ms=1000"));
     motion_select(MOTION_MOLE);
@@ -70,14 +72,32 @@ int main(void)
     assert(starts && ends);
     motion_init();
     motion_input(100,200,100,200,true,0,1,1000);
+    motion_step();
     motion_input(120,210,120,210,true,0,1,1040);
+    motion_step();
     motion_input(0,0,0,0,false,1,-1,1140);
+    motion_step();
     assert(ui_motion.hand.present && ui_motion.hand.closed && ui_motion.hand.cls == 1);
     assert(ui_motion.hand.x == 170 && ui_motion.hand.y == 235);
     motion_input(0,0,0,0,false,2,-1,1240);
+    motion_step();
     assert(ui_motion.hand.present && ui_motion.hand.closed);
     motion_input(0,0,0,0,false,3,-1,1241);
+    motion_step();
     assert(!ui_motion.hand.present && !ui_motion.hand.closed);
+    motion_select(MOTION_MOLE);
+    motion_speed(GAME_SLOW);
+    motion_command(22);
+    assert(ui_motion.speed == GAME_SLOW); /* GUI command has not run rules. */
+    motion_step();
+    assert(ui_motion.speed == GAME_FAST && ui_motion.waiting);
+    motion_command(23);
+    motion_step();
+    assert(ui_motion.running && ui_motion.mole.ticks == 1);
+    motion_snapshot_t view;
+    motion_snapshot_copy(&view);
+    motion_step();
+    assert(view.state.mole.ticks == 1 && ui_motion.mole.ticks == 2);
     puts("PASS lobby: all five cards, exact one-second fist hold, open/loss/outside reset "
          "and shared result restart");
 }

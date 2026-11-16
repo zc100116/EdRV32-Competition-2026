@@ -17,11 +17,11 @@ int main(void)
     s.objects[0] = (slice_object_t){{200*GAME_Q,300*GAME_Q,0,0},2,true,false};
     slice_input(&s,100,300,true,1000);
     slice_input(&s,300,300,true,1100); /* Filtered endpoint 250; sweep crosses 200. */
-    assert(s.score == 10 && !s.objects[0].active && s.halves[0].life == SLICE_FADE);
-    assert(s.halves[1].life == SLICE_FADE && s.halves[0].body.vx < 0);
+    assert(s.score == 10 && !s.objects[0].active && s.halves[0].life == SLICE_FADE*GAME_SUBSTEPS);
+    assert(s.halves[1].life == SLICE_FADE*GAME_SUBSTEPS && s.halves[0].body.vx < 0);
     assert(s.halves[1].body.vx > 0 && s.halves[0].kind == 2 && s.halves[1].side == 1);
     assert(s.trail_count == 2 && s.cursor_x == 250);
-    for (unsigned i = 0; i < SLICE_FADE; ++i) slice_step(&s);
+    for (unsigned i = 0; i < SLICE_FADE*GAME_SUBSTEPS; ++i) slice_step(&s);
     assert(!s.halves[0].life && !s.halves[1].life);
     slice_init(&s,123);
     s.objects[0] = (slice_object_t){{200*GAME_Q,300*GAME_Q,0,0},0,true,true};
@@ -34,7 +34,7 @@ int main(void)
     slice_step(&s);
     assert(s.done && s.misses == 3);
     slice_init(&s,123);
-    s.ticks = SLICE_SECONDS*GAME_HZ-1;
+    s.ticks = SLICE_SECONDS*GAME_STEP_HZ-1;
     slice_step(&s);
     assert(s.done);
     slice_init(&s,123);
@@ -84,10 +84,10 @@ int main(void)
         s.objects[0] = (slice_object_t){{640*GAME_Q,400*GAME_Q,4*GAME_Q,-8*GAME_Q},
                                      0,true,false};
         slice_step(&s);
-        assert(s.objects[0].body.x == 640*GAME_Q+GAME_Q*(int)speed);
-        assert(s.objects[0].body.vy == -8*GAME_Q+SLICE_GRAVITY*(int)speed/4);
-        assert(s.objects[0].body.y == 400*GAME_Q-2*GAME_Q*(int)speed+
-               SLICE_GRAVITY*(int)(speed*speed)/32);
+        assert(s.objects[0].body.x == 640*GAME_Q+GAME_Q*(int)speed/2);
+        assert(s.objects[0].body.vy == -8*GAME_Q+SLICE_GRAVITY*(int)speed/8);
+        assert(s.objects[0].body.y == 400*GAME_Q-GAME_Q*(int)speed+
+               SLICE_GRAVITY*(int)(speed*speed)/128);
     }
     puts("PASS slice: 350 px/s, finger allowance, moving circles, two-frame loss bridge, "
          "three-frame break, segment/fast/hit/near counters, halves and finish");

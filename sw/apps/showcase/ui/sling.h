@@ -1,5 +1,5 @@
 /* sling.h — T-GAME-SLING; integer game rules and tunable prototype parameters.
- * CPU/GUI cooperative domain; positions and per-tick velocities use Q8 pixels.
+ * Application task; Q8 velocities use 30 Hz reference units, integrated at 60 Hz.
  */
 #ifndef SHOWCASE_SLING_H
 #define SHOWCASE_SLING_H
@@ -26,11 +26,13 @@ typedef struct {
     sling_body_t ball;
     sling_target_t targets[SLING_TARGETS];
     sling_particle_t particles[SLING_PARTICLES];
+    int preview[SLING_PREVIEW][2];
     int cursor_x, cursor_y, cls;
     bool closed, present;
     unsigned lost, shots, score, remaining, restart_ticks;
 } sling_state_t;
 extern sling_state_t ui_sling;
+void sling_snapshot_copy(const sling_state_t *s, sling_state_t *destination);
 void sling_init(sling_state_t *s);
 void sling_input(sling_state_t *s, int x, int y, bool closed, unsigned lost, int cls);
 void sling_step(sling_state_t *s);
