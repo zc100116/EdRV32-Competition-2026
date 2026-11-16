@@ -1,0 +1,35 @@
+[16:18:46.669][RX] vision_gui refreshes=3 render_ms=6.344 max_ms=9.624 area_px=13110.666 rnd_ms=0.918 sw_ms=0.000 other_ms=5.425
+[16:18:47.560][RX]
+[16:18:47.560][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222
+[16:18:47.560][RX]   E         D   D   R   R   V   V      3      2
+[16:18:47.560][RX]   EEEE      D   D   RRRRR    V V    3333   2222
+[16:18:47.560][RX]   E         D   D   R  R     V V       3   2
+[16:18:47.560][RX]   EEEEEEE   DDDD    R    R    V     3333   2222
+[16:18:47.560][RX]
+[16:18:47.560][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[16:18:47.560][RX] CHIP_ID: 0xed320001
+[16:18:47.560][RX] CLK_SYS_HZ: 125000000
+[16:18:47.560][RX] ROM bytes: 16384
+[16:18:47.560][RX] SRAM bytes: 65536
+[16:18:47.560][RX] I-cache bytes: 8192
+[16:18:47.560][RX] D-cache bytes: 8192
+[16:18:47.560][RX] MEM_READY: 1
+[16:18:47.560][RX] Build commit: 92b38fd2
+[16:18:47.560][RX] Compiler version: GCC 15.2.0
+[16:18:47.667][RX] BIOS: EdRV32
+[16:18:47.667][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[16:19:07.674][SYS] 建立网口连接失败：等待网卡 以太网 就绪超时：local_ip=192.168.1.2，最后状态 OperStatus=Down, DAD=Deprecated，用时 10.0 s
+[16:19:25.872][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[16:19:25.879][RX] Input error: type 1-4 then Enter
+[16:19:25.880][SYS] Input error: type 1-4 then Enter
+[16:19:25.880][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[16:19:29.020][RX] ETH link: up
+[16:19:29.020][RX] ETH load ready 192.168.1.10:5000
+[16:19:29.488][SYS] 等待网卡 以太网 就绪 … 用时 0.5 s
+[16:19:29.862][RX] Load bytes: 29417992 segments: 5
+[16:19:29.862][RX] Load result: PASS
+[16:19:29.862][RX] Run: 0x90000000
+[16:19:32.325][RX] LVGL v9.6.0 DIRECT ARGB8888 1280x720 batch=32
+[16:19:32.325][RX] Showcase: EdRV32 showcase v2
+[16:19:32.390][RX] ETH peer IP: 0xc0a80102
+[16:19:32.400][RX] ETH peer port: 57701

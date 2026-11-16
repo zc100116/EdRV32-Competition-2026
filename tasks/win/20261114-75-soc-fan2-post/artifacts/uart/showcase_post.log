@@ -1,0 +1,696 @@
+[16:15:39.029][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[16:15:45.250][RX]
+[16:15:45.250][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222
+[16:15:45.250][RX]   E         D   D   R   R   V   V      3      2
+[16:15:45.250][RX]   EEEE      D   D   RRRRR    V V    3333   2222
+[16:15:45.250][RX]   E         D   D   R  R     V V       3   2
+[16:15:45.250][RX]   EEEEEEE   DDDD    R    R    V     3333   2222
+[16:15:45.250][RX]
+[16:15:45.250][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[16:15:45.250][RX] CHIP_ID: 0xed320001
+[16:15:45.250][RX] CLK_SYS_HZ: 125000000
+[16:15:45.250][RX] ROM bytes: 16384
+[16:15:45.250][RX] SRAM bytes: 65536
+[16:15:45.250][RX] I-cache bytes: 8192
+[16:15:45.250][RX] D-cache bytes: 8192
+[16:15:45.250][RX] MEM_READY: 1
+[16:15:45.250][RX] Build commit: 92b38fd2
+[16:15:45.250][RX] Compiler version: GCC 15.2.0
+[16:15:45.374][RX] BIOS: EdRV32
+[16:15:45.374][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[16:15:48.513][RX] ETH link: up
+[16:15:48.513][RX] ETH load ready 192.168.1.10:5000
+[16:15:48.702][SYS] 等待网卡 以太网 就绪 … 用时 0.2 s
+[16:15:48.833][RX] Load bytes: 12768880 segments: 5
+[16:15:48.833][RX] Load result: PASS
+[16:15:48.833][RX] Run: 0x90000000
+[16:15:49.697][RX] LVGL v9.6.0 DIRECT ARGB8888 1280x720 batch=32
+[16:15:49.698][RX] Showcase: EdRV32 showcase v2
+[16:15:49.749][RX] ETH peer IP: 0xc0a80102
+[16:15:49.760][RX] ETH peer port: 55845
+[16:15:49.770][RX] showcase first frame
+[16:15:50.230][RX] CPU%/max_us 2/1179 0/129 5/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:15:50.250][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:15:51.232][RX] CPU%/max_us 2/1182 0/129 1/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:15:51.252][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:15:52.233][RX] CPU%/max_us 2/1182 0/129 0/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:15:52.253][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:15:53.252][RX] CPU%/max_us 2/1187 0/129 1/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:15:53.273][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:15:54.263][RX] CPU%/max_us 2/1392 0/129 0/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:15:54.282][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:15:55.272][RX] CPU%/max_us 2/1392 0/129 1/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:15:55.291][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:15:56.281][RX] CPU%/max_us 2/1392 0/129 0/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:15:56.300][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:15:57.291][RX] CPU%/max_us 2/1392 0/129 1/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:15:57.310][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:15:58.300][RX] CPU%/max_us 2/1392 0/129 0/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:15:58.320][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:15:59.310][RX] CPU%/max_us 2/1392 0/129 1/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:15:59.329][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:00.322][RX] CPU%/max_us 2/1392 0/129 1/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:00.341][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:01.331][RX] CPU%/max_us 2/1392 0/129 1/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:01.350][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:02.342][RX] CPU%/max_us 2/1418 0/129 0/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:02.362][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:03.355][RX] CPU%/max_us 2/1418 0/129 1/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:03.378][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:04.367][RX] CPU%/max_us 2/1418 0/129 0/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:04.387][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:05.383][RX] CPU%/max_us 2/1418 0/129 1/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:05.402][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:06.392][RX] CPU%/max_us 2/1418 0/129 0/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:06.412][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:07.402][RX] CPU%/max_us 2/1418 0/129 1/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:07.422][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:07.721][SYS] UDP 已监听 192.168.1.2:6000 · console
+[16:16:08.147][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[16:16:08.159][RX] ETH peer IP: 0xc0a80102
+[16:16:08.169][RX] ETH peer port: 6000
+[16:16:08.415][RX] CPU%/max_us 2/1418 0/129 1/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:08.435][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:09.513][RX] CPU%/max_us 2/1418 0/129 6/46287 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:09.532][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:10.425][RX] CPU%/max_us 3/1422 1/129 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:10.445][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:10.563][RX] vision_gui refreshes=2 render_ms=20.740 max_ms=37.241 area_px=465100.000 rnd_ms=5.900 sw_ms=0.000 other_ms=14.839
+[16:16:11.438][RX] CPU%/max_us 3/1807 1/214 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:11.451][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:11.535][RX] vision fps=24 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:11.595][RX] vision_gui refreshes=7 render_ms=3.099 max_ms=9.927 area_px=4082.571 rnd_ms=0.294 sw_ms=0.000 other_ms=2.804
+[16:16:12.448][RX] CPU%/max_us 3/1807 1/215 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:12.468][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:12.559][RX] vision fps=27 npu=34.9 wait=0.3 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=20.7 e2e=82.4 period=35.3 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:16:12.622][RX] vision_gui refreshes=2 render_ms=7.052 max_ms=9.635 area_px=13550.000 rnd_ms=0.932 sw_ms=0.000 other_ms=6.119
+[16:16:13.454][RX] CPU%/max_us 3/1807 1/217 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:13.474][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:13.564][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=25.8 e2e=69.9 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:13.626][RX] vision_gui refreshes=2 render_ms=5.247 max_ms=6.328 area_px=9450.000 rnd_ms=0.623 sw_ms=0.000 other_ms=4.624
+[16:16:14.461][RX] CPU%/max_us 3/1807 1/217 10/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:14.482][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:14.573][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=20.9 e2e=69.8 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:16:14.639][RX] vision_gui refreshes=6 render_ms=8.139 max_ms=13.592 area_px=6941.500 rnd_ms=1.335 sw_ms=0.000 other_ms=6.804
+[16:16:15.480][RX] CPU%/max_us 3/1807 1/217 9/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:15.495][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:15.590][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=24.9 e2e=76.5 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=10%
+[16:16:15.650][RX] vision_gui refreshes=10 render_ms=6.507 max_ms=11.407 area_px=5735.300 rnd_ms=1.014 sw_ms=0.000 other_ms=5.493
+[16:16:16.487][RX] CPU%/max_us 3/1807 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:16.504][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:16.597][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=23.2 e2e=79.0 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=9%
+[16:16:16.656][RX] vision_gui refreshes=3 render_ms=3.611 max_ms=6.317 area_px=7619.666 rnd_ms=0.480 sw_ms=0.000 other_ms=3.130
+[16:16:17.506][RX] CPU%/max_us 3/1807 1/272 22/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:17.527][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:17.618][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=17.4 e2e=53.0 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:17.680][RX] vision_gui refreshes=16 render_ms=10.036 max_ms=15.588 area_px=6630.875 rnd_ms=1.538 sw_ms=0.000 other_ms=8.498
+[16:16:18.517][RX] CPU%/max_us 3/1807 1/272 4/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:18.538][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:18.628][RX] vision fps=28 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=25.0 e2e=75.9 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=22%
+[16:16:18.703][RX] vision_gui refreshes=7 render_ms=3.518 max_ms=8.908 area_px=4383.428 rnd_ms=0.363 sw_ms=0.000 other_ms=3.155
+[16:16:19.531][RX] CPU%/max_us 3/2076 1/272 14/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:19.552][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:19.645][RX] vision fps=27 npu=34.9 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=7.5 e2e=53.0 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=4%
+[16:16:19.706][RX] vision_gui refreshes=12 render_ms=11.528 max_ms=26.839 area_px=6262.833 rnd_ms=1.383 sw_ms=0.000 other_ms=10.144
+[16:16:20.541][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:20.572][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:20.660][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=4%
+[16:16:20.858][RX] vision_gui refreshes=2 render_ms=10.803 max_ms=17.400 area_px=18005.000 rnd_ms=1.234 sw_ms=0.000 other_ms=9.568
+[16:16:21.578][RX] CPU%/max_us 2/2076 1/272 35/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:21.603][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:21.704][RX] vision fps=27 npu=35.0 wait=0.7 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=24.7 e2e=81.7 period=35.7 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=37%
+[16:16:21.770][RX] vision_gui refreshes=24 render_ms=16.358 max_ms=39.564 area_px=9810.666 rnd_ms=2.698 sw_ms=0.000 other_ms=13.660
+[16:16:22.583][RX] CPU%/max_us 3/2076 1/272 4/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:22.603][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:22.705][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=27.9 e2e=72.5 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=21%
+[16:16:22.788][RX] vision_gui refreshes=10 render_ms=10.460 max_ms=14.514 area_px=6013.500 rnd_ms=1.270 sw_ms=0.000 other_ms=9.189
+[16:16:23.597][RX] CPU%/max_us 3/2076 1/272 14/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:23.618][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:23.702][RX] vision fps=27 npu=35.0 wait=0.3 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=25.6 e2e=80.9 period=35.3 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=25%
+[16:16:23.774][RX] vision_gui refreshes=17 render_ms=11.472 max_ms=21.822 area_px=6878.823 rnd_ms=1.755 sw_ms=0.000 other_ms=9.716
+[16:16:24.608][RX] CPU%/max_us 3/2076 1/272 3/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:24.629][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:24.719][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=23.1 e2e=86.0 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=6%
+[16:16:24.781][RX] vision_gui refreshes=9 render_ms=3.682 max_ms=11.597 area_px=4035.777 rnd_ms=0.365 sw_ms=0.000 other_ms=3.317
+[16:16:25.610][RX] CPU%/max_us 2/2076 1/272 18/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:25.629][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:25.713][RX] vision fps=27 npu=34.9 wait=0.3 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=24.3 e2e=76.0 period=35.2 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:25.768][RX] vision_gui refreshes=27 render_ms=3.290 max_ms=13.780 area_px=1621.407 rnd_ms=0.270 sw_ms=0.000 other_ms=3.020
+[16:16:26.629][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:26.651][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:26.741][RX] vision fps=27 npu=34.9 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=22.9 e2e=76.2 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=12%
+[16:16:26.801][RX] vision_gui refreshes=18 render_ms=3.217 max_ms=9.299 area_px=1892.722 rnd_ms=0.270 sw_ms=0.000 other_ms=2.947
+[16:16:27.644][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:27.664][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:27.758][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=26.2 e2e=69.2 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:16:27.819][RX] vision_gui refreshes=2 render_ms=5.290 max_ms=6.270 area_px=11325.000 rnd_ms=0.727 sw_ms=0.000 other_ms=4.562
+[16:16:28.656][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:28.677][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:28.762][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=0%
+[16:16:28.824][RX] vision_gui refreshes=1 render_ms=8.971 max_ms=8.971 area_px=18700.000 rnd_ms=1.211 sw_ms=0.000 other_ms=7.760
+[16:16:29.665][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:29.686][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:29.776][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=24.6 e2e=85.8 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:29.839][RX] vision_gui refreshes=2 render_ms=5.188 max_ms=6.762 area_px=11125.000 rnd_ms=0.703 sw_ms=0.000 other_ms=4.485
+[16:16:30.695][RX] vision_gui refreshes=1 render_ms=9.036 max_ms=9.036 area_px=18700.000 rnd_ms=1.152 sw_ms=0.000 other_ms=7.883
+[16:16:30.736][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:30.766][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:30.851][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:31.683][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:31.703][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:31.788][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=29.6 e2e=85.7 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:31.851][RX] vision_gui refreshes=3 render_ms=4.675 max_ms=9.256 area_px=9036.333 rnd_ms=0.605 sw_ms=0.000 other_ms=4.069
+[16:16:32.691][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:32.712][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:32.799][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:32.861][RX] vision_gui refreshes=2 render_ms=6.403 max_ms=9.098 area_px=13450.000 rnd_ms=0.856 sw_ms=0.000 other_ms=5.547
+[16:16:33.700][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:33.721][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:33.814][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=26.3 e2e=85.6 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:33.872][RX] vision_gui refreshes=2 render_ms=6.772 max_ms=9.398 area_px=13450.000 rnd_ms=0.951 sw_ms=0.000 other_ms=5.820
+[16:16:34.710][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:34.731][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:34.822][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:34.885][RX] vision_gui refreshes=2 render_ms=6.394 max_ms=9.127 area_px=13450.000 rnd_ms=0.872 sw_ms=0.000 other_ms=5.521
+[16:16:35.719][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:35.739][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:35.831][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=24.4 e2e=77.2 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:35.893][RX] vision_gui refreshes=2 render_ms=6.525 max_ms=9.300 area_px=13450.000 rnd_ms=0.896 sw_ms=0.000 other_ms=5.628
+[16:16:36.751][RX] vision_gui refreshes=4 render_ms=5.006 max_ms=8.158 area_px=6520.500 rnd_ms=0.690 sw_ms=0.000 other_ms=4.316
+[16:16:36.793][RX] CPU%/max_us 3/2076 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:36.826][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:36.903][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=19.1 e2e=74.4 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=4%
+[16:16:37.757][RX] vision_gui refreshes=6 render_ms=5.976 max_ms=10.062 area_px=8156.000 rnd_ms=0.795 sw_ms=0.000 other_ms=5.180
+[16:16:37.798][RX] CPU%/max_us 3/2076 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:37.834][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:37.918][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=23.9 e2e=82.7 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=7%
+[16:16:38.754][RX] vision_gui refreshes=2 render_ms=6.694 max_ms=9.204 area_px=13550.000 rnd_ms=0.904 sw_ms=0.000 other_ms=5.790
+[16:16:38.797][RX] CPU%/max_us 3/2076 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:38.835][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:38.918][RX] vision fps=27 npu=34.9 wait=0.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=21.5 e2e=85.4 period=35.2 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:16:39.764][RX] vision_gui refreshes=3 render_ms=10.487 max_ms=15.679 area_px=13178.000 rnd_ms=1.630 sw_ms=0.000 other_ms=8.857
+[16:16:39.808][RX] CPU%/max_us 3/2076 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:39.834][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:39.911][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=32.5 e2e=85.4 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=6%
+[16:16:40.773][RX] vision_gui refreshes=2 render_ms=5.359 max_ms=6.562 area_px=10625.000 rnd_ms=0.728 sw_ms=0.000 other_ms=4.630
+[16:16:40.816][RX] CPU%/max_us 3/2076 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:40.837][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:40.920][RX] vision fps=27 npu=34.9 wait=0.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=21.5 e2e=85.3 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:16:41.780][RX] vision_gui refreshes=2 render_ms=6.396 max_ms=9.166 area_px=13450.000 rnd_ms=0.937 sw_ms=0.000 other_ms=5.459
+[16:16:41.824][RX] CPU%/max_us 3/2076 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:41.845][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:41.937][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=31.6 e2e=85.3 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:16:42.788][RX] vision_gui refreshes=2 render_ms=5.008 max_ms=5.992 area_px=10525.000 rnd_ms=0.686 sw_ms=0.000 other_ms=4.321
+[16:16:42.835][RX] CPU%/max_us 3/2076 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:42.866][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:42.940][RX] vision fps=27 npu=34.9 wait=0.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=21.4 e2e=85.2 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:16:43.799][RX] vision_gui refreshes=2 render_ms=4.865 max_ms=6.102 area_px=9350.000 rnd_ms=0.619 sw_ms=0.000 other_ms=4.246
+[16:16:43.838][RX] CPU%/max_us 3/2076 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:43.870][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:43.952][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=31.8 e2e=85.2 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:16:44.811][RX] vision_gui refreshes=2 render_ms=5.163 max_ms=6.242 area_px=10525.000 rnd_ms=0.733 sw_ms=0.000 other_ms=4.430
+[16:16:44.852][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:44.879][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:44.963][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=22.6 e2e=85.1 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:45.821][RX] vision_gui refreshes=1 render_ms=8.780 max_ms=8.780 area_px=18700.000 rnd_ms=1.182 sw_ms=0.000 other_ms=7.598
+[16:16:45.862][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:45.889][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:45.972][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=0%
+[16:16:46.840][RX] vision_gui refreshes=2 render_ms=5.132 max_ms=6.348 area_px=9350.000 rnd_ms=0.666 sw_ms=0.000 other_ms=4.465
+[16:16:46.881][RX] CPU%/max_us 3/2076 1/272 3/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:46.912][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:46.988][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=28.1 e2e=85.0 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:47.835][RX] vision_gui refreshes=2 render_ms=5.401 max_ms=7.184 area_px=11125.000 rnd_ms=0.749 sw_ms=0.000 other_ms=4.651
+[16:16:47.877][RX] CPU%/max_us 3/2076 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:47.908][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:47.981][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=19.2 e2e=85.0 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:16:48.843][RX] vision_gui refreshes=1 render_ms=3.647 max_ms=3.647 area_px=8200.000 rnd_ms=0.500 sw_ms=0.000 other_ms=3.147
+[16:16:48.880][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:48.911][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:48.993][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=29.4 e2e=84.9 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:49.847][RX] vision_gui refreshes=2 render_ms=4.986 max_ms=6.297 area_px=11125.000 rnd_ms=0.683 sw_ms=0.000 other_ms=4.303
+[16:16:49.888][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:49.920][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:49.998][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=24.9 e2e=84.9 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:50.848][RX] vision_gui refreshes=2 render_ms=4.909 max_ms=6.241 area_px=10525.000 rnd_ms=0.693 sw_ms=0.000 other_ms=4.216
+[16:16:50.890][RX] CPU%/max_us 3/2076 1/272 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:50.921][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:50.998][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=34.8 e2e=84.9 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:51.865][RX] vision_gui refreshes=1 render_ms=5.974 max_ms=5.974 area_px=12850.000 rnd_ms=0.778 sw_ms=0.000 other_ms=5.196
+[16:16:51.907][RX] CPU%/max_us 3/2076 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:51.937][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:52.020][RX] vision fps=27 npu=34.9 wait=0.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=35.2 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:16:52.856][RX] vision_gui refreshes=2 render_ms=6.356 max_ms=9.042 area_px=13450.000 rnd_ms=0.824 sw_ms=0.000 other_ms=5.531
+[16:16:52.909][RX] CPU%/max_us 3/2076 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:52.929][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:53.021][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=32.2 e2e=84.8 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:16:53.697][SYS] 等待网卡 以太网 就绪 … 用时 0.2 s
+[16:16:53.867][RX] vision_gui refreshes=2 render_ms=6.461 max_ms=9.373 area_px=13450.000 rnd_ms=0.863 sw_ms=0.000 other_ms=5.597
+[16:16:53.914][RX] CPU%/max_us 3/2076 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:53.935][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:54.027][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=25.5 e2e=84.7 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:16:54.858][RX] vision_gui refreshes=2 render_ms=6.120 max_ms=8.645 area_px=13450.000 rnd_ms=0.838 sw_ms=0.000 other_ms=5.282
+[16:16:54.932][RX] CPU%/max_us 3/2076 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:54.953][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:55.043][RX] vision fps=28 npu=34.9 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:16:55.870][RX] vision_gui refreshes=2 render_ms=6.756 max_ms=9.370 area_px=13450.000 rnd_ms=0.962 sw_ms=0.000 other_ms=5.794
+[16:16:55.944][RX] CPU%/max_us 3/2076 1/272 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:55.964][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:56.056][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=23.1 e2e=84.6 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:16:56.899][RX] vision_gui refreshes=6 render_ms=11.886 max_ms=18.474 area_px=7528.500 rnd_ms=1.671 sw_ms=0.000 other_ms=10.214
+[16:16:56.954][RX] CPU%/max_us 3/2076 1/272 19/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:56.974][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:57.059][RX] vision fps=27 npu=34.9 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:16:57.980][RX] vision_gui refreshes=8 render_ms=19.649 max_ms=41.027 area_px=10889.750 rnd_ms=3.573 sw_ms=0.000 other_ms=16.076
+[16:16:58.042][RX] CPU%/max_us 2/2076 1/272 37/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:58.073][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:58.170][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=22.8 e2e=80.4 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=3%
+[16:16:58.883][RX] vision_gui refreshes=24 render_ms=18.925 max_ms=34.566 area_px=11455.583 rnd_ms=4.324 sw_ms=0.000 other_ms=14.600
+[16:16:59.025][RX] CPU%/max_us 3/2076 1/272 27/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:16:59.045][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:16:59.143][RX] vision fps=26 npu=35.1 wait=1.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=29.8 e2e=75.2 period=36.3 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=44%
+[16:16:59.889][RX] vision_gui refreshes=30 render_ms=8.049 max_ms=15.059 area_px=7604.366 rnd_ms=1.147 sw_ms=0.000 other_ms=6.902
+[16:17:00.029][RX] CPU%/max_us 3/2076 2/272 30/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:00.040][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:00.183][RX] vision fps=27 npu=35.0 wait=0.4 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=25.8 e2e=77.9 period=35.5 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=24%
+[16:17:00.868][RX] vision_gui refreshes=30 render_ms=10.726 max_ms=36.583 area_px=9389.233 rnd_ms=1.676 sw_ms=0.000 other_ms=9.049
+[16:17:01.037][RX] CPU%/max_us 3/2076 2/272 23/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:01.058][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:01.147][RX] vision fps=28 npu=35.0 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=24.8 e2e=76.1 period=35.2 copy=0.0 cpu_comm=2% cpu_app=2% cpu_gui=38%
+[16:17:01.903][RX] vision_gui refreshes=29 render_ms=6.800 max_ms=21.374 area_px=6162.000 rnd_ms=0.969 sw_ms=0.000 other_ms=5.830
+[16:17:02.042][RX] CPU%/max_us 3/2076 2/272 20/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:02.064][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:02.153][RX] vision fps=27 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=24.2 e2e=75.7 period=35.1 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=23%
+[16:17:02.896][RX] vision_gui refreshes=29 render_ms=6.498 max_ms=14.669 area_px=6358.758 rnd_ms=0.944 sw_ms=0.000 other_ms=5.553
+[16:17:03.060][RX] CPU%/max_us 3/2076 2/272 21/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:03.084][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:03.183][RX] vision fps=28 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=24.5 e2e=77.4 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=21%
+[16:17:03.916][RX] vision_gui refreshes=30 render_ms=8.052 max_ms=15.135 area_px=6947.933 rnd_ms=1.267 sw_ms=0.000 other_ms=6.785
+[16:17:04.054][RX] CPU%/max_us 3/2076 1/272 25/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:04.075][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:04.169][RX] vision fps=27 npu=35.0 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=25.0 e2e=76.5 period=35.2 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=21%
+[16:17:04.968][RX] vision_gui refreshes=31 render_ms=9.034 max_ms=21.373 area_px=7125.935 rnd_ms=1.340 sw_ms=0.000 other_ms=7.694
+[16:17:05.077][RX] CPU%/max_us 3/2076 1/272 35/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:05.101][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:05.198][RX] vision fps=27 npu=35.0 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=24.7 e2e=80.4 period=35.2 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=25%
+[16:17:05.950][RX] vision_gui refreshes=30 render_ms=7.965 max_ms=25.406 area_px=6910.600 rnd_ms=1.252 sw_ms=0.000 other_ms=6.713
+[16:17:06.087][RX] CPU%/max_us 3/2076 2/272 25/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:06.107][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:06.202][RX] vision fps=28 npu=35.0 wait=0.3 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=24.2 e2e=74.8 period=35.4 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=35%
+[16:17:06.969][RX] vision_gui refreshes=16 render_ms=9.485 max_ms=22.333 area_px=8200.562 rnd_ms=1.488 sw_ms=0.000 other_ms=7.997
+[16:17:07.088][RX] CPU%/max_us 3/2076 1/272 19/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:07.110][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:07.197][RX] vision fps=27 npu=35.0 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=26.3 e2e=73.6 period=35.1 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=25%
+[16:17:07.969][RX] vision_gui refreshes=31 render_ms=6.968 max_ms=15.205 area_px=5879.290 rnd_ms=0.984 sw_ms=0.000 other_ms=5.984
+[16:17:08.114][RX] CPU%/max_us 3/2076 2/272 20/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:08.135][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:08.245][RX] vision fps=27 npu=35.0 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=23.1 e2e=78.0 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=19%
+[16:17:08.986][RX] vision_gui refreshes=30 render_ms=8.107 max_ms=16.226 area_px=6971.066 rnd_ms=1.097 sw_ms=0.000 other_ms=7.010
+[16:17:09.122][RX] CPU%/max_us 3/2076 1/290 25/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:09.140][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:09.236][RX] vision fps=28 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=25.6 e2e=74.8 period=35.1 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=20%
+[16:17:09.991][RX] vision_gui refreshes=30 render_ms=7.283 max_ms=15.463 area_px=6680.800 rnd_ms=1.004 sw_ms=0.000 other_ms=6.279
+[16:17:10.120][RX] CPU%/max_us 3/2076 2/290 21/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:10.141][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:10.242][RX] vision fps=28 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=25.6 e2e=79.4 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=25%
+[16:17:11.020][RX] vision_gui refreshes=30 render_ms=6.087 max_ms=9.536 area_px=5121.700 rnd_ms=0.846 sw_ms=0.000 other_ms=5.241
+[16:17:11.137][RX] CPU%/max_us 3/2076 2/290 22/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:11.151][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:11.249][RX] vision fps=27 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=24.7 e2e=75.0 period=35.0 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=21%
+[16:17:12.040][RX] vision_gui refreshes=27 render_ms=8.832 max_ms=21.512 area_px=7055.814 rnd_ms=1.384 sw_ms=0.000 other_ms=7.447
+[16:17:12.155][RX] CPU%/max_us 3/2076 2/290 23/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:12.176][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:12.271][RX] vision fps=27 npu=35.0 wait=0.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=26.2 e2e=79.9 period=35.2 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=22%
+[16:17:13.049][RX] vision_gui refreshes=30 render_ms=8.012 max_ms=23.805 area_px=6363.166 rnd_ms=1.240 sw_ms=0.000 other_ms=6.772
+[16:17:13.194][RX] CPU%/max_us 3/2076 1/290 25/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:13.217][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:13.314][RX] vision fps=28 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=26.0 e2e=79.0 period=35.1 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=23%
+[16:17:14.051][RX] vision_gui refreshes=30 render_ms=7.352 max_ms=10.675 area_px=6538.666 rnd_ms=0.937 sw_ms=0.000 other_ms=6.414
+[16:17:14.206][RX] CPU%/max_us 3/2076 2/290 22/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:14.232][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:14.319][RX] vision fps=27 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=25.1 e2e=77.6 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=25%
+[16:17:15.065][RX] vision_gui refreshes=30 render_ms=6.215 max_ms=14.817 area_px=5046.533 rnd_ms=0.820 sw_ms=0.000 other_ms=5.395
+[16:17:15.219][RX] CPU%/max_us 3/2076 2/290 22/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:15.240][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:15.330][RX] vision fps=28 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=24.7 e2e=76.0 period=35.0 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=22%
+[16:17:16.078][RX] vision_gui refreshes=28 render_ms=8.270 max_ms=21.247 area_px=6526.285 rnd_ms=1.354 sw_ms=0.000 other_ms=6.916
+[16:17:16.235][RX] CPU%/max_us 3/2076 1/300 28/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:16.252][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:16.344][RX] vision fps=27 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=25.9 e2e=79.1 period=35.0 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=22%
+[16:17:17.058][RX] vision_gui refreshes=9 render_ms=12.606 max_ms=17.691 area_px=8482.111 rnd_ms=2.415 sw_ms=0.000 other_ms=10.191
+[16:17:17.245][RX] CPU%/max_us 3/2076 1/300 3/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:17.267][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:17.356][RX] vision fps=28 npu=35.0 wait=0.4 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=24.1 e2e=78.1 period=35.4 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=28%
+[16:17:18.074][RX] vision_gui refreshes=5 render_ms=12.327 max_ms=16.857 area_px=11738.600 rnd_ms=2.052 sw_ms=0.000 other_ms=10.274
+[16:17:18.238][RX] CPU%/max_us 3/2076 1/300 13/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:18.269][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:18.353][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=24.8 e2e=67.0 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=3%
+[16:17:19.055][RX] vision_gui refreshes=7 render_ms=12.098 max_ms=14.820 area_px=11160.714 rnd_ms=2.334 sw_ms=0.000 other_ms=9.764
+[16:17:19.258][RX] CPU%/max_us 3/2076 1/300 3/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:19.278][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:19.370][RX] vision fps=28 npu=34.9 wait=0.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=27.6 e2e=66.9 period=35.2 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=13%
+[16:17:20.080][RX] vision_gui refreshes=2 render_ms=6.727 max_ms=9.142 area_px=13650.000 rnd_ms=0.910 sw_ms=0.000 other_ms=5.816
+[16:17:20.272][RX] CPU%/max_us 3/2076 1/300 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:20.293][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:20.386][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=20.9 e2e=71.1 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=3%
+[16:17:21.080][RX] vision_gui refreshes=2 render_ms=6.426 max_ms=9.125 area_px=13450.000 rnd_ms=0.853 sw_ms=0.000 other_ms=5.572
+[16:17:21.287][RX] CPU%/max_us 3/2076 1/300 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:21.308][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:21.400][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=28.0 e2e=83.5 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:17:22.083][RX] vision_gui refreshes=2 render_ms=6.359 max_ms=8.768 area_px=13450.000 rnd_ms=0.843 sw_ms=0.000 other_ms=5.516
+[16:17:22.306][RX] CPU%/max_us 3/2076 1/300 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:22.327][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:22.411][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=30.1 e2e=66.8 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:17:23.083][RX] vision_gui refreshes=2 render_ms=6.512 max_ms=9.187 area_px=13450.000 rnd_ms=0.926 sw_ms=0.000 other_ms=5.586
+[16:17:23.305][RX] CPU%/max_us 3/2076 1/300 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:23.326][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:23.419][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=24.1 e2e=66.7 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:17:24.073][RX] vision_gui refreshes=2 render_ms=6.595 max_ms=9.110 area_px=13450.000 rnd_ms=0.898 sw_ms=0.000 other_ms=5.696
+[16:17:24.314][RX] CPU%/max_us 3/2076 1/300 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:24.326][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:24.419][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=34.0 e2e=100.0 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:17:25.095][RX] vision_gui refreshes=2 render_ms=5.507 max_ms=7.021 area_px=11525.000 rnd_ms=0.738 sw_ms=0.000 other_ms=4.769
+[16:17:25.317][RX] CPU%/max_us 3/2076 1/300 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:25.338][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:25.423][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=24.3 e2e=66.7 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:17:26.094][RX] vision_gui refreshes=2 render_ms=6.483 max_ms=8.953 area_px=13850.000 rnd_ms=0.871 sw_ms=0.000 other_ms=5.612
+[16:17:26.337][RX] CPU%/max_us 3/2076 1/300 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:26.358][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:26.445][RX] vision fps=28 npu=34.9 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:17:27.085][RX] vision_gui refreshes=2 render_ms=6.669 max_ms=9.743 area_px=13450.000 rnd_ms=0.870 sw_ms=0.000 other_ms=5.799
+[16:17:27.346][RX] CPU%/max_us 3/2076 1/300 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:27.367][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:27.450][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=25.6 e2e=66.6 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:17:28.098][RX] vision_gui refreshes=2 render_ms=5.142 max_ms=6.010 area_px=9350.000 rnd_ms=0.630 sw_ms=0.000 other_ms=4.512
+[16:17:28.342][RX] CPU%/max_us 3/2076 1/300 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:28.363][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:28.448][RX] vision fps=28 npu=34.9 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:17:29.108][RX] vision_gui refreshes=2 render_ms=6.795 max_ms=9.080 area_px=13450.000 rnd_ms=0.895 sw_ms=0.000 other_ms=5.899
+[16:17:29.358][RX] CPU%/max_us 3/2076 1/300 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:29.378][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:29.463][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=22.8 e2e=66.5 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:17:30.112][RX] vision_gui refreshes=2 render_ms=3.669 max_ms=3.703 area_px=7025.000 rnd_ms=0.458 sw_ms=0.000 other_ms=3.210
+[16:17:30.370][RX] CPU%/max_us 3/2076 1/300 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:30.391][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:30.479][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=18.8 e2e=66.4 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:17:31.114][RX] vision_gui refreshes=1 render_ms=3.955 max_ms=3.955 area_px=8200.000 rnd_ms=0.501 sw_ms=0.000 other_ms=3.453
+[16:17:31.376][RX] CPU%/max_us 3/2076 1/300 0/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:31.397][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:31.481][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=29.1 e2e=66.4 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:17:32.130][RX] vision_gui refreshes=4 render_ms=10.102 max_ms=15.764 area_px=10978.500 rnd_ms=1.849 sw_ms=0.000 other_ms=8.253
+[16:17:32.381][RX] CPU%/max_us 3/2076 1/300 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:32.402][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:32.494][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=18.6 e2e=83.0 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=0%
+[16:17:33.139][RX] vision_gui refreshes=2 render_ms=6.632 max_ms=9.125 area_px=13550.000 rnd_ms=0.888 sw_ms=0.000 other_ms=5.743
+[16:17:33.390][RX] CPU%/max_us 3/2076 1/300 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:33.410][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:33.495][RX] vision fps=28 npu=34.9 wait=0.3 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=29.3 e2e=66.3 period=35.3 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:17:34.144][RX] vision_gui refreshes=2 render_ms=6.492 max_ms=8.745 area_px=13450.000 rnd_ms=0.870 sw_ms=0.000 other_ms=5.622
+[16:17:34.398][RX] CPU%/max_us 3/2076 1/300 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:34.419][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:34.508][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=21.6 e2e=66.2 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:17:35.151][RX] vision_gui refreshes=2 render_ms=6.483 max_ms=9.426 area_px=13450.000 rnd_ms=0.861 sw_ms=0.000 other_ms=5.621
+[16:17:35.407][RX] CPU%/max_us 3/2076 1/300 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:35.428][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:35.520][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=31.7 e2e=99.6 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:17:36.165][RX] vision_gui refreshes=4 render_ms=10.133 max_ms=15.362 area_px=10823.000 rnd_ms=1.728 sw_ms=0.000 other_ms=8.405
+[16:17:36.426][RX] CPU%/max_us 3/2076 1/300 14/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:36.448][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:36.531][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=25.3 e2e=66.2 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:17:37.155][RX] vision_gui refreshes=6 render_ms=7.935 max_ms=12.065 area_px=6940.833 rnd_ms=1.317 sw_ms=0.000 other_ms=6.618
+[16:17:37.435][RX] CPU%/max_us 3/2076 1/300 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:37.455][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:37.553][RX] vision fps=27 npu=35.0 wait=0.4 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=28.6 e2e=82.8 period=35.4 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=14%
+[16:17:38.170][RX] vision_gui refreshes=2 render_ms=9.455 max_ms=14.107 area_px=15480.000 rnd_ms=1.030 sw_ms=0.000 other_ms=8.424
+[16:17:38.448][RX] CPU%/max_us 3/2076 1/300 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:38.469][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:38.561][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=30.0 e2e=82.7 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:17:39.178][RX] vision_gui refreshes=2 render_ms=8.148 max_ms=12.489 area_px=16475.000 rnd_ms=1.078 sw_ms=0.000 other_ms=7.070
+[16:17:39.459][RX] CPU%/max_us 3/2076 1/300 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:39.479][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:39.574][RX] vision fps=27 npu=34.9 wait=0.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=32.6 e2e=99.4 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:17:40.205][RX] vision_gui refreshes=14 render_ms=12.677 max_ms=17.432 area_px=9265.142 rnd_ms=2.818 sw_ms=0.000 other_ms=9.859
+[16:17:40.501][RX] CPU%/max_us 3/2076 1/300 35/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:40.532][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:40.665][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=29.4 e2e=82.6 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:17:41.185][RX] vision_gui refreshes=25 render_ms=13.094 max_ms=17.293 area_px=12074.160 rnd_ms=3.256 sw_ms=0.000 other_ms=9.837
+[16:17:41.491][RX] CPU%/max_us 3/2076 1/300 17/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:41.516][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:41.703][RX] vision fps=28 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=25.9 e2e=77.8 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=35%
+[16:17:42.222][RX] vision_gui refreshes=23 render_ms=18.354 max_ms=27.277 area_px=15312.782 rnd_ms=4.998 sw_ms=0.000 other_ms=13.355
+[16:17:42.587][RX] CPU%/max_us 2/2076 1/300 43/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:42.633][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:42.840][RX] vision fps=27 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=26.2 e2e=79.6 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=17%
+[16:17:43.311][RX] vision_gui refreshes=28 render_ms=21.340 max_ms=31.047 area_px=15850.535 rnd_ms=5.561 sw_ms=0.000 other_ms=15.778
+[16:17:43.586][RX] CPU%/max_us 1/2076 1/307 56/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:43.643][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:43.772][RX] vision fps=27 npu=35.1 wait=0.6 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=27.1 e2e=83.7 period=35.8 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=43%
+[16:17:44.305][RX] vision_gui refreshes=28 render_ms=20.666 max_ms=41.861 area_px=14355.214 rnd_ms=5.270 sw_ms=0.000 other_ms=15.396
+[16:17:44.605][RX] CPU%/max_us 2/2076 1/356 52/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:44.663][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:44.882][RX] vision fps=27 npu=35.1 wait=0.9 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=30.6 e2e=82.4 period=36.7 copy=0.0 cpu_comm=1% cpu_app=1% cpu_gui=56%
+[16:17:45.307][RX] vision_gui refreshes=28 render_ms=24.125 max_ms=36.446 area_px=17722.642 rnd_ms=6.293 sw_ms=0.000 other_ms=17.831
+[16:17:45.593][RX] CPU%/max_us 2/2076 1/367 46/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:45.638][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:45.773][RX] vision fps=27 npu=35.1 wait=0.9 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=31.8 e2e=91.9 period=36.0 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=52%
+[16:17:46.285][RX] vision_gui refreshes=29 render_ms=18.172 max_ms=28.817 area_px=13152.034 rnd_ms=4.678 sw_ms=0.000 other_ms=13.493
+[16:17:46.611][RX] CPU%/max_us 2/2076 1/367 38/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:46.654][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:46.774][RX] vision fps=27 npu=35.1 wait=1.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=28.9 e2e=80.7 period=35.9 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=46%
+[16:17:47.299][RX] vision_gui refreshes=30 render_ms=16.169 max_ms=26.934 area_px=13349.400 rnd_ms=4.330 sw_ms=0.000 other_ms=11.838
+[16:17:47.600][RX] CPU%/max_us 2/2076 1/367 33/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:47.625][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:47.772][RX] vision fps=28 npu=35.1 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=26.6 e2e=79.2 period=35.3 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=38%
+[16:17:48.273][RX] vision_gui refreshes=20 render_ms=12.754 max_ms=22.391 area_px=8424.450 rnd_ms=2.554 sw_ms=0.000 other_ms=10.200
+[16:17:48.646][RX] CPU%/max_us 3/2076 1/367 10/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:48.660][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:48.805][RX] vision fps=27 npu=35.1 wait=0.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=28.6 e2e=81.3 period=35.3 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=33%
+[16:17:49.273][RX] vision_gui refreshes=11 render_ms=16.266 max_ms=31.147 area_px=12739.909 rnd_ms=3.450 sw_ms=0.000 other_ms=12.815
+[16:17:49.609][RX] CPU%/max_us 3/2076 1/367 23/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:49.638][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:49.757][RX] vision fps=28 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=26.6 e2e=78.1 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=10%
+[16:17:50.301][RX] vision_gui refreshes=21 render_ms=14.470 max_ms=21.177 area_px=10854.666 rnd_ms=3.348 sw_ms=0.000 other_ms=11.121
+[16:17:50.662][RX] CPU%/max_us 2/2076 1/367 37/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:50.683][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:50.826][RX] vision fps=28 npu=35.0 wait=0.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=26.3 e2e=80.8 period=35.2 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=23%
+[16:17:51.321][RX] vision_gui refreshes=25 render_ms=15.219 max_ms=20.134 area_px=10697.640 rnd_ms=3.645 sw_ms=0.000 other_ms=11.574
+[16:17:51.670][RX] CPU%/max_us 2/2076 1/367 37/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:51.702][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:51.840][RX] vision fps=27 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=24.8 e2e=79.0 period=35.1 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=37%
+[16:17:52.312][RX] vision_gui refreshes=29 render_ms=15.858 max_ms=21.759 area_px=12100.862 rnd_ms=3.783 sw_ms=0.000 other_ms=12.075
+[16:17:52.666][RX] CPU%/max_us 3/2076 1/367 27/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:52.688][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:52.786][RX] vision fps=27 npu=35.1 wait=0.5 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=24.6 e2e=80.0 period=35.6 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=37%
+[16:17:53.297][RX] vision_gui refreshes=11 render_ms=11.265 max_ms=15.916 area_px=10507.272 rnd_ms=2.277 sw_ms=0.000 other_ms=8.987
+[16:17:53.549][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[16:17:53.675][RX] CPU%/max_us 3/2076 1/367 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:53.696][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:53.816][RX] vision fps=28 npu=35.1 wait=0.3 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=24.8 e2e=76.0 period=35.4 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=27%
+[16:17:54.352][RX] vision_gui refreshes=12 render_ms=13.761 max_ms=18.694 area_px=11399.583 rnd_ms=2.726 sw_ms=0.000 other_ms=11.034
+[16:17:54.728][RX] CPU%/max_us 2/2076 1/367 39/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:54.762][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:54.867][RX] vision fps=28 npu=35.0 wait=0.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=27.2 e2e=79.0 period=35.3 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=23%
+[16:17:55.352][RX] vision_gui refreshes=30 render_ms=16.152 max_ms=20.221 area_px=11469.500 rnd_ms=3.977 sw_ms=0.000 other_ms=12.175
+[16:17:55.738][RX] CPU%/max_us 2/2076 1/367 42/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:55.750][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:55.888][RX] vision fps=26 npu=35.1 wait=0.7 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=29.0 e2e=84.7 period=35.9 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=43%
+[16:17:56.372][RX] vision_gui refreshes=29 render_ms=15.631 max_ms=21.202 area_px=11375.068 rnd_ms=3.798 sw_ms=0.000 other_ms=11.833
+[16:17:56.741][RX] CPU%/max_us 2/2076 1/367 35/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:56.772][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:56.880][RX] vision fps=28 npu=35.1 wait=0.3 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=26.7 e2e=77.7 period=35.4 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=38%
+[16:17:57.370][RX] vision_gui refreshes=28 render_ms=14.523 max_ms=22.869 area_px=10667.928 rnd_ms=3.380 sw_ms=0.000 other_ms=11.143
+[16:17:57.752][RX] CPU%/max_us 2/2076 1/367 36/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:57.773][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:57.927][RX] vision fps=27 npu=35.1 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=25.8 e2e=80.8 period=35.1 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=36%
+[16:17:58.335][RX] vision_gui refreshes=23 render_ms=15.791 max_ms=19.180 area_px=12337.869 rnd_ms=3.896 sw_ms=0.000 other_ms=11.894
+[16:17:58.748][RX] CPU%/max_us 3/2076 1/367 6/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:58.769][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:58.864][RX] vision fps=27 npu=35.0 wait=0.5 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=27.9 e2e=81.8 period=35.6 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=32%
+[16:17:59.352][RX] vision_gui refreshes=6 render_ms=8.603 max_ms=13.240 area_px=8381.000 rnd_ms=1.332 sw_ms=0.000 other_ms=7.271
+[16:17:59.769][RX] CPU%/max_us 3/2076 1/367 5/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:17:59.790][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:17:59.939][RX] vision fps=28 npu=34.9 wait=0.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=24.1 e2e=79.0 period=35.2 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=5%
+[16:18:00.384][RX] vision_gui refreshes=18 render_ms=10.997 max_ms=24.562 area_px=9951.055 rnd_ms=2.280 sw_ms=0.000 other_ms=8.717
+[16:18:00.794][RX] CPU%/max_us 2/2076 2/367 43/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:00.815][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:00.984][RX] vision fps=27 npu=35.1 wait=0.3 decode=0.0 sort=0.0 nms=0.0 post_span=0.4 gui=26.5 e2e=79.7 period=35.4 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=31%
+[16:18:01.373][RX] vision_gui refreshes=28 render_ms=16.743 max_ms=32.730 area_px=14379.642 rnd_ms=3.880 sw_ms=0.000 other_ms=12.862
+[16:18:01.772][RX] CPU%/max_us 3/2076 1/367 22/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:01.802][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:01.890][RX] vision fps=27 npu=35.1 wait=0.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=25.3 e2e=78.6 period=35.3 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=38%
+[16:18:02.382][RX] vision_gui refreshes=12 render_ms=10.437 max_ms=16.300 area_px=8551.750 rnd_ms=2.046 sw_ms=0.000 other_ms=8.390
+[16:18:02.798][RX] CPU%/max_us 3/2076 1/367 5/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:02.818][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:02.912][RX] vision fps=28 npu=34.9 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=28.8 e2e=89.9 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=8%
+[16:18:03.419][RX] vision_gui refreshes=10 render_ms=14.937 max_ms=21.078 area_px=11883.900 rnd_ms=2.788 sw_ms=0.000 other_ms=12.149
+[16:18:03.797][RX] CPU%/max_us 2/2076 1/367 30/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:03.818][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:03.905][RX] vision fps=27 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=25.0 e2e=75.1 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=20%
+[16:18:04.393][RX] vision_gui refreshes=23 render_ms=11.783 max_ms=23.007 area_px=10262.130 rnd_ms=2.547 sw_ms=0.000 other_ms=9.235
+[16:18:04.822][RX] CPU%/max_us 3/2076 1/367 28/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:04.848][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:04.970][RX] vision fps=28 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=25.2 e2e=80.4 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=23%
+[16:18:05.407][RX] vision_gui refreshes=28 render_ms=10.025 max_ms=22.377 area_px=9327.928 rnd_ms=2.327 sw_ms=0.000 other_ms=7.698
+[16:18:05.850][RX] CPU%/max_us 3/2076 2/367 22/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:05.871][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:05.964][RX] vision fps=27 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=24.5 e2e=75.0 period=35.1 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=24%
+[16:18:06.419][RX] vision_gui refreshes=31 render_ms=7.959 max_ms=17.705 area_px=7709.838 rnd_ms=1.837 sw_ms=0.000 other_ms=6.122
+[16:18:06.863][RX] CPU%/max_us 3/2076 1/367 18/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:06.883][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:06.972][RX] vision fps=28 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=26.0 e2e=80.7 period=35.1 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=25%
+[16:18:07.441][RX] vision_gui refreshes=25 render_ms=6.045 max_ms=9.940 area_px=5768.000 rnd_ms=1.239 sw_ms=0.000 other_ms=4.805
+[16:18:07.880][RX] CPU%/max_us 3/2076 1/367 14/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:07.900][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:07.988][RX] vision fps=27 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=24.9 e2e=76.1 period=35.0 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=17%
+[16:18:08.463][RX] vision_gui refreshes=18 render_ms=6.143 max_ms=9.911 area_px=5986.611 rnd_ms=1.296 sw_ms=0.000 other_ms=4.846
+[16:18:08.903][RX] CPU%/max_us 3/2076 2/367 25/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:08.962][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:09.076][RX] vision fps=28 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.2 gui=23.7 e2e=82.2 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=7%
+[16:18:09.448][RX] vision_gui refreshes=24 render_ms=11.393 max_ms=27.852 area_px=9831.041 rnd_ms=2.458 sw_ms=0.000 other_ms=8.934
+[16:18:09.927][RX] CPU%/max_us 3/2076 2/367 29/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:09.940][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:10.093][RX] vision fps=27 npu=35.0 wait=0.5 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=26.4 e2e=76.0 period=35.6 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=28%
+[16:18:10.489][RX] vision_gui refreshes=27 render_ms=13.950 max_ms=24.067 area_px=11560.259 rnd_ms=3.412 sw_ms=0.000 other_ms=10.537
+[16:18:10.922][RX] CPU%/max_us 2/2076 2/367 45/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:10.953][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:11.059][RX] vision fps=28 npu=35.1 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.4 gui=28.0 e2e=78.8 period=35.3 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=39%
+[16:18:11.465][RX] vision_gui refreshes=29 render_ms=14.541 max_ms=23.034 area_px=12506.241 rnd_ms=3.610 sw_ms=0.000 other_ms=10.931
+[16:18:11.938][RX] CPU%/max_us 3/2076 2/367 30/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:11.961][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:12.050][RX] vision fps=27 npu=35.1 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.4 gui=25.5 e2e=78.7 period=35.3 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=31%
+[16:18:12.490][RX] vision_gui refreshes=30 render_ms=10.071 max_ms=21.795 area_px=8923.366 rnd_ms=2.438 sw_ms=0.000 other_ms=7.633
+[16:18:12.939][RX] CPU%/max_us 3/2076 1/367 33/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:12.961][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:13.072][RX] vision fps=27 npu=35.0 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=24.7 e2e=78.1 period=35.2 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=26%
+[16:18:13.467][RX] vision_gui refreshes=27 render_ms=12.432 max_ms=27.060 area_px=10471.148 rnd_ms=2.855 sw_ms=0.000 other_ms=9.576
+[16:18:13.960][RX] CPU%/max_us 3/2076 2/367 26/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:13.984][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:14.082][RX] vision fps=28 npu=35.1 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=25.4 e2e=77.5 period=35.1 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=29%
+[16:18:14.500][RX] vision_gui refreshes=30 render_ms=8.272 max_ms=15.676 area_px=8049.466 rnd_ms=1.715 sw_ms=0.000 other_ms=6.556
+[16:18:14.966][RX] CPU%/max_us 3/2076 2/367 24/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:14.987][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:15.087][RX] vision fps=27 npu=35.1 wait=0.4 decode=0.0 sort=0.0 nms=0.0 post_span=0.4 gui=24.3 e2e=78.1 period=35.5 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=23%
+[16:18:15.493][RX] vision_gui refreshes=30 render_ms=7.507 max_ms=13.782 area_px=6641.900 rnd_ms=1.554 sw_ms=0.000 other_ms=5.952
+[16:18:15.961][RX] CPU%/max_us 3/2076 2/367 22/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:15.983][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:16.092][RX] vision fps=28 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=24.7 e2e=78.7 period=35.1 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=22%
+[16:18:16.571][RX] vision_gui refreshes=31 render_ms=9.322 max_ms=19.467 area_px=8607.967 rnd_ms=2.110 sw_ms=0.000 other_ms=7.212
+[16:18:17.006][RX] CPU%/max_us 2/2076 2/367 34/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:17.028][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:17.116][RX] vision fps=27 npu=35.1 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=25.9 e2e=76.8 period=35.2 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=32%
+[16:18:17.534][RX] vision_gui refreshes=30 render_ms=10.296 max_ms=24.110 area_px=9313.066 rnd_ms=2.260 sw_ms=0.000 other_ms=8.036
+[16:18:18.015][RX] CPU%/max_us 3/2076 2/367 31/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:18.036][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:18.164][RX] vision fps=27 npu=35.1 wait=0.4 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=24.5 e2e=78.4 period=35.5 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=25%
+[16:18:18.537][RX] vision_gui refreshes=29 render_ms=10.381 max_ms=19.480 area_px=9594.206 rnd_ms=2.217 sw_ms=0.000 other_ms=8.164
+[16:18:19.025][RX] CPU%/max_us 2/2076 1/367 29/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:19.053][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:19.194][RX] vision fps=27 npu=35.0 wait=0.6 decode=0.0 sort=0.0 nms=0.0 post_span=0.3 gui=25.9 e2e=83.5 period=35.7 copy=0.0 cpu_comm=3% cpu_app=2% cpu_gui=26%
+[16:18:19.547][RX] vision_gui refreshes=23 render_ms=16.558 max_ms=31.540 area_px=12489.391 rnd_ms=4.071 sw_ms=0.000 other_ms=12.487
+[16:18:20.053][RX] CPU%/max_us 3/2076 1/367 26/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:20.081][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:20.204][RX] vision fps=28 npu=35.1 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=26.2 e2e=79.9 period=35.1 copy=0.0 cpu_comm=2% cpu_app=1% cpu_gui=39%
+[16:18:20.546][RX] vision_gui refreshes=22 render_ms=12.555 max_ms=17.241 area_px=10258.181 rnd_ms=2.957 sw_ms=0.000 other_ms=9.598
+[16:18:21.061][RX] CPU%/max_us 3/2076 1/367 12/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:21.083][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:21.168][RX] vision fps=27 npu=35.0 wait=0.5 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=25.1 e2e=72.9 period=35.6 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=21%
+[16:18:21.552][RX] vision_gui refreshes=6 render_ms=11.006 max_ms=14.626 area_px=10953.166 rnd_ms=2.196 sw_ms=0.000 other_ms=8.810
+[16:18:22.078][RX] CPU%/max_us 3/2076 1/367 9/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:22.091][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:22.184][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=29.5 e2e=72.4 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:18:22.557][RX] vision_gui refreshes=6 render_ms=10.382 max_ms=13.690 area_px=10136.500 rnd_ms=2.032 sw_ms=0.000 other_ms=8.350
+[16:18:23.080][RX] CPU%/max_us 3/2076 1/367 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:23.101][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:23.195][RX] vision fps=27 npu=34.9 wait=0.3 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=23.7 e2e=72.4 period=35.3 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=3%
+[16:18:23.558][RX] vision_gui refreshes=4 render_ms=8.164 max_ms=12.702 area_px=8800.500 rnd_ms=1.519 sw_ms=0.000 other_ms=6.644
+[16:18:24.098][RX] CPU%/max_us 3/2076 1/367 6/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:24.123][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:24.211][RX] vision fps=28 npu=34.9 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=28.7 e2e=80.6 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=6%
+[16:18:24.569][RX] vision_gui refreshes=4 render_ms=9.159 max_ms=12.948 area_px=10279.000 rnd_ms=1.775 sw_ms=0.000 other_ms=7.383
+[16:18:25.101][RX] CPU%/max_us 3/2076 1/367 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:25.122][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:25.211][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=18.3 e2e=80.6 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:18:25.580][RX] vision_gui refreshes=2 render_ms=5.172 max_ms=6.253 area_px=10625.000 rnd_ms=0.677 sw_ms=0.000 other_ms=4.494
+[16:18:26.106][RX] CPU%/max_us 3/2076 1/367 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:26.131][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:26.220][RX] vision fps=28 npu=34.9 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:18:26.590][RX] vision_gui refreshes=6 render_ms=9.136 max_ms=13.865 area_px=7335.333 rnd_ms=1.987 sw_ms=0.000 other_ms=7.149
+[16:18:27.114][RX] CPU%/max_us 3/2076 1/367 17/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:27.134][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:27.219][RX] vision fps=27 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=27.2 e2e=87.6 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=12%
+[16:18:27.588][RX] vision_gui refreshes=11 render_ms=11.921 max_ms=22.188 area_px=9518.727 rnd_ms=2.500 sw_ms=0.000 other_ms=9.421
+[16:18:28.127][RX] CPU%/max_us 3/2076 1/367 9/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:28.145][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:28.204][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=24.0 e2e=70.5 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=6%
+[16:18:28.591][RX] vision_gui refreshes=29 render_ms=3.179 max_ms=13.653 area_px=1958.206 rnd_ms=0.364 sw_ms=0.000 other_ms=2.814
+[16:18:29.138][RX] CPU%/max_us 3/2076 1/367 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:29.159][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:29.252][RX] vision fps=27 npu=34.9 wait=0.5 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=20.2 e2e=73.1 period=35.5 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=12%
+[16:18:29.602][RX] vision_gui refreshes=3 render_ms=5.321 max_ms=9.835 area_px=9372.666 rnd_ms=0.681 sw_ms=0.000 other_ms=4.640
+[16:18:30.149][RX] CPU%/max_us 3/2076 1/367 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:30.169][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:30.270][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=31.5 e2e=80.4 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=3%
+[16:18:30.603][RX] vision_gui refreshes=2 render_ms=6.083 max_ms=8.564 area_px=13450.000 rnd_ms=0.811 sw_ms=0.000 other_ms=5.272
+[16:18:31.168][RX] CPU%/max_us 3/2076 1/367 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:31.193][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:31.273][RX] vision fps=27 npu=34.9 wait=0.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=35.2 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:18:31.619][RX] vision_gui refreshes=2 render_ms=6.444 max_ms=9.344 area_px=13450.000 rnd_ms=0.864 sw_ms=0.000 other_ms=5.580
+[16:18:32.177][RX] CPU%/max_us 3/2076 1/367 11/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:32.196][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:32.280][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=21.9 e2e=80.3 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=6%
+[16:18:32.624][RX] vision_gui refreshes=8 render_ms=10.082 max_ms=14.715 area_px=7262.125 rnd_ms=2.040 sw_ms=0.000 other_ms=8.042
+[16:18:33.176][RX] CPU%/max_us 3/2076 1/367 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:33.202][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:33.281][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=28.3 e2e=70.2 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:18:33.642][RX] vision_gui refreshes=3 render_ms=4.227 max_ms=8.089 area_px=7553.000 rnd_ms=0.509 sw_ms=0.000 other_ms=3.718
+[16:18:34.205][RX] CPU%/max_us 3/2076 1/367 7/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:34.222][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:34.314][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=19.0 e2e=76.0 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=6%
+[16:18:34.640][RX] vision_gui refreshes=6 render_ms=10.091 max_ms=13.603 area_px=9155.166 rnd_ms=2.136 sw_ms=0.000 other_ms=7.954
+[16:18:35.214][RX] CPU%/max_us 3/2076 1/367 7/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:35.231][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:35.321][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=26.7 e2e=74.6 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:18:35.643][RX] vision_gui refreshes=4 render_ms=9.310 max_ms=13.445 area_px=10280.250 rnd_ms=1.676 sw_ms=0.000 other_ms=7.633
+[16:18:36.206][RX] CPU%/max_us 3/2076 1/367 8/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:36.227][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:36.319][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=25.2 e2e=80.1 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=2%
+[16:18:36.657][RX] vision_gui refreshes=5 render_ms=9.548 max_ms=15.504 area_px=9897.600 rnd_ms=1.693 sw_ms=0.000 other_ms=7.855
+[16:18:37.221][RX] CPU%/max_us 3/2076 1/367 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:37.242][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:37.332][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=31.1 e2e=90.1 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=3%
+[16:18:37.643][RX] vision_gui refreshes=2 render_ms=3.838 max_ms=4.203 area_px=8300.000 rnd_ms=0.488 sw_ms=0.000 other_ms=3.349
+[16:18:38.223][RX] CPU%/max_us 3/2076 1/367 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:38.244][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:38.335][RX] vision fps=28 npu=34.9 wait=0.1 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=0.0 e2e=0.0 period=35.1 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:18:38.646][RX] vision_gui refreshes=2 render_ms=3.791 max_ms=3.834 area_px=7025.000 rnd_ms=0.454 sw_ms=0.000 other_ms=3.337
+[16:18:39.247][RX] CPU%/max_us 3/2076 1/367 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:39.267][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:39.358][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=25.0 e2e=63.3 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:18:39.653][RX] vision_gui refreshes=2 render_ms=5.091 max_ms=6.069 area_px=9350.000 rnd_ms=0.651 sw_ms=0.000 other_ms=4.440
+[16:18:40.256][RX] CPU%/max_us 3/2076 1/367 2/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:40.275][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:40.367][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=20.7 e2e=63.2 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:18:40.670][RX] vision_gui refreshes=2 render_ms=4.771 max_ms=5.926 area_px=9350.000 rnd_ms=0.612 sw_ms=0.000 other_ms=4.158
+[16:18:41.270][RX] CPU%/max_us 3/2076 1/367 1/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:41.291][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:41.380][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=31.1 e2e=96.5 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:18:41.661][RX] vision_gui refreshes=2 render_ms=3.541 max_ms=3.747 area_px=7025.000 rnd_ms=0.446 sw_ms=0.000 other_ms=3.094
+[16:18:42.282][RX] CPU%/max_us 3/2076 1/367 15/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:42.315][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:42.419][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=27.1 e2e=63.1 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=1%
+[16:18:42.672][RX] vision_gui refreshes=16 render_ms=11.010 max_ms=14.775 area_px=8213.250 rnd_ms=2.465 sw_ms=0.000 other_ms=8.544
+[16:18:43.289][RX] CPU%/max_us 3/2076 1/367 3/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:43.310][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:43.393][RX] vision fps=28 npu=35.0 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.1 gui=24.3 e2e=75.8 period=35.0 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=15%
+[16:18:43.664][RX] vision_gui refreshes=5 render_ms=10.399 max_ms=13.636 area_px=11869.400 rnd_ms=2.030 sw_ms=0.000 other_ms=8.368
+[16:18:44.303][RX] CPU%/max_us 3/2076 1/367 3/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:44.321][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:44.414][RX] vision fps=27 npu=34.9 wait=0.2 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=0.0 e2e=0.0 period=35.2 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=3%
+[16:18:44.676][RX] vision_gui refreshes=2 render_ms=7.860 max_ms=12.083 area_px=16375.000 rnd_ms=1.080 sw_ms=0.000 other_ms=6.779
+[16:18:45.317][RX] CPU%/max_us 3/2076 1/367 4/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:45.338][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:45.432][RX] vision fps=28 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=34.1 e2e=96.4 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=3%
+[16:18:45.672][RX] vision_gui refreshes=3 render_ms=6.546 max_ms=10.260 area_px=13297.333 rnd_ms=0.991 sw_ms=0.000 other_ms=5.554
+[16:18:46.334][RX] CPU%/max_us 3/2076 1/367 4/102654 overlay_cpu=0.00% max_us=0 rering=0
+[16:18:46.355][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[16:18:46.458][RX] vision fps=27 npu=34.9 wait=0.0 decode=0.0 sort=0.0 nms=0.0 post_span=0.0 gui=19.3 e2e=74.1 period=34.9 copy=0.0 cpu_comm=3% cpu_app=1% cpu_gui=4%

@@ -1,6 +1,6 @@
 # 卡 75 结果
 
-布局布线成功，时序约束未全部满足。2026-11-16 06:29:42（北京时间）完成 PnR，06:31:48 完成布线后时序报告。尚未取得此轮整片比特流或上板结果。
+布局布线成功，时序约束未全部满足。2026-11-16 06:29:42（北京时间）完成 PnR，06:31:48 完成布线后时序报告。16:13:19 完成整片比特流生成。上板取得 board_npu 全通过以及 Showcase 硬件后处理实时识别串口。
 
 | 项 | 记录 |
 |---|---|
@@ -10,7 +10,7 @@
 | PnR 配置 | 单工程，Slack Weight 40，Placement Decongestion 2，开启拥塞网格 |
 | PnR 实际用时 | 36h 51m 01s；编译到时序报告共 37h 08m 47s |
 | 布线归零 | 通用第 911 轮（PDS iteration 916）未布通、过用均为 0；后续修整至 PDS iteration 928 全部未布通网归零 |
-| CLK_SYS_HZ / 上板 | 串口实测未取得；时序约束为 125 MHz |
+| CLK_SYS_HZ / 上板 | BIOS 实测 125000000；board_npu 39/39；Showcase 实时识别中位数 27 fps |
 
 [实际设置](artifacts/settings.txt) · [各阶段日志节选](artifacts/implementation_stages.txt) · [PDS 单种子汇总](artifacts/multiseed_summary.csv)
 
@@ -78,6 +78,50 @@ ADS 的 preserve DFF 清单确认了 RND 的 26 组四位状态副本、各 8 �
 
 ## 上板
 
-尚未取得本轮整片 .sbit、BIOS 串口、board_npu 或 showcase 的功能和跑分。卡 75 要求布通后继续上板，时序和功能分开记录。
+### 比特流与程序
+
+PDS 记录整片编程文件生成成功，用时 2 分 24 秒，文件 `G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST/generate_bitstream/edrv32_fpga_board_full_top.sbit`，9,188,552 字节。串口为 COM7 / 115200，BIOS 报 `CLK_SYS_HZ: 125000000`、`MEM_READY: 1`，ROM commit `92b38fd2`。[编程文件生成日志](artifacts/bitstream_generation.txt)
+
+串口缓冲含三次成功加载，按 ELF 的非空可加载段字节数和入口分段。原始完整缓冲留在 `G:/codex_project/edrv32-card75/board/uart-current-buffer.log`。
+
+| 时间（北京时间） | ELF | BIOS 记录的加载字节 / 段数 | 入口 |
+|---|---|---:|---|
+| 16:15:15.082 | `board_npu.elf` | 5,190,724 / 1 | `0x80000000` |
+| 16:15:48.833 | `showcase-post.elf` | 12,768,880 / 5 | `0x90000000` |
+| 16:19:29.862 | 卡 85 `showcase-grab-cpu.elf` | 29,417,992 / 5 | `0x90000000` |
+
+### NPU 回归
+
+**39/39 PASS**。D-01 至 D-20 全通过，CRC32 均为 `0738f96e`，与 C-YOLO 一致。C-YOLO 的 `PERF0=6187347` cycles，34.374 ms/帧，**29.091 FPS**。D 组 PERF0 为 6,182,208–6,193,231 cycles。[board_npu 串口](artifacts/uart/board_npu.log)
+
+### Showcase 硬件后处理
+
+`showcase-post.elf` 启动并进入实时识别。16:16:11.535–16:18:46.458 取得 **154 行连续** `vision fps=`，覆盖约 **2 分 35 秒**。16:18:47.560 出现下一次 Boot ROM 输出，随后重新加载另一份 ELF。任务卡要求的完整 5 分钟未取得。用户反馈程序能运行，检测框位置和类别的专项确认未取得。
+
+| 字段 | 最小 / 中位数 / 最大 |
+|---|---:|
+| fps | 24 / **27** / 28 |
+| npu（ms） | 34.9 / 34.9 / 35.1 |
+| wait（ms） | 0.0 / 0.0 / 1.2 |
+| decode（ms） | 0.0 / **0.0** / 0.0 |
+| post_span（ms） | 0.0 / **0.1** / 0.4 |
+| gui（ms） | 0.0 / 25.0 / 34.8 |
+| e2e（ms） | 0.0 / 78.1 / 100.0 |
+| period（ms） | 34.9 / 35.0 / 36.7 |
+
+`gui` 与 `e2e` 各有 16 行原文为 0。其余 138 行的中位数分别为 25.35 ms 和 78.9 ms。[Showcase 串口分段](artifacts/uart/showcase_post.log) · [154 行实时识别原文](artifacts/uart/showcase_vision.log) · [逐项统计](artifacts/showcase_vision_stats.csv)
+
+### 其他检查
+
+| 项目 | 卡 75 `showcase-post.elf` 的记录 |
+|---|---|
+| 图片识别 / PC 收到候选 | 未取得 |
+| 图像处理（高斯、Sobel，1 分钟） | 界面帧率和图像证据未取得 |
+| RND 拷贝 / 半透明叠加 | 专项现场观察和照片未取得 |
+| CoreMark | 串口成绩和截图未取得 |
+| LVGL Benchmark | 指定 ELF 的成绩未取得 |
+| 死机、复位 | 实时识别段后有一次 BIOS 启动和换 ELF；复位原因未取得 |
+
+后续卡 85 ELF 的串口里有一轮完整 LVGL Benchmark，平均 **23 FPS**，ALL 为 **1,290 帧、43.270 ms 平均渲染**。该记录保留供参考，单独标明 ELF 归属。[跑分证据](artifacts/benchmark.txt) · [切换 ELF 的串口](artifacts/uart/elf_switch.log)
 
 本机完整原始文件在工程目录下的 `place_route/run.log`、`place_route/edrv32_fpga_board_full_top.prr`、`place_route/CongestionNetInfo/`、`place_route/CongestionPlot/`、`device_map/edrv32_fpga_board_full_top.dmr`、`synthesize/edrv32_fpga_board_full_top.snr` 和 `report_timing/edrv32_fpga_board_full_top.rtr`。
