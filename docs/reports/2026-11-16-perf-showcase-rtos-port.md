@@ -31,3 +31,13 @@
 
 - 大小由 `riscv-none-elf-size` 与 ELF SHF_EXECINSTR 段统计；日志 `coop.log`、`rtos-hw-final.log`、`rtos-cpu-final.log`、`host-tests.log`、`host-rtos-final.log` 均在 `build/rtos/`。
 - 交付：`build/rtos/showcase-rtos-hw.elf`（不入库）；目标上板后再取得 FPS、ctxsw、kern 与 CoreMark 分数。
+
+## 卡 93 上板结果与结论（2026-11-16）
+
+- 数据：`tasks/win/20261116-93-sched-ab/`，卡 75 比特流，A 协作式、B FreeRTOS，均由 `01352c691` 构建。
+- 抓取：fps 中位 A 25 / B 25；e2e A 89.1 / B 94.3 ms；gui A 32.6 / B 35.7 ms。
+- 实时识别：fps A 25.5（2 行）/ B 27（45 行）；e2e A 75.7 / B 81.4 ms。
+- B 的开销：任务切换 6,165–6,415 次/s，内核占用 13.1–14.9%。
+- B 的问题：游戏按键延迟大（用户反馈）；实时识别侧栏统计全部为 0。
+- 未取得：CoreMark、benchmark、NES、流畅度评分。
+- 结论（用户 2026-11-16）：演示用协作式；FreeRTOS 版本及 `SHOWCASE_SCHED` 参数删除（CLAUDE.md 1.2）。代码可在 `cc7abd99f` 复现。
