@@ -262,7 +262,12 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
     # Calibration results depend on the torch thread count (float reduction order);
     # one thread makes every rebuild of the model image byte-identical.
     torch.set_num_threads(1)
-    if plan.get("task") == "hand":
+    if "weights" in plan:
+        from model_data import calibration_paths
+        weights = Path(plan["weights"])
+        images = calibration_paths(plan["dataset"])
+        samples = images
+    elif plan.get("task") == "hand":
         from hand_data import WEIGHTS, calibration_samples
         weights = WEIGHTS
         images, samples = calibration_samples()
@@ -288,7 +293,7 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
         bias = convolution.bias.detach().cpu().numpy()
         owner_scales = [flow.scale(owner) for owner in flow.sources[command["index"]]]
 
-        if plan.get("task") in ("pose", "hand") and command["layer"] == 22:
+        if command["layer"] == 22:
             physical_cout = command["output_blocks"] * 32 - 16 * command["last_c16_only"]
             physical_cin = command["cin_blocks"] * 16
             weight = np.pad(weight, ((0, physical_cout - weight.shape[0]),
@@ -313,10 +318,10 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
             weight, bias, input_scales, pre_scale, post_scale,
             zero_point, command)
 
-        if plan.get("task") in ("pose", "hand") and command["name"].endswith("cls.out"):
+        if command["name"].endswith("cls.out"):
             # Zero weights plus exact integer bias force dummy classes to -128.
             params = bytearray(params)
-            for channel in range(1, 80):
+            for channel in range(plan["nc"], 80):
                 block, within = divmod(channel, 32)
                 struct.pack_into("<ihBB", params, block * 512 + within * 8,
                                  -256, 1, 0, 0)
@@ -339,6 +344,8 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
 
 
 def cache_directory(plan: dict) -> Path:
+    if "weights" in plan:
+        return CACHE.parent / f"quantized_{plan['dataset']}"
     if plan.get("task") in ("pose", "hand"):
         return CACHE.parent / f"quantized_{plan['task']}"
     return CACHE

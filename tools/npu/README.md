@@ -552,3 +552,37 @@ sigma=1/21，真值框面积×0.53；不与浮点预测比较。
 `predictions.json`、`measurements.json`、`oks.json`、`summary.json`。
 45/60/90/180 四档示意图取同一首张随机验证图，真值/INT8 并排绘制全部 21 点，保存为 96 色 PNG。
 性能沿用 pose 的 MAC 日历周期比×detect 实测 35.0/41.2 ms，属于估算。
+
+## 四个演示模型（T-NPU-MODELS）
+
+权重：`tasks/win/20261115-83-hagrid-train/artifacts/{best.pt,extra/{doodle,helmet}/best.pt}`。
+`compile_yolo.py --task gesture|face` 从模型读取 nc 和关键点维度；
+`--task detect --weights <pt>` 用于简笔画、安全帽。
+类别补 C80，关键点与其分支输入按 C16 补齐；旧 detect/pose/hand 的标定保持不变。
+新模型用各自数据的排序文件名，经 `default_rng(0)` 无放回抽取 96 张标定。
+
+人脸：[derronqi README](https://github.com/derronqi/yolov8-face) 的 yolov8n 权重；
+[WIDER 官方 HF 镜像](https://huggingface.co/datasets/CUHK-CSE/wider_face)。
+`fetch_face.py` 只下载 96 张标定与 300 张评估图片的并集（386 张），使用 ZIP Range 请求；
+标注文件用于完整验证集排序抽样。数据位于 `~/.local/share/edrv32/npu/wider-face/`。
+HaGRID 的本机 600 图/标签及 YAML 位于 `~/.local/share/edrv32/npu/hagrid-val600/`。
+简笔画、安全帽使用相邻 `task-doodle-data`、`task-helmet-data` worktree 的 `build/` 数据。
+
+```sh
+export PYTHONPATH="$PWD/tools/npu:$PWD/third_party/ultralytics" OPENBLAS_NUM_THREADS=1
+P="$HOME/.local/opt/edrv32-py/bin/python"
+$P tools/npu/fetch_face.py
+$P tools/npu/compile_yolo.py --task gesture --image <image> --out build/npu/models_eval/gesture/compiled
+$P tools/npu/compile_yolo.py --task face --image <image> --out build/npu/models_eval/face/compiled
+$P tools/npu/compile_yolo.py --task detect --weights tasks/win/20261115-83-hagrid-train/artifacts/extra/doodle/best.pt --image <image> --out build/npu/models_eval/doodle/compiled
+$P tools/npu/compile_yolo.py --task detect --weights tasks/win/20261115-83-hagrid-train/artifacts/extra/helmet/best.pt --image <image> --out build/npu/models_eval/helmet/compiled
+$P tools/npu/models_eval.py --out build/npu/models_eval > build/npu/models_eval/eval.log 2>&1
+$P -m unittest discover -s tools/npu -p test_compile.py
+```
+
+评估固定 confidence>0.25、同类 NMS IoU>0.45、最多 100 框，不调阈值。
+FP32 与 INT8 均使用 640×384 letterbox；INT8 执行 `npu_ref`、硬件后处理整数参考、
+排序与同类 NMS，再按 anchor 解码关键点。AP 使用 IoU=0.50:0.05:0.95，
+关键点偏差对同类 IoU≥0.5 配对框的 FP32 可见点（confidence>0.5）统计，缩放到 1280×720。
+手势混淆矩阵行是真值、列是 INT8 预测，末行/列 background 包括误检/漏检。
+完整预测与矩阵在 `build/npu/models_eval/<model>/{predictions,summary}.json`。

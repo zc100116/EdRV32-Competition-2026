@@ -36,10 +36,22 @@ def main() -> None:
     source.add_argument("--model-source", type=Path,
                         help="rebuild model/descriptor hex from an offline compiler snapshot")
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--task", choices=("detect", "pose", "hand"), default="detect")
+    parser.add_argument("--task", choices=("detect", "pose", "hand", "gesture", "face"),
+                        default="detect")
+    parser.add_argument("--weights", type=Path)
     args = parser.parse_args()
     started = perf_counter()
-    plan = build_plan(args.task)
+    if args.weights is not None or args.task in ("gesture", "face"):
+        from model_data import weights_for
+        from ultralytics import YOLO
+        weights = args.weights or weights_for(args.task)
+        head = YOLO(str(weights)).model.model[-1]
+        shape = getattr(head, "kpt_shape", (0, 3))
+        plan = build_plan(args.task, head.nc, shape[0] * shape[1])
+        plan["weights"] = str(weights.resolve())
+        plan["dataset"] = args.task if args.task != "detect" else weights.parent.name
+    else:
+        plan = build_plan(args.task)
     segments = {}
     if args.model_source is None:
         from input_pack import pack
@@ -54,7 +66,7 @@ def main() -> None:
     desc = descriptors(plan, rows)
     checks = []
     for scale in range(3):
-        for branch in (("box", "cls", "kpt") if args.task in ("pose", "hand") else ("box", "cls")):
+        for branch in (("box", "cls", "kpt") if plan["nk"] else ("box", "cls")):
             name = f"D{scale}.{branch}"
             tensor = plan["tensors"][name]
             checks.append((name, tensor["base"], tensor["bytes"]))

@@ -140,11 +140,12 @@ class Planner:
         self.conv("L9.cv2", 9, workspace, dest, 1, 1, "model.9.cv2")
 
     def detect(self, scale: int, source: Tensor,
-               box: Tensor, cls: Tensor, task: str) -> None:
+               box: Tensor, cls: Tensor, nc: int, nk: int) -> None:
         box0 = self.view(f"D{scale}.box0", self.head0_base, source, 64)
         box1 = self.view(f"D{scale}.box1", self.head1_base, source, 64)
-        cls0 = self.view(f"D{scale}.cls0", self.head0_base, source, 80 if task == "detect" else 64)
-        cls1 = self.view(f"D{scale}.cls1", self.head1_base, source, 80 if task == "detect" else 64)
+        class_width = ((max(64, min(nc, 100)) + 15) // 16) * 16
+        cls0 = self.view(f"D{scale}.cls0", self.head0_base, source, class_width)
+        cls1 = self.view(f"D{scale}.cls1", self.head1_base, source, class_width)
         prefix = f"model.22.cv2.{scale}"
         self.conv(f"D{scale}.box.cv0", 22, source, box0, 3, 1,
                   f"{prefix}.0")
@@ -160,9 +161,10 @@ class Planner:
         self.conv(f"D{scale}.cls.out", 22, cls1, cls, 1, 1,
                   f"{prefix}.2", activation=False)
 
-        if task in ("pose", "hand"):
-            kpt0 = self.view(f"D{scale}.kpt0", self.head0_base, source, 64)
-            kpt1 = self.view(f"D{scale}.kpt1", self.head1_base, source, 64)
+        if nk:
+            point_width = ((max(16, nk) + 15) // 16) * 16
+            kpt0 = self.view(f"D{scale}.kpt0", self.head0_base, source, point_width)
+            kpt1 = self.view(f"D{scale}.kpt1", self.head1_base, source, point_width)
             prefix = f"model.22.cv4.{scale}"
             self.conv(f"D{scale}.kpt.cv0", 22, source, kpt0, 3, 1, f"{prefix}.0")
             self.conv(f"D{scale}.kpt.cv1", 22, kpt0, kpt1, 3, 1, f"{prefix}.1")
@@ -195,7 +197,12 @@ class Planner:
         }
 
 
-def build_plan(task: str = "detect") -> dict:
+def build_plan(task: str = "detect", nc: int | None = None, nk: int | None = None) -> dict:
+    # Preserve existing callers; new models pass dimensions read from their checkpoint.
+    if nc is None:
+        nc = {"detect": 80, "pose": 1, "hand": 1}[task]
+    if nk is None:
+        nk = {"detect": 0, "pose": 51, "hand": 63}[task]
     plan = Planner()
     t = plan.tensors
     # Reserve consumers' concat surfaces in channel order before producers run.
@@ -218,9 +225,9 @@ def build_plan(task: str = "detect") -> dict:
         plan.reserve_group([(f"D{scale}.box", width, height, 64),
                             (f"D{scale}.cls", width, height, 80)])
         plan.alias(f"D{scale}.logits", f"D{scale}.box", f"D{scale}.cls")
-    if task in ("pose", "hand"):
+    if nk:
         for scale, width, height in [(0, 80, 48), (1, 40, 24), (2, 20, 12)]:
-            plan.reserve(f"D{scale}.kpt", width, height, 64)
+            plan.reserve(f"D{scale}.kpt", width, height, ((nk + 15) // 16) * 16)
     plan.alias("L11", "L10", "L6")
     plan.alias("L14", "L13", "L4")
     plan.alias("L17", "L16", "L12")
@@ -251,11 +258,12 @@ def build_plan(task: str = "detect") -> dict:
     plan.c2f(18, t["L17"], t["L18"], 64, 1, False)
     plan.conv("L19", 19, t["L18"], t["L19"], 3, 2, "model.19")
     plan.c2f(21, t["L20"], t["L21"], 128, 1, False)
-    plan.detect(0, t["L15"], t["D0.box"], t["D0.cls"], task)
-    plan.detect(1, t["L18"], t["D1.box"], t["D1.cls"], task)
-    plan.detect(2, t["L21"], t["D2.box"], t["D2.cls"], task)
+    plan.detect(0, t["L15"], t["D0.box"], t["D0.cls"], nc, nk)
+    plan.detect(1, t["L18"], t["D1.box"], t["D1.cls"], nc, nk)
+    plan.detect(2, t["L21"], t["D2.box"], t["D2.cls"], nc, nk)
     result = plan.finish()
-    if task in ("pose", "hand"):
+    result.update(nc=nc, nk=nk)
+    if task != "detect":
         result["task"] = task
     return result
 

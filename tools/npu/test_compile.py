@@ -216,6 +216,87 @@ class PoseCompileTest(unittest.TestCase):
             self.assertEqual(end["base"] + end["bytes"] - BASES["OUTPUT_BASE"], 1048320)
             self.assertLess(end["base"] + end["bytes"] - BASES["OUTPUT_BASE"], 1024 * 1024)
 
+    def test_existing_bytes_and_four_models(self):
+        from model_data import evaluation_paths, weights_for
+        from quantize import load_quantized
+        from pose_eval import output_bytes
+        from ultralytics import YOLO
+        from ref.npu_ref import Memory, Descriptor as RefDescriptor, read_quant, quantize
+        from format import BASES
+        root = Path(__file__).resolve().parents[2]
+        env = os.environ | {
+            "PYTHONPATH": str(root / "tools/npu") + os.pathsep +
+                          str(root / "third_party/ultralytics"),
+            "OPENBLAS_NUM_THREADS": "1",
+        }
+        image = Path.home() / (
+            ".local/share/edrv32/npu/coco128/images/train2017/000000000009.jpg")
+        with tempfile.TemporaryDirectory(dir=root / "build/npu") as directory:
+            work = Path(directory)
+            old = work / "old"
+            old.mkdir()
+            for name in ("fixed_plan.py", "quantize.py", "compile_yolo.py",
+                         "checkpoint_audit.py", "format.py"):
+                (old / name).write_bytes(subprocess.check_output(
+                    ["git", "show", f"0f009a21:tools/npu/{name}"], cwd=root))
+            for task in ("detect", "pose", "hand"):
+                for label, source in (("old", old), ("new", root / "tools/npu")):
+                    script = (
+                        "import sys; from pathlib import Path; "
+                        "sys.path.insert(0, sys.argv[1]); "
+                        "import quantize, compile_yolo; "
+                        "quantize.CACHE = Path(sys.argv[2]) / 'quantized'; "
+                        "sys.argv = ['compile_yolo', '--task', sys.argv[3], "
+                        "'--image', sys.argv[4], '--out', sys.argv[5]]; compile_yolo.main()"
+                    )
+                    subprocess.run([sys.executable, "-c", script, str(source),
+                                    str(work / label), task, str(image),
+                                    str(work / f"{label}_{task}")],
+                                   env=env, cwd=root, check=True, capture_output=True, text=True)
+                cache = "quantized" + ("" if task == "detect" else f"_{task}")
+                for name in ("model.bin", "quantization.json"):
+                    self.assertEqual((work / "old" / cache / name).read_bytes(),
+                                     (work / "new" / cache / name).read_bytes(), (task, name))
+                for before in (work / f"old_{task}").iterdir():
+                    self.assertEqual(before.read_bytes(),
+                                     (work / f"new_{task}" / before.name).read_bytes(),
+                                     (task, before.name))
+            for name, expected_model, expected_output in (
+                ("gesture", 3505408, 1048320), ("doodle", 3115264, 725760),
+                ("helmet", 3115264, 725760), ("face", 3192064, 806400),
+            ):
+                task = "detect" if name in ("doodle", "helmet") else name
+                weights = weights_for(name)
+                command = [sys.executable, str(root / "tools/npu/compile_yolo.py"),
+                           "--task", task, "--weights", str(weights),
+                           "--image", str(evaluation_paths(name)[0]),
+                           "--out", str(work / name)]
+                subprocess.run(command, env=env, cwd=root, check=True,
+                               capture_output=True, text=True)
+                head = YOLO(str(weights)).model.model[-1]
+                shape = getattr(head, "kpt_shape", (0, 3))
+                plan = build_plan(task, head.nc, shape[0] * shape[1])
+                plan.update(weights=str(weights.resolve()), dataset=name)
+                model, rows = load_quantized(plan)
+                self.assertEqual(len(model), expected_model)
+                self.assertEqual(output_bytes(plan), expected_output)
+                self.assertLess(output_bytes(plan), 1024 * 1024)
+                self.assertEqual(len(descriptors(plan, rows)), 77 if plan["nk"] else 68)
+                memory = Memory()
+                memory.write(BASES["MODEL_BASE"], model)
+                for command, desc in zip(
+                    (c for c in plan["commands"] if c["kind"] != "add"),
+                    descriptors(plan, rows), strict=True,
+                ):
+                    if not command["name"].endswith("cls.out"):
+                        continue
+                    ref_desc = RefDescriptor(struct.unpack("<16I", desc.encode()))
+                    bias, mult, shift, _ = read_quant(memory, command["quant_base"], ref_desc)
+                    output = quantize(np.zeros(80, dtype=np.int64), bias, mult, shift,
+                                      desc.out_zp)
+                    np.testing.assert_array_equal(output[head.nc:],
+                                                  np.full(80 - head.nc, -128))
+
 
 class WeightLayoutTest(unittest.TestCase):
     @staticmethod
