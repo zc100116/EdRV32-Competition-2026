@@ -20,7 +20,7 @@ def convert(elf, output):
         raise ValueError(f'{elf}: expected ELF32 little-endian input')
     header = struct.unpack_from('<16sHHIIIIIHHHHHH', blob)
     regions = json.loads((ROOT / 'rtl/include/soc_address_map.json').read_text())['regions']
-    images = {name: {} for name in ('rom', 'sram', 'ddr')}
+    segments = {name: [] for name in ('rom', 'sram', 'ddr')}
     for index in range(header[10]):
         kind, offset, _vaddr, address, size, _memory_size, _flags, _align = (
             struct.unpack_from('<IIIIIIII', blob, header[5] + index * header[9]))
@@ -30,20 +30,19 @@ def convert(elf, output):
                       if int(item['base'], 0) <= address
                       and address + size <= int(item['base'], 0) + int(item['size'], 0))
         name = region['name'].lower()
-        if name not in images:
+        if name not in segments:
             raise ValueError(f'{elf}: load segment at 0x{address:08x} is not ROM/SRAM/DDR')
-        base = address - int(region['base'], 0)
-        images[name].update(enumerate(blob[offset:offset + size], base))
+        segments[name].append((address - int(region['base'], 0), blob[offset:offset + size]))
     output.mkdir(parents=True, exist_ok=True)
-    for name, contents in images.items():
-        lines = []
-        previous = -2
-        for address, value in sorted(contents.items()):
-            if address != previous + 1:
-                lines.append(f'@{address:08x}')
-            lines.append(f'{value:02x}')
-            previous = address
-        (output / (name + '.hex')).write_text('\n'.join(lines) + ('\n' if lines else ''))
+    # Stream whole segments: a per-byte table of a ~30 MB showcase image exhausts host memory.
+    for name, parts in segments.items():
+        with (output / (name + '.hex')).open('w') as stream:
+            previous = -2
+            for base, data in sorted(parts, key=lambda part: part[0]):
+                if base != previous + 1:
+                    stream.write(f'@{base:08x}\n')
+                stream.write(data.hex('\n') + '\n')
+                previous = base + len(data) - 1
 
 
 if __name__ == '__main__':
