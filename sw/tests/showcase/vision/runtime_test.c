@@ -975,7 +975,8 @@ static void sync_stop_pending_test(void)
             display_frame();
         }
     }
-    puts("PASS sync stop before first/pending latch: FACE/GRAB, stale CUR_BASE, pause, home return");
+    puts("PASS sync stop before first/pending latch: FACE/GRAB, stale CUR_BASE, "
+         "pause, home return");
 }
 static void even_pace_test(void)
 {

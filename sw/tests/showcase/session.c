@@ -25,22 +25,23 @@ static struct session fresh(ui_app_t app)
 }
 int main(void)
 {
-    for(ui_app_t a=UI_APP_CAMERA;a<=UI_APP_GRAB;++a)
+    for(ui_app_t a=UI_APP_CAMERA;a<=UI_APP_GRAB;++a) {
         for(ui_app_t b=UI_APP_CAMERA;b<=UI_APP_GRAB;++b) {
-        for(unsigned paused=0;paused<2;++paused) {
-            struct session s=fresh(a);
-            if(paused) {
-                session_pause(&s,true); session_step(&s); assert(s.state==UI_STATE_PAUSED);
+            for(unsigned paused=0;paused<2;++paused) {
+                struct session s=fresh(a);
+                if(paused) {
+                    session_pause(&s,true); session_step(&s); assert(s.state==UI_STATE_PAUSED);
+                }
+                available=false;
+                session_open(&s,b,1); assert(s.state==UI_STATE_STOPPING);
+                unsigned count=starts; session_step(&s); assert(starts==count && owner==a);
+                /* Another request while stopping replaces the target without a second stop. */
+                unsigned count_stop=stops;
+                session_open(&s,b,2); session_step(&s);
+                assert(stops==count_stop && starts==count && owner==a);
+                available=true; session_step(&s);
+                assert(s.app==b && s.arg==2 && s.state==UI_STATE_RUNNING && owner==b);
             }
-            available=false;
-            session_open(&s,b,1); assert(s.state==UI_STATE_STOPPING);
-            unsigned count=starts; session_step(&s); assert(starts==count && owner==a);
-            /* Another request while stopping replaces the target without a second stop. */
-            unsigned count_stop=stops;
-            session_open(&s,b,2); session_step(&s);
-            assert(stops==count_stop && starts==count && owner==a);
-            available=true; session_step(&s);
-            assert(s.app==b && s.arg==2 && s.state==UI_STATE_RUNNING && owner==b);
         }
     }
     struct session s=fresh(UI_APP_CAMERA);
