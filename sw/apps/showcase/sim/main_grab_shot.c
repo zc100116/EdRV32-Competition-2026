@@ -63,10 +63,12 @@ int main(int argc, char **argv)
     for (unsigned k = 0; k < 21; ++k) {
         moved[k] = hand.points[0][k]; moved[k].x += dx; moved[k].y += dy;
     }
-    grab_frame(&ui_grab,moved,8);
-    grab_frame(&ui_grab,moved,8);
+    uint32_t sample_ms = 0;
+    grab_frame(&ui_grab,moved,8,sample_ms+=40);
+    grab_frame(&ui_grab,moved,8,sample_ms+=40);
     assert(ui_grab.held == 3);
-    for (unsigned i = 0; i < 12; ++i) grab_frame(&ui_grab,hand.points[0],8);
+    for (unsigned i = 0; i < 12; ++i)
+        grab_frame(&ui_grab,hand.points[0],8,sample_ms+=40);
     assert(ui_grab.closed && ui_grab.held == 3 && ui_grab.objects[3].y < 550);
     lv_tick_inc(200);
     ui_refresh();

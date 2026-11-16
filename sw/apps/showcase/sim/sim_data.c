@@ -304,3 +304,13 @@ const lv_image_dsc_t *sim_data_demo_image(void) { return demo_image; }
 /* T-GRAB-TEST: native simulator has no sensor bus. */
 void ui_data_grab_mirror(bool enabled) { (void)enabled; }
 void ui_data_grab_output(const char *text) { fputs(text, stdout); }
+
+/* T-SMOOTH-P0: native UI preserves the A/B selection without a sensor bus. */
+static bool short_exposure;
+bool ui_data_exposure_short(void) { return short_exposure; }
+void ui_data_exposure_toggle(void)
+{
+    short_exposure = !short_exposure;
+    ui_data_grab_output(short_exposure ? "camera exposure=short\r\n" :
+                                       "camera exposure=std\r\n");
+}
