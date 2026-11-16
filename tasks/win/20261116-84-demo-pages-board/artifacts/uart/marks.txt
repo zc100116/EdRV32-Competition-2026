@@ -1,0 +1,12 @@
+2026-11-16 Asia/Shanghai. Page windows inferred only from UART summary lines.
+A page change or gap greater than 2.5 s starts a new window. These are not action or distance marks.
+Page | first | last | samples | FPS median | shown median | disp median | E2E median (ms)
+pose | 11:16:21.451 | 11:16:25.729 | 5 | 25 | 25 | 26 | 97.8
+gesture | 11:16:29.466 | 11:18:04.976 | 95 | 25 | 25 | 30 | 99.2
+face | 11:18:10.138 | 11:19:45.369 | 94 | 28 | 29 | 36.5 | 86.55
+doodle | 11:19:49.531 | 11:19:53.665 | 5 | 21 | 17 | 17 | 132.7
+face | 11:20:00.823 | 11:21:10.431 | 69 | 28 | 29 | 42 | 85
+gesture | 11:21:15.448 | 11:25:14.177 | 236 | 25 | 15 | 16 | 98.65
+helmet | 11:25:17.488 | 11:26:27.652 | 70 | 29 | 30 | 44.5 | 72.55
+doodle | 11:26:32.800 | 11:27:07.634 | 34 | 23.5 | 20 | 26 | 109.65
+doodle | 11:27:16.750 | 11:27:18.747 | 3 | 26 | 27 | 38 | 89.1
