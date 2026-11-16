@@ -36,8 +36,8 @@ static void invalidate_aim(const sling_state_t *s)
     if (s->phase != SLING_AIM && s->phase != SLING_READY) return;
     int x = s->ball.x/SLING_Q;
     int y = s->ball.y/SLING_Q;
-    dirty(222,470,x,y,5);
-    dirty(298,470,x,y,5);
+    dirty(SLING_X-38,SLING_Y,x,y,5);
+    dirty(SLING_X+38,SLING_Y,x,y,5);
     if (s->phase != SLING_AIM) return;
     sling_body_t p;
     trajectory(s,&p);
@@ -55,7 +55,7 @@ void ui_sling_draw(lv_layer_t *layer)
     line.width = 7;
     if (shown.phase == SLING_AIM || shown.phase == SLING_READY) {
         for (unsigned i = 0; i < 2; ++i) {
-            line.p1 = (lv_point_precise_t){i ? 298 : 222,470};
+            line.p1 = (lv_point_precise_t){SLING_X+(i ? 38 : -38),SLING_Y};
             line.p2 = (lv_point_precise_t){shown.ball.x/SLING_Q,shown.ball.y/SLING_Q};
             lv_draw_line(layer,&line);
         }
@@ -96,7 +96,7 @@ void ui_sling_build(lv_obj_t *parent)
 {
     frame = parent;
     shown = ui_sling;
-    game_sprite(frame,&sling_slingshot,260,555);
+    game_sprite(frame,&sling_slingshot,SLING_X,SLING_Y+85);
     for (unsigned i = 0; i < 3; ++i)
         game_sprite(frame,&sling_platform,890+140*(int)i,614-160*(int)i);
     for (unsigned i = 0; i < SLING_TARGETS; ++i) {

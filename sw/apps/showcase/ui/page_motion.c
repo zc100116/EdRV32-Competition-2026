@@ -3,6 +3,7 @@
  */
 #include "game_view.h"
 #include "sling.h"
+#include "grab.h"
 #include "src/draw/lv_draw_private.h"
 #include <stdio.h>
 LV_IMAGE_DECLARE(sling_slingshot);
@@ -29,6 +30,8 @@ static unsigned frames;
 static bool keypoints, painted;
 static int cursor_x, cursor_y, point_xy[21][2];
 static bool cursor_closed, cursor_visible, points_visible;
+static lv_obj_t *setup, *speed_buttons[3], *setup_text;
+static unsigned last_segments, last_fast, last_hits, last_near;
 static lv_obj_t *surface(lv_obj_t *p, int height)
 {
     lv_obj_t *o = lv_obj_create(p);
@@ -121,8 +124,13 @@ static void build_game(void)
         "Esc / 返回：游戏大厅 · 结算后握拳 1 秒或点再来一局 · 关键点开关用于调试");
     if (ui_motion.game == MOTION_SLING) ui_sling_build(scene);
     else if (ui_motion.game != MOTION_HALL) ui_arcade_build(scene,labels);
+    last_segments = last_fast = last_hits = last_near = 0;
+    frames = 0;
+    fps_at = lv_tick_get();
     shown_revision = ui_motion.revision;
     if (ui_motion.game == MOTION_HALL) lv_group_focus_obj(card_buttons[0]);
+    lv_obj_set_hidden(setup,!ui_motion.waiting);
+    if (ui_motion.waiting) lv_group_focus_obj(speed_buttons[ui_motion.speed-GAME_SLOW]);
     lv_obj_update_layout(scene);
 }
 static void hud_sync(void)
@@ -180,6 +188,17 @@ static void refresh(void)
         }
     } else if (ui_motion.game == MOTION_SLING) ui_sling_sync();
     else ui_arcade_sync();
+    lv_obj_set_hidden(setup,!ui_motion.waiting);
+    lv_obj_set_hidden(scene,ui_motion.waiting);
+    if (ui_motion.waiting) {
+        for (unsigned i = 0; i < 3; ++i)
+            lv_obj_set_style_bg_color(speed_buttons[i],
+                lv_color_hex(ui_motion.speed == GAME_SLOW+i ? TEAL : PANEL),0);
+        char choice[120];
+        snprintf(choice,sizeof choice,"速度 %s · 握拳停留 1 秒选择 / 开始 (%u%%)",
+                 motion_speed_name(),ui_motion.hold*100/MOTION_HOLD);
+        ui_text(setup_text,choice);
+    }
     sync_input();
     hud_sync();
     unsigned now = lv_tick_get();
@@ -192,6 +211,22 @@ static void refresh(void)
         snprintf(text,sizeof text,"识别 %u fps   延迟 %u.%u ms\nCPU 空闲 %u%%   游戏绘制 %u fps",
                  v.fps,v.latency_tenths/10,v.latency_tenths%10,ui_data_system().idle,fps);
         ui_text(perf,text);
+        const motion_hand_t *h = &ui_motion.hand;
+        snprintf(text,sizeof text,"game name=%s draw_fps=%u cursor=%d,%d lost=%u cls=%d\r\n",
+                 motion_name(),fps,cursor_x,cursor_y,h->lost,h->cls);
+        ui_data_grab_output(text);
+        if (ui_motion.game == MOTION_SLICE) {
+            const slice_state_t *s = &ui_motion.slice;
+            snprintf(text,sizeof text,
+                     "game name=slice segments=%u fast_segments=%u hits=%u near_misses=%u\r\n",
+                     s->segments-last_segments,s->fast_segments-last_fast,
+                     s->hits-last_hits,s->near_misses-last_near);
+            ui_data_grab_output(text);
+            last_segments = s->segments;
+            last_fast = s->fast_segments;
+            last_hits = s->hits;
+            last_near = s->near_misses;
+        }
     }
 }
 static void tick(lv_timer_t *t)
@@ -212,6 +247,7 @@ static void rendered(lv_event_t *e)
 static void deleted(lv_event_t *e)
 {
     (void)e;
+    motion_finish();
     lv_timer_delete(timer);
     lv_display_remove_event_cb_with_user_data(lv_display_get_default(),rendered,frame);
 }
@@ -222,7 +258,9 @@ void ui_motion_action(unsigned action)
         keypoints = !keypoints;
         points_revision = ui_motion.sample-1;
         ui_text(lv_obj_get_child(key_button,0),keypoints ? "关键点 开" : "关键点 关");
-    } else if (action == 1) motion_select(ui_motion.game);
+    } else if (action >= 20 && action <= 22) motion_speed(GAME_SLOW+action-20);
+    else if (action == 23) motion_start();
+    else if (action == 1) motion_select(ui_motion.game);
     else motion_select((motion_game_t)(action-9));
     refresh();
 }
@@ -268,11 +306,11 @@ void ui_page_motion(lv_obj_t *p)
         lv_obj_set_size(icon,i == 0 ? 58 : 88,i == 0 ? 100 : 88);
         lv_obj_set_pos(icon,i == 0 ? 31 : 16,i == 0 ? 25 : 31);
         lv_image_set_inner_align(icon,LV_IMAGE_ALIGN_STRETCH);
-        ui_label(card,names[i+1],118,34,&sim_font_28,TEXT);
-        lv_obj_t *desc = ui_label(card,summaries[i],118,84,&sim_font_16,MUTED);
-        lv_obj_set_width(desc,215);
+        ui_label(card,names[i+1],105,34,&sim_font_20,TEXT);
+        lv_obj_t *desc = ui_label(card,summaries[i],105,74,&sim_font_16,MUTED);
+        lv_obj_set_width(desc,160);
         rings[i] = lv_arc_create(card);
-        lv_obj_set_pos(rings[i],282,106);
+        lv_obj_set_pos(rings[i],220,110);
         lv_obj_set_size(rings[i],52,52);
         lv_arc_set_range(rings[i],0,MOTION_HOLD);
         lv_arc_set_bg_angles(rings[i],0,360);
@@ -290,6 +328,19 @@ void ui_page_motion(lv_obj_t *p)
     for (unsigned i = 0; i < 3; ++i) stars[i] = game_sprite(result,&sling_star,150+70*(int)i,120);
     ui_button(result,"再来一局",110,180,220,1);
     lv_obj_set_hidden(result,true);
+    setup = ui_box(p,300,200,680,320,PANEL);
+    lv_obj_set_style_bg_opa(setup,LV_OPA_90,0);
+    ui_label(setup,"选择速度，准备好了就开始",40,24,&sim_font_28,TEXT);
+    setup_text = ui_label(setup,"",30,78,&sim_font_16,TEXT);
+    static const char *const speed_names[] = {"慢","中","快"};
+    for (unsigned i = 0; i < 3; ++i) {
+        ui_button(setup,speed_names[i],30+220*(int)i,122,180,20+i);
+        speed_buttons[i] = lv_obj_get_child(setup,-1);
+        lv_obj_set_height(speed_buttons[i],60);
+    }
+    ui_button(setup,"开始",200,242,280,23);
+    lv_obj_set_height(lv_obj_get_child(setup,-1),60);
+    lv_obj_set_hidden(setup,true);
     overlay = surface(lv_screen_active(),720);
     lv_obj_add_event_cb(overlay,draw_overlay,LV_EVENT_DRAW_MAIN,NULL);
     keypoints = painted = points_visible = cursor_visible = false;

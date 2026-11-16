@@ -5,21 +5,21 @@
 void ui_page_home(lv_obj_t *p)
 {
     ui_title(p, "探索芯片的无限可能");
-    lv_obj_t *heading = ui_label(p, "应用中心  /  14", 0, 84, &sim_font_16, ACCENT);
+    lv_obj_t *heading = ui_label(p, "应用中心  /  15", 0, 84, &sim_font_16, ACCENT);
     lv_obj_update_layout(heading);
     lv_obj_set_x(heading, 1240 - lv_obj_get_width(heading));
     const char *names[] = {"视觉识别", "图片识别", "图像处理", "图形引擎", "游戏",
         "系统监控", "芯片信息", "调试助手", "人体姿态", "手势识别", "人脸贴纸",
-        "简笔画识别", "安全帽检测", "抓取测试"};
+        "简笔画识别", "安全帽检测", "抓取测试", "体感游戏"};
     const char *icons[] = {LV_SYMBOL_VIDEO, LV_SYMBOL_IMAGE, LV_SYMBOL_TINT,
         LV_SYMBOL_EDIT, LV_SYMBOL_PLAY, LV_SYMBOL_BARS, LV_SYMBOL_SETTINGS, LV_SYMBOL_USB,
         LV_SYMBOL_VIDEO, LV_SYMBOL_VIDEO, LV_SYMBOL_VIDEO, LV_SYMBOL_EDIT,
-        LV_SYMBOL_VIDEO, LV_SYMBOL_VIDEO};
+        LV_SYMBOL_VIDEO, LV_SYMBOL_VIDEO, LV_SYMBOL_PLAY};
     unsigned required[] = {UI_VIN | UI_NPU, UI_VIN | UI_NPU | UI_ETH, UI_VIN | UI_PIX | UI_GEO,
         UI_RND | UI_DISP, UI_RND | UI_DISP, 0, 0, 0, UI_VIN | UI_NPU, UI_VIN | UI_NPU,
         UI_VIN | UI_NPU | UI_RND, UI_VIN | UI_NPU | UI_PIX, UI_VIN | UI_NPU,
-        UI_VIN | UI_NPU | UI_RND};
-    for(unsigned i = 0; i < 14; ++i) {
+        UI_VIN | UI_NPU | UI_RND, UI_VIN | UI_NPU | UI_RND};
+    for(unsigned i = 0; i < 15; ++i) {
         bool enabled = (ui_data_hardware() & required[i]) == required[i];
         ui_button(p, "", 40 + (int)(i % 4) * 310, 120 + (int)(i / 4) * 124, 292, i + 1);
         lv_obj_t *card = lv_obj_get_child(p, -1);

@@ -36,13 +36,29 @@ int main(void)
     assert(s.score == 20);
     for (unsigned i = s.ticks; i < MOLE_SECONDS*GAME_HZ; ++i) {
         mole_step(&s);
-        for (unsigned h = 0; h < MOLE_HOLES; ++h) assert(s.holes[h].life <= MOLE_LIFE_MAX);
+        for (unsigned h = 0; h < MOLE_HOLES; ++h) assert(s.holes[h].life <= MOLE_LIFE_MAX*2);
     }
     assert(s.done);
     int score = s.score;
     mole_input(&s,x,y,false,true);
     mole_input(&s,x,y,true,true);
     assert(s.score == score);
+    for (unsigned speed = GAME_SLOW; speed <= GAME_FAST; ++speed) {
+        mole_init(&s,7);
+        s.speed = speed;
+        for (unsigned t = 1; t < MOLE_SPAWN*4/speed; ++t) {
+            mole_step(&s);
+            for (unsigned h = 0; h < MOLE_HOLES; ++h) assert(!s.holes[h].life);
+        }
+        mole_step(&s);
+        unsigned active = 0;
+        for (unsigned h = 0; h < MOLE_HOLES; ++h) if (s.holes[h].life) {
+            ++active;
+            assert(s.holes[h].life >= MOLE_LIFE_MIN*4/speed);
+            assert(s.holes[h].life <= MOLE_LIFE_MAX*4/speed);
+        }
+        assert(active == 1);
+    }
     puts("PASS mole: open/grab edge, inclusive radius, visibility expiry, absent hand, "
          "normal/gold/bomb scores and 45-second end");
 }

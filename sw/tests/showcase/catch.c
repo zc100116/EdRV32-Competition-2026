@@ -13,9 +13,9 @@ int main(void)
     assert(s.basket_x == 1000*GAME_Q);
     catch_input(&s,0,true);
     catch_step(&s);
-    assert(s.basket_x == 970*GAME_Q && s.target_x == CATCH_WIDTH/2*GAME_Q);
+    assert(s.basket_x == 970*GAME_Q && s.target_x == GAME_SAFE_LEFT*GAME_Q);
     catch_input(&s,1280,false);
-    assert(s.target_x == CATCH_WIDTH/2*GAME_Q);
+    assert(s.target_x == GAME_SAFE_LEFT*GAME_Q);
     catch_init(&s,21);
     s.ticks = 2;
     s.fruit[0] = (catch_fruit_t){640*GAME_Q,539*GAME_Q,5*GAME_Q,0,true,false};
@@ -34,6 +34,16 @@ int main(void)
     catch_input(&s,1000,true);
     catch_step(&s);
     assert(s.basket_x == before);
+    for (unsigned speed = GAME_SLOW; speed <= GAME_FAST; ++speed) {
+        catch_init(&s,21);
+        s.speed = speed;
+        catch_step(&s);
+        assert(s.fruit[0].vy == CATCH_FALL_START*GAME_Q*(int)speed/4);
+        for (unsigned t = 1; t < CATCH_SPAWN*4/speed; ++t) catch_step(&s);
+        assert(!s.fruit[1].active);
+        catch_step(&s);
+        assert(s.fruit[1].active);
+    }
     puts("PASS catch: x-only tracking, 900 px/s limit, range clamp, absent hand, "
          "rim crossing/miss, fruit/bomb scores, flash and 60-second end");
 }

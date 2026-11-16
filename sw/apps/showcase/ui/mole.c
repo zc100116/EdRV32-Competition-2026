@@ -12,6 +12,7 @@ void mole_init(mole_state_t *s, uint32_t seed)
 {
     memset(s,0,sizeof *s);
     s->rng = seed | 1u;
+    s->speed = GAME_SLOW;
 }
 void mole_input(mole_state_t *s, int x, int y, bool closed, bool present)
 {
@@ -43,13 +44,13 @@ void mole_step(mole_state_t *s)
         if (s->holes[i].flash) --s->holes[i].flash;
     }
     if (s->ticks == MOLE_SECONDS*GAME_HZ) { s->done = true; return; }
-    if (s->ticks % MOLE_SPAWN) return;
+    if (s->ticks % (MOLE_SPAWN*4/s->speed)) return;
     unsigned i = game_random(&s->rng) % MOLE_HOLES;
     mole_hole_t *h = &s->holes[i];
     if (h->life || h->flash) return; /* This random hole is already occupied. */
     unsigned span = MOLE_LIFE_MAX - s->ticks / MOLE_RAMP;
     if (span < MOLE_LIFE_MIN) span = MOLE_LIFE_MIN;
-    h->life = MOLE_LIFE_MIN + game_random(&s->rng) % (span-MOLE_LIFE_MIN+1);
+    h->life = (MOLE_LIFE_MIN + game_random(&s->rng) % (span-MOLE_LIFE_MIN+1))*4/s->speed;
     unsigned kind = game_random(&s->rng) % MOLE_CHANCES;
     h->kind = kind < MOLE_NORMAL_CHANCES ? 0 : kind == MOLE_NORMAL_CHANCES ? 1 : 2;
 }

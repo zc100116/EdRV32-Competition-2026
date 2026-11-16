@@ -13,3 +13,10 @@ void game_integrate(game_body_t *b, int gravity)
     b->y += b->vy + gravity / 2;
     b->vy += gravity;
 }
+
+void game_integrate_speed(game_body_t *b, int gravity, unsigned speed)
+{
+    b->x += b->vx*(int)speed/4;
+    b->y += b->vy*(int)speed/4 + gravity*(int)(speed*speed)/32;
+    b->vy += gravity*(int)speed/4;
+}

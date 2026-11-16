@@ -3,10 +3,11 @@
  */
 #ifndef SHOWCASE_SLING_H
 #define SHOWCASE_SLING_H
+#include "game_math.h"
 #include <stdbool.h>
 #include <stdint.h>
 enum {
-    SLING_Q = 256, SLING_HZ = 30, SLING_X = 260, SLING_Y = 470,
+    SLING_Q = 256, SLING_HZ = 30, SLING_X = 400, SLING_Y = 470,
     SLING_REACH = 90, SLING_PULL = 180, SLING_RADIUS = 28,
     SLING_SHOTS = 5, SLING_TARGETS = 6, SLING_CHIPS = 8,
     SLING_PARTICLES = SLING_TARGETS * SLING_CHIPS,

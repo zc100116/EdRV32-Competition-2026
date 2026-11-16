@@ -50,6 +50,10 @@ static void aim(sling_state_t *s)
         dx = dx * SLING_PULL / (int)length;
         dy = dy * SLING_PULL / (int)length;
     }
+    if (SLING_X+dx < GAME_SAFE_LEFT) dx = GAME_SAFE_LEFT-SLING_X;
+    if (SLING_X+dx > GAME_SAFE_RIGHT) dx = GAME_SAFE_RIGHT-SLING_X;
+    if (SLING_Y+dy < GAME_SAFE_TOP) dy = GAME_SAFE_TOP-SLING_Y;
+    if (SLING_Y+dy > GAME_SAFE_BOTTOM) dy = GAME_SAFE_BOTTOM-SLING_Y;
     s->ball.x = (SLING_X + dx) * SLING_Q;
     s->ball.y = (SLING_Y + dy) * SLING_Q;
 }
@@ -127,7 +131,9 @@ void sling_step(sling_state_t *s)
         if (p->life) { sling_integrate(&p->body); --p->life; }
     }
     if (s->phase == SLING_DONE) {
-        s->restart_ticks = s->present && s->cls == 1 ? s->restart_ticks + 1 : 0;
+        s->restart_ticks = s->present && s->cls == 1 &&
+            s->cursor_x >= 420 && s->cursor_x <= 860 &&
+            s->cursor_y >= 228 && s->cursor_y <= 478 ? s->restart_ticks + 1 : 0;
         if (s->restart_ticks == SLING_RESTART) sling_init(s);
         return;
     }

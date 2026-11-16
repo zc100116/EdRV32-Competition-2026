@@ -17,6 +17,7 @@ typedef struct {
     unsigned ticks;
     int score;
     bool closed, done;
+    unsigned speed;
     uint32_t rng;
 } mole_state_t;
 void mole_center(unsigned hole, int *x, int *y);

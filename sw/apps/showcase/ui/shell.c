@@ -221,7 +221,6 @@ void ui_open(unsigned page)
     if(page==5) ui_data_games(&game_count);
     if(ui_detection_settings) ui_page_detection_settings(content);
     else pages[page](content);
-    if(page==0) ui_button(top,"体感游戏",960,6,160,15);
     session_box=ui_box(content,340,200,600,164,PANEL);
     session_text=ui_label(session_box,"",24,22,&sim_font_20,TEXT);
     lv_obj_set_width(session_text,552);

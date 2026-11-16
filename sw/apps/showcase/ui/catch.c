@@ -7,13 +7,14 @@ void catch_init(catch_state_t *s, uint32_t seed)
 {
     memset(s,0,sizeof *s);
     s->rng = seed | 1u;
+    s->speed = GAME_SLOW;
     s->basket_x = s->target_x = 640*GAME_Q;
 }
 void catch_input(catch_state_t *s, int x, bool present)
 {
     if (!present) return;
-    if (x < CATCH_WIDTH/2) x = CATCH_WIDTH/2;
-    if (x > 1280-CATCH_WIDTH/2) x = 1280-CATCH_WIDTH/2;
+    if (x < GAME_SAFE_LEFT) x = GAME_SAFE_LEFT;
+    if (x > GAME_SAFE_RIGHT) x = GAME_SAFE_RIGHT;
     s->target_x = x*GAME_Q;
 }
 void catch_step(catch_state_t *s)
@@ -40,13 +41,13 @@ void catch_step(catch_state_t *s)
         } else if (f->y > CATCH_EXIT_Y*GAME_Q) f->active = false;
     }
     if (s->ticks == CATCH_SECONDS*GAME_HZ) { s->done = true; return; }
-    if (s->ticks % CATCH_SPAWN != 1) return;
+    if (s->ticks % (CATCH_SPAWN*4/s->speed) != 1) return;
     for (unsigned i = 0; i < CATCH_OBJECTS; ++i) if (!s->fruit[i].active) {
         catch_fruit_t *f = &s->fruit[i];
         f->active = true;
         f->x = (CATCH_SPAWN_X+(int)(game_random(&s->rng)%CATCH_SPAWN_RANGE))*GAME_Q;
         f->y = -CATCH_RADIUS*GAME_Q;
-        f->vy = (CATCH_FALL_START+(int)(s->ticks/CATCH_FALL_RAMP))*GAME_Q;
+        f->vy = (CATCH_FALL_START+(int)(s->ticks/CATCH_FALL_RAMP))*GAME_Q*(int)s->speed/4;
         f->kind = game_random(&s->rng)%CATCH_TYPES;
         f->bomb = game_random(&s->rng)%CATCH_BOMB_CHANCE == 0;
         break;

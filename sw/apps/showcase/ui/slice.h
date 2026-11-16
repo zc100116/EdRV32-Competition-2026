@@ -5,7 +5,8 @@
 #define SHOWCASE_SLICE_H
 #include "game_math.h"
 enum { SLICE_OBJECTS = 9, SLICE_HALVES = 2*SLICE_OBJECTS, SLICE_RADIUS = 36,
-       SLICE_TRAIL = 6, SLICE_SPEED = 800, SLICE_SMOOTH_NUM = 3, SLICE_SMOOTH_DEN = 4,
+       SLICE_TRAIL = 6, SLICE_SPEED = 350,
+       SLICE_FINGER = 24, SLICE_NEAR = 30, SLICE_LOST = 2, SLICE_SMOOTH_NUM = 3, SLICE_SMOOTH_DEN = 4,
        SLICE_SECONDS = 60, SLICE_MISSES = 3, SLICE_SCORE = 10, SLICE_FADE = 24,
        SLICE_WAVE = 45, SLICE_GRAVITY = 128, SLICE_HALF_VX = 4*GAME_Q,
        SLICE_STAR_TWO = 100, SLICE_STAR_THREE = 250, SLICE_TYPES = 4,
@@ -21,6 +22,9 @@ typedef struct {
     slice_half_t halves[SLICE_HALVES];
     unsigned ticks, misses, trail_count, flash;
     int score, cursor_x, cursor_y, trail[SLICE_TRAIL][2], flash_x, flash_y;
+    int previous[SLICE_OBJECTS][2];
+    unsigned lost, segments, fast_segments, hits, near_misses;
+    unsigned speed;
     uint32_t stamp, rng;
     bool cursor_valid, done;
 } slice_state_t;

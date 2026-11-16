@@ -46,3 +46,26 @@
 游戏切换/重开才重建场景；公共计时器、性能窗和光标保持；绘制 fps 按 LVGL 刷新完成计数。
 性能窗复用识别 fps、端到端 ms、CPU idle 字段；图片不旋转，半块是预裁切的独立精灵。
 新游戏状态和物理不使用浮点，原有关键点 float 仅在视觉接口转整数；板上效果待协调者验证。
+
+
+## R2：卡 90 反馈修订
+
+代码：本节所在提交；基线 `3cd55f195`，GCC 15.2.0 / rv32im_zicsr，未做板测。
+入口改为首页第 15 张应用卡，硬件要求 VIN+NPU+RND；游戏返回大厅，大厅返回首页。
+安全区常量集中于 `game_math.h`：x=200–1080、y=120–600；大厅卡片 280×170。
+洞心与命中区域原已在安全区；弹弓叉口 x=400，180 px 圆形拉距再限制于安全区。
+接物篮中心 x=200–1080、y=600，水果出发 x 同范围；手势重开区限于中央结果面板。
+打地鼠、切图形、接物篮新增开始面板，速度按钮可点选或握拳停留 30 步选择并开始。
+三游戏独立保留本次运行的选择，默认慢；动作速率为慢/中/快=0.5/0.75/1。
+经协调者确认：慢档间隔/停留时间 ×2，中档 ×4/3（整数步取整）；局时不缩放。
+切图形以 Q8 时间步缩放速度/重力积分，保留抛物线高度；接物篮缩放水果下落速度。
+切图形门限严格 >350 px/s，命中半径 36+24=60 px；连续丢手 ≤2 帧保留轨迹。
+移动圆用前后目标位置与光标构成相对线段，检测同一插值时刻的最小距离。
+UART `game name=hall/sling/rps/mole/slice/catch` 每秒记录 draw_fps、cursor、lost、cls。
+开局/自然结束/退出记录 event、speed、score、dur_ms；固定速率两游戏标为快。
+切图形另每秒记录 segments、fast_segments、hits、near_misses；近失为未命中且距离 <90 px。
+主机 `make -C sw/tests/showcase games sling grab`：PASS，含新判定、速率、保留选择、串口事件。
+`flock /tmp/edrv32-sw-build.lock make -C sw -j2 PROGRAM=showcase`：PASS。
+`flock /tmp/edrv32-sw-build.lock make -C sw -j2 PROGRAM=showcase SHOWCASE_POST=cpu`：PASS。
+日志：`build/games-r2-tests.log`、`build/games-r2-hw-build.log`、`build/games-r2-cpu-build.log`。
+仅软件验证；四周失灵的具体原因、实际命中体验和绘制帧率仍需上板数据确认。

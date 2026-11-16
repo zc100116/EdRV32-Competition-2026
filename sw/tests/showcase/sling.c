@@ -24,18 +24,20 @@ int main(void)
         assert(b.x == x && b.y == y); /* Exact analytic solution in Q8: 0 px error. */
     }
     sling_init(&s);
-    input(351, 470, true);
+    input(SLING_X+91, SLING_Y, true);
     assert(s.phase == SLING_READY);
-    input(260, 470, true);
+    input(SLING_X, SLING_Y, true);
     assert(s.phase == SLING_READY); /* Must enter grab near fork. */
-    input(350, 470, false);
-    input(350, 470, true);
+    input(SLING_X+90, SLING_Y, false);
+    input(SLING_X+90, SLING_Y, true);
     assert(s.phase == SLING_AIM); /* Inclusive 90 px boundary. */
     input(0, 0, true);
     int dx = s.ball.x / SLING_Q - SLING_X;
     int dy = s.ball.y / SLING_Q - SLING_Y;
     assert(dx * dx + dy * dy <= SLING_PULL * SLING_PULL);
-    assert(dx * dx + dy * dy > 178 * 178);
+    assert(s.ball.x/SLING_Q >= GAME_SAFE_LEFT && s.ball.y/SLING_Q >= GAME_SAFE_TOP);
+    input(SLING_X,720,true);
+    assert(s.ball.y/SLING_Q == GAME_SAFE_BOTTOM);
     pull();
     input(80, 470, false);
     assert(s.phase == SLING_FLY && s.shots == 4);
@@ -67,7 +69,7 @@ int main(void)
     assert(sling_stars(&s) == 2);
     s.score = 450;
     assert(sling_stars(&s) == 3);
-    input(260, 470, true);
+    input(640, 360, true);
     for (unsigned i = 0; i < SLING_RESTART - 1; ++i) sling_step(&s);
     assert(s.phase == SLING_DONE);
     sling_step(&s);

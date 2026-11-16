@@ -3,7 +3,8 @@
  */
 #include "slice.h"
 #include <string.h>
-bool slice_intersects(int ax, int ay, int bx, int by, int cx, int cy, int radius)
+static bool intersects(int ax, int ay, int bx, int by, int cx, int cy,
+                       int radius, bool inclusive)
 {
     int64_t dx = bx-ax;
     int64_t dy = by-ay;
@@ -12,14 +13,18 @@ bool slice_intersects(int ax, int ay, int bx, int by, int cx, int cy, int radius
     int64_t length = dx*dx+dy*dy;
     int64_t projection = px*dx+py*dy;
     int64_t square = (int64_t)radius*radius;
-    if (projection <= 0) return px*px+py*py <= square;
+    if (projection <= 0) return inclusive ? px*px+py*py <= square : px*px+py*py < square;
     if (projection >= length) {
         px = cx-bx;
         py = cy-by;
-        return px*px+py*py <= square;
+        return inclusive ? px*px+py*py <= square : px*px+py*py < square;
     }
     int64_t cross = px*dy-py*dx;
-    return cross*cross <= square*length;
+    return inclusive ? cross*cross <= square*length : cross*cross < square*length;
+}
+bool slice_intersects(int ax, int ay, int bx, int by, int cx, int cy, int radius)
+{
+    return intersects(ax,ay,bx,by,cx,cy,radius,true);
 }
 bool slice_fast(int dx, int dy, unsigned ms)
 {
@@ -30,11 +35,13 @@ void slice_init(slice_state_t *s, uint32_t seed)
 {
     memset(s,0,sizeof *s);
     s->rng = seed | 1u;
+    s->speed = GAME_SLOW;
 }
 static void cut(slice_state_t *s, unsigned i)
 {
     slice_object_t *o = &s->objects[i];
     o->active = false;
+    ++s->hits;
     s->flash = SLICE_FLASH;
     s->flash_x = o->body.x/GAME_Q;
     s->flash_y = o->body.y/GAME_Q;
@@ -53,22 +60,39 @@ static void cut(slice_state_t *s, unsigned i)
 }
 void slice_input(slice_state_t *s, int x, int y, bool present, uint32_t stamp)
 {
-    if (!present) { s->cursor_valid = false; s->trail_count = 0; return; }
+    if (!present) {
+        if (++s->lost > SLICE_LOST) { s->cursor_valid = false; s->trail_count = 0; }
+        return;
+    }
+    s->lost = 0;
     int ax = s->cursor_x;
     int ay = s->cursor_y;
-    if (s->cursor_valid) {
+    if (s->cursor_valid && !s->done) {
         x = (ax*(SLICE_SMOOTH_DEN-SLICE_SMOOTH_NUM)+x*SLICE_SMOOTH_NUM)/SLICE_SMOOTH_DEN;
         y = (ay*(SLICE_SMOOTH_DEN-SLICE_SMOOTH_NUM)+y*SLICE_SMOOTH_NUM)/SLICE_SMOOTH_DEN;
-        if (!s->done && slice_fast(x-ax,y-ay,stamp-s->stamp)) {
-            for (unsigned i = 0; i < SLICE_OBJECTS; ++i) {
-                slice_object_t *o = &s->objects[i];
-                if (o->active && slice_intersects(ax,ay,x,y,o->body.x/GAME_Q,
-                                                  o->body.y/GAME_Q,SLICE_RADIUS)) {
-                    cut(s,i);
-                    if (s->done) break;
-                }
+        ++s->segments;
+        bool fast = slice_fast(x-ax,y-ay,stamp-s->stamp);
+        if (fast) ++s->fast_segments;
+        for (unsigned i = 0; i < SLICE_OBJECTS; ++i) {
+            slice_object_t *o = &s->objects[i];
+            if (!o->active) continue;
+            /* Relative motion gives the closest approach at the same interpolated time. */
+            int bx = x-o->body.x/GAME_Q;
+            int by = y-o->body.y/GAME_Q;
+            int rx = ax-s->previous[i][0];
+            int ry = ay-s->previous[i][1];
+            int radius = SLICE_RADIUS+SLICE_FINGER;
+            if (fast && slice_intersects(rx,ry,bx,by,0,0,radius)) {
+                cut(s,i);
+                if (s->done) break;
+            } else if (intersects(rx,ry,bx,by,0,0,radius+SLICE_NEAR,false)) {
+                ++s->near_misses;
             }
         }
+    }
+    for (unsigned i = 0; i < SLICE_OBJECTS; ++i) {
+        s->previous[i][0] = s->objects[i].body.x/GAME_Q;
+        s->previous[i][1] = s->objects[i].body.y/GAME_Q;
     }
     s->cursor_x = x;
     s->cursor_y = y;
@@ -96,13 +120,15 @@ static void wave(slice_state_t *s)
         o->body = (game_body_t){x*GAME_Q,SLICE_SPAWN_Y*GAME_Q,
             x < 640 ? SLICE_LAUNCH_VX : -SLICE_LAUNCH_VX,
             -(SLICE_LAUNCH_VY_MIN+(int)(game_random(&s->rng)%SLICE_LAUNCH_VY_RANGE))*GAME_Q};
+        s->previous[i][0] = x;
+        s->previous[i][1] = SLICE_SPAWN_Y;
     }
 }
 void slice_step(slice_state_t *s)
 {
     if (s->flash) --s->flash;
     for (unsigned i = 0; i < SLICE_HALVES; ++i) if (s->halves[i].life) {
-        game_integrate(&s->halves[i].body,SLICE_GRAVITY);
+        game_integrate_speed(&s->halves[i].body,SLICE_GRAVITY,s->speed);
         --s->halves[i].life;
     }
     if (s->done) return;
@@ -110,12 +136,12 @@ void slice_step(slice_state_t *s)
     for (unsigned i = 0; i < SLICE_OBJECTS; ++i) {
         slice_object_t *o = &s->objects[i];
         if (!o->active) continue;
-        game_integrate(&o->body,SLICE_GRAVITY);
+        game_integrate_speed(&o->body,SLICE_GRAVITY,s->speed);
         if (o->body.y > SLICE_EXIT_Y*GAME_Q && o->body.vy > 0) {
             o->active = false;
             if (!o->bomb) ++s->misses;
         }
     }
     if (s->misses >= SLICE_MISSES || s->ticks == SLICE_SECONDS*GAME_HZ) s->done = true;
-    if (!s->done && s->ticks % SLICE_WAVE == 1) wave(s);
+    if (!s->done && s->ticks % (SLICE_WAVE*4/s->speed) == 1) wave(s);
 }
