@@ -83,3 +83,53 @@ export PYTHONPATH=/root/edrv32/repo/third_party/ultralytics
 ```
 
 预测使用同一 best.pt，对上表 val 图片执行 `model.predict(source=图片路径, imgsz=640)`，以 `result.plot()` 绘图并保存 PNG；未调整预测参数。
+
+## 附加模型
+
+卡 83 完成后，在同一环境、同一 tmux 会话中依次训练 YOLOv8n 检测器 doodle（20 类，50 轮）和 helmet（helmet/head 两类，100 轮），无中断。均从本机 `~/.local/share/edrv32/npu/yolov8n.pt` 上传的官方 COCO 权重开始；batch=128、imgsz=640、workers=16、cache=False、seed=0、deterministic=True，其余参数默认，未调参。两个数据集 YAML 的 path 已指向 `/root/edrv32/extra/<模型>/yolo/`。
+
+两个模型均以 best.pt 独立验证（imgsz=640、batch=64），下表为 Box 指标，范围 0–1；数字取自各自 `val.txt` 的 `TRAIN_TIMING_JSON`、`METRICS_JSON` 和 CSV 最佳轮次记录。完整运行耗时包含初始化、训练及训练末尾的自动验证，独立验证与预测另行执行。
+
+| 模型 | 轮数 | 完整运行耗时（秒） | P | R | mAP50 | mAP50-95 | best 轮次 |
+|---|---|---|---|---|---|---|---|
+| doodle | 50 | 1782.73 | 0.974334 | 0.956647 | 0.984793 | 0.982096 | 48 |
+| helmet | 100 | 734.88 | 0.920728 | 0.895216 | 0.929523 | 0.609224 | 94 |
+
+- doodle：2026-11-15T23:22:57.290154+00:00 至 2026-11-15T23:52:40.021908+00:00（UTC）；原始日志为服务器 `/root/edrv32/extra-train.log`。
+- helmet：2026-11-15T23:52:48.908356+00:00 至 2026-11-16T00:05:03.783383+00:00（UTC）；原始日志为服务器 `/root/edrv32/extra-train.log`。
+
+### doodle 各类别
+
+| 类别 | P | R | mAP50 | mAP50-95 |
+|---|---|---|---|---|
+| cat | 0.917135 | 0.890000 | 0.955705 | 0.954861 |
+| dog | 0.921248 | 0.833333 | 0.946651 | 0.939236 |
+| fish | 0.986299 | 0.959819 | 0.989006 | 0.986963 |
+| bird | 0.954593 | 0.896667 | 0.960857 | 0.960857 |
+| rabbit | 0.952667 | 0.939253 | 0.980473 | 0.980235 |
+| butterfly | 0.993202 | 0.974011 | 0.994700 | 0.992108 |
+| sun | 0.991892 | 0.983333 | 0.994490 | 0.992890 |
+| moon | 0.971129 | 0.940000 | 0.979742 | 0.976010 |
+| star | 0.979486 | 0.966667 | 0.990188 | 0.987182 |
+| cloud | 0.983084 | 0.968598 | 0.990576 | 0.975775 |
+| lightning | 0.973488 | 0.980000 | 0.991074 | 0.988369 |
+| rainbow | 0.992084 | 0.986667 | 0.993217 | 0.991296 |
+| tree | 0.989790 | 0.969409 | 0.986359 | 0.986201 |
+| flower | 0.989878 | 0.977923 | 0.990265 | 0.988914 |
+| house | 0.995051 | 0.983333 | 0.994543 | 0.991201 |
+| car | 0.987574 | 0.976667 | 0.994281 | 0.993183 |
+| airplane | 0.957121 | 0.967259 | 0.985650 | 0.985650 |
+| sailboat | 0.989557 | 0.980000 | 0.992932 | 0.992932 |
+| apple | 0.986690 | 0.990000 | 0.994669 | 0.994669 |
+| smiley face | 0.974720 | 0.970000 | 0.990481 | 0.983382 |
+
+### helmet 各类别
+
+| 类别 | P | R | mAP50 | mAP50-95 |
+|---|---|---|---|---|
+| helmet | 0.953391 | 0.913269 | 0.964694 | 0.633696 |
+| head | 0.888066 | 0.877163 | 0.894353 | 0.584751 |
+
+每个模型的 `best.pt`、`results.csv`、`args.yaml`、`results.png`、独立验证混淆矩阵、`val.txt` 和四张预测 PNG 均在 `artifacts/extra/doodle/`、`artifacts/extra/helmet/`。两个 best.pt 各约 6 MiB，为要求回传的可运行模型权重；未提交 last.pt。预测选用各自有效 val 图片排序后的前四张，以默认参数 `model.predict(source=图片路径, imgsz=640)` 生成，并用 `result.plot()` 保存 PNG；图片路径记录在 val.txt 的 `PREDICT_INPUT` 行。服务器保持运行，未关机或释放。
+
+复现训练时沿用上文 PYTHONPATH 和 Python 环境，将初始权重换为 `/root/edrv32/init/yolov8n.pt`、data 换为 `/root/edrv32/extra/doodle/yolo/doodle.yaml` 或 `/root/edrv32/extra/helmet/yolo/helmet.yaml`、epochs 分别为 50/100、name 分别为 doodle-v8n/helmet-v8n，其余训练参数与上文一致；独立验证使用各自 `/root/edrv32/runs/<模型>-v8n/weights/best.pt` 和对应 data。
