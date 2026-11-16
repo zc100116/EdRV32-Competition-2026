@@ -1,0 +1,503 @@
+{
+  "eligible_images": 101,
+  "images": 40,
+  "persons": 59,
+  "imgsz": 640,
+  "conf": 0.5,
+  "iou": 0.7,
+  "device": "cpu",
+  "models": {
+    "tasks/win/20261115-83-hagrid-train/artifacts/extra/helmet/best.pt": {
+      "helmet": 26,
+      "head": 13,
+      "per_image": [
+        {
+          "file": "000000032038.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000001490.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000046252.jpg",
+          "persons": 3,
+          "helmet": 3,
+          "head": 0
+        },
+        {
+          "file": "000000015956.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000054931.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000043816.jpg",
+          "persons": 2,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000035197.jpg",
+          "persons": 2,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000036660.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000032081.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000020333.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000060347.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000017905.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000007088.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000037670.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000039480.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000033638.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000029397.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000046048.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000013201.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000031093.jpg",
+          "persons": 3,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000032887.jpg",
+          "persons": 2,
+          "helmet": 1,
+          "head": 1
+        },
+        {
+          "file": "000000034139.jpg",
+          "persons": 2,
+          "helmet": 1,
+          "head": 2
+        },
+        {
+          "file": "000000040757.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000050326.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000025096.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000003553.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000000872.jpg",
+          "persons": 2,
+          "helmet": 2,
+          "head": 0
+        },
+        {
+          "file": "000000010764.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000040036.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000012748.jpg",
+          "persons": 2,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000048153.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000031217.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000060823.jpg",
+          "persons": 2,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000040083.jpg",
+          "persons": 3,
+          "helmet": 0,
+          "head": 2
+        },
+        {
+          "file": "000000041990.jpg",
+          "persons": 3,
+          "helmet": 2,
+          "head": 1
+        },
+        {
+          "file": "000000037988.jpg",
+          "persons": 3,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000038210.jpg",
+          "persons": 2,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000047571.jpg",
+          "persons": 2,
+          "helmet": 2,
+          "head": 0
+        },
+        {
+          "file": "000000005529.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000030504.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        }
+      ]
+    },
+    "tasks/win/20261116-87-helmet-v2-train/artifacts/best.pt": {
+      "helmet": 4,
+      "head": 41,
+      "per_image": [
+        {
+          "file": "000000032038.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000001490.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000046252.jpg",
+          "persons": 3,
+          "helmet": 0,
+          "head": 2
+        },
+        {
+          "file": "000000015956.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 2
+        },
+        {
+          "file": "000000054931.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000043816.jpg",
+          "persons": 2,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000035197.jpg",
+          "persons": 2,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000036660.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000032081.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 2
+        },
+        {
+          "file": "000000020333.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000060347.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000017905.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000007088.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000037670.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000039480.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000033638.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000029397.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000046048.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000013201.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000031093.jpg",
+          "persons": 3,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000032887.jpg",
+          "persons": 2,
+          "helmet": 0,
+          "head": 2
+        },
+        {
+          "file": "000000034139.jpg",
+          "persons": 2,
+          "helmet": 0,
+          "head": 2
+        },
+        {
+          "file": "000000040757.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000050326.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000025096.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000003553.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000000872.jpg",
+          "persons": 2,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000010764.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000040036.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        },
+        {
+          "file": "000000012748.jpg",
+          "persons": 2,
+          "helmet": 0,
+          "head": 4
+        },
+        {
+          "file": "000000048153.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 0
+        },
+        {
+          "file": "000000031217.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000060823.jpg",
+          "persons": 2,
+          "helmet": 0,
+          "head": 2
+        },
+        {
+          "file": "000000040083.jpg",
+          "persons": 3,
+          "helmet": 0,
+          "head": 2
+        },
+        {
+          "file": "000000041990.jpg",
+          "persons": 3,
+          "helmet": 0,
+          "head": 3
+        },
+        {
+          "file": "000000037988.jpg",
+          "persons": 3,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000038210.jpg",
+          "persons": 2,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000047571.jpg",
+          "persons": 2,
+          "helmet": 0,
+          "head": 2
+        },
+        {
+          "file": "000000005529.jpg",
+          "persons": 1,
+          "helmet": 0,
+          "head": 1
+        },
+        {
+          "file": "000000030504.jpg",
+          "persons": 1,
+          "helmet": 1,
+          "head": 0
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+50 epochs completed in 0.134 hours.
+Optimizer stripped from /root/edrv32/helmet-v2/train/weights/last.pt, 6.2MB
+Optimizer stripped from /root/edrv32/helmet-v2/train/weights/best.pt, 6.2MB
+
+Validating /root/edrv32/helmet-v2/train/weights/best.pt...
+Ultralytics 8.4.160 🚀 Python-3.12.16 torch-2.14.1+cu130 CUDA:0 (NVIDIA GeForce RTX 4090, 48510MiB)
+Model summary (fused): 72 layers, 3,006,038 parameters, 0 gradients, 8.1 GFLOPs
+
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 25% ━━━───────── 1/4 4.5s/it 1.3s<13.5s
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 50% ━━━━━━────── 2/4 3.1s/it 3.2s<6.3s
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 75% ━━━━━━━━━─── 3/4 2.7s/it 5.3s<2.7s
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 4/4 1.5s/it 5.9s
+                   all        801       4670      0.952      0.908      0.953      0.662
+                helmet        462       1747      0.941      0.908      0.962      0.627
+                  head        397       2923      0.963      0.907      0.944      0.697
+Speed: 1.9ms preprocess, 0.5ms inference, 0.0ms loss, 0.6ms postprocess per image
+Results saved to /root/edrv32/helmet-v2/train
+real 510.91
+user 3911.35
+sys 969.31
