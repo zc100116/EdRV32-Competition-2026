@@ -1,0 +1,27 @@
+2026-11-16 Asia/Shanghai. Mode windows reconstructed from UART only.
+Start a new window on a mode change, a new ELF run, or a gap >2.5 s.
+Palm/back-of-hand crossover timestamps and per-attempt action labels were unavailable.
+
+ELF run 1 at 15:29:06.865, UART line 51
+ELF run 2 at 15:37:45.434, UART line 1583
+
+Run | Mode | First summary | Last summary | Summary rows
+1 | A | 15:30:06.594 | 15:30:22.775 | 17
+1 | B | 15:30:23.776 | 15:30:23.776 | 1
+1 | D | 15:30:24.805 | 15:30:25.792 | 2
+1 | A | 15:30:26.792 | 15:30:26.792 | 1
+1 | C | 15:30:27.828 | 15:30:27.828 | 1
+1 | A | 15:30:28.799 | 15:33:51.615 | 202
+1 | B | 15:33:52.647 | 15:34:49.232 | 57
+1 | C | 15:34:50.245 | 15:36:59.468 | 129
+1 | D | 15:37:00.486 | 15:37:11.827 | 12
+2 | A | 15:37:56.660 | 15:37:59.668 | 4
+2 | D | 15:38:00.681 | 15:38:38.297 | 38
+2 | A | 15:38:39.321 | 15:38:39.321 | 1
+2 | C | 15:38:40.418 | 15:42:20.058 | 216
+
+Parameter changes
+1 | 15:37:01.829 | D | 20 | UART line 1512
+1 | 15:37:03.362 | D | 25 | UART line 1516
+1 | 15:37:04.538 | D | 20 | UART line 1523
+1 | 15:37:05.067 | D | 25 | UART line 1524

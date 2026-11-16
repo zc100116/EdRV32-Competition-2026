@@ -1,0 +1,66 @@
+[15:30:23.776][RX] grab fps=25 shown=5 disp=5 npu=38.5 wait=0.2 decode=9.3 kpt=0.7 gui=18.7 e2e=89.2 hands=1 mode=B param=0.35 d=1.87 state=open held=-1 picks=0 drops=0 mirror=1 idle=51%
+[15:33:52.647][RX] grab fps=25 shown=15 disp=23 npu=38.5 wait=0.5 decode=9.2 kpt=0.1 gui=15.8 e2e=85.2 hands=0 mode=B param=0.35 d=0.31 state=open held=-1 picks=6 drops=6 mirror=1 idle=46%
+[15:33:53.656][RX] grab fps=25 shown=2 disp=2 npu=38.4 wait=0.0 decode=9.0 kpt=0.0 gui=21.2 e2e=86.2 hands=0 mode=B param=0.35 d=0.31 state=open held=-1 picks=6 drops=6 mirror=1 idle=57%
+[15:33:54.678][RX] grab fps=25 shown=20 disp=25 npu=38.5 wait=0.2 decode=9.3 kpt=0.6 gui=15.5 e2e=84.5 hands=1 mode=B param=0.35 d=1.14 state=open held=-1 picks=6 drops=6 mirror=1 idle=41%
+[15:33:55.323][RX] grab_evt ms=298679 mode=B state=grab d=0.26 obj=-1 x=714 y=371
+[15:33:55.471][RX] grab_evt ms=298834 mode=B state=release d=1.00 obj=-1 x=663 y=325
+[15:33:55.687][RX] grab fps=25 shown=7 disp=8 npu=38.5 wait=0.0 decode=9.2 kpt=0.7 gui=21.8 e2e=95.6 hands=0 mode=B param=0.35 d=0.26 state=grab held=-1 picks=6 drops=6 mirror=1 idle=50%
+[15:33:55.904][RX] grab_evt ms=299258 mode=B state=grab d=0.19 obj=-1 x=658 y=347
+[15:33:56.724][RX] grab fps=25 shown=19 disp=20 npu=38.5 wait=0.0 decode=9.2 kpt=0.8 gui=15.2 e2e=85.2 hands=1 mode=B param=0.35 d=0.15 state=grab held=-1 picks=6 drops=6 mirror=1 idle=42%
+[15:33:57.722][RX] grab fps=25 shown=11 disp=12 npu=38.5 wait=0.0 decode=9.2 kpt=0.7 gui=18.1 e2e=89.1 hands=1 mode=B param=0.35 d=0.52 state=grab held=-1 picks=6 drops=6 mirror=1 idle=48%
+[15:33:57.771][RX] grab_evt ms=301069 mode=B state=release d=1.65 obj=-1 x=640 y=486
+[15:33:58.735][RX] grab fps=25 shown=19 disp=21 npu=38.5 wait=0.0 decode=9.3 kpt=0.8 gui=17.0 e2e=86.8 hands=1 mode=B param=0.35 d=1.36 state=open held=-1 picks=6 drops=6 mirror=1 idle=40%
+[15:33:59.735][RX] grab fps=25 shown=24 disp=26 npu=38.5 wait=0.4 decode=9.4 kpt=0.8 gui=18.8 e2e=89.4 hands=1 mode=B param=0.35 d=1.45 state=open held=-1 picks=6 drops=6 mirror=1 idle=36%
+[15:34:00.747][RX] grab fps=25 shown=8 disp=9 npu=38.5 wait=0.0 decode=9.2 kpt=0.6 gui=19.6 e2e=90.1 hands=1 mode=B param=0.35 d=1.57 state=open held=-1 picks=6 drops=6 mirror=1 idle=50%
+[15:34:01.758][RX] grab fps=25 shown=2 disp=2 npu=38.4 wait=0.0 decode=9.0 kpt=0.2 gui=32.7 e2e=85.8 hands=1 mode=B param=0.35 d=1.57 state=open held=-1 picks=6 drops=6 mirror=1 idle=57%
+[15:34:02.114][RX] grab_evt ms=305461 mode=B state=grab d=0.18 obj=4 x=696 y=554
+[15:34:02.768][RX] grab fps=25 shown=7 disp=7 npu=38.5 wait=0.0 decode=9.0 kpt=0.3 gui=19.3 e2e=83.4 hands=1 mode=B param=0.35 d=0.34 state=grab held=4 picks=7 drops=6 mirror=1 idle=53%
+[15:34:03.810][RX] grab fps=25 shown=6 disp=6 npu=38.5 wait=0.0 decode=9.1 kpt=0.4 gui=23.9 e2e=94.1 hands=0 mode=B param=0.35 d=0.12 state=grab held=4 picks=7 drops=6 mirror=1 idle=53%
+[15:34:04.781][RX] grab fps=25 shown=23 disp=24 npu=38.5 wait=0.0 decode=9.3 kpt=0.8 gui=17.7 e2e=88.6 hands=1 mode=B param=0.35 d=0.21 state=grab held=4 picks=7 drops=6 mirror=1 idle=39%
+[15:34:05.788][RX] grab fps=25 shown=8 disp=9 npu=38.5 wait=0.0 decode=9.2 kpt=0.6 gui=12.8 e2e=79.4 hands=1 mode=B param=0.35 d=0.19 state=grab held=4 picks=7 drops=6 mirror=1 idle=52%
+[15:34:06.820][RX] grab fps=25 shown=6 disp=6 npu=38.5 wait=0.0 decode=9.2 kpt=0.7 gui=20.4 e2e=91.1 hands=1 mode=B param=0.35 d=0.21 state=grab held=4 picks=7 drops=6 mirror=1 idle=51%
+[15:34:07.816][RX] grab fps=25 shown=5 disp=5 npu=38.5 wait=0.0 decode=9.2 kpt=0.6 gui=22.0 e2e=92.2 hands=1 mode=B param=0.35 d=0.14 state=grab held=4 picks=7 drops=6 mirror=1 idle=53%
+[15:34:08.839][RX] grab fps=25 shown=14 disp=15 npu=38.5 wait=0.1 decode=9.2 kpt=0.7 gui=17.0 e2e=87.9 hands=1 mode=B param=0.35 d=0.28 state=grab held=4 picks=7 drops=6 mirror=1 idle=45%
+[15:34:09.838][RX] grab fps=25 shown=10 disp=11 npu=38.5 wait=0.0 decode=9.2 kpt=0.7 gui=18.5 e2e=88.8 hands=1 mode=B param=0.35 d=0.18 state=grab held=4 picks=7 drops=6 mirror=1 idle=49%
+[15:34:10.848][RX] grab fps=25 shown=4 disp=4 npu=38.5 wait=0.0 decode=9.1 kpt=0.6 gui=23.7 e2e=93.8 hands=1 mode=B param=0.35 d=0.16 state=grab held=4 picks=7 drops=6 mirror=1 idle=53%
+[15:34:11.859][RX] grab fps=25 shown=1 disp=1 npu=38.4 wait=0.0 decode=9.1 kpt=0.6 gui=30.7 e2e=102.1 hands=1 mode=B param=0.35 d=0.16 state=grab held=4 picks=7 drops=6 mirror=1 idle=56%
+[15:34:12.892][RX] grab fps=24 shown=12 disp=13 npu=38.5 wait=0.0 decode=9.2 kpt=0.6 gui=17.4 e2e=86.7 hands=1 mode=B param=0.35 d=0.28 state=grab held=4 picks=7 drops=6 mirror=1 idle=48%
+[15:34:13.886][RX] grab fps=25 shown=13 disp=14 npu=38.5 wait=0.0 decode=9.2 kpt=0.7 gui=17.3 e2e=90.4 hands=1 mode=B param=0.35 d=0.32 state=grab held=4 picks=7 drops=6 mirror=1 idle=47%
+[15:34:14.931][RX] grab fps=25 shown=9 disp=9 npu=38.5 wait=0.0 decode=9.2 kpt=0.7 gui=16.6 e2e=87.1 hands=1 mode=B param=0.35 d=0.18 state=grab held=4 picks=7 drops=6 mirror=1 idle=50%
+[15:34:15.527][RX] grab_evt ms=318874 mode=B state=release d=0.86 obj=4 x=552 y=302
+[15:34:15.952][RX] grab fps=25 shown=18 disp=21 npu=38.5 wait=0.3 decode=9.2 kpt=0.7 gui=15.7 e2e=87.0 hands=1 mode=B param=0.35 d=0.28 state=grab held=4 picks=7 drops=6 mirror=1 idle=43%
+[15:34:16.937][RX] grab fps=25 shown=25 disp=25 npu=38.5 wait=0.0 decode=9.4 kpt=0.8 gui=15.6 e2e=85.8 hands=1 mode=B param=0.35 d=0.69 state=open held=-1 picks=7 drops=7 mirror=1 idle=36%
+[15:34:17.933][RX] grab fps=25 shown=23 disp=25 npu=38.5 wait=0.0 decode=9.4 kpt=0.8 gui=16.8 e2e=88.0 hands=1 mode=B param=0.35 d=0.97 state=open held=-1 picks=7 drops=7 mirror=1 idle=40%
+[15:34:18.958][RX] grab fps=25 shown=7 disp=8 npu=38.5 wait=0.0 decode=9.3 kpt=0.6 gui=13.1 e2e=77.9 hands=1 mode=B param=0.35 d=1.48 state=open held=-1 picks=7 drops=7 mirror=1 idle=51%
+[15:34:19.952][RX] grab fps=25 shown=24 disp=26 npu=38.5 wait=0.0 decode=9.3 kpt=0.8 gui=17.2 e2e=87.1 hands=1 mode=B param=0.35 d=1.31 state=open held=-1 picks=7 drops=7 mirror=1 idle=38%
+[15:34:20.961][RX] grab fps=25 shown=3 disp=4 npu=38.4 wait=0.0 decode=9.2 kpt=0.3 gui=20.1 e2e=79.4 hands=0 mode=B param=0.35 d=1.31 state=open held=-1 picks=7 drops=7 mirror=1 idle=55%
+[15:34:21.959][RX] grab fps=25 shown=3 disp=3 npu=38.5 wait=0.0 decode=9.0 kpt=0.3 gui=22.7 e2e=90.5 hands=0 mode=B param=0.35 d=0.18 state=open held=-1 picks=7 drops=7 mirror=1 idle=56%
+[15:34:23.002][RX] grab fps=25 shown=3 disp=3 npu=38.5 wait=0.0 decode=9.2 kpt=0.6 gui=23.9 e2e=90.4 hands=1 mode=B param=0.35 d=1.34 state=open held=-1 picks=7 drops=7 mirror=1 idle=54%
+[15:34:23.984][RX] grab fps=25 shown=19 disp=21 npu=38.5 wait=0.4 decode=9.3 kpt=0.7 gui=16.7 e2e=86.6 hands=1 mode=B param=0.35 d=1.25 state=open held=-1 picks=7 drops=7 mirror=1 idle=41%
+[15:34:24.985][RX] grab fps=25 shown=10 disp=10 npu=38.5 wait=0.0 decode=9.3 kpt=0.7 gui=15.8 e2e=86.4 hands=1 mode=B param=0.35 d=1.33 state=open held=-1 picks=7 drops=7 mirror=1 idle=48%
+[15:34:26.021][RX] grab fps=25 shown=8 disp=9 npu=38.5 wait=0.0 decode=9.3 kpt=0.7 gui=17.0 e2e=88.9 hands=1 mode=B param=0.35 d=1.18 state=open held=-1 picks=7 drops=7 mirror=1 idle=49%
+[15:34:27.020][RX] grab fps=25 shown=14 disp=14 npu=38.5 wait=0.0 decode=9.3 kpt=0.7 gui=18.9 e2e=88.2 hands=1 mode=B param=0.35 d=1.78 state=open held=-1 picks=7 drops=7 mirror=1 idle=45%
+[15:34:28.026][RX] grab fps=25 shown=2 disp=2 npu=38.4 wait=0.0 decode=9.0 kpt=0.1 gui=20.8 e2e=93.0 hands=0 mode=B param=0.35 d=1.78 state=open held=-1 picks=7 drops=7 mirror=1 idle=57%
+[15:34:28.504][RX] grab_evt ms=331859 mode=B state=grab d=0.29 obj=2 x=565 y=527
+[15:34:29.045][RX] grab fps=25 shown=3 disp=3 npu=38.5 wait=0.0 decode=9.0 kpt=0.3 gui=15.0 e2e=90.1 hands=1 mode=B param=0.35 d=1.78 state=open held=-1 picks=7 drops=7 mirror=1 idle=56%
+[15:34:30.072][RX] grab fps=25 shown=4 disp=5 npu=38.5 wait=0.0 decode=9.1 kpt=0.6 gui=18.6 e2e=88.7 hands=1 mode=B param=0.35 d=0.15 state=grab held=2 picks=8 drops=7 mirror=1 idle=52%
+[15:34:31.079][RX] grab fps=25 shown=20 disp=22 npu=38.5 wait=0.0 decode=9.2 kpt=0.7 gui=17.2 e2e=87.8 hands=1 mode=B param=0.35 d=0.25 state=grab held=2 picks=8 drops=7 mirror=1 idle=41%
+[15:34:32.076][RX] grab fps=25 shown=26 disp=28 npu=38.5 wait=0.2 decode=9.3 kpt=0.8 gui=18.0 e2e=88.3 hands=1 mode=B param=0.35 d=0.25 state=grab held=2 picks=8 drops=7 mirror=1 idle=37%
+[15:34:33.138][RX] grab fps=25 shown=11 disp=12 npu=38.5 wait=0.1 decode=9.2 kpt=0.5 gui=16.4 e2e=88.9 hands=0 mode=B param=0.35 d=0.21 state=grab held=2 picks=8 drops=7 mirror=1 idle=48%
+[15:34:34.099][RX] grab fps=25 shown=18 disp=19 npu=38.5 wait=0.0 decode=9.3 kpt=0.7 gui=16.4 e2e=87.1 hands=1 mode=B param=0.35 d=0.22 state=grab held=2 picks=8 drops=7 mirror=1 idle=43%
+[15:34:35.124][RX] grab fps=25 shown=2 disp=2 npu=38.4 wait=0.0 decode=9.1 kpt=0.4 gui=12.0 e2e=67.6 hands=1 mode=B param=0.35 d=0.22 state=grab held=2 picks=8 drops=7 mirror=1 idle=55%
+[15:34:36.113][RX] grab fps=25 shown=25 disp=27 npu=38.5 wait=0.0 decode=9.3 kpt=0.8 gui=15.7 e2e=86.2 hands=1 mode=B param=0.35 d=0.22 state=grab held=2 picks=8 drops=7 mirror=1 idle=37%
+[15:34:37.146][RX] grab fps=25 shown=8 disp=9 npu=38.5 wait=0.0 decode=9.2 kpt=0.6 gui=20.5 e2e=88.4 hands=0 mode=B param=0.35 d=0.23 state=grab held=2 picks=8 drops=7 mirror=1 idle=50%
+[15:34:38.125][RX] grab fps=25 shown=9 disp=9 npu=38.5 wait=0.0 decode=9.1 kpt=0.5 gui=19.9 e2e=87.8 hands=1 mode=B param=0.35 d=0.24 state=grab held=2 picks=8 drops=7 mirror=1 idle=49%
+[15:34:39.143][RX] grab fps=25 shown=9 disp=10 npu=38.5 wait=0.0 decode=9.3 kpt=0.6 gui=19.5 e2e=91.5 hands=1 mode=B param=0.35 d=0.29 state=grab held=2 picks=8 drops=7 mirror=1 idle=48%
+[15:34:40.145][RX] grab fps=25 shown=6 disp=6 npu=38.5 wait=0.0 decode=9.2 kpt=0.5 gui=22.6 e2e=86.8 hands=2 mode=B param=0.35 d=0.26 state=grab held=2 picks=8 drops=7 mirror=1 idle=52%
+[15:34:41.164][RX] grab fps=25 shown=5 disp=5 npu=38.5 wait=0.0 decode=9.2 kpt=0.7 gui=19.0 e2e=90.7 hands=1 mode=B param=0.35 d=0.22 state=grab held=2 picks=8 drops=7 mirror=1 idle=53%
+[15:34:42.148][RX] grab fps=25 shown=7 disp=7 npu=38.5 wait=0.0 decode=9.2 kpt=0.5 gui=18.6 e2e=91.1 hands=1 mode=B param=0.35 d=0.15 state=grab held=2 picks=8 drops=7 mirror=1 idle=50%
+[15:34:43.205][RX] grab fps=25 shown=14 disp=16 npu=38.5 wait=0.0 decode=9.2 kpt=0.7 gui=15.5 e2e=88.7 hands=1 mode=B param=0.35 d=0.16 state=grab held=2 picks=8 drops=7 mirror=1 idle=47%
+[15:34:44.236][RX] grab fps=25 shown=19 disp=20 npu=38.5 wait=0.0 decode=9.2 kpt=0.7 gui=17.4 e2e=88.2 hands=1 mode=B param=0.35 d=0.22 state=grab held=2 picks=8 drops=7 mirror=1 idle=42%
+[15:34:45.221][RX] grab fps=25 shown=17 disp=19 npu=38.5 wait=0.0 decode=9.3 kpt=0.7 gui=15.9 e2e=87.7 hands=1 mode=B param=0.35 d=0.21 state=grab held=2 picks=8 drops=7 mirror=1 idle=44%
+[15:34:45.277][RX] grab_evt ms=348470 mode=B state=release d=0.94 obj=2 x=929 y=190
+[15:34:46.241][RX] grab fps=25 shown=25 disp=25 npu=38.5 wait=0.0 decode=9.3 kpt=0.8 gui=18.3 e2e=88.4 hands=1 mode=B param=0.35 d=0.87 state=open held=-1 picks=8 drops=8 mirror=1 idle=35%
+[15:34:47.200][RX] grab fps=25 shown=24 disp=24 npu=38.5 wait=0.0 decode=9.3 kpt=0.7 gui=16.1 e2e=86.5 hands=0 mode=B param=0.35 d=0.97 state=open held=-1 picks=8 drops=8 mirror=1 idle=38%
+[15:34:48.192][RX] grab fps=25 shown=17 disp=27 npu=38.5 wait=0.0 decode=9.2 kpt=0.0 gui=15.1 e2e=84.7 hands=0 mode=B param=0.35 d=0.97 state=open held=-1 picks=8 drops=8 mirror=1 idle=46%
+[15:34:49.232][RX] grab fps=25 shown=18 disp=30 npu=38.4 wait=0.1 decode=9.2 kpt=0.0 gui=17.2 e2e=85.5 hands=0 mode=B param=0.35 d=0.97 state=open held=-1 picks=8 drops=8 mirror=1 idle=46%
