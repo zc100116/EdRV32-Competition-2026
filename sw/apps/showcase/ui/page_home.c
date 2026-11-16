@@ -24,7 +24,7 @@ static const application_t applications[] = {
     {"人脸贴纸","跟随表情的趣味装扮",&home_stickers,11,MOTION},
     {"简笔画识别","随手一画，识别灵感",&home_doodle,12,CAMERA | UI_PIX},
     {"图片识别","上传图片，探索结果",&home_image,2,CAMERA | UI_ETH},
-    {"积木塔","握住积木，自由搭建",&home_tower,17,MOTION},
+    {"积木塔","握住积木，自由搭建",&home_tower,17,MOTION | UI_GEO},
     {"弹弓打靶","后拉瞄准，松开发射",&home_sling,101,MOTION},
     {"石头剪刀布","亮出手势，与芯片对战",&home_rps,102,MOTION},
     {"打地鼠","眼疾手快，击中目标",&home_mole,103,MOTION},
@@ -88,7 +88,7 @@ void ui_page_home(lv_obj_t *parent)
     cards[0] = ui_scene_card(scenes,&home_scene_vision,"智能视觉 · 检测计数",
                              "看见目标，读懂现场",CAMERA,1);
     cards[1] = ui_scene_card(scenes,&home_scene_tower,"体感积木",
-                             "用双手搭起想象 · 抓取体验",MOTION,17);
+                             "用双手搭起想象 · 抓取体验",MOTION | UI_GEO,17);
     tabs = lv_tabview_create(parent);
     lv_obj_set_width(tabs,LV_PCT(100));
     lv_obj_set_flex_grow(tabs,1);

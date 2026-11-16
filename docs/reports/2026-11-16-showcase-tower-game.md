@@ -39,3 +39,21 @@
 - 截图：`make -C sw/apps/showcase/sim -j2 tower-shots TOWER_OUTPUT=<下述目录>`（同一 flock），原生 LVGL 夹具复用真实规则和美术，含粗体缺字断言。
 - 四图：`/home/workspace/orca/workspaces/EdRV32-Competition-2026/SOC系统设计/outputs/tower/{start,building,glass,result}.png`。
 - 原始日志：`build/tower/{tests,shots,coop-hw-final,coop-cpu-final,rtos-hw}.log`；协作式硬件后处理 ELF：`build/tower/showcase-tower-hw.elf`，均不入库。
+
+## T-TOWER-GEO：双平面硬件旋转（2026-11-16）
+
+- 基线 `2f785b7dd`；复现使用本节所在提交，日志均在 `build/tower-geo/`（不入库）。
+- CPU 将 straight ARGB8888 拆为预乘颜色 RGB565 和 alpha RGB565；源通道按最近值量化，alpha 取绿色 6 位。
+- 每角度两条 Q16.16 逆映射描述符、BG=0；每种一次门铃，保留原来的半像素中心、帧数、取帧及紧密图集布局。
+- GEO 输出按截断区间中点还原；倒数预计算为颜色/alpha 查找表，合成循环无除法，输出仍是 RND 支持的 straight ARGB8888（`draw_rnd.c` 的格式映射）。
+- 暂存物理 `[0x0d000000,0x0e000000)`，前 8 KiB 描述符、两张源图及双平面输出按种类复用；实用峰值 **6,750,208 B**，Surface 4 KiB/stride 32 B 对齐。
+- 图集仍为 `[0x18000000,0x20000000)`：36 种、1,632 帧、29,291,286 像素、117,165,144 B；GEO 含偶数宽填充共 58,714,080 像素。
+- 只生成所选模式种类，按种类更新进度；串口输出 `tower atlas types= frames= pixels= geo_ms= cpu_ms= total_ms=`；首页两个入口均标注 GEO。
+- GEO 同步辅助函数在批次内接管 IRQ 完成状态，恢复原 IRQ mask；ERROR 明确上报并停止，无 CPU 回退；旧 CPU 采样器仅留在测试作对照。
+- 协调者确认：两次 RGB565 量化不能保证原始 RGB ≤8；验收改为黑/白/彩色 `(37,113,201)` 背景合成 RGB ≤12、alpha ≤8。
+- 实际全部帧最大 RGB 误差 **10**、99.9 百分位 **8**；alpha 最大 **5**、99.9 百分位 **3**；RGB >8 为 **14,263/29,291,286（0.048694%）**。
+- 每像素 RGB 误差取三个背景全部通道的最大值；straight RGB 原始最大差 **170**，出现时参考 alpha 为 **3–6**，不作为背景画质判据。
+- 时间仅估算：GEO `58.714 M / 55 M ≈ 1.07 s`；CPU 内环为 27 条 RV32 指令（`objdump -d .../ui/sprite_rot.o`），按 `29.291 M × 30 cycle / 125 MHz ≈ 7.03 s` 估算，两者合计 **8.10 s**，另计拆分、cache 和 GUI 等待；**10 s 目标待上板串口实测**。
+- 验收：`flock /tmp/edrv32-sw-build.lock make -C sw/tests/showcase tower`，含实际素材、逐位 GEO §2.1–2.2 模型、透明蓝边、教学种类跳选及原规则/快照测试（`tower.log`）。
+- 固件：同一 flock 下 `make -C sw -j2 PROGRAM=showcase` 及追加 `SHOWCASE_POST=cpu`，均 PASS、0 告警（`showcase-hw.log`、`showcase-cpu.log`）。
+- 原生 `make -C sw/apps/showcase/sim -j2 tower-shots TOWER_OUTPUT=<绝对路径>`（同一 flock）通过，四图在 `build/tower-geo/shots/`，日志 `native.log`；驱动替身使用同一 GEO 模型，页面不含软件旋转。

@@ -148,33 +148,11 @@ static void geometry(void)
     assert(game.world.bodies[game.platform].aabb.min.x == TOWER_PLATFORM_X*PHYS_ONE);
     assert(game.world.bodies[game.platform].aabb.min.y == TOWER_PLATFORM_Y*PHYS_ONE);
 }
-static void rotations(void)
+void tower_geo_test(const char *art_path);
+int main(int argc, char **argv)
 {
-    uint32_t source[] = {0xffff0000,0x000000ff,0xffff0000,0x000000ff};
-    sprite_source src = {source,2,2};
-    uint32_t c = sprite_rot_sample(src,128,0);
-    assert(c == 0x80ff0000); /* transparent blue must not bleed into the red edge */
-    assert(sprite_rot_sample(src,0,0) == source[0]);
-    assert(sprite_rot_sample(src,-512,0) == 0);
-    unsigned expected[] = {16,32,32,64,64,64};
-    sprite_source sources[36];
-    for (unsigned i = 0; i < 36; ++i) sources[i] = src;
-    uint32_t *pixels = malloc(16*1024*1024);
-    sprite_rot *atlas = malloc(sizeof *atlas);
-    for (unsigned shape = 0; shape < 6; ++shape) {
-        sprite_rot_begin(atlas,sources,UINT64_C(1)<<shape,pixels);
-        while (!sprite_rot_generate(atlas)) {}
-        assert(atlas->total == expected[shape] && atlas->completed == expected[shape]);
-        assert(tower_frame_count(shape) == expected[shape]);
-        assert(tower_frame(shape,0) == 0);
-        assert(tower_frame(shape,PHYS_PI/2) == 16%expected[shape]);
-    }
-    free(atlas);
-    free(pixels);
-}
-int main(void)
-{
-    geometry(); grab_rotation(); impacts(); stable_score(); rotations();
+    assert(argc == 2);
+    geometry(); grab_rotation(); impacts(); stable_score(); tower_geo_test(argv[1]);
     puts("PASS tower grab/release/regrab, rotation latch, replenishment, glass drop/threshold,"
          " particles, stability, challenges, 36 geometries, frame counts and alpha");
 }

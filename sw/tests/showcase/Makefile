@@ -140,9 +140,12 @@ phys-perf:
 .PHONY: tower
 tower:
 	mkdir -p $(BUILD)
-	$(CC) $(FLAGS) -O2 -I$(GAME_UI) tower.c $(GAME_UI)/tower.c \
-	    $(GAME_UI)/phys.c $(GAME_UI)/sprite_rot.c -o $(BUILD)/tower
-	$(BUILD)/tower
+	$(CC) $(FLAGS) -O2 -I$(GAME_UI) -I$(ROOT)/sw/drivers/include \
+	    -I$(ROOT)/sw/bsp/include -ffunction-sections -Wl,--gc-sections \
+	    tower.c tower_geo.c $(GAME_UI)/tower.c \
+	    $(GAME_UI)/phys.c $(GAME_UI)/sprite_rot.c $(ROOT)/sw/drivers/geo.c -o $(BUILD)/tower
+	python3 tower_art.py $(BUILD)/tower-art.bin
+	$(BUILD)/tower $(BUILD)/tower-art.bin
 	$(CC) $(FLAGS) -O2 -I$(GAME_UI) -I$(ROOT)/sw/lib/sched \
 	    -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \
 	    -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/bsp/include -DLV_CONF_INCLUDE_SIMPLE \

@@ -87,6 +87,8 @@ static tower_snapshot snapshots[3], shown, next;
 static sprite_rot atlas;
 static lv_image_dsc_t images[TOWER_KINDS][64];
 static uint32_t *storage;
+static void *geo_scratch;
+static uint64_t atlas_started, atlas_geo_ticks, atlas_cpu_ticks;
 static lv_obj_t *frame, *menu, *choices, *load_panel, *load_bar, *hud, *height_label;
 static lv_obj_t *level_label, *prompt, *countdown, *hold_arc, *result, *result_text;
 static lv_obj_t *record_label;
@@ -319,7 +321,10 @@ static void choose(tower_mode mode)
     for (unsigned i = 0; i < TOWER_KINDS; ++i)
         sources[i] = (sprite_source){(const uint32_t *)originals[i]->data,
                                     originals[i]->header.w,originals[i]->header.h};
+    atlas_started = platform_ticks();
+    atlas_geo_ticks = atlas_cpu_ticks = 0;
     sprite_rot_begin(&atlas,sources,tower_kinds(mode),storage);
+    atlas_cpu_ticks += platform_ticks()-atlas_started;
     lv_bar_set_value(load_bar,0,LV_ANIM_OFF);
 }
 void ui_tower_action(unsigned action)
@@ -348,19 +353,51 @@ void ui_tower_update(void)
 {
     if (painted) { game_loop_drawn(); painted = false; }
     if (loading) {
-        unsigned kind = atlas.kind, frame_number = atlas.frame;
+        unsigned kind = atlas.kind;
         while (!(atlas.kinds & (UINT64_C(1)<<kind))) ++kind;
-        bool done = sprite_rot_generate(&atlas);
-        const sprite_frame *f = &atlas.frames[kind][frame_number];
-#ifdef __riscv
-        cache_clean((uintptr_t)f->pixels,f->width*f->height*4);
-#endif
-        images[kind][frame_number] = (lv_image_dsc_t){
-            .header={.magic=LV_IMAGE_HEADER_MAGIC,.cf=LV_COLOR_FORMAT_ARGB8888,
-                .w=f->width,.h=f->height,.stride=f->width*4},
-            .data_size=f->width*f->height*4,.data=(const uint8_t *)f->pixels};
+        void *scratch = geo_scratch;
+        struct geo_descriptor *descriptors = scratch;
+        uint64_t started = platform_ticks();
+        unsigned first_byte = atlas.bytes;
+        sprite_rot_prepare(&atlas,scratch);
+        unsigned count = tower_frame_count(kind%6)*2;
+        for (unsigned i = 0; i < count; ++i)
+            geo_descriptor_pack(&descriptors[i],&atlas.configs[i]);
+        engine_dma_clean((uintptr_t)scratch,atlas.source_end);
+        atlas_cpu_ticks += platform_ticks()-started;
+        started = platform_ticks();
+        uint32_t error = geo_execute(descriptors,SHOWCASE_TOWER_GEO_BASE,count);
+        if (error) {
+            platform_puts("tower GEO ERR_CODE=");
+            platform_put_hex(error);
+            platform_puts("\r\n");
+            platform_stop();
+        }
+        atlas_geo_ticks += platform_ticks()-started;
+        started = platform_ticks();
+        engine_dma_invalidate((uintptr_t)scratch+atlas.source_end,
+                              atlas.scratch_bytes-atlas.source_end);
+        bool done = sprite_rot_finish(&atlas,scratch);
+        engine_dma_clean((uintptr_t)storage+first_byte,atlas.bytes-first_byte);
+        for (unsigned frame_number = 0; frame_number < tower_frame_count(kind%6);
+             ++frame_number) {
+            const sprite_frame *f = &atlas.frames[kind][frame_number];
+            images[kind][frame_number] = (lv_image_dsc_t){
+                .header={.magic=LV_IMAGE_HEADER_MAGIC,.cf=LV_COLOR_FORMAT_ARGB8888,
+                    .w=f->width,.h=f->height,.stride=f->width*4},
+                .data_size=f->width*f->height*4,.data=(const uint8_t *)f->pixels};
+        }
+        atlas_cpu_ticks += platform_ticks()-started;
         lv_bar_set_value(load_bar,(int)(atlas.completed*100/atlas.total),LV_ANIM_OFF);
         if (done) {
+            char line[192];
+            unsigned hz = platform_clock_hz();
+            snprintf(line,sizeof line,
+                "tower atlas types=%u frames=%u pixels=%u geo_ms=%u cpu_ms=%u total_ms=%u\r\n",
+                atlas.types,atlas.total,atlas.bytes/4,
+                (unsigned)(atlas_geo_ticks*1000/hz),(unsigned)(atlas_cpu_ticks*1000/hz),
+                (unsigned)((platform_ticks()-atlas_started)*1000/hz));
+            platform_puts(line);
             loading = false;
             memset(&shown,0,sizeof shown);
             shown.held = -1;
@@ -436,6 +473,7 @@ static void deleted(lv_event_t *event)
     lv_timer_delete(timer);
 #ifndef __riscv
     free(storage);
+    free(geo_scratch);
 #endif
 }
 void ui_page_tower(lv_obj_t *p)
@@ -455,8 +493,10 @@ void ui_page_tower(lv_obj_t *p)
     shown.platform_x = TOWER_PLATFORM_X;
 #ifdef __riscv
     storage = (uint32_t *)(EDRV32_DDR_BASE+SHOWCASE_TOWER_ROT_BASE);
+    geo_scratch = (void *)(EDRV32_DDR_BASE+SHOWCASE_TOWER_GEO_BASE);
 #else
     storage = malloc(SHOWCASE_TOWER_ROT_BYTES);
+    geo_scratch = malloc(SHOWCASE_TOWER_GEO_BYTES);
 #endif
     ui_video_surface(p);
     frame = ui_box(lv_screen_active(),0,0,1280,720,0x000000);

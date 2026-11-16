@@ -3,7 +3,7 @@ ROOT := $(abspath ../../../..)
 BUILD := $(ROOT)/build/sim
 LVGL := $(ROOT)/third_party/lvgl
 UI := $(wildcard ../ui/*.c)
-UI_HEADERS := $(wildcard ../ui/*.h)
+UI_HEADERS := $(wildcard ../ui/*.h) $(ROOT)/sw/tests/showcase/geo_model.h
 FONT_SIZES := 14 16 20 28 40
 FONTS := $(foreach size,$(FONT_SIZES),$(BUILD)/fonts/sim_font_$(size).c)
 DIGITS := $(BUILD)/fonts/sim_digits_40.c
@@ -21,7 +21,7 @@ PROCESS_HELPERS := $(ROOT)/sw/lib/geo_matrix.c $(ROOT)/sw/lib/geo_matrix.h
 BOLD_FONTS := $(wildcard ../fonts/showcase_*.c)
 ART_NAMES := sling rps mole slice catch home tower
 ART := $(addprefix $(BUILD)/,$(addsuffix _images.c,$(ART_NAMES))) $(BUILD)/stickers.c
-COMMON := $(BOLD_FONTS) $(ART) $(UI) sim_data.c game_loop_port.c process.c $(ROOT)/sw/lib/geo_matrix.c $(ASSETS) $(GAMES) $(FONTS) $(DIGITS)
+COMMON := $(BOLD_FONTS) $(ART) $(UI) sim_data.c game_loop_port.c geo_host.c process.c $(ROOT)/sw/lib/geo_matrix.c $(ASSETS) $(GAMES) $(FONTS) $(DIGITS)
 SHOTS := home home-vrn vision image process graphics games chip debug \
     game-running renderer-list renderer-result benchmark-results overlay-home chip-coremark \
     coremark-counters games-last-row detection-settings process-collapsed \
