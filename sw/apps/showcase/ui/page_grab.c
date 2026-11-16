@@ -147,6 +147,7 @@ void ui_grab_action(unsigned action)
     if (action == 0) {
         ui_grab.mode = (ui_grab.mode + 1) % 4;
         ui_grab.pending_frames = 0;
+        /* Start cursor and decision-value smoothing from the new mode's first frame. */
         ui_grab.smooth = false;
     } else if (action == 1 || action == 2) {
         if (ui_grab.mode == 2) return;

@@ -66,6 +66,8 @@ static struct {
     uint8_t gamma_table[256];
     int32_t matrix[6];
     unsigned capture;
+    bool mirror_pending;
+    bool mirror_enabled;
     unsigned memory_reading;
     int memory_image;
     uint32_t memory_frame;
@@ -533,6 +535,10 @@ static void request_page(unsigned page)
         return;
     }
     v.state = PIPE_STARTING;
+    if (page == PAGE_GRAB) {
+        v.mirror_pending = true;
+        v.mirror_enabled = ui_grab.mirror;
+    }
     memset(&timing, 0, sizeof timing);
     timing.since = platform_ticks();
     timing.idle_since = sched_idle_ticks();
@@ -549,15 +555,20 @@ static void request_page(unsigned page)
     sched_port_unlock(lock);
 }
 void ui_data_grab_output(const char *text) { platform_puts(text); }
-void ui_data_grab_mirror(bool enabled)
+static void set_sensor_mirror(bool enabled)
 {
     if (ov5640_mirror(0, platform_clock_hz(), enabled)) fail("OV5640 horizontal mirror");
 }
-static void enter_grab(void)
+void ui_data_grab_mirror(bool enabled)
 {
-    ui_data_grab_mirror(ui_grab.mirror);
-    request_page(PAGE_GRAB);
+    uint32_t lock = sched_port_lock();
+    v.mirror_pending = true;
+    v.mirror_enabled = enabled;
+    if (v.state == PIPE_LIVE) v.state = PIPE_CONFIGURE;
+    sched_port_unlock(lock);
+    app_wake_at(platform_ticks());
 }
+static void enter_grab(void) { request_page(PAGE_GRAB); }
 static void enter_hand(void) { request_page(PAGE_HAND); }
 static void enter_face(void) { request_page(PAGE_FACE); }
 static void enter_doodle(void) { request_page(PAGE_DOODLE); }
@@ -1328,7 +1339,10 @@ int vision_service(void)
             if (v.page == PAGE_PROCESS) {
                 engine_control(ENGINE_PIX, 0); engine_control(ENGINE_GEO, 0);
             }
-            if (v.page == PAGE_GRAB) ui_data_grab_mirror(false);
+            if (v.page == PAGE_GRAB) {
+                set_sensor_mirror(false);
+                v.mirror_pending = false;
+            }
             if (v.model) select_model(0);
             v.current = -1; v.page = PAGE_NONE; v.state = PIPE_OFF;
         } else if (v.state == PIPE_PAUSING) v.state = PIPE_FROZEN;
@@ -1343,6 +1357,11 @@ int vision_service(void)
         if (model != v.model) select_model(model);
         if (v.page == PAGE_PROCESS && v.gamma_index < 256) {
             sched_port_unlock(lock); return 1;
+        }
+        /* Capture is stopped and drained before changing sensor frame timing. */
+        if (v.mirror_pending) {
+            set_sensor_mirror(v.mirror_enabled);
+            v.mirror_pending = false;
         }
         if (v.page != PAGE_IMAGE) configure_capture();
         if (v.page == PAGE_PROCESS && v.process_dirty) {

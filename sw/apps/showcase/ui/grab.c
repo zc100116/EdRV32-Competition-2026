@@ -17,7 +17,7 @@ static float point_distance(const ui_pose_point_t *p, unsigned a, unsigned b)
 void grab_reset_objects(grab_state_t *s)
 {
     for (unsigned i = 0; i < GRAB_OBJECTS; ++i)
-        s->objects[i] = (grab_object_t){140 + 200 * i, GRAB_GROUND - GRAB_RADIUS, 0, false};
+        s->objects[i] = (grab_object_t){290 + 140 * i, GRAB_GROUND - GRAB_RADIUS, 0, false};
     s->held = -1;
 }
 void grab_init(grab_state_t *s)
@@ -60,17 +60,17 @@ bool grab_frame(grab_state_t *s, const ui_pose_point_t *p, int cls)
 {
     if (!p) {
         s->pending_frames = 0;
-        if (++s->lost == 10 && s->held >= 0) {
+        if (++s->lost == 15 && s->held >= 0) {
             transition(s, false, -1);
             return true;
         }
         return false;
     }
     s->lost = 0;
-    static const unsigned required[4][7] = {
-        {0,9,4,8}, {0,9,4,8,12,16,20}, {0,5,9,13,17}, {4,8}
+    static const unsigned required[4][10] = {
+        {0,5,9,13,17,4,8}, {0,5,9,13,17,4,8,12,16,20}, {0,5,9,13,17}, {4,8}
     };
-    static const unsigned count[] = {4,7,5,2};
+    static const unsigned count[] = {7,10,5,2};
     for (unsigned i = 0; i < count[s->mode]; ++i)
         if (p[required[s->mode][i]].visibility < .5f) {
             s->pending_frames = 0;
@@ -85,6 +85,7 @@ bool grab_frame(grab_state_t *s, const ui_pose_point_t *p, int cls)
     for (unsigned i = 0; i < n; ++i) { x += p[cursor[i]].x; y += p[cursor[i]].y; }
     x /= n;
     y /= n;
+    bool smooth = s->smooth;
     s->x = s->smooth ? .5f * (s->x + x) : x;
     s->y = s->smooth ? .5f * (s->y + y) : y;
     s->smooth = true;
@@ -93,20 +94,24 @@ bool grab_frame(grab_state_t *s, const ui_pose_point_t *p, int cls)
     bool release = false;
     int object = -1;
     if (s->mode <= 1) {
-        s->d = point_distance(p,4,8);
+        float d = point_distance(p,4,8);
         if (s->mode == 1) {
-            for (unsigned i = 2; i < 5; ++i) s->d += point_distance(p,4,tips[i]);
-            s->d /= 4;
+            for (unsigned i = 2; i < 5; ++i) d += point_distance(p,4,tips[i]);
+            d /= 4;
         }
-        s->d /= point_distance(p,0,9);
+        float scale = 0;
+        for (unsigned i = 1; i < 5; ++i) scale += point_distance(p,0,palm[i]);
+        d /= scale / 4;
+        s->d = smooth ? .5f * (s->d + d) : d;
         float threshold = s->thresholds[s->mode] / 100.f;
         close = s->d < threshold;
         release = s->d > threshold + (s->mode == 0 ? .15f : .20f);
     } else if (s->mode == 2) {
-        close = cls == 1 || cls == 4 || cls == 5;
-        release = cls >= 0 && cls != 13 && !close;
+        close = cls == 1 || cls == 5;
+        release = cls == 0 || cls == 11;
     } else {
-        s->d = point_distance(p,4,8);
+        float d = point_distance(p,4,8);
+        s->d = smooth ? .5f * (s->d + d) : d;
         float reach = GRAB_RADIUS + s->thresholds[3];
         release = s->d > 2 * reach + 40;
         for (unsigned i = 0; i < GRAB_OBJECTS; ++i) {
@@ -133,7 +138,7 @@ bool grab_frame(grab_state_t *s, const ui_pose_point_t *p, int cls)
         s->pending_frames = 0;
     s->candidate_object = object;
     s->pending_frames = change ? s->pending_frames + 1 : 0;
-    bool changed = change && (s->mode == 2 || s->pending_frames >= 2);
+    bool changed = change && (s->mode == 2 || s->pending_frames >= (s->closed ? 4u : 2u));
     if (changed) {
         if (!s->closed && s->mode != 3) {
             float nearest = GRAB_RADIUS + 40;

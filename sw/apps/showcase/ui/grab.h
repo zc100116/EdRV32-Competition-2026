@@ -4,7 +4,7 @@
 #ifndef SHOWCASE_GRAB_H
 #define SHOWCASE_GRAB_H
 #include "ui_data.h"
-enum { GRAB_OBJECTS = 6, GRAB_RADIUS = 50, GRAB_GROUND = 650 };
+enum { GRAB_OBJECTS = 6, GRAB_RADIUS = 50, GRAB_GROUND = 520 };
 typedef struct { float x, y, velocity; bool falling; } grab_object_t;
 typedef struct {
     grab_object_t objects[GRAB_OBJECTS];

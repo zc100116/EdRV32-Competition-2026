@@ -133,21 +133,30 @@ int ov5640_init(unsigned camera, uint32_t hz)
     return 0;
 }
 static int sensor_mirror;
+static unsigned vin_enabled;
+static unsigned vin_draining;
+static unsigned capture_configurations;
+static unsigned mirror_writes;
+static unsigned mirror_configuration;
 int ov5640_mirror(unsigned camera, uint32_t hz, int enabled)
 {
     assert(camera == 0 && hz == 125000000);
+    assert(!vin_enabled && !vin_draining);
+    ++mirror_writes;
+    mirror_configuration = capture_configurations;
     sensor_mirror = enabled;
     return 0;
 }
 void engine_control(enum engine_id engine, uint32_t ctrl)
 {
-    (void)ctrl;
+    if (engine == ENGINE_VIN) vin_enabled = ctrl & EDRV32_VIN_CTRL_ENABLE_MASK;
     if (engine == ENGINE_PIX || engine == ENGINE_GEO)
         assert((hardware & (APP_HW_PIX | APP_HW_GEO)) == (APP_HW_PIX | APP_HW_GEO));
 }
 #ifndef NETWORK_INTEGRATION
 struct engine_event engine_poll(enum engine_id engine)
 {
+    if (engine == ENGINE_VIN && vin_draining) return (struct engine_event){.status = 1};
     if (engine == ENGINE_PIX) return (struct engine_event){.status = pix_busy ? 1 : 2};
     if (engine == ENGINE_DISP) return (struct engine_event){.status =
         display_enabled || display_scanned ? 1 : 2};
@@ -158,7 +167,12 @@ struct engine_event engine_poll(enum engine_id engine)
 void vin_camera_size(unsigned camera, unsigned width, unsigned height)
 { assert(camera == 0 && width == 1280 && height == 720); }
 void vin_channel_configure(unsigned channel, const struct vin_channel *c)
-{ assert(channel == 0 || channel == 2); busy[channel] = c->busy_slots; sources[channel] = c->source; }
+{
+    assert(channel == 0 || channel == 2);
+    ++capture_configurations;
+    busy[channel] = c->busy_slots;
+    sources[channel] = c->source;
+}
 void vin_channel_enable(unsigned channel, unsigned enabled)
 { assert(channel == 0 || channel == 2); assert(!enabled); }
 void vin_slots_busy(unsigned channel, uint32_t slots) { busy[channel] = slots; }
@@ -724,7 +738,13 @@ static void grab_test(void)
     ui_grab.mirror = true;
     grab_init(&ui_grab);
     ui_grab.mode = 2;
-    vision_app_grab.enter(); drain();
+    unsigned writes = mirror_writes;
+    unsigned configurations = capture_configurations;
+    vision_app_grab.enter();
+    assert(mirror_writes == writes);
+    drain();
+    assert(mirror_writes == writes + 1 && mirror_configuration == configurations);
+    assert(capture_configurations > configurations);
     assert(sensor_mirror && last_npu.model == VISION_GESTURE_MODEL_BASE);
     camera_event(0, 850);
     output_class(5);
@@ -735,17 +755,35 @@ static void grab_test(void)
     const char *line = vision_report();
     assert(!strncmp(line, "grab fps=", 9) && strstr(line, "mode=C param=none"));
     assert(strstr(line, "held=-1 picks=0 drops=0 mirror=1"));
-    ui_data_grab_mirror(false);
-    assert(!sensor_mirror);
-    ui_data_grab_mirror(true);
-    assert(sensor_mirror);
+    for (unsigned enabled = 0; enabled < 2; ++enabled) {
+        writes = mirror_writes;
+        configurations = capture_configurations;
+        vin_draining = 1;
+        ui_data_grab_mirror(enabled);
+        assert(mirror_writes == writes && vin_enabled);
+        assert(vision_service());
+        assert(!vin_enabled && mirror_writes == writes);
+        assert(capture_configurations == configurations);
+        vin_draining = 0;
+        drain();
+        assert(sensor_mirror == (int)enabled && mirror_writes == writes + 1);
+        assert(mirror_configuration == configurations);
+        assert(capture_configurations > configurations && vin_enabled);
+    }
+    writes = mirror_writes;
+    configurations = capture_configurations;
+    vin_draining = 1;
     vision_app_grab.exit();
-    display_frame(); display_frame(); drain();
+    display_frame(); display_frame();
+    assert(mirror_writes == writes && sensor_mirror && !vin_enabled);
+    vin_draining = 0;
+    drain();
+    assert(mirror_writes == writes + 1 && mirror_configuration == configurations);
     assert(vision_ready(UI_STATE_IDLE) && last_npu.model == VISION_MODEL_BASE);
     assert(!sensor_mirror);
     display_frame(); display_frame();
     puts("PASS grab gesture pipeline, 21 points, serial mode/held/counters, "
-         "sensor mirror switch/restore and detect restore");
+         "sensor mirror enter/switch/restore after VIN idle and before configure, detect restore");
 }
 static void demos_test(void)
 {
