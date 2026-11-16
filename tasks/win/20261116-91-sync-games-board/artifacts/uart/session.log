@@ -1,0 +1,1490 @@
+[21:01:12.999][SYS] connected COM7 @ 115200 8N1
+[21:01:15.358][RX] 
+[21:01:15.358][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[21:01:15.358][RX]   E         D   D   R   R   V   V      3      2 
+[21:01:15.358][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[21:01:15.358][RX]   E         D   D   R  R     V V       3   2    
+[21:01:15.358][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[21:01:15.358][RX] 
+[21:01:15.358][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[21:01:15.358][RX] CHIP_ID: 0xed320001
+[21:01:15.358][RX] CLK_SYS_HZ: 125000000
+[21:01:15.358][RX] ROM bytes: 16384
+[21:01:15.358][RX] SRAM bytes: 65536
+[21:01:15.358][RX] I-cache bytes: 8192
+[21:01:15.358][RX] D-cache bytes: 8192
+[21:01:15.358][RX] MEM_READY: 1
+[21:01:15.358][RX] Build commit: 92b38fd2
+[21:01:15.358][RX] Compiler version: GCC 15.2.0
+[21:01:15.479][RX] Boot SRAM
+[21:01:15.479][RX] Monitor: EdRV32
+[21:01:15.479][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[21:01:35.901][RX] 
+[21:01:35.901][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[21:01:35.901][RX]   E         D   D   R   R   V   V      3      2 
+[21:01:35.901][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[21:01:35.901][RX]   E         D   D   R  R     V V       3   2    
+[21:01:35.901][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[21:01:35.901][RX] 
+[21:01:35.901][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[21:01:35.901][RX] CHIP_ID: 0xed320001
+[21:01:35.901][RX] CLK_SYS_HZ: 125000000
+[21:01:35.901][RX] ROM bytes: 16384
+[21:01:35.901][RX] SRAM bytes: 65536
+[21:01:35.901][RX] I-cache bytes: 8192
+[21:01:35.901][RX] D-cache bytes: 8192
+[21:01:35.901][RX] MEM_READY: 1
+[21:01:35.901][RX] Build commit: 92b38fd2
+[21:01:35.901][RX] Compiler version: GCC 15.2.0
+[21:01:36.004][RX] BIOS: EdRV32
+[21:01:36.004][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[21:02:05.654][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[21:02:05.663][RX] Input error: type 1-4 then Enter
+[21:02:05.663][SYS] Input error: type 1-4 then Enter
+[21:02:05.663][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[21:02:08.803][RX] ETH link: up
+[21:02:08.803][RX] ETH load ready 192.168.1.10:5000
+[21:02:09.023][SYS] 等待网卡 以太网 就绪 … 用时 0.2 s
+[21:02:09.410][RX] Load bytes: 39715896 segments: 5
+[21:02:09.410][RX] Load result: PASS
+[21:02:09.410][RX] Run: 0x90000000
+[21:02:11.880][RX] LVGL v9.6.0 DIRECT ARGB8888 1280x720 batch=32
+[21:02:11.880][RX] Showcase: EdRV32 showcase v2
+[21:02:11.948][RX] ETH peer IP: 0xc0a80102
+[21:02:11.958][RX] ETH peer port: 55598
+[21:02:11.968][RX] showcase first frame
+[21:02:12.418][RX] CPU%/max_us 2/1181 0/152 8/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:12.438][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:13.436][RX] CPU%/max_us 2/1195 0/152 2/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:13.457][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:14.446][RX] CPU%/max_us 2/1195 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:14.466][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:15.457][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:15.477][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:16.467][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:16.487][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:17.476][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:17.496][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:18.485][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:18.505][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:19.496][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:19.516][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:20.506][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:20.525][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:21.515][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:21.535][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:22.524][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:22.544][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:23.535][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:23.555][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:24.550][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:24.570][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:25.560][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:25.580][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:26.569][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:26.589][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:27.579][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:27.600][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:28.592][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:28.612][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:29.601][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:29.621][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:30.611][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:30.631][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:31.621][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:31.640][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:32.636][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:32.656][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:33.648][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:33.668][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:34.575][SYS] 建立网口连接失败：UDP bind 192.168.1.2:6000: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。
+[21:02:34.658][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:34.677][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:35.667][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:35.688][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:36.679][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:36.699][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:37.691][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:37.711][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:38.705][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:38.725][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:39.717][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:39.737][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:40.727][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:40.747][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:41.738][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:41.758][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:42.749][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:42.768][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:43.758][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:43.778][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:44.770][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:44.790][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:45.781][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:45.801][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:46.791][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:46.810][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:47.800][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:47.820][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:48.811][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:48.831][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:49.822][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:49.842][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:50.835][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:50.855][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:51.844][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:51.865][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:52.855][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:52.875][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:53.864][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:53.884][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:54.874][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:54.894][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:55.883][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:55.903][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:56.896][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:56.915][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:57.905][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:57.924][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:58.914][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:58.934][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:02:59.923][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:02:59.944][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:00.935][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:00.955][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:01.944][RX] CPU%/max_us 2/1440 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:01.964][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:02.954][RX] CPU%/max_us 2/1440 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:02.974][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:03.963][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:03.983][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:04.972][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:04.992][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:05.982][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:06.001][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:06.995][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:07.015][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:08.004][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:08.025][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:09.016][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:09.036][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:10.026][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:10.045][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:11.035][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:11.054][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:12.045][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:12.065][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:13.057][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:13.077][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:14.068][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:14.088][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:15.078][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:15.097][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:16.087][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:16.107][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:17.098][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:17.118][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:18.112][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:18.132][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:19.121][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:19.141][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:20.133][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:20.152][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:21.142][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:21.162][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:22.155][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:22.175][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:23.164][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:23.184][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:24.173][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:24.194][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:25.183][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:25.203][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:26.196][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:26.215][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:27.205][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:27.225][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:28.216][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:28.236][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:29.228][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:29.248][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:30.243][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:30.262][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:31.252][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:31.272][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:32.261][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:32.282][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:33.271][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:33.291][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:34.282][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:34.302][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:35.292][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:35.311][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:36.301][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:36.321][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:37.313][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:37.333][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:38.322][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:38.342][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:39.331][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:39.351][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:40.340][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:40.361][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:41.353][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:41.373][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:42.365][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:42.385][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:43.376][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:43.399][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:44.390][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:44.410][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:45.402][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:45.422][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:46.412][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:46.431][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:47.421][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:47.440][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:48.430][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:48.451][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:49.440][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:49.460][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:50.450][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:50.469][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:51.462][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:51.482][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:52.472][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:52.491][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:53.482][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:53.502][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:54.496][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:54.515][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:55.508][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:55.528][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:56.519][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:56.540][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:57.529][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:57.549][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:58.538][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:58.558][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:03:59.549][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:03:59.569][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:00.559][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:00.579][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:01.568][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:01.588][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:02.578][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:02.598][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:03.588][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:03.608][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:04.597][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:04.618][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:05.607][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:05.627][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:06.617][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:06.636][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:07.626][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:07.646][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:08.635][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:08.655][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:09.648][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:09.667][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:10.657][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:10.676][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:11.666][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:11.686][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:12.675][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:12.696][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:13.688][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:13.707][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:14.697][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:14.717][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:15.706][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:15.726][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:16.716][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:16.736][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:17.725][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:17.745][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:18.734][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:18.754][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:19.745][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:19.765][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:20.757][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:20.777][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:21.769][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:21.789][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:22.781][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:22.801][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:23.790][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:23.810][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:24.799][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:24.819][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:25.811][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:25.831][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:26.821][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:26.841][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:27.754][SYS] 建立网口连接失败：UDP bind 192.168.1.2:6000: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。
+[21:04:27.830][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:27.850][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:28.841][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:28.862][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:29.247][SYS] 建立网口连接失败：UDP bind 192.168.1.2:6000: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。
+[21:04:29.852][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:29.872][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:30.861][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:30.881][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:31.872][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:31.892][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:32.882][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:32.901][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:33.892][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:33.912][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:34.901][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:34.921][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:35.911][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:35.931][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:36.923][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:36.943][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:37.933][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:37.953][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:38.945][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:38.964][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:39.954][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:39.973][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:40.963][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:40.982][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:41.975][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:41.995][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:42.984][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:43.004][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:43.998][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:44.016][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:45.005][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:45.026][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:46.017][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:46.037][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:47.029][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:47.048][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:48.037][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:48.058][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:49.049][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:49.069][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:50.059][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:50.079][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:51.068][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:51.088][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:52.081][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:52.100][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:53.090][RX] CPU%/max_us 2/1460 0/152 0/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:53.111][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:54.103][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:54.123][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:55.115][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:55.134][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:56.124][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:56.144][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:57.135][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:57.157][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:58.146][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:58.164][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:04:59.156][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:04:59.176][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:00.165][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:00.185][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:01.177][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:01.198][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:02.193][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:02.208][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:03.198][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:03.218][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:04.213][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:04.230][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:05.220][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:05.239][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:06.229][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:06.248][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:07.238][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:07.258][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:08.247][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:08.267][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:08.974][SYS] UDP 已监听 192.168.1.2:6000 · console
+[21:05:09.260][RX] CPU%/max_us 2/1460 0/152 1/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:09.281][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:09.375][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[21:05:09.387][RX] ETH peer IP: 0xc0a80102
+[21:05:09.397][RX] ETH peer port: 6000
+[21:05:10.269][RX] CPU%/max_us 2/1460 0/152 7/57304 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:10.289][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:11.309][RX] CPU%/max_us 2/1460 0/152 27/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:11.328][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:12.241][RX] game name=hall draw_fps=14 cursor=640,360 lost=20 cls=-1
+[21:05:12.305][RX] CPU%/max_us 2/1845 1/1314 12/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:12.330][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:12.415][RX] grab fps=20 shown=20 disp=16 npu=38.4 wait=0.1 decode=0.0 kpt=0.0 gui=26.5 e2e=75.8 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=86%
+[21:05:13.240][RX] game name=hall draw_fps=19 cursor=640,360 lost=41 cls=-1
+[21:05:13.335][RX] CPU%/max_us 3/1845 1/1314 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:13.351][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:13.452][RX] grab fps=21 shown=21 disp=19 npu=38.4 wait=0.5 decode=0.0 kpt=0.0 gui=29.1 e2e=76.4 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:05:13.967][RX] game name=sling event=start speed=快 score=0 dur_ms=0
+[21:05:14.328][RX] CPU%/max_us 3/1845 1/1314 18/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:14.359][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:14.453][RX] grab fps=21 shown=22 disp=8 npu=38.4 wait=3.6 decode=0.0 kpt=0.0 gui=18.7 e2e=71.0 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=82%
+[21:05:14.929][RX] game name=sling draw_fps=6 cursor=640,360 lost=81 cls=-1
+[21:05:15.337][RX] CPU%/max_us 3/1845 1/1314 5/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:15.368][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:15.470][RX] grab fps=24 shown=26 disp=5 npu=38.4 wait=0.2 decode=0.0 kpt=0.0 gui=12.9 e2e=66.1 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=88%
+[21:05:15.929][RX] game name=sling draw_fps=2 cursor=640,360 lost=107 cls=-1
+[21:05:16.355][RX] CPU%/max_us 3/1845 1/1314 5/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:16.376][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:16.478][RX] grab fps=25 shown=26 disp=2 npu=38.4 wait=0.0 decode=0.0 kpt=0.0 gui=9.1 e2e=62.2 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=89%
+[21:05:16.932][RX] game name=sling draw_fps=8 cursor=640,360 lost=132 cls=-1
+[21:05:17.361][RX] CPU%/max_us 3/1845 1/1314 6/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:17.382][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:17.483][RX] grab fps=24 shown=25 disp=8 npu=38.4 wait=0.0 decode=0.0 kpt=0.0 gui=16.7 e2e=69.1 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=87%
+[21:05:17.937][RX] game name=sling draw_fps=1 cursor=640,360 lost=158 cls=-1
+[21:05:18.363][RX] CPU%/max_us 3/1845 1/1314 5/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:18.378][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:18.478][RX] grab fps=25 shown=26 disp=2 npu=38.4 wait=0.0 decode=0.0 kpt=0.0 gui=9.2 e2e=63.4 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=89%
+[21:05:18.963][RX] game name=sling draw_fps=5 cursor=640,360 lost=0 cls=-1
+[21:05:19.382][RX] CPU%/max_us 3/1845 3/1314 8/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:19.402][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:19.505][RX] grab fps=23 shown=23 disp=13 npu=38.4 wait=0.2 decode=0.0 kpt=0.3 gui=23.4 e2e=75.2 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=86%
+[21:05:19.980][RX] game name=sling draw_fps=24 cursor=426,530 lost=0 cls=0
+[21:05:20.390][RX] CPU%/max_us 3/1845 4/1314 9/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:20.410][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:20.507][RX] grab fps=21 shown=22 disp=24 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=29.4 e2e=74.5 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=82%
+[21:05:20.979][RX] game name=sling draw_fps=24 cursor=389,461 lost=0 cls=0
+[21:05:21.397][RX] CPU%/max_us 3/1845 3/1314 9/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:21.418][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:21.513][RX] grab fps=21 shown=23 disp=24 npu=38.4 wait=0.1 decode=0.0 kpt=0.8 gui=33.3 e2e=78.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=82%
+[21:05:21.981][RX] game name=sling draw_fps=22 cursor=404,459 lost=0 cls=0
+[21:05:22.420][RX] CPU%/max_us 2/1845 3/1561 31/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:22.462][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:22.627][RX] grab fps=21 shown=21 disp=20 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=33.4 e2e=79.2 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=74%
+[21:05:23.118][RX] game name=sling draw_fps=15 cursor=342,488 lost=0 cls=1
+[21:05:23.523][RX] CPU%/max_us 1/1845 2/1561 64/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:23.541][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:23.789][RX] grab fps=16 shown=15 disp=15 npu=38.4 wait=15.2 decode=0.0 kpt=0.8 gui=80.6 e2e=136.1 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=36%
+[21:05:24.141][RX] game name=sling draw_fps=13 cursor=199,535 lost=0 cls=1
+[21:05:24.543][RX] CPU%/max_us 1/1845 2/1561 63/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:24.593][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:24.756][RX] grab fps=14 shown=14 disp=14 npu=38.4 wait=14.9 decode=0.0 kpt=0.8 gui=86.0 e2e=139.4 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=31%
+[21:05:25.061][RX] game name=sling draw_fps=13 cursor=177,503 lost=0 cls=1
+[21:05:25.489][RX] CPU%/max_us 3/1845 4/1561 5/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:25.512][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:25.610][RX] grab fps=21 shown=23 disp=11 npu=38.4 wait=2.1 decode=0.0 kpt=0.7 gui=34.8 e2e=85.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=65%
+[21:05:26.063][RX] game name=sling draw_fps=5 cursor=167,481 lost=0 cls=1
+[21:05:26.501][RX] CPU%/max_us 3/1862 3/1561 22/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:26.523][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:26.737][RX] grab fps=22 shown=20 disp=6 npu=38.5 wait=1.2 decode=0.0 kpt=0.7 gui=21.9 e2e=71.8 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=70%
+[21:05:27.082][RX] game name=sling draw_fps=9 cursor=167,467 lost=0 cls=0
+[21:05:27.518][RX] CPU%/max_us 3/1862 3/1561 20/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:27.566][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:27.686][RX] grab fps=19 shown=20 disp=17 npu=38.4 wait=1.8 decode=0.0 kpt=0.8 gui=45.7 e2e=95.1 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=65%
+[21:05:28.091][RX] game name=sling draw_fps=23 cursor=176,476 lost=0 cls=0
+[21:05:28.512][RX] CPU%/max_us 3/1862 3/1561 16/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:28.533][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:28.634][RX] grab fps=20 shown=21 disp=20 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=45.7 e2e=89.2 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=62%
+[21:05:29.112][RX] game name=sling draw_fps=21 cursor=347,414 lost=0 cls=0
+[21:05:29.522][RX] CPU%/max_us 3/1862 3/1561 9/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:29.543][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:29.643][RX] grab fps=21 shown=22 disp=24 npu=38.4 wait=0.1 decode=0.0 kpt=0.8 gui=34.2 e2e=79.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=84%
+[21:05:30.220][RX] game name=sling draw_fps=21 cursor=406,467 lost=0 cls=1
+[21:05:30.622][RX] CPU%/max_us 1/1862 2/1561 52/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:30.690][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:30.790][RX] grab fps=19 shown=19 disp=18 npu=38.4 wait=4.3 decode=0.0 kpt=0.8 gui=41.5 e2e=88.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=63%
+[21:05:31.293][RX] game name=sling draw_fps=12 cursor=201,522 lost=0 cls=1
+[21:05:31.597][RX] CPU%/max_us 1/1862 2/1561 55/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:31.646][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:31.777][RX] grab fps=15 shown=14 disp=13 npu=38.4 wait=13.3 decode=0.0 kpt=0.8 gui=79.6 e2e=133.2 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=40%
+[21:05:32.209][RX] game name=sling draw_fps=15 cursor=176,469 lost=0 cls=0
+[21:05:32.639][RX] CPU%/max_us 3/1862 3/1561 16/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:32.654][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:32.770][RX] grab fps=19 shown=19 disp=19 npu=38.5 wait=3.8 decode=0.0 kpt=0.8 gui=54.4 e2e=103.1 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=58%
+[21:05:33.278][RX] game name=sling draw_fps=26 cursor=351,429 lost=0 cls=0
+[21:05:33.648][RX] CPU%/max_us 2/1862 3/1561 28/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:33.668][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:33.769][RX] grab fps=19 shown=21 disp=25 npu=38.5 wait=1.7 decode=0.0 kpt=0.8 gui=51.5 e2e=96.9 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=61%
+[21:05:34.254][RX] game name=sling draw_fps=22 cursor=388,456 lost=0 cls=4
+[21:05:34.652][RX] CPU%/max_us 3/1862 4/1626 9/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:34.673][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:34.817][RX] grab fps=21 shown=23 disp=23 npu=38.4 wait=0.0 decode=0.0 kpt=1.2 gui=28.9 e2e=73.7 hands=2 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=80%
+[21:05:35.300][RX] game name=sling draw_fps=16 cursor=298,512 lost=0 cls=1
+[21:05:35.700][RX] CPU%/max_us 2/1862 2/1626 33/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:35.721][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:35.820][RX] grab fps=17 shown=17 disp=15 npu=38.4 wait=5.8 decode=0.0 kpt=0.8 gui=57.5 e2e=106.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=51%
+[21:05:36.372][RX] game name=sling draw_fps=8 cursor=183,555 lost=0 cls=1
+[21:05:36.705][RX] CPU%/max_us 2/1862 2/1626 49/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:36.755][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:36.884][RX] grab fps=18 shown=17 disp=10 npu=38.4 wait=8.0 decode=0.0 kpt=0.7 gui=51.5 e2e=102.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=54%
+[21:05:37.329][RX] game name=sling draw_fps=17 cursor=170,545 lost=0 cls=0
+[21:05:37.725][RX] CPU%/max_us 3/1862 4/1626 18/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:37.767][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:37.921][RX] grab fps=18 shown=20 disp=20 npu=38.4 wait=5.5 decode=0.0 kpt=0.7 gui=58.8 e2e=108.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=61%
+[21:05:38.333][RX] game name=sling draw_fps=24 cursor=229,533 lost=0 cls=4
+[21:05:38.720][RX] CPU%/max_us 3/1862 3/1626 15/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:38.740][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:38.844][RX] grab fps=19 shown=19 disp=22 npu=38.5 wait=1.7 decode=0.0 kpt=0.8 gui=52.1 e2e=96.7 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=62%
+[21:05:39.342][RX] game name=sling draw_fps=22 cursor=336,460 lost=0 cls=4
+[21:05:39.736][RX] CPU%/max_us 3/1878 4/1626 9/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:39.758][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:39.857][RX] grab fps=22 shown=22 disp=24 npu=38.4 wait=0.0 decode=0.0 kpt=0.8 gui=31.9 e2e=76.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:05:40.346][RX] game name=sling draw_fps=25 cursor=389,461 lost=0 cls=4
+[21:05:40.798][RX] CPU%/max_us 3/1878 3/1626 14/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:40.850][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:41.048][RX] grab fps=21 shown=22 disp=25 npu=38.4 wait=0.0 decode=0.0 kpt=0.8 gui=30.5 e2e=75.1 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=82%
+[21:05:41.345][RX] game name=sling draw_fps=16 cursor=336,500 lost=6 cls=1
+[21:05:41.759][RX] CPU%/max_us 3/1878 1/1626 8/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:41.780][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:41.881][RX] grab fps=19 shown=21 disp=14 npu=38.4 wait=1.7 decode=0.0 kpt=0.4 gui=39.1 e2e=84.7 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=67%
+[21:05:42.408][RX] game name=sling draw_fps=4 cursor=278,507 lost=0 cls=1
+[21:05:42.783][RX] CPU%/max_us 1/1878 2/1626 57/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:42.803][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:42.905][RX] grab fps=23 shown=23 disp=5 npu=38.4 wait=0.1 decode=0.0 kpt=0.1 gui=17.3 e2e=70.5 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=76%
+[21:05:43.382][RX] game name=sling draw_fps=22 cursor=327,483 lost=0 cls=0
+[21:05:43.782][RX] CPU%/max_us 3/1878 3/1626 8/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:43.813][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:43.911][RX] grab fps=18 shown=19 disp=24 npu=38.4 wait=5.2 decode=0.0 kpt=0.8 gui=58.3 e2e=106.1 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=67%
+[21:05:44.416][RX] game name=sling draw_fps=23 cursor=385,453 lost=0 cls=0
+[21:05:44.805][RX] CPU%/max_us 3/1878 3/1626 10/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:44.826][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:44.925][RX] grab fps=21 shown=22 disp=24 npu=38.4 wait=0.4 decode=0.0 kpt=0.8 gui=31.7 e2e=77.1 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=82%
+[21:05:45.423][RX] game name=sling draw_fps=19 cursor=393,485 lost=4 cls=1
+[21:05:45.825][RX] CPU%/max_us 3/1878 1/1626 5/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:45.846][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:45.949][RX] grab fps=20 shown=22 disp=19 npu=38.4 wait=0.5 decode=0.0 kpt=0.6 gui=36.3 e2e=80.9 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=80%
+[21:05:46.528][RX] game name=sling draw_fps=5 cursor=245,492 lost=0 cls=1
+[21:05:46.886][RX] CPU%/max_us 1/1878 2/1626 59/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:46.944][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:47.158][RX] grab fps=23 shown=22 disp=5 npu=38.4 wait=1.6 decode=0.0 kpt=0.2 gui=15.2 e2e=66.5 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=78%
+[21:05:47.576][RX] game name=sling draw_fps=14 cursor=218,525 lost=0 cls=1
+[21:05:47.922][RX] CPU%/max_us 1/1878 2/1626 66/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:47.942][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:48.159][RX] grab fps=13 shown=15 disp=15 npu=38.4 wait=23.3 decode=0.0 kpt=0.8 gui=91.0 e2e=152.8 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=30%
+[21:05:48.544][RX] game name=sling draw_fps=15 cursor=224,560 lost=0 cls=1
+[21:05:48.876][RX] CPU%/max_us 2/1878 2/1626 51/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:48.896][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:48.997][RX] grab fps=15 shown=16 disp=16 npu=38.4 wait=11.8 decode=0.0 kpt=0.8 gui=83.5 e2e=138.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=39%
+[21:05:49.599][RX] game name=sling draw_fps=11 cursor=219,567 lost=0 cls=1
+[21:05:49.955][RX] CPU%/max_us 2/1878 2/1626 47/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:50.005][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:50.207][RX] grab fps=19 shown=19 disp=11 npu=38.4 wait=2.8 decode=0.0 kpt=0.7 gui=47.2 e2e=94.4 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=58%
+[21:05:50.610][RX] game name=sling draw_fps=14 cursor=200,563 lost=0 cls=1
+[21:05:50.957][RX] CPU%/max_us 2/1878 3/1626 34/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:50.974][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:51.144][RX] grab fps=16 shown=18 disp=15 npu=38.4 wait=9.7 decode=0.0 kpt=0.8 gui=69.3 e2e=121.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=49%
+[21:05:51.579][RX] game name=sling draw_fps=11 cursor=205,580 lost=0 cls=1
+[21:05:51.950][RX] CPU%/max_us 3/1878 3/1626 28/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:51.962][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:52.067][RX] grab fps=19 shown=20 disp=12 npu=38.4 wait=3.1 decode=0.0 kpt=0.7 gui=44.3 e2e=93.2 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=61%
+[21:05:52.505][RX] game name=sling event=end speed=快 score=350 dur_ms=38600
+[21:05:52.613][RX] game name=sling draw_fps=21 cursor=236,577 lost=0 cls=0
+[21:05:52.952][RX] CPU%/max_us 2/1878 3/1626 33/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:52.987][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:53.109][RX] grab fps=18 shown=18 disp=20 npu=38.4 wait=4.6 decode=0.0 kpt=0.7 gui=46.6 e2e=95.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=71%
+[21:05:53.622][RX] game name=sling draw_fps=21 cursor=242,585 lost=9 cls=0
+[21:05:53.937][RX] CPU%/max_us 2/1878 1/1626 13/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:53.956][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:54.030][RX] grab fps=20 shown=16 disp=21 npu=38.4 wait=3.9 decode=0.0 kpt=0.5 gui=47.4 e2e=93.3 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=64%
+[21:05:54.630][RX] game name=sling draw_fps=27 cursor=242,585 lost=29 cls=0
+[21:05:54.942][RX] CPU%/max_us 3/1878 1/1626 13/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:54.957][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:55.037][RX] grab fps=18 shown=21 disp=30 npu=38.4 wait=1.3 decode=0.0 kpt=0.0 gui=52.6 e2e=99.2 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=81%
+[21:05:55.646][RX] game name=sling draw_fps=29 cursor=242,585 lost=48 cls=0
+[21:05:55.965][RX] CPU%/max_us 3/1878 1/1626 14/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:55.986][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:56.065][RX] grab fps=18 shown=18 disp=28 npu=38.4 wait=1.8 decode=0.0 kpt=0.0 gui=52.3 e2e=97.3 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=81%
+[21:05:56.961][RX] CPU%/max_us 3/1878 1/1626 8/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:56.982][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:57.067][RX] grab fps=18 shown=19 disp=21 npu=38.4 wait=4.0 decode=0.0 kpt=0.0 gui=45.1 e2e=88.8 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=81%
+[21:05:57.388][RX] game name=hall draw_fps=18 cursor=242,585 lost=84 cls=0
+[21:05:57.968][RX] CPU%/max_us 3/1878 1/1626 12/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:58.002][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:58.089][RX] grab fps=21 shown=21 disp=21 npu=38.4 wait=0.9 decode=0.0 kpt=0.0 gui=36.5 e2e=86.3 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=82%
+[21:05:58.406][RX] game name=hall draw_fps=19 cursor=242,585 lost=107 cls=0
+[21:05:58.993][RX] CPU%/max_us 2/1878 1/1626 16/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:05:59.010][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:05:59.099][RX] grab fps=21 shown=23 disp=20 npu=38.4 wait=0.0 decode=0.0 kpt=0.0 gui=30.1 e2e=77.0 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=82%
+[21:05:59.443][RX] game name=hall draw_fps=27 cursor=242,585 lost=128 cls=0
+[21:06:00.056][RX] CPU%/max_us 2/1878 1/1626 22/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:00.068][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:00.168][RX] grab fps=20 shown=20 disp=25 npu=38.4 wait=1.9 decode=0.0 kpt=0.0 gui=44.6 e2e=90.3 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=79%
+[21:06:00.521][RX] game name=mole draw_fps=28 cursor=301,577 lost=0 cls=0
+[21:06:01.075][RX] CPU%/max_us 2/1878 3/1626 32/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:01.087][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:01.211][RX] grab fps=16 shown=18 disp=30 npu=38.5 wait=4.6 decode=0.0 kpt=0.5 gui=56.4 e2e=106.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=68%
+[21:06:01.545][RX] game name=mole draw_fps=29 cursor=294,591 lost=0 cls=0
+[21:06:01.994][RX] game name=mole event=start speed=慢 score=0 dur_ms=0
+[21:06:02.089][RX] CPU%/max_us 3/1878 3/1626 22/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:02.109][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:02.211][RX] grab fps=22 shown=20 disp=29 npu=38.5 wait=1.0 decode=0.0 kpt=0.8 gui=43.7 e2e=89.4 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=63%
+[21:06:02.546][RX] game name=mole draw_fps=26 cursor=323,528 lost=0 cls=0
+[21:06:03.091][RX] CPU%/max_us 3/1878 3/1626 9/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:03.112][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:03.212][RX] grab fps=21 shown=23 disp=27 npu=38.5 wait=0.1 decode=0.0 kpt=0.8 gui=38.7 e2e=83.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=76%
+[21:06:03.549][RX] game name=mole draw_fps=23 cursor=425,450 lost=0 cls=0
+[21:06:04.095][RX] CPU%/max_us 3/1878 4/1626 9/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:04.115][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:04.217][RX] grab fps=20 shown=21 disp=24 npu=38.4 wait=0.0 decode=0.0 kpt=0.8 gui=34.4 e2e=78.9 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:06:04.552][RX] game name=mole draw_fps=24 cursor=958,395 lost=0 cls=0
+[21:06:05.110][RX] CPU%/max_us 3/1878 1/1626 5/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:05.131][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:05.217][RX] grab fps=21 shown=22 disp=24 npu=38.4 wait=0.0 decode=0.0 kpt=1.1 gui=29.0 e2e=74.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=82%
+[21:06:05.561][RX] game name=mole draw_fps=10 cursor=987,396 lost=5 cls=0
+[21:06:06.113][RX] CPU%/max_us 3/1878 3/1626 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:06.133][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:06.229][RX] grab fps=22 shown=24 disp=11 npu=38.4 wait=0.3 decode=0.0 kpt=0.1 gui=23.0 e2e=70.2 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=86%
+[21:06:06.578][RX] game name=mole draw_fps=19 cursor=668,408 lost=0 cls=0
+[21:06:07.128][RX] CPU%/max_us 3/1878 3/1626 9/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:07.148][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:07.247][RX] grab fps=22 shown=22 disp=19 npu=38.4 wait=0.1 decode=0.0 kpt=0.7 gui=27.4 e2e=75.4 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=84%
+[21:06:07.579][RX] game name=mole draw_fps=25 cursor=640,313 lost=0 cls=0
+[21:06:08.133][RX] CPU%/max_us 3/1878 3/1626 9/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:08.156][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:08.261][RX] grab fps=20 shown=22 disp=26 npu=38.4 wait=0.0 decode=0.0 kpt=0.8 gui=34.2 e2e=78.4 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:06:08.580][RX] game name=mole draw_fps=24 cursor=723,432 lost=0 cls=0
+[21:06:09.145][RX] CPU%/max_us 3/1878 3/1626 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:09.166][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:09.270][RX] grab fps=20 shown=21 disp=24 npu=38.4 wait=0.4 decode=0.0 kpt=0.8 gui=35.4 e2e=80.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:06:09.578][RX] game name=mole draw_fps=24 cursor=764,394 lost=0 cls=0
+[21:06:10.160][RX] CPU%/max_us 3/1878 3/1626 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:10.181][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:10.278][RX] grab fps=20 shown=20 disp=23 npu=38.4 wait=0.3 decode=0.0 kpt=0.8 gui=37.7 e2e=82.4 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=84%
+[21:06:10.580][RX] game name=mole draw_fps=26 cursor=746,369 lost=0 cls=0
+[21:06:11.171][RX] CPU%/max_us 3/1878 3/1626 9/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:11.192][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:11.296][RX] grab fps=20 shown=21 disp=26 npu=38.4 wait=0.2 decode=0.0 kpt=0.8 gui=39.2 e2e=83.4 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:06:11.598][RX] game name=mole draw_fps=26 cursor=918,485 lost=0 cls=0
+[21:06:12.173][RX] CPU%/max_us 3/1878 3/1626 9/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:12.194][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:12.307][RX] grab fps=21 shown=22 disp=27 npu=38.4 wait=0.0 decode=0.0 kpt=0.7 gui=33.0 e2e=77.4 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=81%
+[21:06:12.597][RX] game name=mole draw_fps=27 cursor=905,305 lost=0 cls=0
+[21:06:13.186][RX] CPU%/max_us 3/1878 4/1626 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:13.207][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:13.303][RX] grab fps=21 shown=22 disp=27 npu=38.4 wait=0.1 decode=0.0 kpt=0.8 gui=36.3 e2e=81.2 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=81%
+[21:06:13.599][RX] game name=mole draw_fps=22 cursor=768,549 lost=0 cls=0
+[21:06:14.191][RX] CPU%/max_us 3/1878 2/1626 5/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:14.211][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:14.314][RX] grab fps=21 shown=23 disp=23 npu=38.4 wait=0.0 decode=0.0 kpt=0.9 gui=31.3 e2e=76.3 hands=2 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:06:14.599][RX] game name=mole draw_fps=15 cursor=570,398 lost=0 cls=0
+[21:06:15.219][RX] CPU%/max_us 3/1878 3/1626 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:15.239][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:15.348][RX] grab fps=22 shown=22 disp=14 npu=38.4 wait=0.3 decode=0.0 kpt=0.7 gui=25.1 e2e=74.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=85%
+[21:06:15.605][RX] game name=mole draw_fps=27 cursor=642,299 lost=0 cls=0
+[21:06:16.229][RX] CPU%/max_us 3/1878 3/1626 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:16.250][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:16.351][RX] grab fps=19 shown=20 disp=27 npu=38.4 wait=0.5 decode=0.0 kpt=0.9 gui=43.1 e2e=88.8 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=82%
+[21:06:16.607][RX] game name=mole draw_fps=24 cursor=690,456 lost=0 cls=7
+[21:06:17.240][RX] CPU%/max_us 3/1878 4/1626 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:17.261][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:17.363][RX] grab fps=20 shown=21 disp=24 npu=38.4 wait=0.2 decode=0.0 kpt=0.9 gui=35.2 e2e=79.9 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:06:17.612][RX] game name=mole draw_fps=23 cursor=575,391 lost=0 cls=7
+[21:06:18.258][RX] CPU%/max_us 3/1878 3/1626 9/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:18.279][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:18.378][RX] grab fps=21 shown=22 disp=23 npu=38.4 wait=0.2 decode=0.0 kpt=1.0 gui=32.7 e2e=78.7 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:06:18.611][RX] game name=mole draw_fps=25 cursor=647,340 lost=0 cls=5
+[21:06:19.268][RX] CPU%/max_us 3/1878 4/1626 8/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:19.289][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:19.386][RX] grab fps=21 shown=22 disp=26 npu=38.4 wait=0.3 decode=0.0 kpt=0.9 gui=31.5 e2e=76.4 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=81%
+[21:06:19.605][RX] game name=mole draw_fps=24 cursor=689,397 lost=0 cls=0
+[21:06:20.279][RX] CPU%/max_us 3/1878 3/1626 6/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:20.301][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:20.397][RX] grab fps=20 shown=21 disp=24 npu=38.4 wait=0.5 decode=0.0 kpt=1.0 gui=37.2 e2e=82.9 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:06:20.612][RX] game name=mole draw_fps=16 cursor=727,467 lost=0 cls=13
+[21:06:21.296][RX] CPU%/max_us 3/1878 3/1626 8/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:21.317][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:21.417][RX] grab fps=20 shown=22 disp=16 npu=38.4 wait=0.5 decode=0.0 kpt=0.6 gui=28.1 e2e=75.5 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=85%
+[21:06:21.631][RX] game name=mole draw_fps=23 cursor=934,525 lost=1 cls=1
+[21:06:22.313][RX] CPU%/max_us 3/1878 4/1626 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:22.333][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:22.433][RX] grab fps=21 shown=21 disp=23 npu=38.4 wait=0.5 decode=0.0 kpt=0.8 gui=37.7 e2e=83.7 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=82%
+[21:06:22.632][RX] game name=mole draw_fps=24 cursor=425,456 lost=0 cls=5
+[21:06:23.320][RX] CPU%/max_us 3/1878 3/1626 6/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:23.340][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:23.441][RX] grab fps=21 shown=22 disp=24 npu=38.4 wait=0.0 decode=0.0 kpt=0.9 gui=32.6 e2e=76.9 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:06:23.647][RX] game name=mole draw_fps=14 cursor=445,324 lost=0 cls=0
+[21:06:24.336][RX] CPU%/max_us 3/1878 4/1626 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:24.350][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:24.454][RX] grab fps=22 shown=23 disp=15 npu=38.4 wait=0.0 decode=0.0 kpt=0.6 gui=23.3 e2e=69.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=85%
+[21:06:24.645][RX] game name=mole draw_fps=24 cursor=924,410 lost=0 cls=0
+[21:06:25.343][RX] CPU%/max_us 3/1878 3/2161 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:25.358][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:25.460][RX] grab fps=20 shown=21 disp=24 npu=38.4 wait=0.0 decode=0.0 kpt=1.0 gui=35.7 e2e=80.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:06:25.656][RX] game name=mole draw_fps=14 cursor=697,418 lost=3 cls=0
+[21:06:26.365][RX] CPU%/max_us 3/1878 4/2161 10/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:26.386][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:26.490][RX] grab fps=21 shown=23 disp=17 npu=38.4 wait=0.0 decode=0.0 kpt=0.7 gui=26.5 e2e=72.2 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=85%
+[21:06:26.663][RX] game name=mole draw_fps=19 cursor=697,466 lost=0 cls=1
+[21:06:27.357][RX] CPU%/max_us 3/1878 3/2161 9/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:27.378][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:27.477][RX] grab fps=22 shown=22 disp=18 npu=38.4 wait=0.0 decode=0.0 kpt=0.7 gui=28.8 e2e=77.5 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:06:27.681][RX] game name=mole draw_fps=20 cursor=942,477 lost=2 cls=1
+[21:06:28.372][RX] CPU%/max_us 3/1878 3/2161 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:28.393][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:28.492][RX] grab fps=21 shown=23 disp=22 npu=38.4 wait=0.0 decode=0.0 kpt=0.7 gui=26.1 e2e=70.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:06:28.678][RX] game name=mole draw_fps=22 cursor=938,474 lost=0 cls=0
+[21:06:29.397][RX] CPU%/max_us 3/1878 3/2161 8/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:29.418][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:29.517][RX] grab fps=20 shown=20 disp=21 npu=38.4 wait=0.0 decode=0.0 kpt=0.8 gui=35.6 e2e=80.7 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=84%
+[21:06:29.673][RX] game name=mole draw_fps=24 cursor=749,341 lost=0 cls=0
+[21:06:30.401][RX] CPU%/max_us 3/1878 4/2161 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:30.422][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:30.520][RX] grab fps=20 shown=21 disp=24 npu=38.4 wait=0.2 decode=0.0 kpt=0.8 gui=36.6 e2e=81.7 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:06:30.689][RX] game name=mole draw_fps=24 cursor=414,354 lost=0 cls=0
+[21:06:31.413][RX] CPU%/max_us 3/1878 4/2161 6/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:31.434][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:31.532][RX] grab fps=20 shown=22 disp=25 npu=38.4 wait=0.2 decode=0.0 kpt=0.9 gui=32.6 e2e=77.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=84%
+[21:06:31.691][RX] game name=mole draw_fps=12 cursor=434,408 lost=4 cls=5
+[21:06:32.427][RX] CPU%/max_us 3/1878 1/2161 4/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:32.448][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:32.549][RX] grab fps=22 shown=23 disp=16 npu=38.4 wait=0.0 decode=0.0 kpt=0.8 gui=25.5 e2e=72.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=84%
+[21:06:32.695][RX] game name=mole draw_fps=5 cursor=434,408 lost=28 cls=5
+[21:06:33.439][RX] CPU%/max_us 3/1878 3/2161 8/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:33.456][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:33.556][RX] grab fps=23 shown=24 disp=5 npu=38.4 wait=0.0 decode=0.0 kpt=0.0 gui=15.8 e2e=66.2 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=88%
+[21:06:33.714][RX] game name=mole draw_fps=21 cursor=503,370 lost=0 cls=0
+[21:06:34.450][RX] CPU%/max_us 3/1878 3/2161 8/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:34.472][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:34.582][RX] grab fps=23 shown=24 disp=19 npu=38.4 wait=0.0 decode=0.0 kpt=0.5 gui=22.3 e2e=69.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=84%
+[21:06:34.714][RX] game name=mole draw_fps=25 cursor=473,397 lost=0 cls=0
+[21:06:35.456][RX] CPU%/max_us 3/1878 3/2161 6/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:35.477][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:35.578][RX] grab fps=21 shown=21 disp=24 npu=38.4 wait=0.0 decode=0.0 kpt=0.8 gui=29.8 e2e=74.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=83%
+[21:06:35.715][RX] game name=mole draw_fps=25 cursor=463,384 lost=0 cls=0
+[21:06:36.462][RX] CPU%/max_us 3/1878 4/2161 8/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:36.483][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:36.583][RX] grab fps=21 shown=22 disp=25 npu=38.4 wait=0.0 decode=0.0 kpt=0.8 gui=30.1 e2e=74.8 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=84%
+[21:06:36.712][RX] game name=mole draw_fps=24 cursor=390,450 lost=0 cls=0
+[21:06:37.486][RX] CPU%/max_us 3/1878 1/2161 4/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:37.507][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:37.611][RX] grab fps=21 shown=22 disp=25 npu=38.4 wait=0.1 decode=0.0 kpt=0.9 gui=31.4 e2e=76.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=82%
+[21:06:37.731][RX] game name=mole draw_fps=7 cursor=453,482 lost=0 cls=0
+[21:06:38.501][RX] CPU%/max_us 3/1878 3/2161 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:38.518][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:38.618][RX] grab fps=22 shown=24 disp=10 npu=38.4 wait=0.0 decode=0.0 kpt=0.4 gui=18.5 e2e=66.7 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=86%
+[21:06:38.729][RX] game name=mole draw_fps=24 cursor=902,365 lost=2 cls=0
+[21:06:39.492][RX] CPU%/max_us 3/1878 1/2161 9/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:39.510][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:39.595][RX] grab fps=21 shown=21 disp=23 npu=38.4 wait=0.5 decode=0.0 kpt=0.8 gui=34.5 e2e=80.5 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=84%
+[21:06:39.737][RX] game name=mole draw_fps=19 cursor=902,365 lost=25 cls=0
+[21:06:40.515][RX] CPU%/max_us 3/1878 1/2161 4/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:40.536][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:40.634][RX] grab fps=21 shown=22 disp=17 npu=38.4 wait=0.2 decode=0.0 kpt=0.0 gui=28.4 e2e=74.7 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=85%
+[21:06:40.745][RX] game name=mole draw_fps=9 cursor=902,365 lost=22 cls=0
+[21:06:41.520][RX] CPU%/max_us 3/1878 1/2161 6/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:41.533][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:41.615][RX] grab fps=23 shown=25 disp=12 npu=38.4 wait=0.1 decode=0.0 kpt=0.0 gui=23.7 e2e=71.3 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=87%
+[21:06:41.757][RX] game name=mole draw_fps=23 cursor=902,365 lost=43 cls=0
+[21:06:42.529][RX] CPU%/max_us 2/1878 1/2161 11/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:42.542][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:42.621][RX] grab fps=20 shown=19 disp=20 npu=38.4 wait=0.1 decode=0.0 kpt=0.0 gui=39.2 e2e=85.0 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=85%
+[21:06:42.774][RX] game name=mole draw_fps=27 cursor=902,365 lost=65 cls=0
+[21:06:43.587][RX] game name=mole event=end speed=慢 score=50 dur_ms=41600
+[21:06:43.622][RX] CPU%/max_us 3/1878 1/2161 15/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:43.653][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:43.737][RX] grab fps=21 shown=23 disp=28 npu=38.4 wait=0.0 decode=0.0 kpt=0.0 gui=41.0 e2e=85.9 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=82%
+[21:06:44.559][RX] game name=hall draw_fps=21 cursor=902,365 lost=103 cls=0
+[21:06:44.596][RX] CPU%/max_us 3/1878 1/2161 11/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:44.617][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:44.710][RX] grab fps=22 shown=21 disp=22 npu=38.5 wait=2.5 decode=0.0 kpt=0.0 gui=37.6 e2e=84.2 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=81%
+[21:06:45.556][RX] game name=hall draw_fps=17 cursor=902,365 lost=126 cls=0
+[21:06:45.615][RX] CPU%/max_us 3/1878 1/2161 11/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:45.631][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:45.722][RX] grab fps=23 shown=24 disp=18 npu=38.4 wait=0.1 decode=0.0 kpt=0.0 gui=28.9 e2e=76.7 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=84%
+[21:06:46.569][RX] game name=hall draw_fps=23 cursor=902,365 lost=149 cls=0
+[21:06:46.700][RX] CPU%/max_us 2/1878 1/2161 19/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:46.721][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:46.833][RX] grab fps=21 shown=23 disp=24 npu=38.4 wait=0.2 decode=0.0 kpt=0.0 gui=35.2 e2e=79.9 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=81%
+[21:06:47.671][RX] game name=slice draw_fps=29 cursor=891,456 lost=3 cls=0
+[21:06:47.711][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:06:47.755][RX] CPU%/max_us 3/1878 2/2161 22/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:47.774][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:47.880][RX] grab fps=21 shown=20 disp=28 npu=38.5 wait=2.3 decode=0.0 kpt=0.2 gui=44.6 e2e=89.0 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=70%
+[21:06:48.682][RX] game name=slice draw_fps=30 cursor=891,456 lost=25 cls=0
+[21:06:48.726][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:06:48.755][RX] CPU%/max_us 3/1878 1/2161 27/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:48.768][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:48.864][RX] grab fps=21 shown=22 disp=30 npu=38.5 wait=0.0 decode=0.0 kpt=0.0 gui=41.9 e2e=85.6 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=70%
+[21:06:49.695][RX] game name=slice draw_fps=29 cursor=891,456 lost=44 cls=0
+[21:06:49.740][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:06:49.784][RX] CPU%/max_us 2/1878 1/2161 23/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:49.805][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:49.905][RX] grab fps=18 shown=19 disp=30 npu=38.5 wait=4.3 decode=0.0 kpt=0.0 gui=52.8 e2e=98.7 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=68%
+[21:06:50.695][RX] game name=slice draw_fps=30 cursor=891,456 lost=62 cls=0
+[21:06:50.742][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:06:50.784][RX] CPU%/max_us 3/1878 1/2161 21/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:50.804][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:50.917][RX] grab fps=17 shown=18 disp=30 npu=38.5 wait=3.6 decode=0.0 kpt=0.0 gui=58.1 e2e=102.2 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=74%
+[21:06:51.694][RX] game name=slice draw_fps=30 cursor=891,456 lost=80 cls=0
+[21:06:51.743][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:06:51.784][RX] CPU%/max_us 2/1878 1/2161 21/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:51.804][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:51.917][RX] grab fps=17 shown=18 disp=30 npu=38.5 wait=3.5 decode=0.0 kpt=0.0 gui=58.1 e2e=102.1 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=74%
+[21:06:52.684][RX] game name=slice draw_fps=30 cursor=891,456 lost=98 cls=0
+[21:06:52.728][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:06:52.773][RX] CPU%/max_us 3/1878 1/2161 20/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:52.795][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:52.895][RX] grab fps=17 shown=18 disp=30 npu=38.5 wait=3.5 decode=0.0 kpt=0.0 gui=58.0 e2e=102.1 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=74%
+[21:06:53.685][RX] game name=slice draw_fps=29 cursor=891,456 lost=116 cls=0
+[21:06:53.729][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:06:53.776][RX] CPU%/max_us 2/1878 1/2161 27/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:53.795][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:53.917][RX] grab fps=17 shown=18 disp=30 npu=38.5 wait=4.5 decode=0.0 kpt=0.0 gui=57.2 e2e=102.0 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=72%
+[21:06:54.719][RX] game name=slice draw_fps=30 cursor=891,456 lost=134 cls=0
+[21:06:54.765][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:06:54.798][RX] CPU%/max_us 3/1878 1/2161 22/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:54.829][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:54.928][RX] grab fps=17 shown=18 disp=30 npu=38.5 wait=5.0 decode=0.0 kpt=0.0 gui=56.3 e2e=102.0 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=70%
+[21:06:55.722][RX] game name=slice draw_fps=30 cursor=809,363 lost=0 cls=1
+[21:06:55.766][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:06:55.818][RX] CPU%/max_us 3/1878 2/2161 27/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:55.839][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:55.952][RX] grab fps=17 shown=18 disp=30 npu=38.5 wait=4.7 decode=0.0 kpt=0.4 gui=56.2 e2e=102.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=70%
+[21:06:56.721][RX] game name=slice draw_fps=30 cursor=797,367 lost=0 cls=1
+[21:06:56.762][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:06:56.805][RX] CPU%/max_us 3/1878 3/2161 25/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:56.831][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:56.939][RX] grab fps=17 shown=18 disp=30 npu=38.6 wait=4.7 decode=0.0 kpt=0.7 gui=55.5 e2e=101.9 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=68%
+[21:06:57.707][RX] game name=slice draw_fps=30 cursor=772,368 lost=0 cls=0
+[21:06:57.766][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:06:57.816][RX] CPU%/max_us 2/1878 3/2161 26/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:57.874][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:58.016][RX] grab fps=17 shown=18 disp=30 npu=38.5 wait=4.8 decode=0.0 kpt=0.8 gui=55.4 e2e=101.9 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=68%
+[21:06:58.747][RX] game name=slice draw_fps=29 cursor=789,366 lost=0 cls=1
+[21:06:58.791][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:06:58.835][RX] CPU%/max_us 3/1878 3/2161 25/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:58.856][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:58.968][RX] grab fps=20 shown=21 disp=29 npu=38.5 wait=1.5 decode=0.0 kpt=0.8 gui=46.2 e2e=91.5 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=64%
+[21:06:59.736][RX] game name=slice draw_fps=30 cursor=752,358 lost=0 cls=1
+[21:06:59.778][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:06:59.819][RX] CPU%/max_us 3/1878 3/2161 26/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:06:59.859][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:06:59.956][RX] grab fps=22 shown=23 disp=31 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=40.0 e2e=85.1 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=66%
+[21:07:00.745][RX] game name=slice draw_fps=30 cursor=744,390 lost=0 cls=1
+[21:07:00.780][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:00.834][RX] CPU%/max_us 3/1878 4/2161 24/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:00.869][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:00.978][RX] grab fps=21 shown=23 disp=30 npu=38.5 wait=0.0 decode=0.0 kpt=1.0 gui=39.5 e2e=85.1 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=67%
+[21:07:01.748][RX] game name=slice draw_fps=30 cursor=659,400 lost=0 cls=1
+[21:07:01.791][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:01.835][RX] CPU%/max_us 2/1878 3/2161 29/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:01.856][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:01.970][RX] grab fps=22 shown=22 disp=30 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=40.2 e2e=85.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=66%
+[21:07:02.747][RX] game name=slice draw_fps=30 cursor=495,405 lost=0 cls=7
+[21:07:02.778][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:02.849][RX] CPU%/max_us 3/1878 4/2161 25/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:02.869][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:02.977][RX] grab fps=21 shown=23 disp=30 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=39.6 e2e=85.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=66%
+[21:07:03.744][RX] game name=slice draw_fps=30 cursor=532,395 lost=0 cls=1
+[21:07:03.787][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:03.849][RX] CPU%/max_us 3/1878 3/2161 23/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:03.870][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:04.009][RX] grab fps=22 shown=22 disp=30 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=40.1 e2e=84.9 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=69%
+[21:07:04.736][RX] game name=slice draw_fps=30 cursor=725,438 lost=0 cls=1
+[21:07:04.779][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:04.880][RX] CPU%/max_us 3/1878 3/2161 25/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:04.903][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:05.002][RX] grab fps=21 shown=23 disp=30 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=39.6 e2e=84.9 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=67%
+[21:07:05.746][RX] game name=slice draw_fps=30 cursor=735,317 lost=0 cls=1
+[21:07:05.788][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:05.882][RX] CPU%/max_us 3/1878 3/2161 24/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:05.903][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:06.012][RX] grab fps=22 shown=22 disp=30 npu=38.6 wait=0.0 decode=0.0 kpt=0.8 gui=39.9 e2e=84.8 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=67%
+[21:07:06.746][RX] game name=slice draw_fps=30 cursor=735,329 lost=0 cls=1
+[21:07:06.788][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:06.903][RX] CPU%/max_us 3/1878 4/2161 23/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:06.924][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:07.035][RX] grab fps=21 shown=23 disp=30 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=39.3 e2e=84.8 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=68%
+[21:07:07.743][RX] game name=slice draw_fps=30 cursor=745,319 lost=0 cls=1
+[21:07:07.787][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:07.885][RX] CPU%/max_us 3/1878 3/2161 23/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:07.911][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:08.019][RX] grab fps=22 shown=22 disp=30 npu=38.6 wait=0.0 decode=0.0 kpt=0.9 gui=39.7 e2e=84.7 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=68%
+[21:07:08.747][RX] game name=slice draw_fps=30 cursor=715,433 lost=0 cls=0
+[21:07:08.783][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:08.917][RX] CPU%/max_us 3/1878 3/2161 26/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:08.946][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:09.048][RX] grab fps=21 shown=23 disp=30 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=39.3 e2e=84.7 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=67%
+[21:07:09.735][RX] game name=slice draw_fps=30 cursor=680,451 lost=0 cls=1
+[21:07:09.777][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:09.937][RX] CPU%/max_us 3/1878 4/2161 24/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:09.958][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:10.067][RX] grab fps=22 shown=22 disp=30 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=39.7 e2e=84.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=67%
+[21:07:10.747][RX] game name=slice draw_fps=30 cursor=649,433 lost=0 cls=1
+[21:07:10.783][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:10.952][RX] CPU%/max_us 3/1878 3/2161 26/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:10.982][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:11.102][RX] grab fps=21 shown=23 disp=30 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=39.2 e2e=84.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=65%
+[21:07:11.745][RX] game name=slice draw_fps=29 cursor=671,391 lost=0 cls=0
+[21:07:11.788][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:11.959][RX] CPU%/max_us 3/1878 3/2161 27/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:11.981][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:12.088][RX] grab fps=22 shown=22 disp=30 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=39.7 e2e=84.6 hands=2 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=64%
+[21:07:12.770][RX] game name=slice draw_fps=30 cursor=713,382 lost=0 cls=0
+[21:07:12.811][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:12.978][RX] CPU%/max_us 3/1878 3/2161 23/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:13.007][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:13.172][RX] grab fps=21 shown=23 disp=30 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=39.1 e2e=84.5 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=69%
+[21:07:13.783][RX] game name=slice draw_fps=29 cursor=718,373 lost=0 cls=1
+[21:07:13.847][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:13.986][RX] CPU%/max_us 2/1878 3/2161 33/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:14.013][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:14.121][RX] grab fps=21 shown=21 disp=29 npu=38.5 wait=0.3 decode=0.0 kpt=0.8 gui=40.9 e2e=86.1 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=63%
+[21:07:14.813][RX] game name=slice draw_fps=29 cursor=718,376 lost=0 cls=1
+[21:07:14.856][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:14.990][RX] CPU%/max_us 3/1878 3/2161 24/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:15.013][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:15.121][RX] grab fps=21 shown=21 disp=30 npu=38.6 wait=1.5 decode=0.0 kpt=0.8 gui=42.1 e2e=87.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=64%
+[21:07:15.813][RX] game name=slice draw_fps=30 cursor=537,400 lost=0 cls=1
+[21:07:15.854][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:16.015][RX] CPU%/max_us 3/1878 3/2161 24/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:16.038][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:16.138][RX] grab fps=21 shown=23 disp=30 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=39.0 e2e=84.4 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=69%
+[21:07:16.813][RX] game name=slice draw_fps=30 cursor=521,392 lost=0 cls=1
+[21:07:16.857][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:17.034][RX] CPU%/max_us 3/1878 3/2298 23/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:17.055][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:17.168][RX] grab fps=22 shown=22 disp=30 npu=38.6 wait=0.0 decode=0.0 kpt=0.9 gui=39.3 e2e=84.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=66%
+[21:07:17.809][RX] game name=slice draw_fps=30 cursor=472,405 lost=0 cls=1
+[21:07:17.853][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:18.041][RX] CPU%/max_us 2/1878 3/2298 29/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:18.062][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:18.172][RX] grab fps=21 shown=23 disp=30 npu=38.6 wait=0.0 decode=0.0 kpt=0.8 gui=38.9 e2e=84.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=67%
+[21:07:18.820][RX] game name=slice draw_fps=29 cursor=556,390 lost=0 cls=0
+[21:07:18.851][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:19.052][RX] CPU%/max_us 3/1878 3/2298 23/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:19.073][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:19.183][RX] grab fps=18 shown=18 disp=29 npu=38.5 wait=2.7 decode=0.0 kpt=0.9 gui=51.8 e2e=97.2 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=67%
+[21:07:19.832][RX] game name=slice draw_fps=30 cursor=452,389 lost=0 cls=1
+[21:07:19.889][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:20.066][RX] CPU%/max_us 2/1878 3/2298 28/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:20.089][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:20.209][RX] grab fps=17 shown=18 disp=30 npu=38.6 wait=3.4 decode=0.0 kpt=0.8 gui=55.6 e2e=100.9 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=70%
+[21:07:20.829][RX] game name=slice draw_fps=30 cursor=451,397 lost=0 cls=1
+[21:07:20.870][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:21.068][RX] CPU%/max_us 3/1878 3/2298 25/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:21.096][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:21.204][RX] grab fps=17 shown=18 disp=30 npu=38.6 wait=6.1 decode=0.0 kpt=0.8 gui=53.0 e2e=100.8 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=62%
+[21:07:21.825][RX] game name=slice draw_fps=30 cursor=473,420 lost=0 cls=1
+[21:07:21.861][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:22.073][RX] CPU%/max_us 3/1878 3/2298 24/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:22.095][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:22.204][RX] grab fps=17 shown=18 disp=30 npu=38.6 wait=3.5 decode=0.0 kpt=0.8 gui=55.4 e2e=100.8 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=70%
+[21:07:22.830][RX] game name=slice draw_fps=30 cursor=593,464 lost=0 cls=1
+[21:07:22.871][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:23.085][RX] CPU%/max_us 2/1878 3/2298 24/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:23.105][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:23.219][RX] grab fps=17 shown=18 disp=30 npu=38.6 wait=2.8 decode=0.0 kpt=0.9 gui=56.0 e2e=100.7 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=68%
+[21:07:23.849][RX] game name=slice draw_fps=29 cursor=576,519 lost=0 cls=1
+[21:07:23.916][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:24.092][RX] CPU%/max_us 2/1878 3/2298 30/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:24.114][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:24.221][RX] grab fps=17 shown=18 disp=30 npu=38.6 wait=3.4 decode=0.0 kpt=0.8 gui=55.7 e2e=100.7 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=67%
+[21:07:24.838][RX] game name=slice draw_fps=30 cursor=615,534 lost=0 cls=1
+[21:07:24.897][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:07:25.123][RX] CPU%/max_us 2/1878 3/2298 34/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:25.160][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:25.290][RX] grab fps=22 shown=23 disp=30 npu=38.5 wait=0.0 decode=0.0 kpt=0.8 gui=40.6 e2e=85.4 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=63%
+[21:07:25.442][RX] game name=slice event=start speed=慢 score=0 dur_ms=0
+[21:07:25.859][RX] game name=slice draw_fps=28 cursor=607,538 lost=0 cls=1
+[21:07:25.902][RX] game name=slice segments=8 fast_segments=0 hits=0 near_misses=1
+[21:07:26.126][RX] CPU%/max_us 2/1878 3/2298 34/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:26.161][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:26.312][RX] grab fps=20 shown=21 disp=29 npu=38.6 wait=3.2 decode=0.0 kpt=0.8 gui=48.9 e2e=96.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=59%
+[21:07:26.895][RX] game name=slice draw_fps=24 cursor=598,323 lost=0 cls=0
+[21:07:26.947][RX] game name=slice segments=21 fast_segments=8 hits=1 near_misses=5
+[21:07:27.169][RX] CPU%/max_us 2/1878 3/2298 38/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:27.210][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:27.366][RX] grab fps=20 shown=18 disp=27 npu=38.5 wait=2.8 decode=0.0 kpt=0.9 gui=50.0 e2e=96.8 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=57%
+[21:07:27.880][RX] game name=slice draw_fps=23 cursor=892,255 lost=0 cls=0
+[21:07:27.922][RX] game name=slice segments=20 fast_segments=8 hits=1 near_misses=10
+[21:07:28.171][RX] CPU%/max_us 2/1878 3/2298 27/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:28.189][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:28.291][RX] grab fps=19 shown=21 disp=22 npu=38.5 wait=1.0 decode=0.0 kpt=0.9 gui=63.6 e2e=107.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=54%
+[21:07:28.906][RX] game name=slice draw_fps=28 cursor=841,406 lost=0 cls=0
+[21:07:28.942][RX] game name=slice segments=22 fast_segments=6 hits=0 near_misses=6
+[21:07:29.191][RX] CPU%/max_us 2/1878 3/2298 32/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:29.229][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:29.355][RX] grab fps=21 shown=22 disp=29 npu=38.5 wait=0.1 decode=0.0 kpt=0.8 gui=42.6 e2e=87.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=64%
+[21:07:29.923][RX] game name=slice draw_fps=27 cursor=784,248 lost=0 cls=0
+[21:07:29.967][RX] game name=slice segments=22 fast_segments=5 hits=0 near_misses=0
+[21:07:30.204][RX] CPU%/max_us 3/1878 3/2298 29/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:30.225][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:30.337][RX] grab fps=20 shown=20 disp=27 npu=38.5 wait=0.7 decode=0.0 kpt=0.8 gui=49.0 e2e=93.7 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=61%
+[21:07:30.961][RX] game name=slice draw_fps=26 cursor=469,302 lost=0 cls=0
+[21:07:31.009][RX] game name=slice segments=22 fast_segments=11 hits=1 near_misses=1
+[21:07:31.225][RX] CPU%/max_us 2/1878 3/2298 36/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:31.247][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:31.381][RX] grab fps=21 shown=20 disp=28 npu=38.5 wait=0.5 decode=0.0 kpt=0.9 gui=44.9 e2e=89.5 hands=2 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=61%
+[21:07:31.973][RX] game name=slice draw_fps=27 cursor=506,298 lost=0 cls=0
+[21:07:32.038][RX] game name=slice segments=22 fast_segments=0 hits=0 near_misses=0
+[21:07:32.240][RX] CPU%/max_us 2/1878 3/2298 34/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:32.273][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:32.420][RX] grab fps=21 shown=21 disp=25 npu=38.5 wait=0.5 decode=0.0 kpt=1.0 gui=50.8 e2e=95.5 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=57%
+[21:07:32.975][RX] game name=slice draw_fps=28 cursor=510,244 lost=0 cls=0
+[21:07:33.032][RX] game name=slice segments=23 fast_segments=1 hits=0 near_misses=1
+[21:07:33.260][RX] CPU%/max_us 2/1878 3/2298 34/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:33.294][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:33.453][RX] grab fps=21 shown=23 disp=29 npu=38.5 wait=0.5 decode=0.0 kpt=0.9 gui=45.6 e2e=90.8 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=58%
+[21:07:34.006][RX] game name=slice draw_fps=21 cursor=902,226 lost=0 cls=0
+[21:07:34.051][RX] game name=slice segments=19 fast_segments=16 hits=2 near_misses=2
+[21:07:34.257][RX] CPU%/max_us 2/1878 3/2298 41/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:34.296][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:34.421][RX] grab fps=19 shown=19 disp=24 npu=38.5 wait=1.8 decode=0.0 kpt=0.8 gui=57.9 e2e=102.9 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=55%
+[21:07:35.015][RX] game name=slice draw_fps=23 cursor=318,299 lost=0 cls=0
+[21:07:35.062][RX] game name=slice segments=20 fast_segments=16 hits=0 near_misses=3
+[21:07:35.255][RX] CPU%/max_us 2/1878 3/2298 39/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:35.290][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:35.422][RX] grab fps=19 shown=16 disp=24 npu=38.5 wait=2.9 decode=0.0 kpt=0.8 gui=55.4 e2e=101.2 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=56%
+[21:07:36.020][RX] game name=slice draw_fps=24 cursor=528,262 lost=0 cls=0
+[21:07:36.070][RX] game name=slice segments=20 fast_segments=11 hits=1 near_misses=3
+[21:07:36.288][RX] CPU%/max_us 2/1878 3/2298 36/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:36.308][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:36.440][RX] grab fps=18 shown=18 disp=23 npu=38.5 wait=1.9 decode=0.0 kpt=0.9 gui=64.5 e2e=108.5 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=55%
+[21:07:37.040][RX] game name=slice draw_fps=25 cursor=883,189 lost=0 cls=0
+[21:07:37.090][RX] game name=slice segments=19 fast_segments=15 hits=1 near_misses=7
+[21:07:37.320][RX] CPU%/max_us 2/1878 2/2298 32/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:37.341][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:37.476][RX] grab fps=18 shown=16 disp=25 npu=38.5 wait=3.6 decode=0.0 kpt=1.0 gui=52.5 e2e=99.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=58%
+[21:07:38.035][RX] game name=slice draw_fps=25 cursor=576,227 lost=0 cls=7
+[21:07:38.087][RX] game name=slice segments=20 fast_segments=9 hits=1 near_misses=1
+[21:07:38.330][RX] CPU%/max_us 2/1878 3/2298 34/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:38.356][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:38.474][RX] grab fps=19 shown=15 disp=25 npu=38.5 wait=3.7 decode=0.0 kpt=0.8 gui=64.0 e2e=110.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=58%
+[21:07:39.075][RX] game name=slice draw_fps=28 cursor=333,327 lost=0 cls=7
+[21:07:39.121][RX] game name=slice segments=22 fast_segments=10 hits=0 near_misses=8
+[21:07:39.365][RX] CPU%/max_us 3/1894 3/2298 29/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:39.396][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:39.527][RX] grab fps=20 shown=21 disp=28 npu=38.5 wait=1.6 decode=0.0 kpt=0.9 gui=52.6 e2e=99.2 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=58%
+[21:07:40.119][RX] game name=slice draw_fps=27 cursor=322,162 lost=0 cls=7
+[21:07:40.171][RX] game name=slice segments=22 fast_segments=8 hits=0 near_misses=12
+[21:07:40.359][RX] CPU%/max_us 2/1903 2/2298 37/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:40.382][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:40.513][RX] grab fps=20 shown=21 disp=27 npu=38.5 wait=1.1 decode=0.0 kpt=1.0 gui=52.1 e2e=97.6 hands=2 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=60%
+[21:07:41.129][RX] game name=slice draw_fps=27 cursor=341,139 lost=20 cls=7
+[21:07:41.162][RX] game name=slice segments=2 fast_segments=2 hits=1 near_misses=0
+[21:07:41.381][RX] CPU%/max_us 3/1903 1/2298 24/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:41.410][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:41.524][RX] grab fps=20 shown=20 disp=27 npu=38.5 wait=1.1 decode=0.0 kpt=0.4 gui=53.3 e2e=98.2 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=57%
+[21:07:42.183][RX] game name=slice draw_fps=27 cursor=843,330 lost=0 cls=0
+[21:07:42.247][RX] game name=slice segments=17 fast_segments=5 hits=2 near_misses=3
+[21:07:42.414][RX] CPU%/max_us 2/1903 3/2298 47/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:42.460][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:42.674][RX] grab fps=21 shown=22 disp=29 npu=38.5 wait=1.6 decode=0.0 kpt=0.3 gui=52.9 e2e=98.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=62%
+[21:07:43.216][RX] game name=slice draw_fps=23 cursor=538,158 lost=0 cls=7
+[21:07:43.263][RX] game name=slice segments=17 fast_segments=17 hits=0 near_misses=2
+[21:07:43.405][RX] CPU%/max_us 2/1903 3/2298 34/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:43.466][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:43.675][RX] grab fps=19 shown=19 disp=22 npu=38.5 wait=4.0 decode=0.0 kpt=1.0 gui=63.2 e2e=110.3 hands=2 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=46%
+[21:07:44.240][RX] game name=slice draw_fps=19 cursor=922,96 lost=0 cls=0
+[21:07:44.297][RX] game name=slice segments=17 fast_segments=12 hits=2 near_misses=0
+[21:07:44.445][RX] CPU%/max_us 2/1903 3/2298 41/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:44.477][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:44.640][RX] grab fps=20 shown=20 disp=24 npu=38.5 wait=1.5 decode=0.0 kpt=0.7 gui=53.3 e2e=98.1 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=55%
+[21:07:45.224][RX] game name=slice draw_fps=25 cursor=1059,188 lost=0 cls=0
+[21:07:45.268][RX] game name=slice segments=21 fast_segments=7 hits=0 near_misses=0
+[21:07:45.437][RX] CPU%/max_us 2/1903 3/2298 32/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:45.465][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:45.566][RX] grab fps=19 shown=20 disp=21 npu=38.5 wait=3.0 decode=0.0 kpt=0.7 gui=64.9 e2e=110.5 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=52%
+[21:07:46.265][RX] game name=slice draw_fps=28 cursor=350,103 lost=0 cls=7
+[21:07:46.317][RX] game name=slice segments=17 fast_segments=6 hits=1 near_misses=6
+[21:07:46.471][RX] CPU%/max_us 2/1903 3/2298 39/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:46.491][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:46.632][RX] grab fps=21 shown=22 disp=29 npu=38.5 wait=1.1 decode=0.0 kpt=0.8 gui=52.6 e2e=98.2 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=60%
+[21:07:47.278][RX] game name=slice draw_fps=25 cursor=800,93 lost=1 cls=0
+[21:07:47.322][RX] game name=slice segments=11 fast_segments=4 hits=0 near_misses=0
+[21:07:47.472][RX] CPU%/max_us 3/1903 2/2298 31/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:47.502][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:47.603][RX] grab fps=20 shown=20 disp=24 npu=38.5 wait=1.0 decode=0.0 kpt=0.6 gui=57.3 e2e=101.3 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=57%
+[21:07:48.311][RX] game name=slice draw_fps=25 cursor=609,230 lost=0 cls=7
+[21:07:48.362][RX] game name=slice segments=15 fast_segments=8 hits=1 near_misses=0
+[21:07:48.509][RX] CPU%/max_us 2/1903 3/2298 40/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:48.541][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:48.671][RX] grab fps=21 shown=22 disp=28 npu=38.5 wait=0.2 decode=0.0 kpt=0.3 gui=43.0 e2e=86.7 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=65%
+[21:07:49.320][RX] game name=slice draw_fps=23 cursor=856,89 lost=1 cls=0
+[21:07:49.358][RX] game name=slice segments=16 fast_segments=4 hits=2 near_misses=15
+[21:07:49.508][RX] CPU%/max_us 2/1903 2/2298 33/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:49.533][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:49.670][RX] grab fps=19 shown=19 disp=24 npu=38.5 wait=1.8 decode=0.0 kpt=0.7 gui=58.8 e2e=103.9 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=53%
+[21:07:50.319][RX] game name=slice draw_fps=28 cursor=784,63 lost=1 cls=0
+[21:07:50.367][RX] game name=slice segments=18 fast_segments=3 hits=0 near_misses=13
+[21:07:50.514][RX] CPU%/max_us 2/1903 2/2298 32/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:50.535][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:50.643][RX] grab fps=21 shown=22 disp=27 npu=38.5 wait=1.1 decode=0.0 kpt=0.7 gui=59.1 e2e=104.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=60%
+[21:07:51.347][RX] game name=slice draw_fps=27 cursor=684,120 lost=0 cls=7
+[21:07:51.399][RX] game name=slice segments=8 fast_segments=3 hits=1 near_misses=3
+[21:07:51.535][RX] CPU%/max_us 2/1903 3/2298 37/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:51.557][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:51.686][RX] grab fps=20 shown=21 disp=27 npu=38.5 wait=0.9 decode=0.0 kpt=0.5 gui=54.4 e2e=99.4 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=64%
+[21:07:52.353][RX] game name=slice draw_fps=25 cursor=818,165 lost=0 cls=0
+[21:07:52.401][RX] game name=slice segments=20 fast_segments=11 hits=0 near_misses=11
+[21:07:52.560][RX] CPU%/max_us 2/1903 3/2298 35/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:52.595][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:52.716][RX] grab fps=19 shown=17 disp=26 npu=38.5 wait=3.3 decode=0.0 kpt=0.6 gui=49.3 e2e=95.5 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=62%
+[21:07:53.377][RX] game name=slice draw_fps=26 cursor=711,166 lost=0 cls=7
+[21:07:53.431][RX] game name=slice segments=22 fast_segments=4 hits=0 near_misses=1
+[21:07:53.583][RX] CPU%/max_us 2/1903 3/2298 37/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:53.618][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:53.769][RX] grab fps=19 shown=18 disp=25 npu=38.5 wait=0.9 decode=0.0 kpt=0.9 gui=50.9 e2e=95.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=59%
+[21:07:54.420][RX] game name=slice draw_fps=22 cursor=928,127 lost=0 cls=0
+[21:07:54.475][RX] game name=slice segments=21 fast_segments=7 hits=1 near_misses=5
+[21:07:54.588][RX] CPU%/max_us 2/1903 2/2298 42/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:54.617][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:54.754][RX] grab fps=21 shown=22 disp=28 npu=38.5 wait=1.2 decode=0.0 kpt=1.0 gui=48.2 e2e=94.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=55%
+[21:07:55.439][RX] game name=slice draw_fps=22 cursor=589,131 lost=0 cls=7
+[21:07:55.508][RX] game name=slice segments=20 fast_segments=13 hits=1 near_misses=3
+[21:07:55.637][RX] CPU%/max_us 2/1903 3/2298 42/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:55.650][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:55.809][RX] grab fps=19 shown=20 disp=21 npu=38.5 wait=0.5 decode=0.0 kpt=0.8 gui=64.5 e2e=107.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=53%
+[21:07:56.420][RX] game name=slice draw_fps=20 cursor=388,185 lost=0 cls=7
+[21:07:56.474][RX] game name=slice segments=19 fast_segments=5 hits=1 near_misses=3
+[21:07:56.621][RX] CPU%/max_us 2/1903 3/2298 36/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:56.656][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:56.786][RX] grab fps=19 shown=18 disp=22 npu=38.5 wait=1.2 decode=0.0 kpt=1.0 gui=60.8 e2e=104.8 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=53%
+[21:07:57.468][RX] game name=slice draw_fps=26 cursor=489,193 lost=0 cls=7
+[21:07:57.542][RX] game name=slice segments=23 fast_segments=8 hits=1 near_misses=6
+[21:07:57.629][RX] CPU%/max_us 2/1903 3/2298 37/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:57.662][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:57.773][RX] grab fps=19 shown=18 disp=21 npu=38.5 wait=2.1 decode=0.0 kpt=0.8 gui=64.3 e2e=108.4 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=57%
+[21:07:58.502][RX] game name=slice draw_fps=25 cursor=874,88 lost=2 cls=7
+[21:07:58.550][RX] game name=slice segments=15 fast_segments=11 hits=0 near_misses=2
+[21:07:58.647][RX] CPU%/max_us 2/1903 2/2298 31/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:58.685][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:58.861][RX] grab fps=20 shown=20 disp=28 npu=38.4 wait=1.8 decode=0.0 kpt=0.8 gui=54.2 e2e=100.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=59%
+[21:07:59.501][RX] game name=slice draw_fps=21 cursor=593,162 lost=0 cls=7
+[21:07:59.541][RX] game name=slice segments=15 fast_segments=6 hits=1 near_misses=4
+[21:07:59.654][RX] CPU%/max_us 2/1903 3/2298 38/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:07:59.690][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:07:59.815][RX] grab fps=18 shown=14 disp=24 npu=38.4 wait=3.2 decode=0.0 kpt=0.6 gui=57.6 e2e=102.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=59%
+[21:08:00.492][RX] game name=slice draw_fps=23 cursor=397,263 lost=0 cls=7
+[21:08:00.531][RX] game name=slice segments=20 fast_segments=12 hits=1 near_misses=6
+[21:08:00.693][RX] CPU%/max_us 2/1903 3/2298 41/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:00.713][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:00.832][RX] grab fps=19 shown=21 disp=24 npu=38.5 wait=1.3 decode=0.0 kpt=0.7 gui=62.4 e2e=107.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=56%
+[21:08:01.533][RX] game name=slice draw_fps=23 cursor=849,146 lost=0 cls=7
+[21:08:01.593][RX] game name=slice segments=20 fast_segments=15 hits=2 near_misses=1
+[21:08:01.703][RX] CPU%/max_us 2/1903 3/2298 46/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:01.741][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:01.908][RX] grab fps=20 shown=18 disp=23 npu=38.5 wait=2.2 decode=0.0 kpt=1.0 gui=62.0 e2e=107.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=55%
+[21:08:02.533][RX] game name=slice draw_fps=24 cursor=648,271 lost=0 cls=7
+[21:08:02.586][RX] game name=slice segments=21 fast_segments=7 hits=0 near_misses=0
+[21:08:02.696][RX] CPU%/max_us 2/1903 3/2298 32/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:02.721][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:02.848][RX] grab fps=18 shown=18 disp=22 npu=38.5 wait=2.9 decode=0.0 kpt=1.1 gui=64.4 e2e=111.0 hands=2 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=50%
+[21:08:03.577][RX] game name=slice draw_fps=24 cursor=1010,225 lost=0 cls=0
+[21:08:03.624][RX] game name=slice segments=22 fast_segments=13 hits=1 near_misses=8
+[21:08:03.706][RX] CPU%/max_us 2/1903 3/2339 40/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:03.731][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:03.849][RX] grab fps=20 shown=21 disp=27 npu=38.5 wait=0.3 decode=0.0 kpt=0.9 gui=54.6 e2e=98.9 hands=3 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=59%
+[21:08:04.596][RX] game name=slice draw_fps=24 cursor=650,266 lost=0 cls=7
+[21:08:04.652][RX] game name=slice segments=21 fast_segments=10 hits=1 near_misses=1
+[21:08:04.724][RX] CPU%/max_us 2/1903 3/2339 37/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:04.749][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:04.871][RX] grab fps=20 shown=21 disp=23 npu=38.5 wait=0.2 decode=0.0 kpt=1.1 gui=58.9 e2e=102.8 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=55%
+[21:08:05.585][RX] game name=slice draw_fps=28 cursor=448,276 lost=0 cls=0
+[21:08:05.652][RX] game name=slice segments=22 fast_segments=4 hits=0 near_misses=0
+[21:08:05.742][RX] CPU%/max_us 2/1903 3/2339 33/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:05.776][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:05.906][RX] grab fps=20 shown=21 disp=25 npu=38.5 wait=1.0 decode=0.0 kpt=1.0 gui=54.6 e2e=99.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=57%
+[21:08:06.622][RX] game name=slice draw_fps=22 cursor=365,262 lost=0 cls=7
+[21:08:06.671][RX] game name=slice segments=20 fast_segments=8 hits=2 near_misses=3
+[21:08:06.756][RX] CPU%/max_us 2/1903 2/2339 38/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:06.786][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:06.927][RX] grab fps=20 shown=21 disp=28 npu=38.5 wait=1.3 decode=0.0 kpt=1.1 gui=50.3 e2e=95.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=60%
+[21:08:07.637][RX] game name=slice draw_fps=24 cursor=757,151 lost=0 cls=7
+[21:08:07.694][RX] game name=slice segments=18 fast_segments=15 hits=0 near_misses=5
+[21:08:07.761][RX] CPU%/max_us 2/1903 3/2339 36/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:07.786][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:07.910][RX] grab fps=19 shown=20 disp=23 npu=38.5 wait=3.1 decode=0.0 kpt=0.8 gui=61.7 e2e=108.7 hands=2 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=53%
+[21:08:08.675][RX] game name=slice draw_fps=25 cursor=656,137 lost=0 cls=7
+[21:08:08.725][RX] game name=slice segments=20 fast_segments=6 hits=1 near_misses=3
+[21:08:08.794][RX] CPU%/max_us 2/1903 3/2339 34/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:08.814][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:08.946][RX] grab fps=19 shown=20 disp=24 npu=38.5 wait=2.4 decode=0.0 kpt=0.8 gui=58.9 e2e=105.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=58%
+[21:08:09.675][RX] game name=slice draw_fps=21 cursor=855,177 lost=0 cls=0
+[21:08:09.721][RX] game name=slice segments=20 fast_segments=10 hits=0 near_misses=0
+[21:08:09.826][RX] CPU%/max_us 2/1903 3/2339 31/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:09.858][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:09.987][RX] grab fps=19 shown=19 disp=25 npu=38.5 wait=3.2 decode=0.0 kpt=0.8 gui=60.6 e2e=108.3 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=57%
+[21:08:10.741][RX] game name=slice draw_fps=23 cursor=521,166 lost=0 cls=7
+[21:08:10.798][RX] game name=slice segments=21 fast_segments=12 hits=1 near_misses=4
+[21:08:10.852][RX] CPU%/max_us 2/1903 2/2339 45/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:10.886][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:11.014][RX] grab fps=20 shown=20 disp=23 npu=38.5 wait=0.5 decode=0.0 kpt=0.9 gui=59.4 e2e=102.7 hands=2 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=58%
+[21:08:11.725][RX] game name=slice draw_fps=22 cursor=602,122 lost=0 cls=7
+[21:08:11.797][RX] game name=slice segments=19 fast_segments=10 hits=1 near_misses=7
+[21:08:11.863][RX] CPU%/max_us 2/1903 2/2339 40/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:11.898][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:12.045][RX] grab fps=19 shown=21 disp=23 npu=38.5 wait=2.4 decode=0.0 kpt=0.8 gui=63.7 e2e=109.6 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=53%
+[21:08:12.756][RX] game name=slice draw_fps=24 cursor=740,334 lost=0 cls=0
+[21:08:12.802][RX] game name=slice segments=22 fast_segments=8 hits=0 near_misses=0
+[21:08:12.856][RX] CPU%/max_us 2/1903 3/2339 34/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:12.891][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:13.043][RX] grab fps=18 shown=18 disp=22 npu=38.5 wait=3.6 decode=0.0 kpt=0.8 gui=61.6 e2e=108.7 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=56%
+[21:08:13.794][RX] game name=slice draw_fps=23 cursor=443,279 lost=0 cls=0
+[21:08:13.847][RX] game name=slice segments=21 fast_segments=7 hits=0 near_misses=0
+[21:08:13.900][RX] CPU%/max_us 2/1903 3/2339 37/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:13.921][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:14.076][RX] grab fps=19 shown=19 disp=22 npu=38.5 wait=1.9 decode=0.0 kpt=0.9 gui=62.5 e2e=108.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=56%
+[21:08:14.802][RX] game name=slice draw_fps=26 cursor=383,277 lost=0 cls=0
+[21:08:14.873][RX] game name=slice segments=21 fast_segments=0 hits=0 near_misses=0
+[21:08:14.941][RX] CPU%/max_us 2/1903 3/2339 40/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:14.967][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:15.809][RX] game name=slice draw_fps=27 cursor=493,220 lost=0 cls=0
+[21:08:15.852][RX] game name=slice segments=21 fast_segments=6 hits=2 near_misses=2
+[21:08:15.946][RX] CPU%/max_us 2/1903 3/2339 36/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:15.984][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:16.148][RX] grab fps=20 shown=20 disp=26 npu=38.5 wait=1.3 decode=0.0 kpt=0.8 gui=50.0 e2e=95.0 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=58%
+[21:08:16.831][RX] game name=slice draw_fps=21 cursor=753,169 lost=0 cls=0
+[21:08:16.874][RX] game name=slice segments=21 fast_segments=13 hits=1 near_misses=1
+[21:08:16.919][RX] CPU%/max_us 2/1903 3/2339 36/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:16.940][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:17.039][RX] grab fps=19 shown=20 disp=22 npu=38.5 wait=2.1 decode=0.0 kpt=0.9 gui=62.8 e2e=107.4 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=50%
+[21:08:17.842][RX] game name=slice draw_fps=29 cursor=571,306 lost=0 cls=0
+[21:08:17.913][RX] game name=slice segments=23 fast_segments=9 hits=0 near_misses=1
+[21:08:17.979][RX] CPU%/max_us 3/1903 3/2339 32/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:18.013][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:18.149][RX] grab fps=21 shown=22 disp=29 npu=38.5 wait=0.2 decode=0.0 kpt=0.8 gui=49.4 e2e=94.4 hands=1 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=63%
+[21:08:18.184][RX] game name=slice event=end speed=慢 score=360 dur_ms=52500
+[21:08:18.844][RX] game name=slice draw_fps=16 cursor=612,293 lost=9 cls=0
+[21:08:18.886][RX] game name=slice segments=2 fast_segments=2 hits=1 near_misses=1
+[21:08:18.927][RX] CPU%/max_us 3/1903 1/2339 7/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:18.944][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:19.040][RX] grab fps=21 shown=23 disp=17 npu=38.5 wait=0.2 decode=0.0 kpt=0.5 gui=35.6 e2e=82.9 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=72%
+[21:08:19.849][RX] game name=slice draw_fps=9 cursor=612,293 lost=33 cls=0
+[21:08:19.892][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:08:19.933][RX] CPU%/max_us 3/1903 1/2339 6/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:19.949][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:20.052][RX] grab fps=24 shown=24 disp=11 npu=38.4 wait=0.2 decode=0.0 kpt=0.0 gui=23.5 e2e=72.4 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=87%
+[21:08:20.847][RX] game name=slice draw_fps=12 cursor=612,293 lost=56 cls=0
+[21:08:20.879][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:08:20.934][RX] CPU%/max_us 3/1907 1/2339 10/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:20.957][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:21.045][RX] grab fps=22 shown=23 disp=12 npu=38.4 wait=0.0 decode=0.0 kpt=0.0 gui=25.9 e2e=76.3 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=86%
+[21:08:21.846][RX] game name=slice draw_fps=28 cursor=612,293 lost=79 cls=0
+[21:08:21.887][RX] game name=slice segments=0 fast_segments=0 hits=0 near_misses=0
+[21:08:21.935][RX] CPU%/max_us 3/1907 1/2339 13/142741 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:21.957][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:22.046][RX] grab fps=22 shown=23 disp=28 npu=38.4 wait=0.0 decode=0.0 kpt=0.0 gui=48.0 e2e=92.9 hands=0 mode=A param=0.00 d=0.00 state=open held=0 picks=0 drops=0 mirror=1 idle=81%
+[21:08:23.096][RX] CPU%/max_us 2/1907 1/2339 25/156761 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:23.116][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:24.094][RX] CPU%/max_us 2/1907 0/2339 22/156761 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:24.114][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:25.109][RX] CPU%/max_us 2/1907 0/2339 2/156761 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:25.129][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:26.113][RX] CPU%/max_us 2/1907 0/2339 2/156761 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:26.133][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:27.105][RX] CPU%/max_us 2/1907 0/2339 12/156761 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:27.120][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:28.328][RX] CPU%/max_us 3/1907 1/2339 21/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:28.349][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:29.373][RX] CPU%/max_us 2/1907 1/2339 30/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:29.413][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:29.512][RX] face fps=15 shown=11 disp=25 npu=34.2 wait=6.1 decode=0.0 gui=65.8 e2e=103.8 faces=1 size=167 idle=72%
+[21:08:30.384][RX] CPU%/max_us 2/1907 1/2339 29/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:30.422][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:30.512][RX] face fps=19 shown=19 disp=20 npu=34.4 wait=0.6 decode=0.0 gui=70.8 e2e=107.3 faces=1 size=164 idle=65%
+[21:08:31.411][RX] CPU%/max_us 2/1907 1/2339 29/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:31.432][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:31.514][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=70.0 e2e=105.9 faces=1 size=161 idle=65%
+[21:08:32.383][RX] CPU%/max_us 2/1907 1/2339 28/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:32.423][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:32.513][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=69.9 e2e=105.9 faces=1 size=162 idle=66%
+[21:08:33.422][RX] CPU%/max_us 2/1907 1/2339 30/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:33.443][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:33.533][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=70.0 e2e=105.8 faces=1 size=166 idle=65%
+[21:08:34.429][RX] CPU%/max_us 2/1907 1/2339 28/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:34.443][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:34.530][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.1 decode=0.0 gui=69.8 e2e=105.8 faces=1 size=169 idle=65%
+[21:08:35.432][RX] CPU%/max_us 1/1907 2/2339 33/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:35.466][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:35.535][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=69.8 e2e=105.8 faces=1 size=170 idle=64%
+[21:08:36.473][RX] CPU%/max_us 2/1907 1/2339 32/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:36.488][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:36.567][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.3 decode=0.0 gui=69.5 e2e=105.7 faces=1 size=168 idle=62%
+[21:08:37.465][RX] CPU%/max_us 2/1907 1/2339 31/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:37.478][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:37.568][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.1 decode=0.0 gui=69.6 e2e=105.7 faces=1 size=163 idle=64%
+[21:08:38.492][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:38.520][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:38.610][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=69.7 e2e=105.6 faces=1 size=146 idle=63%
+[21:08:39.492][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:39.520][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:39.592][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=69.8 e2e=105.6 faces=1 size=150 idle=66%
+[21:08:40.522][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:40.567][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:40.642][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=69.8 e2e=105.5 faces=1 size=152 idle=67%
+[21:08:41.532][RX] CPU%/max_us 2/1907 1/2339 29/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:41.565][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:41.632][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=69.7 e2e=105.5 faces=1 size=162 idle=66%
+[21:08:42.567][RX] CPU%/max_us 2/1907 1/2339 29/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:42.585][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:42.671][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=69.5 e2e=105.4 faces=1 size=156 idle=65%
+[21:08:43.576][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:43.611][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:43.684][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=69.5 e2e=105.4 faces=1 size=169 idle=66%
+[21:08:44.585][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:44.621][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:44.716][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=69.5 e2e=105.3 faces=1 size=160 idle=66%
+[21:08:45.593][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:45.630][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:45.710][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=69.4 e2e=105.3 faces=1 size=148 idle=66%
+[21:08:46.611][RX] CPU%/max_us 2/1907 2/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:46.631][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:46.713][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=69.4 e2e=105.2 faces=1 size=158 idle=66%
+[21:08:47.643][RX] CPU%/max_us 2/1907 2/2339 28/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:47.674][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:47.763][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=69.3 e2e=105.2 faces=1 size=156 idle=67%
+[21:08:48.642][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:48.672][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:48.741][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=69.3 e2e=105.2 faces=1 size=155 idle=66%
+[21:08:49.672][RX] CPU%/max_us 2/1907 2/2339 28/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:49.711][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:49.782][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=69.2 e2e=105.1 faces=1 size=158 idle=66%
+[21:08:50.683][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:50.722][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:50.811][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=69.2 e2e=105.1 faces=1 size=154 idle=66%
+[21:08:51.721][RX] CPU%/max_us 2/1907 1/2339 29/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:51.742][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:51.831][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=69.1 e2e=105.0 faces=1 size=157 idle=66%
+[21:08:52.735][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:52.762][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:52.841][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=69.1 e2e=105.0 faces=1 size=157 idle=66%
+[21:08:53.763][RX] CPU%/max_us 2/1907 1/2339 29/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:53.783][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:53.872][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=69.0 e2e=104.9 faces=1 size=154 idle=66%
+[21:08:54.780][RX] CPU%/max_us 2/1907 2/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:54.811][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:54.882][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=69.0 e2e=104.9 faces=1 size=157 idle=66%
+[21:08:55.782][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:55.810][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:55.881][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.9 e2e=104.8 faces=1 size=155 idle=66%
+[21:08:56.791][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:56.821][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:56.892][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.9 e2e=104.8 faces=1 size=157 idle=66%
+[21:08:57.811][RX] CPU%/max_us 2/1907 1/2339 30/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:57.842][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:57.932][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.8 e2e=104.7 faces=1 size=155 idle=67%
+[21:08:58.822][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:58.842][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:58.930][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.8 e2e=104.7 faces=1 size=157 idle=66%
+[21:08:59.843][RX] CPU%/max_us 2/1907 2/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:08:59.873][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:08:59.942][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.7 e2e=104.6 faces=1 size=158 idle=67%
+[21:09:00.861][RX] CPU%/max_us 2/1907 1/2339 28/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:00.879][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:00.962][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.7 e2e=104.6 faces=1 size=155 idle=67%
+[21:09:01.870][RX] CPU%/max_us 2/1907 2/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:01.891][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:01.972][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.6 e2e=104.5 faces=1 size=157 idle=67%
+[21:09:02.866][RX] CPU%/max_us 2/1907 2/2339 28/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:02.886][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:02.971][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.6 e2e=104.5 faces=1 size=159 idle=66%
+[21:09:03.882][RX] CPU%/max_us 2/1907 2/2339 28/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:03.910][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:03.982][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.5 e2e=104.4 faces=1 size=160 idle=66%
+[21:09:04.886][RX] CPU%/max_us 2/1907 2/2339 26/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:04.921][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:05.010][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.5 e2e=104.4 faces=1 size=153 idle=67%
+[21:09:05.885][RX] CPU%/max_us 2/1907 2/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:05.932][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:06.011][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.5 e2e=104.3 faces=1 size=155 idle=66%
+[21:09:06.926][RX] CPU%/max_us 2/1907 2/2339 29/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:06.943][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:07.023][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.4 e2e=104.3 faces=1 size=165 idle=65%
+[21:09:07.600][SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[21:09:07.932][RX] CPU%/max_us 2/1907 2/2339 28/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:07.963][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:08.062][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.4 e2e=104.2 faces=1 size=162 idle=65%
+[21:09:08.938][RX] CPU%/max_us 2/1907 2/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:08.973][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:09.061][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.2 e2e=104.2 faces=1 size=159 idle=66%
+[21:09:09.961][RX] CPU%/max_us 2/1907 1/2339 30/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:09.982][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:10.063][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=68.3 e2e=104.1 faces=1 size=166 idle=66%
+[21:09:10.984][RX] CPU%/max_us 2/1907 2/2339 28/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:11.022][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:11.113][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.2 e2e=104.1 faces=1 size=170 idle=66%
+[21:09:11.994][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:12.025][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:12.114][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.2 e2e=104.0 faces=1 size=158 idle=66%
+[21:09:13.012][RX] CPU%/max_us 2/1907 1/2339 28/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:13.032][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:13.124][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=68.2 e2e=104.0 faces=1 size=160 idle=66%
+[21:09:14.021][RX] CPU%/max_us 2/1907 1/2339 28/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:14.048][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:14.139][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.1 e2e=104.0 faces=1 size=159 idle=66%
+[21:09:15.041][RX] CPU%/max_us 2/1907 2/2339 26/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:15.071][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:15.164][RX] face fps=19 shown=20 disp=20 npu=34.5 wait=0.0 decode=0.0 gui=68.0 e2e=103.9 faces=1 size=160 idle=66%
+[21:09:16.041][RX] CPU%/max_us 2/1907 2/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:16.072][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:16.176][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=68.0 e2e=103.9 faces=1 size=156 idle=66%
+[21:09:17.062][RX] CPU%/max_us 2/1907 1/2339 30/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:17.082][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:17.171][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=68.0 e2e=103.8 faces=1 size=157 idle=66%
+[21:09:18.079][RX] CPU%/max_us 2/1907 2/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:18.115][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:18.211][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.9 e2e=103.8 faces=1 size=155 idle=66%
+[21:09:19.115][RX] CPU%/max_us 2/1907 1/2339 28/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:19.136][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:19.221][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.9 e2e=103.7 faces=1 size=161 idle=66%
+[21:09:20.091][RX] CPU%/max_us 2/1907 2/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:20.125][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:20.221][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.9 e2e=103.7 faces=1 size=161 idle=67%
+[21:09:21.125][RX] CPU%/max_us 2/1907 2/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:21.162][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:21.228][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.7 e2e=103.6 faces=1 size=158 idle=66%
+[21:09:22.161][RX] CPU%/max_us 2/1907 2/2339 28/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:22.182][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:22.261][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.7 e2e=103.6 faces=1 size=162 idle=66%
+[21:09:23.142][RX] CPU%/max_us 2/1907 2/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:23.170][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:23.238][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.7 e2e=103.5 faces=1 size=161 idle=66%
+[21:09:24.171][RX] CPU%/max_us 2/1907 2/2339 29/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:24.192][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:24.271][RX] face fps=20 shown=21 disp=22 npu=34.4 wait=0.4 decode=0.0 gui=63.6 e2e=99.9 faces=1 size=160 idle=67%
+[21:09:25.172][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:25.186][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:25.271][RX] face fps=19 shown=20 disp=22 npu=34.4 wait=0.4 decode=0.0 gui=61.2 e2e=97.6 faces=1 size=171 idle=66%
+[21:09:26.189][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:26.222][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:26.291][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.6 e2e=103.4 faces=1 size=162 idle=67%
+[21:09:27.211][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:27.232][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:27.312][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.6 e2e=103.4 faces=1 size=159 idle=66%
+[21:09:28.212][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:28.233][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:28.321][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.5 e2e=103.3 faces=1 size=171 idle=67%
+[21:09:29.235][RX] CPU%/max_us 2/1907 1/2339 31/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:29.275][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:29.361][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.4 e2e=103.3 faces=1 size=171 idle=67%
+[21:09:30.261][RX] CPU%/max_us 2/1907 1/2339 29/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:30.282][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:30.371][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.4 e2e=103.2 faces=1 size=171 idle=64%
+[21:09:31.283][RX] CPU%/max_us 2/1907 2/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:31.311][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:31.382][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.1 decode=0.0 gui=67.3 e2e=103.2 faces=1 size=169 idle=66%
+[21:09:32.283][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:32.315][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:32.383][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.3 e2e=103.1 faces=1 size=164 idle=66%
+[21:09:33.318][RX] CPU%/max_us 2/1907 1/2339 29/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:33.338][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:33.421][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.3 e2e=103.1 faces=1 size=165 idle=66%
+[21:09:34.328][RX] CPU%/max_us 2/1907 1/2339 29/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:34.361][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:34.432][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.3 e2e=103.0 faces=1 size=165 idle=66%
+[21:09:35.342][RX] CPU%/max_us 2/1907 2/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:35.372][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:35.438][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.1 decode=0.0 gui=67.1 e2e=103.0 faces=1 size=171 idle=66%
+[21:09:36.362][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:36.382][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:36.462][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.2 e2e=102.9 faces=1 size=162 idle=66%
+[21:09:37.373][RX] CPU%/max_us 2/1907 1/2339 28/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:37.411][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:37.474][RX] face fps=19 shown=20 disp=20 npu=34.4 wait=0.0 decode=0.0 gui=67.1 e2e=102.9 faces=1 size=169 idle=66%
+[21:09:38.386][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:38.411][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:38.477][RX] face fps=19 shown=20 disp=20 npu=34.3 wait=0.1 decode=0.0 gui=67.1 e2e=102.8 faces=1 size=162 idle=66%
+[21:09:39.411][RX] CPU%/max_us 2/1907 1/2339 27/233180 overlay_cpu=0.00% max_us=0 rering=0
+[21:09:39.432][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:09:39.521][RX] face fps=19 shown=20 disp=20 npu=34.3 wait=0.0 decode=0.0 gui=67.2 e2e=102.8 faces=1 size=163 idle=66%
