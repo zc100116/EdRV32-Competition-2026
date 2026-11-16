@@ -102,6 +102,26 @@ void motion_input(int x, int y, int raw_x, int raw_y, bool closed,
                   unsigned lost, int cls, uint32_t stamp)
 {
     ++ui_motion.sample;
+    if (!lost) {
+        uint32_t elapsed = stamp-ui_motion.seen_at;
+        if (ui_motion.have_hand && elapsed) {
+            ui_motion.velocity_x = (x-ui_motion.seen_x)*1000/(int)elapsed;
+            ui_motion.velocity_y = (y-ui_motion.seen_y)*1000/(int)elapsed;
+        }
+        ui_motion.seen_x = x;
+        ui_motion.seen_y = y;
+        ui_motion.seen_at = stamp;
+        ui_motion.have_hand = true;
+    } else if (ui_motion.have_hand && stamp-ui_motion.seen_at <= MOTION_LOST_MS) {
+        int elapsed = (int)(stamp-ui_motion.seen_at);
+        x = ui_motion.seen_x + ui_motion.velocity_x*elapsed/1000;
+        y = ui_motion.seen_y + ui_motion.velocity_y*elapsed/1000;
+        raw_x = x;
+        raw_y = y;
+        closed = ui_motion.hand.closed;
+        cls = ui_motion.hand.cls;
+        lost = 0;
+    }
     ui_motion.hand = (motion_hand_t){x,y,cls,closed,!lost,lost};
     if (ui_motion.waiting) return;
     switch (ui_motion.game) {

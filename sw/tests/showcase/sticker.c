@@ -92,12 +92,12 @@ int main(void)
     sticker_place(&s.tracks[0],12,&p);
     assert(p.x==400 && p.y==360 && p.width==70);
     sticker_place_part(&s.tracks[0],15,0,&p);
-    assert(p.x==370 && p.y==330 && p.width==45);
+    assert(p.x==346 && p.y==330 && p.width==45);
     sticker_place_part(&s.tracks[0],15,1,&p);
-    assert(p.x==430 && p.y==330 && p.width==45);
+    assert(p.x==454 && p.y==330 && p.width==45);
     f=face(400,300,80,36); memset(&s,0,sizeof s); sticker_step(&s,&f,1,37);
     sticker_place_part(&s.tracks[0],16,0,&p);
-    assert(p.x==370 && p.y==321 && s.tracks[0].angle==4);
+    assert(p.x==346 && p.y==310 && s.tracks[0].angle==4);
     for (unsigned part=0;part<STICKER_PARTS;++part) {
         int style=-1; unsigned options=0;
         while ((style=sticker_next(part,style))>=0) {

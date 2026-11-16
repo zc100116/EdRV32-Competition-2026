@@ -37,7 +37,7 @@ int main(void)
     assert(!ui_motion.hold && ui_motion.game == MOTION_HALL);
     motion_input(x+50,y+50,x,y,true,0,1,3000);
     for (unsigned i = 0; i < 20; ++i) motion_step();
-    motion_input(x+50,y+50,x,y,true,1,1,3100);
+    motion_input(x+50,y+50,x,y,true,1,1,3201);
     motion_step();
     assert(!ui_motion.hold);
     motion_input(0,0,0,0,true,0,1,3200);
@@ -68,6 +68,16 @@ int main(void)
     motion_select(MOTION_MOLE);
     assert(ui_motion.waiting && ui_motion.speed == GAME_FAST);
     assert(starts && ends);
+    motion_init();
+    motion_input(100,200,100,200,true,0,1,1000);
+    motion_input(120,210,120,210,true,0,1,1040);
+    motion_input(0,0,0,0,false,1,-1,1140);
+    assert(ui_motion.hand.present && ui_motion.hand.closed && ui_motion.hand.cls == 1);
+    assert(ui_motion.hand.x == 170 && ui_motion.hand.y == 235);
+    motion_input(0,0,0,0,false,2,-1,1240);
+    assert(ui_motion.hand.present && ui_motion.hand.closed);
+    motion_input(0,0,0,0,false,3,-1,1241);
+    assert(!ui_motion.hand.present && !ui_motion.hand.closed);
     puts("PASS lobby: all five cards, exact one-second fist hold, open/loss/outside reset "
          "and shared result restart");
 }

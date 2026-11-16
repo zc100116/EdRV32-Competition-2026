@@ -4,6 +4,7 @@
  * Clock domain: clk_sys; CLINT tick, shared RND/DISP interrupt services.
  */
 #include "showcase_lvgl.h"
+#include "../board/vision/metrics.h"
 #include "virtual_input.h"
 #include "draw_rnd.h"
 #include "../platform.h"
@@ -71,10 +72,6 @@ static uint64_t refresh_start;
 static uint64_t flush_start;
 static uint64_t flush_ticks;
 static bool frame_rendered;
-static struct {
-    uint64_t start, render, maximum, area, rnd, sw;
-    uint32_t refreshes;
-} vision_window;
 static struct showcase_draw_rnd_stats vision_before;
 static bool vision_refresh;
 
@@ -280,34 +277,26 @@ lv_timer_t *__wrap_lv_timer_create(lv_timer_cb_t cb, uint32_t period, void *user
     return __real_lv_timer_create(cb, period, user_data);
 }
 
-static void vision_print(void)
+static struct smooth_gui gui_metrics;
+static uint64_t last_flush;
+static uint64_t result_render_start;
+static bool rendering_result;
+static bool visual_page(void)
 {
-    uint64_t now = platform_ticks();
-    if (ui_page != 1 || benchmark_running) {
-        memset(&vision_window, 0, sizeof(vision_window));
-        return;
-    }
-    if (!vision_window.start) vision_window.start = now;
-    if (now - vision_window.start < platform_clock_hz()) return;
-    uint64_t frames = vision_window.refreshes ? vision_window.refreshes : 1u;
-    uint64_t divisor = frames * (platform_clock_hz() / 1000u);
-    platform_puts("vision_gui refreshes="); platform_put_u32(vision_window.refreshes);
-    print_average("render_ms", vision_window.render, divisor);
-    print_average("max_ms", vision_window.maximum, platform_clock_hz() / 1000u);
-    print_average("area_px", vision_window.area, frames);
-    print_average("rnd_ms", vision_window.rnd, divisor);
-    print_average("sw_ms", vision_window.sw, divisor);
-    print_average("other_ms", (int64_t)vision_window.render - (int64_t)vision_window.rnd -
-                  (int64_t)vision_window.sw, divisor);
-    platform_puts("\r\n");
-    memset(&vision_window, 0, sizeof(vision_window));
-    vision_window.start = now;
+    return ui_page == 1 || ui_page == 2 || (ui_page >= 9 && ui_page <= 15);
+}
+void smooth_gui_take(struct smooth_gui *out)
+{
+    uint32_t state = virtual_input_lock();
+    *out = gui_metrics;
+    gui_metrics = (struct smooth_gui){0};
+    virtual_input_unlock(state);
 }
 
 static void benchmark_refresh_event(lv_event_t *event)
 {
     if (lv_event_get_code(event) == LV_EVENT_REFR_START) {
-        vision_refresh = ui_page == 1 && !benchmark_running;
+        vision_refresh = visual_page() && !benchmark_running;
         if (vision_refresh) vision_before = *showcase_draw_rnd_stats();
     }
     if (!benchmark_running && !vision_refresh) return;
@@ -332,15 +321,6 @@ static void benchmark_refresh_event(lv_event_t *event)
         if (benchmark_running) {
             benchmark_window.render_ticks += platform_ticks() - refresh_start - flush_ticks;
             if (frame_rendered) benchmark_window.frames++;
-        } else if (frame_rendered) {
-            uint64_t elapsed = platform_ticks() - refresh_start - flush_ticks;
-            const struct showcase_draw_rnd_stats *stats = showcase_draw_rnd_stats();
-            ++vision_window.refreshes;
-            vision_window.render += elapsed;
-            if (elapsed > vision_window.maximum) vision_window.maximum = elapsed;
-            vision_window.rnd += stats->rnd_ticks - vision_before.rnd_ticks +
-                                stats->copy.ticks - vision_before.copy.ticks;
-            vision_window.sw += stats->sw_ticks - vision_before.sw_ticks;
         }
         break;
     default: break;
@@ -373,8 +353,6 @@ static volatile uint32_t display_events;
 
 static void flush(lv_display_t *disp, const lv_area_t *area, uint8_t *pixels)
 {
-    if (vision_refresh)
-        vision_window.area += (uint64_t)lv_area_get_width(area) * lv_area_get_height(area);
     uint32_t bytes = (uint32_t)(area->x2 - area->x1 + 1) * 4u;
     uint32_t covered = (((uint32_t)area->x2 * 4u + 33u) & ~31u) -
                        (((uint32_t)area->x1 * 4u) & ~31u);
@@ -388,6 +366,18 @@ static void flush(lv_display_t *disp, const lv_area_t *area, uint8_t *pixels)
     if (lv_display_flush_is_last(disp)) {
         if (clean_all_needed) cache_clean_all();
         pending_pixels = (const uint32_t *)pixels;
+        if (visual_page()) {
+            last_flush = platform_ticks();
+            if (rendering_result) {
+                const struct showcase_draw_rnd_stats *stats = showcase_draw_rnd_stats();
+                gui_metrics.render += last_flush - result_render_start;
+                gui_metrics.rnd += stats->rnd_ticks - vision_before.rnd_ticks +
+                                   stats->copy.ticks - vision_before.copy.ticks;
+                gui_metrics.sw += stats->sw_ticks - vision_before.sw_ticks;
+                ++gui_metrics.frames;
+                rendering_result = false;
+            }
+        }
         if (!sync_camera()) vision_gui_submitted();
         flush_pending = true;
         dirty_bytes = 0;
@@ -414,6 +404,10 @@ void showcase_gui_disp_event(uint32_t irq)
         sync_flush_waiting = false;
     }
     if (!flush_pending || !(irq & EDRV32_DISP_IRQ_STAT_SWITCH1_MASK)) return;
+    if (visual_page()) {
+        gui_metrics.vsync += platform_ticks() - last_flush;
+        ++gui_metrics.scans;
+    }
     display_events |= irq;
     sched_signal(&gui_task, PLATFORM_SWITCH1);
 }
@@ -559,7 +553,6 @@ void showcase_gui_step(struct sched_task *task)
     uint32_t task_events = sched_take(task);
     if (task_events & PLATFORM_INPUT) input_pending = true;
     if (showcase_gui_paused() || !scan_started) return;
-    vision_print();
     uint32_t state = virtual_input_lock();
     uint32_t events = display_events;
     display_events = 0;
@@ -575,6 +568,12 @@ void showcase_gui_step(struct sched_task *task)
         }
         if (flush_pending) return;
     }
+    bool input_redraw = input_pending;
+    bool result = vision_result_pending();
+    bool synchronized = sync_camera();
+    if (synchronized && !result && !input_redraw) return;
+    rendering_result = result;
+    if (result) result_render_start = vision_result_taken();
     if (input_pending) {
         input_pending = false;
         for (lv_indev_t *input = lv_indev_get_next(NULL); input; input = lv_indev_get_next(input))
@@ -589,7 +588,7 @@ void showcase_gui_step(struct sched_task *task)
     /* Motion pages consume inference in their timers; reserve the matching
      * camera snapshot on every GUI pass, including unchanged overlays. */
     if (sync_camera()) (void)ui_data_vision();
-    if (ui_data_session().app == UI_APP_GRAB) {
+    if (synchronized && result) {
         /* Grab/motion timers advance by elapsed ticks. Run their view update
          * before rendering this result, even between periodic deadlines. */
         for (lv_timer_t *t = lv_timer_get_next(NULL); t; t = lv_timer_get_next(t)) {
@@ -599,10 +598,32 @@ void showcase_gui_step(struct sched_task *task)
             if (!framework) lv_timer_ready(t);
         }
     }
+    /* Paused page timers run exactly once on a new result. Inputs retain their
+     * own LVGL processing and may submit an independent overlay. */
+    if (synchronized) {
+        for (lv_timer_t *t = lv_timer_get_next(NULL); t; t = lv_timer_get_next(t)) {
+            bool framework = false;
+            for (unsigned i = 0; i < framework_timer_count; ++i)
+                if (framework_timers[i] == t) framework = true;
+            if (!framework) {
+                if (result) lv_timer_resume(t);
+                else lv_timer_pause(t);
+            }
+        }
+    }
     uint32_t delay = lv_timer_handler();
+    if (synchronized) {
+        for (lv_timer_t *t = lv_timer_get_next(NULL); t; t = lv_timer_get_next(t)) {
+            bool framework = false;
+            for (unsigned i = 0; i < framework_timer_count; ++i)
+                if (framework_timers[i] == t) framework = true;
+            if (!framework) lv_timer_pause(t);
+        }
+    }
     /* Invalidated overlays must render before deciding there was no redraw. */
     if (sync_camera() && !flush_pending) lv_refr_now(display);
     /* Unchanged overlays need no L1 flip; the recognized camera still advances. */
+    rendering_result = false;
     if (!flush_pending && sync_camera()) vision_gui_submitted();
     sched_signal(&application_task,1);
     if (!flush_pending && delay != LV_NO_TIMER_READY)

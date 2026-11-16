@@ -3,12 +3,14 @@
  */
 #include "theme.h"
 #include "grab.h"
+#include "../board/vision/metrics.h"
 #include "src/draw/lv_draw_private.h"
 #include "src/misc/lv_area_private.h"
 #include <stdio.h>
 #include <string.h>
 static lv_obj_t *frame;
 static lv_obj_t *status;
+static lv_obj_t *exposure_label;
 static lv_timer_t *animation;
 static uint32_t animated_at;
 static grab_state_t shown;
@@ -165,6 +167,10 @@ void ui_grab_action(unsigned action)
         ui_grab.mirror = !ui_grab.mirror;
         ui_data_grab_mirror(ui_grab.mirror);
     } else if (action == 5) grab_reset_objects(&ui_grab);
+    else if (action == 6) {
+        ui_data_exposure_toggle();
+        ui_text(exposure_label, ui_data_exposure_short() ? "曝光 短" : "曝光 标准");
+    }
     ui_grab_update();
 }
 void ui_page_grab(lv_obj_t *p)
@@ -178,7 +184,10 @@ void ui_page_grab(lv_obj_t *p)
         "模式", "参数 −", "参数 +", "关键点 开关", "镜像 开关", "物体复位"
     };
     for (unsigned i = 0; i < 6; ++i)
-        ui_button(p,labels[i],230+170*(int)i,6,160,i);
+        ui_button(p,labels[i],200+145*(int)i,6,135,i);
+    ui_button(p,ui_data_exposure_short() ? "曝光 短" : "曝光 标准",
+                                   1080,6,180,6);
+    exposure_label = lv_obj_get_child(lv_obj_get_child(p,-1),0);
     frame = ui_box(lv_screen_active(),0,0,1280,720,BG);
     lv_obj_set_style_bg_opa(frame,LV_OPA_TRANSP,0);
     lv_obj_set_style_border_width(frame,0,0);

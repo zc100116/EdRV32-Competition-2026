@@ -13,6 +13,12 @@ void ui_demo_update(void) {}
 static ui_app_t active_app;
 static unsigned consumes, submits, page_ready, refreshes;
 static bool timers_enabled;
+static bool pending_result = true;
+bool vision_result_pending(void) { return pending_result; }
+uint64_t vision_result_taken(void) { pending_result = false; return 0; }
+lv_timer_t *lv_timer_get_next(lv_timer_t *timer);
+void lv_timer_pause(lv_timer_t *timer) { (void)timer; }
+void lv_timer_resume(lv_timer_t *timer) { (void)timer; }
 static lv_timer_t *const page_timer = (lv_timer_t *)(uintptr_t)1;
 static lv_timer_t *const engine_timer = (lv_timer_t *)(uintptr_t)2;
 lv_timer_t *lv_timer_get_next(lv_timer_t *timer)
@@ -39,6 +45,7 @@ int main(void)
     const ui_app_t apps[] = {UI_APP_FACE,UI_APP_GRAB};
     for (unsigned i=0;i<2;++i) {
         active_app=apps[i];
+        pending_result=true;
         timers_enabled=active_app==UI_APP_GRAB;
         framework_timer_count=1;
         framework_timers[0]=engine_timer;
@@ -49,6 +56,10 @@ int main(void)
         assert(consumes==reads_before+1 && submits==before+1);
         assert(refreshes==refresh_before+1);
         if (active_app==UI_APP_GRAB) assert(page_ready);
+        unsigned ready_before = page_ready;
+        showcase_gui_step(&gui_task);
+        assert(consumes==reads_before+1 && refreshes==refresh_before+1);
+        assert(page_ready==ready_before); /* No timer work or L1 flip between results. */
         /* Model the last flush block: it stages L1 until FRAME has latched. */
         flush_pending=true;
         sync_flush_waiting=true;

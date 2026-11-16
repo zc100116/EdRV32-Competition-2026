@@ -9,7 +9,7 @@
 #include "slice.h"
 #include "catch.h"
 enum { MOTION_PAGE = 15, MOTION_GAMES = 5, MOTION_HOLD = GAME_HZ,
-       MOTION_CARD_W = 280, MOTION_CARD_H = 170 };
+       MOTION_LOST_MS = 200, MOTION_CARD_W = 280, MOTION_CARD_H = 170 };
 typedef enum { MOTION_HALL, MOTION_SLING, MOTION_RPS, MOTION_MOLE,
                MOTION_SLICE, MOTION_CATCH } motion_game_t;
 typedef struct {
@@ -23,7 +23,10 @@ typedef struct {
     int hovered;
     unsigned hold, restart, speed, duration;
     bool waiting, running;
-    uint32_t rng, revision, sample;
+    uint32_t rng, revision, sample, seen_at;
+    int seen_x, seen_y;
+    int velocity_x, velocity_y;
+    bool have_hand;
     rps_state_t rps;
     mole_state_t mole;
     slice_state_t slice;

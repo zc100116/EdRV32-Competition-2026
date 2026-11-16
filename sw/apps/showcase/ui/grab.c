@@ -56,11 +56,22 @@ static void transition(grab_state_t *s, bool closed, int object)
         ++s->drops;
     }
 }
-bool grab_frame(grab_state_t *s, const ui_pose_point_t *p, int cls)
+bool grab_frame(grab_state_t *s, const ui_pose_point_t *p, int cls, uint32_t stamp)
 {
     if (!p) {
         s->pending_frames = 0;
-        if (++s->lost == 15 && s->held >= 0) {
+        ++s->lost;
+        uint32_t elapsed = stamp - s->seen_at;
+        if (s->smooth && elapsed <= GRAB_LOST_MS) {
+            s->x = s->seen_x + s->velocity_x * elapsed;
+            s->y = s->seen_y + s->velocity_y * elapsed;
+            if (s->held >= 0) {
+                s->objects[s->held].x = s->x + s->offset_x;
+                s->objects[s->held].y = s->y + s->offset_y;
+            }
+            return false;
+        }
+        if (s->closed) {
             transition(s, false, -1);
             return true;
         }
@@ -88,6 +99,13 @@ bool grab_frame(grab_state_t *s, const ui_pose_point_t *p, int cls)
     bool smooth = s->smooth;
     s->x = s->smooth ? .5f * (s->x + x) : x;
     s->y = s->smooth ? .5f * (s->y + y) : y;
+    if (smooth && stamp != s->seen_at) {
+        s->velocity_x = (s->x-s->seen_x)/(stamp-s->seen_at);
+        s->velocity_y = (s->y-s->seen_y)/(stamp-s->seen_at);
+    }
+    s->seen_x = s->x;
+    s->seen_y = s->y;
+    s->seen_at = stamp;
     s->smooth = true;
     s->cls = cls;
     bool close = false;

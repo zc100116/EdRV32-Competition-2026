@@ -19,4 +19,6 @@ int ov5640_init(unsigned int camera, uint32_t clock_hz);
 int ov5640_chip_id(unsigned int camera, uint32_t clock_hz, uint16_t *chip_id);
 /* T-GRAB-TEST: sensor horizontal mirror, SCCB NACK returns -1. */
 int ov5640_mirror(unsigned int camera, uint32_t clock_hz, int enabled);
+/* T-SMOOTH-P0: change AEC ceiling and gain only; no sensor restart, NACK = -1. */
+int ov5640_exposure_limit(unsigned int camera, uint32_t clock_hz, int short_exposure);
 #endif

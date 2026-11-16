@@ -4,6 +4,7 @@
  */
 #include "vision_hooks.h"
 #include "memory.h"
+#include "metrics.h"
 #include "model.h"
 #include "wire.h"
 #include "post.h"
@@ -36,7 +37,8 @@ static grab_state_t motion_cursor;
 #include "../../lvgl/showcase_lvgl.h"
 
 enum { REF_PAIR = 1, REF_JOB = 2, REF_READY = 4, REF_DISPLAY = 8,
-       REF_NPU = 16, REF_GEO = 32, REF_RESULT = 64, REF_TAKEN = 128 };
+       REF_NPU = 16, REF_GEO = 32, REF_RESULT = 64, REF_TAKEN = 128,
+       REF_CAPTURE = 256, REF_FRAME = 512 };
 enum { PAGE_NONE, PAGE_CAMERA, PAGE_IMAGE, PAGE_PROCESS, PAGE_POSE, PAGE_HAND,
        PAGE_FACE, PAGE_DOODLE, PAGE_HELMET, PAGE_GRAB, PAGE_COUNT };
 enum { JOB_IDLE, JOB_CH2, JOB_NPU, JOB_POST, JOB_SEND, JOB_TX };
@@ -77,14 +79,16 @@ static struct {
     uint32_t memory_frame;
     uint64_t memory_tick;
     unsigned initialized;
-    unsigned refs[8];
+    unsigned refs[10];
+    int capture_image[4];
+    uint32_t capture_busy;
     int ready, current, pair_image, pair_input;
     int result_image, taken_image;
     uint64_t result_vin, result_handoff, taken_vin, taken_handoff;
     uint32_t image_id, input_id;
     uint64_t image_tick;
     uint32_t input_busy;
-    lv_image_dsc_t images[8];
+    lv_image_dsc_t images[10];
     unsigned job;
     int job_image;
     unsigned job_input;
@@ -193,6 +197,7 @@ static uint32_t result_revision, result_taken;
 static volatile uint32_t result_submitted, result_presented;
 static void reference(int slot, unsigned add, unsigned remove);
 static uint32_t image_address(unsigned slot);
+static _Noreturn void fail(const char *message);
 static uint64_t gui_vin, gui_handoff;
 void vision_gui_submitted(void)
 {
@@ -242,7 +247,30 @@ void vision_gui_presented(uint64_t tick)
     }
     detection_applied = detection_armed;
 }
-static char report[512];
+static char report[1600];
+static uint64_t result_ready_at;
+static uint64_t wait_sum;
+static unsigned skipped;
+static unsigned wait_count;
+static volatile uint32_t pace[5], display_frame, previous_switch;
+bool vision_result_pending(void) { return result_taken != result_revision; }
+uint64_t vision_result_taken(void)
+{
+    uint64_t tick = platform_ticks();
+    wait_sum += tick - result_ready_at;
+    ++wait_count;
+    if (!sync_page()) result_taken = result_revision;
+    return tick;
+}
+static bool short_exposure;
+bool ui_data_exposure_short(void) { return short_exposure; }
+void ui_data_exposure_toggle(void)
+{
+    short_exposure = !short_exposure;
+    if (ov5640_exposure_limit(0, platform_clock_hz(), short_exposure))
+        fail("OV5640 exposure limit");
+    platform_puts(short_exposure ? "camera exposure=short\r\n" : "camera exposure=std\r\n");
+}
 /* Design P5 8.6 / card 54: one line per completed PC image, emitted once. */
 static char image_line[320];
 const char *vision_report(void)
@@ -331,9 +359,9 @@ static void *uncached(uint32_t address)
 }
 static uint32_t image_address(unsigned slot)
 {
-    if (slot >= 6) return SHOWCASE_IMAGE_BASE + (slot - 6) * SHOWCASE_IMAGE_BYTES;
-    return slot < 4 ? VISION_IMAGE_BASE + slot * VISION_IMAGE_SPACING :
-           VISION_GEO_BASE + (slot - 4) * VISION_IMAGE_SPACING;
+    if (slot >= 8) return SHOWCASE_IMAGE_BASE + (slot - 8) * SHOWCASE_IMAGE_BYTES;
+    return slot < 6 ? VISION_IMAGE_BASE + slot * VISION_IMAGE_SPACING :
+           VISION_GEO_BASE + (slot - 6) * VISION_IMAGE_SPACING;
 }
 static _Noreturn void fail(const char *message)
 {
@@ -346,12 +374,30 @@ static unsigned tenths(uint64_t ticks)
 {
     return (unsigned)(ticks * 10000u / platform_clock_hz());
 }
+/* vin-spec 4.3: a free pool buffer becomes a hardware slot only after its
+ * new address is written; clearing SLOT_BUSY is the final ownership transfer. */
+static void refill_capture(void)
+{
+    for (unsigned slot = 0; slot < 4; ++slot) {
+        if (v.capture_image[slot] >= 0) continue;
+        for (unsigned image = 0; image < 6; ++image) {
+            if (v.refs[image]) continue;
+            v.refs[image] = REF_CAPTURE;
+            v.capture_image[slot] = (int)image;
+            vin_surface_base(0, slot, image_address(image));
+            v.capture_busy &= ~(1u << slot);
+            break;
+        }
+    }
+    vin_slots_busy(0, v.capture_busy);
+}
 static void reference(int slot, unsigned add, unsigned remove)
 {
     if (slot < 0) return;
     uint32_t lock = sched_port_lock();
     v.refs[slot] = (v.refs[slot] & ~remove) | add;
-    if (v.capture) {
+    if (v.capture && sync_page()) refill_capture();
+    else if (v.capture) {
         uint32_t busy = 0;
         for (unsigned i = 0; i < 4; ++i) {
             if (v.refs[i]) busy |= 1u << i;
@@ -370,7 +416,7 @@ static int free_image(unsigned first, unsigned end)
 static void initialize(void)
 {
     if (v.initialized) return;
-    for (unsigned i = 0; i < 8; ++i) {
+    for (unsigned i = 0; i < 10; ++i) {
         v.images[i] = (lv_image_dsc_t){
             .header = {.magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565,
                        .flags = LV_IMAGE_FLAGS_MODIFIABLE, .w = 1280, .h = 720,
@@ -446,10 +492,18 @@ void vision_display_irq(uint32_t irq)
 {
     uint32_t lock = sched_port_lock();
     irq_flags[ENGINE_DISP] |= irq;
+    if (irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK) ++display_frame;
+    if (sync_page() && (irq & EDRV32_DISP_IRQ_STAT_SWITCH_MASK)) {
+        if (previous_switch) {
+            unsigned interval = display_frame - previous_switch;
+            ++pace[interval >= 5 ? 4 : interval - 1];
+        }
+        previous_switch = display_frame;
+    }
     if (irq & EDRV32_DISP_IRQ_STAT_SWITCH1_MASK) ++timing.disp;
     if (sync_page() && (irq & EDRV32_DISP_IRQ_STAT_SWITCH_MASK)) {
         uint32_t released = disp_released(DISP_L0);
-        for (unsigned i = 0; i < 4; ++i)
+        for (unsigned i = 0; i < 6; ++i)
             if (image_address(i) == released) reference((int)i, 0, REF_DISPLAY);
     }
     /* No L1 redraw means no SWITCH1. L0's scan still completes this result. */
@@ -463,7 +517,7 @@ uint32_t vision_upload_base(void)
 {
     uint32_t lock = sched_port_lock();
     uint32_t base = 0;
-    for (unsigned i = 6; i < 8; ++i)
+    for (unsigned i = 8; i < 10; ++i)
         if (!v.refs[i]) { v.receive_start = platform_ticks(); base = image_address(i); break; }
     sched_port_unlock(lock);
     return base;
@@ -473,13 +527,13 @@ static void display_step(uint32_t flags)
     /* DISP 2.4/5.3: stopped IDLE also releases the last scanned surface. */
     if (v.state == PIPE_STOPPING && v.display_owned &&
         (engine_poll(ENGINE_DISP).status & EDRV32_DISP_STATUS_IDLE_MASK)) {
-        for (unsigned i = 0; i < 8; ++i) reference((int)i, 0, REF_DISPLAY);
+        for (unsigned i = 0; i < 10; ++i) reference((int)i, 0, REF_DISPLAY);
         v.display_owned = 0;
         v.submitted = -1;
     }
     if (!sync_page() && (flags & EDRV32_DISP_IRQ_STAT_SWITCH_MASK)) {
         uint32_t released = disp_released(DISP_L0);
-        for (unsigned i = 0; i < 8; ++i)
+        for (unsigned i = 0; i < 10; ++i)
             if (image_address(i) == released) reference((int)i, 0, REF_DISPLAY);
     }
     if (!(flags & EDRV32_DISP_IRQ_STAT_FRAME_MASK)) return;
@@ -490,7 +544,7 @@ static void display_step(uint32_t flags)
         reference(v.ready, 0, REF_READY);
         v.ready = -1;
         unsigned held = 0;
-        for (unsigned i = 0; i < 8; ++i) held |= v.refs[i] & REF_DISPLAY;
+        for (unsigned i = 0; i < 10; ++i) held |= v.refs[i] & REF_DISPLAY;
         if (!held) v.display_owned = 0;
     } else if (v.ready >= 0 && v.submitted < 0) {
         v.current = v.ready;
@@ -608,10 +662,21 @@ static void request_page(unsigned page)
             motion_seed((uint32_t)platform_ticks());
         }
     }
+    uint64_t busy[3], maximum[3];
+    struct smooth_irq irqs[7];
+    struct smooth_gui gui;
+    smooth_tasks(busy, maximum);
+    smooth_irqs(irqs);
+    smooth_gui_take(&gui);
+    skipped = mmio_read32(EDRV32_VIN_BASE + EDRV32_VIN_PERF_OFFSET(9));
     memset(&timing, 0, sizeof timing);
     timing.since = platform_ticks();
     timing.idle_since = sched_idle_ticks();
     result_revision = result_taken = result_submitted = result_presented = 0;
+    previous_switch = 0;
+    memset((void *)pace, 0, sizeof pace);
+    wait_sum = 0;
+    wait_count = 0;
     gui_armed = gui_ready = 0; report[0] = 0;
     sessions[page].data.boxes = boxes;
     if (page == PAGE_POSE) memset(&pose, 0, sizeof pose);
@@ -715,10 +780,21 @@ static void configure_capture(void)
 {
     struct vin_channel image = {VIN_CAM0, 4, VISION_STRIDE, {0}, 0};
     struct vin_channel input = {VIN_CAM0, 3, VISION_STRIDE, {0}, 0};
-    for (unsigned i = 0; i < 4; ++i) {
-        image.base[i] = image_address(i);
-        if (v.refs[i]) image.busy_slots |= 1u << i;
+    v.capture_busy = 0;
+    for (unsigned slot = 0; slot < 4; ++slot) {
+        if (sync_page()) {
+            int buffer = free_image(0, 6);
+            v.capture_image[slot] = buffer;
+            if (buffer >= 0) {
+                v.refs[buffer] = REF_CAPTURE;
+                image.base[slot] = image_address((unsigned)buffer);
+            } else v.capture_busy |= 1u << slot;
+        } else {
+            image.base[slot] = image_address(slot);
+            if (v.refs[slot]) v.capture_busy |= 1u << slot;
+        }
     }
+    image.busy_slots = v.capture_busy;
     for (unsigned i = 0; i < 3; ++i) input.base[i] = VISION_INPUT_BASE +
                                                                i * VISION_INPUT_SPACING;
     /* VRN must never touch PIX/GEO, including camera configuration. */
@@ -780,25 +856,14 @@ static void start_inference(unsigned input, int image, uint32_t frame, uint64_t 
     }
 #endif
 }
-static void camera_frame(unsigned channel)
+static void camera_frame_data(unsigned channel, int slot, struct vin_frame frame)
 {
-    struct vin_frame frame = vin_frame_done(channel);
-    if (frame.info & (EDRV32_VIN_CH_DONE_INFO_INCOMPLETE_MASK |
-                      EDRV32_VIN_CH_DONE_INFO_BUS_ERR_MASK)) {
-        irq_errors[ENGINE_VIN] |= 1u;
-        return;
-    }
-    if ((v.state != PIPE_LIVE && !(v.page == PAGE_DOODLE && channel == 2)) ||
-        v.page == PAGE_IMAGE ||
-        (live_page() &&
-         !v.model_ready)) return;
-    int slot = (int)vin_frame_slot(frame.info);
     if (v.page == PAGE_PROCESS) {
         if (channel == 0) {
             v.applied_revision = v.shadow_revision;
             if (process.original || !(process.enabled & 0xf80u)) queue_image(slot);
             else if (v.geo_source < 0) {
-                int target = free_image(4, 6);
+                int target = free_image(6, 8);
                 if (target < 0) return;
                 v.geo_source = slot;
                 v.geo_target = target;
@@ -856,6 +921,30 @@ static void camera_frame(unsigned channel)
         vin_slots_busy(2, v.input_busy);
     }
 }
+static void camera_frame(unsigned channel)
+{
+    struct vin_frame frame = vin_frame_done(channel);
+    if (frame.info & (EDRV32_VIN_CH_DONE_INFO_INCOMPLETE_MASK |
+                      EDRV32_VIN_CH_DONE_INFO_BUS_ERR_MASK)) {
+        irq_errors[ENGINE_VIN] |= 1u;
+        return;
+    }
+    if ((v.state != PIPE_LIVE && !(v.page == PAGE_DOODLE && channel == 2)) ||
+        v.page == PAGE_IMAGE ||
+        (live_page() &&
+         !v.model_ready)) return;
+    int slot = (int)vin_frame_slot(frame.info);
+    int image = slot;
+    if (channel == 0 && sync_page()) {
+        v.capture_busy |= 1u << slot;
+        vin_slots_busy(0, v.capture_busy);
+        image = v.capture_image[slot];
+        v.capture_image[slot] = -1;
+        v.refs[image] = (v.refs[image] & ~REF_CAPTURE) | REF_FRAME;
+    }
+    camera_frame_data(channel, image, frame);
+    if (channel == 0 && sync_page()) reference(image, 0, REF_FRAME);
+}
 /* Latest matched VIN pair is retained while NPU and the previous post overlap. */
 static void camera_start(void)
 {
@@ -905,6 +994,7 @@ static void publish_result(void)
             d->x0,d->y0,d->x1-d->x0,d->y1-d->y0,d->class_id};
     }
     timing.handoff = platform_ticks();
+    result_ready_at = timing.handoff;
     timing.completed[0] = timing.npu_done - timing.job_npu_start;
     timing.sums[9] += timing.copy_ticks;
     timing.completed[1] = timing.post_start - timing.npu_done;
@@ -1111,6 +1201,46 @@ static void timing_step(void)
             "gui=%u.%u e2e=%u.%u\r\n", data->fps,shown,disp,a[0]/10,a[0]%10,
             a[1]/10,a[1]%10,a[2]/10,a[2]%10,a[6]/10,a[6]%10,a[7]/10,a[7]%10);
     } else report[0] = 0;
+    uint64_t busy[3], maximum[3];
+    struct smooth_irq irqs[7];
+    struct smooth_gui gui;
+    smooth_tasks(busy, maximum);
+    smooth_irqs(irqs);
+    smooth_gui_take(&gui);
+    unsigned skip_now = mmio_read32(EDRV32_VIN_BASE + EDRV32_VIN_PERF_OFFSET(9));
+    unsigned histogram[5];
+    lock = sched_port_lock();
+    for (unsigned i = 0; i < 5; ++i) { histogram[i] = pace[i]; pace[i] = 0; }
+    sched_port_unlock(lock);
+    if (report[0]) {
+        size_t used = strlen(report);
+        used += snprintf(report+used, sizeof report-used,
+            "sched page=%u comm=%u app=%u gui=%u comm_max=%u app_max=%u gui_max=%u irq=",
+            v.page, (unsigned)(busy[0]*100/(now-timing.since)),
+            (unsigned)(busy[1]*100/(now-timing.since)),
+            (unsigned)(busy[2]*100/(now-timing.since)),
+            tenths(maximum[0])/10, tenths(maximum[1])/10, tenths(maximum[2])/10);
+        static const char *const names[] = {"vin","npu","disp","rnd","eth","uart","gpio"};
+        for (unsigned i = 0; i < 7; ++i)
+            used += snprintf(report+used, sizeof report-used, "%s%s:%u/%u",
+                i ? "," : "", names[i], irqs[i].count,
+                (unsigned)(irqs[i].ticks*1000000/platform_clock_hz()));
+        used += snprintf(report+used, sizeof report-used, " skip=%u", skip_now-skipped);
+        if (sync_page())
+            used += snprintf(report+used, sizeof report-used,
+                " pace=1:%u,2:%u,3:%u,4:%u,5+:%u", histogram[0],histogram[1],
+                histogram[2],histogram[3],histogram[4]);
+        snprintf(report+used, sizeof report-used,
+            " gui_wait=%u render=%u rnd=%u sw=%u vsync=%u\r\n",
+            wait_count ? tenths(wait_sum/wait_count)/10 : 0,
+            gui.frames ? tenths(gui.render/gui.frames)/10 : 0,
+            gui.frames ? tenths(gui.rnd/gui.frames)/10 : 0,
+            gui.frames ? tenths(gui.sw/gui.frames)/10 : 0,
+            gui.scans ? tenths(gui.vsync/gui.scans)/10 : 0);
+    }
+    skipped = skip_now;
+    wait_sum = 0;
+    wait_count = 0;
     timing.kpt_ticks = 0;
     memset(timing.jitter, 0, sizeof timing.jitter);
     timing.samples = timing.gui_samples = 0;
@@ -1294,7 +1424,7 @@ int vision_service(void)
             }
             if (v.page == PAGE_GRAB && ui_page == MOTION_PAGE) {
                 grab_frame(&motion_cursor,hand.count ? hand.points[largest] : NULL,
-                           hand.state.cls);
+                           hand.state.cls, (uint32_t)(platform_ticks()*1000/platform_clock_hz()));
                 int raw_x = (int)motion_cursor.x;
                 int raw_y = (int)motion_cursor.y;
                 if (hand.count) {
@@ -1312,7 +1442,8 @@ int vision_service(void)
                     (uint32_t)(platform_ticks()*1000/platform_clock_hz()));
             }
             if (v.page == PAGE_GRAB && ui_page != MOTION_PAGE && grab_frame(&ui_grab,
-                    hand.count ? hand.points[largest] : NULL, hand.state.cls)) {
+                    hand.count ? hand.points[largest] : NULL, hand.state.cls,
+                    (uint32_t)(platform_ticks()*1000/platform_clock_hz()))) {
                 char line[192];
                 char value[32];
                 grab_value(&ui_grab, value, sizeof value);
@@ -1433,6 +1564,12 @@ int vision_service(void)
              !(engine_poll(ENGINE_GEO).status & EDRV32_GEO_STATUS_IDLE_MASK))) {
             sched_port_unlock(lock); return 1;
         }
+        if (v.capture && sync_page()) {
+            /* VIN is IDLE: return every still-armed capture buffer to the pool. */
+            vin_slots_busy(0, 0);
+            v.capture = 0;
+            for (unsigned i = 0; i < 6; ++i) v.refs[i] &= ~REF_CAPTURE;
+        }
         pair_release(); v.capture = 0;
         if (v.state == PIPE_STOPPING) {
             if (v.display_owned) { sched_port_unlock(lock); return 1; }
@@ -1477,7 +1614,7 @@ int vision_service(void)
         sessions[PAGE_IMAGE].upload == UPLOAD_READY) {
         sessions[PAGE_IMAGE].upload = UPLOAD_EMPTY;
         timing.cancelled = false; v.job_request = request;
-        int slot = 6 + (int)((v.upload_base - SHOWCASE_IMAGE_BASE) / SHOWCASE_IMAGE_BYTES);
+        int slot = 8 + (int)((v.upload_base - SHOWCASE_IMAGE_BASE) / SHOWCASE_IMAGE_BYTES);
         v.job_image = slot; reference(slot, REF_JOB, 0);
         v.job_input = 0; v.job_frame = v.next_frame++; v.image_job = 1;
         sessions[PAGE_IMAGE].frame = v.job_frame;

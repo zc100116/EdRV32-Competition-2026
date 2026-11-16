@@ -79,3 +79,9 @@ uint32_t vin_write_status(unsigned int channel)
 {
     return mmio_read32(EDRV32_VIN_BASE + EDRV32_VIN_CH_WR_STAT_OFFSET(channel));
 }
+
+/* VIN 4.3: address is latched on frame reception, before ownership is returned. */
+void vin_surface_base(unsigned int channel, unsigned int slot, uint32_t address)
+{
+    mmio_write32(EDRV32_VIN_BASE + EDRV32_VIN_CH_SURF_BASE_OFFSET(channel, slot), address);
+}

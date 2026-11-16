@@ -5,6 +5,7 @@
 #include <stdio.h>
 static ui_pose_point_t p[21];
 static grab_state_t s;
+static uint32_t stamp;
 static void hand(float x, float y, float gap)
 {
     for (unsigned i = 0; i < 21; ++i) p[i] = (ui_pose_point_t){x,y,1};
@@ -12,7 +13,7 @@ static void hand(float x, float y, float gap)
     p[4].x = x - gap/2;
     p[8].x = x + gap/2;
 }
-static bool frame(void) { return grab_frame(&s,p,0); }
+static bool frame(void) { return grab_frame(&s,p,0,stamp+=40); }
 static void test_a(void)
 {
     grab_init(&s);
@@ -61,10 +62,13 @@ static void test_a(void)
     hand(290,470,20);
     frame(); frame();
     assert(s.held == 1); /* Both in range: choose nearest. */
-    for (unsigned i = 0; i < 10; ++i) assert(!grab_frame(&s,NULL,-1) && s.held == 1);
+    for (unsigned i = 0; i < 10; ++i) assert(!grab_frame(&s,NULL,-1,stamp+=10) && s.held == 1);
     assert(!frame() && s.held == 1 && s.lost == 0);
-    for (unsigned i = 0; i < 14; ++i) assert(!grab_frame(&s,NULL,-1) && s.held == 1);
-    assert(grab_frame(&s,NULL,-1) && s.held == -1 && !s.closed && s.drops == 1);
+    float seen_x = s.x;
+    float speed = s.velocity_x;
+    assert(!grab_frame(&s,NULL,-1,s.seen_at+200) && s.held == 1 && s.closed);
+    assert(fabsf(s.x-seen_x-speed*200) < .01f);
+    assert(grab_frame(&s,NULL,-1,s.seen_at+201) && s.held == -1 && !s.closed);
     grab_init(&s);
     hand(640,300,20);
     frame(); frame();
@@ -131,11 +135,11 @@ static void test_c(void)
         hand(290,470,20);
         bool close = cls == 1 || cls == 5;
         bool release = cls == 0 || cls == 11;
-        grab_frame(&s,p,cls);
+        grab_frame(&s,p,cls,stamp+=40);
         assert(s.closed == close);
         s.closed = true;
         s.held = 0;
-        grab_frame(&s,p,cls);
+        grab_frame(&s,p,cls,stamp+=40);
         assert(s.closed == !release);
         assert(s.held == (release ? -1 : 0));
     }
@@ -143,23 +147,32 @@ static void test_c(void)
     grab_init(&s); s.mode = 2;
     for (unsigned i = 0; i < 3; ++i) {
         ui_gesture_debounce(&debounce,5);
-        grab_frame(&s,p,debounce.cls);
+        grab_frame(&s,p,debounce.cls,stamp+=40);
         assert(s.closed == (i == 2));
     }
     for (unsigned i = 0; i < 3; ++i) {
         ui_gesture_debounce(&debounce,0);
-        grab_frame(&s,p,debounce.cls);
+        grab_frame(&s,p,debounce.cls,stamp+=40);
         assert(s.closed == (i != 2));
     }
 }
 int main(void)
 {
     test_a();
+    grab_init(&s);
+    hand(290,470,20); frame(); frame();
+    hand(390,430,20); frame();
+    uint32_t seen_at = s.seen_at;
+    assert(!grab_frame(&s,NULL,-1,seen_at+100) && s.closed && s.held == 0);
+    assert(fabsf(s.x-465) < .01f && fabsf(s.y-400) < .01f);
+    assert(s.objects[0].x == s.x && s.objects[0].y == s.y);
+    assert(grab_frame(&s,NULL,-1,seen_at+201) && s.held == -1);
     test_scale();
     test_b();
     test_d();
     test_c();
     puts("PASS grab R2 layout, A/B four-root scale, A/B/D value smoothing, "
          "2-frame grab/4-frame release, C hold classes/3-frame debounce, "
-         "visibility, nearest pick, smooth follow, gravity, regrab and 15-frame hand loss");
+         "visibility, nearest pick, smooth follow, gravity, regrab and "
+         "200 ms hand loss hold/release/extrapolation");
 }

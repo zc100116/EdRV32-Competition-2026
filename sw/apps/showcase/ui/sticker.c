@@ -182,6 +182,9 @@ void sticker_place_part(const sticker_track_t *t, unsigned style, unsigned side,
     } else if (a->part == STICKER_CHEEKS) {
         x = (t->filter[4+2*side].value+t->filter[10+2*side].value)/2;
         y = (t->filter[5+2*side].value+t->filter[11+2*side].value)/2;
+        int outward = side ? 3 : -3;
+        x += outward * (t->filter[6].value-t->filter[4].value)/10;
+        y += outward * (t->filter[7].value-t->filter[5].value)/10;
     }
     int ox = a->offset_x*d/256, oy = a->offset_y*d/256;
     p->anchor_x=x/256; p->anchor_y=y/256;

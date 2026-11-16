@@ -4,6 +4,7 @@
 #define _GNU_SOURCE
 #include "vision_hooks.h"
 #include "memory.h"
+#include "metrics.h"
 #include "model.h"
 #include "pose.h"
 #include "session.h"
@@ -24,6 +25,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+void smooth_tasks(uint64_t busy[3], uint64_t maximum[3])
+{ memset(busy,0,3*sizeof *busy); memset(maximum,0,3*sizeof *maximum); }
+void smooth_irqs(struct smooth_irq out[7]) { memset(out,0,7*sizeof *out); }
+void smooth_gui_take(struct smooth_gui *out) { *out = (struct smooth_gui){0}; }
+int ov5640_exposure_limit(unsigned camera, uint32_t hz, int short_exposure)
+{ (void)camera; (void)hz; (void)short_exposure; return 0; }
 unsigned ui_page;
 static struct session model_session;
 void board_session_fail(unsigned error)
@@ -50,6 +57,8 @@ static bool model_ready(ui_app_t app, ui_state_t target)
 static uint32_t hardware = APP_HW_VIN | APP_HW_NPU | APP_HW_ETH;
 static uint64_t ticks;
 static uint32_t busy[3];
+static uint32_t capture_bases[4];
+static unsigned base_replacements;
 static enum vin_source sources[3];
 static struct vin_frame frames[3];
 static uint32_t last_input;
@@ -174,10 +183,26 @@ void vin_channel_configure(unsigned channel, const struct vin_channel *c)
     ++capture_configurations;
     busy[channel] = c->busy_slots;
     sources[channel] = c->source;
+    if (channel == 0) {
+        assert(c->ring_count == 4);
+        memcpy(capture_bases,c->base,sizeof capture_bases);
+    }
 }
 void vin_channel_enable(unsigned channel, unsigned enabled)
 { assert(channel == 0 || channel == 2); assert(!enabled); }
 void vin_slots_busy(unsigned channel, uint32_t slots) { busy[channel] = slots; }
+void vin_surface_base(unsigned channel, unsigned slot, uint32_t address)
+{
+    assert(channel == 0 && slot < 4 && (busy[0] & (1u << slot)));
+    assert(address >= VISION_IMAGE_BASE && address < VISION_IMAGE_BASE+6*VISION_IMAGE_SPACING);
+    capture_bases[slot] = address;
+    ++base_replacements;
+}
+static void assert_retained(uint32_t address)
+{
+    for (unsigned slot = 0; slot < 4; ++slot)
+        assert((busy[0] & (1u << slot)) || capture_bases[slot] != address);
+}
 struct vin_frame vin_frame_done(unsigned channel) { return frames[channel]; }
 unsigned vin_frame_slot(uint32_t info)
 { return (info & EDRV32_VIN_CH_DONE_INFO_SLOT_MASK) >> EDRV32_VIN_CH_DONE_INFO_SLOT_POS; }
@@ -274,10 +299,11 @@ static void camera(unsigned slot, unsigned frame_id)
     frames[0] = (struct vin_frame){slot << EDRV32_VIN_CH_DONE_INFO_SLOT_POS, frame_id};
     frames[2] = (struct vin_frame){slot << EDRV32_VIN_CH_DONE_INFO_SLOT_POS, frame_id};
     unsigned before = npu_runs;
+    uint32_t captured = capture_bases[slot];
     event(ENGINE_VIN, EDRV32_VIN_IRQ_STAT_FRAME_MASK | EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
     vision_service();
     assert(npu_runs == before + 1);
-    assert(busy[0] & (1u << slot));
+    assert((busy[0] & (1u << slot)) || capture_bases[slot] != captured);
     event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
     vision_service();
     assert(vision_post_active());
@@ -723,7 +749,11 @@ static void hand_test(void)
     assert(hand->points[0][20].x > hand->points[0][0].x);
     ticks += platform_clock_hz();
     vision_service();
-    assert(!strncmp(vision_report(), "gesture fps=", 12));
+    const char *gesture_line = vision_report();
+    assert(!strncmp(gesture_line, "gesture fps=", 12));
+    assert(strstr(gesture_line,"\r\nsched page=5 comm="));
+    assert(strstr(gesture_line,"irq=vin:") && strstr(gesture_line," gui_wait="));
+    assert(!strstr(gesture_line," pace="));
     assert(!*vision_report()); /* Half-second CPU reports consume each hand line once. */
     camera_event(1, 801);
     assert(last_output != first_output);
@@ -852,51 +882,59 @@ static void sync_test(void)
     for (unsigned page = 0; page < 2; ++page) {
         apps[page]->enter(); drain();
         unsigned submits = l0_submissions;
+        unsigned replacements = base_replacements;
+        uint32_t first = capture_bases[0];
         camera_event(0,1000);
         display_frame(); display_frame();
-        assert(l0_submissions == submits); /* CH0 alone never displays. */
+        assert(l0_submissions == submits);
         event(ENGINE_NPU,EDRV32_NPU_IRQ_STAT_DONE_MASK); drain();
-        assert(busy[0] == 1);
+        assert(base_replacements > replacements && capture_bases[0] ==
+               VISION_IMAGE_BASE+4*VISION_IMAGE_SPACING);
+        assert_retained(first);
         ui_data_vision(); vision_gui_submitted();
         assert(l0_submissions == ++submits);
         display_frame();
-        assert(display_current == VISION_IMAGE_BASE);
+        assert(display_current == first);
         ui_data_vision(); vision_gui_submitted(); display_frame();
-        assert(l0_submissions == submits); /* Each inferred frame at most once. */
+        assert(l0_submissions == submits);
+        uint32_t second = capture_bases[1];
         camera(1,1001);
-        ui_data_vision(); vision_gui_submitted(); /* GUI pass with no L1 redraw. */
-        display_frame();
-        assert(l0_submissions == ++submits);
-        assert(display_current == VISION_IMAGE_BASE+VISION_IMAGE_SPACING);
-        assert(busy[0] == 2);
-        camera(2,1002);
-        camera(0,1003); /* Untaken result 1002 is skipped and released. */
-        assert(busy[0] == 3);
-        ui_data_vision();
-        camera(2,1004); /* Taken 1003 survives publication of 1004. */
-        assert(busy[0] == 7);
-        vision_gui_submitted(); display_frame();
-        assert(l0_submissions == ++submits && display_current == VISION_IMAGE_BASE);
-        assert(busy[0] == 5);
+        assert(capture_bases[1] == VISION_IMAGE_BASE+5*VISION_IMAGE_SPACING);
         ui_data_vision(); vision_gui_submitted(); display_frame();
-        assert(l0_submissions == ++submits && busy[0] == 4);
+        assert(l0_submissions == ++submits && display_current == second);
+        assert_retained(second);
+        camera(2,1002);
+        uint32_t taken = capture_bases[0];
+        camera(0,1003); /* Untaken 1002 is released for capture reuse. */
+        ui_data_vision();
+        uint32_t newest = capture_bases[2];
+        camera(2,1004); /* Taken 1003 survives publication of 1004. */
+        assert_retained(taken); assert_retained(newest); assert_retained(second);
+        assert(busy[0] & (1u << 2)); /* All six buffers owned: slot stays busy. */
+        vision_gui_submitted(); display_frame();
+        assert(l0_submissions == ++submits && display_current == taken);
+        assert(!(busy[0] & (1u << 2))); /* Releasing L0 replenishes the blocked slot. */
+        ui_data_vision(); vision_gui_submitted(); display_frame();
+        assert(l0_submissions == ++submits && display_current == newest);
+        uint32_t paused = capture_bases[1];
         camera(1,1005); ui_data_vision();
         vision_pause(true); drain();
-        assert(vision_ready(UI_STATE_PAUSED) && busy[0] == 6);
+        assert(vision_ready(UI_STATE_PAUSED));
         vision_gui_submitted(); display_frame();
-        assert(l0_submissions == ++submits &&
-               display_current == VISION_IMAGE_BASE+VISION_IMAGE_SPACING);
+        assert(l0_submissions == ++submits && display_current == paused);
         vision_pause(false); drain();
-        assert(busy[0] == 2); /* Frozen VIN's busy register refreshes at configure. */
-        camera_event(0,1006);
-        apps[page]->exit(); /* Stop while NPU owns a frame. */
+        assert_retained(paused);
+        unsigned slot = 0;
+        while (busy[0] & (1u << slot)) ++slot;
+        camera_event(slot,1006);
+        apps[page]->exit();
         event(ENGINE_NPU,EDRV32_NPU_IRQ_STAT_DONE_MASK);
         display_frame(); display_frame(); drain();
         display_frame(); display_frame();
         assert(vision_ready(UI_STATE_IDLE) && busy[0] == 0 && busy[2] == 0);
     }
-    puts("PASS sync: CH0 withheld, once-only, no redraw, skipped/taken ownership, "
-         "pause/exit drain");
+    puts("PASS sync six-buffer pool: address-before-unbusy, spare buffers, pool exhaustion, "
+         "L0 ownership, untaken/taken results and pause/exit drain");
 }
 static void sync_timing_test(void)
 {
@@ -914,6 +952,8 @@ static void sync_timing_test(void)
     const char *line=vision_report();
     const char *e2e=strstr(line,"e2e=");
     assert(e2e && strstr(line,"shown=1"));
+    assert(strstr(line,"\r\nsched page=6 comm="));
+    assert(strstr(line," pace=1:") && strstr(line," vsync="));
     unsigned milliseconds=(unsigned)strtoul(e2e+4,NULL,10);
     assert(milliseconds>=100 && milliseconds<110);
     vision_app_face.exit(); display_frame(); display_frame(); drain();
@@ -954,6 +994,9 @@ static void matrix_test(void)
 int main(void)
 {
     assert(mmap((void *)(uintptr_t)EDRV32_NPU_BASE, 4096,
+                PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
+           != MAP_FAILED);
+    assert(mmap((void *)(uintptr_t)EDRV32_VIN_BASE, 4096,
                 PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
            != MAP_FAILED);
     matrix_test();

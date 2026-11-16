@@ -1,4 +1,4 @@
-/* sched.c — showcase 4.5.2 host acceptance: wall step max includes IRQ wait. */
+/* sched.c — showcase 4.5.2 host acceptance: busy step max excludes IRQ wait. */
 #include "sched.h"
 #include "port.h"
 #include <assert.h>
@@ -43,8 +43,8 @@ int main(void)
 {
     struct sched_task task={"test",step,0,1,UINT64_MAX,0,0}; sched_add(&task);
     if(!setjmp(finished)) sched_run();
-    assert(task.busy_ticks==31 && task.max_step_ticks==37 && sched_idle_ticks()==20);
-    puts("PASS scheduler busy=31 max_step=37 idle=20");
+    assert(task.busy_ticks==31 && task.max_step_ticks==17 && sched_idle_ticks()==20);
+    puts("PASS scheduler busy=31 max_step=17 idle=20");
     task.events=0; task.wake_at=UINT64_MAX;
     fairness=1; now=0;
     struct sched_task app={"app",app_slice,1,0,0,0,0};

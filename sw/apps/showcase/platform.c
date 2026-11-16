@@ -4,6 +4,7 @@
  * Clock domain: clk_sys, media IRQs from clk_mem.
  */
 #include "platform.h"
+#include "board/vision/metrics.h"
 #include "board/serial.h"
 #include "app.h"
 #include "runtime.h"
@@ -46,6 +47,21 @@ static uint64_t millisecond_base;
 static volatile uint32_t rnd_done;
 static uint64_t rnd_elapsed;
 static uint64_t rnd_irq_tick;
+static struct smooth_irq irq_totals[7];
+static const unsigned irq_sources[] = {
+    EDRV32_PLIC_SOURCE_VIN, EDRV32_PLIC_SOURCE_NPU, EDRV32_PLIC_SOURCE_DISP,
+    EDRV32_PLIC_SOURCE_RND, EDRV32_PLIC_SOURCE_ETH, EDRV32_PLIC_SOURCE_UART0,
+    EDRV32_PLIC_SOURCE_GPIO0
+};
+void smooth_irqs(struct smooth_irq out[7])
+{
+    uint32_t state = virtual_input_lock();
+    for (unsigned i = 0; i < 7; ++i) {
+        out[i] = irq_totals[i];
+        irq_totals[i] = (struct smooth_irq){0};
+    }
+    virtual_input_unlock(state);
+}
 static rnd_callback app_rnd_callback;
 static engine_irq_callback app_disp_callback;
 static void *app_context;
@@ -205,6 +221,7 @@ static void __attribute__((interrupt("machine"), aligned(4))) interrupt_entry(vo
         clint_set_compare(board_prof_deadline(UINT64_MAX));
     } else if (cause == 0x8000000bu) {
         unsigned source = plic_claim();
+        uint64_t started = platform_ticks();
         if (source == EDRV32_PLIC_SOURCE_RND) rnd_irq_handle();
         else if (source == EDRV32_PLIC_SOURCE_DISP) engine_irq_handle(source);
         else if (source == EDRV32_PLIC_SOURCE_UART0) {
@@ -221,6 +238,11 @@ static void __attribute__((interrupt("machine"), aligned(4))) interrupt_entry(vo
                 source==EDRV32_PLIC_SOURCE_PIX || source==EDRV32_PLIC_SOURCE_GEO)
             engine_irq_handle(source);
         if (source != EDRV32_PLIC_SOURCE_NONE) plic_complete(source);
+        uint64_t elapsed = platform_ticks() - started;
+        for (unsigned i = 0; i < 7; ++i) if (source == irq_sources[i]) {
+            ++irq_totals[i].count;
+            irq_totals[i].ticks += elapsed;
+        }
     } else {
         uint32_t pc;
         __asm__ volatile ("csrr %0, mepc" : "=r"(pc));

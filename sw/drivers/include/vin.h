@@ -26,6 +26,8 @@ void vin_channel_configure(unsigned int channel, const struct vin_channel *confi
 void vin_channel_enable(unsigned int channel, unsigned int enabled);
 /* VIN 4.3: write the complete ownership bitmap; caller serializes IRQ/main updates. */
 void vin_slots_busy(unsigned int channel, uint32_t slots);
+/* VIN 4.3: caller keeps this slot busy until the replacement address is written. */
+void vin_surface_base(unsigned int channel, unsigned int slot, uint32_t address);
 /* VIN 4.3, 5.1: read the last frame's raw flags/slot/source and matching frame_id. */
 struct vin_frame vin_frame_done(unsigned int channel);
 /* VIN 4.3: extract the ring slot from CHn_DONE_INFO. */

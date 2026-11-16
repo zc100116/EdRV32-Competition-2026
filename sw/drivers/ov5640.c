@@ -330,3 +330,32 @@ int ov5640_mirror(unsigned int camera, uint32_t clock_hz, int enabled)
     i2c_init(camera, clock_hz, 100000u);
     return i2c_sccb_write(0x3cu, 0x3821u, enabled ? 0x07u : 0x01u);
 }
+
+/* T-SMOOTH-P0 A/B: line = HTS/SCLK = 1892/42 MHz = 45.0476 us.
+ * 10 ms = floor(420000/1892) = 221 lines (0x00dd, 9.9555 ms),
+ * matching the existing 50 Hz band step. Standard = 740 lines (0x02e4,
+ * 33.335 ms). Limit both 50/60 Hz AEC modes and their maximum band counts.
+ * Gain ceiling 0x00f8 (15.5x) -> 0x0340 (52x): 248*740/221 rounded up to 52x.
+ * This preserves the exposure*gain budget when the short ceiling is active.
+ */
+int ov5640_exposure_limit(unsigned int camera, uint32_t clock_hz, int short_exposure)
+{
+    const struct ov5640_register limits[] = {
+        /* Datasheet 4.8: short mode uses manual 50 Hz banding (10 ms step).
+         * Standard restores the initialization table's automatic detection. */
+        {0x3c00u, short_exposure ? 0x04u : 0x00u},
+        {0x3c01u, short_exposure ? 0xb4u : 0x34u},
+        {0x3a02u, short_exposure ? 0x00u : 0x02u},
+        {0x3a03u, short_exposure ? 0xddu : 0xe4u},
+        {0x3a14u, short_exposure ? 0x00u : 0x02u},
+        {0x3a15u, short_exposure ? 0xddu : 0xe4u},
+        {0x3a0du, short_exposure ? 0x01u : 0x04u},
+        {0x3a0eu, short_exposure ? 0x01u : 0x03u},
+        {0x3a18u, short_exposure ? 0x03u : 0x00u},
+        {0x3a19u, short_exposure ? 0x40u : 0xf8u}
+    };
+    i2c_init(camera, clock_hz, 100000u);
+    for (size_t i = 0; i < sizeof limits / sizeof limits[0]; ++i)
+        if (i2c_sccb_write(0x3cu, limits[i].address, limits[i].value)) return -1;
+    return 0;
+}

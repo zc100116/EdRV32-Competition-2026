@@ -21,7 +21,7 @@
 #include "uart.h"
 #include <string.h>
 static ui_system_t system_data;
-static char report_line[768];
+static char report_line[2048];
 static unsigned report_length;
 static uint64_t report_time,previous_busy[3],previous_idle;
 static uint32_t previous_frames,previous_display,previous_nes;

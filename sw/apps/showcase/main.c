@@ -1,6 +1,7 @@
 /* main.c — P5 3.1/3.2/8.1; exclusive application manager and service scheduling.
  * The shell consumes backend sessions, never UI page globals; clk_sys. */
 #include "platform.h"
+#include "board/vision/metrics.h"
 #include "runtime.h"
 #include "board/input.h"
 #include "apps.h"
@@ -23,6 +24,17 @@ struct sched_task application_task = {
     "当前应用", application_step, 1, 1, UINT64_MAX, 0, 0
 };
 struct sched_task gui_task = {"图形界面", showcase_gui_step, 2, 1, UINT64_MAX, 0, 0};
+void smooth_tasks(uint64_t busy[3], uint64_t maximum[3])
+{
+    static uint64_t previous[3];
+    struct sched_task *tasks[] = {&communication_task, &application_task, &gui_task};
+    for (unsigned i = 0; i < 3; ++i) {
+        busy[i] = tasks[i]->busy_ticks - previous[i];
+        previous[i] = tasks[i]->busy_ticks;
+        maximum[i] = tasks[i]->max_step_ticks;
+        tasks[i]->max_step_ticks = 0;
+    }
+}
 void app_wake_at(uint64_t t) { sched_wake_at(&application_task, t); }
 uint32_t app_events(void) { return step_events; }
 uint64_t app_busy_ticks(void) { return application_task.busy_ticks; }
