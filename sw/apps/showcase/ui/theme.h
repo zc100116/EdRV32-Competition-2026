@@ -57,6 +57,8 @@ void ui_pose_update(void);
 void ui_page_hand(lv_obj_t *p);
 void ui_hand_update(void);
 void ui_hand_toggle(void);
+void ui_page_sling(lv_obj_t *p);
+void ui_sling_action(unsigned action);
 void ui_page_grab(lv_obj_t *p);
 void ui_grab_update(void);
 void ui_grab_action(unsigned action);

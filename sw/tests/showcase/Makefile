@@ -73,3 +73,10 @@ grab:
 	    grab.c $(ROOT)/sw/apps/showcase/ui/grab.c $(ROOT)/sw/apps/showcase/ui/gesture.c \
 	    -lm -o $(BUILD)/grab
 	$(BUILD)/grab
+
+.PHONY: sling
+sling:
+	mkdir -p $(BUILD)
+	$(CC) $(FLAGS) -I$(ROOT)/sw/apps/showcase/ui \
+	    sling.c $(ROOT)/sw/apps/showcase/ui/sling.c -o $(BUILD)/sling
+	$(BUILD)/sling

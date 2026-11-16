@@ -125,3 +125,10 @@ $(ROOT)/build/showcase/helmet_model.c: $(ROOT)/tools/sw/embed_showcase_model.py 
 	    $(ROOT)/sw/apps/showcase/models/helmet $@ --name helmet \
 	    --quantization $(ROOT)/sw/apps/showcase/models/helmet/quantization.json \
 	    --classes 2 --points 0
+
+# T-GAME-SLING: original alpha sprites, generated ARGB8888 descriptors.
+PROGRAM_SOURCES += build/showcase/sling_images.c
+$(ROOT)/build/showcase/sling_images.c: $(ROOT)/tools/sw/embed_showcase_images.py \
+    $(ROOT)/tools/sw/png2c.py $(wildcard $(ROOT)/sw/apps/showcase/assets/sling/*.png)
+	python3 $(ROOT)/tools/sw/embed_showcase_images.py \
+	    $(ROOT)/sw/apps/showcase/assets/sling $@ --prefix sling

@@ -170,7 +170,8 @@ void ui_open(unsigned page)
         ui_mode=0;
         static const ui_app_t apps[]={UI_APP_NONE,UI_APP_CAMERA,UI_APP_IMAGE,
             UI_APP_PROCESS,UI_APP_GRAPHICS,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,
-            UI_APP_POSE, UI_APP_HAND, UI_APP_FACE, UI_APP_DOODLE, UI_APP_HELMET, UI_APP_GRAB};
+            UI_APP_POSE, UI_APP_HAND, UI_APP_FACE, UI_APP_DOODLE, UI_APP_HELMET,
+            UI_APP_GRAB, UI_APP_GRAB};
         if(apps[old_page]!=UI_APP_NONE || game_active ||
            ui_data_session().app==UI_APP_COREMARK) ui_data_app_open(UI_APP_NONE,0);
         game_active=false;
@@ -198,7 +199,7 @@ void ui_open(unsigned page)
     ui_label(top, "EdRV32", 140, 9, &sim_font_20, ACCENT);
     const char *names[] = {"首页", "视觉识别", "图片识别", "图像处理", "图形引擎",
         "游戏", "系统监控", "芯片信息", "调试助手", "人体姿态", "手势识别",
-        "人脸贴纸", "简笔画识别", "安全帽检测", "抓取测试"};
+        "人脸贴纸", "简笔画识别", "安全帽检测", "抓取测试", "体感弹弓"};
     ui_label(top, names[page], 260, 12, &sim_font_16, TEXT);
     status = ui_label(top, "", 420, 14, &sim_font_14, MUTED);
     ui_button(top,"‹ 返回",12,6,108,1000);
@@ -215,10 +216,11 @@ void ui_open(unsigned page)
     void (*pages[])(lv_obj_t *) = {ui_page_home, ui_page_vision, ui_page_image,
         ui_page_process, ui_page_graphics, ui_page_games, NULL,
         ui_page_chip, ui_page_debug, ui_page_pose, ui_page_hand,
-        ui_page_face, ui_page_doodle, ui_page_helmet, ui_page_grab};
+        ui_page_face, ui_page_doodle, ui_page_helmet, ui_page_grab, ui_page_sling};
     if(page==5) ui_data_games(&game_count);
     if(ui_detection_settings) ui_page_detection_settings(content);
     else pages[page](content);
+    if(page==0) ui_button(top,"体感弹弓",960,6,160,15);
     session_box=ui_box(content,340,200,600,164,PANEL);
     session_text=ui_label(session_box,"",24,22,&sim_font_20,TEXT);
     lv_obj_set_width(session_text,552);
@@ -258,7 +260,8 @@ static void activate(unsigned action)
         home_focus = action - 1;
         const unsigned required[]={0,UI_VIN|UI_NPU,UI_VIN|UI_NPU|UI_ETH,
             UI_VIN|UI_PIX|UI_GEO,UI_RND|UI_DISP,UI_RND|UI_DISP,0,0,0,UI_VIN|UI_NPU,UI_VIN|UI_NPU,
-            UI_VIN|UI_NPU|UI_RND,UI_VIN|UI_NPU|UI_PIX,UI_VIN|UI_NPU,UI_VIN|UI_NPU|UI_RND};
+            UI_VIN|UI_NPU|UI_RND,UI_VIN|UI_NPU|UI_PIX,UI_VIN|UI_NPU,
+            UI_VIN|UI_NPU|UI_RND,UI_VIN|UI_NPU|UI_RND};
         if((ui_data_hardware()&required[action])!=required[action]) return;
         ui_tab = 0;
         ui_mode = 0;
@@ -269,6 +272,8 @@ static void activate(unsigned action)
         ui_detection_settings_action(action);
     } else if((ui_page==1 || ui_page==2) && action==2) {
         ui_detection_settings=true; ui_open(ui_page);
+    } else if(ui_page == 15) {
+        ui_sling_action(action);
     } else if(ui_page == 14) {
         ui_grab_action(action);
     } else if(ui_page >= 11) {

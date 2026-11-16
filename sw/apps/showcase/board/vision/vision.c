@@ -15,6 +15,7 @@
 #include "../../platform.h"
 #include "../../ui/ui_data.h"
 #include "../../ui/grab.h"
+#include "../../ui/sling.h"
 #include "../../ui/detection.h"
 #include "port.h"
 #include "sched.h"
@@ -28,6 +29,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+extern unsigned ui_page;
+static grab_state_t sling_cursor;
 #include "../../runtime.h"
 #include "../../lvgl/showcase_lvgl.h"
 
@@ -537,7 +540,11 @@ static void request_page(unsigned page)
     v.state = PIPE_STARTING;
     if (page == PAGE_GRAB) {
         v.mirror_pending = true;
-        v.mirror_enabled = ui_grab.mirror;
+        v.mirror_enabled = ui_page == 15 ? true : ui_grab.mirror;
+        if (ui_page == 15) {
+            grab_init(&sling_cursor);
+            sling_cursor.mode = 2;
+        }
     }
     memset(&timing, 0, sizeof timing);
     timing.since = platform_ticks();
@@ -1208,7 +1215,13 @@ int vision_service(void)
                 hand.size = hand.confidence = 0;
                 ui_gesture_debounce(&hand.state, -1);
             }
-            if (v.page == PAGE_GRAB && grab_frame(&ui_grab,
+            if (v.page == PAGE_GRAB && ui_page == 15) {
+                grab_frame(&sling_cursor,hand.count ? hand.points[largest] : NULL,
+                           hand.state.cls);
+                sling_input(&ui_sling,(int)sling_cursor.x,(int)sling_cursor.y,
+                            sling_cursor.closed,sling_cursor.lost,hand.state.cls);
+            }
+            if (v.page == PAGE_GRAB && ui_page != 15 && grab_frame(&ui_grab,
                     hand.count ? hand.points[largest] : NULL, hand.state.cls)) {
                 char line[192];
                 char value[32];
