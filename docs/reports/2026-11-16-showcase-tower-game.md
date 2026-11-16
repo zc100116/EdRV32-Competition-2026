@@ -1,0 +1,41 @@
+# 积木塔游戏验收
+
+- 实现提交：`510592722`；构建标识 `f3469acf5`；首次游戏实现。
+- 起始基线 `fdca476e2`，完成时 rebase 到 `49a910c77`；上游仅增 Windows 回传数据，软件源码未变。
+- 工具：GCC 13.3.0（主机）、xPack RV32 GCC 15.2.0；C11 / `-O2 -Wall -Wextra -Werror`。
+- 条件：Linux 原生 LVGL；无 FPGA/速度等级测量，无 SoC 仿真、仿真虚拟机访问。
+- 应用任务通过 main 的一个挂钩运行 60 Hz；`app_wake_at` 预约绝对截止时间。
+- 每次最多执行一个到期步和两个补步；仍落后时丢弃剩余时间，late 计补步与丢弃步。
+- 规则、物理不在 LVGL 定时器中；GUI 定时器只生成入口图集、读取快照和更新对象。
+- 三缓冲快照：应用复制到既非已发布也非 GUI 正在读的槽，再在 sched_port_lock 内切序号。
+- GUI 在锁内登记读槽，锁外复制；快照含位置/角度/帧号、粒子、手和 HUD，休眠块无主动失效。
+- 动态块/手/粒子失效新旧边界，抓取投影、平台及高度线分别失效；沿用性能浮窗。
+- 旋转 DDR 物理 `[0x18000000,0x20000000)`，预留 128 MiB；更新 ddr_map.h 与 b2 §3.3。
+- 全部 36 种：**1,632 帧、117,165,144 B（111.74 MiB）**；只生成所选关卡种类。
+- 方块 16、板/砖 32、三角/拱/圆 64 帧；步距 360°/64，按最近角度取帧。
+- 逆变换双线性采样先按 alpha 加权颜色，再还原 straight ARGB8888；透明蓝边不污染红色测试通过。
+- 每帧生成后 clean cache；运行时 lv_draw_image 经 RND 做 alpha 复制，无软件旋转。
+- 主机全图集生成约 **0.83 s CPU 时间**（build/tower/shots.log）；不代表板端耗时。
+- 板端粗估：29,291,286 像素 × 假设 500 cycle/像素 ÷ 125 MHz ≈ **117 s**；未计 DDR 等待，未上板实测。
+- 平台 720×64 px，左上 (280,620)；块几何与 0° 美术一致，拱用四个凸四边形逼近。
+- 最多 24 刚体（含平台，即 23 块）；重力 900 px/s²，抓取力 2000，握拳停留 60 步。
+- 木/石/冰/金属/橡胶/玻璃 density=8/16/7/24/4/7（均除以 65536）；先居中几何以保证惯量可表示。
+- 相应摩擦 Q16 为 49152/52429/3277/32768/58982/26214，弹性为 3277/1966/1311/1311/52429/1311。
+- 剪刀手每次 +90°；必须回到握拳才重新触发；抓紧/其他手势保持，张开/四指松开；沿用 PAGE_GRAB 模式 C 的 200 ms 丢手保持。
+- 玻璃单接触冲量严格 >180 碎裂；真实 80/160 px 落下峰值 135/193，分别不碎/碎。
+- 其他材质冲量 >80 扬尘（每块间隔 20 步）；12 片玻璃存活 60 步，3 粒扬尘存活 24 步，共 48 粒槽。
+- 只计静止块高度，10 px/cm；基准高度差 <2 px 连续 180 步且未抓取算稳定；记录本局最高值。
+- 挑战一目标 240 px / 90 s；稳定达标按 ≤45/≤70/>70 s 给 3/2/1 星，超时未达标 0 星。
+- 挑战二搭建 60 s，平台 ±20 px、2 Hz 三角波 5 s，再等待稳定；每剩余 80 px 一星，最多三星。
+- 教学先完成平台上方释放，再完成旋转和释放；自由搭建不限时，六格随机补充，可清空。
+- 开始/结束串口：`game name=tower event=start|end mode=教学|挑战一|挑战二|自由 height=<cm> blocks=<块数> dur_ms=<ms> stars=<n>`。
+- 每秒串口：`draw_fps phys_ms steps late awake bodies cursor=x,y lost cls`；phys_ms 为应用规则/物理平均步耗时，awake/bodies 含平台。
+- 橡胶六图加入固定种子 20261116 的 ±5 色阶颗粒、柔和斜向高光，仍沿用原几何和斜面描边。
+- 协调者授权扩充 32 号粗体；新增字符：`一二塔学战挑教由自`，其他字号不变。
+- 字库复现：以字体头部所列 NotoSansSC-Bold.otf 为 build/tower/NotoSansSC-Bold.otf，令 build/tower/font_titles.c 内容为 `section(" ·一二体判取塔学定感战抓挑教数显智木检测由示积置能自视觉计设");`。
+- 运行 `python3 tools/sw/gen_fonts.py --output-dir build/tower/fonts --bold-font build/tower/NotoSansSC-Bold.otf --bold-sizes 32 -- build/tower/font_titles.c`，复制生成的 showcase_bold_32.c 到 sw/apps/showcase/fonts/。
+- 验收：`flock /tmp/edrv32-sw-build.lock make -C sw -j2 PROGRAM=showcase`、追加 `SHOWCASE_POST=cpu`、追加 `SHOWCASE_SCHED=rtos`，均 PASS、0 告警。
+- 规则回归：`flock /tmp/edrv32-sw-build.lock make -C sw/tests/showcase tower phys games`，均 PASS；含抓放/重新抓起、剪刀锁存、玻璃、稳定/计分、补架、容量、帧数/alpha 和调度快照。
+- 截图：`make -C sw/apps/showcase/sim -j2 tower-shots TOWER_OUTPUT=<下述目录>`（同一 flock），原生 LVGL 夹具复用真实规则和美术，含粗体缺字断言。
+- 四图：`/home/workspace/orca/workspaces/EdRV32-Competition-2026/SOC系统设计/outputs/tower/{start,building,glass,result}.png`。
+- 原始日志：`build/tower/{tests,shots,coop-hw-final,coop-cpu-final,rtos-hw}.log`；协作式硬件后处理 ELF：`build/tower/showcase-tower-hw.elf`，均不入库。
