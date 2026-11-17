@@ -24,7 +24,9 @@ private class ExportSnapshots : SnapshotHandler {
         object : SnapshotHandler.FrameHandler {
             override fun handle(image: BufferedImage) {
                 val name = snapshot.name!!
-                val directory = if (name.startsWith("frame-")) {
+                val directory = if (name.startsWith("site-frame-")) {
+                    File(System.getProperty("demo.build"), "site-frames")
+                } else if (name.startsWith("frame-")) {
                     File(System.getProperty("demo.build"), "farm-frames")
                 } else File(System.getProperty("demo.output")!!)
                 directory.mkdirs()
@@ -50,12 +52,42 @@ class DemoSnapshots {
                 CompositionLocalProvider(LocalInspectionMode provides true) {
                     DemoTheme {
                         SceneScreen(repository, scene, scene.items.first(),
-                            farm = if (scene.id == "farm") FarmModel.frame(0.0) else null)
+                            farm = if (scene.id == "farm") FarmModel.frame(0.0) else null,
+                            site = if (scene.id == "helmet") SiteModel.frame(0.0) else null)
                     }
                 }
             }
         }
         paparazzi.snapshot("sources") { DemoTheme { SourcesScreen(repository) } }
+    }
+
+    @Test fun siteSequence() {
+        val repository = MediaRepository(paparazzi.context)
+        val frames = JSONArray()
+        fun render(name: String, seconds: Double, demo: Boolean) {
+            val state = SiteModel.frame(seconds, demo)
+            paparazzi.snapshot(name) { SiteCanvas(repository, state, Modifier.fillMaxSize()) }
+            frames.put(JSONObject().put("file", "$name.png").put("seconds", seconds)
+                .put("static", !demo).put("head", state.workers.count {
+                    !it.wearing && it.x in 0f..2000f })
+                .put("helmet", state.workers.count { it.wearing }))
+        }
+        for (second in 0..24) render("site-frame-demo-%02d".format(second),
+            second.toDouble(), true)
+        for (second in 0..19) render("site-frame-static-%02d".format(second),
+            second + 40.0, false)
+        File(System.getProperty("demo.build"), "site-frames.json").writeText(frames.toString(2))
+        val moments = mapOf("all-helmets" to 2, "hat-off" to 8, "hat-on" to 12,
+            "visitor-entered" to 18, "visitor-left" to 24)
+        moments.forEach { (name, second) ->
+            paparazzi.snapshot("site-$name") {
+                SiteCanvas(repository, SiteModel.frame(second.toDouble(), true),
+                    Modifier.fillMaxSize())
+            }
+        }
+        paparazzi.snapshot("site-reset") {
+            SiteCanvas(repository, SiteModel.frame(0.0), Modifier.fillMaxSize())
+        }
     }
 
     @Test fun farmSequence() {

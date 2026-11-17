@@ -82,3 +82,79 @@ Use case: photorealistic-natural. Square transparent animation sprite sheet in e
 Edit this original photographic cow cutout into a clean realistic surveillance farm character. Keep exactly the same adult reddish brown Hereford dairy cow, white face, broad unmistakably bovine pink muzzle, visible udder and short horns. Preserve the broad side-on body and sharply recognizable cow silhouette, all four legs, full long tail. Change viewpoint to a fixed camera elevated 35 degrees looking down, still broadside, facing right, head turned slightly toward camera. Bright even natural daylight, detailed realistic fur, correct anatomy. The entire cow fills about 90 percent of the rectangular landscape image with a modest transparent margin around every hoof and tail. Remove all stray white halos and any background debris; output ONLY the single cow on true fully transparent background. No ground, shadows, grass, other creatures, text or objects.
 
 Remove the entire background from this exact photographic cow. Preserve the cow, fur, head, udder, tail, legs and hooves exactly as shown, without changing its pose, appearance, lighting or proportions. Output the isolated full cow with an ACTUAL ALPHA TRANSPARENT background: every pixel that is not the cow must be transparent, including all space between its legs, around the tail and under its belly. No colored background, gradient, blur, floor or shadow. Do not crop any part of the cow. This is a transparent cutout for compositing over grass.
+
+## 互动工地（R5-14/15）
+
+工地第一项为 CAM-05 施工区，第二项保留原 Mixkit 视频。六名工人复位为四戴帽、两未戴；点工人摘戴帽，长按拖动。点空地显示控制栏，含前后切换、演示、复位和暂停。演示：0–5 s 全员戴帽静止；5 s 摘帽，6.4–10 s 擦汗并拿帽；10 s 戴回；14–16 s 未戴帽访客进入，16–21 s 停留，21–23 s 离开。环境尘土、塔吊投影、搬运步态、铲土和敲打按时间确定，SiteModel.kt / SiteCanvas.kt 为运行与截图共用实现。
+
+`prepare_assets.py site` 切分原创两张 3×2 角色图集，每人两种状态按共同脚底和相同外框对齐，另备擦汗动作和摘下的帽子。`prepare_assets.py catalog` 将工地插为第一项并更新缩略图。新增素材保存在 `art/site/`，不修改原农场素材。
+
+```sh
+$P tools/demo/app/prepare_assets.py site
+flock /tmp/edrv32-sw-build.lock tools/demo/app/gradlew -p tools/demo/app --no-daemon testDebugUnitTest
+flock /tmp/edrv32-sw-build.lock $P tools/demo/app/validate.py site
+flock /tmp/edrv32-sw-build.lock tools/demo/app/gradlew -p tools/demo/app --no-daemon assembleDebug
+```
+
+Paparazzi 导出 `build/demo-app/site-frames/`，含复位连续 20 s 和剧本 0–24 s 每秒截图；标签在 `site-frames.json`，仅把进入画面的访客头部计为可见。安全帽 INT8 拍屏验证复用原模型、原退化和原阈值，`site-results.json` 保存每帧计数、框和得分，`outputs/demo-app/site-contact.png` 为联系表。验收分别要求复位四戴两未戴、警示阶段至少一未戴、解除阶段零未戴，三个比例均 ≥90%。本次 versionCode 2 / versionName 1.1。
+
+### 工地美术提示词（内置 imagegen）
+
+背景：Use case: photorealistic-natural. Asset: landscape 16:9 CCTV construction site background for compositing six workers later. Fixed security camera elevated 35 degrees looking diagonally downward, no horizon. Realistic Chinese building construction yard in soft daylight. Broad empty dusty compacted earth central working area occupies central 85 percent. Around outer perimeter: scaffold with unfinished concrete columns at upper left, stacked red bricks and rebar upper right, small cement mixer at right edge, corrugated perimeter fence along far edge. Mud tracks, scattered modest gravel, realistic fine earth texture. Keep all central ground clear for large worker cutouts. No people, no helmets on ground, no vehicles, no lettering, no logo, no timestamp or watermarks. Sharp natural photographic textures and coherent perspective.
+
+人物：Use case: photorealistic-natural. Asset: six different construction worker cutouts on actual transparent background, exact 3 columns by 2 rows of equal cells with wide empty gutters. One full body worker in each cell, all feet and head visible, no overlap. Camera elevated 30 degrees looking down, three-quarter front view, heads clearly visible, faces and top of heads large. SAME soft daylight as overcast construction site. ALL SIX WITHOUT ANY HAT OR HELMET, visible natural hair and bare heads. Each wears construction reflective safety vest and work boots. Top left: stocky middle aged Asian man orange vest gray workwear standing hands relaxed. Top center: tall dark skinned man lime vest blue trousers carrying a small brick at waist. Top right: older Asian man orange vest beige clothes holding shovel at waist. Bottom left: woman dark hair tied back lime vest navy workwear holding small hammer low at side. Bottom center: younger Asian man orange vest dark blue clothes standing arms at side. Bottom right: light skinned gray haired male visitor lime vest light shirt dark trousers hands relaxed. Detailed realistic photographic people, accurate anatomy, natural proportions, front three quarter faces easy to see. Every cell equal scale, full figure centered, ample transparent margin, same baseline. No hats, no helmets, no headwear, no ground, no shadows, no scene, no text, no watermark, no cut off limbs.
+
+人物透明边缘编辑：Edit target: these exact six construction worker photographs. Background extraction: remove ALL background pixels completely to actual alpha transparency including dark gray backdrop, halos, and all ground shadows. Keep all six workers, their size, position, clothing, tools, faces, hair, limbs and poses pixel-identical. Preserve exact 3 columns by 2 rows arrangement. Do not change or add any objects. Absolutely transparent empty space everywhere outside the six people. NO dark matte, NO gray backdrop, NO colored backdrop. Output isolated worker sprites on transparent alpha.
+
+戴帽编辑：Edit target: exact six construction worker sprite sheet. Change ONLY the heads: fit a realistic construction HARD HAT snugly onto every person's head, covering all top hair. Top row helmets yellow, white, blue respectively. Bottom row helmets white, yellow, orange respectively. Strong real industrial rigid plastic dome and wide protective brim, realistic shadows on forehead, correct elevated perspective. Keep ALL SIX people bodies, clothing, tools, faces, feet, poses, positions and scale EXACTLY as reference. Same 3 columns by 2 rows. Full bodies. Preserve fully transparent background and remove all background matte and shadows. Output actual alpha transparent cutouts. No other changes or objects, no text.
+
+擦汗编辑：Use the TOP LEFT man only as identity reference. Generate ONE isolated full-body photograph of exactly this stocky middle aged Asian construction worker with short black hair, orange reflective vest over gray work clothes and boots. Same elevated 30 degree camera, same body size/proportions, same face, same outfit, same three-quarter front stance. He is wiping sweat from his forehead with his RIGHT forearm raised across the brow while his LEFT hand holds his removed yellow hard hat low beside his hip. Bare head visible above forearm. All full body including feet, hard hat and elbows in frame. True alpha transparent background outside person. No ground, no shadow, no other people, no scene, no text.
+
+擦汗识别调整：Precise object edit of this same worker photograph. Change ONLY his raised right arm: move his elbow downward and to his right side, bend arm so his right fingertips wipe sweat at the SIDE of his right cheek/temple, BELOW his hairline, beside his ear. Entire top of head, forehead, black hair, and both eyebrows must be fully visible and entirely unobstructed. His hand must NOT touch or cover his forehead or top of head. No arm or fingers across brow or above his head. Keep exactly the same man, face, hairstyle, orange reflective vest, gray clothes, boots, same left hand holding yellow helmet low by left hip. Same elevated camera, same body proportions, pose and full body framing. True fully transparent alpha background; no scene, no ground, no shadow, no text.
+
+新工作树复用已交付 APK 素材和板端量化快照时，以下命令恢复既有输入，之后执行上述 `site`、`catalog` 更新及验证流程（不重新标定）：
+
+```sh
+$P - <<'PY'
+from pathlib import Path
+from zipfile import ZipFile
+with ZipFile('/home/workspace/orca/workspaces/EdRV32-Competition-2026/SOC系统设计/outputs/demo-app/edrv32-demo.apk') as apk:
+    for name in apk.namelist():
+        if name.startswith('assets/'):
+            path = Path('build/demo-app') / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(apk.read(name))
+PY
+flock /tmp/edrv32-sw-build.lock $P - <<'PY'
+from pathlib import Path
+import shutil
+from compile_yolo import read_model_hex
+from format import BASES
+cache = Path('build/npu/quantized_helmet')
+cache.mkdir(parents=True, exist_ok=True)
+source = Path('sw/apps/showcase/models/helmet')
+(cache / 'model.bin').write_bytes(read_model_hex(source / 'mem_model.hex', BASES['MODEL_BASE']))
+shutil.copy2(source / 'quantization.json', cache / 'quantization.json')
+PY
+```
+
+若已有完整素材则按正常 `prepare_assets.py` 流程打包；复用包时，在 `prepare_assets.py site` 后更新已恢复的 catalog：
+
+```sh
+$P - <<'PY'
+import json
+import sys
+from pathlib import Path
+from PIL import Image
+sys.path.insert(0, 'tools/demo/app')
+from prepare_assets import site_catalog
+path = Path('build/demo-app/assets/catalog.json')
+catalog = json.loads(path.read_text())
+site_catalog(catalog['scenes'])
+path.write_text(json.dumps(catalog, ensure_ascii=False, indent=2))
+Image.open('build/demo-app/assets/site/poster.jpg').resize((480, 270)).save(
+    'build/demo-app/assets/thumbnails/helmet.jpg', quality=85)
+PY
+```
+
+访客：Use case: photorealistic-natural. ONE full body isolated male construction-site visitor, fictional adult Asian man aged 45 wearing a dark red long sleeve polo shirt, tan work trousers and dark work shoes, small clipboard held at waist. NO HELMET, NO HAT, short black hair clearly visible. Average slender build, distinct moustache, dark rectangular eyeglasses. Elevated 30 degree security camera looking down, three quarter front stance facing slightly to right, both feet and full head visible. Natural overcast daylight, sharp real photography detailed skin and cloth. Generous actual alpha transparent margin around full body. No ground, no shadow, no scene, no other people, no lettering or watermark.

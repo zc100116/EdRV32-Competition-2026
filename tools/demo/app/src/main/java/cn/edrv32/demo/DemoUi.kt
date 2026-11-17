@@ -89,6 +89,10 @@ fun HomeScreen(repository: MediaRepository, enter: (String) -> Unit = {},
                         FarmCanvas(repository, FarmModel.frame(0.0, true),
                             Modifier.fillMaxWidth().aspectRatio(16f / 9),
                             onTap = { enter(scene.id) })
+                    } else if (scene.id == "helmet") {
+                        SiteCanvas(repository, SiteModel.frame(0.0),
+                            Modifier.fillMaxWidth().aspectRatio(16f / 9),
+                            onTap = { enter(scene.id) }, onHat = { enter(scene.id) })
                     } else Image(thumbnail, null,
                         Modifier.fillMaxWidth().aspectRatio(16f / 9),
                         contentScale = ContentScale.Crop)
@@ -144,8 +148,10 @@ fun MediaScreen(repository: MediaRepository, scene: DemoScene, back: () -> Unit)
     var demo by remember { mutableStateOf(false) }
     var intrusion by remember { mutableStateOf<Double?>(null) }
     val dragged = remember { mutableStateMapOf<Int, FarmPoint>() }
+    val hats = remember { mutableStateMapOf<Int, SiteHatAction>() }
     val farm = scene.id == "farm"
     val item = scene.items[index]
+    val site = item.type == "site"
     fun reveal() { controls = true; interaction++ }
     fun change(delta: Int) {
         index = (index + delta + scene.items.size) % scene.items.size
@@ -158,8 +164,8 @@ fun MediaScreen(repository: MediaRepository, scene: DemoScene, back: () -> Unit)
             index = (index + 1) % scene.items.size
         }
     }
-    LaunchedEffect(playing, farm) {
-        if (farm && playing) {
+    LaunchedEffect(playing, farm, site) {
+        if ((farm || site) && playing) {
             var previous = withFrameNanos { it }
             while (true) {
                 val now = withFrameNanos { it }
@@ -174,14 +180,19 @@ fun MediaScreen(repository: MediaRepository, scene: DemoScene, back: () -> Unit)
         toggle = { playing = !playing; reveal() }, reveal = { reveal() },
         reset = {
             seconds = 0.0; playing = true; demo = false; intrusion = null
-            dragged.clear(); reveal()
+            dragged.clear(); hats.clear(); reveal()
         },
         runDemo = {
             seconds = 0.0; playing = true; demo = true; intrusion = null
-            dragged.clear(); reveal()
+            dragged.clear(); hats.clear(); reveal()
         },
         intrude = { playing = true; demo = false; intrusion = seconds; reveal() },
-        drag = { id, point -> dragged[id] = point })
+        drag = { id, point -> dragged[id] = point },
+        site = if (site) SiteModel.frame(seconds, demo, hats, dragged) else null,
+        hat = { id ->
+            val worker = SiteModel.frame(seconds, demo, hats, dragged).workers.first { it.id == id }
+            hats[id] = SiteHatAction(seconds, !worker.wearing)
+        })
 }
 
 @Composable
@@ -190,10 +201,11 @@ fun SceneScreen(repository: MediaRepository, scene: DemoScene, item: DemoMedia,
     back: () -> Unit = {}, previous: () -> Unit = {}, next: () -> Unit = {},
     toggle: () -> Unit = {}, reveal: () -> Unit = {}, reset: () -> Unit = {},
     runDemo: () -> Unit = {}, intrude: () -> Unit = {},
-    drag: (Int, FarmPoint) -> Unit = { _, _ -> }) {
+    drag: (Int, FarmPoint) -> Unit = { _, _ -> }, site: SiteFrame? = null,
+    hat: (Int) -> Unit = {}) {
     Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
         var displacement by remember { mutableFloatStateOf(0f) }
-        val gestures = if (farm == null) Modifier.pointerInput(item.id) {
+        val gestures = if (farm == null && site == null) Modifier.pointerInput(item.id) {
             detectTapGestures { reveal() }
         }.pointerInput(item.id) {
             detectHorizontalDragGestures(onDragStart = { displacement = 0f },
@@ -206,13 +218,15 @@ fun SceneScreen(repository: MediaRepository, scene: DemoScene, item: DemoMedia,
         Box(Modifier.fillMaxWidth().aspectRatio(16f / 9).clipToBounds()) {
             if (farm != null) {
                 FarmCanvas(repository, farm, Modifier.fillMaxSize(), reveal, drag)
+            } else if (site != null) {
+                SiteCanvas(repository, site, Modifier.fillMaxSize(), reveal, hat, drag)
             } else if (item.type == "video/mp4" && !LocalInspectionMode.current) {
                 VideoSurface(repository, item, playing, Modifier.fillMaxSize())
             } else {
                 val image = remember(item.path) { repository.image(item.poster) }
                 Image(image, item.name, Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
             }
-            if (farm == null) Box(Modifier.matchParentSize().then(gestures))
+            if (farm == null && site == null) Box(Modifier.matchParentSize().then(gestures))
             AnimatedVisibility(controls, enter = fadeIn(), exit = fadeOut(),
                 modifier = Modifier.align(Alignment.BottomCenter)) {
                 Column(Modifier.fillMaxWidth().background(Brush.verticalGradient(
@@ -225,8 +239,9 @@ fun SceneScreen(repository: MediaRepository, scene: DemoScene, item: DemoMedia,
                         if (farm == null) {
                             OutlinedButton(previous) { Text("上一个") }
                             OutlinedButton(next) { Text("下一个") }
-                        } else {
-                            OutlinedButton(intrude) { Text("闯入") }
+                        }
+                        if (farm != null || site != null) {
+                            if (farm != null) OutlinedButton(intrude) { Text("闯入") }
                             OutlinedButton(runDemo) { Text("演示") }
                             OutlinedButton(reset) { Text("复位") }
                         }

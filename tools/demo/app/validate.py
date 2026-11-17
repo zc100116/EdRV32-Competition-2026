@@ -247,6 +247,36 @@ def farm():
     print('PASS farm', flush=True)
 
 
+def site():
+    model = Model('helmet')
+    rows = json.loads((BUILD / 'site-frames.json').read_text())
+    results, samples = [], []
+    good = Counter()
+    total = Counter()
+    for i, row in enumerate(rows):
+        frame = cv2.imread(str(BUILD / 'site-frames' / row['file']))
+        boxes, scores, ids, _, annotated = model.run(frame, row['file'][:-4])
+        counts = Counter(model.names[int(cls)] for cls in ids)
+        group = 'static' if row['static'] else 'warning' if row['head'] else 'clear'
+        passed = (counts['helmet'] == 4 and counts['head'] == 2) if row['static'] else (
+            counts['head'] >= 1 if row['head'] else counts['head'] == 0)
+        good[group] += passed
+        total[group] += 1
+        results.append(row | dict(counts=dict(counts), passed=passed, boxes=boxes.tolist(),
+                                  scores=scores.tolist(), classes=ids.tolist()))
+        if i < 25 or i % 4 == 0:
+            samples.append((row['file'][:-4] + ' ' + str(dict(counts)), annotated))
+        print('site', row['file'], dict(counts), passed, flush=True)
+    summary = {group: [good[group], total[group]] for group in ('static', 'warning', 'clear')}
+    (BUILD / 'site-results.json').write_text(json.dumps(dict(summary=summary, frames=results),
+                                                       indent=2))
+    kit.contact_sheet('site', samples)
+    print('site summary', summary, flush=True)
+    if any(good[group] / total[group] < .9 for group in summary):
+        raise SystemExit('FAIL: site acceptance')
+    print('PASS site', flush=True)
+
+
 def main():
     torch.set_num_threads(1)
     (BUILD / 'frames').mkdir(parents=True, exist_ok=True)
@@ -259,6 +289,8 @@ def main():
             user_videos()
         elif stage == 'farm':
             farm()
+        elif stage == 'site':
+            site()
         else:
             raise ValueError(stage)
 

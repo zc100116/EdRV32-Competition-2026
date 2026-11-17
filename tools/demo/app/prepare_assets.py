@@ -55,6 +55,61 @@ def art():
 
 
 
+def site():
+    output = ASSETS / 'site'
+    output.mkdir(parents=True, exist_ok=True)
+    source = ROOT / 'art/site'
+    shutil.copy2(source / 'background.jpg', output / 'background.jpg')
+    sheets = [Image.open(source / (name + '-sheet.webp')) for name in ('head', 'helmet')]
+    visitor = Image.open(source / 'visitor.webp')
+    visitor = visitor.crop(visitor.getchannel('A').point(lambda a: 255 if a >= 64 else 0).getbbox())
+    visitor.thumbnail((318, 490))
+    canvas = Image.new('RGBA', (318, 490))
+    canvas.paste(visitor, ((318-visitor.width)//2, 490-visitor.height))
+    canvas.save(output / 'visitor.webp', lossless=True)
+    wipe = Image.open(source / 'wipe.webp')
+    wipe = wipe.crop(wipe.getchannel('A').point(lambda a: 255 if a >= 64 else 0).getbbox())
+    wipe.thumbnail((318, 490))
+    canvas = Image.new('RGBA', (318, 490))
+    canvas.paste(wipe, ((318-wipe.width)//2, 490-wipe.height))
+    canvas.save(output / 'wipe.webp', lossless=True)
+    for i in range(6):
+        x, y = i % 3, i // 3
+        frames = [im.crop((x*512, y*512, (x+1)*512, (y+1)*512)) for im in sheets]
+        bounds = [f.getchannel('A').point(lambda a: 255 if a >= 64 else 0).getbbox()
+                  for f in frames]
+        left = min(b[0] for b in bounds)
+        top = min(b[1] for b in bounds)
+        right = max(b[2] for b in bounds)
+        bottom = max(b[3] for b in bounds)
+        # Both states share one foot baseline, body scale and head position.
+        height = bottom - top
+        width = round(height * .65)
+        for name, frame in zip(('head', 'helmet'), frames):
+            sprite = Image.new('RGBA', (width, height))
+            cutout = frame.crop((left, top, right, bottom))
+            sprite.paste(cutout, ((width-cutout.width)//2, 0))
+            sprite.save(output / f'{i}-{name}.webp', lossless=True)
+        cap = frames[1].crop((180, 0, 300, 58))
+        cap.save(output / f'{i}-cap.webp', lossless=True)
+    poster = Image.open(output / 'background.jpg').convert('RGBA')
+    positions = [(360, 385), (940, 360), (1530, 365), (520, 865), (1100, 865), (1680, 865)]
+    for i, (x, y) in enumerate(positions):
+        sprite = Image.open(output / f'{i}-{"helmet" if i < 4 else "head"}.webp')
+        sprite = sprite.resize((318, 490), Image.Resampling.LANCZOS)
+        poster.alpha_composite(sprite, (x-159, y-245))
+    poster.convert('RGB').save(output / 'poster.jpg', quality=90)
+
+
+def site_catalog(scenes):
+    scene = next(s for s in scenes if s['id'] == 'helmet')
+    scene['items'] = [dict(id='site', name='CAM-05 施工区', path='site/background.jpg',
+        type='site', poster='site/poster.jpg', author='本项目 · imagegen 原创',
+        source='原创工地背景及工人角色；提示词见 README.md',
+        license='本项目原创素材，可随演示使用与修改', license_url='无第三方素材许可')
+    ] + [item for item in scene['items'] if item['id'] != 'site']
+
+
 def video():
     output = ASSETS / 'videos'
     downloads = BUILD / 'user-sources'
@@ -119,6 +174,7 @@ def catalog():
         type='farm', poster='farm/background.jpg', author='本项目 · imagegen 原创',
         source='原创监控背景及逐帧角色；提示词见 README.md',
         license='本项目原创素材，可随演示使用与修改', license_url='无第三方素材许可')]
+    site_catalog(scenes)
     for scene in scenes:
         for item in scene['items']:
             if item['type'] == 'video/mp4':
@@ -128,7 +184,7 @@ def catalog():
                 if not ok:
                     raise RuntimeError('Cannot decode '+item['path'])
                 cv2.imwrite(str(ASSETS / item['poster']), frame)
-            elif item['type'] != 'farm':
+            elif item['type'] not in ('farm', 'site'):
                 shutil.copy2(ASSETS / item['path'], ASSETS / item['poster'])
         poster = ASSETS / scene['items'][0]['poster']
         ImageOps.fit(Image.open(poster).convert('RGB'), (480, 270)).save(
@@ -145,5 +201,5 @@ def catalog():
 
 
 if __name__ == '__main__':
-    for stage in (sys.argv[1:] or ['art', 'video', 'catalog']):
-        {'art': art, 'video': video, 'catalog': catalog}[stage]()
+    for stage in (sys.argv[1:] or ['art', 'site', 'video', 'catalog']):
+        {'art': art, 'site': site, 'video': video, 'catalog': catalog}[stage]()

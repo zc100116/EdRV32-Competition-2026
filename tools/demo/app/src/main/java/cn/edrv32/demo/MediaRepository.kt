@@ -17,6 +17,7 @@ data class DemoScene(
     val items: List<DemoMedia>,
 )
 class MediaRepository(val context: Context) {
+    val siteArt by lazy { SiteArt(this) }
     val scenes: List<DemoScene>
     init {
         val root = JSONObject(context.assets.open("catalog.json").bufferedReader().readText())
