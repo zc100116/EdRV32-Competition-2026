@@ -35,3 +35,10 @@
 画板段的 `hands=0 / 1 / 2` 分别有 134 / 68 / 6 条。统计覆盖整个画板页面停留时间，含手离开画面的时段。
 
 [现场反馈原话](artifacts/notes.md)
+
+## 用户补充的演示素材
+
+- [车流1.mp4](artifacts/media/车流1.mp4)
+- [车流2.mp4](artifacts/media/车流2.mp4)
+- [跳舞1.mp4](artifacts/media/跳舞1.mp4)
+- [跳舞2.mp4](artifacts/media/跳舞2.mp4)
