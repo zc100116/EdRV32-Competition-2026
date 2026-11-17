@@ -1,9 +1,9 @@
-/* page_home.c — R4 design §4/§8.1 D6; two scenes and 21 classified applications.
+/* page_home.c — R4 design §4/§8.1 D6; two scenes and 20 classified applications.
  * GUI clock; focus follows the same card order across all four tab pages.
  */
 #include "widgets.h"
 #define ICON(name) LV_IMAGE_DECLARE(home_##name)
-ICON(detection); ICON(helmet); ICON(pose); ICON(gesture); ICON(stickers); ICON(doodle);
+ICON(detection); ICON(helmet); ICON(pose); ICON(gesture); ICON(stickers);
 ICON(image); ICON(tower); ICON(sling); ICON(rps); ICON(mole); ICON(slice); ICON(catch);
 ICON(process); ICON(graphics); ICON(nes); ICON(monitor); ICON(chip); ICON(debug); ICON(settings);
 ICON(scene_vision); ICON(scene_tower);
@@ -22,7 +22,6 @@ static const application_t applications[] = {
     {"人体姿态","骨骼关键点与动作",&home_pose,9,CAMERA},
     {"手势识别","让双手成为控制器",&home_gesture,10,CAMERA},
     {"人脸贴纸","跟随表情的趣味装扮",&home_stickers,11,MOTION},
-    {"简笔画识别","随手一画，识别灵感",&home_doodle,12,CAMERA | UI_PIX},
     {"图片识别","上传图片，探索结果",&home_image,2,CAMERA | UI_ETH},
     {"方块工坊","手势搭房子、挖方块",&home_tower,17,MOTION},
     {"物理积木","点赞召唤，转动与搭建",&home_tower,18,MOTION},
@@ -39,8 +38,8 @@ static const application_t applications[] = {
     {"调试助手","串口与网络工具",&home_debug,8,0},
     {"设置","显示与抓取判定",&home_settings,16,0}
 };
-static const unsigned starts[] = {0,7,14,17,21};
-static lv_obj_t *tabs, *cards[23];
+static const unsigned starts[] = {0,6,13,16,20};
+static lv_obj_t *tabs, *cards[22];
 static unsigned selected_tab, selected_card;
 static void card_focused(lv_event_t *event)
 {
@@ -73,7 +72,7 @@ bool ui_home_key(uint32_t key)
 {
     if (key != LV_KEY_NEXT && key != LV_KEY_PREV) return false;
     int direction = key == LV_KEY_NEXT ? 1 : -1;
-    selected_card = (selected_card+23+direction)%23;
+    selected_card = (selected_card+22+direction)%22;
     lv_group_focus_obj(cards[selected_card]);
     lv_obj_add_state(cards[selected_card],LV_STATE_FOCUS_KEY);
     return true;
@@ -116,7 +115,7 @@ void ui_page_home(lv_obj_t *parent)
                                      app->hardware,app->action);
         }
     }
-    for (unsigned i = 0; i < 23; ++i)
+    for (unsigned i = 0; i < 22; ++i)
         lv_obj_add_event_cb(cards[i],card_focused,LV_EVENT_FOCUSED,(void *)(uintptr_t)i);
     lv_tabview_set_active(tabs,selected_tab,LV_ANIM_OFF);
     lv_obj_add_event_cb(tabs,tab_changed,LV_EVENT_VALUE_CHANGED,NULL);

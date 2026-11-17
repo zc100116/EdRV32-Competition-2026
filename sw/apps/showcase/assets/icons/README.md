@@ -18,7 +18,6 @@ For every icon below, substitute its Subject into this shared prompt:
 - `pose.png`: a stylized articulated human figure stretching inside blue brackets.
 - `gesture.png`: an open teal hand with small motion sparkles.
 - `stickers.png`: a smiling peach face wearing playful cyan cat ears.
-- `doodle.png`: a blue pencil drawing an amber star.
 - `image.png`: a framed landscape photograph with a small teal magnifying glass.
 - `tower.png`: three balanced colorful toy building blocks with a small hand above.
 - `sling.png`: a wooden slingshot with a coral ball.

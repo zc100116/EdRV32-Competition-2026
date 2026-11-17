@@ -286,15 +286,8 @@ void sim_data_pose(unsigned count, unsigned frame)
 }
 
 static ui_demo_t demo;
-static unsigned doodle_threshold = 128;
 static const lv_image_dsc_t *demo_image;
 const ui_demo_t *ui_data_demo(void) { return &demo; }
-unsigned ui_data_doodle_threshold(void) { return doodle_threshold; }
-void ui_data_doodle_adjust(int delta)
-{
-    int value = (int)doodle_threshold + delta;
-    doodle_threshold = (unsigned)LV_CLAMP(0, value, 255);
-}
 void sim_data_demo(const ui_demo_t *data, const ui_hand_t *gesture, const lv_image_dsc_t *image)
 {
     demo = *data; hand = *gesture; demo_image = image;

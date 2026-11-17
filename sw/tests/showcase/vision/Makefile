@@ -24,7 +24,7 @@ RUNTIME_TEST ?= runtime_test
 network:
 	$(MAKE) runtime RUNTIME_TEST=network_test
 runtime: $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c \
-    $(addprefix $(ROOT)/build/showcase/,$(addsuffix _model.c,gesture face doodle helmet))
+    $(addprefix $(ROOT)/build/showcase/,$(addsuffix _model.c,gesture face helmet))
 	mkdir -p $(OUT)
 	$(CC) $(CFLAGS) -DLV_CONF_INCLUDE_SIMPLE -I$(LVGL_ROOT) \
 	    -I$(ROOT)/sw/apps/showcase/lvgl -I$(ROOT)/sw/apps/showcase -I$(ROOT)/sw/bsp/include \
@@ -33,7 +33,7 @@ runtime: $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c \
 	    $(VISION)/wire.c $(VISION)/pose.c $(ROOT)/sw/lib/yolo_tables.c $(ROOT)/sw/drivers/rnd.c \
 	    $(ROOT)/sw/apps/showcase/ui/detection.c $(ROOT)/sw/lib/geo_matrix.c \
 	    $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c \
-	    $(addprefix $(ROOT)/build/showcase/,$(addsuffix _model.c,gesture face doodle helmet)) \
+	    $(addprefix $(ROOT)/build/showcase/,$(addsuffix _model.c,gesture face helmet)) \
 	    $(ROOT)/sw/apps/showcase/ui/gesture.c $(ROOT)/sw/apps/showcase/ui/grab.c \
 	    $(addprefix $(ROOT)/sw/apps/showcase/ui/,$(addsuffix .c,sticker motion rps mole slice catch sling)) \
     $(ROOT)/sw/apps/showcase/board/session.c \
@@ -83,13 +83,6 @@ $(ROOT)/build/showcase/face_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
 	    --quantization $(ROOT)/sw/apps/showcase/models/face/quantization.json \
 	    --classes 1 --points 5
 
-$(ROOT)/build/showcase/doodle_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
-    $(wildcard $(ROOT)/sw/apps/showcase/models/doodle/*)
-	python3 $(ROOT)/tools/sw/embed_showcase_model.py \
-	    $(ROOT)/sw/apps/showcase/models/doodle $@ --name doodle \
-	    --quantization $(ROOT)/sw/apps/showcase/models/doodle/quantization.json \
-	    --classes 20 --points 0
-
 $(ROOT)/build/showcase/helmet_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
     $(wildcard $(ROOT)/sw/apps/showcase/models/helmet/*)
 	python3 $(ROOT)/tools/sw/embed_showcase_model.py \
@@ -97,7 +90,7 @@ $(ROOT)/build/showcase/helmet_model.c: $(ROOT)/tools/sw/embed_showcase_model.py 
 	    --quantization $(ROOT)/sw/apps/showcase/models/helmet/quantization.json \
 	    --classes 2 --points 0
 
-NEW_MODELS := $(addprefix $(ROOT)/build/showcase/,$(addsuffix _model.c,gesture face doodle helmet))
+NEW_MODELS := $(addprefix $(ROOT)/build/showcase/,$(addsuffix _model.c,gesture face helmet))
 .PHONY: models
 models: $(NEW_MODELS)
 	mkdir -p $(OUT)

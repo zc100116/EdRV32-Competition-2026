@@ -24,7 +24,7 @@ typedef struct { unsigned threshold; uint32_t classes[3]; } ui_detection_config_
  * Values equal the EDSC `app` and `state` fields. */
 typedef enum { UI_APP_NONE, UI_APP_CAMERA, UI_APP_IMAGE, UI_APP_PROCESS,
                UI_APP_GRAPHICS, UI_APP_GAME, UI_APP_COREMARK, UI_APP_POSE, UI_APP_HAND = 8,
-               UI_APP_FACE, UI_APP_DOODLE, UI_APP_HELMET, UI_APP_GRAB } ui_app_t;
+               UI_APP_FACE, UI_APP_HELMET = 11, UI_APP_GRAB } ui_app_t;
 typedef enum { UI_STATE_IDLE, UI_STATE_STARTING, UI_STATE_RUNNING, UI_STATE_PAUSED,
                UI_STATE_STOPPING, UI_STATE_FAILED } ui_state_t;
 typedef struct {
@@ -103,15 +103,12 @@ extern const char *const ui_gesture_names[14];
 extern const char *const ui_gesture_ids[14];
 extern const char *const ui_gesture_numbers[14];
 extern const char *const ui_gesture_rps[14];
-extern const char *const ui_doodle_names[20];
 typedef struct {
     unsigned count, size, helmet, head;
     ui_detection_t objects[100];
     ui_pose_point_t points[100][5];
 } ui_demo_t;
 const ui_demo_t *ui_data_demo(void);
-unsigned ui_data_doodle_threshold(void);
-void ui_data_doodle_adjust(int delta);
 /* Ask the PC for the previous (-1) or next (+1) image of its list (EDSC IMAGE_STEP). */
 void ui_data_image_step(int direction);
 ui_detection_config_t ui_data_detection_config(void);

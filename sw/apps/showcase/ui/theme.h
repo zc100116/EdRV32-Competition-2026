@@ -85,7 +85,6 @@ void ui_page_grab(lv_obj_t *p);
 void ui_grab_update(void);
 void ui_grab_action(unsigned action);
 void ui_page_face(lv_obj_t *p);
-void ui_page_doodle(lv_obj_t *p);
 void ui_page_helmet(lv_obj_t *p);
 void ui_demo_update(void);
 void ui_demo_action(unsigned action);

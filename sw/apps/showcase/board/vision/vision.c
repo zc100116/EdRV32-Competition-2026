@@ -40,7 +40,7 @@ enum { REF_PAIR = 1, REF_JOB = 2, REF_READY = 4, REF_DISPLAY = 8,
        REF_NPU = 16, REF_GEO = 32, REF_RESULT = 64, REF_TAKEN = 128,
        REF_CAPTURE = 256, REF_FRAME = 512 };
 enum { PAGE_NONE, PAGE_CAMERA, PAGE_IMAGE, PAGE_PROCESS, PAGE_POSE, PAGE_HAND,
-       PAGE_FACE, PAGE_DOODLE, PAGE_HELMET, PAGE_GRAB, PAGE_COUNT };
+       PAGE_FACE, PAGE_HELMET, PAGE_GRAB, PAGE_COUNT };
 enum { JOB_IDLE, JOB_CH2, JOB_NPU, JOB_POST, JOB_SEND, JOB_TX };
 enum pipeline_state { PIPE_OFF, PIPE_STARTING, PIPE_LIVE, PIPE_PAUSING, PIPE_FROZEN,
                       PIPE_STOPPING, PIPE_CONFIGURE };
@@ -54,9 +54,7 @@ static struct vision_session {
 } sessions[PAGE_COUNT];
 static ui_hand_t hand;
 static ui_demo_t demo;
-static unsigned doodle_threshold = 128;
 const ui_demo_t *ui_data_demo(void) { return &demo; }
-unsigned ui_data_doodle_threshold(void) { return doodle_threshold; }
 const ui_hand_t *ui_data_hand(void) { return &hand; }
 static ui_pose_t pose;
 const ui_pose_t *ui_data_pose(void) { return &pose; }
@@ -74,10 +72,6 @@ static struct {
     unsigned capture;
     bool mirror_pending;
     bool mirror_enabled;
-    unsigned memory_reading;
-    int memory_image;
-    uint32_t memory_frame;
-    uint64_t memory_tick;
     unsigned initialized;
     unsigned refs[10];
     int capture_image[4];
@@ -150,31 +144,16 @@ static const struct model {
     MODEL(pose, POSE, VISION_POSE_OUTPUT_BYTES, 1, 17),
     MODEL(gesture, GESTURE, VISION_POSE_OUTPUT_BYTES, 14, 21),
     MODEL(face, FACE, VISION_FACE_OUTPUT_BYTES, 1, 5),
-    {VISION_DOODLE_DESC_BASE, VISION_DOODLE_MODEL_BASE, VISION_OUTPUT_BYTES, 20, 0, 25,
-     &showcase_doodle_count, &showcase_doodle_desc_bytes, &showcase_doodle_weights_bytes,
-     showcase_doodle_desc, showcase_doodle_weights, showcase_doodle_heads, NULL},
     {VISION_HELMET_DESC_BASE, VISION_HELMET_MODEL_BASE, VISION_OUTPUT_BYTES, 2, 0, 25,
      &showcase_helmet_count, &showcase_helmet_desc_bytes, &showcase_helmet_weights_bytes,
      showcase_helmet_desc, showcase_helmet_weights, showcase_helmet_heads, NULL}
 #undef MODEL
 };
-static const unsigned page_models[PAGE_COUNT] = {0, 0, 0, 0, 1, 2, 3, 4, 5, 2};
+static const unsigned page_models[PAGE_COUNT] = {0, 0, 0, 0, 1, 2, 3, 4, 2};
 static bool sync_page(void) { return v.page == PAGE_FACE || v.page == PAGE_GRAB; }
 static bool live_page(void)
 {
     return v.page == PAGE_CAMERA || v.page >= PAGE_POSE;
-}
-void ui_data_doodle_adjust(int delta)
-{
-    doodle_threshold = (unsigned)((int)doodle_threshold + delta);
-    if (doodle_threshold > 255) doodle_threshold = delta < 0 ? 0 : 255;
-    char line[48];
-    snprintf(line, sizeof line, "doodle thr=%u\r\n", doodle_threshold);
-    platform_puts(line);
-    uint32_t lock = sched_port_lock();
-    if (v.state == PIPE_LIVE) v.state = PIPE_CONFIGURE;
-    sched_port_unlock(lock);
-    app_wake_at(platform_ticks());
 }
 static volatile uint32_t irq_flags[ENGINE_NPU + 1];
 static volatile uint32_t irq_errors[ENGINE_NPU + 1];
@@ -727,7 +706,6 @@ void ui_data_grab_mirror(bool enabled)
 static void enter_grab(void) { request_page(PAGE_GRAB); }
 static void enter_hand(void) { request_page(PAGE_HAND); }
 static void enter_face(void) { request_page(PAGE_FACE); }
-static void enter_doodle(void) { request_page(PAGE_DOODLE); }
 static void enter_helmet(void) { request_page(PAGE_HELMET); }
 static void enter_pose(void) { request_page(PAGE_POSE); }
 static void enter_camera(void) { request_page(PAGE_CAMERA); }
@@ -824,13 +802,6 @@ static void configure_capture(void)
         pix_mode();
         if (v.process_dirty) return;
     }
-    else if (v.page == PAGE_DOODLE) {
-        struct pix_config binary = {EDRV32_PIX_CFG_GRAY_EN_MASK | EDRV32_PIX_CFG_BIN_EN_MASK,
-            PIX_BYPASS, PIX_BYPASS, v.gamma_bank, 256, 0, doodle_threshold};
-        pix_configure(&binary);
-        engine_control(ENGINE_PIX, EDRV32_PIX_CTRL_ENABLE_MASK);
-        input.source = VIN_MEMORY;
-    }
     else if (platform_hardware() & APP_HW_PIX) {
         struct pix_config bypass = {0, PIX_BYPASS, PIX_BYPASS, v.gamma_bank, 256, 0, 128};
         pix_configure(&bypass);
@@ -903,31 +874,6 @@ static void camera_frame_data(unsigned channel, int slot, struct vin_frame frame
         }
         return;
     }
-    if (v.page == PAGE_DOODLE) {
-        if (channel == 0) {
-            queue_image(slot);
-            if (v.pair_input >= 0) return;
-            reference(v.pair_image, 0, REF_PAIR);
-            v.pair_image = slot;
-            v.image_id = frame.frame_id;
-            v.image_tick = vin_done_tick[0];
-            reference(slot, REF_PAIR, 0);
-        } else {
-            v.pair_input = slot;
-            v.input_busy |= 1u << slot;
-            vin_slots_busy(2, v.input_busy);
-            /* CH2 completion implies memory reads have completed. The source
-             * remains REF_PAIR until promoted to REF_NPU by camera_start. */
-            reference(v.pair_image, 0, REF_PAIR);
-            v.pair_image = v.memory_image;
-            v.image_id = v.memory_frame;
-            v.image_tick = v.memory_tick;
-            reference(v.memory_image, REF_PAIR, REF_GEO);
-            v.input_id = v.memory_frame;
-            v.memory_reading = 0;
-        }
-        return;
-    }
     if (channel == 0 && !sync_page()) queue_image(slot);
     if (channel == 0) {
         reference(v.pair_image, 0, REF_PAIR);
@@ -951,7 +897,7 @@ static void camera_frame(unsigned channel)
         irq_errors[ENGINE_VIN] |= 1u;
         return;
     }
-    if ((v.state != PIPE_LIVE && !(v.page == PAGE_DOODLE && channel == 2)) ||
+    if (v.state != PIPE_LIVE ||
         v.page == PAGE_IMAGE ||
         (live_page() &&
          !v.model_ready)) return;
@@ -976,18 +922,6 @@ static void camera_start(void)
         irq_errors[ENGINE_VIN] || irq_errors[ENGINE_NPU] ||
         (irq_flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_ERROR_MASK) ||
         (irq_flags[ENGINE_NPU] & EDRV32_NPU_IRQ_STAT_ERROR_MASK)) return;
-    if (v.page == PAGE_DOODLE && v.pair_input < 0 && v.pair_image >= 0 &&
-        !v.memory_reading) {
-        v.memory_image = v.pair_image;
-        v.memory_frame = v.image_id;
-        v.memory_tick = v.image_tick;
-        reference(v.memory_image, REF_GEO, REF_PAIR);
-        v.pair_image = -1;
-        v.memory_reading = 1;
-        vin_memory_start(image_address((unsigned)v.memory_image), VISION_STRIDE,
-                         VISION_WIDTH, VISION_HEIGHT);
-        return;
-    }
     if (v.pair_image >= 0 && v.pair_input >= 0 && v.image_id == v.input_id) {
         reference(v.pair_image, REF_NPU, REF_PAIR);
         start_inference((unsigned)v.pair_input, v.pair_image, v.image_id, v.image_tick);
@@ -1010,7 +944,6 @@ static void publish_result(void)
         const yolo_detection *d=&v.detections[i];
         sessions[v.page].raw[i]=(ui_detection_t){((v.page == PAGE_HAND || v.page == PAGE_GRAB) ?
              ui_gesture_names[d->class_id] :
-             v.page == PAGE_DOODLE ? ui_doodle_names[d->class_id] :
              v.page == PAGE_FACE ? "人脸" : v.page == PAGE_HELMET ?
              (d->class_id ? "未戴" : "安全帽") : ui_coco_names[d->class_id]),d->score/10,
             d->x0,d->y0,d->x1-d->x0,d->y1-d->y0,d->class_id};
@@ -1182,10 +1115,8 @@ static void timing_step(void)
         char detail[96];
         if (v.page == PAGE_FACE)
             snprintf(detail, sizeof detail, "faces=%u size=%u", demo.count, demo.size/2);
-        else if (v.page == PAGE_DOODLE)
-            snprintf(detail, sizeof detail, "objs=%u thr=%u", demo.count, doodle_threshold);
         else snprintf(detail, sizeof detail, "helmet=%u head=%u", demo.helmet, demo.head);
-        static const char *const names[] = {"face", "doodle", "helmet"};
+        static const char *const names[] = {"face", "helmet"};
         snprintf(report, sizeof report,
             "%s fps=%u shown=%u disp=%u npu=%u.%u wait=%u.%u decode=%u.%u "
             "gui=%u.%u e2e=%u.%u %s idle=%u%%\r\n", names[v.page-PAGE_FACE],
@@ -1489,8 +1420,8 @@ int vision_service(void)
 #endif
             for (unsigned i = 0; i < demo.count; ++i) {
                 const yolo_detection *d = &v.detections[i];
-                const char *name = v.page == PAGE_FACE ? "人脸" : v.page == PAGE_DOODLE ?
-                    ui_doodle_names[d->class_id] : d->class_id ? "未戴" : "安全帽";
+                const char *name = v.page == PAGE_FACE ? "人脸" :
+                    d->class_id ? "未戴" : "安全帽";
                 demo.objects[i] = (ui_detection_t){name, d->score / 10, d->x0, d->y0,
                     d->x1 - d->x0, d->y1 - d->y0, d->class_id};
                 unsigned size = (unsigned)((d->x1 - d->x0) > (d->y1 - d->y0) ?
@@ -1577,7 +1508,7 @@ int vision_service(void)
     }
     if ((v.state == PIPE_CONFIGURE || v.state == PIPE_PAUSING ||
          v.state == PIPE_STOPPING) && v.job == JOB_IDLE && !v.npu_busy &&
-        !v.done_mask && !v.memory_reading && v.geo_source < 0) {
+        !v.done_mask && v.geo_source < 0) {
         if (v.capture && !(engine_poll(ENGINE_VIN).status & EDRV32_VIN_STATUS_IDLE_MASK)) {
             sched_port_unlock(lock); return 1;
         }
@@ -1598,7 +1529,6 @@ int vision_service(void)
             engine_control(ENGINE_VIN, 0);
             if (live_page() || v.page == PAGE_IMAGE)
                 engine_control(ENGINE_NPU, 0);
-            if (v.page == PAGE_DOODLE) engine_control(ENGINE_PIX, 0);
             if (v.page == PAGE_PROCESS) {
                 engine_control(ENGINE_PIX, 0); engine_control(ENGINE_GEO, 0);
             }
@@ -1676,8 +1606,6 @@ const struct app vision_app_hand = {
     "手势识别", NULL, APP_HW_VIN | APP_HW_NPU, 0, enter_hand, step, leave};
 const struct app vision_app_face = {
     "人脸贴纸", NULL, APP_HW_VIN | APP_HW_NPU | APP_HW_RND, 0, enter_face, step, leave};
-const struct app vision_app_doodle = {
-    "简笔画识别", NULL, APP_HW_VIN | APP_HW_NPU | APP_HW_PIX, 0, enter_doodle, step, leave};
 const struct app vision_app_helmet = {
     "安全帽检测", NULL, APP_HW_VIN | APP_HW_NPU, 0, enter_helmet, step, leave};
 const struct app vision_app_pose = {

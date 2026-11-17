@@ -5,6 +5,12 @@
 #include "theme.h"
 #include "src/themes/lv_theme_private.h"
 static void widget_theme_apply(lv_theme_t *theme, lv_obj_t *object);
+static void dropdown_opened(lv_event_t *event)
+{
+    lv_obj_t *list=lv_dropdown_get_list(lv_event_get_target_obj(event));
+    lv_obj_set_parent(list,lv_layer_top());
+    lv_obj_move_to_index(list,-1);
+}
 static lv_style_t panel_style;
 static lv_style_t focus_style;
 static lv_style_t label_style;
@@ -184,7 +190,7 @@ void ui_widget_style(lv_obj_t *o)
     if (lv_obj_check_type(o,&lv_button_class) || lv_obj_check_type(o,&lv_imagebutton_class) ||
         lv_obj_check_type(o,&lv_spinbox_class) || lv_obj_check_type(o,&lv_dropdown_class) ||
         lv_obj_check_type(o,&lv_roller_class) || lv_obj_check_type(o,&lv_table_class) ||
-        lv_obj_check_type(o,&lv_msgbox_class)) {
+        lv_obj_check_type(o,&lv_msgbox_class) || lv_obj_check_type(o,&lv_dropdownlist_class)) {
         lv_obj_add_style(o,&panel_style,0);
         lv_obj_add_style(o,&hover_style,LV_STATE_HOVERED);
         lv_obj_add_style(o,&pressed_style,LV_STATE_PRESSED);
@@ -247,7 +253,8 @@ void ui_widget_style(lv_obj_t *o)
         lv_obj_set_style_radius(o,LV_RADIUS_CIRCLE,0);
         lv_obj_set_style_shadow_width(o,0,0);
     }
-    if (lv_obj_check_type(o,&lv_dropdown_class) || lv_obj_check_type(o,&lv_roller_class)) {
+    if (lv_obj_check_type(o,&lv_dropdown_class) ||
+        lv_obj_check_type(o,&lv_dropdownlist_class) || lv_obj_check_type(o,&lv_roller_class)) {
         lv_obj_set_style_bg_color(o,lv_color_hex(SELECTED),LV_PART_SELECTED);
         lv_obj_set_style_bg_opa(o,LV_OPA_COVER,LV_PART_SELECTED);
         lv_obj_set_style_text_color(o,lv_color_hex(ACCENT),LV_PART_SELECTED);
@@ -261,4 +268,6 @@ static void widget_theme_apply(lv_theme_t *theme, lv_obj_t *object)
 {
     (void)theme;
     ui_widget_style(object);
+    if(lv_obj_check_type(object,&lv_dropdown_class))
+        lv_obj_add_event_cb(object,dropdown_opened,LV_EVENT_READY,NULL);
 }

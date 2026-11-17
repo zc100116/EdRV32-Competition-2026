@@ -2,6 +2,7 @@
  * Deterministic scene construction, original assets and desktop camera fixture.
  */
 #include "game_view.h"
+#include "widgets.h"
 #include "sim_data.h"
 #include "workshop.h"
 #include "game_loop.h"
@@ -113,6 +114,50 @@ static void games(void)
         ui_open(0);
     }
 }
+static lv_obj_t *find_type(lv_obj_t *parent,const lv_obj_class_t *type)
+{
+    if(lv_obj_check_type(parent,type)) return parent;
+    for(unsigned i=0;i<lv_obj_get_child_count(parent);++i) {
+        lv_obj_t *found=find_type(lv_obj_get_child(parent,(int)i),type);
+        if(found) return found;
+    }
+    return NULL;
+}
+static void check_dropdown(lv_obj_t *dropdown)
+{
+    assert(dropdown);
+    lv_dropdown_open(dropdown);
+    lv_obj_t *list=lv_dropdown_get_list(dropdown);
+    assert(lv_obj_get_style_bg_opa(list,0)==LV_OPA_COVER);
+    assert(lv_obj_get_style_border_width(list,0)>0);
+    assert(lv_obj_get_parent(list)==lv_layer_top());
+}
+static void settings_capture(void)
+{
+    ui_open(3);
+    sim_data_session(UI_APP_PROCESS,UI_STATE_RUNNING,NULL);
+    ui_refresh();
+    ui_process_config_t config=ui_data_process_config();
+    config.enabled|=1u<<2;
+    ui_data_process_set(&config);
+    ui_process_update();
+    ui_camera_drawer_toggle();
+    lv_tick_inc(200); lv_timer_handler();
+    lv_obj_t *dropdown=find_type(lv_screen_active(),&lv_dropdown_class);
+    assert(dropdown);
+    lv_obj_t *row=lv_obj_get_parent(dropdown);
+    lv_obj_scroll_to_y(lv_obj_get_parent(row),lv_obj_get_y(row)-12,LV_ANIM_OFF);
+    check_dropdown(dropdown);
+    capture("process-s1-open");
+    lv_dropdown_close(dropdown);
+    ui_open(0); ui_home_select_tab(0);
+    capture("home-ai");
+    ui_open(1); ui_detection_settings=true; ui_open(1);
+    check_dropdown(find_type(lv_screen_active(),&lv_dropdown_class));
+    ui_open(8);
+    check_dropdown(find_type(lv_screen_active(),&lv_dropdown_class));
+    ui_open(0);
+}
 int main(int argc, char **argv)
 {
     assert(argc == 2);
@@ -137,6 +182,7 @@ int main(int argc, char **argv)
     ui_hand_t gesture = {0};
     sim_data_demo(&demo,&gesture,&sim_indoor);
     games();
+    settings_capture();
     lv_deinit();
     puts("PASS native five arcade games start/playing/result captures; workshop has separate scenes");
 }

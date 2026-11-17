@@ -328,8 +328,14 @@ lv_obj_t *ui_camera_metrics(lv_obj_t *header)
 }
 void ui_camera_metrics_update(lv_obj_t *label)
 {
-    ui_vision_t d=ui_data_vision();
     char text[120];
+    if(ui_page==3) {
+        ui_system_t system=ui_data_system();
+        lv_snprintf(text,sizeof text,"CPU %u%% · GUI %u FPS",system.cpu,system.fps);
+        ui_text(label,text);
+        return;
+    }
+    ui_vision_t d=ui_data_vision();
     lv_snprintf(text,sizeof text,"%u fps · NPU %u.%u ms · 延迟 %u.%u ms",
         d.fps,d.npu_tenths/10,d.npu_tenths%10,
         d.latency_tenths/10,d.latency_tenths%10);

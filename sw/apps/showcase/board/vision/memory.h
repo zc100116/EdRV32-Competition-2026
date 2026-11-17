@@ -13,7 +13,6 @@
  * Pose   [0x00090000,0x000a0000), [0x00500000,0x00900000).
  * Gesture[0x000a0000,0x000b0000), [0x00900000,0x00d00000).
  * Face descriptors [0x000b0000,0x000c0000), model [0x0c000000,0x0c400000).
- * Doodle descriptors [0x000c0000,0x000d0000), model [0x0c400000,0x0c800000).
  * Helmet descriptors [0x000d0000,0x000e0000), model [0x0c800000,0x0cc00000).
  * Checked against B2 software design 3.3 and board/ddr_map.h: these regions
  * are free; coordinator approved moving the proposed models out of UPLOAD
@@ -28,8 +27,6 @@
 #define VISION_GESTURE_MODEL_BASE 0x00900000u
 #define VISION_FACE_DESC_BASE 0x000b0000u
 #define VISION_FACE_MODEL_BASE 0x0c000000u
-#define VISION_DOODLE_DESC_BASE 0x000c0000u
-#define VISION_DOODLE_MODEL_BASE 0x0c400000u
 #define VISION_HELMET_DESC_BASE 0x000d0000u
 #define VISION_HELMET_MODEL_BASE 0x0c800000u
 #define VISION_FACE_OUTPUT_BYTES 806400u

@@ -167,8 +167,8 @@ int main(int argc,char **argv)
     lv_display_set_buffers(display,drawbuffer,NULL,sizeof drawbuffer,LV_DISPLAY_RENDER_MODE_FULL);
     lv_display_set_flush_cb(display,flush);
     sim_data_init(); ui_start();
-    const unsigned pages[]={1,2,3,9,10,11,12,13};
-    const char *names[]={"vision","image","process","pose","hand","face","doodle","helmet"};
+    const unsigned pages[]={1,2,3,9,10,11,13};
+    const char *names[]={"vision","image","process","pose","hand","face","helmet"};
     extern const lv_image_dsc_t sim_indoor;
     ui_demo_t demo={0}; ui_hand_t hand={0};
     demo.count=1; demo.helmet=1;
@@ -180,12 +180,12 @@ int main(int argc,char **argv)
     for(unsigned k=0;k<5;++k) demo.points[0][k]=points[k];
     hand.people[0]=demo.objects[0];
     for(unsigned k=0;k<21;++k) hand.points[0][k]=(ui_pose_point_t){380+k*3,270+k*5,1};
-    for(unsigned i=0;i<8;++i) {
+    for(unsigned i=0;i<7;++i) {
         ui_open(pages[i]);
         if(pages[i]==9) sim_data_pose(1,0);
         if(pages[i]==2) sim_data_image_status(UI_IMAGE_DONE);
         if(pages[i]>=10) {
-            demo.objects[0].category=pages[i]==11 ? "人脸" : pages[i]==12 ? "猫" : "安全帽";
+            demo.objects[0].category=pages[i]==11 ? "人脸" : "安全帽";
             demo.size=240;
             sim_data_demo(&demo,&hand,&sim_indoor);
             for(unsigned f=0;f<8;++f) { ++sticker_revision; lv_tick_inc(33); ui_refresh(); }
@@ -229,6 +229,6 @@ int main(int argc,char **argv)
         assert(!ui_camera_drawer_close());
         ui_hide_interface(); assert(ui_restore_interface());
     }
-    puts("PASS: eight compact pages, <=15% pixels, drawers, four-key traversal and settings");
+    puts("PASS: seven compact pages, <=15% pixels, drawers, four-key traversal and settings");
     return 0;
 }

@@ -218,8 +218,6 @@ void npu_configure(const struct npu_config *c)
             c->descriptors == VISION_GESTURE_DESC_BASE) ||
            (c->count == 77 && c->model == VISION_FACE_MODEL_BASE &&
             c->descriptors == VISION_FACE_DESC_BASE) ||
-           (c->count == 68 && c->model == VISION_DOODLE_MODEL_BASE &&
-            c->descriptors == VISION_DOODLE_DESC_BASE) ||
            (c->count == 68 && c->model == VISION_HELMET_MODEL_BASE &&
             c->descriptors == VISION_HELMET_DESC_BASE));
     last_npu = *c;
@@ -820,41 +818,25 @@ static void grab_test(void)
 }
 static void demos_test(void)
 {
-    const struct app *apps[] = {&vision_app_face, &vision_app_doodle, &vision_app_helmet};
-    const uint32_t bases[] = {VISION_FACE_MODEL_BASE,VISION_DOODLE_MODEL_BASE,
+    const struct app *apps[] = {&vision_app_face, &vision_app_helmet};
+    const uint32_t bases[] = {VISION_FACE_MODEL_BASE,
                               VISION_HELMET_MODEL_BASE};
-    const uint8_t *weights[] = {showcase_face_weights,showcase_doodle_weights,
+    const uint8_t *weights[] = {showcase_face_weights,
                                 showcase_helmet_weights};
-    const uint32_t bytes[] = {showcase_face_weights_bytes,showcase_doodle_weights_bytes,
+    const uint32_t bytes[] = {showcase_face_weights_bytes,
                               showcase_helmet_weights_bytes};
     hardware |= APP_HW_PIX | APP_HW_GEO | APP_HW_RND;
-    for (unsigned page = 0; page < 3; ++page) {
+    for (unsigned page = 0; page < 2; ++page) {
         assert(!memcmp(physical(bases[page]),weights[page],bytes[page]));
         apps[page]->enter(); drain();
         assert(last_npu.model == bases[page]);
-        unsigned runs = npu_runs;
-        if (page == 1) {
-            assert(sources[0] == VIN_CAM0 && sources[2] == VIN_MEMORY);
-            assert(last_pix.flags == (EDRV32_PIX_CFG_GRAY_EN_MASK | EDRV32_PIX_CFG_BIN_EN_MASK));
-            assert(last_pix.threshold == 128);
-            frames[0] = (struct vin_frame){0,900};
-            event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_FRAME_MASK);
-            assert(memory_base == VISION_IMAGE_BASE && busy[0] & 1);
-            assert(npu_runs == runs);
-            /* Camera may complete another slot while memory source reads slot 0. */
-            frames[0] = (struct vin_frame){1u << EDRV32_VIN_CH_DONE_INFO_SLOT_POS,901};
-            event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_FRAME_MASK);
-            assert(busy[0] & 1);
-            frames[2] = (struct vin_frame){0,12}; /* memory IDs are independent */
-            event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
-            assert(npu_runs == runs+1 && busy[0] & 1);
-        } else camera_event(0,900+page);
-        output_class(page == 2 ? 1 : 0);
+        camera_event(0,900+page);
+        output_class(page == 1 ? 1 : 0);
         event(ENGINE_NPU,EDRV32_NPU_IRQ_STAT_DONE_MASK); drain();
         const ui_demo_t *d = ui_data_demo();
         assert(d->count == 1);
         if (page == 0) assert(d->points[0][0].x >= 0 && d->size > 0);
-        if (page == 2) assert(d->head == 1 && !d->helmet);
+        if (page == 1) assert(d->head == 1 && !d->helmet);
         ui_data_vision(); vision_gui_submitted();
         if (page == 0) display_frame();
         vision_display_irq(EDRV32_DISP_IRQ_STAT_SWITCH1_MASK);
@@ -865,17 +847,11 @@ static void demos_test(void)
         ticks += platform_clock_hz(); vision_service();
         const char *line = vision_report();
         assert(strstr(line,"shown=1 disp=2"));
-        if (page == 1) {
-            ui_data_doodle_adjust(8); drain();
-            assert(ui_data_doodle_threshold() == 136 && last_pix.threshold == 136);
-            ui_data_doodle_adjust(-8); drain();
-            assert(last_pix.threshold == 128);
-        }
         apps[page]->exit(); display_frame(); display_frame(); drain();
         assert(vision_ready(UI_STATE_IDLE) && last_npu.model == VISION_MODEL_BASE);
         display_frame(); display_frame();
     }
-    puts("PASS face/doodle/helmet models, camera-memory source ownership, threshold and shown/disp");
+    puts("PASS face/helmet models and shown/disp");
 }
 static void sync_test(void)
 {

@@ -9,6 +9,7 @@
 #include "src/draw/lv_draw_private.h"
 #include <stdio.h>
 LV_IMAGE_DECLARE(sling_star);
+LV_FONT_DECLARE(game_digits_28);
 LV_IMAGE_DECLARE(ws_cursor_hand_grab);
 LV_IMAGE_DECLARE(ws_cursor_hand_open);
 static const char *const names[] = {
@@ -62,7 +63,7 @@ static void draw_overlay(lv_event_t *e)
     dot.bg_color = lv_color_hex(cursor_closed ? 0xffc24c : 0xffffff);
     dot.border_color = dot.bg_color;
     dot.border_width = 3;
-    if (cursor_visible) {
+    if (cursor_visible && !ui_motion_view.done) {
         lv_area_t a = {cursor_x-18,cursor_y-18,cursor_x+18,cursor_y+18};
         lv_draw_rect(layer,&dot,&a);
     }
@@ -123,11 +124,10 @@ static void build_game(void)
     ui_text(title,names[ui_motion_view.state.game]);
     ui_text(setup_title,names[ui_motion_view.state.game]);
     ui_text(prompt,instructions[ui_motion_view.state.game]);
-    ui_hint("Esc / 返回：首页体感互动 · 结算后握拳 1 秒或点再来一局 · 关键点开关用于调试");
     if (ui_motion_view.state.game == MOTION_SLING) ui_sling_build(scene);
     else ui_arcade_build(scene,labels);
     frames = 0;
-    fps_at = lv_tick_get();
+    fps_at = lv_tick_get()-1000;
     shown_revision = ui_motion_view.state.revision;
     lv_obj_set_hidden(setup,!ui_motion_view.state.waiting);
     lv_obj_set_hidden(speed_segment,ui_motion_view.state.game < MOTION_MOLE);
@@ -173,6 +173,7 @@ static void hud_sync(void)
     ui_text(prompt,text);
     lv_bar_set_value(countdown,(int)left,LV_ANIM_OFF);
     bool done = ui_motion_view.done;
+    lv_obj_set_hidden(hud,done);
     lv_obj_set_hidden(result,!done);
     if (done && !result_shown) {
         snprintf(text,sizeof text,"%d",score);
@@ -214,7 +215,7 @@ static void refresh(void)
         fps_at = now;
         ui_vision_t v = ui_data_vision();
         char text[160];
-        snprintf(text,sizeof text,"识别 %u fps   延迟 %u.%u ms\nCPU 空闲 %u%%   游戏绘制 %u fps",
+        snprintf(text,sizeof text,"识别 %u fps · 延迟 %u.%u ms · CPU 空闲 %u%% · 绘制 %u fps",
                  v.fps,v.latency_tenths/10,v.latency_tenths%10,ui_data_system().idle,fps);
         ui_text(perf,text);
     }
@@ -296,9 +297,11 @@ void ui_motion_action(unsigned action)
         dirty_points();
         keypoints = !keypoints;
         points_revision = ui_motion_view.state.sample-1;
-        ui_text(lv_obj_get_child(key_button,0),keypoints ? "关键点 开" : "关键点 关");
+        lv_obj_set_state(key_button,LV_STATE_CHECKED,keypoints);
     } else motion_command(action);
 }
+static void keypoints_changed(lv_event_t *event)
+{ (void)event; ui_motion_action(0); }
 static void speed_changed(lv_event_t *event)
 {
     unsigned selected = lv_buttonmatrix_get_selected_button(lv_event_get_target_obj(event));
@@ -310,40 +313,48 @@ void ui_page_motion(lv_obj_t *p)
     motion_select((motion_game_t)ui_motion_entry);
     motion_snapshot_copy(&ui_motion_view);
     last_segments = last_fast = last_hits = last_near = 0;
-    ui_video_surface(p);
-    title = ui_badge(p,"");
-    lv_obj_set_pos(title,24,12);
-    lv_obj_set_style_bg_grad_dir(title,LV_GRAD_DIR_NONE,0);
-    lv_obj_set_style_text_font(title,&sim_font_20,0);
-    hud = ui_number(p,"0",false);
-    lv_obj_set_pos(hud,270,0);
-    countdown = lv_bar_create(p);
-    lv_obj_set_pos(countdown,450,24);
-    lv_obj_set_size(countdown,250,14);
-    key_button = ui_game_button(p,"关键点 关",730,6,150,0);
-    lv_obj_set_height(key_button,40);
-    prompt = ui_label(p,"",40,86,&sim_font_16,TEXT);
-    lv_obj_t *panel = ui_box(p,900,54,356,64,PANEL);
-    perf = ui_label(panel,"等待识别",12,8,&sim_font_16,TEXT);
+    lv_obj_t *header = ui_camera_layout(p,names[ui_motion_view.state.game]);
+    title = lv_obj_get_child(header,1);
+    hud = ui_text_label(header,"0",&game_digits_28,ACCENT);
+    lv_obj_set_width(hud,90);
+    countdown = lv_bar_create(header);
+    lv_obj_set_size(countdown,110,8);
+    prompt = ui_text_label(header,"",&sim_font_14,TEXT);
+    lv_obj_set_width(prompt,180);
+    perf = ui_text_label(header,"等待识别",&sim_font_14,MUTED);
+    lv_obj_set_flex_grow(perf,1);
+    key_button = ui_flex_switch(header,"关键点",false);
+    lv_obj_set_width(lv_obj_get_parent(key_button),140);
+    lv_obj_set_style_pad_all(lv_obj_get_parent(key_button),0,0);
+    lv_obj_add_event_cb(key_button,keypoints_changed,LV_EVENT_VALUE_CHANGED,NULL);
     frame = surface(lv_screen_active(),720);
     lv_obj_move_to_index(frame,0);
     scene = surface(frame,720);
     lv_obj_add_event_cb(frame,draw_scene,LV_EVENT_DRAW_MAIN,NULL);
-    labels = surface(p,632);
-    result = ui_box(p,360,155,560,345,PANEL);
+    labels = surface(p,720);
+    lv_obj_set_ignore_layout(labels,true);
+    result = ui_box(p,400,210,480,300,PANEL);
+    lv_obj_set_ignore_layout(result,true);
     lv_obj_center(result);
-    lv_obj_t *heading = ui_emphasis(result,"本局得分",false);
-    lv_obj_align(heading,LV_ALIGN_TOP_MID,0,18);
+    lv_obj_t *heading = ui_text_label(result,"本局得分",&showcase_bold_24,TEXT);
+    lv_obj_align(heading,LV_ALIGN_TOP_MID,0,16);
     result_text = ui_number(result,"0",false);
-    lv_obj_align(result_text,LV_ALIGN_TOP_MID,0,70);
+    lv_obj_align(result_text,LV_ALIGN_TOP_MID,0,48);
     for (unsigned i = 0; i < 3; ++i)
-        stars[i] = game_sprite(result,&sling_star,210+70*(int)i,180);
+        stars[i] = game_sprite(result,&sling_star,170+70*(int)i,146);
     record_badge = ui_badge(result,"新纪录");
-    lv_obj_align(record_badge,LV_ALIGN_TOP_MID,0,218);
-    ui_game_button(result,"再来一局",28,267,236,1);
-    ui_game_button(result,"返回",296,267,236,1000);
+    lv_obj_align(record_badge,LV_ALIGN_TOP_MID,0,184);
+    lv_obj_t *again = ui_game_button(result,"再来一局",20,230,212,1);
+    lv_obj_set_height(again,48);
+    lv_obj_set_style_bg_color(again,lv_color_hex(ACCENT),0);
+    lv_obj_set_style_text_color(lv_obj_get_child(again,0),lv_color_hex(PANEL),0);
+    lv_obj_t *back = ui_game_button(result,"返回",248,230,212,1000);
+    lv_obj_set_height(back,48);
+    lv_obj_set_style_border_color(back,lv_color_hex(ACCENT),0);
+    lv_obj_set_style_border_width(back,2,0);
     lv_obj_set_hidden(result,true);
     setup = ui_box(p,300,200,680,320,PANEL);
+    lv_obj_set_ignore_layout(setup,true);
     setup_title = ui_emphasis(setup,"",false);
     lv_obj_set_pos(setup_title,30,20);
     ui_game_instruction(setup,&ws_cursor_hand_open,"",30,70,620);
@@ -367,7 +378,7 @@ void ui_page_motion(lv_obj_t *p)
     cursor_y = 360;
     cursor_closed = false;
     frames = 0;
-    fps_at = lv_tick_get();
+    fps_at = lv_tick_get()-1000;
     shown_revision = ui_motion_view.state.revision-1;
     points_revision = ui_motion_view.state.sample;
     timer = lv_timer_create(tick,16,NULL);

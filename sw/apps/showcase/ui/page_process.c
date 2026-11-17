@@ -91,6 +91,7 @@ void ui_page_process(lv_obj_t *p)
     lv_obj_add_event_cb(view_switch,enabled_changed,LV_EVENT_VALUE_CHANGED,(void *)12);
     ui_action_button(header,"全部恢复默认",2);
     lv_obj_t *panel=ui_camera_drawer(p,header,"设置");
+    lv_obj_set_style_pad_row(panel,6,0);
     lv_obj_set_scrollable(panel,true); lv_obj_set_scroll_dir(panel,LV_DIR_VER);
     const char *names[]={"亮度 / 对比度","伽马","第一级滤波 S1","第二级滤波 S2",
         "灰度","二值化","反色","旋转","缩放","平移","水平镜像","垂直镜像"};
@@ -100,13 +101,16 @@ void ui_page_process(lv_obj_t *p)
             ui_text_label(panel,stage==0 ? "PIX · 点运算 / 滤波" : "GEO · 几何变换",
                           &sim_font_20,ACCENT);
         lv_obj_t *row=ui_panel(panel,LV_PCT(100));
+        lv_obj_set_style_pad_all(row,8,0);
+        lv_obj_set_style_pad_row(row,6,0);
         enables[stage]=ui_flex_switch(row,names[stage],false);
+        lv_obj_set_style_pad_ver(lv_obj_get_parent(enables[stage]),0,0);
         lv_obj_add_event_cb(enables[stage],enabled_changed,LV_EVENT_VALUE_CHANGED,
                             (void *)(uintptr_t)stage);
         for(unsigned i=0;i<10;++i) if(parameters[i].stage==stage) {
             if(i==3 || i==4) controls[i]=ui_select(row,"均值\n高斯\n锐化\nSobel\n腐蚀\n膨胀");
             else {
-                values[i]=ui_text_label(row,"",&sim_font_14,MUTED);
+                values[i]=ui_text_label(row,"",&sim_font_16,TEXT);
                 controls[i]=lv_slider_create(row); ui_widget_style(controls[i]);
                 lv_obj_set_width(controls[i],LV_PCT(100));
                 lv_slider_set_range(controls[i],parameters[i].low,parameters[i].high);

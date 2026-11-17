@@ -35,8 +35,8 @@ int main(int argc, char **argv)
                            LV_DISPLAY_RENDER_MODE_FULL);
     lv_display_set_flush_cb(display, flush);
     sim_data_init(); ui_start();
-    static const char *const names[] = {"gesture","face","doodle","helmet"};
-    for (unsigned model = 0; model < 4; ++model) {
+    static const char *const names[] = {"gesture","face","helmet"};
+    for (unsigned model = 0; model < 3; ++model) {
         char path[1024];
         snprintf(path, sizeof path, "%s/%s.rgb565", argv[1], names[model]);
         FILE *f = fopen(path, "rb"); assert(f);
@@ -56,12 +56,12 @@ int main(int argc, char **argv)
             read_exact(d, sizeof d, f); read_exact(mapped, sizeof mapped, f);
             unsigned cls = d[4];
             const char *label = model == 0 ? ui_gesture_names[cls] : model == 1 ? "人脸" :
-                model == 2 ? ui_doodle_names[cls] : cls ? "未戴" : "安全帽";
+                cls ? "未戴" : "安全帽";
             ui_detection_t box = {label,d[5]/10,d[0],d[1],d[2]-d[0],d[3]-d[1],cls};
             demo.objects[i] = hand.people[i] = box;
             unsigned size = (unsigned)LV_MAX(box.width,box.height);
             demo.size = LV_MAX(demo.size,size);
-            if (model == 3) { if (cls) ++demo.head; else ++demo.helmet; }
+            if (model == 2) { if (cls) ++demo.head; else ++demo.helmet; }
             unsigned nk = model == 0 ? 21 : model == 1 ? 5 : 0;
             ui_pose_point_t points[21];
             if (nk) read_exact(points, nk*sizeof points[0], f);
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
             for (unsigned i = 0; i < 3; ++i) ui_gesture_debounce(&hand.state,(int)b->class_id);
         }
         sim_data_demo(&demo,&hand,&image);
-        ui_open(10+model); lv_tick_inc(200); ui_refresh();
+        ui_open(model==2 ? 13 : 10+model); lv_tick_inc(200); ui_refresh();
         lv_obj_update_layout(lv_screen_active()); lv_obj_invalidate(lv_screen_active());
         lv_refr_now(NULL);
         snprintf(path,sizeof path,"shots/demo-%s.rgb565",names[model]);

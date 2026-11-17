@@ -26,7 +26,7 @@ def main():
     torch.set_num_threads(1)
     out = ROOT / 'build/npu/demo_pages_test'
     out.mkdir(parents=True, exist_ok=True)
-    for name, nc, nk in [('gesture',14,21),('face',1,5),('doodle',20,0),('helmet',2,0)]:
+    for name, nc, nk in [('gesture',14,21),('face',1,5),('helmet',2,0)]:
         source = ROOT / 'sw/apps/showcase/models' / name
         quant = json.loads((source / 'quantization.json').read_text())
         task = name if nk else 'detect'
@@ -66,9 +66,6 @@ def main():
         rgb = prepare_image(path)[0].permute(1,2,0).numpy()[12:372]
         rgb = cv2.resize((rgb*255).round().astype(np.uint8), (1280,720),
                          interpolation=cv2.INTER_NEAREST).astype(np.uint16)
-        if name == 'doodle':
-            gray = (rgb[:,:,0]*77 + rgb[:,:,1]*150 + rgb[:,:,2]*29 + 128) >> 8
-            rgb = np.repeat(np.where(gray >= 128, 255, 0)[:,:,None], 3, axis=2).astype(np.uint16)
         pixels = ((rgb[:,:,0] >> 3) << 11) | ((rgb[:,:,1] >> 2) << 5) | (rgb[:,:,2] >> 3)
         (out / f'{name}.rgb565').write_bytes(pixels.astype('<u2').tobytes())
         print(f'{name} image={path}', flush=True)

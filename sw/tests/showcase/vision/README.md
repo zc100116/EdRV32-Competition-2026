@@ -25,7 +25,7 @@ Host tests establish behavior and numerical equivalence, not FPGA latency.
 Artifacts remain under `build/sw/showcase/vision/` and `build/sw/tests/showcase/`.
 
 T-DEMO-PAGES: `make -C sw/tests/showcase/vision models` executes one real evaluation
-image per gesture/face/doodle/helmet model through `models_eval.integer`, then the
+image per gesture/face/helmet model through `models_eval.integer`, then the
 production C post/keypoint decoder (coordinate error <= 0.5 px). It also checks
 three-frame class debounce, interrupted candidate runs and missing hands.
 Runtime covers six embedded snapshots, new model selection and detect restoration,

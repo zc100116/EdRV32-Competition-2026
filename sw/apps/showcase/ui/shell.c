@@ -39,7 +39,7 @@ bool ui_restore_interface(void)
 {
     if(!interface_hidden) return false;
     interface_hidden=false;
-    bool compact=(ui_page>=1 && ui_page<=3) || (ui_page>=9 && ui_page<=13);
+    bool compact=(ui_page>=1 && ui_page<=3) || (ui_page>=9 && ui_page<=13) || ui_page==15;
     lv_obj_set_hidden(top,compact); lv_obj_set_hidden(bottom,compact);
     lv_obj_set_hidden(content,false);
     lv_obj_set_hidden(restore_surface,true);
@@ -164,7 +164,7 @@ void ui_refresh(void)
         case 9: ui_pose_update(); break;
         case 10: ui_hand_update(); break;
         case 14: ui_grab_update(); break;
-        case 11: case 12: case 13: ui_demo_update(); break;
+        case 11: case 13: ui_demo_update(); break;
         case 3: ui_process_update(); break;
         case 4: ui_graphics_update(); break;
         case 5: {
@@ -187,7 +187,7 @@ void ui_open(unsigned page)
         ui_mode=0;
         static const ui_app_t apps[]={UI_APP_NONE,UI_APP_CAMERA,UI_APP_IMAGE,
             UI_APP_PROCESS,UI_APP_GRAPHICS,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,
-            UI_APP_POSE, UI_APP_HAND, UI_APP_FACE, UI_APP_DOODLE, UI_APP_HELMET,
+            UI_APP_POSE, UI_APP_HAND, UI_APP_FACE, UI_APP_NONE, UI_APP_HELMET,
             UI_APP_GRAB, UI_APP_GRAB, UI_APP_NONE, UI_APP_GRAB, UI_APP_GRAB};
         if(apps[old_page]!=UI_APP_NONE || game_active ||
            ui_data_session().app==UI_APP_COREMARK) ui_data_app_open(UI_APP_NONE,0);
@@ -221,7 +221,7 @@ void ui_open(unsigned page)
     ui_text_label(top,"EdRV32",&sim_font_20,ACCENT);
     const char *names[] = {"首页", "目标检测计数", "图片识别", "图像处理", "图形引擎",
         "经典游戏", "系统监控", "芯片信息", "调试助手", "人体姿态", "手势识别",
-        "人脸贴纸", "简笔画识别", "安全帽检测", "抓取测试", "体感互动", "设置", "方块工坊", "物理积木"};
+        "人脸贴纸", "", "安全帽检测", "抓取测试", "体感互动", "设置", "方块工坊", "物理积木"};
     ui_text_label(top,names[page],&sim_font_16,TEXT);
     status = ui_text_label(top,"",&sim_font_14,MUTED);
     lv_obj_set_flex_grow(status,1);
@@ -243,10 +243,10 @@ void ui_open(unsigned page)
     void (*pages[])(lv_obj_t *) = {ui_page_home, ui_page_vision, ui_page_image,
         ui_page_process, ui_page_graphics, ui_page_games, NULL,
         ui_page_chip, ui_page_debug, ui_page_pose, ui_page_hand,
-        ui_page_face, ui_page_doodle, ui_page_helmet, ui_page_grab, ui_page_motion,
+        ui_page_face, NULL, ui_page_helmet, ui_page_grab, ui_page_motion,
         ui_page_settings, ui_page_workshop, ui_page_tower};
     if(page==5) ui_data_games(&game_count);
-    bool compact=(page>=1 && page<=3) || (page>=9 && page<=13) || page==17 || page==18;
+    bool compact=(page>=1 && page<=3) || (page>=9 && page<=13) || page==15 || page==17 || page==18;
     if(compact) {
         lv_obj_set_hidden(top,true); lv_obj_set_hidden(bottom,true);
         lv_obj_set_size(content,1280,720); lv_obj_set_pos(content,0,0);

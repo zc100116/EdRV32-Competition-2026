@@ -83,7 +83,7 @@ $(BUILD)/showcase_pose_bench: main_pose_bench.c $(COMMON) $(POSE_PAGE) $(LINUX_L
 demos: $(BUILD)/showcase_demo_shots
 	mkdir -p $(BUILD)/shots
 	cd $(BUILD) && ./showcase_demo_shots $(ROOT)/build/npu/demo_pages_test
-	$(foreach name,gesture face doodle helmet,python3 $(ROOT)/tools/sw/raw2png.py $(BUILD)/shots/demo-$(name).rgb565 $(BUILD)/shots/demo-$(name).png;)
+	$(foreach name,gesture face helmet,python3 $(ROOT)/tools/sw/raw2png.py $(BUILD)/shots/demo-$(name).rgb565 $(BUILD)/shots/demo-$(name).png;)
 
 $(BUILD)/showcase_demo_shots: main_demo_shots.c $(COMMON) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_demo_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
@@ -123,7 +123,7 @@ frame-shots: $(BUILD)/showcase_frame_shots
 $(BUILD)/showcase_frame_shots: main_frame_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_frame_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
 
-PAGES_SHOTS := vision image process graphics games chip debug pose hand face doodle helmet settings monitor vision-categories detection-settings debug-network graphics-renderers image-loading chip-running hand-debug face-debug helmet-warning session-failed
+PAGES_SHOTS := vision image process graphics games chip debug pose hand face helmet settings monitor vision-categories detection-settings debug-network graphics-renderers image-loading chip-running hand-debug face-debug helmet-warning session-failed
 PAGES_OUTPUT ?= $(ROOT)/build/sim/ui-pages
 .PHONY: pages-shots
 pages-shots: $(BUILD)/showcase_pages_shots
@@ -137,7 +137,7 @@ $(BUILD)/showcase_pages_shots: main_pages_shots.c $(COMMON) $(UI_HEADERS) $(LINU
 # T-GAMES-LOOP: all six games, three states each, using application snapshots.
 GAMES_OUTPUT ?= $(ROOT)/build/sim/games-loop
 GAMES_SHOTS := $(foreach game,sling rps mole slice catch,\
-    $(addprefix $(game)-,start playing result))
+    $(addprefix $(game)-,start playing result)) process-s1-open home-ai
 .PHONY: games-shots
 games-shots: $(BUILD)/showcase_games_shots
 	mkdir -p $(GAMES_OUTPUT)
@@ -147,7 +147,7 @@ games-shots: $(BUILD)/showcase_games_shots
 $(BUILD)/showcase_games_shots: main_games_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_games_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
 
-COMPACT_NAMES := vision image process pose hand face doodle helmet
+COMPACT_NAMES := vision image process pose hand face helmet
 COMPACT_OUTPUT ?= $(ROOT)/build/sim/ui-compact
 .PHONY: compact-shots
 compact-shots: $(BUILD)/showcase_compact_shots

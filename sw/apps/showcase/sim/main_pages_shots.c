@@ -184,9 +184,9 @@ int main(int argc, char **argv)
     lv_display_set_buffers(d,drawbuffer,NULL,sizeof drawbuffer,LV_DISPLAY_RENDER_MODE_FULL);
     lv_display_set_flush_cb(d,flush);
     sim_data_init(); ui_start();
-    const unsigned pages[]={1,2,3,4,5,7,8,9,10,11,12,13,16};
+    const unsigned pages[]={1,2,3,4,5,7,8,9,10,11,13,16};
     const char *names[]={"vision","image","process","graphics","games","chip","debug",
-                         "pose","hand","face","doodle","helmet","settings"};
+                         "pose","hand","face","helmet","settings"};
     extern const lv_image_dsc_t sim_indoor;
     ui_demo_t demo={0}; ui_hand_t hand={0};
     demo.count=1; demo.helmet=1;
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
         if(pages[i]>=10 && pages[i]<=13) sim_data_demo(&demo,&hand,&sim_indoor);
         if(pages[i]==2) sim_data_image_status(UI_IMAGE_DONE);
         if(pages[i]>=10 && pages[i]<=13) {
-            demo.objects[0].category=pages[i]==11 ? "人脸" : pages[i]==12 ? "猫" : "安全帽";
+            demo.objects[0].category=pages[i]==11 ? "人脸" : "安全帽";
             demo.size=240;
             sim_data_demo(&demo,&hand,&sim_indoor);
             for(unsigned f=0;f<8;++f) { ++sticker_revision; lv_tick_inc(33); ui_refresh(); }

@@ -14,10 +14,6 @@ const char *const ui_gesture_numbers[14] = {
 const char *const ui_gesture_rps[14] = {
     "布", "石头", "剪刀", "—", "—", "—", "—", "—", "—", "—", "—", "—", "—", "—"
 };
-const char *const ui_doodle_names[20] = {
-    "猫", "狗", "鱼", "鸟", "兔子", "蝴蝶", "太阳", "月亮", "星星", "云",
-    "闪电", "彩虹", "树", "花", "房子", "汽车", "飞机", "帆船", "苹果", "笑脸"
-};
 bool ui_gesture_debounce(ui_hand_state_t *s, int cls)
 {
     if (cls < 0) { s->candidate = -1; s->frames = 0; return false; }

@@ -1,4 +1,4 @@
-/* page_demo.c — T-DEMO-PAGES; face stickers, doodles and helmet validation.
+/* page_demo.c — T-DEMO-PAGES; face stickers and helmet validation.
  * RND-supported circles/rounded rectangles and horizontal strips; GUI domain.
  */
 #include "widgets.h"
@@ -14,7 +14,7 @@ static lv_obj_t *sticker_name, *part_select[STICKER_PARTS], *preset_buttons[4];
 static const char *part_maps[STICKER_PARTS][STICKER_SETS+2];
 static int choices[STICKER_PARTS][STICKER_SETS+1];
 static unsigned choice_count[STICKER_PARTS];
-static lv_obj_t *result_name, *helmet_count, *head_count;
+static lv_obj_t *helmet_count, *head_count;
 #define ART(name) \
     extern const lv_image_dsc_t sticker_##name##_m24, sticker_##name##_m12, \
         sticker_##name##_z0, sticker_##name##_p12, sticker_##name##_p24
@@ -101,7 +101,6 @@ static void draw(lv_event_t *event)
         uint32_t ink = ui_page == 13 ? (box->class_id ? 0xdc2626 : 0x059669) :
                        color(box->class_id);
         shape(layer, box->x, box->y, box->width, box->height, ink, true, false);
-        if (ui_page == 12) shape(layer, box->x + 6, box->y + 6, 16, 16, ink, false, true);
         if (ui_page != 11) continue;
         const ui_pose_point_t *p = shown.points[i];
         if (points_enabled) for (unsigned k = 0; k < 5; ++k)
@@ -229,15 +228,8 @@ static void page(lv_obj_t *p, const char *title)
         sticker_name=ui_text_label(picker,"",&sim_font_14,TEXT); selection_text();
         ui_action_button(picker,"关键点",1);
     }
-    if(ui_page==12) {
-        ui_action_button(picker,"阈值 -8",1); ui_action_button(picker,"阈值 +8",2);
-    }
     lv_obj_t *side=ui_camera_card(p);
     if(ui_page==11) lv_obj_set_hidden(side,true);
-    if(ui_page==12) {
-        result_name=ui_text_label(side,"",&showcase_bold_32,ACCENT);
-        lv_obj_set_width(result_name,LV_PCT(100));
-    }
     if(ui_page==13) {
         ui_live_badge(side,"已戴安全帽",TEAL); helmet_count=ui_text_label(side,"0",&sim_font_20,TEAL);
         ui_live_badge(side,"未戴安全帽",0xdc2626); head_count=ui_number(side,"0",false);
@@ -248,12 +240,10 @@ static void page(lv_obj_t *p, const char *title)
     lv_obj_set_style_text_font(warning,&sim_font_16,0);
     lv_obj_set_pos(warning,12,260);
     lv_obj_set_hidden(warning,true);
-    ui_hint(ui_page == 12 ? "白底黑线 · 摄像头 → 灰度二值化 → 内存源 → NPU" :
-            ui_page == 11 ? "五个部位独立选贴纸 · 同步镜像画面 · 调试显示关键点" :
+    ui_hint(ui_page == 11 ? "五个部位独立选贴纸 · 同步镜像画面 · 调试显示关键点" :
             "绿框 安全帽 · 红框 未戴 · 上板功能验证");
 }
 void ui_page_face(lv_obj_t *p) { page(p, "人脸贴纸"); }
-void ui_page_doodle(lv_obj_t *p) { page(p, "简笔画识别"); }
 void ui_page_helmet(lv_obj_t *p) { page(p, "安全帽检测"); }
 void ui_demo_action(unsigned action)
 {
@@ -274,7 +264,6 @@ void ui_demo_action(unsigned action)
             lv_obj_set_hidden(tags[i], !points_enabled);
         invalidate();
     }
-    else if (ui_page == 12) ui_data_doodle_adjust(action == 1 ? -8 : 8);
 }
 void ui_demo_update(void)
 {
@@ -309,7 +298,6 @@ void ui_demo_update(void)
         lv_snprintf(detail,sizeof detail,"%u",d->helmet); ui_text(helmet_count,detail);
         lv_snprintf(detail,sizeof detail,"%u",d->head); ui_text(head_count,detail);
     }
-    if(ui_page==12) ui_text(result_name,d->count ? d->objects[0].category : "等待识别");
     ui_camera_metrics_update(metrics);
     lv_obj_set_hidden(warning, ui_page != 13 || !d->head);
     ui_text(pause_label, ui_data_session().state == UI_STATE_PAUSED ? "继续画面" : "暂停画面");

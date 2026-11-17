@@ -42,11 +42,10 @@ int main(int argc, char **argv)
     static const struct model models[] = {
         {"gesture",showcase_gesture_heads,showcase_gesture_keypoints,14,21,1048320},
         {"face",showcase_face_heads,showcase_face_keypoints,1,5,806400},
-        {"doodle",showcase_doodle_heads,NULL,20,0,725760},
         {"helmet",showcase_helmet_heads,NULL,2,0,725760}
     };
     const struct model *m = NULL;
-    for (unsigned i = 0; i < 4; ++i) if (!strcmp(argv[1], models[i].name)) m = &models[i];
+    for (unsigned i = 0; i < 3; ++i) if (!strcmp(argv[1], models[i].name)) m = &models[i];
     assert(m);
     FILE *file = fopen(argv[2], "rb");
     if (!file) { perror(argv[2]); return 1; }

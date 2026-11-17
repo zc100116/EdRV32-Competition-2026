@@ -37,7 +37,6 @@ extern const struct app vision_app_pose;
 extern const struct app vision_app_hand;
 extern const struct app vision_app_grab;
 extern const struct app vision_app_face;
-extern const struct app vision_app_doodle;
 extern const struct app vision_app_helmet;
 extern const struct app vision_app_camera;
 extern const struct app vision_app_image;

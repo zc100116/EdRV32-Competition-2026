@@ -108,15 +108,6 @@ $(ROOT)/build/showcase/face_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
 	    --quantization $(ROOT)/sw/apps/showcase/models/face/quantization.json \
 	    --classes 1 --points 5
 
-# T-DEMO-PAGES: immutable doodle compiler snapshot.
-PROGRAM_SOURCES += build/showcase/doodle_model.c
-$(ROOT)/build/showcase/doodle_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
-    $(wildcard $(ROOT)/sw/apps/showcase/models/doodle/*)
-	python3 $(ROOT)/tools/sw/embed_showcase_model.py \
-	    $(ROOT)/sw/apps/showcase/models/doodle $@ --name doodle \
-	    --quantization $(ROOT)/sw/apps/showcase/models/doodle/quantization.json \
-	    --classes 20 --points 0
-
 # T-DEMO-PAGES: immutable helmet compiler snapshot.
 PROGRAM_SOURCES += build/showcase/helmet_model.c
 $(ROOT)/build/showcase/helmet_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
