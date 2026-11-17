@@ -1,43 +1,16 @@
-# 平板 AI 演示素材包
+# 演示素材与 INT8 识别基线
 
-将 `demo-kit.html` 复制到手机或平板，离线浏览器打开。首页选择七个场景；竖屏自动顺时针旋转 90°，建议横屏观看。支持全屏时场景控制栏显示“全屏”。浏览器的自动播放策略要求通过点击卡片进入视频，视频静音并在页面内循环播放。
-
-底部“返回 / 上一个 / 下一个 / 暂停或播放”控制素材；图片播放时每 5 秒切换，也可沿舞台左右滑动。来源地址仅作为文字显示，不会访问外网。只在进入场景时将当前媒体解码为 Blob URL，切换或返回会释放，首页使用单独的小缩略图。农场 iframe 的 srcdoc 直接来自未修改的 `../farm-sim/farm-sim.html`；农场控制行为保留，左下添加包级返回按钮。
-
-## 现场话术
-
-平板横放，让其占摄像头画面宽度约 65%，对焦清晰后保持固定；可从 30–50 cm 调整，以取景比例为准。素材标注在图像区域下方，取景时保留整个素材区域。
-
-| 场景 | 开发板应用 | 现场演示 |
-|---|---|---|
-| 智慧农场 | 智慧农场 | 按原农场说明对齐栏位，先盘点，再用剧本或拖动演示走失和串栏 |
-| 马路车流 | 目标检测计数 | 观察车辆经过、检测框跟随及车辆分类计数 |
-| 动物园 | 目标检测计数 | 先看单只动物，再切换混合场景对照每类数量 |
-| 舞蹈 | 人体姿态 | 观察身体关键点随舞步变化；竖幅原片保留全身并留黑边 |
-| 手势 | 手势识别 | 暂停在一张图，待板端稳定后依次切换；13 类对应板端手势名称 |
-| 工地 | 安全帽检测 | 观察示范者从未戴帽到戴上安全帽，展示两个检测类别；素材为正面职业演示 |
-| 人脸 | 人脸贴纸 | 从单人切到双人、三人合影，观察每张脸对应的贴纸 |
-
-## 素材与许可
-
-图片为内置 imagegen 新生成的虚构人物或写实动物，不使用任何数据集图像。`media/` 仅提交压缩 JPEG；原始 PNG 留在生成工具目录中，不入库。首页农场缩略图来自原农场网页截图。
-视频取自 Mixkit Stock Video Free License，逐项作者、来源、公开文件 URL、截取起点、时长及慢放倍率见 `clips.json`；同样信息内嵌到来源页。排除标注 Restricted License 的素材；脚本使用 `User-Agent: demo-media-fetch/1.0`，不伪装浏览器、不带项目或个人信息。
-视频统一 1280×720、H.264 Main、yuv420p、25 fps、静音、faststart，尾部与头部交叉淡化 0.5 秒以循环；较短原片等比慢放至 20 秒后处理，输出约 19.5 秒。原片和转码结果均在 `build/demo-kit/`，不入库。
-
-## 复现
-
-从仓库根目录执行，ffmpeg 为 `~/.local/opt/video/bin/ffmpeg`：
+Android APK 已取代 HTML 素材包；工程、使用方法及复现命令见 `../app/README.md`。
+`media/` 保留 23 张原创 imagegen 照片和旧缩略图；`media.json` 记录原素材及识别预期。
+`clips.json` 逐项记录 Mixkit Free License 视频的作者、公开来源、截取与慢放参数。
+`fetch.py` 仍将原片与转码结果放在 `build/demo-kit/`，脚本使用 `demo-media-fetch/1.0`。
+`validate.py` 保留 T-DEMO-KIT 的拍屏几何、退化与同阈值 INT8 参考执行，供 APK 验证复用。
+素材未改变时沿用 `docs/reports/2026-11-17-showcase-demo-kit.md` 的验证结果。
 
 ```sh
-~/.local/opt/edrv32-py/bin/python tools/demo/kit/fetch.py
-~/.local/opt/edrv32-py/bin/python tools/demo/kit/build.py
-PYTHONPATH=tools/npu:third_party/ultralytics OPENBLAS_NUM_THREADS=1 ~/.local/opt/edrv32-py/bin/python tools/demo/kit/validate.py
-npm install --prefix build/farm-sim playwright-core@1.65.1
-node tools/demo/kit/capture.mjs
+flock /tmp/edrv32-sw-build.lock ~/.local/opt/edrv32-py/bin/python tools/demo/kit/fetch.py
+PYTHONPATH=tools/npu:third_party/ultralytics OPENBLAS_NUM_THREADS=1 flock /tmp/edrv32-sw-build.lock ~/.local/opt/edrv32-py/bin/python tools/demo/kit/validate.py
 ```
-
-`fetch.py` 可在末尾指定 clips.json 中的片段 ID，仅重新转码该片段；`validate.py` 可在末尾指定场景 ID，仅复核该场景。一次只运行一个 ffmpeg 或一个模型验证任务。依赖与模型权重沿用 `tools/npu/README.md`，不下载演示数据集。
-验证固定使用板端的 INT8 描述符参考执行、confidence >0.25 和同类 NMS IoU >0.45；拍屏沿用农场四角、模糊、亮度和种子 17 的噪声。视频每秒取一帧，输出逐帧 JSON 和六张联系表。`capture.mjs` 拦截网络请求，检查包大小、七个场景、媒体切换与释放、暂停/播放、旋转滑动，并生成 2560×1600 横屏及 1080×1728 竖屏截图。
 
 ## 图片生成提示词
 

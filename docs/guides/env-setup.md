@@ -180,3 +180,33 @@ iverilog -V | head -1
 yosys -V                         # Yosys 0.70+219
 ~/.local/opt/edrv32-py/bin/python -c "import torch, numpy; print(torch.__version__, numpy.__version__)"   # 2.14.1+cpu 2.5.2
 ```
+
+### 8. Android 原生演示 APK（JDK 17 / SDK 37）
+
+工具链独立放在 `~/.local/opt/android/`，不使用模拟器。主机 JDK 为 Eclipse Temurin
+17.0.21+9，SDK command-line tools 19，平台 `android-37.0`、build-tools 37.0.0。
+Paparazzi 1.3.5 在 JDK 17 中渲染 Compose，工程 compileSdk 35、targetSdk 37；另装 SDK 35 供编译和 JVM 渲染使用。
+
+```sh
+mkdir -p ~/.local/opt/android build/demo-app
+curl -fL -A demo-media-fetch/1.0 https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jdk/hotspot/normal/eclipse -o build/demo-app/jdk17.tar.gz
+mkdir -p ~/.local/opt/android/jdk17
+tar -xzf build/demo-app/jdk17.tar.gz --strip-components=1 -C ~/.local/opt/android/jdk17
+curl -fL -A demo-media-fetch/1.0 https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip -o build/demo-app/cmdline-tools.zip
+mkdir -p ~/.local/opt/android/sdk/cmdline-tools
+unzip build/demo-app/cmdline-tools.zip -d ~/.local/opt/android/sdk/cmdline-tools
+mv ~/.local/opt/android/sdk/cmdline-tools/cmdline-tools ~/.local/opt/android/sdk/cmdline-tools/latest
+export JAVA_HOME=$HOME/.local/opt/android/jdk17
+export ANDROID_HOME=$HOME/.local/opt/android/sdk
+export PATH=$JAVA_HOME/bin:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/build-tools/37.0.0:$PATH
+yes | sdkmanager --sdk_root="$ANDROID_HOME" --licenses
+sdkmanager --sdk_root="$ANDROID_HOME" 'platforms;android-37.0' 'platforms;android-35' 'build-tools;37.0.0' 'platform-tools'
+cd tools/demo/app
+flock /tmp/edrv32-sw-build.lock ./gradlew --no-daemon assembleDebug
+```
+
+工程自带 Gradle 8.14.3 wrapper，首次运行会下载分发包。`gradle.properties` 固定
+`-Xmx1536m`、单 worker、Kotlin in-process；每次构建使用 `--no-daemon`。
+Gradle、模型推理、ffmpeg 以及软件构建共用 `/tmp/edrv32-sw-build.lock`，只串行运行。
+素材准备、JVM 截图和 APK 验证见 `tools/demo/app/README.md`；APK 输出至
+`build/demo-app/edrv32-demo.apk`，签名使用 Android debug key。
