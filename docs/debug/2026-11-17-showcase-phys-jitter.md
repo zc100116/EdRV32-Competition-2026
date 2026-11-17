@@ -90,3 +90,73 @@ flock /tmp/edrv32-sw-build.lock make -C sw/tests/showcase phys tower grab
 `tower` 新增初始 3 方块/3 球静止 180 步、当步拾取、钢块跟手零误差、推动睡眠邻居、抛出限速、4° 休眠角度边界、召唤全形状在平台内和钢块撞冰块能量上界测试；保留召唤保持、24 件淡出、旋转重新触发、移除支撑、玻璃高低落差和三场景稳定性检查。`grab` 同时验证导出的四种原始判定及设置页旧行为。球始终直接显示零度原图，物理角度继续积分；方块六种材质各生成 16 帧，共 96 帧，按卡 95 的 11068 ms / 1632 帧估算为 651.1 ms，尚未再次上板实测。
 
 原生 LVGL 截图在 `outputs/grablab/{initial,steel-held,mode-d}.png`。截图发现粗体标题缺“实、验”，经协调器授权保留全部原字形并补充指定字符，检查四字标题均非占位字形；字形结果由协调器先提交为 `5327b43f3`，本分支在第二次 rebase 时直接复用；没有修改共享布局。构建、验收、截图日志分别在 `build/grablab/{build-final,tests-final,shots-final}.log`。
+
+## 9. T-GRAB-FIX：卡 96 全宽平台、稳定松手与旋转尺寸
+
+### 现象与复现
+
+基线 `76290bc712`（已先 rebase 到 `origin/zc100116/b3`），上板源 `f9ad95530`。
+录像为 `origin/win/20261117-96-r5-board` 中的
+`tasks/win/20261117-96-r5-board/artifacts/video/QQ20261117-15629.mp4`。
+约 69 s 木块旋转时出现窄条，78 s 物体越过短平台边缘，84 s、90 s 张手后物体冲出顶部。
+主机使用 GCC 13.3.0、固定种子 42、60 Hz、重力 900 px/s²。
+
+```sh
+mkdir -p build/grablab
+git show origin/win/20261117-96-r5-board:tasks/win/20261117-96-r5-board/artifacts/video/QQ20261117-15629.mp4 > build/grablab/board96.mp4
+~/.local/opt/video/bin/ffmpeg -ss 82 -i build/grablab/board96.mp4 -t 10 \
+  -vf 'fps=3,scale=480:-1,tile=6x5' -frames:v 1 build/grablab/release96.png -y
+~/.local/opt/video/bin/ffmpeg -ss 68 -i build/grablab/board96.mp4 -t 2 \
+  -vf 'fps=3,scale=480:-1,tile=3x2' -frames:v 1 build/grablab/wood96.png -y
+. ~/.local/opt/edrv32/env.sh
+flock /tmp/edrv32-sw-build.lock make -C sw -j2 PROGRAM=showcase
+flock /tmp/edrv32-sw-build.lock make -C sw/tests/showcase phys tower
+flock /tmp/edrv32-sw-build.lock make -C sw/apps/showcase/sim tower-shots \
+  TOWER_OUTPUT="$PWD/outputs/grablab"
+```
+
+### 三个问题的根因与修复
+
+1. **平台和画面边缘**：原平台只覆盖 x=280–1000，没有侧墙，`tower_impacts()`
+   还在 AABB 全部落到 y>720 时删除物体。平台改为 x=0–1280；`phys_confine_x()`
+   以旋转后 AABB 解析求解两侧不可见墙的位移，消除向墙外的速度，包含运动学抓取体。
+   删除越过底部的清理逻辑；24 块时最老块淡出替换以及玻璃冲击破碎保持原行为。
+2. **松手飞走**：录像中张手时指尖光标上移，放开后方块沿该方向继续飞行；代码中
+   `tower.c:grab()` 在释放当步先调用 `phys_grab_move()`，把该帧光标跳变换成最高
+   1200 px/s 的速度，`phys_grab_release()` 又保留线速度。这条路径可以由主机确定性
+   重现，无需假设碰撞数值异常。另一个已确认的过渡问题是 A/B/D 的张手释放阈值
+   大于闭合阈值，指尖在进入张手过渡后仍会改变位置：实验页现在从不再满足闭合条件
+   的第一帧起保留最后稳定坐标，直到再次闭合或释放；剪刀手仍能跟手旋转。
+   释放当步不移动目标，恢复动态体时线速度、角速度均清零，后续只自然受重力落下。
+   录像未记录原始坐标和速度，不能给出板上每一帧的数值；代码回归和真实页面的
+   开合阈值过渡测试分别确认这两处路径。
+3. **木块忽大忽小**：`sprite_rot_prepare()` 的正弦表有 64 项，余弦却使用
+   `sine[(f+16)%24]`。第 8 帧起查到错误象限，例如 f=8 时正弦约 0.707、余弦为 0，
+   矩阵不再是单位旋转，包围盒和逆采样一起缩放变形。改为 `%64`，六种方块共用
+   正确的正交旋转。材质对应、原图尺寸、渲染缩放和帧索引没有发现额外缺陷。
+   球仍直接使用原图，不增加旋转帧或素材。
+
+### 防回归和结果
+
+`phys.c:grab_test()` 直接检查带非零线速度、角速度的抓取体释放后两个速度都为零。
+`tower.c:grab_test()` 令释放帧光标突跳 (+200,−200) px，关闭重力时位置和速度不变，
+恢复重力后仅竖直向下运动；`side_walls()` 检查方块/球以 ±1200 px/s 撞墙、旋转、
+抓取到画面外再旋转和释放，完整 AABB 始终在 x=0–1280 内，并检查不再越界删除。
+原有 24 块淡出、碰撞能量和堆叠稳定性回归保留。
+
+`tower_geo.c:square_size()` 对真实六种材质各 16 帧（96 帧）独立使用
+`80*(|cos θ|+|sin θ|)` 与 6400 px² 作参考，不使用被测描述符矩阵求期望值。
+面积同时检查原始材质透明度归一化的 alpha 积分及 50% 覆盖轮廓（冰、玻璃也以
+各自原始 alpha 的一半作轮廓阈值），两者偏差均须 ≤3%；所有非零 alpha 像素的
+外接框宽高偏差须 ≤2 px。还检查帧索引映射，保留 RGB/alpha 插值误差检查。
+`sim/main_tower_shots.c:opening_transition()` 使用真实页面的 A 模式，在闭合、
+张手过渡、完全释放三阶段同时上移光标，检查物体在过渡期保持稳定位置，释放后自然下落。
+
+构建、回归与截图日志分别位于 `build/grablab/{build-final,tests-final,shots-final}.log`，
+96 帧实测 50% 覆盖轮廓面积最大偏差 0.313%，非零 alpha 外接框最大偏差 1.93 px。
+全宽平台原生 LVGL 截图为 `outputs/grablab/full-platform.png`。初次主机验收因当前工作树
+未初始化 LVGL/CoreMark 子模块而中断，补齐仓库锁定的依赖后重跑；未修改子模块版本。
+
+最终结果：指定固件构建成功，编译告警 0；`phys tower` 全部通过；原生 LVGL 张手过渡、
+页面重入与截图检查通过，旋转图集 6 批、4269144 字节。截图已目视确认平台横跨全宽。
+未进行本次修复的再次上板验证。

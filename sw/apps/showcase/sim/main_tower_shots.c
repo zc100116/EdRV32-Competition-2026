@@ -67,6 +67,40 @@ static lv_obj_t *find_modes(lv_obj_t *parent)
     }
     return NULL;
 }
+/* Exercise the real page rule across its close/release hysteresis interval. */
+static void opening_transition(void)
+{
+    ui_demo_t demo = {0};
+    ui_hand_t hand = {.count=1};
+    for (unsigned i = 0; i < 21; ++i) hand.points[0][i].visibility = 1;
+    static const unsigned palm[] = {5,9,13,17};
+    for (unsigned i = 0; i < 4; ++i) hand.points[0][palm[i]].y = 100;
+    hand.points[0][8].x = 10;
+    ui_grab.x = 340; ui_grab.y = 580; ui_grab.cls = 1;
+    sim_data_demo(&demo,&hand,&sim_indoor);
+    publish();
+    tower_snapshot snap;
+    assert(game_loop_read(&snap) && snap.held >= 0);
+    int id = snap.held;
+    ui_grab.x = 400; ui_grab.y = 300;
+    publish();
+    assert(game_loop_read(&snap));
+    int x = snap.blocks[id].x, y = snap.blocks[id].y;
+    hand.points[0][8].x = 30; /* Between close=.25 and release=.40. */
+    ui_grab.x = 450; ui_grab.y = 150;
+    sim_data_demo(&demo,&hand,&sim_indoor);
+    publish();
+    assert(game_loop_read(&snap) && snap.held == id);
+    assert(snap.blocks[id].x == x && snap.blocks[id].y == y);
+    hand.points[0][8].x = 60;
+    ui_grab.x = 500; ui_grab.y = 50;
+    sim_data_demo(&demo,&hand,&sim_indoor);
+    publish();
+    assert(game_loop_read(&snap) && snap.held == -1);
+    assert(snap.blocks[id].x == x && snap.blocks[id].y >= y &&
+           snap.blocks[id].y <= y+1);
+    puts("PASS page opening transition holds last stable position before natural release");
+}
 int main(int argc, char **argv)
 {
     assert(argc == 2);
@@ -109,12 +143,14 @@ int main(int argc, char **argv)
     publish();
     tower_snapshot keyshot;
     assert(game_loop_read(&keyshot) && keyshot.bodies == 7);
+    opening_transition();
     game_loop_stop();
     tower_init(&fixture,42);
     game_loop_config config = {freeze,snapshot,report,&fixture,
         {&buffers[0],&buffers[1],&buffers[2]},sizeof(tower_snapshot)};
     game_loop_start(&config);
     publish(); capture("initial");
+    capture("full-platform");
     int id = tower_spawn(&fixture,6,640,300);
     tower_step(&fixture,(tower_input){640,300,1,true,0});
     tower_step(&fixture,(tower_input){700,280,1,true,0});

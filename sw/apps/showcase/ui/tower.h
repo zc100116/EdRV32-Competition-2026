@@ -6,7 +6,7 @@
 #define SHOWCASE_TOWER_H
 #include "phys.h"
 enum { TOWER_HZ = 60, TOWER_KINDS = 12, TOWER_PARTICLES = 48,
-    TOWER_PLATFORM_X = 280, TOWER_PLATFORM_Y = 620, TOWER_PLATFORM_W = 720,
+    TOWER_PLATFORM_X = 0, TOWER_PLATFORM_Y = 620, TOWER_PLATFORM_W = 1280,
     TOWER_PLATFORM_H = 64, TOWER_SUMMON = 18, TOWER_FADE = 18,
     TOWER_GLASS_IMPULSE = 180 * PHYS_ONE, TOWER_DUST_IMPULSE = 80 * PHYS_ONE };
 typedef struct { int x, y, cls; bool closed; unsigned lost; } tower_input;

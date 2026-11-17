@@ -138,7 +138,6 @@ void tower_impacts(tower_state *s)
             particles(s,(phys_vec){b->position.x,b->aabb.max.y},0,3);
             s->blocks[i].dust_at = s->ticks+20;
         }
-        if (b->used && b->aabb.min.y > Q(720)) phys_body_remove(&s->world,i);
     }
 }
 static void grab(tower_state *s)
@@ -147,7 +146,6 @@ static void grab(tower_state *s)
     int held = s->world.grab.body;
     if (held >= 0) {
         if (!s->hand.closed) {
-            phys_grab_move(&s->world,point);
             phys_grab_release(&s->world);
             ++s->released;
         } else {
@@ -234,6 +232,7 @@ void tower_step(tower_state *s, tower_input input)
         if (delta && delta < PHYS_PI*4/180 && delta > -PHYS_PI*4/180)
             phys_body_set_angle(&s->world,i,nearest);
     }
+    phys_confine_x(&s->world,Q(TOWER_PLATFORM_X),Q(TOWER_PLATFORM_X+TOWER_PLATFORM_W));
     tower_impacts(s);
 }
 void tower_snapshot_copy(const tower_state *s, tower_snapshot *o)

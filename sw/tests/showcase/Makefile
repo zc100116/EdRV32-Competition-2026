@@ -151,7 +151,7 @@ tower:
 	$(CC) $(FLAGS) -O2 -I$(GAME_UI) -I$(ROOT)/sw/drivers/include \
 	    -I$(ROOT)/sw/bsp/include -ffunction-sections -Wl,--gc-sections \
 	    tower.c tower_geo.c $(GAME_UI)/tower.c \
-	    $(GAME_UI)/phys.c $(GAME_UI)/sprite_rot.c $(ROOT)/sw/drivers/geo.c -o $(BUILD)/tower
+	    $(GAME_UI)/phys.c $(GAME_UI)/sprite_rot.c $(ROOT)/sw/drivers/geo.c -lm -o $(BUILD)/tower
 	python3 tower_art.py $(BUILD)/tower-art.bin
 	$(BUILD)/tower $(BUILD)/tower-art.bin
 	$(CC) $(FLAGS) -O2 -I$(GAME_UI) -I$(ROOT)/sw/lib/sched \

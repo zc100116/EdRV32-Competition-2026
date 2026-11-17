@@ -81,7 +81,7 @@ void sprite_rot_prepare(sprite_rot *a, void *scratch)
     phys_vec pivot = tower_pivot(k%2);
     for (unsigned f = 0; f < tower_frame_count(k%2); ++f) {
         int sn = sine[f];
-        int cs = sine[(f+16)%24];
+        int cs = sine[(f+16)%64];
         int min_x = 1000, min_y = 1000, max_x = -1000, max_y = -1000;
         for (unsigned i = 0; i < 4; ++i) {
             int x = (i&1 ? (int)src.width : 0)*65536-pivot.x;

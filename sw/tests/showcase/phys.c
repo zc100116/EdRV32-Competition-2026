@@ -213,7 +213,11 @@ static void grab_test(void)
     double angle_error=fabs(real(b->angle)-3.141592653589793/2)*180/3.141592653589793;
     printf("grab angle error=%.3fdeg\n",angle_error);
     require(angle_error<2,"grab rotation",angle_error,2);
+    b->angular_velocity = Q(3);
+    phys_grab_move(&world,(phys_vec){Q(206),Q(-50)});
     phys_grab_release(&world);
+    require(b->velocity.x == 0 && b->velocity.y == 0 && b->angular_velocity == 0,
+            "release clears linear and angular velocity",real(b->velocity.y),0);
 }
 static void earthquake_test(void)
 {

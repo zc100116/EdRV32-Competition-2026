@@ -350,6 +350,7 @@ void phys_grab_create(phys_world *w, int id, phys_vec p)
 }
 void phys_grab_move(phys_world *w, phys_vec p)
 {
+    /* Contact velocity lets a held body push neighbors; release discards it. */
     phys_vec delta = sub(p,w->grab.target);
     phys_q speed = length(delta);
     if (speed > 20*PHYS_ONE) delta = scale(delta,divide(20*PHYS_ONE,speed));
@@ -366,9 +367,27 @@ void phys_grab_release(phys_world *w)
     b->type = PHYS_DYNAMIC;
     b->inv_mass = divide(PHYS_ONE,b->mass);
     b->inv_inertia = divide(PHYS_ONE,b->inertia);
+    b->velocity = (phys_vec){0,0};
     b->angular_velocity = 0;
     wake(b);
     w->grab.body = -1;
+}
+
+/* Infinite invisible side walls: constrain the complete rotated silhouette. */
+void phys_confine_x(phys_world *w, phys_q left, phys_q right)
+{
+    for (int i = 0; i < PHYS_MAX_BODIES; ++i) {
+        phys_body *b = &w->bodies[i];
+        if (!b->used || b->type == PHYS_STATIC) continue;
+        phys_q shift = 0;
+        if (b->aabb.min.x < left) shift = left-b->aabb.min.x;
+        else if (b->aabb.max.x > right) shift = right-b->aabb.max.x;
+        if (!shift) continue;
+        b->position.x += shift;
+        if ((shift > 0 && b->velocity.x < 0) || (shift < 0 && b->velocity.x > 0))
+            b->velocity.x = 0;
+        geometry(b);
+    }
 }
 
 /* Outward face with largest minimum separation. */

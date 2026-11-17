@@ -5,6 +5,7 @@
 #include "sprite_rot.h"
 #include "ddr_map.h"
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -96,6 +97,39 @@ static unsigned percentile(const unsigned histogram[256], unsigned pixels)
     }
     abort();
 }
+/* Independent geometric reference: do not reuse the descriptor matrix under test. */
+static void square_size(const sprite_source *source, const sprite_frame *frame,
+                        unsigned kind, unsigned angle)
+{
+    unsigned area = 0, alpha_sum = 0;
+    unsigned source_alpha = source->pixels[40*source->width+40] >> 24;
+    unsigned half_alpha = source_alpha/2;
+    int min_x = (int)frame->width, min_y = (int)frame->height;
+    int max_x = -1, max_y = -1;
+    for (unsigned y = 0; y < frame->height; ++y)
+        for (unsigned x = 0; x < frame->width; ++x) {
+            unsigned alpha = frame->pixels[y*frame->width+x] >> 24;
+            alpha_sum += alpha;
+            if (!alpha) continue;
+            /* Measure silhouette at 50% coverage, including translucent materials. */
+            if (alpha >= half_alpha) ++area;
+            if ((int)x < min_x) min_x = (int)x;
+            if ((int)x > max_x) max_x = (int)x;
+            if ((int)y < min_y) min_y = (int)y;
+            if ((int)y > max_y) max_y = (int)y;
+        }
+    double radians = angle*2.0*acos(-1.0)/64;
+    double extent = source->width*(fabs(cos(radians))+fabs(sin(radians)));
+    double error = fabs((double)area/(source->width*source->height)-1);
+    printf("square kind=%u frame=%u area=%u error=%.3f%% bbox=%dx%d theory=%.3f\n",
+        kind,angle,area,error*100,max_x-min_x+1,max_y-min_y+1,extent);
+    assert(error <= .03);
+    assert(fabs((double)alpha_sum/(source_alpha*source->width*source->height)-1) <= .03);
+    assert(fabs(max_x-min_x+1-extent) <= 2);
+    assert(fabs(max_y-min_y+1-extent) <= 2);
+    phys_q physical = (phys_q)llround(radians*PHYS_ONE);
+    assert(tower_frame(0,physical) == angle);
+}
 void tower_geo_test(const char *art_path)
 {
     FILE *art = fopen(art_path,"rb");
@@ -141,6 +175,7 @@ void tower_geo_test(const char *art_path)
         sprite_rot_finish(a,scratch);
         for (unsigned f = 0; f < count/2; ++f) {
             const sprite_frame *frame = &a->frames[k][f];
+            square_size(&sources[k],frame,k,f);
             const int32_t *m = a->configs[f*2].matrix;
             for (unsigned y = 0; y < frame->height; ++y)
                 for (unsigned x = 0; x < frame->width; ++x) {

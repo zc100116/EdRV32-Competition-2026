@@ -53,11 +53,22 @@ static void grab_test(void)
     tower_step(&game,(tower_input){749,259,1,true,0});
     tower_step(&game,(tower_input){749,259,2,true,0});
     assert(game.rotations == 2);
-    tower_step(&game,(tower_input){949,259,0,false,0});
+    phys_vec stable = game.world.bodies[id].position;
+    game.world.gravity.y = 0;
+    game.world.bodies[id].angular_velocity = PHYS_ONE;
+    tower_step(&game,(tower_input){949,59,0,false,0});
     assert(game.world.grab.body == -1 && game.released == 1);
     assert(game.world.bodies[id].type == PHYS_DYNAMIC);
-    assert(game.world.bodies[id].velocity.x > 1100*PHYS_ONE &&
-           game.world.bodies[id].velocity.x <= 1200*PHYS_ONE);
+    assert(game.world.bodies[id].velocity.x == 0 &&
+           game.world.bodies[id].velocity.y == 0 &&
+           game.world.bodies[id].angular_velocity == 0);
+    assert(game.world.bodies[id].position.x == stable.x &&
+           game.world.bodies[id].position.y == stable.y);
+    game.world.gravity.y = 900*PHYS_ONE;
+    tower_step(&game,(tower_input){949,59,0,false,0});
+    assert(game.world.bodies[id].velocity.x == 0 &&
+           game.world.bodies[id].velocity.y > 0 &&
+           game.world.bodies[id].position.y > stable.y);
     /* A held steel block pushes a sleeping neighbor and stays on the cursor. */
     empty();
     id = tower_spawn(&game,6,600,400);
@@ -69,7 +80,40 @@ static void grab_test(void)
         tower_step(&game,(tower_input){x,400,1,true,0});
     assert(game.world.bodies[id].position.x == 650*PHYS_ONE);
     assert(game.world.bodies[other].position.x > 700*PHYS_ONE);
-    puts("immediate expanded-shape pick; steel cursor error=0; throw cap; kinematic push PASS");
+    puts("immediate expanded-shape pick; steel cursor error=0; "
+         "zero-speed stable release; kinematic push PASS");
+}
+static void side_walls(void)
+{
+    for (unsigned shape = 0; shape < 2; ++shape) {
+        for (int side = 0; side < 2; ++side) {
+            empty();
+            int id = tower_spawn(&game,(int)shape,side ? 1200 : 80,200);
+            phys_body *b = &game.world.bodies[id];
+            b->velocity.x = (side ? 1200 : -1200)*PHYS_ONE;
+            b->angular_velocity = PHYS_ONE;
+            for (int t = 0; t < 180; ++t) {
+                tower_step(&game,(tower_input){640,100,0,false,0});
+                assert(b->used && b->aabb.min.x >= 0 &&
+                       b->aabb.max.x <= 1280*PHYS_ONE);
+            }
+            /* Drag beyond either edge and rotate while against the wall. */
+            tower_step(&game,(tower_input){b->position.x/PHYS_ONE,
+                b->position.y/PHYS_ONE,1,true,0});
+            assert(game.world.grab.body == id);
+            tower_step(&game,(tower_input){side ? 1500 : -200,300,2,true,0});
+            assert(b->aabb.min.x >= 0 && b->aabb.max.x <= 1280*PHYS_ONE);
+            tower_step(&game,(tower_input){640,0,0,false,0});
+            assert(b->velocity.x == 0);
+        }
+    }
+    /* Falling beyond the old platform edges no longer deletes the block. */
+    empty();
+    int id = tower_spawn(&game,0,60,760);
+    tower_step(&game,(tower_input){640,100,0,false,0});
+    assert(game.world.bodies[id].used);
+    assert(TOWER_PLATFORM_X == 0 && TOWER_PLATFORM_W == 1280);
+    puts("full platform; dynamic/rotating/held side walls; no off-platform deletion PASS");
 }
 static void sleep_snap(void)
 {
@@ -219,7 +263,7 @@ void tower_geo_test(const char *art_path);
 int main(int argc, char **argv)
 {
     assert(argc == 2);
-    initial(); grab_test(); sleep_snap(); summons(); summon_timing_and_fade();
+    initial(); grab_test(); side_walls(); sleep_snap(); summons(); summon_timing_and_fade();
     heavy_corner(); impact_energy(); impacts(); stability(); tower_geo_test(argv[1]);
     puts("PASS grablab rules, contact stability and GEO art");
 }

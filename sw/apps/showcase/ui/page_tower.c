@@ -70,6 +70,7 @@ static void simulate(void *context)
     if (action) tower_summon(&state,(int)ui_grab.x);
     grab_state_t rule = ui_grab;
     rule.mode = selected_mode;
+    int hand_x = (int)ui_grab.x, hand_y = (int)ui_grab.y;
     const ui_hand_t *pose = ui_data_hand();
     if (pose->count) {
         unsigned largest = 0;
@@ -94,12 +95,26 @@ static void simulate(void *context)
         if (valid) {
             bool close, release;
             grab_rule(&rule,points,ui_grab.cls,targets,count,40,false,&close,&release);
+            /* Finger separation moves the fingertip cursor before release hysteresis.
+             * Keep the last closed-pose position throughout that opening transition. */
+            if (closed && !close) {
+                hand_x = state.hand.x;
+                hand_y = state.hand.y;
+            }
             if (closed ? release : close) closed = !closed;
         }
-    } else closed = false;
+    } else {
+        closed = false;
+        hand_x = state.hand.x;
+        hand_y = state.hand.y;
+    }
     /* Scissors rotates the held body in every mode, even when the fingers separate. */
-    if (pose->count && state.world.grab.body >= 0 && ui_grab.cls == 2) closed = true;
-    tower_input hand = {(int)ui_grab.x,(int)ui_grab.y,ui_grab.cls,
+    if (pose->count && state.world.grab.body >= 0 && ui_grab.cls == 2) {
+        closed = true;
+        hand_x = (int)ui_grab.x;
+        hand_y = (int)ui_grab.y;
+    }
+    tower_input hand = {hand_x,hand_y,ui_grab.cls,
                         closed,ui_grab.lost};
     tower_step(&state,hand);
     unsigned us = (unsigned)((platform_ticks()-started)*1000000/platform_clock_hz());
