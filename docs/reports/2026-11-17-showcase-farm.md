@@ -33,3 +33,7 @@
 - 素材调优：照片草地、牛 380/400 px、马 350 px、鸡 320 px/鸭 250 px；牛栏加宽，错开牲畜，避免头部遮挡。截图与框图 `outputs/farm-sim/{initial,missing,crossing}{,-camera,-detections}.png`，逐只数据 `build/farm-sim/detections.json`。
 - 复现：`npm install --prefix build/farm-sim playwright-core@1.65.1 && node tools/demo/farm-sim/capture.mjs`；`PYTHONPATH=tools/npu:third_party/ultralytics OPENBLAS_NUM_THREADS=1 ~/.local/opt/edrv32-py/bin/python tools/demo/farm-sim/validate.py`。
 - PASS/0 告警：`flock /tmp/edrv32-sw-build.lock make -C sw -j2 PROGRAM=showcase`（先加载 env.sh）、`flock /tmp/edrv32-sw-build.lock make -C sw/tests/showcase farm`、`flock /tmp/edrv32-sw-build.lock make -C sw/apps/showcase/sim -j2 farm-shots FARM_OUTPUT="$PWD/outputs/farm-sim/board"`；日志 `build/farm-sim/{build,ui}.log`，覆盖百分比分栏、滑条重计数与本次开机保留；浏览器剧本/停止/复位/鼠标/触摸 PASS。
+
+- T-FARM-SIM-FIT（本报告所在提交，基于 `5e1ebd7a3`）：2000×1200 舞台等比居中、黑边，竖屏旋转 90°；支持时显示全屏按钮，无 RTL 变更（Verilator/Verilog 风格检查不适用）。
+- `node tools/demo/farm-sim/capture.mjs`：Chromium 1248 / Playwright 1.65.1，1080×1728 DPR 2.5、2400×1080、2560×1600、1280×800；三栏九只动物完整可见，鼠标/触摸拖动、旋转重排、全屏与不支持时隐藏 PASS；截图 `outputs/farm-sim/fit-*.png`，日志 `build/farm-sim/capture-fit.log`。
+- `PYTHONPATH=tools/npu:third_party/ultralytics OPENBLAS_NUM_THREADS=1 ~/.local/opt/edrv32-py/bin/python tools/demo/farm-sim/validate.py`：26/26 可见动物分类正确，最低置信度 0.500，识别通过结论不变；日志 `build/farm-sim/validate-fit.log`，未做微信/QQ/iPad 真机验证。
