@@ -11,7 +11,7 @@
 | 舞蹈 | 人体姿态 | 用户 2 段与 Mixkit 2 段，观察全身关键点 |
 | 检测图集 | 目标检测计数 | 24 张 COCO 图像和 6 张原创动物园照片 |
 | 手势 | 手势识别 | HaGRID 每类 2 张，共 26 张，另有原创 13 张；暂停等待板端稳定 |
-| 工地 | 安全帽检测 | Mixkit 示范者戴上安全帽的片段，两个类别都出现 |
+| 工地 | 安全帽检测 | 互动工地，复位四戴两未戴；点人摘戴、拖动与剧本演示，Mixkit 视频保留为第二项 |
 | 人脸 | 人脸贴纸 | 4 张原创虚构成人照片，分别 1、1、2、3 人 |
 
 农场脚本：0–5 秒静止盘点，5–7 秒羊走出，7–11 秒走失等待，11–13 秒羊归来，13–16 秒人翻越围栏走进，16–21 秒停留，21–24 秒离开。画外动物停留；从它离开的对应画面边缘往里拖可带回，或按“复位”。云影、草木、角色动作、时间戳和噪点完全由时间决定，不使用随机数；拖动坐标也可独立重放。FarmModel.kt 和 FarmCanvas.kt 为运行与 JVM 截图共用的状态及绘制实现。
@@ -37,7 +37,7 @@ flock /tmp/edrv32-sw-build.lock tools/demo/app/gradlew -p tools/demo/app --no-da
 $ANDROID_HOME/build-tools/37.0.0/aapt dump permissions build/demo-app/edrv32-demo.apk
 ```
 
-prepare_assets.py 可指定 art、video、catalog 阶段，validate.py 可指定 data、user、farm 阶段。ffmpeg、模型、Gradle 与软件构建共用指定锁。Gradle 单 worker、-Xmx1536m、Kotlin in-process、--no-daemon，不运行模拟器。
+prepare_assets.py 可指定 art、video、catalog 阶段，validate.py 可指定 data、user、farm、site 阶段。ffmpeg、模型、Gradle 与软件构建共用指定锁。Gradle 单 worker、-Xmx1536m、Kotlin in-process、--no-daemon，不运行模拟器。
 
 素材写入 build/demo-app/assets/ 后由 Gradle 打包。用户视频按 user_clips.json 截取，1280×720 H.264 Main、静音、等比留边，不去水印或字幕。旧 Mixkit 与原创照片沿用通过的原素材。牛/马/羊/人物图集按 2×2 分帧，牛2和鸡为单张透明照片；每帧去除透明留白后按共同脚底基线对齐为透明 WebP。视频、数据集图片、APK、中间帧及筛选结果不入库。
 

@@ -37,3 +37,12 @@ JVM Paparazzi 调用实际 Compose/Canvas；视频页截图以该视频实际首
 - 根因：按各帧联合透明外框缩放，留白使身体比例不一致；独立生成的动作帧外形不同，镜像朝向也影响量化模型。
 - 修复：逐帧裁去透明留白后按共同脚底对齐；替换马/人物/前景牛/鸡原图；连续网格驱动腿、尾和头，羊采食，母鸡原地轻动头尾并增大呈现尺寸。
 - 回归：静止 18/20、人在场 10/11、无人 35/35、无额外类别 45/46；模型、阈值及拍屏退化未改动。
+
+## 工地场景
+
+- 实现 commit `a8e98ea03`；versionCode 2 / versionName 1.1；工地第一项为六工人互动场景，原 Mixkit 视频保留第二项。
+- Paparazzi：复位 20 s、剧本 0–24 s 每秒共 45 帧；静止四戴两未戴 19/20（95%），未戴警示 11/11（100%），全员戴帽零未戴 14/14（100%）。
+- 沿用 v2 板端 INT8 快照、原拍屏退化、conf>0.25 / NMS IoU>0.45；横臂遮额曾误认帽子，改为擦鬓角并露出完整头发；不改模型和阈值。
+- JDK 17 / Gradle 8.14.3 / Paparazzi 1.3.5；`testDebugUnitTest` 全套 7/7，通过后红衣访客版工地/首页重跑 4/4；`validate.py site` 和 `assembleDebug` 通过，均使用指定 flock / --no-daemon。
+- APK：71,322,578 B（68.02 MiB），小于 95 MB；构建日志 `build/demo-app/site-apk-build.log`，验证日志与逐帧结果 `build/demo-app/site-final-validation.log`、`site-results.json`。
+- 首页、五个剧本时刻、复位图、验证联系表、逐帧结果及新 APK 已覆盖到 `/home/workspace/orca/workspaces/EdRV32-Competition-2026/SOC系统设计/outputs/demo-app/`；美术与复现命令见 `tools/demo/app/README.md`。
