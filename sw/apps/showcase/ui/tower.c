@@ -146,9 +146,22 @@ static void grab(tower_state *s)
     int held = s->world.grab.body;
     if (held >= 0) {
         if (!s->hand.closed) {
-            phys_grab_release(&s->world);
+            phys_grab_throw(&s->world,s->hand.lost ?
+                            (phys_vec){0,0} : s->throw_velocity);
             ++s->released;
         } else {
+            /* Seven fixed 60 Hz positions span 100 ms. Opening freezes the
+             * last closed-pose estimate, including its entire release delay. */
+            if (!s->opening && !s->hand.lost) {
+                s->motion[s->motion_next] = point;
+                s->motion_next = (s->motion_next+1)%7;
+                if (s->motion_count < 7) ++s->motion_count;
+                if (s->motion_count == 7) {
+                    phys_vec first = s->motion[s->motion_next];
+                    s->throw_velocity = (phys_vec){(point.x-first.x)*10,
+                                                   (point.y-first.y)*10};
+                }
+            }
             phys_grab_move(&s->world,point);
             if (s->hand.cls == 1) s->rotate_ready = true;
             if (s->hand.cls == 2 && s->rotate_ready) {
@@ -165,6 +178,9 @@ static void grab(tower_state *s)
             contains(&s->world.bodies[i],point)) { target = i; break; }
     if (!s->hand.closed || target < 0) return;
     phys_grab_create(&s->world,target,point);
+    s->motion[0] = point;
+    s->motion_count = s->motion_next = 1;
+    s->throw_velocity = (phys_vec){0,0};
     s->rotate_ready = true;
     ++s->picked;
 }

@@ -53,3 +53,9 @@
 - make -C sw -j2 PROGRAM=showcase、make -C sw/tests/showcase draw grab 在共用 flock 下通过、0 告警；含真实回放、±45°、400/300 ms 行为；合成抖动降低仍为 80.36%，塌缩竖直偏差 0 px。
 - 每次画板更新输出 draw f/hand/kp8/kp5/cls/pen/why/out，其他原有串口行保留；grab.c/h 和抓取/体感规则未改。
 - 命令见 tools/demo/draw-replay/README.md；原始中间数据/日志 build/draw-fix3/，逐帧证据和每处断线见 docs/debug/2026-11-17-showcase-draw-jumps.md；后 39 秒未逐帧验收，仍需上板确认。
+
+## T-HAND-THROW：双手锁定与串口降频
+- 实现为本节所在提交，基线 c2b7638c6；新分支起止 rebase origin/zc100116/b3；主机 GCC 13.3.0 / xPack GCC 15.2.0，无 RTL 改动，未访问仿真虚拟机。
+- 落笔按上一帧 MCP5 最近位置匹配（距离 <120 px），不按面积/类别切手；丢失按原 300 ms 保持，超时结束该笔后才重新选手。
+- 卡 99 原始 origin/win/20261117-99-draw-farm-board:tasks/win/20261117-99-draw-farm-board/artifacts/uart/session.log 的 f1255–1310 保存为 sw/tests/showcase/draw-card99.txt；日志只含旧选手，缺失画手位置线性补全，另一候选合成，交替排序/面积；56 帧最大相邻输出跳动 17.681 px（≤60），远手单独出现不接管；既有真实 240 帧回归仍通过。
+- draw f= 仅在 pen/选手索引改变、相邻输出跳动 >40 px 或 f%25=0 输出；共用 flock 下 make -C sw -j2 PROGRAM=showcase 通过、0 告警；主机验收 make -C sw/tests/showcase draw grab phys tower 全通过，日志 build/hand-throw/{build,tests-final}.log，git diff --check 通过。

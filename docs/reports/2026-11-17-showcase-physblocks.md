@@ -31,3 +31,9 @@
 - 截图：`flock /tmp/edrv32-sw-build.lock make -C sw/apps/showcase/sim -j2 tower-shots TOWER_OUTPUT="$PWD/outputs/grablab"`；三图已目视检查，标题字形齐全。
 - 日志：`build/grablab/{build-final,tests-final,shots-final,probe-before,probe-after}.log`；截图：`outputs/grablab/{initial,steel-held,mode-d}.png`。
 - 细节：`docs/debug/2026-11-17-showcase-phys-jitter.md` §8；`git diff --check` 通过，无 RTL 改动。
+
+## T-HAND-THROW：张手前速度甩出
+- 实现为本节所在提交，基线 c2b7638c6，起止 rebase origin/zc100116/b3；60 Hz 下最近 7 个闭手位置覆盖 100 ms，以首尾差求平均速度；张手开始即冻结位置/速度，丢手释放为零，尚无完整 100 ms 样本时为零。
+- 合成测试确定起甩阈值 300 px/s（299→0、300→甩出），向量速度上限 1200 px/s；角速度 vx/120 rad/s、限幅 ±8 rad/s；侧墙按已有材质弹性反弹，地面与 A–D 判定/阈值不变。
+- 覆盖慢放 120 px/s→0、左右横甩 ±720 px/s→同方向速度与旋转、张手冻结 200 ms 及释放帧跳点不入速度、5000→≤1200 px/s、橡胶球侧墙反弹；模型和体感游戏未改。
+- 验收命令均使用 flock /tmp/edrv32-sw-build.lock：make -C sw -j2 PROGRAM=showcase 已通过、0 告警；make -C sw/tests/showcase draw grab phys tower 全通过；日志 build/hand-throw/{build,tests-final}.log；GCC 15.2.0 / 主机 GCC 13.3.0，git diff --check 通过，无 RTL 改动。

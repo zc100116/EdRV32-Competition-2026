@@ -23,6 +23,8 @@ static uint32_t report_at;
 static unsigned frames;
 static unsigned draw_frame;
 static bool changed;
+static int previous_hand;
+static bool previous_pen;
 static lv_area_t dirty;
 static lv_area_t stamp_bounds(int x, int y, int radius)
 {
@@ -62,11 +64,16 @@ void ui_draw_update(void)
 {
     const ui_hand_t *hand = ui_data_hand();
     uint32_t now = lv_tick_get();
-    unsigned largest = 0;
-    for (unsigned i = 1; i < hand->count; ++i)
-        if (hand->people[i].width*hand->people[i].height >
-            hand->people[largest].width*hand->people[largest].height) largest = i;
-    bool present = hand->count != 0;
+    draw_point_t anchors[100];
+    float areas[100];
+    for (unsigned i = 0; i < hand->count; ++i) {
+        anchors[i] = (draw_point_t){hand->points[i][5].x,hand->points[i][5].y};
+        areas[i] = hand->people[i].width*hand->people[i].height;
+    }
+    int largest = draw_choose_hand(&state,anchors,areas,hand->count,now);
+    bool present = largest >= 0;
+    float previous_x = state.x;
+    float previous_y = state.y;
     float x = present ? hand->points[largest][8].x : state.x;
     float y = present ? hand->points[largest][8].y : state.y;
     int item = draw_hover(&state,present,(int)x,(int)y,now);
@@ -78,14 +85,22 @@ void ui_draw_update(void)
             points[i] = (draw_point_t){hand->points[largest][i].x,hand->points[largest][i].y};
     draw_hand_step(&state,present,present ? (int)hand->people[largest].class_id : -1,
                    points,now,stamp,NULL);
-    char trace[160];
-    snprintf(trace,sizeof trace,
-        "draw f=%u hand=%d kp8=%d,%d kp5=%d,%d cls=%d pen=%u why=%s out=%d,%d\r\n",
-        draw_frame++,present ? (int)largest : -1,
-        present ? (int)points[8].x : -1,present ? (int)points[8].y : -1,
-        present ? (int)points[5].x : -1,present ? (int)points[5].y : -1,
-        state.cls,(unsigned)state.down,state.why,(int)state.x,(int)state.y);
-    ui_data_grab_output(trace);
+    float dx = state.x-previous_x;
+    float dy = state.y-previous_y;
+    if (state.down != previous_pen || largest != previous_hand ||
+        dx*dx+dy*dy > 40*40 || draw_frame%25 == 0) {
+        char trace[160];
+        snprintf(trace,sizeof trace,
+            "draw f=%u hand=%d kp8=%d,%d kp5=%d,%d cls=%d pen=%u why=%s out=%d,%d\r\n",
+            draw_frame,largest,
+            present ? (int)points[8].x : -1,present ? (int)points[8].y : -1,
+            present ? (int)points[5].x : -1,present ? (int)points[5].y : -1,
+            state.cls,(unsigned)state.down,state.why,(int)state.x,(int)state.y);
+        ui_data_grab_output(trace);
+    }
+    previous_hand = largest;
+    previous_pen = state.down;
+    ++draw_frame;
     if (changed) lv_obj_invalidate_area(canvas,&dirty);
     int size = (int)draw_sizes[state.size];
     lv_obj_set_size(cursor,size,size);
@@ -166,6 +181,8 @@ void ui_page_draw(lv_obj_t *parent)
     selection();
     frames = 0;
     draw_frame = 0;
+    previous_hand = -1;
+    previous_pen = false;
     report_at = lv_tick_get();
     timer = lv_timer_create(tick,40,NULL);
     lv_obj_add_event_cb(canvas,deleted,LV_EVENT_DELETE,NULL);

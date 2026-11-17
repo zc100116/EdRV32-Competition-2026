@@ -262,6 +262,66 @@ static void tilted_index(void)
     assert(s.strokes == 1);
     puts("tilt: -45..45 degrees, non-point class, continuous stroke");
 }
+static void two_hands(void)
+{
+    FILE *input = fopen("draw-card99.txt","r");
+    assert(input);
+    struct record { unsigned frame; int hand, x, y, mx, my, cls; } records[56];
+    char line[200];
+    for (unsigned i = 0; i < 56; ++i) {
+        assert(fgets(line,sizeof line,input));
+        struct record *r = &records[i];
+        assert(sscanf(line,"draw f=%u hand=%d kp8=%d,%d kp5=%d,%d cls=%d",
+                      &r->frame,&r->hand,&r->x,&r->y,&r->mx,&r->my,&r->cls) == 7);
+    }
+    fclose(input);
+    draw_state_t s;
+    draw_init(&s);
+    float maximum = 0;
+    for (unsigned i = 0; i < 56; ++i) {
+        struct record r = records[i];
+        /* UART only contains the old selected hand. Interpolate the drawing hand
+         * across those records selecting the distant hand; retain it as distractor. */
+        struct record other = {0,0,900,650,940,600,13};
+        if (r.x > 700) {
+            other = r;
+            unsigned before = i-1, after = i+1;
+            while (records[before].x > 700) --before;
+            while (records[after].x > 700) ++after;
+            float t = (i-before)/(float)(after-before);
+            r.x = records[before].x+t*(records[after].x-records[before].x);
+            r.y = records[before].y+t*(records[after].y-records[before].y);
+            r.mx = records[before].mx+t*(records[after].mx-records[before].mx);
+            r.my = records[before].my+t*(records[after].my-records[before].my);
+            r.cls = records[before].cls;
+        }
+        unsigned order = i%2;
+        draw_point_t anchors[2];
+        anchors[order] = (draw_point_t){r.mx,r.my};
+        anchors[1-order] = (draw_point_t){other.mx,other.my};
+        float areas[2] = {100,100};
+        areas[i < 2 ? order : 1-order] = 200;
+        int chosen = draw_choose_hand(&s,anchors,areas,2,i*40);
+        assert(chosen == (int)order);
+        float x = s.x, y = s.y;
+        step(&s,true,r.cls,false,r.x,r.y,i*40);
+        if (i > 1) {
+            float jump = hypotf(s.x-x,s.y-y);
+            if (jump > maximum) maximum = jump;
+            assert(jump <= 60 && s.down);
+        }
+    }
+    draw_point_t distant = {940,600};
+    float area = 200;
+    uint32_t seen = s.seen_at;
+    for (unsigned elapsed = 40; elapsed <= 320; elapsed += 40) {
+        assert(draw_choose_hand(&s,&distant,&area,1,seen+elapsed) == -1);
+        step(&s,false,-1,false,0,0,seen+elapsed);
+        assert(s.down == (elapsed <= 300));
+    }
+    printf("card99 f1255-1310: alternating order/area, max jump %.3f px; lost hold PASS\n",
+           maximum);
+}
 int main(void)
 {
     geometry_test();
@@ -269,6 +329,7 @@ int main(void)
     synthetic();
     outliers();
     tilted_index();
+    two_hands();
     puts("PASS draw: geometry OR class, 2 frames/400 ms release, <=300 ms bridge, "
          "no dots, tools, >=70% jitter");
     return 0;

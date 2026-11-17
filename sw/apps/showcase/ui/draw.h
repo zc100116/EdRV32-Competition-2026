@@ -29,6 +29,7 @@ typedef struct {
     float length;
     float finger_lengths[5];
     draw_point_t finger_offset;
+    draw_point_t hand_anchor;
     unsigned finger_count;
     unsigned finger_next;
     uint32_t extrapolate_at;
@@ -65,6 +66,9 @@ void draw_select(draw_state_t *state, unsigned item);
 bool draw_pointing(const draw_point_t points[21]);
 void draw_step(draw_state_t *state, bool present, int cls, bool geometry, float x, float y,
                uint32_t now, draw_stamp_fn stamp, void *context);
+/* Largest area before pen-down; nearest MCP within 120 px while drawing. */
+int draw_choose_hand(draw_state_t *state, const draw_point_t *anchors,
+                     const float *areas, unsigned count, uint32_t now);
 /* Keypoint consistency and the shared pen/eraser position confirmation. */
 void draw_hand_step(draw_state_t *state, bool present, int cls,
                     const draw_point_t points[21], uint32_t now,

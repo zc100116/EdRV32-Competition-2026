@@ -72,6 +72,7 @@ static void simulate(void *context)
     rule.mode = selected_mode;
     int hand_x = (int)ui_grab.x, hand_y = (int)ui_grab.y;
     const ui_hand_t *pose = ui_data_hand();
+    state.opening = false;
     if (pose->count) {
         unsigned largest = 0;
         for (unsigned i = 1; i < pose->count; ++i)
@@ -98,6 +99,7 @@ static void simulate(void *context)
             /* Finger separation moves the fingertip cursor before release hysteresis.
              * Keep the last closed-pose position throughout that opening transition. */
             if (closed && !close) {
+                state.opening = true;
                 hand_x = state.hand.x;
                 hand_y = state.hand.y;
             }
@@ -111,6 +113,7 @@ static void simulate(void *context)
     /* Scissors rotates the held body in every mode, even when the fingers separate. */
     if (pose->count && state.world.grab.body >= 0 && ui_grab.cls == 2) {
         closed = true;
+        state.opening = false;
         hand_x = (int)ui_grab.x;
         hand_y = (int)ui_grab.y;
     }

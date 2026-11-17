@@ -83,6 +83,54 @@ static void grab_test(void)
     puts("immediate expanded-shape pick; steel cursor error=0; "
          "zero-speed stable release; kinematic push PASS");
 }
+static void throws(void)
+{
+    for (int direction = -1; direction <= 1; ++direction) {
+        empty();
+        game.world.gravity.y = 0;
+        int id = tower_spawn(&game,6,640,250);
+        tower_step(&game,(tower_input){640,250,1,true,0});
+        int dx = direction ? direction*12 : 2;
+        for (int t = 1; t <= 6; ++t)
+            tower_step(&game,(tower_input){640+dx*t,250,1,true,0});
+        phys_vec position = game.world.bodies[id].position;
+        phys_vec saved = game.throw_velocity;
+        /* Opening freezes samples for longer than the averaging window. */
+        game.opening = true;
+        for (int t = 0; t < 12; ++t)
+            tower_step(&game,(tower_input){640+dx*6,250,13,true,0});
+        assert(game.throw_velocity.x == saved.x);
+        tower_step(&game,(tower_input){1000,50,0,false,0});
+        phys_body *b = &game.world.bodies[id];
+        if (!direction) {
+            assert(b->velocity.x == 0 && b->velocity.y == 0 && b->angular_velocity == 0);
+            assert(b->position.x == position.x && b->position.y == position.y);
+        } else {
+            assert(b->velocity.x == direction*720*PHYS_ONE);
+            assert(b->position.x*direction > position.x*direction);
+            assert(b->angular_velocity*direction > 0);
+        }
+    }
+    for (int speed = 299; speed <= 300; ++speed) {
+        empty();
+        int id = tower_spawn(&game,6,640,250);
+        phys_grab_create(&game.world,id,game.world.bodies[id].position);
+        phys_grab_throw(&game.world,(phys_vec){speed*PHYS_ONE,0});
+        assert(game.world.bodies[id].velocity.x == (speed == 299 ? 0 : 300*PHYS_ONE));
+    }
+    empty();
+    int id = tower_spawn(&game,9,640,250);
+    phys_grab_create(&game.world,id,game.world.bodies[id].position);
+    phys_grab_throw(&game.world,(phys_vec){5000*PHYS_ONE,0});
+    phys_body *b = &game.world.bodies[id];
+    assert(b->velocity.x <= 1200*PHYS_ONE && b->velocity.x > 1199*PHYS_ONE);
+    b->position.x = 1300*PHYS_ONE;
+    phys_body_set_angle(&game.world,id,0);
+    phys_confine_x(&game.world,0,1280*PHYS_ONE);
+    assert(b->velocity.x < 0);
+    puts("throws: 120 px/s place=0; +/-720 px/s throw; opening jump excluded; "
+         "1200 px/s cap and rubber wall rebound PASS");
+}
 static void side_walls(void)
 {
     for (unsigned shape = 0; shape < 2; ++shape) {
@@ -263,7 +311,7 @@ void tower_geo_test(const char *art_path);
 int main(int argc, char **argv)
 {
     assert(argc == 2);
-    initial(); grab_test(); side_walls(); sleep_snap(); summons(); summon_timing_and_fade();
+    throws(); initial(); grab_test(); side_walls(); sleep_snap(); summons(); summon_timing_and_fade();
     heavy_corner(); impact_energy(); impacts(); stability(); tower_geo_test(argv[1]);
     puts("PASS grablab rules, contact stability and GEO art");
 }

@@ -101,6 +101,8 @@ void phys_grab_create(phys_world *world, int body, phys_vec point);
 void phys_grab_move(phys_world *world, phys_vec target);
 void phys_grab_rotate(phys_world *world, phys_q angle_delta);
 void phys_grab_release(phys_world *world);
+/* 300 px/s dead zone, 1200 px/s cap; horizontal motion supplies spin. */
+void phys_grab_throw(phys_world *world, phys_vec velocity);
 void phys_body_set_angle(phys_world *world, int body, phys_q angle);
 /* Side walls contain each nonstatic body including its rotated extents. */
 void phys_confine_x(phys_world *world, phys_q left, phys_q right);

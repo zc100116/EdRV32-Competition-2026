@@ -17,6 +17,9 @@ typedef struct {
     tower_block blocks[PHYS_MAX_BODIES];
     tower_particle particles[TOWER_PARTICLES];
     tower_input hand;
+    phys_vec motion[7], throw_velocity;
+    unsigned motion_count, motion_next;
+    bool opening; /* caller marks the pre-release finger separation interval */
     unsigned ticks, picked, released, rotations, particle_next, broken;
     unsigned summon_hold, sequence, fade_ticks;
     int platform, fading, pending_x;

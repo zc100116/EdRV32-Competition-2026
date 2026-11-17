@@ -62,6 +62,25 @@ static float distance2(draw_point_t a, draw_point_t b)
     float dy = a.y-b.y;
     return dx*dx+dy*dy;
 }
+int draw_choose_hand(draw_state_t *s, const draw_point_t *anchors,
+                     const float *areas, unsigned count, uint32_t now)
+{
+    int chosen = -1;
+    float best = s->down ? 120*120 : 0;
+    for (unsigned i = 0; i < count; ++i) {
+        float value = s->down ? distance2(anchors[i],s->hand_anchor) : areas[i];
+        if (s->down ? value < best : chosen < 0 || value > best) {
+            best = value;
+            chosen = (int)i;
+        }
+    }
+    /* Expiration is handled by draw_hand_step, without acquiring another hand
+     * in the same frame that finishes the lost stroke. */
+    if (chosen >= 0 && (!s->down || now-s->seen_at <= DRAW_LOST_MS))
+        s->hand_anchor = anchors[chosen];
+    else chosen = -1;
+    return chosen;
+}
 bool draw_pointing(const draw_point_t p[21])
 {
     float index = distance2(p[8],p[0]);

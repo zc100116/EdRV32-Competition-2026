@@ -373,6 +373,18 @@ void phys_grab_release(phys_world *w)
     w->grab.body = -1;
 }
 
+void phys_grab_throw(phys_world *w, phys_vec velocity)
+{
+    phys_body *b = &w->bodies[w->grab.body];
+    phys_q speed = length(velocity);
+    phys_grab_release(w);
+    if (speed < 300*PHYS_ONE) return;
+    if (speed > 1200*PHYS_ONE)
+        velocity = scale(velocity,divide(1200*PHYS_ONE,speed));
+    b->velocity = velocity;
+    b->angular_velocity = clamp(velocity.x/120,-8*PHYS_ONE,8*PHYS_ONE);
+}
+
 /* Infinite invisible side walls: constrain the complete rotated silhouette. */
 void phys_confine_x(phys_world *w, phys_q left, phys_q right)
 {
@@ -385,7 +397,7 @@ void phys_confine_x(phys_world *w, phys_q left, phys_q right)
         if (!shift) continue;
         b->position.x += shift;
         if ((shift > 0 && b->velocity.x < 0) || (shift < 0 && b->velocity.x > 0))
-            b->velocity.x = 0;
+            b->velocity.x = -mul(b->velocity.x,b->material.restitution);
         geometry(b);
     }
 }
