@@ -1,0 +1,44 @@
+* { box-sizing:border-box; -webkit-user-select:none; user-select:none }
+html,body { width:100%; height:100%; margin:0; overflow:hidden; background:#000 }
+body { font-family:"Noto Sans CJK SC","Microsoft YaHei",sans-serif; color:#f5f1e6 }
+button { font:inherit; cursor:pointer; color:inherit; border:1px solid #ffffff30;
+    border-radius:12px; background:#ffffff0c; padding:14px 22px; min-height:48px }
+button:active { background:#ffffff25 }
+[hidden] { display:none !important }
+#stage { position:absolute; width:2000px; height:1200px; transform-origin:top left;
+    background:#101e25; overflow:hidden; touch-action:pan-y }
+#home { height:100%; padding:58px 64px 26px;
+    background:radial-gradient(ellipse at top right,#2b4747 0,transparent 60%),#101e25 }
+header { display:flex; align-items:center; justify-content:space-between; gap:30px }
+.eyebrow { margin:0 0 16px; font-size:16px; letter-spacing:5px; color:#d8b98b }
+h1 { margin:0; font-size:48px; font-weight:600; letter-spacing:3px }
+.intro { font-size:21px; color:#aab9b9; margin:18px 0 36px }
+#sources-open { margin-top:-35px; color:#d8b98b; font-size:19px }
+#cards { display:grid; grid-template-columns:repeat(4,1fr); gap:24px }
+.card { padding:0; overflow:hidden; text-align:left; background:#1c3038; border-color:#ffffff16 }
+.card img { width:100%; height:300px; object-fit:cover; display:block }
+.card .label { padding:18px 22px 20px; display:block }
+.card strong { display:block; font-size:25px; font-weight:500; letter-spacing:2px }
+.card small { display:block; margin-top:8px; font-size:16px; color:#a5b8bc }
+.card em { float:right; font-style:normal; color:#ddbb85 }
+footer { margin-top:28px; color:#91a5a9; font-size:16px; letter-spacing:2px }
+footer span { float:right }
+#scene { position:absolute; inset:0; background:#060b0d }
+#media { width:2000px; height:1125px; touch-action:none; position:relative }
+#media img,#media video { width:100%; height:100%; object-fit:contain; display:block }
+#media iframe { width:2000px; height:1200px; border:0; background:#000 }
+#scene.farm nav { position:absolute; bottom:12px; left:12px; background:#102229bb;
+    width:auto; height:auto; padding:0; border-radius:12px }
+#scene.farm nav>*:not(#back) { display:none }
+nav { height:75px; padding:10px 28px; display:flex; align-items:center; gap:16px;
+    background:#14252d; font-size:20px }
+nav button { padding:12px 24px }
+#caption { flex:1; color:#d8dcd8; font-size:22px; padding:0 10px }
+#sources { padding:50px 64px; height:100%; overflow:auto; touch-action:pan-y }
+#sources h1 { font-size:38px }
+#sources p { color:#a5b8bc; font-size:20px }
+#credits { margin-top:26px; display:grid; grid-template-columns:1fr 1fr; gap:18px }
+.credit { padding:20px; border:1px solid #ffffff20; border-radius:12px; font-size:19px }
+.credit p { font-size:16px !important; overflow-wrap:anywhere; margin:9px 0 }
+#hint { position:fixed; top:10px; left:10px; padding:7px 12px; font-size:14px;
+    color:#fff; background:#14252dcc; border-radius:8px; pointer-events:none }
