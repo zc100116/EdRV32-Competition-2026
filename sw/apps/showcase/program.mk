@@ -169,3 +169,10 @@ $(ROOT)/build/showcase/tower_images.c: $(ROOT)/tools/sw/embed_showcase_images.py
     $(ROOT)/tools/sw/png2c.py $(wildcard $(ROOT)/sw/apps/showcase/assets/tower/*.png)
 	python3 $(ROOT)/tools/sw/embed_showcase_images.py \
 	    $(ROOT)/sw/apps/showcase/assets/tower $@ --prefix tower
+
+# T-WS-ART: root PNGs only; offline source/ is excluded by the nonrecursive glob.
+PROGRAM_SOURCES += build/showcase/workshop_images.c
+$(ROOT)/build/showcase/workshop_images.c: $(ROOT)/tools/sw/embed_showcase_images.py \
+    $(ROOT)/tools/sw/png2c.py $(wildcard $(ROOT)/sw/apps/showcase/assets/workshop/*.png)
+	python3 $(ROOT)/tools/sw/embed_showcase_images.py \
+	    $(ROOT)/sw/apps/showcase/assets/workshop $@ --prefix ws
