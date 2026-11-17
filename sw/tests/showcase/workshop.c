@@ -117,11 +117,21 @@ static void inventory(void)
 {
     empty();
     s.selected=WS_STONE;
-    ticks(29,0,0,7); assert(!s.inventory);
-    step(0,0,7); assert(s.inventory);
-    ticks(60,0,0,7); assert(s.inventory);
-    step(0,0,0); ticks(30,0,0,7); assert(!s.inventory);
-    step(0,0,0); ticks(30,0,0,7); assert(s.inventory);
+    ticks(60,0,0,7); assert(!s.inventory);
+    ticks(24,0,0,8);
+    workshop_snapshot_copy(&s,&a);
+    assert(!s.inventory && a.hold==24);
+    step(0,0,7);
+    workshop_snapshot_copy(&s,&a);
+    assert(a.hold==0 && s.thumb_ticks==0 && !s.thumb_latched);
+    ticks(47,0,0,8); assert(!s.inventory);
+    step(0,0,8); assert(s.inventory);
+    workshop_snapshot_copy(&s,&a);
+    assert(a.hold==0 && s.thumb_latched);
+    ticks(60,0,0,8); assert(s.inventory);
+    step(0,0,0); ticks(47,0,0,8); assert(s.inventory);
+    step(0,0,8); assert(!s.inventory);
+    step(0,0,0); ticks(48,0,0,8); assert(s.inventory);
     unsigned places=s.places;
     step(330,175,1);
     assert(!s.inventory && s.selected==WS_HAND && s.places==places);

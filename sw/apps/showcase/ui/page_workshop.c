@@ -738,10 +738,11 @@ void ui_workshop_update(void)
                 0x4aceb4 : 0x44556b),0);
         }
     }
-    lv_obj_set_hidden(hold_arc,!shown.menu || !shown.hold);
-    if (shown.menu && shown.hold) {
+    lv_obj_set_hidden(hold_arc,!shown.hold);
+    if (shown.hold) {
+        lv_arc_set_range(hold_arc,0,shown.menu ? 60 : WS_INVENTORY_HOLD);
         lv_arc_set_value(hold_arc,(int)shown.hold);
-        lv_obj_set_pos(hold_arc,shown.hand.x-32,shown.hand.y-32);
+        lv_obj_set_pos(hold_arc,shown.hand.x+(shown.menu ? -32 : 24),shown.hand.y-32);
     }
     cache_process();
 }
@@ -818,7 +819,7 @@ void ui_page_workshop(lv_obj_t *p)
     lv_image_set_inner_align(item_icon,LV_IMAGE_ALIGN_CONTAIN);
     lv_image_set_src(item_icon,&ws_tool_hand);
     item_label=ui_text_label(hud,"空手",&sim_font_16,TEAL);
-    lv_obj_t *hint=ui_text_label(hud,"OK 手势：物品栏 · 剪刀手：旋转",&sim_font_14,MUTED);
+    lv_obj_t *hint=ui_text_label(hud,"点赞保持 0.8 s：物品栏 · 剪刀手：旋转",&sim_font_14,MUTED);
     lv_obj_set_flex_grow(hint,1);
     ui_action_button(hud,"物品栏",5);
     ui_action_button(hud,"换场景",4);

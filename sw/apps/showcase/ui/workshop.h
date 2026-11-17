@@ -6,7 +6,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 enum { WS_COLS=20, WS_ROWS=11, WS_CELL=48, WS_X=160, WS_Y=152,
-       WS_BOTTOM=680, WS_BLOCKS=220, WS_ANIMALS=4, WS_PARTICLES=512, WS_HZ=60 };
+       WS_BOTTOM=680, WS_BLOCKS=220, WS_ANIMALS=4, WS_PARTICLES=512, WS_HZ=60,
+       WS_INVENTORY_HOLD=48 };
 typedef enum {
     WS_HAND, WS_PICK, WS_GRASS, WS_DIRT, WS_STONE, WS_GRAVEL, WS_SAND,
     WS_PLANK, WS_LOG, WS_STONEBRICK, WS_BRICK, WS_METAL, WS_ICE, WS_GLASS,
@@ -39,11 +40,11 @@ typedef struct {
     ws_input hand;
     uint32_t random, ticks;
     unsigned animal_count, scene, sky, selected, orientation, places, breaks, moves;
-    unsigned ok_ticks, mine_ticks, return_ticks, menu_hold;
+    unsigned thumb_ticks, mine_ticks, return_ticks, menu_hold;
     int held, lifted, mining, last_cell, inventory_hover, menu_hover;
     int origin_x,origin_y, return_x,return_y;
     bool selection_grab;
-    bool menu, inventory, ok_latched, scissors, was_closed, preview;
+    bool menu, inventory, thumb_latched, scissors, was_closed, preview;
     int preview_x,preview_y;
 } workshop_state;
 typedef struct { int x,y,w,h; } ws_rect;
@@ -65,7 +66,7 @@ void workshop_init(workshop_state *s);
 void workshop_scene(workshop_state *s, unsigned scene);
 void workshop_reconnect(workshop_state *s);
 void workshop_step(workshop_state *s, ws_input input);
-void workshop_key(workshop_state *s, unsigned key); /* 1 next, 2 prev, 3 OK, 4 back */
+void workshop_key(workshop_state *s, unsigned key); /* 1 next, 2 prev, 3 confirm, 4 back */
 int workshop_add(workshop_state *s, unsigned item, unsigned orientation, int x,int y);
 void workshop_remove(workshop_state *s, int id);
 bool workshop_fits(const workshop_state *s, unsigned item,unsigned orientation,int x,int y);

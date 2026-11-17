@@ -608,14 +608,14 @@ void workshop_step(workshop_state *s,ws_input input)
         p->y+=p->vy;
         ++p->vy;
     }
-    if (input.cls==7 && input.lost<=200) {
-        if (!s->ok_latched && ++s->ok_ticks>=30) {
+    if (input.cls==8 && input.lost<=200) {
+        if (!s->thumb_latched && ++s->thumb_ticks>=WS_INVENTORY_HOLD) {
             s->inventory=!s->inventory;
-            s->ok_latched=true;
+            s->thumb_latched=true;
             s->mining=-1;
             s->mine_ticks=0;
         }
-    } else { s->ok_ticks=0; s->ok_latched=false; }
+    } else { s->thumb_ticks=0; s->thumb_latched=false; }
     if (input.cls==2 && !s->scissors && !s->inventory) {
         if (s->held>=0) {
             ws_block *b=&s->blocks[s->held];
@@ -666,5 +666,5 @@ void workshop_snapshot_copy(const workshop_state *s,workshop_snapshot *out)
     out->inventory=s->inventory;
     out->returning=s->return_ticks!=0;
     out->hover=s->menu ? s->menu_hover : s->inventory_hover;
-    out->hold=s->menu_hold;
+    out->hold=s->menu ? s->menu_hold : s->thumb_latched ? 0 : s->thumb_ticks;
 }

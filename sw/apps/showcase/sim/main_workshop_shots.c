@@ -105,6 +105,19 @@ int main(int argc,char **argv)
         if (scene==2) { fixture.sky=WS_NIGHT; capture("castle-night"); }
     }
     workshop_scene(&fixture,1);
+    step(24,760,340,8);
+    capture("inventory-hold-half");
+    lv_obj_t *arc=NULL;
+    for(unsigned i=0;i<lv_obj_get_child_count(lv_screen_active());++i) {
+        lv_obj_t *object=lv_obj_get_child(lv_screen_active(),(int)i);
+        if(lv_obj_check_type(object,&lv_arc_class)) arc=object;
+    }
+    assert(arc && !lv_obj_is_hidden(arc));
+    assert(lv_arc_get_value(arc)==24 && lv_arc_get_max_value(arc)==48);
+    step(1,760,340,0);
+    lv_tick_inc(17); game_loop_step(); ui_workshop_update();
+    assert(lv_obj_is_hidden(arc));
+    workshop_scene(&fixture,1);
     fixture.sky=WS_NIGHT;
     fixture.inventory=true;
     fixture.inventory_hover=6;
@@ -151,5 +164,5 @@ int main(int argc,char **argv)
     game_loop_stop();
     ui_open(0);
     lv_deinit();
-    puts("PASS native workshop 13 scene, sky and interaction captures");
+    puts("PASS native workshop 14 scene, sky and interaction captures");
 }
