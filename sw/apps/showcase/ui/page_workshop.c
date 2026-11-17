@@ -819,7 +819,7 @@ void ui_page_workshop(lv_obj_t *p)
     lv_image_set_inner_align(item_icon,LV_IMAGE_ALIGN_CONTAIN);
     lv_image_set_src(item_icon,&ws_tool_hand);
     item_label=ui_text_label(hud,"空手",&sim_font_16,TEAL);
-    lv_obj_t *hint=ui_text_label(hud,"点赞保持 0.8 s：物品栏 · 剪刀手：旋转",&sim_font_14,MUTED);
+    lv_obj_t *hint=ui_text_label(hud,"OK 保持 0.8 s：物品栏 · 剪刀手：旋转",&sim_font_14,MUTED);
     lv_obj_set_flex_grow(hint,1);
     ui_action_button(hud,"物品栏",5);
     ui_action_button(hud,"换场景",4);

@@ -105,7 +105,7 @@ int main(int argc,char **argv)
         if (scene==2) { fixture.sky=WS_NIGHT; capture("castle-night"); }
     }
     workshop_scene(&fixture,1);
-    step(24,760,340,8);
+    step(24,760,340,7);
     capture("inventory-hold-half");
     lv_obj_t *arc=NULL;
     for(unsigned i=0;i<lv_obj_get_child_count(lv_screen_active());++i) {

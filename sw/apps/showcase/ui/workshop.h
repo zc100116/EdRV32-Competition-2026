@@ -40,11 +40,11 @@ typedef struct {
     ws_input hand;
     uint32_t random, ticks;
     unsigned animal_count, scene, sky, selected, orientation, places, breaks, moves;
-    unsigned thumb_ticks, mine_ticks, return_ticks, menu_hold;
+    unsigned ok_ticks, mine_ticks, return_ticks, menu_hold;
     int held, lifted, mining, last_cell, inventory_hover, menu_hover;
     int origin_x,origin_y, return_x,return_y;
     bool selection_grab;
-    bool menu, inventory, thumb_latched, scissors, was_closed, preview;
+    bool menu, inventory, ok_latched, scissors, was_closed, preview;
     int preview_x,preview_y;
 } workshop_state;
 typedef struct { int x,y,w,h; } ws_rect;

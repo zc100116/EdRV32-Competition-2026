@@ -20,6 +20,8 @@
 #define LV_USE_OS LV_OS_NONE
 #endif
 #define LV_DEF_REFR_PERIOD 16
+/* Match the board invalidation capacity when comparing camera overlays. */
+#define LV_INV_BUF_SIZE 128
 #define LV_BUILD_EXAMPLES 0
 #define LV_BUILD_DEMOS 0
 #define LV_USE_3DTEXTURE 0

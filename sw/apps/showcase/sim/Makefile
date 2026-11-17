@@ -201,3 +201,15 @@ draw-shots: $(BUILD)/showcase_draw_shots
 	rm $(addprefix $(DRAW_OUTPUT)/,$(addsuffix .rgb565,writing smooth eraser motion-tab))
 $(BUILD)/showcase_draw_shots: main_draw_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_draw_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
+
+# T-FARM-LAG-OK: compare git-extracted baseline with identical real LVGL work.
+FARM_PAGE_SOURCE ?= ../ui/page_farm.c
+.PHONY: farm-bench $(BUILD)/showcase_farm_bench
+farm-bench: $(BUILD)/showcase_farm_bench
+	$(BUILD)/showcase_farm_bench
+$(BUILD)/showcase_farm_bench: main_farm_bench.c $(COMMON) $(FARM_PAGE_SOURCE) $(LINUX_LV)
+	$(CC) $(FLAGS) -Werror main_farm_bench.c \
+	    $(filter-out ../ui/page_farm.c,$(COMMON)) $(FARM_PAGE_SOURCE) $(LINUX_LV) -lm \
+	    -Wl,--wrap=lv_obj_invalidate,--wrap=lv_obj_invalidate_area,--wrap=lv_label_set_text \
+	    -Wl,--wrap=lv_obj_set_style_bg_color,--wrap=lv_obj_class_create_obj \
+	    -Wl,--wrap=lv_obj_delete,--wrap=farm_frame,--wrap=ui_data_vision -o $@

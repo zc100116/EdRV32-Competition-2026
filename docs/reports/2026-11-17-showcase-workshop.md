@@ -49,3 +49,6 @@
 - T-WS-LIGHT-PERF：K=6；8 px 粗亮度图分帧生成，普通 GUI 更新估算预算 380000 周期，单格编辑优先。
 - 前轮主机记录：小屋黄昏25帧、小屋夜晚19帧、城堡夜晚29帧；最终构建/测试/截图按协调者要求停止，由协调者构建上板。
 - 与旧 ARGB8888 格子缓存比较，RGB 最大误差5、alpha误差0，协调者已接受；当前代码直接提交，未宣称最终验收通过。
+
+- T-FARM-LAG-OK（本节所在提交）：物品栏开关恢复为 OK（class 7），保持 48 个 60 Hz 逻辑帧即 0.8 s；保留进度环、换手势取消和单次保持只触发一次，顶栏共用提示同步为“OK 保持 0.8 s”。
+- `flock /tmp/edrv32-sw-build.lock make -C sw -j2 PROGRAM=showcase` 与 `flock /tmp/edrv32-sw-build.lock make -C sw/tests/showcase farm workshop` 通过、0 告警；日志 `build/farm-lag/{build,tests}.log`，覆盖点赞不触发、OK 24/47/48 帧、取消、持续保持和再次开关。
