@@ -42,6 +42,10 @@ void draw_select(draw_state_t *s, unsigned item)
     s->down = false;
     s->positive_frames = 0;
     s->negative_frames = 0;
+    s->finger_count = 0;
+    s->finger_next = 0;
+    s->extrapolating = false;
+    s->tracking_paused = false;
     if (item < 8) s->color = item;
     else if (item < 11) s->size = item-8;
     else if (item < 13) s->tool = item == 11 ? DRAW_PEN : DRAW_ERASER;
@@ -125,11 +129,20 @@ static void finish(draw_state_t *s, draw_stamp_fn stamp, void *context)
     s->positive_frames = 0;
     s->negative_frames = 0;
     s->curve_count = 0;
+    s->finger_count = 0;
+    s->finger_next = 0;
+    s->extrapolating = false;
+    s->tracking_paused = false;
+    s->confirming = false;
 }
 static float alpha(float cutoff, float dt)
 {
     float r = 6.2831853f*cutoff*dt;
     return r/(1+r);
+}
+static float median3(float a, float b, float c)
+{
+    return fmaxf(fminf(a,b),fminf(fmaxf(a,b),c));
 }
 void draw_step(draw_state_t *s, bool present, int cls, bool geometry, float x, float y,
                uint32_t now, draw_stamp_fn stamp, void *context)
@@ -165,6 +178,8 @@ void draw_step(draw_state_t *s, bool present, int cls, bool geometry, float x, f
         s->y = y;
         if (s->positive_frames < 2) return;
         s->down = true;
+        s->previous_raw = (draw_point_t){x,y};
+        s->confirming = false;
         s->raw_x = x;
         s->raw_y = y;
         s->velocity_x = 0;
@@ -187,12 +202,33 @@ void draw_step(draw_state_t *s, bool present, int cls, bool geometry, float x, f
         s->y = y;
         return;
     }
+    if (s->tracking_paused) return;
+    /* Centered three-frame position median rejects isolated velocity spikes
+     * before One Euro, with exactly one added frame of delay. */
+    draw_point_t current = {x,y};
+    if (!s->confirming) {
+        s->confirmation = current;
+        s->confirmation_at = now;
+        s->confirming = true;
+        return;
+    }
+    draw_point_t accepted = {
+        median3(s->previous_raw.x,s->confirmation.x,x),
+        median3(s->previous_raw.y,s->confirmation.y,y)
+    };
+    uint32_t accepted_at = s->confirmation_at;
+    s->previous_raw = s->confirmation;
+    s->confirmation = current;
+    s->confirmation_at = now;
+    x = accepted.x;
+    y = accepted.y;
+    now = accepted_at;
     float dt = (now-s->filter_at)*.001f;
     float derivative_alpha = alpha(1,dt);
     s->velocity_x += derivative_alpha*((x-s->raw_x)/dt-s->velocity_x);
     s->velocity_y += derivative_alpha*((y-s->raw_y)/dt-s->velocity_y);
     float speed = sqrtf(s->velocity_x*s->velocity_x+s->velocity_y*s->velocity_y);
-    float a = alpha(.35f+.012f*speed,dt);
+    float a = alpha(2.5f+.012f*speed,dt);
     draw_point_t next = {s->x+a*(x-s->x),s->y+a*(y-s->y)};
     s->filter_at = now;
     s->raw_x = x;
@@ -220,6 +256,73 @@ void draw_step(draw_state_t *s, bool present, int cls, bool geometry, float x, f
     }
     s->x = next.x;
     s->y = next.y;
+}
+static float median(const float values[5], unsigned count)
+{
+    float sorted[5];
+    memcpy(sorted,values,count*sizeof sorted[0]);
+    for (unsigned i = 1; i < count; ++i) {
+        float value = sorted[i];
+        unsigned j = i;
+        while (j && sorted[j-1] > value) {
+            sorted[j] = sorted[j-1];
+            --j;
+        }
+        sorted[j] = value;
+    }
+    return sorted[count/2];
+}
+void draw_hand_step(draw_state_t *s, bool present, int cls, const draw_point_t p[21],
+                    uint32_t now, draw_stamp_fn stamp, void *context)
+{
+    if (!present) {
+        draw_step(s,false,cls,false,s->x,s->y,now,stamp,context);
+        return;
+    }
+    bool resumed = false;
+    draw_point_t points[21];
+    memcpy(points,p,sizeof points);
+    float length = sqrtf(distance2(p[8],p[5]));
+    float distal = sqrtf(distance2(p[8],p[7]));
+    float dx = p[7].x-p[6].x;
+    float dy = p[7].y-p[6].y;
+    float direction2 = dx*dx+dy*dy;
+    float dot = dx*(p[8].x-p[7].x)+dy*(p[8].y-p[7].y);
+    bool unreliable = s->down && s->finger_count &&
+        (length < .7f*median(s->finger_lengths,s->finger_count) ||
+         dot <= 0 || dot*dot < .5f*direction2*distal*distal);
+    if (unreliable) {
+        if (!s->extrapolating) s->extrapolate_at = now;
+        s->extrapolating = true;
+        if (now-s->extrapolate_at > 300) {
+            s->tracking_paused = true;
+        }
+        float scale = median(s->distal_lengths,s->finger_count)/sqrtf(direction2);
+        points[8] = (draw_point_t){p[7].x+dx*scale,p[7].y+dy*scale};
+    } else {
+        s->extrapolating = false;
+        if (s->tracking_paused) {
+            /* Resume at the recovered tip without painting the paused interval. */
+            s->x = s->raw_x = p[8].x;
+            s->y = s->raw_y = p[8].y;
+            s->velocity_x = s->velocity_y = 0;
+            s->filter_at = now;
+            s->previous_raw = p[8];
+            s->confirming = false;
+            s->curve[0] = s->curve[1] = p[8];
+            s->curve_count = 2;
+            resumed = true;
+        }
+    }
+    bool geometry = draw_pointing(points);
+    if (!unreliable && (s->down || cls == DRAW_POINT || geometry)) {
+        s->finger_lengths[s->finger_next] = length;
+        s->distal_lengths[s->finger_next] = distal;
+        s->finger_next = (s->finger_next+1)%5;
+        if (s->finger_count < 5) ++s->finger_count;
+    }
+    draw_step(s,true,cls,geometry,points[8].x,points[8].y,now,stamp,context);
+    if (resumed) s->tracking_paused = false;
 }
 void draw_raster(uint32_t *pixels, const draw_state_t *s, int x, int y)
 {

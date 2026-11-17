@@ -5,8 +5,11 @@
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 static uint32_t pixels[DRAW_WIDTH*DRAW_HEIGHT];
 static unsigned count;
+static bool measure_deviation;
+static int maximum_deviation;
 static uint32_t random_state = 42653887;
 static float uniform(void)
 {
@@ -22,6 +25,8 @@ static void stamp(void *context, const draw_state_t *s, int x, int y)
     (void)context;
     assert(s->tool == DRAW_ERASER || s->length >= 10);
     ++count;
+    if (measure_deviation && abs(y-250) > maximum_deviation)
+        maximum_deviation = abs(y-250);
     draw_raster(pixels,s,x,y);
 }
 static void step(draw_state_t *s, bool present, int cls, bool geometry,
@@ -164,11 +169,74 @@ static void synthetic(void)
     assert(out <= .3*in);
     assert(s.strokes == 3 && s.pending_count == 0);
 }
+static void hand(draw_state_t *s, unsigned frame, float length, float collapse, bool angle)
+{
+    float x = 250+2*frame;
+    draw_point_t p[21] = {{0}};
+    p[0] = (draw_point_t){x,310+length};
+    p[5] = (draw_point_t){x,250+length};
+    p[6] = (draw_point_t){x,370};
+    p[7] = (draw_point_t){x,310};
+    p[8] = (draw_point_t){x+(angle ? 120 : 0),250+collapse};
+    p[4] = (draw_point_t){x+10,290+length};
+    for (unsigned tip = 12; tip <= 20; tip += 4) {
+        p[tip-2] = (draw_point_t){x,250+length};
+        p[tip] = (draw_point_t){x,290+length};
+    }
+    draw_hand_step(s,true,0,p,40*frame,stamp,NULL);
+}
+static void outliers(void)
+{
+    measure_deviation = true;
+    maximum_deviation = 0;
+    for (unsigned tool = 0; tool < 2; ++tool) {
+        for (unsigned duration = 2; duration <= 5; ++duration) {
+            draw_state_t s;
+            draw_init(&s);
+            draw_select(&s,tool ? 12 : 11);
+            float ratio = .5f+.05f*(duration-2);
+            for (unsigned frame = 0; frame < 100; ++frame) {
+                hand(&s,frame,120/(1-ratio),
+                     frame >= 35 && frame < 35+duration ? 120 : 0,false);
+                if (frame > 2) assert(s.down && !s.tracking_paused);
+            }
+            assert(s.strokes == 1 && maximum_deviation <= 10);
+            /* A sideways fingertip can keep its MCP length yet violate DIP direction. */
+            for (unsigned frame = 100; frame < 105; ++frame)
+                hand(&s,frame,120/(1-ratio),0,true);
+            assert(s.down && s.strokes == 1 && maximum_deviation <= 10);
+        }
+    }
+    draw_state_t s;
+    draw_init(&s);
+    for (unsigned frame = 0; frame < 60; ++frame)
+        step(&s,true,DRAW_POINT,false,250+2*frame,frame == 30 ? 370 : 250,40*frame);
+    assert(s.strokes == 1 && maximum_deviation <= 10);
+    draw_init(&s);
+    for (unsigned frame = 0; frame < 30; ++frame) hand(&s,frame,300,0,false);
+    for (unsigned frame = 30; frame < 39; ++frame) hand(&s,frame,300,120,false);
+    assert(s.down && s.tracking_paused);
+    unsigned before = count;
+    for (unsigned frame = 39; frame < 43; ++frame) hand(&s,frame,300,120,false);
+    assert(count == before);
+    for (unsigned frame = 43; frame < 60; ++frame) hand(&s,frame,300,0,false);
+    assert(s.down && !s.tracking_paused && s.strokes == 1 && count > before);
+    measure_deviation = false;
+    printf("outliers: pen/eraser, 2..5 frames, MCP length 50..65%%, 120 px collapse, "
+           "angle/spike/pause/resume: maximum vertical deviation=%d px\n",maximum_deviation);
+    for (unsigned speed = 0; speed < 3; ++speed) {
+        float velocity = speed == 0 ? 12.5f : speed == 1 ? 50 : 75;
+        printf("estimated algorithm latency at %.1f px/s: before=%.1f ms after=%.1f ms\n",
+               velocity,1000/(6.2831853f*(.35f+.012f*velocity))+40,
+               1000/(6.2831853f*(2.5f+.012f*velocity))+80);
+    }
+}
 int main(void)
 {
     geometry_test();
     transitions();
     synthetic();
+    outliers();
     puts("PASS draw: geometry OR class, 2/4 frames, <=200 ms bridge, no dots, tools, >=70% jitter");
     return 0;
 }

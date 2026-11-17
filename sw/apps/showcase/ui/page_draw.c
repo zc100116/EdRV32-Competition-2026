@@ -75,8 +75,8 @@ void ui_draw_update(void)
     if (present)
         for (unsigned i = 0; i < 21; ++i)
             points[i] = (draw_point_t){hand->points[largest][i].x,hand->points[largest][i].y};
-    draw_step(&state,present,present ? (int)hand->people[largest].class_id : -1,
-              present && draw_pointing(points),x,y,now,stamp,NULL);
+    draw_hand_step(&state,present,present ? (int)hand->people[largest].class_id : -1,
+                   points,now,stamp,NULL);
     if (changed) lv_obj_invalidate_area(canvas,&dirty);
     int size = (int)draw_sizes[state.size];
     lv_obj_set_size(cursor,size,size);

@@ -29,3 +29,15 @@
 - 合成测试种子 42653887，900 帧/25 Hz、各轴 Gaussian σ=6 px、90 帧分类中断、7 帧丢手（恢复间隔 80/120/200 ms），得到预期 3 笔，无 <10 px 笔迹写出。
 - 抖动指标 RMS(Δ(输出−真值))：输入 12.272 px→输出 2.485 px，降低 79.75%；位置 RMSE 6.662 px（含滤波滞后，不以抖动指标代替定位误差）。
 - flock /tmp/edrv32-sw-build.lock 串行执行 make -C sw -j2 PROGRAM=showcase、make -C sw/tests/showcase draw、make -C sw/apps/showcase/sim -j2 draw-shots：全部通过、0 编译告警；日志 build/draw-fix/{build,host,shots}.log，截图 outputs/draw/smooth.png（宿主模拟，未重做上板）。
+
+## T-DRAW-FIX2：脸前指尖跳点
+- 实现为本节所在提交，rebase 基线 origin/zc100116/b3=7539e98c0；xPack GCC 15.2.0、宿主 cc，25 Hz、1280×720；板上问题基线 c902e9c9e。
+- 可靠帧维护最近 5 次 MCP→tip 和 DIP→tip 长度中位数；MCP 长度 <70% 或 DIP→tip 与 PIP→DIP 夹角 >45°，沿 PIP→DIP 用中位末节长度外推；连续 >300 ms 暂停，恢复后接续。
+- 画笔/橡皮共用跟踪；One Euro 前逐轴 3 帧中值去单帧速度跳点，新增 1 帧延迟；min_cutoff 0.35→2.5 Hz，β=0.012、导数 cutoff=1 Hz。
+- 新增合成：2/3/4/5 帧指尖下移 120 px、MCP 长度 50/55/60/65%，画笔/橡皮最大笔迹竖直偏差 0 px（要求 ≤10），各为 1 笔；方向异常、单帧 120 px 跳点、>300 ms 暂停/恢复均通过。
+- 同种子 42653887、900 帧 Gaussian σ=6 px：抖动 RMS 基线 2.485→2.411 px（输入 12.272 px，降低 80.36%），位置 RMSE 6.662→5.924 px，保留原 3 笔与丢手/分类中断覆盖。
+- 延迟估算：匀速稳态 One Euro τ=1000/[2π(min_cutoff+βv)] ms；画笔另加样条 40 ms，新版再加中值 40 ms；不含有意落笔的 2 帧确认。
+- v=12.5/50/75 px/s：算法延迟旧 358.3/207.5/167.3→新 140.1/131.3/126.8 ms；仍 >120 ms，继续提高 cutoff 会放大本次噪声测试抖动，故保留该限制。
+- 指尖到屏幕估算还需加 UI 采样/显示等待各 0..40 ms（合计均值约 40 ms）：新版约 167..180 ms，再加未实测的相机/推理/传输时间；不是实板端到端测量。
+- flock /tmp/edrv32-sw-build.lock 串行运行 make -C sw -j2 PROGRAM=showcase、make -C sw/tests/showcase draw：通过，0 告警；git diff --check 通过，未改 RTL，Verilog 风格/lint 不适用。
+- 日志 build/draw-fix2/{build,host}.log；完整构建首次因未初始化 LVGL 子模块失败，补齐锁定子模块后重跑；未重做上板，仍需脸前遮挡实拍确认。
