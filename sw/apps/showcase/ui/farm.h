@@ -1,27 +1,30 @@
-/* farm.h — R5-4; camera-independent farm counts, timed alerts and daily samples.
- * Caller supplies frame coordinates and monotonic milliseconds; no LVGL ownership.
+/* farm.h — R5-11; single-area inventory, missing animals and intrusion alerts.
+ * Caller supplies monotonic milliseconds; pure C without LVGL ownership.
  */
 #ifndef SHOWCASE_FARM_H
 #define SHOWCASE_FARM_H
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-enum { FARM_PENS=3, FARM_CLASSES=4, FARM_EVENTS=20, FARM_SAMPLES=60, FARM_PAGE=19 };
+enum { FARM_CLASSES=4, FARM_EVENTS=20, FARM_SAMPLES=60, FARM_PAGE=19 };
 typedef struct { unsigned class_id; int x, y, width, height; } farm_box_t;
+typedef enum {
+    FARM_MISSING, FARM_MISSING_CLEAR, FARM_INTRUDE, FARM_INTRUDE_CLEAR
+} farm_event_type_t;
 typedef struct {
     uint32_t time_ms;
-    unsigned pen, animal, amount;
-    bool crossing, active;
+    unsigned class_id, amount;
+    farm_event_type_t type;
 } farm_event_t;
 typedef struct { uint32_t time_ms; unsigned total[FARM_CLASSES]; } farm_sample_t;
 typedef struct { uint32_t since; bool pending, active; } farm_alarm_t;
 typedef struct {
-    unsigned boundaries[2]; /* Percent of camera width, left then right. */
-    unsigned counts[FARM_PENS][FARM_CLASSES];
-    unsigned expected[FARM_PENS][FARM_CLASSES];
-    unsigned total[FARM_CLASSES];
-    farm_alarm_t missing[FARM_PENS][FARM_CLASSES];
-    farm_alarm_t crossing[FARM_PENS][FARM_CLASSES];
+    unsigned counts[FARM_CLASSES];
+    unsigned expected[FARM_CLASSES];
+    unsigned person;
+    farm_alarm_t missing[FARM_CLASSES];
+    farm_alarm_t intrude;
+    unsigned day, missing_today, intrude_today;
     farm_event_t events[FARM_EVENTS];
     farm_sample_t samples[FARM_SAMPLES];
     unsigned event_head, event_count, event_revision;
@@ -29,15 +32,12 @@ typedef struct {
     uint32_t sample_tick;
     void (*event)(const farm_event_t *event);
 } farm_t;
-extern const char *const farm_pen_names[FARM_PENS];
 extern const unsigned farm_class_ids[FARM_CLASSES];
-extern const unsigned farm_home_pen[FARM_CLASSES];
 int farm_animal(unsigned class_id);
 void farm_init(farm_t *farm, uint32_t now, void (*event)(const farm_event_t *));
-void farm_frame(farm_t *farm, const farm_box_t *boxes, unsigned count,
-                unsigned width, uint32_t now);
+void farm_frame(farm_t *farm, const farm_box_t *boxes, unsigned count, uint32_t now);
 void farm_inventory(farm_t *farm, uint32_t now);
 unsigned farm_alerts(const farm_t *farm);
-bool farm_pen_alert(const farm_t *farm, unsigned pen);
+const char *farm_event_name(farm_event_type_t type);
 void farm_event_text(const farm_event_t *event, char *text, size_t size);
 #endif

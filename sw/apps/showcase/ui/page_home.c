@@ -20,7 +20,7 @@ typedef struct {
 #define MOTION (CAMERA | UI_RND)
 static const application_t applications[] = {
     {"目标检测计数","实时识别与数量统计",&home_detection,1,CAMERA},
-    {"智慧农场","分栏计数与农场告警",&home_farm,19,CAMERA},
+    {"智慧农场","动物盘点与闯入告警",&home_farm,19,CAMERA},
     {"安全帽检测","看见安全，及时提醒",&home_helmet,13,CAMERA},
     {"人体姿态","骨骼关键点与动作",&home_pose,9,CAMERA},
     {"手势识别","让双手成为控制器",&home_gesture,10,CAMERA},

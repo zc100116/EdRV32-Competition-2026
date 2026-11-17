@@ -37,3 +37,12 @@
 - T-FARM-SIM-FIT（本报告所在提交，基于 `5e1ebd7a3`）：2000×1200 舞台等比居中、黑边，竖屏旋转 90°；支持时显示全屏按钮，无 RTL 变更（Verilator/Verilog 风格检查不适用）。
 - `node tools/demo/farm-sim/capture.mjs`：Chromium 1248 / Playwright 1.65.1，1080×1728 DPR 2.5、2400×1080、2560×1600、1280×800；三栏九只动物完整可见，鼠标/触摸拖动、旋转重排、全屏与不支持时隐藏 PASS；截图 `outputs/farm-sim/fit-*.png`，日志 `build/farm-sim/capture-fit.log`。
 - `PYTHONPATH=tools/npu:third_party/ultralytics OPENBLAS_NUM_THREADS=1 ~/.local/opt/edrv32-py/bin/python tools/demo/farm-sim/validate.py`：26/26 可见动物分类正确，最低置信度 0.500，识别通过结论不变；日志 `build/farm-sim/validate-fit.log`，未做微信/QQ/iPad 真机验证。
+
+## T-FARM-AREA：单区域与闯入告警（R5-11）
+- 实现为本节所在提交；起止 rebase origin/zc100116/b3，基线 b70f1a085；目标 xPack GCC 15.2.0、主机 GCC 13.3、LVGL 9.6.0，1280×720；无 RTL 改动，Verilator lint 不适用。
+- 全画面牛/马/羊/鸟计数，删除分栏线、栏位滑块、栏名和串栏状态；盘点后少于基准持续 2000 ms 告警，恢复即时解除；person 持续 500 ms 触发、无人连续 1000 ms 解除，0.3 s 出现不告警。
+- 看板显示四类当前/基准、今日走失/闯入次数、20 条最近事件和原 10 s/60 点四类曲线；时间沿用运行时长 HH:MM:SS，今日计数按该单调时钟的 24 h 日界复位。
+- 固件 make -C sw -j2 PROGRAM=showcase、逻辑 make -C sw/tests/showcase farm、主机 make -C sw/apps/showcase/sim -j2 farm-shots 均用共用 flock 串行通过、0 告警；日志 build/farm-area/{build,host,shots}.log。
+- 截图 /home/workspace/orca/workspaces/EdRV32-Competition-2026/SOC系统设计/outputs/farm/{normal,intrude,missing,dashboard}.png，另有 home-ai.png；为真实 LVGL 渲染加合成检测框，街景是主机占位相机背景，不是模型识别或上板测量。
+- 正常 3/1/3/2 只，闯入红色人框且动物计数不变，走失羊 2/3；L1 覆盖正常 11.165%、闯入 11.856%、走失 11.455%、看板 34.484%；四曲线像素、事件/恢复、按键遍历和新文案字形检查通过。
+- 串口按 1 s 输出 farm counts=... person=... alerts=...，四种出现/解除事件输出 farm event=missing|missing_clear|intrude|intrude_clear class=... amount=...；首页副标题为“动物盘点与闯入告警”，常规字库自动包含新字形，无需修改既有粗体字库。

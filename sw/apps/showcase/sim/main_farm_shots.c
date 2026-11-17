@@ -1,4 +1,4 @@
-/* main_farm_shots.c — R5-4; full detection fixtures and farm framebuffer captures.
+/* main_farm_shots.c — R5-11; single-area counts, intrusion and dashboard captures.
  * Host clock timings include software rendering and RGB565 output composition.
  */
 #define _POSIX_C_SOURCE 200809L
@@ -112,7 +112,7 @@ static void traverse(void)
         if(!hidden(object) && !lv_obj_is_disabled(object)) assert(visited[j]);
     }
 }
-static ui_detection_t animals[9];
+static ui_detection_t animals[10];
 static void frame(unsigned count, unsigned elapsed)
 {
     sim_data_farm(animals,count);
@@ -129,12 +129,13 @@ int main(int argc,char **argv)
     lv_display_set_buffers(display,drawbuffer,NULL,sizeof drawbuffer,LV_DISPLAY_RENDER_MODE_FULL);
     lv_display_set_flush_cb(display,flush);
     sim_data_init(); ui_start();
-    const unsigned ids[9]={17,18,18,18,14,14,19,19,19};
-    const int positions[9][2]={{50,400},{500,290},{620,420},{720,320},
-        {990,310},{1130,440},{80,220},{210,320},{300,480}};
-    for(unsigned i=0;i<9;++i) animals[i]=(ui_detection_t){
+    const unsigned ids[10]={19,19,19,17,14,14,18,18,18,0};
+    const int positions[10][2]={{80,220},{320,320},{510,480},{280,480},
+        {990,510},{1130,440},{620,240},{720,420},{1020,310},{850,180}};
+    for(unsigned i=0;i<10;++i) animals[i]=(ui_detection_t){
         .category=ui_coco_names[ids[i]],.class_id=ids[i],.confidence=95,
-        .x=positions[i][0],.y=positions[i][1],.width=80,.height=80};
+        .x=positions[i][0],.y=positions[i][1],.width=i==9 ? 120 : 80,
+        .height=i==9 ? 260 : 80};
     ui_open(FARM_PAGE);
     /* Use full raw boxes even when the other application's display filter excludes them. */
     ui_data_detection_all(false);
@@ -143,37 +144,35 @@ int main(int argc,char **argv)
     ui_activate(0);
     capture("normal");
     assert(covered*100<=1280*720*15);
-    assert(find_label(lv_screen_active(),"牛栏 牛 3/3 马 1/1"));
+    assert(find_label(lv_screen_active(),"牛 3 / 3"));
+    assert(find_label(lv_screen_active(),"羊 3 / 3"));
+    assert(!find_label(lv_screen_active(),"栏位对齐"));
     traverse();
+    frame(10,33);
+    frame(10,499);
+    frame(10,1);
+    capture("intrude");
+    lv_obj_t *warning=find_label(lv_screen_active(),"有人闯入");
+    assert(warning && !hidden(warning));
+    assert(find_label(lv_screen_active(),"牛 3 / 3"));
+    unsigned red=0;
+    for(unsigned y=180;y<440;++y) for(unsigned x=850;x<970;++x)
+        red+=(drawbuffer[y*1280+x]&0xffffff)==0xdc2626;
+    assert(red>500);
+    frame(9,33);
+    frame(9,1000);
+    assert(hidden(warning));
     frame(8,33);
     frame(8,2000);
     capture("missing");
-    assert(find_label(lv_screen_active(),"牛栏少 1 头牛"));
-    assert(find_label(lv_screen_active(),"牛栏 牛 #dc2626 2#/3 马 1/1"));
+    assert(find_label(lv_screen_active(),"羊 少 1 只"));
+    assert(find_label(lv_screen_active(),"羊 #dc2626 2# / 3"));
     lv_obj_t *label=find_label(lv_screen_active(),"看板"); assert(label);
     lv_obj_send_event(lv_obj_get_parent(label),LV_EVENT_CLICKED,NULL);
     lv_tick_inc(200); lv_timer_handler();
     capture("dashboard");
-    lv_obj_t *left_label=find_label(lv_screen_active(),"左分界 33%");
-    lv_obj_t *right_label=find_label(lv_screen_active(),"右分界 67%");
-    assert(left_label && right_label);
-    lv_obj_t *drawer=lv_obj_get_parent(left_label);
-    lv_obj_t *left=lv_obj_get_child(drawer,lv_obj_get_index(left_label)+1);
-    lv_obj_t *right=lv_obj_get_child(drawer,lv_obj_get_index(right_label)+1);
-    assert(lv_obj_check_type(left,&lv_slider_class));
-    assert(lv_obj_check_type(right,&lv_slider_class));
-    lv_slider_set_value(left,60,LV_ANIM_OFF);
-    lv_obj_send_event(left,LV_EVENT_VALUE_CHANGED,NULL);
-    lv_slider_set_value(right,80,LV_ANIM_OFF);
-    lv_obj_send_event(right,LV_EVENT_VALUE_CHANGED,NULL);
-    assert(find_label(lv_screen_active(),"左分界 60%"));
-    assert(find_label(lv_screen_active(),"右分界 80%"));
-    assert(find_label(lv_screen_active(),"牛栏 牛 #dc2626 2#/3 马 1/1 羊 3/0"));
-    capture("alignment");
-    lv_slider_set_value(left,33,LV_ANIM_OFF);
-    lv_obj_send_event(left,LV_EVENT_VALUE_CHANGED,NULL);
-    lv_slider_set_value(right,67,LV_ANIM_OFF);
-    lv_obj_send_event(right,LV_EVENT_VALUE_CHANGED,NULL);
+    assert(find_label(lv_screen_active(),"今日走失 1 次 · 闯入 1 次"));
+    assert(find_label(lv_screen_active(),"动物盘点 · 当前 / 基准"));
     const uint32_t colors[]={TEAL,ACCENT,0xd97706,0x9333ea};
     for(unsigned c=0;c<4;++c) {
         unsigned pixels=0;
@@ -185,22 +184,17 @@ int main(int argc,char **argv)
     ui_back(); assert(ui_page==FARM_PAGE);
     frame(9,33);
     frame(9,3000);
-    assert(hidden(find_label(lv_screen_active(),"牛栏少 1 头牛")));
+    assert(hidden(find_label(lv_screen_active(),"羊 少 1 只")));
     ui_hide_interface(); assert(ui_restore_interface());
     ui_back(); assert(ui_page==0);
     ui_home_select_tab(0);
     capture("home-ai");
     assert(find_label(lv_screen_active(),"智慧农场"));
+    assert(find_label(lv_screen_active(),"动物盘点与闯入告警"));
     ui_open(FARM_PAGE);
-    left_label=find_label(lv_screen_active(),"左分界 33%");
-    drawer=lv_obj_get_parent(left_label);
-    left=lv_obj_get_child(drawer,lv_obj_get_index(left_label)+1);
-    lv_slider_set_value(left,45,LV_ANIM_OFF);
-    lv_obj_send_event(left,LV_EVENT_VALUE_CHANGED,NULL);
-    ui_back();
-    ui_open(FARM_PAGE);
-    assert(find_label(lv_screen_active(),"左分界 45%"));
+    assert(!find_label(lv_screen_active(),"左分界 33%"));
     ui_data_detection_all(true);
-    puts("PASS farm UI: full counts, inventory, alarm, recovery, drawer, home and <=15% coverage");
+    puts("PASS farm UI: whole-area counts, inventory, red person box, "
+         "intrusion/clear, loss/clear, drawer and home");
     return 0;
 }

@@ -180,9 +180,9 @@ tower-shots: $(BUILD)/showcase_tower_shots
 $(BUILD)/showcase_tower_shots: main_tower_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_tower_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
 
-# R5-4: host camera detections and four farm acceptance captures.
+# R5-11: host camera detections and farm alert/dashboard acceptance captures.
 FARM_OUTPUT ?= $(ROOT)/outputs/farm
-FARM_SHOTS := normal missing dashboard home-ai
+FARM_SHOTS := normal intrude missing dashboard home-ai
 .PHONY: farm-shots
 farm-shots: $(BUILD)/showcase_farm_shots
 	mkdir -p $(FARM_OUTPUT)

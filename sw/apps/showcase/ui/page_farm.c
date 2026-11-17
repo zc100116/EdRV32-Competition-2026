@@ -1,4 +1,4 @@
-/* page_farm.c — R5-4; compact farm camera overlay and folded daily dashboard.
+/* page_farm.c — R5-11; whole-area inventory, intrusion and daily dashboard.
  * GUI tick clock; full postprocessed COCO boxes use the existing camera pipeline.
  */
 #include "widgets.h"
@@ -9,31 +9,22 @@
 #include <string.h>
 enum { FARM_BOXES=100, RED=0xdc2626 };
 static farm_t farm;
-static unsigned boundaries[2]={33,67};
-static lv_obj_t *pen_lines[2], *alignment[2], *alignment_labels[2];
-static lv_obj_t *surface, *metrics, *badges[FARM_PENS], *rows[FARM_PENS];
-static lv_obj_t *banner, *chart, *chart_scale, *timeline, *tags[FARM_BOXES];
+static lv_obj_t *surface, *metrics, *rows[FARM_CLASSES], *dashboard_rows[FARM_CLASSES];
+static lv_obj_t *banner, *chart, *chart_scale, *timeline, *daily, *tags[FARM_BOXES];
 static lv_chart_series_t *series[FARM_CLASSES];
 static lv_area_t rectangles[FARM_BOXES];
+static uint32_t rectangle_colors[FARM_BOXES];
 static unsigned shown_count, timeline_revision, chart_revision;
-static uint32_t banner_tick, report_tick, metrics_tick;
-static bool banner_visible, pen_alert[FARM_PENS];
+static uint32_t report_tick, metrics_tick;
 static const uint32_t colors[FARM_CLASSES]={TEAL,ACCENT,0xd97706,0x9333ea};
 static void event_output(const farm_event_t *e)
 {
-    char message[100];
-    char line[180];
-    farm_event_text(e,message,sizeof message);
-    snprintf(line,sizeof line,"farm event=%s time_ms=%lu\r\n",message,
-             (unsigned long)e->time_ms);
+    char line[120];
+    snprintf(line,sizeof line,"farm event=%s class=%u amount=%u\r\n",
+             farm_event_name(e->type),e->class_id,e->amount);
     ui_data_grab_output(line);
-    if(e->active) {
-        ui_text(banner,message);
-        banner_tick=e->time_ms;
-        banner_visible=true;
-        lv_obj_set_hidden(banner,false);
-    }
 }
+
 static void draw_boxes(lv_event_t *event)
 {
     lv_draw_rect_dsc_t d;
@@ -41,8 +32,10 @@ static void draw_boxes(lv_event_t *event)
     d.bg_opa=LV_OPA_TRANSP;
     d.border_color=lv_color_hex(TEAL);
     d.border_width=2;
-    for(unsigned i=0;i<shown_count;++i)
+    for(unsigned i=0;i<shown_count;++i) {
+        d.border_color=lv_color_hex(rectangle_colors[i]);
         lv_draw_rect(lv_event_get_layer(event),&d,&rectangles[i]);
+    }
 }
 static void invalidate_edges(const lv_area_t *a)
 {
@@ -98,53 +91,60 @@ void ui_farm_update(void)
     unsigned kept=0;
     for(unsigned i=0;i<count;++i) {
         const ui_detection_t *b=&raw[i];
-        if(farm_animal(b->class_id)<0) continue;
+        if(farm_animal(b->class_id)<0 && b->class_id!=0) continue;
         confidence[kept]=b->confidence;
         boxes[kept++]=(farm_box_t){b->class_id,b->x,b->y,b->width,b->height};
     }
     uint32_t now=lv_tick_get();
-    farm_frame(&farm,boxes,kept,1280,now);
+    farm_frame(&farm,boxes,kept,now);
     for(unsigned i=0;i<shown_count || i<kept;++i) {
         bool before=i<shown_count;
         bool after=i<kept;
         lv_area_t next={0};
         if(after) next=(lv_area_t){boxes[i].x,boxes[i].y,
             boxes[i].x+boxes[i].width-1,boxes[i].y+boxes[i].height-1};
-        if(before!=after || (after && memcmp(&next,&rectangles[i],sizeof next))) {
+        uint32_t color=after && boxes[i].class_id==0 ?
+            (farm.intrude.active ? RED : ACCENT) : TEAL;
+        if(before!=after || (after && (memcmp(&next,&rectangles[i],sizeof next) ||
+                                      rectangle_colors[i]!=color))) {
             if(before) invalidate_edges(&rectangles[i]);
             if(after) invalidate_edges(&next);
             rectangles[i]=next;
+            rectangle_colors[i]=color;
         }
         lv_obj_set_hidden(tags[i],!after);
         if(after) {
             char text[64];
             snprintf(text,sizeof text,"%s %u%%",ui_coco_names[boxes[i].class_id],confidence[i]);
             ui_text(tags[i],text);
+            lv_obj_set_style_bg_color(tags[i],lv_color_hex(color),0);
             lv_obj_set_pos(tags[i],boxes[i].x,boxes[i].y<22 ? 0 : boxes[i].y-22);
         }
     }
     shown_count=kept;
-    for(unsigned p=0;p<FARM_PENS;++p) {
-        char text[240];
-        size_t used=(size_t)snprintf(text,sizeof text,"%s",farm_pen_names[p]);
-        for(unsigned a=0;a<FARM_CLASSES;++a) {
-            if(farm_home_pen[a]!=p && !farm.counts[p][a] && !farm.expected[p][a]) continue;
-            bool missing=farm.counts[p][a]<farm.expected[p][a];
-            used+=(size_t)snprintf(text+used,sizeof text-used," %s %s%u%s/%u",
-                ui_coco_names[farm_class_ids[a]],missing ? "#dc2626 " : "",
-                farm.counts[p][a],missing ? "#" : "",farm.expected[p][a]);
-        }
-        ui_text(rows[p],text);
-        bool alert=farm_pen_alert(&farm,p);
-        if(pen_alert[p]!=alert) {
-            pen_alert[p]=alert;
-            lv_obj_set_style_bg_color(badges[p],lv_color_hex(alert ? RED : PANEL),0);
-            lv_obj_set_style_text_color(badges[p],lv_color_hex(alert ? PANEL : TEXT),0);
-        }
+    for(unsigned a=0;a<FARM_CLASSES;++a) {
+        char text[100];
+        bool missing=farm.counts[a]<farm.expected[a];
+        snprintf(text,sizeof text,"%s %s%u%s / %u",ui_coco_names[farm_class_ids[a]],
+                 missing ? "#dc2626 " : "",farm.counts[a],missing ? "#" : "",
+                 farm.expected[a]);
+        ui_text(rows[a],text);
+        ui_text(dashboard_rows[a],text);
     }
-    if(banner_visible && now-banner_tick>=3000) {
-        lv_obj_set_hidden(banner,true); banner_visible=false;
+    char text[120];
+    snprintf(text,sizeof text,"今日走失 %u 次 · 闯入 %u 次",farm.missing_today,farm.intrude_today);
+    ui_text(daily,text);
+    bool alert=farm.intrude.active;
+    if(alert) ui_text(banner,"有人闯入");
+    else for(unsigned a=0;a<FARM_CLASSES;++a) {
+        if(!farm.missing[a].active) continue;
+        farm_event_t event={now,farm_class_ids[a],farm.expected[a]-farm.counts[a],FARM_MISSING};
+        farm_event_text(&event,text,sizeof text);
+        ui_text(banner,text);
+        alert=true;
+        break;
     }
+    lv_obj_set_hidden(banner,!alert);
     update_chart();
     update_timeline();
     if(now-metrics_tick>=1000) {
@@ -154,8 +154,9 @@ void ui_farm_update(void)
     if(now-report_tick>=1000) {
         report_tick=now;
         char line[120];
-        snprintf(line,sizeof line,"farm counts=%u,%u,%u,%u alerts=%u\r\n",
-            farm.total[0],farm.total[1],farm.total[2],farm.total[3],farm_alerts(&farm));
+        snprintf(line,sizeof line,"farm counts=%u,%u,%u,%u person=%u alerts=%u\r\n",
+            farm.counts[0],farm.counts[1],farm.counts[2],farm.counts[3],
+            farm.person,farm_alerts(&farm));
         ui_data_grab_output(line);
     }
 }
@@ -166,28 +167,13 @@ void ui_farm_action(unsigned action)
         ui_farm_update();
     }
 }
-static void alignment_changed(lv_event_t *event)
-{
-    unsigned index=(unsigned)(uintptr_t)lv_event_get_user_data(event);
-    boundaries[index]=(unsigned)lv_slider_get_value(alignment[index]);
-    farm.boundaries[index]=boundaries[index];
-    lv_slider_set_range(alignment[0],1,(int)boundaries[1]-1);
-    lv_slider_set_range(alignment[1],(int)boundaries[0]+1,99);
-    char text[64];
-    snprintf(text,sizeof text,"%s分界 %u%%",index ? "右" : "左",boundaries[index]);
-    ui_text(alignment_labels[index],text);
-    lv_obj_set_x(pen_lines[index],(int)(1280*boundaries[index]/100));
-    ui_farm_update();
-}
 void ui_page_farm(lv_obj_t *parent)
 {
     uint32_t now=lv_tick_get();
     farm_init(&farm,now,event_output);
-    memcpy(farm.boundaries,boundaries,sizeof boundaries);
     report_tick=metrics_tick=now;
     timeline_revision=chart_revision=0;
-    shown_count=0; banner_visible=false;
-    memset(pen_alert,0,sizeof pen_alert);
+    shown_count=0;
     lv_obj_t *header=ui_camera_layout(parent,"智慧农场");
     metrics=ui_camera_metrics(header);
     ui_action_button(header,"盘点",0);
@@ -199,25 +185,6 @@ void ui_page_farm(lv_obj_t *parent)
     lv_obj_set_pos(surface,0,0); lv_obj_set_height(surface,720);
     lv_obj_move_to_index(surface,0);
     lv_obj_add_event_cb(surface,draw_boxes,LV_EVENT_DRAW_MAIN,NULL);
-    static const lv_point_precise_t line_points[2]={{0,0},{0,662}};
-    for(unsigned p=0;p<FARM_PENS;++p) {
-        if(p) {
-            lv_obj_t *line=lv_line_create(surface);
-            pen_lines[p-1]=line;
-            lv_line_set_points(line,line_points,2);
-            lv_obj_set_pos(line,(int)(boundaries[p-1]*1280/100),54);
-            lv_obj_set_style_line_width(line,1,0);
-            lv_obj_set_style_line_color(line,lv_color_hex(PANEL),0);
-            lv_obj_set_style_line_dash_width(line,6,0);
-            lv_obj_set_style_line_dash_gap(line,8,0);
-        }
-        badges[p]=ui_label(surface,farm_pen_names[p],(int)(p*1280/3+330),58,
-                           &sim_font_14,TEXT);
-        lv_obj_set_style_bg_opa(badges[p],LV_OPA_COVER,0);
-        lv_obj_set_style_bg_color(badges[p],lv_color_hex(PANEL),0);
-        lv_obj_set_style_pad_all(badges[p],4,0);
-        lv_obj_set_style_radius(badges[p],6,0);
-    }
     for(unsigned i=0;i<FARM_BOXES;++i) {
         tags[i]=ui_label(surface,"",0,0,&sim_font_14,PANEL);
         lv_obj_set_style_bg_color(tags[i],lv_color_hex(TEAL),0);
@@ -225,10 +192,11 @@ void ui_page_farm(lv_obj_t *parent)
         lv_obj_set_hidden(tags[i],true);
     }
     lv_obj_t *card=ui_camera_card(parent);
-    for(unsigned p=0;p<FARM_PENS;++p) {
-        rows[p]=ui_text_label(card,"",&sim_font_16,TEXT);
-        lv_label_set_recolor(rows[p],true);
-        lv_obj_set_width(rows[p],208);
+    ui_text_label(card,"当前 / 基准",&sim_font_14,MUTED);
+    for(unsigned a=0;a<FARM_CLASSES;++a) {
+        rows[a]=ui_text_label(card,"",&sim_font_16,TEXT);
+        lv_label_set_recolor(rows[a],true);
+        lv_obj_set_width(rows[a],208);
     }
     banner=ui_label(parent,"",0,54,&sim_font_20,PANEL);
     lv_obj_set_ignore_layout(banner,true);
@@ -238,27 +206,21 @@ void ui_page_farm(lv_obj_t *parent)
     lv_obj_align(banner,LV_ALIGN_TOP_MID,0,54);
     lv_obj_set_hidden(banner,true);
     lv_obj_t *drawer=ui_camera_drawer(parent,header,"看板");
-    ui_text_label(drawer,"栏位对齐",&sim_font_20,TEXT);
-    for(unsigned i=0;i<2;++i) {
-        char text[64];
-        snprintf(text,sizeof text,"%s分界 %u%%",i ? "右" : "左",boundaries[i]);
-        alignment_labels[i]=ui_text_label(drawer,text,&sim_font_16,TEXT);
-        alignment[i]=lv_slider_create(drawer);
-        ui_widget_style(alignment[i]);
-        lv_obj_set_width(alignment[i],264);
-        lv_slider_set_range(alignment[i],i ? (int)boundaries[0]+1 : 1,
-                            i ? 99 : (int)boundaries[1]-1);
-        lv_slider_set_value(alignment[i],(int)boundaries[i],LV_ANIM_OFF);
-        lv_obj_add_event_cb(alignment[i],alignment_changed,LV_EVENT_VALUE_CHANGED,
-                            (void *)(uintptr_t)i);
+    lv_obj_set_style_pad_gap(drawer,8,0);
+    ui_text_label(drawer,"动物盘点 · 当前 / 基准",&sim_font_20,TEXT);
+    for(unsigned a=0;a<FARM_CLASSES;++a) {
+        dashboard_rows[a]=ui_text_label(drawer,"",&sim_font_16,TEXT);
+        lv_label_set_recolor(dashboard_rows[a],true);
+        lv_obj_set_width(dashboard_rows[a],288);
     }
+    daily=ui_text_label(drawer,"今日走失 0 次 · 闯入 0 次",&sim_font_16,TEXT);
     ui_text_label(drawer,"今日统计",&sim_font_20,TEXT);
     lv_obj_t *legend=ui_stack(drawer,LV_FLEX_FLOW_ROW,12);
     for(unsigned a=0;a<FARM_CLASSES;++a)
         ui_text_label(legend,ui_coco_names[farm_class_ids[a]],&sim_font_16,colors[a]);
     chart_scale=ui_text_label(drawer,"数量 0–4 · 每 10 秒采样",&sim_font_14,MUTED);
     chart=lv_chart_create(drawer);
-    lv_obj_set_size(chart,288,180);
+    lv_obj_set_size(chart,288,140);
     lv_chart_set_type(chart,LV_CHART_TYPE_LINE);
     lv_chart_set_point_count(chart,FARM_SAMPLES);
     lv_chart_set_axis_range(chart,LV_CHART_AXIS_PRIMARY_Y,0,4);
@@ -268,7 +230,7 @@ void ui_page_farm(lv_obj_t *parent)
         series[a]=lv_chart_add_series(chart,lv_color_hex(colors[a]),LV_CHART_AXIS_PRIMARY_Y);
         lv_chart_set_all_values(chart,series[a],LV_CHART_POINT_NONE);
     }
-    ui_text_label(drawer,"告警时间线",&sim_font_20,TEXT);
+    ui_text_label(drawer,"最近事件",&sim_font_20,TEXT);
     timeline=ui_text_label(drawer,"暂无告警",&sim_font_14,MUTED);
     lv_obj_set_width(timeline,288);
 }
