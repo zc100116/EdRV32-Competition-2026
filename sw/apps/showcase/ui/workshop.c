@@ -8,10 +8,11 @@ const char *const ws_names[WS_ITEMS] = {
     "砖块","金属","冰","玻璃","树叶","灯","窗户","门","木梁","石柱",
     "木斜坡","砖斜坡"};
 const char *const ws_scene_names[3] = {"空地","小屋","城堡"};
+/* Alpha-weighted RGB means of the original day sprites; tools have no debris. */
 const uint32_t ws_colors[WS_ITEMS] = {
-    0,0,0x72a657,0x956747,0x839095,0xa19b8b,0xe7c778,0xb58b59,0x79563e,0x889da7,
-    0xba7059,0x9caeb9,0x9ddceb,0xbce3df,0x5c985a,0xeac36b,0x93c8d1,0x8f6743,
-    0xa97b4f,0x99a4a5,0xad8254,0xb76e56};
+    0,0,0xa28561,0xab8262,0x959ca4,0x979591,0xd7c28f,0xbe9769,0xab835d,
+    0xa3a9ab,0xc7947e,0xa3b4b4,0xadd3d7,0xb0cfc6,0x87a478,0x94998c,0x95998b,
+    0x9e8362,0xbf9767,0xa3aaad,0xb09068,0xb88c7a};
 static bool loose(unsigned item) { return item==WS_SAND || item==WS_GRAVEL; }
 void workshop_shape(unsigned item,unsigned orientation,int *w,int *h)
 {
@@ -168,10 +169,23 @@ static void frightened(workshop_state *s,int x,int y)
         if (a->action==WS_LIFT) continue;
         if (a->x/2>=x-28 && a->x/2<=x+76 && a->y/2>=y && a->y/2<=y+104) {
             int dir=a->x/2<x+24 ? -1 : 1;
-            int nx=a->x/2+dir*48;
-            if (nx<WS_X+28 || nx>WS_X+WS_COLS*48-28) { dir=-dir; nx=a->x/2+dir*48; }
-            int cx=(nx-WS_X)/48,cy=(a->y/2-WS_Y-1)/48;
-            if (cell(s,cx,cy)>=0) { dir=-dir; nx=a->x/2+dir*48; }
+            int nx=a->x/2;
+            int cy=(a->y/2-WS_Y-1)/48;
+            for (int distance=1;distance<WS_COLS;++distance) {
+                bool found=false;
+                for (int side=0;side<2;++side) {
+                    int candidate=a->x/2+(side ? -dir : dir)*48*distance;
+                    int cx=(candidate-WS_X)/48;
+                    if (candidate>=WS_X+28 && candidate<=WS_X+WS_COLS*48-28 &&
+                        cell(s,cx,cy)<0) {
+                        nx=candidate;
+                        dir=side ? -dir : dir;
+                        found=true;
+                        break;
+                    }
+                }
+                if (found) break;
+            }
             a->x=nx*2;
             a->direction=dir;
             a->action=WS_RUN;
@@ -214,14 +228,17 @@ static void falling(workshop_state *s)
         f->offset+=distance;
         if (distance==gap && stationary_contact) {
             int rows=f->offset/96;
+            bool landed[WS_BLOCKS]={false};
             for (int i=0;i<WS_BLOCKS;++i) if (s->blocks[i].used && s->blocks[i].group==g) {
                 ws_block *b=&s->blocks[i];
                 b->y+=(int16_t)rows;
                 b->group=0;
-                frightened(s,WS_X+b->x*48,WS_Y+b->y*48);
+                landed[i]=true;
                 particle(s,WS_X+b->x*48+24,WS_Y+(b->y+1)*48,-2,-3,18,0,0);
             }
             workshop_reconnect(s);
+            for (int i=0;i<WS_BLOCKS;++i) if (landed[i])
+                frightened(s,WS_X+s->blocks[i].x*48,WS_Y+s->blocks[i].y*48);
         }
     }
 }
@@ -257,9 +274,9 @@ void workshop_scene(workshop_state *s,unsigned scene)
         insert(s,WS_DOOR,0,8,8);
         insert(s,WS_WINDOW,0,10,7);
         for (int x=4;x<=12;++x) insert(s,WS_BRICK,0,x,5);
-        insert(s,WS_BRICK_SLOPE,0,4,4);
+        insert(s,WS_BRICK_SLOPE,1,4,4);
         for (int x=5;x<=11;++x) insert(s,WS_BRICK,0,x,4);
-        insert(s,WS_BRICK_SLOPE,1,12,4);
+        insert(s,WS_BRICK_SLOPE,0,12,4);
         /* Lamp replaces an interior wall cell rather than overlapping it. */
         for (int i=0;i<WS_BLOCKS;++i)
             if (s->blocks[i].used && s->blocks[i].x==7 && s->blocks[i].y==6)
@@ -317,8 +334,8 @@ static int floor_below(const workshop_state *s,int x,int y)
 }
 static void animals(workshop_state *s)
 {
-    /* Replaced with the art pack's documented stride when it is integrated. */
-    static const int strides[2]={32,24};
+    /* assets/workshop/README.md: displacement advances exactly with walk frames. */
+    static const int strides[2]={24,16};
     for (unsigned i=0;i<s->animal_count;++i) {
         ws_animal *a=&s->animals[i];
         if (a->action==WS_LIFT) {
@@ -477,6 +494,16 @@ static void interact(workshop_state *s,bool pressed,bool released)
     unsigned orientation=s->held>=0 ? s->blocks[s->held].orientation : s->orientation;
     s->preview=item>=WS_GRASS && workshop_fits(s,item,orientation,x,y);
     if (s->return_ticks) {
+        while (s->origin_y>=0 && !workshop_fits(s,item,orientation,
+               s->origin_x,s->origin_y)) --s->origin_y;
+        if (s->origin_y<0) {
+            int px,py,id=s->held;
+            held_position(s,&px,&py);
+            s->held=-1;
+            s->return_ticks=0;
+            shatter(s,id,px+24,py+24);
+            return;
+        }
         if (--s->return_ticks==0) {
             s->blocks[s->held].x=(int16_t)s->origin_x;
             s->blocks[s->held].y=(int16_t)s->origin_y;

@@ -9,8 +9,8 @@
 #include "src/draw/lv_draw_private.h"
 #include <stdio.h>
 LV_IMAGE_DECLARE(sling_star);
-LV_IMAGE_DECLARE(tower_hand_fist);
-LV_IMAGE_DECLARE(tower_hand_open);
+LV_IMAGE_DECLARE(ws_cursor_hand_grab);
+LV_IMAGE_DECLARE(ws_cursor_hand_open);
 static const char *const names[] = {
     "", "弹弓打靶", "石头剪刀布", "打地鼠", "切图形", "接物篮"};
 static const char *const instructions[] = {
@@ -346,7 +346,7 @@ void ui_page_motion(lv_obj_t *p)
     setup = ui_box(p,300,200,680,320,PANEL);
     setup_title = ui_emphasis(setup,"",false);
     lv_obj_set_pos(setup_title,30,20);
-    ui_game_instruction(setup,&tower_hand_open,"",30,70,620);
+    ui_game_instruction(setup,&ws_cursor_hand_open,"",30,70,620);
     lv_obj_t *row = lv_obj_get_child(setup,-1);
     setup_text = lv_obj_get_child(row,1);
     static const char *const speed_names[] = {"慢","中","快",""};
@@ -356,7 +356,7 @@ void ui_page_motion(lv_obj_t *p)
     lv_obj_set_style_pad_all(speed_segment,0,0);
     lv_obj_set_style_pad_column(speed_segment,40,0);
     lv_obj_add_event_cb(speed_segment,speed_changed,LV_EVENT_VALUE_CHANGED,NULL);
-    ui_game_instruction(setup,&tower_hand_fist,"握拳停留 1 秒选择 / 开始",30,192,620);
+    ui_game_instruction(setup,&ws_cursor_hand_grab,"握拳停留 1 秒选择 / 开始",30,192,620);
     start_button = ui_game_button(setup,"开始",200,242,280,23);
     hold_arc = ui_hold_arc(lv_screen_active(),MOTION_HOLD);
     lv_obj_set_hidden(hold_arc,true);

@@ -5,9 +5,10 @@
 #include "detection.h"
 #include "renderer.h"
 #include "game_view.h"
-#include "tower.h"
-void ui_page_tower(lv_obj_t *parent);
-void ui_tower_action(unsigned action);
+#include "workshop.h"
+void ui_page_workshop(lv_obj_t *parent);
+void ui_workshop_action(unsigned action);
+bool ui_workshop_key(uint32_t key);
 unsigned ui_page;
 unsigned ui_tab;
 unsigned ui_mode;
@@ -75,6 +76,7 @@ static lv_key_t remap(lv_indev_t *input,lv_key_t key)
     if(interface_hidden && lv_indev_get_state(input)==LV_INDEV_STATE_PRESSED) {
         ui_restore_interface(); lv_indev_wait_release(input); return 0;
     }
+    if(input && ui_page==17 && ui_workshop_key(key)) return 0;
     lv_obj_t *o=lv_group_get_focused(group);
     if(key==LV_KEY_ESC) return (lv_key_t)KEY_BACK;
     if(key==LV_KEY_ENTER && o && editable(o)) return (lv_key_t)KEY_EDIT;
@@ -215,7 +217,7 @@ void ui_open(unsigned page)
     ui_text_label(top,"EdRV32",&sim_font_20,ACCENT);
     const char *names[] = {"首页", "目标检测计数", "图片识别", "图像处理", "图形引擎",
         "经典游戏", "系统监控", "芯片信息", "调试助手", "人体姿态", "手势识别",
-        "人脸贴纸", "简笔画识别", "安全帽检测", "抓取测试", "体感互动", "设置", "积木塔"};
+        "人脸贴纸", "简笔画识别", "安全帽检测", "抓取测试", "体感互动", "设置", "方块工坊"};
     ui_text_label(top,names[page],&sim_font_16,TEXT);
     status = ui_text_label(top,"",&sim_font_14,MUTED);
     lv_obj_set_flex_grow(status,1);
@@ -238,9 +240,9 @@ void ui_open(unsigned page)
         ui_page_process, ui_page_graphics, ui_page_games, NULL,
         ui_page_chip, ui_page_debug, ui_page_pose, ui_page_hand,
         ui_page_face, ui_page_doodle, ui_page_helmet, ui_page_grab, ui_page_motion,
-        ui_page_settings, ui_page_tower};
+        ui_page_settings, ui_page_workshop};
     if(page==5) ui_data_games(&game_count);
-    bool compact=(page>=1 && page<=3) || (page>=9 && page<=13);
+    bool compact=(page>=1 && page<=3) || (page>=9 && page<=13) || page==17;
     if(compact) {
         lv_obj_set_hidden(top,true); lv_obj_set_hidden(bottom,true);
         lv_obj_set_size(content,1280,720); lv_obj_set_pos(content,0,0);
@@ -299,7 +301,7 @@ static void activate(unsigned action)
     } else if((ui_page==1 || ui_page==2) && action==2) {
         ui_camera_drawer_toggle();
     } else if(ui_page == 17) {
-        ui_tower_action(action);
+        ui_workshop_action(action);
     } else if(ui_page == 15) {
         ui_motion_action(action);
     } else if(ui_page == 14) {
@@ -344,6 +346,7 @@ void ui_activate(unsigned action) { activate(action); }
 void ui_key(uint32_t key)
 {
     if(ui_restore_interface()) return;
+    if(ui_page==17 && ui_workshop_key(key)) return;
     key=remap(NULL,key);
     if(key==KEY_BACK) { ui_back(); return; }
     if(ui_page==0 && ui_home_key(key)) return;

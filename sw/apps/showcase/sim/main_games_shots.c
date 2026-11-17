@@ -3,7 +3,7 @@
  */
 #include "game_view.h"
 #include "sim_data.h"
-#include "tower.h"
+#include "workshop.h"
 #include "game_loop.h"
 #include "grab.h"
 #include <assert.h>
@@ -11,16 +11,9 @@
 #include <string.h>
 #include <time.h>
 extern const lv_image_dsc_t sim_indoor;
-extern void ui_tower_action(unsigned action);
-extern void ui_tower_update(void);
-extern bool ui_tower_loading(void);
-extern unsigned ui_tower_atlas_bytes(void);
 static uint16_t framebuffer[1280*720];
 static uint32_t drawbuffer[1280*720];
-static tower_state fixture;
-static tower_snapshot buffers[3];
 static const char *directory;
-static bool tower_active;
 static motion_snapshot_t motion_fixture, motion_buffers[3];
 static void flush(lv_display_t *display, const lv_area_t *area, uint8_t *pixels)
 {
@@ -35,8 +28,7 @@ static void flush(lv_display_t *display, const lv_area_t *area, uint8_t *pixels)
 }
 static void capture(const char *name)
 {
-    if (tower_active) ui_tower_update();
-    else ui_motion_update();
+    ui_motion_update();
     lv_obj_update_layout(lv_screen_active());
     lv_refr_now(NULL);
     char path[1024];
@@ -46,10 +38,6 @@ static void capture(const char *name)
     fclose(f);
 }
 static void freeze(void *context) { (void)context; }
-static void snapshot(void *context, void *destination)
-{
-    tower_snapshot_copy(context,destination);
-}
 static void report(void *context, unsigned a, unsigned b, unsigned c, unsigned d)
 {
     (void)context; (void)a; (void)b; (void)c; (void)d;
@@ -58,11 +46,6 @@ static void publish(void)
 {
     lv_tick_inc(17);
     game_loop_step();
-}
-static void block(int kind, int x, int y)
-{
-    int id = tower_spawn(&fixture,kind,x,y);
-    fixture.world.bodies[id].awake = false;
 }
 static void motion_snapshot(void *context, void *destination)
 {
@@ -154,35 +137,6 @@ int main(int argc, char **argv)
     ui_hand_t gesture = {0};
     sim_data_demo(&demo,&gesture,&sim_indoor);
     games();
-    tower_active = true;
-    ui_open(17);
-    sim_data_session(UI_APP_GRAB,UI_STATE_RUNNING,NULL);
-    ui_refresh();
-    publish(); capture("tower-start");
-    ui_tower_action(3);
-    clock_t begin = clock();
-    while (ui_tower_loading()) ui_tower_update();
-    printf("tower atlas host_cpu_ms=%ld\n",(long)((clock()-begin)*1000/CLOCKS_PER_SEC));
-    printf("tower atlas bytes=%u\n",ui_tower_atlas_bytes());
-    game_loop_stop();
-    tower_init(&fixture,TOWER_FREE,42,0);
-    fixture.hand = (tower_input){735,275,1,true,0};
-    block(6,530,580); block(6,730,580);
-    block(1,630,520); block(0,590,460); block(0,670,460);
-    block(2,630,390); block(3,630,320);
-    fixture.peak = fixture.height = 340;
-    fixture.ticks = 35*60;
-    game_loop_config config = {freeze,snapshot,report,&fixture,
-        {&buffers[0],&buffers[1],&buffers[2]},sizeof(tower_snapshot)};
-    game_loop_start(&config);
-    publish(); capture("tower-playing");
-    fixture.mode = TOWER_HIGH;
-    fixture.stable = TOWER_STABLE;
-    fixture.new_record = true;
-    tower_finish(&fixture);
-    publish(); capture("tower-result");
-    game_loop_stop();
-    ui_open(0);
     lv_deinit();
-    puts("PASS native six-game start/playing/result captures (18 images)");
+    puts("PASS native five arcade games start/playing/result captures; workshop has separate scenes");
 }

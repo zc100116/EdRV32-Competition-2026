@@ -53,8 +53,8 @@ void workshop_dirty(const workshop_snapshot *a,const workshop_snapshot *b,
         const ws_animal *p=&a->animals[i],*q=&b->animals[i];
         if (p->x!=q->x || p->y!=q->y || p->frame!=q->frame ||
             p->direction!=q->direction || p->action!=q->action)
-            emit(join((ws_rect){p->x/2-32,p->y/2-56,64,56},
-                      (ws_rect){q->x/2-32,q->y/2-56,64,56}),context);
+            emit(join((ws_rect){p->x/2-32,p->y/2-52,64,56},
+                      (ws_rect){q->x/2-32,q->y/2-52,64,56}),context);
     }
     for (unsigned i=0;i<WS_PARTICLES;++i) {
         const ws_particle *p=&a->particles[i],*q=&b->particles[i];
@@ -77,7 +77,9 @@ void workshop_dirty(const workshop_snapshot *a,const workshop_snapshot *b,
     }
     if (a->preview_x!=b->preview_x || a->preview_y!=b->preview_y ||
         a->preview!=b->preview || a->held!=b->held || a->selected!=b->selected ||
-        a->orientation!=b->orientation || a->inventory!=b->inventory) {
+        a->orientation!=b->orientation || a->inventory!=b->inventory ||
+        (a->held>=0 && b->held>=0 &&
+         a->blocks[a->held].orientation!=b->blocks[b->held].orientation)) {
         if (a->selected>=WS_GRASS || a->held>=0) emit(preview(a),context);
         if (b->selected>=WS_GRASS || b->held>=0) emit(preview(b),context);
     }

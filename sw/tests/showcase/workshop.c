@@ -147,7 +147,7 @@ static void animals_test(void)
     p->action=WS_WALK; p->timer=300; p->phase=0; p->direction=1;
     int x=p->x;
     ticks(5,0,0,0); assert(p->x==x);
-    step(0,0,0); assert(p->frame==1 && p->x==x+8);
+    step(0,0,0); assert(p->frame==1 && p->x==x+6);
     /* Put the foot 24px before a one-cell step. */
     p->x=(WS_X+4*48-24)*2; p->y=(WS_Y+9*48)*2; p->phase=50;
     workshop_add(&s,WS_STONE,0,4,8);
@@ -198,8 +198,10 @@ static void areas(void)
     empty();
     for (int x=4;x<14;++x) for (int y=4;y<7;++y)
         s.blocks[(x-4)*3+y-4]=(ws_block){true,WS_STONE,0,(int16_t)x,(int16_t)y,0};
-    workshop_reconnect(&s); workshop_snapshot_copy(&s,&a);
-    ticks(4,0,0,0); workshop_snapshot_copy(&s,&b); measure("30-cell-fall");
+    workshop_reconnect(&s);
+    s.falls[s.blocks[0].group-1].velocity=32;
+    workshop_snapshot_copy(&s,&a);
+    ticks(1,0,0,0); workshop_snapshot_copy(&s,&b); measure("30-cell-fall");
     workshop_snapshot_copy(&s,&a); s.inventory=true;
     workshop_snapshot_copy(&s,&b); measure("inventory-open");
 }

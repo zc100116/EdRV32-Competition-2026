@@ -3,7 +3,7 @@ ROOT := $(abspath ../../../..)
 BUILD := $(ROOT)/build/sim
 LVGL := $(ROOT)/third_party/lvgl
 UI := $(wildcard ../ui/*.c)
-UI_HEADERS := $(wildcard ../ui/*.h) $(ROOT)/sw/tests/showcase/geo_model.h
+UI_HEADERS := $(wildcard ../ui/*.h)
 FONT_SIZES := 14 16 20 28 40
 FONTS := $(foreach size,$(FONT_SIZES),$(BUILD)/fonts/sim_font_$(size).c)
 DIGITS := $(BUILD)/fonts/sim_digits_40.c
@@ -19,9 +19,9 @@ LINUX_LV := $(patsubst $(LVGL)/%.c,$(BUILD)/linux/%.o,$(LV_SOURCES))
 WIN_LV := $(patsubst $(LVGL)/%.c,$(BUILD)/win/%.o,$(LV_SOURCES))
 PROCESS_HELPERS := $(ROOT)/sw/lib/geo_matrix.c $(ROOT)/sw/lib/geo_matrix.h
 BOLD_FONTS := $(wildcard ../fonts/showcase_*.c)
-ART_NAMES := sling rps mole slice catch home tower
+ART_NAMES := sling rps mole slice catch home ws
 ART := $(addprefix $(BUILD)/,$(addsuffix _images.c,$(ART_NAMES))) $(BUILD)/stickers.c
-COMMON := $(BOLD_FONTS) $(ART) $(UI) sim_data.c game_loop_port.c geo_host.c process.c $(ROOT)/sw/lib/geo_matrix.c $(ASSETS) $(GAMES) $(FONTS) $(DIGITS)
+COMMON := $(BOLD_FONTS) $(ART) $(UI) sim_data.c game_loop_port.c process.c $(ROOT)/sw/lib/geo_matrix.c $(ASSETS) $(GAMES) $(FONTS) $(DIGITS)
 SHOTS := home home-vrn vision image process graphics games chip debug \
     game-running renderer-list renderer-result benchmark-results overlay-home chip-coremark \
     coremark-counters games-last-row detection-settings process-collapsed \
@@ -105,8 +105,9 @@ $(BUILD)/$(1)_images.c: $(ROOT)/tools/sw/embed_showcase_images.py \
     $$(wildcard ../assets/$(2)/*.png)
 	python3 $(ROOT)/tools/sw/embed_showcase_images.py ../assets/$(2) $$@ --prefix $(1)
 endef
-$(foreach art,sling rps mole slice catch tower,$(eval $(call SIM_ART_RULE,$(art),$(art))))
+$(foreach art,sling rps mole slice catch,$(eval $(call SIM_ART_RULE,$(art),$(art))))
 $(eval $(call SIM_ART_RULE,home,icons))
+$(eval $(call SIM_ART_RULE,ws,workshop))
 $(BUILD)/stickers.c: $(wildcard ../assets/stickers/*.png)
 	python3 $(ROOT)/tools/sw/rotate_showcase_stickers.py ../assets/stickers $(BUILD)/sticker-frames
 	python3 $(ROOT)/tools/sw/embed_showcase_images.py $(BUILD)/sticker-frames $@ --prefix sticker
@@ -122,15 +123,6 @@ frame-shots: $(BUILD)/showcase_frame_shots
 $(BUILD)/showcase_frame_shots: main_frame_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_frame_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
 
-TOWER_OUTPUT ?= $(ROOT)/build/sim/tower
-.PHONY: tower-shots
-tower-shots: $(BUILD)/showcase_tower_shots
-	mkdir -p $(TOWER_OUTPUT)
-	$(BUILD)/showcase_tower_shots $(TOWER_OUTPUT)
-	$(foreach name,start building glass result,python3 $(ROOT)/tools/sw/raw2png.py $(TOWER_OUTPUT)/$(name).rgb565 $(TOWER_OUTPUT)/$(name).png;)
-	rm $(addprefix $(TOWER_OUTPUT)/,$(addsuffix .rgb565,start building glass result))
-$(BUILD)/showcase_tower_shots: main_tower_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
-	$(CC) $(FLAGS) -Werror main_tower_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
 PAGES_SHOTS := vision image process graphics games chip debug pose hand face doodle helmet settings monitor vision-categories detection-settings debug-network graphics-renderers image-loading chip-running hand-debug face-debug helmet-warning session-failed
 PAGES_OUTPUT ?= $(ROOT)/build/sim/ui-pages
 .PHONY: pages-shots
@@ -144,7 +136,7 @@ $(BUILD)/showcase_pages_shots: main_pages_shots.c $(COMMON) $(UI_HEADERS) $(LINU
 
 # T-GAMES-LOOP: all six games, three states each, using application snapshots.
 GAMES_OUTPUT ?= $(ROOT)/build/sim/games-loop
-GAMES_SHOTS := $(foreach game,sling rps mole slice catch tower,\
+GAMES_SHOTS := $(foreach game,sling rps mole slice catch,\
     $(addprefix $(game)-,start playing result))
 .PHONY: games-shots
 games-shots: $(BUILD)/showcase_games_shots
@@ -165,3 +157,15 @@ compact-shots: $(BUILD)/showcase_compact_shots
 	rm $(BUILD)/ui-compact/*.rgb565
 $(BUILD)/showcase_compact_shots: main_compact_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_compact_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
+
+WORKSHOP_OUTPUT ?= $(ROOT)/build/sim/workshop
+WORKSHOP_SHOTS := selection clearing-day house-day castle-day house-dusk house-night \
+    inventory crack-4 falling animal-lift animal-stun slope-preview
+.PHONY: workshop-shots
+workshop-shots: $(BUILD)/showcase_workshop_shots
+	mkdir -p $(WORKSHOP_OUTPUT)
+	$(BUILD)/showcase_workshop_shots $(WORKSHOP_OUTPUT)
+	$(foreach name,$(WORKSHOP_SHOTS),python3 $(ROOT)/tools/sw/raw2png.py $(WORKSHOP_OUTPUT)/$(name).rgb565 $(WORKSHOP_OUTPUT)/$(name).png;)
+	rm $(addprefix $(WORKSHOP_OUTPUT)/,$(addsuffix .rgb565,$(WORKSHOP_SHOTS)))
+$(BUILD)/showcase_workshop_shots: main_workshop_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
+	$(CC) $(FLAGS) -Werror main_workshop_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
