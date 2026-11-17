@@ -44,8 +44,8 @@ void workshop_dirty(const workshop_snapshot *a,const workshop_snapshot *b,
         if (!q->used) t=r;
         if ((p->used && (p->item==WS_LAMP || p->item==WS_WINDOW)) ||
             (q->used && (q->item==WS_LAMP || q->item==WS_WINDOW))) {
-            r=(ws_rect){r.x-48,r.y-48,r.w+96,r.h+96};
-            t=(ws_rect){t.x-48,t.y-48,t.w+96,t.h+96};
+            r=(ws_rect){r.x-144,r.y-144,r.w+288,r.h+288};
+            t=(ws_rect){t.x-144,t.y-144,t.w+288,t.h+288};
         }
         emit(join(r,t),context);
     }
@@ -72,8 +72,16 @@ void workshop_dirty(const workshop_snapshot *a,const workshop_snapshot *b,
     if (a->hand.x!=b->hand.x || a->hand.y!=b->hand.y ||
         a->hand.closed!=b->hand.closed || a->selected!=b->selected ||
         (b->selected==WS_PICK && b->hand.closed && a->ticks/10!=b->ticks/10)) {
-        emit(join((ws_rect){a->hand.x-32,a->hand.y-32,64,64},
-                  (ws_rect){b->hand.x-32,b->hand.y-32,64,64}),context);
+        emit(join((ws_rect){a->hand.x-24,a->hand.y-12,88,72},
+                  (ws_rect){b->hand.x-24,b->hand.y-12,88,72}),context);
+        const workshop_snapshot *states[]={a,b};
+        for (unsigned i=0;i<2;++i) {
+            const workshop_snapshot *s=states[i];
+            int x=(s->hand.x-WS_X)/48,y=(s->hand.y-WS_Y)/48;
+            if (!s->menu && !s->inventory && s->selected<WS_GRASS && s->held<0 &&
+                s->hand.x>=WS_X && s->hand.y>=WS_Y && x<WS_COLS && y<WS_ROWS)
+                emit((ws_rect){WS_X+x*48,WS_Y+y*48,48,48},context);
+        }
     }
     if (a->preview_x!=b->preview_x || a->preview_y!=b->preview_y ||
         a->preview!=b->preview || a->held!=b->held || a->selected!=b->selected ||

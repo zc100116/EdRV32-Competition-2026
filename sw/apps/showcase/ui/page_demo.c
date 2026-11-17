@@ -139,13 +139,7 @@ static const char *const preset_names[] = {"猫咪", "派对", "酷", "兔子"};
 static void selection_text(void)
 {
     char text[256];
-    lv_snprintf(text, sizeof text, "套装：%s\n%s：%s\n%s：%s\n%s：%s\n%s：%s\n%s：%s",
-        preset < 4 ? preset_names[preset] : "自选",
-        part_names[0], selected[0] < 0 ? "无" : sticker_styles[selected[0]].name,
-        part_names[1], selected[1] < 0 ? "无" : sticker_styles[selected[1]].name,
-        part_names[2], selected[2] < 0 ? "无" : sticker_styles[selected[2]].name,
-        part_names[3], selected[3] < 0 ? "无" : sticker_styles[selected[3]].name,
-        part_names[4], selected[4] < 0 ? "无" : sticker_styles[selected[4]].name);
+    lv_snprintf(text, sizeof text, "套装：%s",preset < 4 ? preset_names[preset] : "自选");
     ui_text(sticker_name, text);
 }
 static void selection_changed(lv_event_t *event)

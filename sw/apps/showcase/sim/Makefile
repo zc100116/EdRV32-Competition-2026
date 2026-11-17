@@ -160,7 +160,7 @@ $(BUILD)/showcase_compact_shots: main_compact_shots.c $(COMMON) $(UI_HEADERS) $(
 
 WORKSHOP_OUTPUT ?= $(ROOT)/build/sim/workshop
 WORKSHOP_SHOTS := selection clearing-day house-day castle-day house-dusk house-night \
-    inventory crack-4 falling animal-lift animal-stun slope-preview
+    inventory crack-4 falling animal-lift animal-stun slope-preview castle-night
 .PHONY: workshop-shots
 workshop-shots: $(BUILD)/showcase_workshop_shots
 	mkdir -p $(WORKSHOP_OUTPUT)

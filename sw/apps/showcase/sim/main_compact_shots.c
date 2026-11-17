@@ -215,7 +215,7 @@ int main(int argc,char **argv)
             assert(!find_type(lv_screen_active(),&lv_dropdown_class));
             lv_obj_t *party=find_label(lv_screen_active(),"派对"); assert(party);
             lv_obj_send_event(lv_obj_get_parent(party),LV_EVENT_CLICKED,NULL);
-            assert(find_label(lv_screen_active(),"套装：派对\n头饰：派对帽\n眼睛：星星眼\n鼻子：无\n嘴巴：无\n脸颊：腮红"));
+            assert(find_label(lv_screen_active(),"套装：派对"));
         }
         if(pages[i]==3) {
             ui_process_config_t original=ui_data_process_config();

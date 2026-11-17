@@ -83,6 +83,12 @@ int main(int argc,char **argv)
     fixture.hand=(ws_input){1020,240,0,false,0};
     fixture.sky=WS_DUSK; capture("house-dusk");
     fixture.sky=WS_NIGHT; capture("house-night");
+    workshop_scene(&fixture,2);
+    fixture.sky=WS_NIGHT;
+    fixture.hand=(ws_input){1020,240,0,false,0};
+    capture("castle-night");
+    workshop_scene(&fixture,1);
+    fixture.sky=WS_NIGHT;
     fixture.inventory=true;
     fixture.inventory_hover=6;
     fixture.hand=(ws_input){500,270,0,false,0};
@@ -121,5 +127,5 @@ int main(int argc,char **argv)
     game_loop_stop();
     ui_open(0);
     lv_deinit();
-    puts("PASS native workshop 12 scene, sky and interaction captures");
+    puts("PASS native workshop 13 scene, sky and interaction captures");
 }

@@ -137,7 +137,7 @@ static void interactions(void)
     ui_open(11); assert(ui_debug_overlay); assert(!find_label(lv_screen_active(),"调试"));
     lv_obj_t *preset=find_label(lv_screen_active(),"派对"); assert(preset);
     lv_obj_send_event(lv_obj_get_parent(preset),LV_EVENT_CLICKED,NULL);
-    assert(find_label(lv_screen_active(),"套装：派对\n头饰：派对帽\n眼睛：星星眼\n鼻子：无\n嘴巴：无\n脸颊：腮红"));
+    assert(find_label(lv_screen_active(),"套装：派对"));
     ui_open(16); assert(lv_obj_has_state(named_switch("调试叠加"),LV_STATE_CHECKED));
     toggle(named_switch("调试叠加"),false); assert(!ui_debug_overlay);
     lv_obj_t *test=find_label(lv_screen_active(),"抓取测试"); assert(test);

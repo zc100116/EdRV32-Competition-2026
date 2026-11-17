@@ -10,6 +10,9 @@
 #include "src/draw/lv_draw_private.h"
 #include <stdio.h>
 #include <string.h>
+#ifndef __riscv
+#include <time.h>
+#endif
 LV_IMAGE_DECLARE(ws_block_grass);
 LV_IMAGE_DECLARE(ws_block_dirt);
 LV_IMAGE_DECLARE(ws_block_stone);
@@ -188,6 +191,8 @@ static lv_image_dsc_t tile_images[WS_ROWS+2][WS_COLS+2];
 static bool tile_used[WS_ROWS+2][WS_COLS+2];
 static uint32_t minimaps[3][160*88];
 static lv_image_dsc_t thumbnails[3];
+static uint32_t swing_pixels[64*64];
+static lv_image_dsc_t swing_image;
 static const lv_image_dsc_t *block_image(unsigned item,unsigned orientation,unsigned sky)
 {
     if (item==WS_BEAM) return orientation ? &ws_beam_v : &ws_beam_h;
@@ -234,19 +239,66 @@ static uint32_t blend(uint32_t dest,uint32_t src)
     }
     return value;
 }
-static void tile_blit(int col,int row,const lv_image_dsc_t *image,int x,int y)
+enum { LIGHT_RADIUS=144, LIGHT_RADIUS2=144*144 };
+static struct { int x,y; } lights[WS_BLOCKS];
+static unsigned light_count;
+static bool changed_tiles[WS_ROWS+2][WS_COLS+2];
+#ifndef __riscv
+static unsigned shaded_pixels, light_samples, lit_samples;
+#endif
+static bool light_item(unsigned item) { return item==WS_LAMP || item==WS_WINDOW; }
+static unsigned ambient(unsigned sky)
+{
+    static const unsigned values[]={255,179,102};
+    return values[sky];
+}
+static unsigned brightness(int x,int y)
+{
+    unsigned base=ambient(next.sky),value=base;
+#ifndef __riscv
+    ++shaded_pixels;
+#endif
+    for (unsigned i=0;i<light_count;++i) {
+        int dx=x-lights[i].x,dy=y-lights[i].y;
+        unsigned distance=(unsigned)(dx*dx+dy*dy);
+#ifndef __riscv
+        ++light_samples;
+#endif
+        if (distance>=LIGHT_RADIUS2) continue;
+#ifndef __riscv
+        ++lit_samples;
+#endif
+        unsigned t=(LIGHT_RADIUS2-distance)*255/LIGHT_RADIUS2;
+        unsigned restored=base+(255-base)*t*t/(255*255);
+        if (restored>value) value=restored;
+    }
+    return value;
+}
+static uint32_t shade(uint32_t pixel,unsigned amount)
+{
+    unsigned r=((pixel>>16)&255)*amount/255;
+    unsigned g=((pixel>>8)&255)*amount/255;
+    unsigned b=(pixel&255)*amount/255;
+    return (pixel&0xff000000)|(r<<16)|(g<<8)|b;
+}
+static void tile_blit(int col,int row,const lv_image_dsc_t *image,int x,int y,
+                      bool illuminate,bool source)
 {
     int tx=WS_X+(col-1)*48,ty=WS_Y+(row-1)*48;
     int left=x>tx ? x : tx,top=y>ty ? y : ty;
     int right=x+(int)image->header.w,bottom=y+(int)image->header.h;
     if (right>tx+48) right=tx+48;
     if (bottom>ty+48) bottom=ty+48;
+    if (left>=right || top>=bottom) return;
     const uint32_t *src=(const uint32_t *)image->data;
     for (int yy=top;yy<bottom;++yy)
         for (int xx=left;xx<right;++xx) {
+            uint32_t pixel=src[(yy-y)*image->header.w+xx-x];
+            if (!(pixel>>24)) continue;
+            if (illuminate && !source) pixel=shade(pixel,brightness(xx,yy));
             uint32_t *p=&tiles[row][col][(yy-ty)*48+xx-tx];
-            *p=blend(*p,src[(yy-y)*image->header.w+xx-x]);
-            if (*p>>24) tile_used[row][col]=true;
+            *p=blend(*p,pixel);
+            tile_used[row][col]=true;
         }
 }
 static bool fixed(const workshop_snapshot *s,int i)
@@ -257,39 +309,74 @@ static void cache_region(ws_rect r)
 {
     for (int row=0;row<WS_ROWS+2;++row) for (int col=0;col<WS_COLS+2;++col) {
         int x=WS_X+(col-1)*48,y=WS_Y+(row-1)*48;
-        if (x>=r.x+r.w || x+48<=r.x || y>=r.y+r.h || y+48<=r.y) continue;
-        memset(tiles[row][col],0,sizeof tiles[row][col]);
-        tile_used[row][col]=false;
-        for (int pass=0;pass<2;++pass) for (int i=0;i<WS_BLOCKS;++i) {
-            if (!fixed(&next,i)) continue;
-            ws_rect b=workshop_block_rect(&next,i);
-            unsigned item=next.blocks[i].item;
-            if (!pass) {
-                if (next.sky && (item==WS_LAMP || item==WS_WINDOW))
-                    tile_blit(col,row,&ws_glow,b.x-48,b.y-48);
-            } else tile_blit(col,row,block_image(item,next.blocks[i].orientation,next.sky),
-                             b.x,b.y);
-        }
+        if (x<r.x+r.w && x+48>r.x && y<r.y+r.h && y+48>r.y)
+            changed_tiles[row][col]=true;
     }
 }
 static void cache_update(void)
 {
-    if (shown.menu!=next.menu || shown.scene!=next.scene || shown.sky!=next.sky) {
-        cache_region((ws_rect){WS_X-48,WS_Y-48,1056,624});
-        return;
-    }
-    for (int i=0;i<WS_BLOCKS;++i) {
-        bool old=fixed(&shown,i),now=fixed(&next,i);
-        if (old==now && !memcmp(&shown.blocks[i],&next.blocks[i],sizeof(ws_block))) continue;
-        if (old) {
-            ws_rect r=workshop_block_rect(&shown,i);
-            cache_region((ws_rect){r.x-48,r.y-48,r.w+96,r.h+96});
-        }
-        if (now) {
+    bool full=shown.menu!=next.menu || shown.scene!=next.scene || shown.sky!=next.sky;
+#ifndef __riscv
+    clock_t started=clock();
+    shaded_pixels=light_samples=lit_samples=0;
+#endif
+    light_count=0;
+    if (next.sky) for (int i=0;i<WS_BLOCKS;++i)
+        if (next.blocks[i].used && light_item(next.blocks[i].item)) {
             ws_rect r=workshop_block_rect(&next,i);
-            cache_region((ws_rect){r.x-48,r.y-48,r.w+96,r.h+96});
+            lights[light_count].x=r.x+24;
+            lights[light_count++].y=r.y+24;
         }
+    memset(changed_tiles,0,sizeof changed_tiles);
+    if (full) cache_region((ws_rect){WS_X-48,WS_Y-48,1056,624});
+    else for (int i=0;i<WS_BLOCKS;++i) {
+        bool old=fixed(&shown,i),now=fixed(&next,i);
+        ws_rect a=workshop_block_rect(&shown,i),b=workshop_block_rect(&next,i);
+        if (old==now && !memcmp(&shown.blocks[i],&next.blocks[i],sizeof(ws_block)) &&
+            !memcmp(&a,&b,sizeof a)) continue;
+        if (old) cache_region(a);
+        if (now) cache_region(b);
+        if (!next.sky) continue;
+        if (shown.blocks[i].used && light_item(shown.blocks[i].item))
+            cache_region((ws_rect){a.x-144,a.y-144,a.w+288,a.h+288});
+        if (next.blocks[i].used && light_item(next.blocks[i].item))
+            cache_region((ws_rect){b.x-144,b.y-144,b.w+288,b.h+288});
     }
+    for (int row=0;row<WS_ROWS+2;++row) for (int col=0;col<WS_COLS+2;++col) {
+        if (!changed_tiles[row][col]) continue;
+        memset(tiles[row][col],0,sizeof tiles[row][col]);
+        tile_used[row][col]=false;
+        for (int i=0;i<WS_BLOCKS;++i) {
+            if (!fixed(&next,i)) continue;
+            ws_rect r=workshop_block_rect(&next,i);
+            unsigned item=next.blocks[i].item;
+            tile_blit(col,row,block_image(item,next.blocks[i].orientation,next.sky),
+                      r.x,r.y,next.sky!=WS_DAY,light_item(item));
+        }
+        /* The warm halo is composited after the opaque wall pixels. */
+        for (unsigned i=0;i<light_count;++i)
+            tile_blit(col,row,&ws_glow,lights[i].x-72,lights[i].y-72,false,false);
+    }
+#ifndef __riscv
+    if (full) printf("workshop cache sky=%u scene=%u us=%lu pixels=%u samples=%u lit=%u\n",
+        next.sky,next.scene,(unsigned long)((clock()-started)*1000000/CLOCKS_PER_SEC),
+        shaded_pixels,light_samples,lit_samples);
+#endif
+}
+static void shaded_picture(lv_layer_t *layer,const lv_image_dsc_t *image,ws_rect r,
+                           bool source,lv_opa_t opacity)
+{
+    lv_draw_image_dsc_t d;
+    lv_draw_image_dsc_init(&d);
+    d.src=image;
+    d.opa=opacity;
+    d.scale_x=r.w*256/image->header.w;
+    d.scale_y=r.h*256/image->header.h;
+    d.pivot=(lv_point_t){0,0};
+    d.recolor=lv_color_black();
+    d.recolor_opa=(lv_opa_t)(source ? 0 : 255-ambient(shown.sky));
+    lv_area_t area={r.x,r.y,r.x+(int)image->header.w-1,r.y+(int)image->header.h-1};
+    lv_draw_image(layer,&d,&area);
 }
 static void draw_world(lv_event_t *e)
 {
@@ -306,11 +393,11 @@ static void draw_dynamic(lv_event_t *e)
     if (!shown.menu) {
         for (int i=0;i<WS_BLOCKS;++i) {
             const ws_block *b=&shown.blocks[i];
-            if (!b->used || (!b->group && i!=shown.held)) continue;
+            if (!b->used || (!b->group && i!=shown.held) ||
+                (i==shown.held && !shown.returning)) continue;
             ws_rect r=workshop_block_rect(&shown,i);
-            if (shown.sky && (b->item==WS_LAMP || b->item==WS_WINDOW))
-                picture(layer,&ws_glow,r.x-48,r.y-48,144,144,255);
-            picture(layer,block_image(b->item,b->orientation,shown.sky),r.x,r.y,r.w,r.h,255);
+            shaded_picture(layer,block_image(b->item,b->orientation,shown.sky),r,
+                           light_item(b->item),255);
         }
         for (unsigned i=0;i<shown.animal_count;++i) {
             const ws_animal *a=&shown.animals[i];
@@ -318,8 +405,8 @@ static void draw_dynamic(lv_event_t *e)
                 (a->action==WS_WALK || a->action==WS_RUN || a->action==WS_JUMP) ? 1 : 0;
             const lv_image_dsc_t *art=animal_frames[a->species][action][a->direction<0]
                                                   [a->frame%(action==1 ? 8 : 2)];
-            picture(layer,art,a->x/2-(int)art->header.w/2,a->y/2-52,
-                    art->header.w,art->header.h,255);
+            shaded_picture(layer,art,(ws_rect){a->x/2-(int)art->header.w/2,a->y/2-52,
+                           (int)art->header.w,(int)art->header.h},false,255);
         }
         for (unsigned i=0;i<WS_PARTICLES;++i) {
             const ws_particle *p=&shown.particles[i];
@@ -347,23 +434,53 @@ static void draw_dynamic(lv_event_t *e)
             ws_rect r={WS_X+shown.preview_x*48,WS_Y+(shown.preview_y-h+1)*48,w*48,h*48};
             if (shown.preview_x>=0 && shown.preview_y>=0 && shown.preview_x<20 &&
                 shown.preview_y<11) {
-                picture(layer,block_image(item,ori,shown.sky),r.x,r.y,r.w,r.h,128);
-                if (!shown.preview) rect(layer,r,0xf44949,130);
-                else {
-                    rect(layer,(ws_rect){r.x,r.y,r.w,2},0x91edbd,220);
-                    rect(layer,(ws_rect){r.x,r.y,2,r.h},0x91edbd,220);
-                }
+                shaded_picture(layer,block_image(item,ori,shown.sky),r,light_item(item),153);
+                uint32_t color=shown.preview ? 0x62e29a : 0xff6161;
+                rect(layer,(ws_rect){r.x,r.y,r.w,2},color,255);
+                rect(layer,(ws_rect){r.x,r.y+r.h-2,r.w,2},color,255);
+                rect(layer,(ws_rect){r.x,r.y,2,r.h},color,255);
+                rect(layer,(ws_rect){r.x+r.w-2,r.y,2,r.h},color,255);
             }
         }
     }
 }
+static void outline(lv_layer_t *layer,ws_rect r,uint32_t color)
+{
+    rect(layer,(ws_rect){r.x,r.y,r.w,2},color,255);
+    rect(layer,(ws_rect){r.x,r.y+r.h-2,r.w,2},color,255);
+    rect(layer,(ws_rect){r.x,r.y,2,r.h},color,255);
+    rect(layer,(ws_rect){r.x+r.w-2,r.y,2,r.h},color,255);
+}
 static void draw_cursor(lv_event_t *e)
 {
     lv_layer_t *layer=lv_event_get_layer(e);
+    bool swinging=shown.selected==WS_PICK && shown.hand.closed && shown.ticks/10%2;
     const lv_image_dsc_t *cursor=shown.selected==WS_PICK ?
-        (shown.hand.closed && shown.ticks/10%2 ? &ws_cursor_pick_swing : &ws_cursor_pick) :
+        (swinging ? &swing_image : &ws_cursor_pick) :
         (shown.hand.closed ? &ws_cursor_hand_grab : &ws_cursor_hand_open);
-    picture(layer,cursor,shown.hand.x-32,shown.hand.y-32,64,64,255);
+    /* Tip coordinates from compose_workshop_art.py, scaled to a 48 px cursor.
+     * The swing frame is mirrored so the handle remains below/right of its tip.
+     */
+    int tip_x=shown.selected==WS_PICK ? (swinging ? 15 : 16) :
+              shown.hand.closed ? 14 : 23;
+    int tip_y=shown.selected==WS_PICK ? (swinging ? 12 : 13) :
+              shown.hand.closed ? 16 : 7;
+    if (!shown.menu && !shown.inventory && shown.selected<WS_GRASS && shown.held<0) {
+        int x=(shown.hand.x-WS_X)/48,y=(shown.hand.y-WS_Y)/48;
+        if (shown.hand.x>=WS_X && shown.hand.y>=WS_Y && x<WS_COLS && y<WS_ROWS)
+            outline(layer,(ws_rect){WS_X+x*48,WS_Y+y*48,48,48},0xe5f2ef);
+    }
+    picture(layer,cursor,shown.hand.x-tip_x,shown.hand.y-tip_y,48,48,255);
+    if (!shown.menu && !shown.inventory && (shown.selected>=WS_GRASS || shown.held>=0)) {
+        unsigned item=shown.held>=0 ? shown.blocks[shown.held].item : shown.selected;
+        unsigned orientation=shown.held>=0 ? shown.blocks[shown.held].orientation :
+                                          shown.orientation;
+        const lv_image_dsc_t *icon=block_image(item,orientation,shown.sky);
+        int maximum=icon->header.w>icon->header.h ? icon->header.w : icon->header.h;
+        ws_rect r={shown.hand.x+36,shown.hand.y+24,
+                   (int)icon->header.w*24/maximum,(int)icon->header.h*24/maximum};
+        shaded_picture(layer,icon,r,light_item(item),255);
+    }
 }
 static void simulate(void *unused)
 {
@@ -525,6 +642,11 @@ void ui_page_workshop(lv_obj_t *p)
     memset(tiles,0,sizeof tiles);
     memset(tile_used,0,sizeof tile_used);
     maps();
+    const uint32_t *source=(const uint32_t *)ws_cursor_pick_swing.data;
+    for (int y=0;y<64;++y) for (int x=0;x<64;++x)
+        swing_pixels[y*64+x]=source[y*64+63-x];
+    swing_image=ws_cursor_pick_swing;
+    swing_image.data=(const uint8_t *)swing_pixels;
     for (int y=0;y<WS_ROWS+2;++y) for (int x=0;x<WS_COLS+2;++x)
         tile_images[y][x]=(lv_image_dsc_t){
             .header={.magic=LV_IMAGE_HEADER_MAGIC,.cf=LV_COLOR_FORMAT_ARGB8888,

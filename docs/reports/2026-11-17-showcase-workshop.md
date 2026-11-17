@@ -33,3 +33,15 @@
 `sim/{main_tower_shots.c,geo_host.c}`；`assets/tower/` 全部；`tools/sw/compose_tower_blocks.py`；
 `sw/tests/showcase/{phys.c,tower.c,tower_loop.c,tower_geo.c,tower_art.py,geo_model.h}`。
 同时删除 GEO 角度帧辅助函数、DDR 旋转/暂存区和构建/测试规则；首页卡片仍名“体感积木”。
+
+
+## T-WS-POLISH（本节所在提交，基线 c52cbe2b6）
+- 环境亮度 100/70/40%；光源半径 144 px，以距离平方的二次衰减逐像素恢复亮度，灯窗全亮，光晕叠在墙面上。
+- 天色切换整体重建；方块变化只更新相应格子，光源增删/移动更新新旧半径内格子，同次更新去重。
+- 光标 48 px，指尖/镐尖对齐原判定位置，目标浅色框；手旁 24 px 物品图标；预览 alpha 153、四边 2 px 绿/红框。
+- 贴纸摘要仅保留“套装：名称”，两个原生截图断言同步修改；未改世界规则或输入判定。
+- 主机 GCC 13.3.0、O2、clock() 单次整层重建：小屋夜晚 4.055 ms，城堡夜晚 5.940 ms（均包含光晕）。
+- 城堡夜晚像素计数：着色 N=244224，光源采样 S=976896，半径内采样 I=211732；清屏 C=658944、光晕预算 G=82944。
+- RV32 估算基本操作数 O=32N+12S+24I+40G+C=28596192；假定平均 3 周期/操作，光晕每像素额外三次 33 周期除法。
+- 像素循环估算 (3O+99G)/100MHz=0.940 s，计入格子遍历约 1 s；仅为模型估算，不含 DDR 等待，频率变化按 100MHz/f 缩放。
+- 验收：两种 showcase 构建、workshop/sticker 主机测试全部通过，0 告警；日志 `build/workshop-polish/`；原生 workshop 13 张、compact 16 张；截图位于上述 workshop 目录和同级 `ui-compact/`。
