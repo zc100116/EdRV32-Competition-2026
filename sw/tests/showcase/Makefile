@@ -165,3 +165,9 @@ farm:
 	mkdir -p $(BUILD)
 	$(CC) $(FLAGS) -I$(GAME_UI) farm.c $(GAME_UI)/farm.c -o $(BUILD)/farm
 	$(BUILD)/farm
+
+.PHONY: draw
+draw:
+	mkdir -p $(BUILD)
+	$(CC) -I$(GAME_UI) $(FLAGS) draw.c $(GAME_UI)/draw.c -lm -o $(BUILD)/draw
+	$(BUILD)/draw

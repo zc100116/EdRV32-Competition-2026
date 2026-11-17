@@ -7,6 +7,7 @@ ICON(detection); ICON(helmet); ICON(pose); ICON(gesture); ICON(stickers);
 ICON(image); ICON(tower); ICON(sling); ICON(rps); ICON(mole); ICON(slice); ICON(catch);
 ICON(process); ICON(graphics); ICON(nes); ICON(monitor); ICON(chip); ICON(debug); ICON(settings);
 ICON(farm);
+ICON(draw);
 ICON(scene_vision); ICON(scene_tower);
 typedef struct {
     const char *name;
@@ -27,6 +28,7 @@ static const application_t applications[] = {
     {"图片识别","上传图片，探索结果",&home_image,2,CAMERA | UI_ETH},
     {"方块工坊","手势搭房子、挖方块",&home_tower,17,MOTION},
     {"抓取实验","方块和球，体验抓取模式",&home_tower,18,MOTION},
+    {"空中画板","伸出食指，自由画写",&home_draw,20,MOTION},
     {"弹弓打靶","后拉瞄准，松开发射",&home_sling,101,MOTION},
     {"石头剪刀布","亮出手势，与芯片对战",&home_rps,102,MOTION},
     {"打地鼠","眼疾手快，击中目标",&home_mole,103,MOTION},
@@ -40,8 +42,8 @@ static const application_t applications[] = {
     {"调试助手","串口与网络工具",&home_debug,8,0},
     {"设置","显示与抓取判定",&home_settings,16,0}
 };
-static const unsigned starts[] = {0,7,14,17,21};
-static lv_obj_t *tabs, *cards[23];
+static const unsigned starts[] = {0,7,15,18,22};
+static lv_obj_t *tabs, *cards[24];
 static unsigned selected_tab, selected_card;
 static void card_focused(lv_event_t *event)
 {
@@ -74,7 +76,7 @@ bool ui_home_key(uint32_t key)
 {
     if (key != LV_KEY_NEXT && key != LV_KEY_PREV) return false;
     int direction = key == LV_KEY_NEXT ? 1 : -1;
-    selected_card = (selected_card+23+direction)%23;
+    selected_card = (selected_card+24+direction)%24;
     lv_group_focus_obj(cards[selected_card]);
     lv_obj_add_state(cards[selected_card],LV_STATE_FOCUS_KEY);
     return true;
@@ -117,7 +119,7 @@ void ui_page_home(lv_obj_t *parent)
                                      app->hardware,app->action);
         }
     }
-    for (unsigned i = 0; i < 23; ++i)
+    for (unsigned i = 0; i < 24; ++i)
         lv_obj_add_event_cb(cards[i],card_focused,LV_EVENT_FOCUSED,(void *)(uintptr_t)i);
     lv_tabview_set_active(tabs,selected_tab,LV_ANIM_OFF);
     lv_obj_add_event_cb(tabs,tab_changed,LV_EVENT_VALUE_CHANGED,NULL);

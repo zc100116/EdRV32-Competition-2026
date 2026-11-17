@@ -52,3 +52,10 @@ final 96x96 pixels. Save the generated image.”
 resized to 96×96 with Pillow LANCZOS. Prompt:
 
 > Use case: stylized-concept. Asset type: original app icon for an embedded showcase. Subject: a friendly cream cow head beside a tiny teal barn and amber fence, a smart farm symbol. Single centered object, orthographic soft 3D clay illustration with crisp simple silhouette, navy outlines, blue #2563eb and teal #0d9488 palette with warm coral and amber accents. No text, no letters, no brand logos, no watermark. Transparent background, square composition, generous 12% padding. Designed to remain recognizable at 96x96 pixels.
+
+## Air drawing icon (2026-11-17)
+
+`draw.png`: Original built-in imagegen output, downsampled to 96×96 RGBA with
+Pillow LANCZOS, preserving alpha. Prompt:
+
+> Use case: stylized-concept. Asset type: original app icon for an embedded showcase. Subject: air drawing, represented by a teal pointing index finger drawing a curved coral paint stroke above a small blue artist palette with amber paint dots. Single centered object, orthographic soft 3D clay illustration with crisp simple silhouette, navy outlines, blue #2563eb and teal #0d9488 palette with warm coral and amber accents. No text, no letters, no brand logos, no watermark. Transparent background, square composition, generous 12% padding. Designed to remain recognizable at 96x96 pixels.
