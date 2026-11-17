@@ -7,6 +7,9 @@
 #include "game_view.h"
 #include "workshop.h"
 void ui_page_workshop(lv_obj_t *parent);
+void ui_page_tower(lv_obj_t *parent);
+bool ui_tower_key(uint32_t key);
+bool ui_tower_keypad(lv_indev_t *input, uint32_t key);
 void ui_workshop_action(unsigned action);
 bool ui_workshop_key(uint32_t key);
 unsigned ui_page;
@@ -77,6 +80,7 @@ static lv_key_t remap(lv_indev_t *input,lv_key_t key)
         ui_restore_interface(); lv_indev_wait_release(input); return 0;
     }
     if(input && ui_page==17 && ui_workshop_key(key)) return 0;
+    if(input && ui_page==18 && ui_tower_keypad(input,key)) return 0;
     lv_obj_t *o=lv_group_get_focused(group);
     if(key==LV_KEY_ESC) return (lv_key_t)KEY_BACK;
     if(key==LV_KEY_ENTER && o && editable(o)) return (lv_key_t)KEY_EDIT;
@@ -184,7 +188,7 @@ void ui_open(unsigned page)
         static const ui_app_t apps[]={UI_APP_NONE,UI_APP_CAMERA,UI_APP_IMAGE,
             UI_APP_PROCESS,UI_APP_GRAPHICS,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,
             UI_APP_POSE, UI_APP_HAND, UI_APP_FACE, UI_APP_DOODLE, UI_APP_HELMET,
-            UI_APP_GRAB, UI_APP_GRAB, UI_APP_NONE, UI_APP_GRAB};
+            UI_APP_GRAB, UI_APP_GRAB, UI_APP_NONE, UI_APP_GRAB, UI_APP_GRAB};
         if(apps[old_page]!=UI_APP_NONE || game_active ||
            ui_data_session().app==UI_APP_COREMARK) ui_data_app_open(UI_APP_NONE,0);
         game_active=false;
@@ -217,7 +221,7 @@ void ui_open(unsigned page)
     ui_text_label(top,"EdRV32",&sim_font_20,ACCENT);
     const char *names[] = {"首页", "目标检测计数", "图片识别", "图像处理", "图形引擎",
         "经典游戏", "系统监控", "芯片信息", "调试助手", "人体姿态", "手势识别",
-        "人脸贴纸", "简笔画识别", "安全帽检测", "抓取测试", "体感互动", "设置", "方块工坊"};
+        "人脸贴纸", "简笔画识别", "安全帽检测", "抓取测试", "体感互动", "设置", "方块工坊", "物理积木"};
     ui_text_label(top,names[page],&sim_font_16,TEXT);
     status = ui_text_label(top,"",&sim_font_14,MUTED);
     lv_obj_set_flex_grow(status,1);
@@ -240,9 +244,9 @@ void ui_open(unsigned page)
         ui_page_process, ui_page_graphics, ui_page_games, NULL,
         ui_page_chip, ui_page_debug, ui_page_pose, ui_page_hand,
         ui_page_face, ui_page_doodle, ui_page_helmet, ui_page_grab, ui_page_motion,
-        ui_page_settings, ui_page_workshop};
+        ui_page_settings, ui_page_workshop, ui_page_tower};
     if(page==5) ui_data_games(&game_count);
-    bool compact=(page>=1 && page<=3) || (page>=9 && page<=13) || page==17;
+    bool compact=(page>=1 && page<=3) || (page>=9 && page<=13) || page==17 || page==18;
     if(compact) {
         lv_obj_set_hidden(top,true); lv_obj_set_hidden(bottom,true);
         lv_obj_set_size(content,1280,720); lv_obj_set_pos(content,0,0);
@@ -347,6 +351,7 @@ void ui_key(uint32_t key)
 {
     if(ui_restore_interface()) return;
     if(ui_page==17 && ui_workshop_key(key)) return;
+    if(ui_page==18 && ui_tower_key(key)) return;
     key=remap(NULL,key);
     if(key==KEY_BACK) { ui_back(); return; }
     if(ui_page==0 && ui_home_key(key)) return;

@@ -125,3 +125,37 @@ workshop:
 	$(CC) $(FLAGS) -O2 -I$(GAME_UI) workshop.c $(GAME_UI)/workshop.c \
 	    $(GAME_UI)/workshop_view.c -o $(BUILD)/workshop
 	$(BUILD)/workshop
+
+# T-TOWER-PHYS: no LVGL or hardware; one build/run at a time.
+.PHONY: phys phys-perf
+phys:
+	mkdir -p $(BUILD)
+	$(CC) $(FLAGS) -O2 -I$(GAME_UI) phys.c $(GAME_UI)/phys.c -lm -o $(BUILD)/phys
+	$(BUILD)/phys > $(BUILD)/phys.log
+	cat $(BUILD)/phys.log
+phys-perf:
+	mkdir -p $(BUILD)
+	bash -c '. ~/.local/opt/edrv32/env.sh && riscv-none-elf-gcc \
+	    -march=rv32im -mabi=ilp32 -O2 -std=c11 -Wall -Wextra -Werror \
+	    -DPHYS_PERF -I$(GAME_UI) -I$(ROOT)/sw/bsp/include -nostdlib \
+	    -T$(ROOT)/tools/cpu/eval/workloads/spike.ld \
+	    $(ROOT)/tools/cpu/eval/workloads/start.S phys.c $(GAME_UI)/phys.c \
+	    $(ROOT)/sw/bsp/host.c -lc -lgcc -o $(BUILD)/phys-perf.elf && \
+	    spike --isa=rv32im_zicsr_zicntr --disable-dtb $(BUILD)/phys-perf.elf' \
+	    > $(BUILD)/phys-perf.log 2>&1
+	cat $(BUILD)/phys-perf.log
+
+.PHONY: tower
+tower:
+	mkdir -p $(BUILD)
+	$(CC) $(FLAGS) -O2 -I$(GAME_UI) -I$(ROOT)/sw/drivers/include \
+	    -I$(ROOT)/sw/bsp/include -ffunction-sections -Wl,--gc-sections \
+	    tower.c tower_geo.c $(GAME_UI)/tower.c \
+	    $(GAME_UI)/phys.c $(GAME_UI)/sprite_rot.c $(ROOT)/sw/drivers/geo.c -o $(BUILD)/tower
+	python3 tower_art.py $(BUILD)/tower-art.bin
+	$(BUILD)/tower $(BUILD)/tower-art.bin
+	$(CC) $(FLAGS) -O2 -I$(GAME_UI) -I$(ROOT)/sw/lib/sched \
+	    -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \
+	    -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/bsp/include -DLV_CONF_INCLUDE_SIMPLE \
+	    tower_loop.c $(GAME_UI)/game_loop.c -o $(BUILD)/tower_loop
+	$(BUILD)/tower_loop

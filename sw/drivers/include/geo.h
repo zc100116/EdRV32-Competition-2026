@@ -27,4 +27,11 @@ int32_t geo_q16(int32_t numerator, int32_t denominator);
 void geo_descriptor_pack(struct geo_descriptor *descriptor, const struct geo_config *config);
 /* GEO 4.1: submit an already coherent, 32-byte-aligned physical descriptor list. */
 void geo_submit(uint32_t descriptors, uint32_t count);
+/* Submit one coherent batch and wait for DONE/ERROR, returning the GEO error code. */
+uint32_t geo_execute(struct geo_descriptor *table, uint32_t physical, unsigned count);
+/* GEO 2.5: byte stride for a tightly allocated RGB565 surface. */
+static inline unsigned geo_surface_stride(unsigned width)
+{
+    return (width*2u+31u)&~31u;
+}
 #endif

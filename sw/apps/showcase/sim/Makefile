@@ -19,9 +19,9 @@ LINUX_LV := $(patsubst $(LVGL)/%.c,$(BUILD)/linux/%.o,$(LV_SOURCES))
 WIN_LV := $(patsubst $(LVGL)/%.c,$(BUILD)/win/%.o,$(LV_SOURCES))
 PROCESS_HELPERS := $(ROOT)/sw/lib/geo_matrix.c $(ROOT)/sw/lib/geo_matrix.h
 BOLD_FONTS := $(wildcard ../fonts/showcase_*.c)
-ART_NAMES := sling rps mole slice catch home ws
+ART_NAMES := sling rps mole slice catch home ws tower
 ART := $(addprefix $(BUILD)/,$(addsuffix _images.c,$(ART_NAMES))) $(BUILD)/stickers.c
-COMMON := $(BOLD_FONTS) $(ART) $(UI) sim_data.c game_loop_port.c process.c $(ROOT)/sw/lib/geo_matrix.c $(ASSETS) $(GAMES) $(FONTS) $(DIGITS)
+COMMON := $(BOLD_FONTS) $(ART) $(UI) sim_data.c game_loop_port.c geo_host.c process.c $(ROOT)/sw/lib/geo_matrix.c $(ASSETS) $(GAMES) $(FONTS) $(DIGITS)
 SHOTS := home home-vrn vision image process graphics games chip debug \
     game-running renderer-list renderer-result benchmark-results overlay-home chip-coremark \
     coremark-counters games-last-row detection-settings process-collapsed \
@@ -105,7 +105,7 @@ $(BUILD)/$(1)_images.c: $(ROOT)/tools/sw/embed_showcase_images.py \
     $$(wildcard ../assets/$(2)/*.png)
 	python3 $(ROOT)/tools/sw/embed_showcase_images.py ../assets/$(2) $$@ --prefix $(1)
 endef
-$(foreach art,sling rps mole slice catch,$(eval $(call SIM_ART_RULE,$(art),$(art))))
+$(foreach art,sling rps mole slice catch tower,$(eval $(call SIM_ART_RULE,$(art),$(art))))
 $(eval $(call SIM_ART_RULE,home,icons))
 $(eval $(call SIM_ART_RULE,ws,workshop))
 $(BUILD)/stickers.c: $(wildcard ../assets/stickers/*.png)
@@ -169,3 +169,13 @@ workshop-shots: $(BUILD)/showcase_workshop_shots
 	rm $(addprefix $(WORKSHOP_OUTPUT)/,$(addsuffix .rgb565,$(WORKSHOP_SHOTS)))
 $(BUILD)/showcase_workshop_shots: main_workshop_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_workshop_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
+
+TOWER_OUTPUT ?= $(ROOT)/build/sim/tower
+.PHONY: tower-shots
+tower-shots: $(BUILD)/showcase_tower_shots
+	mkdir -p $(TOWER_OUTPUT)
+	$(BUILD)/showcase_tower_shots $(TOWER_OUTPUT)
+	$(foreach name,stacked falling rotated,python3 $(ROOT)/tools/sw/raw2png.py $(TOWER_OUTPUT)/$(name).rgb565 $(TOWER_OUTPUT)/$(name).png;)
+	rm $(addprefix $(TOWER_OUTPUT)/,$(addsuffix .rgb565,stacked falling rotated))
+$(BUILD)/showcase_tower_shots: main_tower_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
+	$(CC) $(FLAGS) -Werror main_tower_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
