@@ -7,4 +7,6 @@
 - [弹弓打靶结算](photos/slingshot-result.png)
 - [图像处理设置展开 S1 滤波下拉框](photos/image-processing-settings.png)
 
-两张截图由用户提供。逐页评分及视频未取得。
+两张截图由用户提供。逐页评分未取得。
+
+- [用户补充的上板录像](video/QQ20261117-134147.mp4)
