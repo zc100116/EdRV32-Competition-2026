@@ -6,6 +6,7 @@
 #include "sim_data.h"
 #include <assert.h>
 #include <stdio.h>
+#include <math.h>
 extern void ui_draw_update(void);
 extern const lv_image_dsc_t sim_indoor;
 static uint16_t framebuffer[1280*720];
@@ -69,14 +70,14 @@ static void sample(int x, int y, int cls)
 }
 static void line(int x, int y, int nx, int ny)
 {
-    sample(x,y,0);
+    for (unsigned i = 0; i < 4; ++i) sample(x,y,0);
     sample(x,y,DRAW_POINT);
     int dx = nx-x;
     int dy = ny-y;
     int steps = (LV_MAX(LV_ABS(dx),LV_ABS(dy))+7)/8;
     for (int i = 1; i <= steps; ++i) sample(x+dx*i/steps,y+dy*i/steps,DRAW_POINT);
     for (int i = 0; i < 6; ++i) sample(nx,ny,DRAW_POINT);
-    sample(nx,ny,0);
+    for (unsigned i = 0; i < 4; ++i) sample(nx,ny,0);
 }
 static void hover(unsigned item)
 {
@@ -111,6 +112,27 @@ int main(int argc, char **argv)
     line(920,270,920,520);
     sample(960,540,0);
     capture("writing");
+    /* Noisy cursive input through the actual page, including class and hand gaps. */
+    ui_back();
+    ui_open(DRAW_PAGE);
+    sim_data_session(UI_APP_GRAB,UI_STATE_RUNNING,NULL);
+    ui_refresh();
+    hover(6);
+    for (unsigned i = 0; i < 220; ++i) {
+        int x = 260+3*(int)i;
+        int y = 370+(int)(85*sinf(i*.045f));
+        int jitter_x = (int)((i*17)%21)-10;
+        int jitter_y = (int)((i*29)%21)-10;
+        if (i >= 90 && i < 94) {
+            hand.count = 0;
+            ui_demo_t demo = {0};
+            sim_data_demo(&demo,&hand,&sim_indoor);
+            lv_tick_inc(40);
+            ui_draw_update();
+        } else sample(x+jitter_x,y+jitter_y,i%10 == 5 ? 0 : DRAW_POINT);
+    }
+    for (unsigned i = 0; i < 4; ++i) sample(920,370,0);
+    capture("smooth");
     hover(10);
     hover(12);
     sample(960,540,0);

@@ -197,7 +197,7 @@ DRAW_OUTPUT ?= $(ROOT)/outputs/draw
 draw-shots: $(BUILD)/showcase_draw_shots
 	mkdir -p $(DRAW_OUTPUT)
 	$(BUILD)/showcase_draw_shots $(DRAW_OUTPUT)
-	$(foreach name,writing eraser motion-tab,python3 $(ROOT)/tools/sw/raw2png.py $(DRAW_OUTPUT)/$(name).rgb565 $(DRAW_OUTPUT)/$(name).png;)
-	rm $(addprefix $(DRAW_OUTPUT)/,$(addsuffix .rgb565,writing eraser motion-tab))
+	$(foreach name,writing smooth eraser motion-tab,python3 $(ROOT)/tools/sw/raw2png.py $(DRAW_OUTPUT)/$(name).rgb565 $(DRAW_OUTPUT)/$(name).png;)
+	rm $(addprefix $(DRAW_OUTPUT)/,$(addsuffix .rgb565,writing smooth eraser motion-tab))
 $(BUILD)/showcase_draw_shots: main_draw_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_draw_shots.c $(COMMON) $(LINUX_LV) -lm -o $@

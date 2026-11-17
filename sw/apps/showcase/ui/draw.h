@@ -23,6 +23,18 @@ typedef struct {
     float raw_x;
     float raw_y;
     float carry;
+    float velocity_x;
+    float velocity_y;
+    float length;
+    draw_point_t curve[4];
+    draw_point_t pending[4];
+    unsigned curve_count;
+    unsigned pending_count;
+    unsigned positive_frames;
+    unsigned negative_frames;
+    uint32_t filter_at;
+    bool committed;
+    bool gap;
     uint32_t seen_at;
     unsigned strokes;
     unsigned points;
@@ -39,7 +51,8 @@ void draw_init(draw_state_t *state);
 /* Returns the selected toolbar item once per uninterrupted 600 ms hover. */
 int draw_hover(draw_state_t *state, bool present, int x, int y, uint32_t now);
 void draw_select(draw_state_t *state, unsigned item);
-void draw_step(draw_state_t *state, bool present, int cls, float x, float y,
+bool draw_pointing(const draw_point_t points[21]);
+void draw_step(draw_state_t *state, bool present, int cls, bool geometry, float x, float y,
                uint32_t now, draw_stamp_fn stamp, void *context);
 /* Clips each circular pen / square eraser stamp to the 1280x720 layer. */
 void draw_raster(uint32_t *pixels, const draw_state_t *state, int x, int y);

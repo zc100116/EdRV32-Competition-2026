@@ -71,8 +71,12 @@ void ui_draw_update(void)
     int item = draw_hover(&state,present,(int)x,(int)y,now);
     if (item >= 0) select_item((unsigned)item);
     changed = false;
+    draw_point_t points[21];
+    if (present)
+        for (unsigned i = 0; i < 21; ++i)
+            points[i] = (draw_point_t){hand->points[largest][i].x,hand->points[largest][i].y};
     draw_step(&state,present,present ? (int)hand->people[largest].class_id : -1,
-              x,y,now,stamp,NULL);
+              present && draw_pointing(points),x,y,now,stamp,NULL);
     if (changed) lv_obj_invalidate_area(canvas,&dirty);
     int size = (int)draw_sizes[state.size];
     lv_obj_set_size(cursor,size,size);
