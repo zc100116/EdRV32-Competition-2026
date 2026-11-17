@@ -21,6 +21,7 @@ static lv_obj_t *buttons[DRAW_ITEMS];
 static lv_timer_t *timer;
 static uint32_t report_at;
 static unsigned frames;
+static unsigned draw_frame;
 static bool changed;
 static lv_area_t dirty;
 static lv_area_t stamp_bounds(int x, int y, int radius)
@@ -77,6 +78,14 @@ void ui_draw_update(void)
             points[i] = (draw_point_t){hand->points[largest][i].x,hand->points[largest][i].y};
     draw_hand_step(&state,present,present ? (int)hand->people[largest].class_id : -1,
                    points,now,stamp,NULL);
+    char trace[160];
+    snprintf(trace,sizeof trace,
+        "draw f=%u hand=%d kp8=%d,%d kp5=%d,%d cls=%d pen=%u why=%s out=%d,%d\r\n",
+        draw_frame++,present ? (int)largest : -1,
+        present ? (int)points[8].x : -1,present ? (int)points[8].y : -1,
+        present ? (int)points[5].x : -1,present ? (int)points[5].y : -1,
+        state.cls,(unsigned)state.down,state.why,(int)state.x,(int)state.y);
+    ui_data_grab_output(trace);
     if (changed) lv_obj_invalidate_area(canvas,&dirty);
     int size = (int)draw_sizes[state.size];
     lv_obj_set_size(cursor,size,size);
@@ -156,6 +165,7 @@ void ui_page_draw(lv_obj_t *parent)
     lv_obj_set_hidden(arc,true);
     selection();
     frames = 0;
+    draw_frame = 0;
     report_at = lv_tick_get();
     timer = lv_timer_create(tick,40,NULL);
     lv_obj_add_event_cb(canvas,deleted,LV_EVENT_DELETE,NULL);

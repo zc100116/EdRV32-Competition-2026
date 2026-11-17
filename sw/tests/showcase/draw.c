@@ -1,5 +1,5 @@
 /* draw.c — T-DRAW-FIX host acceptance; deterministic geometry and noisy trajectories.
- * Gaussian sigma=6 px, classifier interruptions and 40..200 ms missing hands.
+ * Gaussian sigma=6 px, classifier interruptions and <=300 ms missing hands.
  */
 #include "draw.h"
 #include <assert.h>
@@ -63,48 +63,47 @@ static void transitions(void)
     for (unsigned i = 1; i <= 20; ++i)
         step(&s,true,0,true,300+4*i,300,40+40*i);
     assert(s.strokes == 1 && count);
-    for (unsigned i = 1; i <= 3; ++i) {
-        step(&s,true,0,false,380,300,840+40*i);
-        assert(s.down);
-    }
-    step(&s,true,DRAW_POINT,false,380,300,1000);
+    /* Other classes (including the false peace seen in the recording) hold. */
+    for (unsigned i = 1; i <= 15; ++i)
+        step(&s,true,2,false,380,300,840+40*i);
     assert(s.down && s.strokes == 1);
-    for (unsigned i = 1; i <= 4; ++i) {
-        step(&s,true,0,false,380,300,1000+40*i);
-        assert(s.down == (i < 4));
+    for (unsigned i = 0; i <= 10; ++i) {
+        step(&s,true,0,false,380,300,1480+40*i);
+        assert(s.down == (i < 10));
     }
+    assert(s.why && !s.down);
     unsigned before = count;
-    step(&s,true,DRAW_POINT,false,600,300,1200);
-    step(&s,true,DRAW_POINT,false,600,300,1240);
+    step(&s,true,DRAW_POINT,false,600,300,1920);
+    step(&s,true,DRAW_POINT,false,600,300,1960);
     for (unsigned i = 1; i <= 10; ++i)
-        step(&s,true,DRAW_POINT,false,600+0.2f*i,300,1240+40*i);
-    for (unsigned i = 1; i <= 4; ++i)
-        step(&s,true,0,false,602,300,1640+40*i);
+        step(&s,true,DRAW_POINT,false,600+0.2f*i,300,1960+40*i);
+    for (unsigned i = 0; i <= 10; ++i)
+        step(&s,true,1,false,602,300,2400+40*i);
     assert(s.strokes == 1 && count == before); /* <10 px produces no dot */
-    step(&s,true,DRAW_POINT,false,650,350,1840);
-    step(&s,true,DRAW_POINT,false,650,350,1880);
-    step(&s,false,-1,false,0,0,2080);
+    step(&s,true,DRAW_POINT,false,650,350,2840);
+    step(&s,true,DRAW_POINT,false,650,350,2880);
+    step(&s,false,-1,false,0,0,3180);
     assert(s.down);
-    step(&s,true,DRAW_POINT,false,680,350,2080); /* exact 200 ms recovery */
+    step(&s,true,DRAW_POINT,false,680,350,3180); /* exact 300 ms recovery */
     assert(s.down);
-    step(&s,false,-1,false,0,0,2281);
+    step(&s,false,-1,false,0,0,3481);
     assert(!s.down && !s.visible);
     draw_select(&s,2);
     assert(s.color == 2 && s.tool == DRAW_PEN);
     draw_select(&s,12);
     assert(s.tool == DRAW_ERASER);
     unsigned old = count;
-    step(&s,true,0,false,700,300,2320);
+    step(&s,true,0,false,700,300,3520);
     assert(count == old);
-    step(&s,true,DRAW_POINT,false,700,300,2360);
-    step(&s,true,DRAW_POINT,false,700,300,2400);
+    step(&s,true,DRAW_POINT,false,700,300,3560);
+    step(&s,true,DRAW_POINT,false,700,300,3600);
     assert(count == old+1 && pixels[300*DRAW_WIDTH+700] == 0);
-    step(&s,true,DRAW_POINT,false,200,100,2440);
+    step(&s,true,DRAW_POINT,false,200,100,3640);
     assert(!s.down);
-    assert(draw_hover(&s,true,200,100,2440) == -1);
-    assert(draw_hover(&s,true,200,100,3039) == -1);
-    assert(draw_hover(&s,true,200,100,3040) == 0);
-    assert(draw_hover(&s,true,200,100,3080) == -1);
+    assert(draw_hover(&s,true,200,100,3640) == -1);
+    assert(draw_hover(&s,true,200,100,4239) == -1);
+    assert(draw_hover(&s,true,200,100,4240) == 0);
+    assert(draw_hover(&s,true,200,100,4280) == -1);
     for (unsigned i = 0; i < 3; ++i) {
         draw_select(&s,8+i);
         assert(draw_sizes[s.size] == (6u << i));
@@ -157,7 +156,7 @@ static void synthetic(void)
             previous_oy = oy;
             previous = present;
         }
-        for (unsigned i = 0; i < 4; ++i, now += 40)
+        for (unsigned i = 0; i <= 10; ++i, now += 40)
             step(&s,true,0,false,s.raw_x,s.raw_y,now);
         assert(!s.down && s.strokes == stroke+1);
     }
@@ -218,18 +217,50 @@ static void outliers(void)
     assert(s.down && s.tracking_paused);
     unsigned before = count;
     for (unsigned frame = 39; frame < 43; ++frame) hand(&s,frame,300,120,false);
-    assert(count == before);
+    assert(!s.down);
     for (unsigned frame = 43; frame < 60; ++frame) hand(&s,frame,300,0,false);
-    assert(s.down && !s.tracking_paused && s.strokes == 1 && count > before);
+    assert(s.down && !s.tracking_paused && s.strokes == 2 && count > before);
     measure_deviation = false;
     printf("outliers: pen/eraser, 2..5 frames, MCP length 50..65%%, 120 px collapse, "
-           "angle/spike/pause/resume: maximum vertical deviation=%d px\n",maximum_deviation);
+           "angle/spike/pause/release/recover: maximum vertical deviation=%d px\n",
+           maximum_deviation);
     for (unsigned speed = 0; speed < 3; ++speed) {
         float velocity = speed == 0 ? 12.5f : speed == 1 ? 50 : 75;
-        printf("estimated algorithm latency at %.1f px/s: before=%.1f ms after=%.1f ms\n",
-               velocity,1000/(6.2831853f*(.35f+.012f*velocity))+40,
-               1000/(6.2831853f*(2.5f+.012f*velocity))+80);
+        printf("estimated draw latency at %.1f px/s (25 Hz): "
+               "before=%.1f ms after=%.1f ms\n",
+               velocity,1000/(6.2831853f*(2.5f+.012f*velocity))+80,
+               1000/(6.2831853f*(2.5f+.012f*velocity))+40);
     }
+}
+static void tilted_index(void)
+{
+    draw_state_t s;
+    draw_init(&s);
+    for (unsigned frame = 0; frame <= 90; ++frame) {
+        draw_point_t p[21] = {{0}};
+        p[0] = (draw_point_t){100,400};
+        p[4] = (draw_point_t){120,370};
+        p[5] = (draw_point_t){100,340};
+        p[6] = (draw_point_t){100,310};
+        p[7] = (draw_point_t){100,280};
+        p[8] = (draw_point_t){100,250};
+        for (unsigned tip = 12; tip <= 20; tip += 4) {
+            p[tip-2] = (draw_point_t){100,330};
+            p[tip] = (draw_point_t){100,370};
+        }
+        float angle = ((float)frame-45)*3.14159265f/180;
+        for (unsigned i = 0; i < 21; ++i) {
+            float x = p[i].x-100;
+            float y = p[i].y-400;
+            p[i] = (draw_point_t){400+3*frame+x*cosf(angle)-y*sinf(angle),
+                                  400+x*sinf(angle)+y*cosf(angle)};
+        }
+        assert(draw_pointing(p));
+        draw_hand_step(&s,true,2,p,40*frame,stamp,NULL);
+        if (frame) assert(s.down);
+    }
+    assert(s.strokes == 1);
+    puts("tilt: -45..45 degrees, non-point class, continuous stroke");
 }
 int main(void)
 {
@@ -237,6 +268,8 @@ int main(void)
     transitions();
     synthetic();
     outliers();
-    puts("PASS draw: geometry OR class, 2/4 frames, <=200 ms bridge, no dots, tools, >=70% jitter");
+    tilted_index();
+    puts("PASS draw: geometry OR class, 2 frames/400 ms release, <=300 ms bridge, "
+         "no dots, tools, >=70% jitter");
     return 0;
 }

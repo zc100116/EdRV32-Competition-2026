@@ -41,3 +41,15 @@
 - 指尖到屏幕估算还需加 UI 采样/显示等待各 0..40 ms（合计均值约 40 ms）：新版约 167..180 ms，再加未实测的相机/推理/传输时间；不是实板端到端测量。
 - flock /tmp/edrv32-sw-build.lock 串行运行 make -C sw -j2 PROGRAM=showcase、make -C sw/tests/showcase draw：通过，0 告警；git diff --check 通过，未改 RTL，Verilog 风格/lint 不适用。
 - 日志 build/draw-fix2/{build,host}.log；完整构建首次因未初始化 LVGL 子模块失败，补齐锁定子模块后重跑；未重做上板，仍需脸前遮挡实拍确认。
+
+## T-DRAW-FIX3：真实录像逐帧复现
+- 实现为本节所在提交，起止 rebase origin/zc100116/b3；基线 b0f257989，板上 ELF 59ea15655；xPack GCC 15.2.0、C11、Python 3.12、torch 2.14.1+cpu、numpy 2.5.2、OpenCV 5.0.0。
+- 输入：卡 98 QQ20261117-185928.mp4 前 240 帧（0–7.963 s）；1280×720 后 letterbox，保留工具栏、暗色遮罩和白线，不修补；不是原始相机输入的逐位重建。
+- 使用 ELF 同源不可变 gesture INT8 镜像（14 类+21 点）、原整数参考/NMS及原 C 规则；未改模型/阈值；逐帧数据 sw/tests/showcase/draw-real.json，121379 B。
+- 根因：PIP/DIP 连同 tip 塌缩后轴反向，旧外推继续向掌下；4 帧所有非指点提笔误伤 fist/peace 抖动，200 ms 丢手又造成一处断线。
+- 修复：用可靠 tip−MCP 向量随掌部平移，原始点判手势；明确收指/张掌持续 400 ms 提笔，短漏检保持 300 ms；删除一帧延迟样条，保留中值/One Euro/3 px 插点。
+- 同段回放：光标/笔迹 V 事件各 1→0（>60 px，≤300 ms 返回）；提笔 4→1，非有意 3→0，暂停 0→0，笔画 5→2；唯一有意张掌标注 f171–209，新提笔 f180。
+- 干净 f60–119 实际笔迹延迟 86→53 ms，拟合 RMSE 5.094→4.993 px；同期 47 条流水线 e2e 中位 72.4 ms，组合端到端估计 158.4→125.4 ms，非新固件上板实测或全速度最坏保证。
+- make -C sw -j2 PROGRAM=showcase、make -C sw/tests/showcase draw grab 在共用 flock 下通过、0 告警；含真实回放、±45°、400/300 ms 行为；合成抖动降低仍为 80.36%，塌缩竖直偏差 0 px。
+- 每次画板更新输出 draw f/hand/kp8/kp5/cls/pen/why/out，其他原有串口行保留；grab.c/h 和抓取/体感规则未改。
+- 命令见 tools/demo/draw-replay/README.md；原始中间数据/日志 build/draw-fix3/，逐帧证据和每处断线见 docs/debug/2026-11-17-showcase-draw-jumps.md；后 39 秒未逐帧验收，仍需上板确认。

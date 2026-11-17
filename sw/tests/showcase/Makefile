@@ -171,3 +171,6 @@ draw:
 	mkdir -p $(BUILD)
 	$(CC) -I$(GAME_UI) $(FLAGS) draw.c $(GAME_UI)/draw.c -lm -o $(BUILD)/draw
 	$(BUILD)/draw
+	$(CC) -I$(GAME_UI) $(FLAGS) $(ROOT)/tools/demo/draw-replay/replay.c \
+	    $(GAME_UI)/draw.c -lm -o $(BUILD)/draw-replay
+	python3 draw_replay.py $(BUILD)/draw-replay

@@ -6,7 +6,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 enum { DRAW_WIDTH = 1280, DRAW_HEIGHT = 720, DRAW_COLORS = 8, DRAW_ITEMS = 14,
-       DRAW_PAGE = 20, DRAW_POINT = 3, DRAW_HOLD_MS = 600 };
+       DRAW_PAGE = 20, DRAW_POINT = 3, DRAW_HOLD_MS = 600,
+       DRAW_RELEASE_MS = 400, DRAW_LOST_MS = 300 };
 typedef enum { DRAW_PEN, DRAW_ERASER } draw_tool_t;
 typedef struct {
     float x;
@@ -27,7 +28,7 @@ typedef struct {
     float velocity_y;
     float length;
     float finger_lengths[5];
-    float distal_lengths[5];
+    draw_point_t finger_offset;
     unsigned finger_count;
     unsigned finger_next;
     uint32_t extrapolate_at;
@@ -37,15 +38,14 @@ typedef struct {
     draw_point_t previous_raw;
     uint32_t confirmation_at;
     bool confirming;
-    draw_point_t curve[4];
     draw_point_t pending[4];
-    unsigned curve_count;
     unsigned pending_count;
     unsigned positive_frames;
     unsigned negative_frames;
+    uint32_t release_at;
+    const char *why;
     uint32_t filter_at;
     bool committed;
-    bool gap;
     uint32_t seen_at;
     unsigned strokes;
     unsigned points;

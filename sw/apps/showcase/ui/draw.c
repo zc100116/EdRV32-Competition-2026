@@ -1,4 +1,4 @@
-/* draw.c — T-DRAW / R5-5; One Euro filtering, Catmull-Rom and 3 px resampling.
+/* draw.c — T-DRAW / R5-5; One Euro filtering and causal 3 px resampling.
  * Caller clock in milliseconds; only explicitly selected eraser clears alpha.
  */
 #include "draw.h"
@@ -14,6 +14,7 @@ void draw_init(draw_state_t *s)
     s->size = 1;
     s->hover = -1;
     s->cls = -1;
+    s->why = "idle";
 }
 static bool toolbar(float x, float y)
 {
@@ -94,41 +95,11 @@ static void segment(draw_state_t *s, draw_point_t a, draw_point_t b,
     }
     s->carry = fmodf(s->carry+length,3);
 }
-static draw_point_t catmull(const draw_point_t p[4], float t)
+static void finish(draw_state_t *s)
 {
-    float t2 = t*t;
-    float t3 = t2*t;
-    float w0 = .5f*(-t+2*t2-t3);
-    float w1 = .5f*(2-5*t2+3*t3);
-    float w2 = .5f*(t+4*t2-3*t3);
-    float w3 = .5f*(-t2+t3);
-    return (draw_point_t){w0*p[0].x+w1*p[1].x+w2*p[2].x+w3*p[3].x,
-                          w0*p[0].y+w1*p[1].y+w2*p[2].y+w3*p[3].y};
-}
-static void curve_segment(draw_state_t *s, draw_stamp_fn stamp, void *context)
-{
-    /* One-pixel subdivisions before the shared 3 px arc-length sampler. */
-    float length = 0;
-    for (unsigned i = 1; i < 4; ++i)
-        length += sqrtf(distance2(s->curve[i-1],s->curve[i]));
-    unsigned steps = (unsigned)ceilf(length)+1;
-    draw_point_t previous = s->curve[1];
-    for (unsigned i = 1; i <= steps; ++i) {
-        draw_point_t next = catmull(s->curve,(float)i/steps);
-        segment(s,previous,next,stamp,context);
-        previous = next;
-    }
-}
-static void finish(draw_state_t *s, draw_stamp_fn stamp, void *context)
-{
-    if (s->down && s->curve_count == 3) {
-        s->curve[3] = s->curve[2];
-        curve_segment(s,stamp,context);
-    }
     s->down = false;
     s->positive_frames = 0;
     s->negative_frames = 0;
-    s->curve_count = 0;
     s->finger_count = 0;
     s->finger_next = 0;
     s->extrapolating = false;
@@ -144,34 +115,43 @@ static float median3(float a, float b, float c)
 {
     return fmaxf(fminf(a,b),fminf(fmaxf(a,b),c));
 }
-void draw_step(draw_state_t *s, bool present, int cls, bool geometry, float x, float y,
-               uint32_t now, draw_stamp_fn stamp, void *context)
+static void position_step(draw_state_t *s, bool present, int cls, bool geometry,
+                          bool release, float x, float y, uint32_t now,
+                          draw_stamp_fn stamp, void *context)
 {
     s->cls = present ? cls : -1;
-    if (now-s->seen_at > 200) {
-        finish(s,stamp,context);
+    s->why = cls == DRAW_POINT ? "class" : geometry ? "geometry" : "hold";
+    if (now-s->seen_at > DRAW_LOST_MS) {
+        finish(s);
         s->visible = false;
     }
     if (!present) {
         s->positive_frames = 0;
-        s->gap = true;
+        s->negative_frames = 0;
+        s->why = s->down ? "missing_hold" : "lost";
         return;
     }
     s->seen_at = now;
     s->visible = true;
     if (toolbar(x,y)) {
-        finish(s,stamp,context);
+        s->why = "toolbar";
+        finish(s);
         s->x = x;
         s->y = y;
         return;
     }
-    bool pointing = cls == DRAW_POINT || geometry;
+    bool pointing = (cls == DRAW_POINT && !release) || geometry;
     if (pointing) {
         ++s->positive_frames;
         s->negative_frames = 0;
+    } else if (release) {
+        s->positive_frames = 0;
+        if (!s->negative_frames) s->release_at = now;
+        ++s->negative_frames;
+        s->why = "release_wait";
     } else {
         s->positive_frames = 0;
-        ++s->negative_frames;
+        s->negative_frames = 0;
     }
     if (!s->down) {
         s->x = x;
@@ -190,14 +170,12 @@ void draw_step(draw_state_t *s, bool present, int cls, bool geometry, float x, f
         s->pending_count = 1;
         s->pending[0] = (draw_point_t){x,y};
         s->committed = false;
-        s->gap = false;
-        s->curve[0] = s->curve[1] = (draw_point_t){x,y};
-        s->curve_count = 2;
         if (s->tool == DRAW_ERASER) commit(s,stamp,context);
         return;
     }
-    if (s->negative_frames >= 4) {
-        finish(s,stamp,context);
+    if (s->negative_frames && now-s->release_at >= DRAW_RELEASE_MS) {
+        finish(s);
+        s->why = "release";
         s->x = x;
         s->y = y;
         return;
@@ -233,29 +211,18 @@ void draw_step(draw_state_t *s, bool present, int cls, bool geometry, float x, f
     s->filter_at = now;
     s->raw_x = x;
     s->raw_y = y;
-    if (s->tool == DRAW_ERASER) {
-        segment(s,(draw_point_t){s->x,s->y},next,stamp,context);
-        s->gap = false;
-    } else if (s->gap) {
-        /* Finish the delayed spline endpoint, then bridge missing observations linearly. */
-        if (s->curve_count == 3) {
-            s->curve[3] = s->curve[2];
-            curve_segment(s,stamp,context);
-        }
-        segment(s,(draw_point_t){s->x,s->y},next,stamp,context);
-        s->curve[0] = s->curve[1] = next;
-        s->curve_count = 2;
-        s->gap = false;
-    } else {
-        s->curve[s->curve_count++] = next;
-        if (s->curve_count == 4) {
-            curve_segment(s,stamp,context);
-            memmove(s->curve,s->curve+1,3*sizeof s->curve[0]);
-            s->curve_count = 3;
-        }
-    }
+    /* Emit through the current filtered point. The former delayed spline added
+     * a full frame after position confirmation; direct arc-length sampling
+     * retains the same filtered trajectory without that display delay. */
+    segment(s,(draw_point_t){s->x,s->y},next,stamp,context);
     s->x = next.x;
     s->y = next.y;
+}
+void draw_step(draw_state_t *s, bool present, int cls, bool geometry, float x, float y,
+               uint32_t now, draw_stamp_fn stamp, void *context)
+{
+    position_step(s,present,cls,geometry,cls == 0 || cls == 1 || cls == 5,
+                  x,y,now,stamp,context);
 }
 static float median(const float values[5], unsigned count)
 {
@@ -297,8 +264,11 @@ void draw_hand_step(draw_state_t *s, bool present, int cls, const draw_point_t p
         if (now-s->extrapolate_at > 300) {
             s->tracking_paused = true;
         }
-        float scale = median(s->distal_lengths,s->finger_count)/sqrtf(direction2);
-        points[8] = (draw_point_t){p[7].x+dx*scale,p[7].y+dy*scale};
+        /* Recorded face overlap folds PIP/DIP as well as the tip. Their current
+         * axis points downward, so translate the last observed MCP-relative tip
+         * with the palm instead of projecting along that corrupted axis. */
+        points[8] = (draw_point_t){p[5].x+s->finger_offset.x,
+                                 p[5].y+s->finger_offset.y};
     } else {
         s->extrapolating = false;
         if (s->tracking_paused) {
@@ -309,19 +279,19 @@ void draw_hand_step(draw_state_t *s, bool present, int cls, const draw_point_t p
             s->filter_at = now;
             s->previous_raw = p[8];
             s->confirming = false;
-            s->curve[0] = s->curve[1] = p[8];
-            s->curve_count = 2;
             resumed = true;
         }
     }
-    bool geometry = draw_pointing(points);
+    bool geometry = draw_pointing(p);
     if (!unreliable && (s->down || cls == DRAW_POINT || geometry)) {
+        s->finger_offset = (draw_point_t){p[8].x-p[5].x,p[8].y-p[5].y};
         s->finger_lengths[s->finger_next] = length;
-        s->distal_lengths[s->finger_next] = distal;
         s->finger_next = (s->finger_next+1)%5;
         if (s->finger_count < 5) ++s->finger_count;
     }
-    draw_step(s,true,cls,geometry,points[8].x,points[8].y,now,stamp,context);
+    bool release = cls == 0 || cls == 1 || cls == 5 ||
+        distance2(p[8],p[0]) <= distance2(p[6],p[0]);
+    position_step(s,true,cls,geometry,release,points[8].x,points[8].y,now,stamp,context);
     if (resumed) s->tracking_paused = false;
 }
 void draw_raster(uint32_t *pixels, const draw_state_t *s, int x, int y)
