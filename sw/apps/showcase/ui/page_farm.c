@@ -9,6 +9,8 @@
 #include <string.h>
 enum { FARM_BOXES=100, RED=0xdc2626 };
 static farm_t farm;
+static unsigned boundaries[2]={33,67};
+static lv_obj_t *pen_lines[2], *alignment[2], *alignment_labels[2];
 static lv_obj_t *surface, *metrics, *badges[FARM_PENS], *rows[FARM_PENS];
 static lv_obj_t *banner, *chart, *chart_scale, *timeline, *tags[FARM_BOXES];
 static lv_chart_series_t *series[FARM_CLASSES];
@@ -164,10 +166,24 @@ void ui_farm_action(unsigned action)
         ui_farm_update();
     }
 }
+static void alignment_changed(lv_event_t *event)
+{
+    unsigned index=(unsigned)(uintptr_t)lv_event_get_user_data(event);
+    boundaries[index]=(unsigned)lv_slider_get_value(alignment[index]);
+    farm.boundaries[index]=boundaries[index];
+    lv_slider_set_range(alignment[0],1,(int)boundaries[1]-1);
+    lv_slider_set_range(alignment[1],(int)boundaries[0]+1,99);
+    char text[64];
+    snprintf(text,sizeof text,"%s分界 %u%%",index ? "右" : "左",boundaries[index]);
+    ui_text(alignment_labels[index],text);
+    lv_obj_set_x(pen_lines[index],(int)(1280*boundaries[index]/100));
+    ui_farm_update();
+}
 void ui_page_farm(lv_obj_t *parent)
 {
     uint32_t now=lv_tick_get();
     farm_init(&farm,now,event_output);
+    memcpy(farm.boundaries,boundaries,sizeof boundaries);
     report_tick=metrics_tick=now;
     timeline_revision=chart_revision=0;
     shown_count=0; banner_visible=false;
@@ -187,8 +203,9 @@ void ui_page_farm(lv_obj_t *parent)
     for(unsigned p=0;p<FARM_PENS;++p) {
         if(p) {
             lv_obj_t *line=lv_line_create(surface);
+            pen_lines[p-1]=line;
             lv_line_set_points(line,line_points,2);
-            lv_obj_set_pos(line,(int)(p*1280/3),54);
+            lv_obj_set_pos(line,(int)(boundaries[p-1]*1280/100),54);
             lv_obj_set_style_line_width(line,1,0);
             lv_obj_set_style_line_color(line,lv_color_hex(PANEL),0);
             lv_obj_set_style_line_dash_width(line,6,0);
@@ -221,6 +238,20 @@ void ui_page_farm(lv_obj_t *parent)
     lv_obj_align(banner,LV_ALIGN_TOP_MID,0,54);
     lv_obj_set_hidden(banner,true);
     lv_obj_t *drawer=ui_camera_drawer(parent,header,"看板");
+    ui_text_label(drawer,"栏位对齐",&sim_font_20,TEXT);
+    for(unsigned i=0;i<2;++i) {
+        char text[64];
+        snprintf(text,sizeof text,"%s分界 %u%%",i ? "右" : "左",boundaries[i]);
+        alignment_labels[i]=ui_text_label(drawer,text,&sim_font_16,TEXT);
+        alignment[i]=lv_slider_create(drawer);
+        ui_widget_style(alignment[i]);
+        lv_obj_set_width(alignment[i],264);
+        lv_slider_set_range(alignment[i],i ? (int)boundaries[0]+1 : 1,
+                            i ? 99 : (int)boundaries[1]-1);
+        lv_slider_set_value(alignment[i],(int)boundaries[i],LV_ANIM_OFF);
+        lv_obj_add_event_cb(alignment[i],alignment_changed,LV_EVENT_VALUE_CHANGED,
+                            (void *)(uintptr_t)i);
+    }
     ui_text_label(drawer,"今日统计",&sim_font_20,TEXT);
     lv_obj_t *legend=ui_stack(drawer,LV_FLEX_FLOW_ROW,12);
     for(unsigned a=0;a<FARM_CLASSES;++a)

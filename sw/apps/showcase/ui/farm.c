@@ -18,6 +18,8 @@ int farm_animal(unsigned class_id)
 void farm_init(farm_t *f, uint32_t now, void (*event)(const farm_event_t *))
 {
     memset(f,0,sizeof *f);
+    f->boundaries[0]=33;
+    f->boundaries[1]=67;
     f->sample_tick=now;
     f->event=event;
 }
@@ -65,7 +67,9 @@ void farm_frame(farm_t *f, const farm_box_t *boxes, unsigned count,
         int a=farm_animal(boxes[i].class_id);
         if(a<0) continue;
         /* Bottom midpoint selects a vertical pen; y does not affect membership. */
-        unsigned p=(unsigned)(2*boxes[i].x+boxes[i].width)*FARM_PENS/(2*width);
+        unsigned midpoint=(unsigned)(2*boxes[i].x+boxes[i].width)*100;
+        unsigned p=midpoint<2*width*f->boundaries[0] ? 0 :
+                   midpoint<2*width*f->boundaries[1] ? 1 : 2;
         ++f->counts[p][a];
         ++f->total[a];
     }

@@ -13,3 +13,23 @@
 - 截图：`outputs/farm/{normal,missing,dashboard,home-ai}.png`；街景背景叠加主机合成动物检测框，仅验证 UI 与统计，不代表模型动物识别实测。
 - 串口：按 1 s 间隔打印 `farm counts=3,1,3,2 alerts=0` 等；出现/解除输出 `farm event=... time_ms=...`，时间线显示运行时长 HH:MM:SS。
 - 图标：内置 imagegen 原创，96×96 RGBA；提示词见 `sw/apps/showcase/assets/icons/README.md`；粗体 24 字形沿用 T-GRAB-EXP 的统一补字。
+
+## T-FARM-SIM：平板模拟与栏位对齐
+
+- 代码：本报告所在提交；构建/逻辑/UI 验收基线 `7539e98c0`，交付 rebase 到 `4d4e5dfbd`；无 RTL 改动，Verilator lint 不适用。
+- 主机 Chromium 1248 / playwright-core 1.65.1；2000×1200 渲染，投影四角 (220,100)/(1052,112)/(1044,614)/(228,603) 到 1280×720，宽 65%；σ=1 px、亮度 0.85、噪声 σ=2、种子 17。
+- YOLOv8n COCO-80：`~/.local/share/edrv32/npu/yolov8n.pt` 的仓库 INT8 标定，640×384 描述符参考执行及整数后处理；全部可见动物正确检出（26/26），最低 0.449；走失羊离场不计。
+| 动物（初始位置） | COCO 类 | 初始置信度 | 走失中置信度 | 串栏中置信度 |
+|---|---|---:|---:|---:|
+| 牛 1（左上） | cow/19 | 0.886 | 0.694 | 0.807 |
+| 牛 2（左下） | cow/19 | 0.774 | 0.736 | 0.500 |
+| 马（牛栏右上） | horse/17 | 0.921 | 0.863 | 0.905 |
+| 羊 1（上，走失） | sheep/18 | 0.694 | 离场 | 0.774 |
+| 羊 2（中） | sheep/18 | 0.736 | 0.694 | 0.837 |
+| 羊 3（下，串栏） | sheep/18 | 0.694 | 0.736 | 0.886 |
+| 鸡 1（上） | bird/14 | 0.774 | 0.449 | 0.601 |
+| 鸡 2（中） | bird/14 | 0.863 | 0.774 | 0.807 |
+| 鸭（下） | bird/14 | 0.837 | 0.774 | 0.863 |
+- 素材调优：照片草地、牛 380/400 px、马 350 px、鸡 320 px/鸭 250 px；牛栏加宽，错开牲畜，避免头部遮挡。截图与框图 `outputs/farm-sim/{initial,missing,crossing}{,-camera,-detections}.png`，逐只数据 `build/farm-sim/detections.json`。
+- 复现：`npm install --prefix build/farm-sim playwright-core@1.65.1 && node tools/demo/farm-sim/capture.mjs`；`PYTHONPATH=tools/npu:third_party/ultralytics OPENBLAS_NUM_THREADS=1 ~/.local/opt/edrv32-py/bin/python tools/demo/farm-sim/validate.py`。
+- PASS/0 告警：`flock /tmp/edrv32-sw-build.lock make -C sw -j2 PROGRAM=showcase`（先加载 env.sh）、`flock /tmp/edrv32-sw-build.lock make -C sw/tests/showcase farm`、`flock /tmp/edrv32-sw-build.lock make -C sw/apps/showcase/sim -j2 farm-shots FARM_OUTPUT="$PWD/outputs/farm-sim/board"`；日志 `build/farm-sim/{build,ui}.log`，覆盖百分比分栏、滑条重计数与本次开机保留；浏览器剧本/停止/复位/鼠标/触摸 PASS。

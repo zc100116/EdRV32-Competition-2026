@@ -16,6 +16,7 @@ typedef struct {
 typedef struct { uint32_t time_ms; unsigned total[FARM_CLASSES]; } farm_sample_t;
 typedef struct { uint32_t since; bool pending, active; } farm_alarm_t;
 typedef struct {
+    unsigned boundaries[2]; /* Percent of camera width, left then right. */
     unsigned counts[FARM_PENS][FARM_CLASSES];
     unsigned expected[FARM_PENS][FARM_CLASSES];
     unsigned total[FARM_CLASSES];

@@ -154,10 +154,30 @@ int main(int argc,char **argv)
     lv_obj_send_event(lv_obj_get_parent(label),LV_EVENT_CLICKED,NULL);
     lv_tick_inc(200); lv_timer_handler();
     capture("dashboard");
+    lv_obj_t *left_label=find_label(lv_screen_active(),"左分界 33%");
+    lv_obj_t *right_label=find_label(lv_screen_active(),"右分界 67%");
+    assert(left_label && right_label);
+    lv_obj_t *drawer=lv_obj_get_parent(left_label);
+    lv_obj_t *left=lv_obj_get_child(drawer,lv_obj_get_index(left_label)+1);
+    lv_obj_t *right=lv_obj_get_child(drawer,lv_obj_get_index(right_label)+1);
+    assert(lv_obj_check_type(left,&lv_slider_class));
+    assert(lv_obj_check_type(right,&lv_slider_class));
+    lv_slider_set_value(left,60,LV_ANIM_OFF);
+    lv_obj_send_event(left,LV_EVENT_VALUE_CHANGED,NULL);
+    lv_slider_set_value(right,80,LV_ANIM_OFF);
+    lv_obj_send_event(right,LV_EVENT_VALUE_CHANGED,NULL);
+    assert(find_label(lv_screen_active(),"左分界 60%"));
+    assert(find_label(lv_screen_active(),"右分界 80%"));
+    assert(find_label(lv_screen_active(),"牛栏 牛 #dc2626 2#/3 马 1/1 羊 3/0"));
+    capture("alignment");
+    lv_slider_set_value(left,33,LV_ANIM_OFF);
+    lv_obj_send_event(left,LV_EVENT_VALUE_CHANGED,NULL);
+    lv_slider_set_value(right,67,LV_ANIM_OFF);
+    lv_obj_send_event(right,LV_EVENT_VALUE_CHANGED,NULL);
     const uint32_t colors[]={TEAL,ACCENT,0xd97706,0x9333ea};
     for(unsigned c=0;c<4;++c) {
         unsigned pixels=0;
-        for(unsigned y=210;y<390;++y) for(unsigned x=972;x<1260;++x)
+        for(unsigned y=300;y<650;++y) for(unsigned x=972;x<1260;++x)
             pixels+=(drawbuffer[y*1280+x]&0xffffff)==colors[c];
         assert(pixels>50);
     }
@@ -171,6 +191,15 @@ int main(int argc,char **argv)
     ui_home_select_tab(0);
     capture("home-ai");
     assert(find_label(lv_screen_active(),"智慧农场"));
+    ui_open(FARM_PAGE);
+    left_label=find_label(lv_screen_active(),"左分界 33%");
+    drawer=lv_obj_get_parent(left_label);
+    left=lv_obj_get_child(drawer,lv_obj_get_index(left_label)+1);
+    lv_slider_set_value(left,45,LV_ANIM_OFF);
+    lv_obj_send_event(left,LV_EVENT_VALUE_CHANGED,NULL);
+    ui_back();
+    ui_open(FARM_PAGE);
+    assert(find_label(lv_screen_active(),"左分界 45%"));
     ui_data_detection_all(true);
     puts("PASS farm UI: full counts, inventory, alarm, recovery, drawer, home and <=15% coverage");
     return 0;
