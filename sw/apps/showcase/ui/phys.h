@@ -73,8 +73,8 @@ typedef struct {
 } phys_pair;
 typedef struct {
     int body;
-    phys_vec local_anchor, target, impulse;
-    phys_q max_force, target_angle, angular_impulse;
+    phys_vec offset, target;
+    phys_q target_angle;
 } phys_grab;
 typedef struct { int contact_pairs, iterations; } phys_stats;
 typedef struct {
@@ -96,10 +96,12 @@ void phys_world_clear(phys_world *world);
 int phys_body_add(phys_world *world, const phys_body_def *definition);
 void phys_body_remove(phys_world *world, int body);
 phys_body *phys_body_get(phys_world *world, int body);
-void phys_grab_create(phys_world *world, int body, phys_vec point, phys_q max_force);
+/* Grabbed bodies are kinematic; move is exact, with 1200 px/s throw velocity cap. */
+void phys_grab_create(phys_world *world, int body, phys_vec point);
 void phys_grab_move(phys_world *world, phys_vec target);
 void phys_grab_rotate(phys_world *world, phys_q angle_delta);
 void phys_grab_release(phys_world *world);
+void phys_body_set_angle(phys_world *world, int body, phys_q angle);
 void phys_step(phys_world *world);
 phys_stats phys_world_stats(const phys_world *world);
 #endif

@@ -21,6 +21,10 @@ void grab_init(grab_state_t *s);
 void grab_reset_objects(grab_state_t *s);
 /* cls is already debounced by the gesture page's three-frame filter. */
 bool grab_frame(grab_state_t *s, const ui_pose_point_t *points, int cls, uint32_t stamp);
+/* Raw rule result: caller owns transition timing and supplies D's current targets. */
+int grab_rule(grab_state_t *s, const ui_pose_point_t *points, int cls,
+              const grab_object_t *objects, unsigned count, float radius,
+              bool smooth, bool *close, bool *release);
 void grab_animate(grab_state_t *s, float seconds);
 void grab_value(const grab_state_t *s, char *text, unsigned size);
 void ui_data_grab_mirror(bool enabled);

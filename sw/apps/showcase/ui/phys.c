@@ -332,23 +332,44 @@ static void wake(phys_body *b)
 {
     if (b->type == PHYS_DYNAMIC) { b->awake = true; b->sleep_steps = 0; }
 }
-void phys_grab_create(phys_world *w, int id, phys_vec p, phys_q force)
+void phys_body_set_angle(phys_world *w, int id, phys_q angle)
 {
-    w->grab = (phys_grab){.body=id,.local_anchor=rotate(sub(p,w->bodies[id].position),
-        -w->bodies[id].angle),.target=p,.max_force=force,.target_angle=w->bodies[id].angle};
-    wake(&w->bodies[id]);
+    w->bodies[id].angle = angle;
+    geometry(&w->bodies[id]);
+}
+void phys_grab_create(phys_world *w, int id, phys_vec p)
+{
+    phys_body *b = &w->bodies[id];
+    w->grab = (phys_grab){.body=id,.offset=sub(p,b->position),
+        .target=p,.target_angle=b->angle};
+    b->type = PHYS_KINEMATIC;
+    b->inv_mass = b->inv_inertia = 0;
+    b->velocity = (phys_vec){0,0};
+    b->angular_velocity = 0;
+    b->awake = true;
 }
 void phys_grab_move(phys_world *w, phys_vec p)
 {
+    phys_vec delta = sub(p,w->grab.target);
+    phys_q speed = length(delta);
+    if (speed > 20*PHYS_ONE) delta = scale(delta,divide(20*PHYS_ONE,speed));
+    w->bodies[w->grab.body].velocity = scale(delta,60*PHYS_ONE);
     w->grab.target = p;
-    wake(&w->bodies[w->grab.body]);
 }
 void phys_grab_rotate(phys_world *w, phys_q delta)
 {
     w->grab.target_angle = wrap(w->grab.target_angle+delta);
-    wake(&w->bodies[w->grab.body]);
 }
-void phys_grab_release(phys_world *w) { w->grab.body = -1; }
+void phys_grab_release(phys_world *w)
+{
+    phys_body *b = &w->bodies[w->grab.body];
+    b->type = PHYS_DYNAMIC;
+    b->inv_mass = divide(PHYS_ONE,b->mass);
+    b->inv_inertia = divide(PHYS_ONE,b->inertia);
+    b->angular_velocity = 0;
+    wake(b);
+    w->grab.body = -1;
+}
 
 /* Outward face with largest minimum separation. */
 static phys_q face_axis(const phys_part *a, const phys_part *b, int *edge)
@@ -527,19 +548,26 @@ static phys_vec velocity(const phys_body *b, phys_vec r, bool push)
     return add(push ? b->push_velocity : b->velocity,
         spin(push ? b->push_angular : b->angular_velocity,r));
 }
+/* Multiply the lever arm by inverse inertia before reducing to Q16.16.
+ * Full-size metal impacts exceed the 32768 range of an intermediate torque. */
+static phys_q angular_impulse(phys_vec r, phys_vec p, phys_q inverse)
+{
+    int64_t torque = (int64_t)r.x*p.y-(int64_t)r.y*p.x;
+    return (phys_q)((torque/PHYS_ONE)*inverse/PHYS_ONE);
+}
 static void impulse(phys_body *a, phys_body *b, phys_vec ra, phys_vec rb,
                     phys_vec p, bool push)
 {
     if (push) {
         a->push_velocity = sub(a->push_velocity,scale(p,a->inv_mass));
-        a->push_angular -= mul(a->inv_inertia,cross(ra,p));
+        a->push_angular -= angular_impulse(ra,p,a->inv_inertia);
         b->push_velocity = add(b->push_velocity,scale(p,b->inv_mass));
-        b->push_angular += mul(b->inv_inertia,cross(rb,p));
+        b->push_angular += angular_impulse(rb,p,b->inv_inertia);
     } else {
         a->velocity = sub(a->velocity,scale(p,a->inv_mass));
-        a->angular_velocity -= mul(a->inv_inertia,cross(ra,p));
+        a->angular_velocity -= angular_impulse(ra,p,a->inv_inertia);
         b->velocity = add(b->velocity,scale(p,b->inv_mass));
-        b->angular_velocity += mul(b->inv_inertia,cross(rb,p));
+        b->angular_velocity += angular_impulse(rb,p,b->inv_inertia);
     }
 }
 static phys_q effective(phys_body *a, phys_body *b, phys_contact *c, phys_vec n)
@@ -638,39 +666,6 @@ static void solve(phys_body *a, phys_body *b, phys_pair *p)
     }
 }
 
-/* Implicit spring: f=5 Hz, damping ratio=1; angular spring f=7 Hz.
- * Softness depends on body mass, so tuning is independent of material density.
- */
-static void solve_grab(phys_world *w)
-{
-    phys_grab *g = &w->grab;
-    phys_body *b = &w->bodies[g->body];
-    phys_vec r = rotate(g->local_anchor,b->angle);
-    phys_q gamma = mul(b->inv_mass,49571);
-    phys_q beta = 815570;
-    phys_vec error = sub(add(b->position,r),g->target);
-    phys_vec rhs = add(add(velocity(b,r,false),scale(error,beta)),scale(g->impulse,gamma));
-    phys_q k11 = b->inv_mass+mul(mul(r.y,b->inv_inertia),r.y)+gamma;
-    phys_q k22 = b->inv_mass+mul(mul(r.x,b->inv_inertia),r.x)+gamma;
-    phys_q k12 = -mul(mul(r.x,b->inv_inertia),r.y);
-    phys_q determinant = mul(k11,k22)-mul(k12,k12);
-    phys_vec change = {divide(mul(k12,rhs.y)-mul(k22,rhs.x),determinant),
-        divide(mul(k12,rhs.x)-mul(k11,rhs.y),determinant)};
-    phys_vec old = g->impulse;
-    g->impulse = add(old,change);
-    phys_q size = length(g->impulse);
-    phys_q limit = g->max_force/60;
-    if (size > limit) g->impulse = scale(g->impulse,divide(limit,size));
-    change = sub(g->impulse,old);
-    b->velocity = add(b->velocity,scale(change,b->inv_mass));
-    b->angular_velocity += mul(b->inv_inertia,cross(r,change));
-    phys_q angular_gamma = mul(b->inv_inertia,32690);
-    phys_q angular_error = wrap(b->angle-g->target_angle);
-    phys_q torque = -divide(b->angular_velocity+mul(angular_error,1054781)+
-        mul(angular_gamma,g->angular_impulse),b->inv_inertia+angular_gamma);
-    g->angular_impulse += torque;
-    b->angular_velocity += mul(b->inv_inertia,torque);
-}
 void phys_step(phys_world *w)
 {
     w->stats = (phys_stats){0,SOLVER_ITERATIONS};
@@ -681,6 +676,14 @@ void phys_step(phys_world *w)
         b->max_normal_impulse = 0;
         b->push_velocity = (phys_vec){0,0};
         b->push_angular = 0;
+    }
+    if (w->grab.body >= 0) {
+        phys_body *b = &w->bodies[w->grab.body];
+        phys_vec target = sub(w->grab.target,w->grab.offset);
+        b->angular_velocity = wrap(w->grab.target_angle-b->angle)*60;
+        b->position = target;
+        b->angle = w->grab.target_angle;
+        geometry(b);
     }
     int index = 0;
     for (int i=0; i<PHYS_MAX_BODIES; ++i) for (int j=i+1; j<PHYS_MAX_BODIES; ++j) {
@@ -750,14 +753,7 @@ void phys_step(phys_world *w)
                 scale(tangent(c->normal),c->tangent_impulse)),false);
         }
     }
-    if (w->grab.body >= 0) {
-        phys_body *b = &w->bodies[w->grab.body];
-        b->velocity = add(b->velocity,scale(w->grab.impulse,b->inv_mass));
-        b->angular_velocity += mul(b->inv_inertia,cross(
-            rotate(w->grab.local_anchor,b->angle),w->grab.impulse)+w->grab.angular_impulse);
-    }
     for (int iteration=0; iteration<SOLVER_ITERATIONS; ++iteration) {
-        if (w->grab.body >= 0) solve_grab(w);
         for (int i=0; i<active_count; ++i) {
             phys_pair *p = &w->pairs[active[i]];
             solve(&w->bodies[p->a],&w->bodies[p->b],p);
@@ -808,7 +804,7 @@ void phys_step(phys_world *w)
     }
     for (int i=0; i<PHYS_MAX_BODIES; ++i) {
         phys_body *b = &w->bodies[i];
-        if (!b->used || b->type == PHYS_STATIC || !b->awake) continue;
+        if (!b->used || b->type == PHYS_STATIC || !b->awake || w->grab.body == i) continue;
         phys_vec previous = b->position;
         phys_q angle = b->angle;
         phys_vec v = add(b->velocity,b->push_velocity);

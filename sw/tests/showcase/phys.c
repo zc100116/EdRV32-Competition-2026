@@ -111,7 +111,7 @@ static void rest_test(void)
     require(asleep && asleep<=120,"rest sleep",asleep,120);
     require(!b->moved,"sleep redraw",b->moved,0);
     require(!b->max_normal_impulse,"sleep impact",real(b->max_normal_impulse),0);
-    phys_grab_create(&world,id,b->position,Q(2000));
+    phys_grab_create(&world,id,b->position);
     require(b->awake,"grab wakes sleeping body",b->awake,1);
     phys_grab_release(&world);
     steps(60);
@@ -201,7 +201,7 @@ static void grab_test(void)
 {
     begin();
     int id=block(PHYS_DYNAMIC,0,0,20,20,0,wood);
-    phys_grab_create(&world,id,(phys_vec){Q(6),0},Q(2000));
+    phys_grab_create(&world,id,(phys_vec){Q(6),0});
     phys_grab_move(&world,(phys_vec){Q(106),Q(50)});
     steps(60);
     phys_body *b=&world.bodies[id];

@@ -114,18 +114,23 @@ void tower_geo_test(const char *art_path)
     sprite_rot *a = malloc(sizeof *a);
     model_vectors(scratch);
     transparent_edge(a,scratch,pixels);
-    sprite_rot_begin(a,sources,(UINT64_C(1)<<36)-1,pixels);
+    sprite_rot_begin(a,sources,(UINT64_C(1)<<TOWER_KINDS)-1,pixels);
+    for (unsigned k = 1; k < TOWER_KINDS; k += 2) {
+        assert(a->frames[k][0].pixels == sources[k].pixels);
+        assert(tower_frame(1,PHYS_PI/2) == 0 && tower_frame(1,PHYS_PI) == 0);
+    }
     unsigned max_rgb = 0, max_alpha = 0, max_straight = 0;
     unsigned rgb_histogram[256] = {0}, alpha_histogram[256] = {0};
     unsigned over8 = 0, geo_pixels = 0;
     unsigned alpha_low = 255, alpha_high = 0, max_scratch = 0;
-    unsigned expected[] = {16,32,32,64,64,64};
+    unsigned expected[] = {16,1};
     const unsigned backgrounds[][3] = {{0,0,0},{255,255,255},{37,113,201}};
     while (a->completed < a->total) {
         unsigned k = a->kind;
+        while (!(a->kinds & (UINT64_C(1)<<k))) ++k;
         sprite_rot_prepare(a,scratch);
-        unsigned count = tower_frame_count(k%6)*2;
-        assert(count==expected[k%6]*2);
+        unsigned count = tower_frame_count(k%2)*2;
+        assert(count==expected[k%2]*2);
         assert(a->scratch_bytes <= SHOWCASE_TOWER_GEO_BYTES);
         if (a->scratch_bytes > max_scratch) max_scratch = a->scratch_bytes;
         for (unsigned i = 0; i < count; ++i) {
@@ -175,11 +180,11 @@ void tower_geo_test(const char *art_path)
                     assert(da <= 8);
                 }
         }
-        assert(tower_frame(k%6,0)==0);
-        assert(tower_frame(k%6,PHYS_PI/2)==16%expected[k%6]);
+        assert(tower_frame(k%2,0)==0);
+        assert(tower_frame(k%2,PHYS_PI/2)==16%expected[k%2]);
     }
-    assert(a->completed==1632 && a->bytes==117165144);
-    printf("GEO all 36 types frames=%u pixels=%u scratch=%u composite_rgb=%u "
+    assert(a->completed==96);
+    printf("GEO 6 squares frames=%u pixels=%u scratch=%u composite_rgb=%u "
         "alpha=%u straight_rgb=%u at_alpha=%u..%u\n",a->completed,a->bytes/4,max_scratch,
         max_rgb,max_alpha,max_straight,alpha_low,alpha_high);
     fflush(stdout);

@@ -13,10 +13,6 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageOps
 # Arch is the upper half of an annulus centered at (80, 80), radii 80 and 40.
 SHAPES = {
     "square": {"size": (80, 80), "vertices": ((0, 0), (80, 0), (80, 80), (0, 80))},
-    "plank": {"size": (240, 40), "vertices": ((0, 0), (240, 0), (240, 40), (0, 40))},
-    "brick": {"size": (120, 60), "vertices": ((0, 0), (120, 0), (120, 60), (0, 60))},
-    "triangle": {"size": (120, 80), "vertices": ((60, 0), (120, 80), (0, 80))},
-    "arch": {"size": (160, 80), "center": (80, 80), "radius": 80, "cutout_radius": 40},
     "circle": {"size": (80, 80), "center": (40, 40), "radius": 40},
 }
 MATERIALS = {"wood": 255, "stone": 255, "ice": 179, "metal": 255,
@@ -94,8 +90,8 @@ def main():
             for y in range(texture.height):
                 for x in range(texture.width):
                     red, green, blue = pixels[x, y]
-                    light = max(0, 14 - abs((x + y) % 128 - 40) // 2)
-                    noise = grain.randrange(-7, 8)
+                    light = max(0, 32 - abs((x + y) % 128 - 40) // 2)
+                    noise = grain.randrange(-20, 21)
                     pixels[x, y] = tuple(max(0, min(255, c + light + noise))
                                          for c in (red, green, blue))
         for shape, geometry in SHAPES.items():

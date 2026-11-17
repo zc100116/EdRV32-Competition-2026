@@ -11,15 +11,14 @@ static uint32_t random_next(tower_state *s)
 }
 unsigned tower_frame_count(unsigned shape)
 {
-    static const unsigned frames[] = {16,32,32,64,64,64};
-    return frames[shape];
+    return shape ? 1 : 16;
 }
 unsigned tower_frame(unsigned shape, phys_q angle)
 {
-    /* Every frame advances 2pi/64; symmetric silhouettes wrap earlier. */
+    if (shape) return 0;
     int64_t scaled = (int64_t)angle*64;
     int a = (int)((scaled >= 0 ? scaled+PHYS_PI : scaled-PHYS_PI)/(2*PHYS_PI));
-    return (unsigned)a & (tower_frame_count(shape)-1);
+    return (unsigned)a & 15;
 }
 void tower_geometry(unsigned shape, phys_body_def *d)
 {
@@ -27,56 +26,20 @@ void tower_geometry(unsigned shape, phys_body_def *d)
     d->type = PHYS_DYNAMIC;
     d->part_count = 1;
     phys_shape *p = &d->parts[0];
-    if (shape == 5) {
+    if (shape) {
         p->type = PHYS_CIRCLE;
         p->center = (phys_vec){Q(40),Q(40)};
         p->radius = Q(40);
-    } else if (shape == 4) {
-        static const int outer[5][2] = {{0,80},{23,23},{80,0},{137,23},{160,80}};
-        static const int inner[5][2] = {{40,80},{52,52},{80,40},{108,52},{120,80}};
-        d->part_count = 4;
-        for (int i = 0; i < 4; ++i) {
-            p = &d->parts[i];
-            p->count = 4;
-            p->vertices[0] = (phys_vec){Q(outer[i][0]),Q(outer[i][1])};
-            p->vertices[1] = (phys_vec){Q(outer[i+1][0]),Q(outer[i+1][1])};
-            p->vertices[2] = (phys_vec){Q(inner[i+1][0]),Q(inner[i+1][1])};
-            p->vertices[3] = (phys_vec){Q(inner[i][0]),Q(inner[i][1])};
-        }
-    } else if (shape == 3) {
-        p->count = 3;
-        p->vertices[0] = (phys_vec){Q(60),0};
-        p->vertices[1] = (phys_vec){Q(120),Q(80)};
-        p->vertices[2] = (phys_vec){0,Q(80)};
     } else {
-        static const int widths[] = {80,240,120};
-        static const int heights[] = {80,40,60};
         p->count = 4;
-        p->vertices[1].x = p->vertices[2].x = Q(widths[shape]);
-        p->vertices[2].y = p->vertices[3].y = Q(heights[shape]);
+        p->vertices[1].x = p->vertices[2].x = Q(80);
+        p->vertices[2].y = p->vertices[3].y = Q(80);
     }
 }
 phys_vec tower_pivot(unsigned shape)
 {
-    if (shape == 5) return (phys_vec){Q(40),Q(40)};
-    phys_body_def d;
-    tower_geometry(shape,&d);
-    int64_t area = 0, x = 0, y = 0;
-    for (int part = 0; part < d.part_count; ++part) {
-        phys_shape *p = &d.parts[part];
-        for (int i = 0; i < p->count; ++i) {
-            phys_vec a = p->vertices[i];
-            phys_vec b = p->vertices[(i+1)%p->count];
-            int ax = a.x/PHYS_ONE, ay = a.y/PHYS_ONE;
-            int bx = b.x/PHYS_ONE, by = b.y/PHYS_ONE;
-            int cross = ax*by-ay*bx;
-            area += cross;
-            x += (ax+bx)*cross;
-            y += (ay+by)*cross;
-        }
-    }
-    return (phys_vec){(phys_q)(x*PHYS_ONE/(3*area)),
-                      (phys_q)(y*PHYS_ONE/(3*area))};
+    (void)shape;
+    return (phys_vec){Q(40),Q(40)};
 }
 int tower_spawn(tower_state *s, int kind, int x, int y)
 {
@@ -88,11 +51,10 @@ int tower_spawn(tower_state *s, int kind, int x, int y)
         {24,32768,1311}, {4,58982,52429}, {7,26214,1311}
     };
     phys_body_def d;
-    unsigned shape = (unsigned)kind%6;
+    unsigned shape = (unsigned)kind%2;
     tower_geometry(shape,&d);
     phys_vec pivot = tower_pivot(shape);
-    /* Center source geometry before integration: full-size planks then keep their
-     * Q16.16 inertia representable without changing the physical algorithm. */
+    /* Integrate and render around the shared 40 px center. */
     for (int k = 0; k < d.part_count; ++k) {
         d.parts[k].center.x -= pivot.x;
         d.parts[k].center.y -= pivot.y;
@@ -102,7 +64,8 @@ int tower_spawn(tower_state *s, int kind, int x, int y)
         }
     }
     d.position = (phys_vec){Q(x),Q(y)};
-    d.material = materials[kind/6];
+    d.material = materials[kind/2];
+    if (!shape) d.material.restitution = 0;
     int id = phys_body_add(&s->world,&d);
     s->blocks[id] = (tower_block){kind,0,++s->sequence};
     return id;
@@ -111,7 +74,7 @@ void tower_init(tower_state *s, uint32_t seed)
 {
     memset(s,0,sizeof *s);
     s->rng = seed;
-    s->hover = s->fading = -1;
+    s->fading = -1;
     s->summon_ready = true;
     phys_world_init(&s->world,(phys_vec){0,Q(900)});
     phys_body_def d = {.type=PHYS_STATIC,.position={Q(TOWER_PLATFORM_X+TOWER_PLATFORM_W/2),
@@ -124,6 +87,10 @@ void tower_init(tower_state *s, uint32_t seed)
         d.parts[0].vertices[v].y -= Q(TOWER_PLATFORM_H/2);
     }
     s->platform = phys_body_add(&s->world,&d);
+    for (int i = 0; i < 6; ++i) {
+        int id = tower_spawn(s,i*2+(i%2),340+i*120,TOWER_PLATFORM_Y-40);
+        s->world.bodies[id].awake = false;
+    }
 }
 static bool contains(const phys_body *b, phys_vec point)
 {
@@ -132,14 +99,14 @@ static bool contains(const phys_body *b, phys_vec point)
         if (p->shape.type == PHYS_CIRCLE) {
             int64_t dx = (point.x-p->center.x)/256;
             int64_t dy = (point.y-p->center.y)/256;
-            int64_t r = p->shape.radius/256;
+            int64_t r = (p->shape.radius+Q(12))/256;
             if (dx*dx+dy*dy <= r*r) return true;
         } else {
             bool inside = true;
             for (int j = 0; j < p->shape.count; ++j) {
                 phys_vec a = p->vertices[j];
                 phys_vec n = p->world_normals[j];
-                if ((int64_t)(point.x-a.x)*n.x+(int64_t)(point.y-a.y)*n.y > 0)
+                if ((int64_t)(point.x-a.x)*n.x+(int64_t)(point.y-a.y)*n.y > (int64_t)Q(12)*PHYS_ONE)
                     inside = false;
             }
             if (inside) return true;
@@ -161,11 +128,11 @@ void tower_impacts(tower_state *s)
     for (int i = 0; i < PHYS_MAX_BODIES; ++i) {
         phys_body *b = &s->world.bodies[i];
         if (!b->used || i == s->platform) continue;
-        if (s->blocks[i].kind/6 == 5 && b->max_normal_impulse > TOWER_GLASS_IMPULSE) {
+        if (s->blocks[i].kind/2 == 5 && b->max_normal_impulse > TOWER_GLASS_IMPULSE) {
             particles(s,b->position,1,12);
             phys_body_remove(&s->world,i);
             ++s->broken;
-        } else if (s->blocks[i].kind/6 != 5 &&
+        } else if (s->blocks[i].kind/2 != 5 &&
                    b->max_normal_impulse > TOWER_DUST_IMPULSE &&
                    s->ticks >= s->blocks[i].dust_at) {
             particles(s,(phys_vec){b->position.x,b->aabb.max.y},0,3);
@@ -180,6 +147,7 @@ static void grab(tower_state *s)
     int held = s->world.grab.body;
     if (held >= 0) {
         if (!s->hand.closed) {
+            phys_grab_move(&s->world,point);
             phys_grab_release(&s->world);
             ++s->released;
         } else {
@@ -197,30 +165,25 @@ static void grab(tower_state *s)
     for (int i = PHYS_MAX_BODIES-1; i >= 0; --i)
         if (i != s->platform && i != s->fading && s->world.bodies[i].used &&
             contains(&s->world.bodies[i],point)) { target = i; break; }
-    if (!s->hand.closed || target < 0) { s->hover = -1; s->hold = 0; return; }
-    if (s->hover != target) { s->hover = target; s->hold = 0; }
-    if (++s->hold < TOWER_HOLD) return;
-    phys_grab_create(&s->world,target,point,Q(2000));
+    if (!s->hand.closed || target < 0) return;
+    phys_grab_create(&s->world,target,point);
     s->rotate_ready = true;
     ++s->picked;
-    s->hold = 0;
-    s->hover = -1;
 }
-/* A separate random draw for shape/material avoids the LCG low-bit correlation.
- * Fifteen tickets: two for each ordinary shape and five for balls. */
+/* Draw shape and material independently from the upper LCG bits. */
 static void sky_drop(tower_state *s, int x)
 {
-    unsigned ticket = (random_next(s)>>16)%15;
-    unsigned shape = ticket < 10 ? ticket%5 : 5;
+    unsigned shape = (random_next(s)>>16)%2;
     unsigned material = (random_next(s)>>16)%6;
-    int id = tower_spawn(s,(int)(material*6+shape),x,-160);
+    int id = tower_spawn(s,(int)(material*2+shape),x,-160);
     s->world.bodies[id].angular_velocity = (phys_q)((random_next(s)>>16)%32769)-16384;
 }
 void tower_summon(tower_state *s, int x)
 {
     if (s->world.grab.body >= 0 || s->fading >= 0) return;
-    if (x < TOWER_PLATFORM_X) x = TOWER_PLATFORM_X;
-    if (x > TOWER_PLATFORM_X+TOWER_PLATFORM_W) x = TOWER_PLATFORM_X+TOWER_PLATFORM_W;
+    if (x < TOWER_PLATFORM_X+57) x = TOWER_PLATFORM_X+57;
+    if (x > TOWER_PLATFORM_X+TOWER_PLATFORM_W-57)
+        x = TOWER_PLATFORM_X+TOWER_PLATFORM_W-57;
     unsigned count = 0;
     int oldest = -1;
     for (int i = 0; i < PHYS_MAX_BODIES; ++i) {
@@ -262,6 +225,15 @@ void tower_step(tower_state *s, tower_input input)
         }
     } else s->summon_hold = 0;
     phys_step(&s->world);
+    for (int i = 0; i < PHYS_MAX_BODIES; ++i) {
+        phys_body *b = &s->world.bodies[i];
+        if (!b->used || b->awake || i == s->platform || s->blocks[i].kind%2) continue;
+        phys_q quarter = PHYS_PI/2;
+        phys_q nearest = ((b->angle+(b->angle >= 0 ? quarter/2 : -quarter/2))/quarter)*quarter;
+        phys_q delta = b->angle-nearest;
+        if (delta && delta < PHYS_PI*4/180 && delta > -PHYS_PI*4/180)
+            phys_body_set_angle(&s->world,i,nearest);
+    }
     tower_impacts(s);
 }
 void tower_snapshot_copy(const tower_state *s, tower_snapshot *o)
@@ -269,8 +241,6 @@ void tower_snapshot_copy(const tower_state *s, tower_snapshot *o)
     memset(o,0,sizeof *o);
     o->hand = s->hand;
     o->ticks = s->ticks;
-    o->hold = s->hold;
-    o->hover = s->hover;
     o->broken = s->broken;
     o->held = s->world.grab.body;
     o->platform_x = TOWER_PLATFORM_X;
@@ -282,7 +252,7 @@ void tower_snapshot_copy(const tower_state *s, tower_snapshot *o)
         o->awake += b->awake;
         o->blocks[i] = (tower_render_block){true,b->awake,b->position.x/PHYS_ONE,
             b->position.y/PHYS_ONE,s->blocks[i].kind,
-            (int)tower_frame((unsigned)s->blocks[i].kind%6,b->angle),b->angle,b->aabb,
+            (int)tower_frame((unsigned)s->blocks[i].kind%2,b->angle),b->angle,b->aabb,
             i == s->fading ? (TOWER_FADE-s->fade_ticks)*255/TOWER_FADE : 255};
     }
 }

@@ -156,8 +156,25 @@ static void test_c(void)
         assert(s.closed == (i != 2));
     }
 }
+static void test_lab_rules(void)
+{
+    grab_object_t target = {640,300,0,false};
+    for (unsigned mode = 0; mode < 4; ++mode) {
+        grab_init(&s);
+        s.mode = mode;
+        hand(640,300,20);
+        bool close, release;
+        int object = grab_rule(&s,p,1,&target,1,40,false,&close,&release);
+        assert(close && !release && s.pending_frames == 0);
+        if (mode == 3) assert(object == 0);
+        hand(640,300,240);
+        grab_rule(&s,p,0,&target,1,40,false,&close,&release);
+        assert(!close && release);
+    }
+}
 int main(void)
 {
+    test_lab_rules();
     test_a();
     grab_init(&s);
     hand(290,470,20); frame(); frame();

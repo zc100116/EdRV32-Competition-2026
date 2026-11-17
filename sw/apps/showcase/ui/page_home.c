@@ -24,7 +24,7 @@ static const application_t applications[] = {
     {"人脸贴纸","跟随表情的趣味装扮",&home_stickers,11,MOTION},
     {"图片识别","上传图片，探索结果",&home_image,2,CAMERA | UI_ETH},
     {"方块工坊","手势搭房子、挖方块",&home_tower,17,MOTION},
-    {"物理积木","点赞召唤，转动与搭建",&home_tower,18,MOTION},
+    {"抓取实验","方块和球，体验抓取模式",&home_tower,18,MOTION},
     {"弹弓打靶","后拉瞄准，松开发射",&home_sling,101,MOTION},
     {"石头剪刀布","亮出手势，与芯片对战",&home_rps,102,MOTION},
     {"打地鼠","眼疾手快，击中目标",&home_mole,103,MOTION},

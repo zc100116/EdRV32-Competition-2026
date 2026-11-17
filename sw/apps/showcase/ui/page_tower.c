@@ -20,40 +20,16 @@
 #include <stdlib.h>
 #endif
 LV_IMAGE_DECLARE(tower_block_wood_square);
-LV_IMAGE_DECLARE(tower_block_wood_plank);
-LV_IMAGE_DECLARE(tower_block_wood_brick);
-LV_IMAGE_DECLARE(tower_block_wood_triangle);
-LV_IMAGE_DECLARE(tower_block_wood_arch);
 LV_IMAGE_DECLARE(tower_block_wood_circle);
 LV_IMAGE_DECLARE(tower_block_stone_square);
-LV_IMAGE_DECLARE(tower_block_stone_plank);
-LV_IMAGE_DECLARE(tower_block_stone_brick);
-LV_IMAGE_DECLARE(tower_block_stone_triangle);
-LV_IMAGE_DECLARE(tower_block_stone_arch);
 LV_IMAGE_DECLARE(tower_block_stone_circle);
 LV_IMAGE_DECLARE(tower_block_ice_square);
-LV_IMAGE_DECLARE(tower_block_ice_plank);
-LV_IMAGE_DECLARE(tower_block_ice_brick);
-LV_IMAGE_DECLARE(tower_block_ice_triangle);
-LV_IMAGE_DECLARE(tower_block_ice_arch);
 LV_IMAGE_DECLARE(tower_block_ice_circle);
 LV_IMAGE_DECLARE(tower_block_metal_square);
-LV_IMAGE_DECLARE(tower_block_metal_plank);
-LV_IMAGE_DECLARE(tower_block_metal_brick);
-LV_IMAGE_DECLARE(tower_block_metal_triangle);
-LV_IMAGE_DECLARE(tower_block_metal_arch);
 LV_IMAGE_DECLARE(tower_block_metal_circle);
 LV_IMAGE_DECLARE(tower_block_rubber_square);
-LV_IMAGE_DECLARE(tower_block_rubber_plank);
-LV_IMAGE_DECLARE(tower_block_rubber_brick);
-LV_IMAGE_DECLARE(tower_block_rubber_triangle);
-LV_IMAGE_DECLARE(tower_block_rubber_arch);
 LV_IMAGE_DECLARE(tower_block_rubber_circle);
 LV_IMAGE_DECLARE(tower_block_glass_square);
-LV_IMAGE_DECLARE(tower_block_glass_plank);
-LV_IMAGE_DECLARE(tower_block_glass_brick);
-LV_IMAGE_DECLARE(tower_block_glass_triangle);
-LV_IMAGE_DECLARE(tower_block_glass_arch);
 LV_IMAGE_DECLARE(tower_block_glass_circle);
 LV_IMAGE_DECLARE(tower_platform);
 LV_IMAGE_DECLARE(tower_hand_open);
@@ -64,29 +40,24 @@ LV_IMAGE_DECLARE(tower_shard_1);
 LV_IMAGE_DECLARE(tower_shard_2);
 LV_IMAGE_DECLARE(tower_shard_3);
 static const lv_image_dsc_t *const originals[TOWER_KINDS] = {
-    &tower_block_wood_square,&tower_block_wood_plank,&tower_block_wood_brick,
-    &tower_block_wood_triangle,&tower_block_wood_arch,&tower_block_wood_circle,
-    &tower_block_stone_square,&tower_block_stone_plank,&tower_block_stone_brick,
-    &tower_block_stone_triangle,&tower_block_stone_arch,&tower_block_stone_circle,
-    &tower_block_ice_square,&tower_block_ice_plank,&tower_block_ice_brick,
-    &tower_block_ice_triangle,&tower_block_ice_arch,&tower_block_ice_circle,
-    &tower_block_metal_square,&tower_block_metal_plank,&tower_block_metal_brick,
-    &tower_block_metal_triangle,&tower_block_metal_arch,&tower_block_metal_circle,
-    &tower_block_rubber_square,&tower_block_rubber_plank,&tower_block_rubber_brick,
-    &tower_block_rubber_triangle,&tower_block_rubber_arch,&tower_block_rubber_circle,
-    &tower_block_glass_square,&tower_block_glass_plank,&tower_block_glass_brick,
-    &tower_block_glass_triangle,&tower_block_glass_arch,&tower_block_glass_circle,
+    &tower_block_wood_square,&tower_block_wood_circle,
+    &tower_block_stone_square,&tower_block_stone_circle,
+    &tower_block_ice_square,&tower_block_ice_circle,
+    &tower_block_metal_square,&tower_block_metal_circle,
+    &tower_block_rubber_square,&tower_block_rubber_circle,
+    &tower_block_glass_square,&tower_block_glass_circle,
 };
 static tower_state state;
 static tower_snapshot snapshots[3], shown, next;
 static sprite_rot atlas;
-static lv_image_dsc_t images[TOWER_KINDS][64];
+static lv_image_dsc_t images[TOWER_KINDS][16];
 static uint32_t *storage;
 static void *geo_scratch;
 static uint64_t atlas_started;
-static lv_obj_t *frame, *load_panel, *load_bar, *hold_arc;
+static lv_obj_t *frame, *load_panel, *load_bar, *mode_text;
 static lv_timer_t *timer;
-static unsigned command, phys_max_us;
+static unsigned command, phys_max_us, selected_mode;
+static bool closed;
 static bool loading, atlas_ready, painted, key_down;
 static void simulate(void *context)
 {
@@ -97,8 +68,39 @@ static void simulate(void *context)
     command = 0;
     sched_port_unlock(lock);
     if (action) tower_summon(&state,(int)ui_grab.x);
+    grab_state_t rule = ui_grab;
+    rule.mode = selected_mode;
+    const ui_hand_t *pose = ui_data_hand();
+    if (pose->count) {
+        unsigned largest = 0;
+        for (unsigned i = 1; i < pose->count; ++i)
+            if (pose->people[i].width*pose->people[i].height >
+                pose->people[largest].width*pose->people[largest].height) largest = i;
+        grab_object_t targets[PHYS_MAX_BODIES];
+        unsigned count = 0;
+        for (int i = 0; i < PHYS_MAX_BODIES; ++i) {
+            const phys_body *b = &state.world.bodies[i];
+            if (b->used && i != state.platform)
+                targets[count++] = (grab_object_t){b->position.x/(float)PHYS_ONE,
+                    b->position.y/(float)PHYS_ONE,0,false};
+        }
+        const ui_pose_point_t *points = pose->points[largest];
+        static const unsigned required[4][10] = {
+            {0,5,9,13,17,4,8},{0,5,9,13,17,4,8,12,16,20},{0,5,9,13,17},{4,8}};
+        static const unsigned counts[] = {7,10,5,2};
+        bool valid = true;
+        for (unsigned i = 0; i < counts[rule.mode]; ++i)
+            if (points[required[rule.mode][i]].visibility < .5f) valid = false;
+        if (valid) {
+            bool close, release;
+            grab_rule(&rule,points,ui_grab.cls,targets,count,40,false,&close,&release);
+            if (closed ? release : close) closed = !closed;
+        }
+    } else closed = false;
+    /* Scissors rotates the held body in every mode, even when the fingers separate. */
+    if (pose->count && state.world.grab.body >= 0 && ui_grab.cls == 2) closed = true;
     tower_input hand = {(int)ui_grab.x,(int)ui_grab.y,ui_grab.cls,
-                        ui_grab.closed,ui_grab.lost};
+                        closed,ui_grab.lost};
     tower_step(&state,hand);
     unsigned us = (unsigned)((platform_ticks()-started)*1000000/platform_clock_hz());
     if (us > phys_max_us) phys_max_us = us;
@@ -116,7 +118,7 @@ static void report(void *context, unsigned draws, unsigned steps,
     tower_snapshot_copy(&state,&snap);
     char line[192];
     snprintf(line,sizeof line,
-        "game name=physblocks draw_fps=%u phys_us=%u phys_max_us=%u late=%u bodies=%u awake=%u\r\n",
+        "game name=grablab draw_fps=%u phys_us=%u phys_max_us=%u late=%u bodies=%u awake=%u\r\n",
         draws,mean_us,phys_max_us,late,snap.bodies,snap.awake);
     phys_max_us = 0;
     platform_puts(line);
@@ -252,7 +254,7 @@ void ui_tower_update(void)
         struct geo_descriptor *descriptors = scratch;
         unsigned first_byte = atlas.bytes;
         sprite_rot_prepare(&atlas,scratch);
-        unsigned count = tower_frame_count(kind%6)*2;
+        unsigned count = tower_frame_count(kind%2)*2;
         for (unsigned i = 0; i < count; ++i)
             geo_descriptor_pack(&descriptors[i],&atlas.configs[i]);
         engine_dma_clean((uintptr_t)scratch,atlas.source_end);
@@ -267,7 +269,7 @@ void ui_tower_update(void)
                               atlas.scratch_bytes-atlas.source_end);
         bool done = sprite_rot_finish(&atlas,scratch);
         engine_dma_clean((uintptr_t)storage+first_byte,atlas.bytes-first_byte);
-        for (unsigned frame_number = 0; frame_number < tower_frame_count(kind%6);
+        for (unsigned frame_number = 0; frame_number < tower_frame_count(kind%2);
              ++frame_number) {
             const sprite_frame *f = &atlas.frames[kind][frame_number];
             images[kind][frame_number] = (lv_image_dsc_t){
@@ -278,7 +280,7 @@ void ui_tower_update(void)
         lv_bar_set_value(load_bar,(int)(atlas.completed*100/atlas.total),LV_ANIM_OFF);
         if (done) {
             char line[128];
-            snprintf(line,sizeof line,"game name=physblocks event=atlas total_ms=%u\r\n",
+            snprintf(line,sizeof line,"game name=grablab event=atlas total_ms=%u\r\n",
                 (unsigned)((platform_ticks()-atlas_started)*1000/platform_clock_hz()));
             platform_puts(line);
             atlas_ready = true;
@@ -295,9 +297,6 @@ void ui_tower_update(void)
     if (!game_loop_read(&next)) return;
     invalidate(&shown,&next);
     shown = next;
-    lv_arc_set_value(hold_arc,(int)shown.hold);
-    lv_obj_set_pos(hold_arc,shown.hand.x-32,shown.hand.y-32);
-    lv_obj_set_hidden(hold_arc,!shown.hold);
 }
 static void tick(lv_timer_t *t) { (void)t; ui_tower_update(); }
 static void deleted(lv_event_t *event)
@@ -307,15 +306,32 @@ static void deleted(lv_event_t *event)
     lv_timer_delete(timer);
     /* The atlas and its storage live for the boot, including page re-entry. */
 }
+static void mode_changed(lv_event_t *event)
+{
+    static const char *const names[] = {"A 捏合","B 五指聚拢","C 手势分类","D 双指夹取"};
+    unsigned mode = lv_buttonmatrix_get_selected_button(lv_event_get_target_obj(event));
+    uint32_t lock = sched_port_lock();
+    selected_mode = ui_grab.mode = mode;
+    closed = false;
+    sched_port_unlock(lock);
+    lv_label_set_text(mode_text,names[mode]);
+}
 void ui_page_tower(lv_obj_t *p)
 {
     grab_init(&ui_grab);
-    ui_grab.mode = 2;
+    ui_settings_apply_grab();
+    selected_mode = ui_grab.mode = 0;
+    closed = false;
     tower_init(&state,42);
     tower_snapshot_copy(&state,&shown);
     command = phys_max_us = 0;
     painted = key_down = false;
-    lv_obj_t *header = ui_camera_layout(p,"物理积木");
+    lv_obj_t *header = ui_camera_layout(p,"抓取实验");
+    static const char *const modes[] = {"A","B","C","D",""};
+    lv_obj_t *selector = ui_segment(header,modes,selected_mode);
+    lv_obj_set_size(selector,220,40);
+    lv_obj_add_event_cb(selector,mode_changed,LV_EVENT_VALUE_CHANGED,NULL);
+    mode_text = ui_text_label(header,"A 捏合",&sim_font_14,MUTED);
     ui_text_label(header,"点赞：掉落 · 剪刀手：旋转",&sim_font_14,MUTED);
     frame = ui_box(lv_screen_active(),0,0,1280,720,0);
     lv_obj_set_clickable(frame,false);
@@ -326,8 +342,6 @@ void ui_page_tower(lv_obj_t *p)
     lv_obj_move_to_index(frame,0);
     lv_obj_add_event_cb(frame,draw,LV_EVENT_DRAW_MAIN,NULL);
     lv_obj_add_event_cb(frame,deleted,LV_EVENT_DELETE,NULL);
-    hold_arc = ui_hold_arc(lv_screen_active(),TOWER_HOLD);
-    lv_obj_set_hidden(hold_arc,true);
     load_panel = ui_box(lv_screen_active(),360,250,560,160,0x142b40);
     ui_label(load_panel,"正在生成积木旋转帧",30,24,&sim_font_28,0xffffff);
     load_bar = lv_bar_create(load_panel);
@@ -348,6 +362,7 @@ void ui_page_tower(lv_obj_t *p)
             for (unsigned i = 0; i < TOWER_KINDS; ++i)
                 sources[i] = (sprite_source){(const uint32_t *)originals[i]->data,
                                             originals[i]->header.w,originals[i]->header.h};
+            for (unsigned i = 1; i < TOWER_KINDS; i += 2) images[i][0] = *originals[i];
             atlas_started = platform_ticks();
             sprite_rot_begin(&atlas,sources,(UINT64_C(1)<<TOWER_KINDS)-1,storage);
         }

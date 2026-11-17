@@ -8,17 +8,20 @@
 static void tower_scene(tower_state *s, unsigned scene)
 {
     tower_init(s,42);
+    for (int i = 1; i < PHYS_MAX_BODIES; ++i) phys_body_remove(&s->world,i);
     if (scene == 0)
         for (int i = 0; i < 5; ++i) tower_spawn(s,0,640,580-80*i);
     if (scene == 1) {
-        for (int i = 0; i < 3; ++i) tower_spawn(s,1,640,600-40*i);
-        tower_spawn(s,3,580,473);
-        tower_spawn(s,3,700,473);
+        tower_spawn(s,6,640,580);
+        tower_spawn(s,4,640,500);
+        tower_spawn(s,6,640,100);
+        tower_spawn(s,0,480,580);
+        tower_spawn(s,0,800,580);
     }
     if (scene == 2) {
         tower_spawn(s,0,480,580);
         tower_spawn(s,0,800,580);
-        for (int i = 0; i < 3; ++i) tower_spawn(s,5,560+80*i,572);
+        for (int i = 0; i < 3; ++i) tower_spawn(s,1,560+80*i,572);
     }
     for (int i = 1; i <= 5; ++i) {
         phys_body *b = &s->world.bodies[i];

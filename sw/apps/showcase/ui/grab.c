@@ -56,6 +56,54 @@ static void transition(grab_state_t *s, bool closed, int object)
         ++s->drops;
     }
 }
+int grab_rule(grab_state_t *s, const ui_pose_point_t *p, int cls,
+              const grab_object_t *objects, unsigned count, float radius,
+              bool smooth, bool *close_out, bool *release_out)
+{
+    static const unsigned tips[] = {4,8,12,16,20};
+    static const unsigned palm[] = {0,5,9,13,17};
+    bool close = false;
+    bool release = false;
+    int object = -1;
+    if (s->mode <= 1) {
+        float d = point_distance(p,4,8);
+        if (s->mode == 1) {
+            for (unsigned i = 2; i < 5; ++i) d += point_distance(p,4,tips[i]);
+            d /= 4;
+        }
+        float scale = 0;
+        for (unsigned i = 1; i < 5; ++i) scale += point_distance(p,0,palm[i]);
+        d /= scale / 4;
+        s->d = smooth ? .5f * (s->d + d) : d;
+        float threshold = s->thresholds[s->mode] / 100.f;
+        close = s->d < threshold;
+        release = s->d > threshold + (s->mode == 0 ? .15f : .20f);
+    } else if (s->mode == 2) {
+        close = cls == 1 || cls == 5;
+        release = cls == 0 || cls == 11;
+    } else {
+        float d = point_distance(p,4,8);
+        s->d = smooth ? .5f * (s->d + d) : d;
+        float reach = radius + s->thresholds[3];
+        release = s->d > 2 * reach + 40;
+        for (unsigned i = 0; i < count; ++i) {
+            const grab_object_t *o = &objects[i];
+            float ax = p[4].x - o->x;
+            float ay = p[4].y - o->y;
+            float bx = p[8].x - o->x;
+            float by = p[8].y - o->y;
+            if (distance(p[4].x,p[4].y,o->x,o->y) <= reach &&
+                distance(p[8].x,p[8].y,o->x,o->y) <= reach && ax*bx + ay*by < 0) {
+                object = (int)i;
+                close = true;
+                break;
+            }
+        }
+    }
+    *close_out = close;
+    *release_out = release;
+    return object;
+}
 bool grab_frame(grab_state_t *s, const ui_pose_point_t *p, int cls, uint32_t stamp)
 {
     if (!p) {
@@ -108,44 +156,9 @@ bool grab_frame(grab_state_t *s, const ui_pose_point_t *p, int cls, uint32_t sta
     s->seen_at = stamp;
     s->smooth = true;
     s->cls = cls;
-    bool close = false;
-    bool release = false;
-    int object = -1;
-    if (s->mode <= 1) {
-        float d = point_distance(p,4,8);
-        if (s->mode == 1) {
-            for (unsigned i = 2; i < 5; ++i) d += point_distance(p,4,tips[i]);
-            d /= 4;
-        }
-        float scale = 0;
-        for (unsigned i = 1; i < 5; ++i) scale += point_distance(p,0,palm[i]);
-        d /= scale / 4;
-        s->d = smooth ? .5f * (s->d + d) : d;
-        float threshold = s->thresholds[s->mode] / 100.f;
-        close = s->d < threshold;
-        release = s->d > threshold + (s->mode == 0 ? .15f : .20f);
-    } else if (s->mode == 2) {
-        close = cls == 1 || cls == 5;
-        release = cls == 0 || cls == 11;
-    } else {
-        float d = point_distance(p,4,8);
-        s->d = smooth ? .5f * (s->d + d) : d;
-        float reach = GRAB_RADIUS + s->thresholds[3];
-        release = s->d > 2 * reach + 40;
-        for (unsigned i = 0; i < GRAB_OBJECTS; ++i) {
-            const grab_object_t *o = &s->objects[i];
-            float ax = p[4].x - o->x;
-            float ay = p[4].y - o->y;
-            float bx = p[8].x - o->x;
-            float by = p[8].y - o->y;
-            if (distance(p[4].x,p[4].y,o->x,o->y) <= reach &&
-                distance(p[8].x,p[8].y,o->x,o->y) <= reach && ax*bx + ay*by < 0) {
-                object = (int)i;
-                close = true;
-                break;
-            }
-        }
-    }
+    bool close, release;
+    int object = grab_rule(s,p,cls,s->objects,GRAB_OBJECTS,GRAB_RADIUS,
+                           smooth,&close,&release);
     if (s->held >= 0) {
         s->objects[s->held].x = s->x + s->offset_x;
         s->objects[s->held].y = s->y + s->offset_y;

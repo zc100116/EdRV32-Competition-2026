@@ -32,11 +32,14 @@ void sprite_rot_begin(sprite_rot *a, const sprite_source sources[TOWER_KINDS],
 {
     memset(a,0,sizeof *a);
     memcpy(a->sources,sources,sizeof a->sources);
-    a->kinds = kinds;
+    a->kinds = kinds & UINT64_C(0x555);
+    for (unsigned i = 1; i < TOWER_KINDS; i += 2)
+        a->frames[i][0] = (sprite_frame){(uint32_t *)sources[i].pixels,
+            sources[i].width,sources[i].height,-40,-40};
     a->storage = storage;
     for (unsigned i = 0; i < TOWER_KINDS; ++i)
-        if (kinds & (UINT64_C(1)<<i)) {
-            a->total += tower_frame_count(i%6);
+        if (a->kinds & (UINT64_C(1)<<i)) {
+            a->total += tower_frame_count(i%2);
             ++a->types;
         }
     /* Fold reciprocal multiplication/saturation into the RGB565 reconstruction tables.
@@ -75,10 +78,10 @@ void sprite_rot_prepare(sprite_rot *a, void *scratch)
                 (((c>>8)&255)*v+127)/255,((c&255)*v+127)/255);
             alpha[y*stride/2+x] = encode(v,v,v);
         }
-    phys_vec pivot = tower_pivot(k%6);
-    for (unsigned f = 0; f < tower_frame_count(k%6); ++f) {
+    phys_vec pivot = tower_pivot(k%2);
+    for (unsigned f = 0; f < tower_frame_count(k%2); ++f) {
         int sn = sine[f];
-        int cs = sine[(f+16)%64];
+        int cs = sine[(f+16)%24];
         int min_x = 1000, min_y = 1000, max_x = -1000, max_y = -1000;
         for (unsigned i = 0; i < 4; ++i) {
             int x = (i&1 ? (int)src.width : 0)*65536-pivot.x;
@@ -122,7 +125,7 @@ void sprite_rot_prepare(sprite_rot *a, void *scratch)
 bool sprite_rot_finish(sprite_rot *a, const void *scratch)
 {
     unsigned k = a->kind;
-    for (unsigned f = 0; f < tower_frame_count(k%6); ++f) {
+    for (unsigned f = 0; f < tower_frame_count(k%2); ++f) {
         const sprite_frame out = a->frames[k][f];
         const struct geo_config *config = &a->configs[f*2];
         const uint16_t *color = (const uint16_t *)((const uint8_t *)scratch+

@@ -221,7 +221,7 @@ void ui_open(unsigned page)
     ui_text_label(top,"EdRV32",&sim_font_20,ACCENT);
     const char *names[] = {"首页", "目标检测计数", "图片识别", "图像处理", "图形引擎",
         "经典游戏", "系统监控", "芯片信息", "调试助手", "人体姿态", "手势识别",
-        "人脸贴纸", "", "安全帽检测", "抓取测试", "体感互动", "设置", "方块工坊", "物理积木"};
+        "人脸贴纸", "", "安全帽检测", "抓取测试", "体感互动", "设置", "方块工坊", "抓取实验"};
     ui_text_label(top,names[page],&sim_font_16,TEXT);
     status = ui_text_label(top,"",&sim_font_14,MUTED);
     lv_obj_set_flex_grow(status,1);

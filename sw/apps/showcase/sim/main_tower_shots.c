@@ -2,9 +2,9 @@
  * Deterministic scene construction, original assets and desktop camera fixture.
  */
 #include "theme.h"
+#include "widgets.h"
 #include "sim_data.h"
 #include "tower.h"
-#include "../../../tests/showcase/tower_scenes.h"
 #include "game_loop.h"
 #include "grab.h"
 #include <assert.h>
@@ -57,14 +57,27 @@ static void publish(void)
     lv_tick_inc(17);
     game_loop_step();
 }
+static lv_obj_t *find_modes(lv_obj_t *parent)
+{
+    if (lv_obj_check_type(parent,&lv_buttonmatrix_class) &&
+        !strcmp(lv_buttonmatrix_get_button_text(parent,0),"A")) return parent;
+    for (unsigned i = 0; i < lv_obj_get_child_count(parent); ++i) {
+        lv_obj_t *found = find_modes(lv_obj_get_child(parent,(int)i));
+        if (found) return found;
+    }
+    return NULL;
+}
 int main(int argc, char **argv)
 {
     assert(argc == 2);
     directory = argv[1];
     lv_init();
     lv_font_glyph_dsc_t glyph;
-    assert(lv_font_get_glyph_dsc(&showcase_bold_24,&glyph,0x7406,0));
-    assert(!glyph.is_placeholder);
+    static const uint32_t title[] = {0x6293,0x53d6,0x5b9e,0x9a8c};
+    for (unsigned i = 0; i < 4; ++i) {
+        assert(lv_font_get_glyph_dsc(&showcase_bold_24,&glyph,title[i],0));
+        assert(!glyph.is_placeholder);
+    }
     lv_display_t *display = lv_display_create(1280,720);
     lv_display_set_color_format(display,LV_COLOR_FORMAT_ARGB8888);
     lv_display_set_buffers(display,drawbuffer,NULL,sizeof drawbuffer,LV_DISPLAY_RENDER_MODE_FULL);
@@ -81,8 +94,8 @@ int main(int argc, char **argv)
     clock_t begin = clock();
     unsigned batches = 0;
     while (ui_tower_loading()) { ui_tower_update(); ++batches; }
-    assert(batches == 36);
-    printf("physblocks atlas host_cpu_ms=%ld bytes=%u batches=%u\n",
+    assert(batches == 6);
+    printf("grablab atlas host_cpu_ms=%ld bytes=%u batches=%u\n",
         (long)((clock()-begin)*1000/CLOCKS_PER_SEC),ui_tower_atlas_bytes(),batches);
     unsigned bytes = ui_tower_atlas_bytes();
     game_loop_stop();
@@ -95,37 +108,28 @@ int main(int argc, char **argv)
     assert(ui_tower_key(LV_KEY_ENTER));
     publish();
     tower_snapshot keyshot;
-    assert(game_loop_read(&keyshot) && keyshot.bodies == 1);
+    assert(game_loop_read(&keyshot) && keyshot.bodies == 7);
     game_loop_stop();
-    tower_scene(&fixture,0);
-    for (unsigned t = 0; t < 90; ++t)
-        tower_step(&fixture,(tower_input){850,280,0,false,0});
-    tower_snapshot snap;
-    tower_snapshot_copy(&fixture,&snap);
-    assert(snap.bodies == 5 && snap.awake == 0);
+    tower_init(&fixture,42);
     game_loop_config config = {freeze,snapshot,report,&fixture,
         {&buffers[0],&buffers[1],&buffers[2]},sizeof(tower_snapshot)};
     game_loop_start(&config);
-    publish(); capture("stacked");
-    for (unsigned t = 0; t < 72; ++t)
-        tower_step(&fixture,(tower_input){850,280,8,false,0});
-    assert(fixture.sequence == 6);
-    tower_snapshot_copy(&fixture,&snap);
-    assert(snap.bodies == 6 && snap.awake > 0);
-    publish(); capture("falling");
-    tower_init(&fixture,42);
-    int id = tower_spawn(&fixture,1,640,300);
-    /* Feed the shared fist and scissors path with a steady cursor. */
-    fixture.world.gravity.y = 0;
-    for (unsigned t = 0; t < 60; ++t)
-        tower_step(&fixture,(tower_input){640,300,1,true,0});
+    publish(); capture("initial");
+    int id = tower_spawn(&fixture,6,640,300);
+    tower_step(&fixture,(tower_input){640,300,1,true,0});
+    tower_step(&fixture,(tower_input){700,280,1,true,0});
     assert(fixture.world.grab.body == id);
-    for (unsigned t = 0; t < 8; ++t)
-        tower_step(&fixture,(tower_input){640,300,2,true,0});
-    assert(fixture.rotations == 1);
-    publish(); capture("rotated");
+    assert(fixture.world.bodies[id].position.x == 700*PHYS_ONE);
+    publish(); capture("steel-held");
+    lv_obj_t *selector = find_modes(lv_screen_active());
+    assert(selector);
+    lv_buttonmatrix_set_selected_button(selector,3);
+    lv_buttonmatrix_set_button_ctrl(selector,3,LV_BUTTONMATRIX_CTRL_CHECKED);
+    lv_obj_send_event(selector,LV_EVENT_VALUE_CHANGED,NULL);
+    assert(ui_grab.mode == 3);
+    publish(); capture("mode-d");
     game_loop_stop();
     ui_open(0);
     lv_deinit();
-    puts("PASS native physblocks stacked/falling/rotated captures and atlas re-entry");
+    puts("PASS native grablab initial/steel/mode captures and atlas re-entry");
 }

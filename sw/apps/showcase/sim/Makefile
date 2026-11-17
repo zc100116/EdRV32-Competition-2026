@@ -175,7 +175,7 @@ TOWER_OUTPUT ?= $(ROOT)/build/sim/tower
 tower-shots: $(BUILD)/showcase_tower_shots
 	mkdir -p $(TOWER_OUTPUT)
 	$(BUILD)/showcase_tower_shots $(TOWER_OUTPUT)
-	$(foreach name,stacked falling rotated,python3 $(ROOT)/tools/sw/raw2png.py $(TOWER_OUTPUT)/$(name).rgb565 $(TOWER_OUTPUT)/$(name).png;)
-	rm $(addprefix $(TOWER_OUTPUT)/,$(addsuffix .rgb565,stacked falling rotated))
+	$(foreach name,initial steel-held mode-d,python3 $(ROOT)/tools/sw/raw2png.py $(TOWER_OUTPUT)/$(name).rgb565 $(TOWER_OUTPUT)/$(name).png;)
+	rm $(addprefix $(TOWER_OUTPUT)/,$(addsuffix .rgb565,initial steel-held mode-d))
 $(BUILD)/showcase_tower_shots: main_tower_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_tower_shots.c $(COMMON) $(LINUX_LV) -lm -o $@

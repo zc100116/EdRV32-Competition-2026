@@ -10,7 +10,7 @@ from png2c import decode_png
 assets = Path(__file__).resolve().parents[2] / 'apps/showcase/assets/tower'
 with Path(sys.argv[1]).open('wb') as output:
     for material in ('wood', 'stone', 'ice', 'metal', 'rubber', 'glass'):
-        for shape in ('square', 'plank', 'brick', 'triangle', 'arch', 'circle'):
+        for shape in ('square', 'circle'):
             png = assets / f'block-{material}-{shape}.png'
             width, height, rgba = decode_png(png.read_bytes())
             output.write(struct.pack('<II', width, height))
