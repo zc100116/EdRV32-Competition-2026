@@ -7,8 +7,11 @@
 #include "game_loop.h"
 #include <assert.h>
 #include <stdio.h>
+#include <time.h>
+#include <string.h>
 extern const lv_image_dsc_t sim_indoor;
 void ui_workshop_update(void);
+unsigned ui_workshop_pending(void);
 static uint16_t framebuffer[1280*720];
 static uint32_t drawbuffer[1280*720];
 static workshop_state fixture;
@@ -36,7 +39,23 @@ static void capture(const char *name)
 {
     lv_tick_inc(17);
     game_loop_step();
-    ui_workshop_update();
+    unsigned frames=0;
+    clock_t total=0,maximum=0;
+    do {
+        unsigned pending=ui_workshop_pending();
+        clock_t begin=clock();
+        ui_workshop_update();
+        if (pending) assert(ui_workshop_pending()<pending);
+        clock_t elapsed=clock()-begin;
+        total+=elapsed;
+        if (elapsed>maximum) maximum=elapsed;
+        ++frames;
+    } while (ui_workshop_pending());
+    if (!strcmp(name,"house-dusk") || !strcmp(name,"house-night") ||
+        !strcmp(name,"castle-night")) assert(frames<=29);
+    printf("cache_capture name=%s frames=%u total_us=%lu max_frame_us=%lu\n",name,frames,
+        (unsigned long)(total*1000000/CLOCKS_PER_SEC),
+        (unsigned long)(maximum*1000000/CLOCKS_PER_SEC));
     lv_obj_update_layout(lv_screen_active());
     lv_refr_now(NULL);
     char path[1024];
@@ -44,6 +63,7 @@ static void capture(const char *name)
     FILE *file=fopen(path,"wb");
     assert(file && fwrite(framebuffer,sizeof framebuffer,1,file)==1);
     fclose(file);
+
 }
 static void step(unsigned count,int x,int y,int cls)
 {
@@ -78,15 +98,12 @@ int main(int argc,char **argv)
         workshop_scene(&fixture,scene);
         fixture.hand=(ws_input){1020,240,0,false,0};
         capture(names[scene]);
+        if (scene==1) {
+            fixture.sky=WS_DUSK; capture("house-dusk");
+            fixture.sky=WS_NIGHT; capture("house-night");
+        }
+        if (scene==2) { fixture.sky=WS_NIGHT; capture("castle-night"); }
     }
-    workshop_scene(&fixture,1);
-    fixture.hand=(ws_input){1020,240,0,false,0};
-    fixture.sky=WS_DUSK; capture("house-dusk");
-    fixture.sky=WS_NIGHT; capture("house-night");
-    workshop_scene(&fixture,2);
-    fixture.sky=WS_NIGHT;
-    fixture.hand=(ws_input){1020,240,0,false,0};
-    capture("castle-night");
     workshop_scene(&fixture,1);
     fixture.sky=WS_NIGHT;
     fixture.inventory=true;
@@ -124,6 +141,13 @@ int main(int argc,char **argv)
     fixture.orientation=1;
     step(1,808,368,0);
     capture("slope-preview");
+    fixture.sky=WS_NIGHT;
+    lv_tick_inc(17); game_loop_step(); ui_workshop_update();
+    while (ui_workshop_pending()) ui_workshop_update();
+    workshop_remove(&fixture,fixture.grid[10][0]);
+    lv_tick_inc(17); game_loop_step(); ui_workshop_update();
+    assert(ui_workshop_pending()==0);
+    puts("PASS night single-cell edit completes in the current GUI frame");
     game_loop_stop();
     ui_open(0);
     lv_deinit();

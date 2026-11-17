@@ -10,9 +10,6 @@
 #include "src/draw/lv_draw_private.h"
 #include <stdio.h>
 #include <string.h>
-#ifndef __riscv
-#include <time.h>
-#endif
 LV_IMAGE_DECLARE(ws_block_grass);
 LV_IMAGE_DECLARE(ws_block_dirt);
 LV_IMAGE_DECLARE(ws_block_stone);
@@ -225,61 +222,165 @@ static void rect(lv_layer_t *layer,ws_rect r,uint32_t color,lv_opa_t opacity)
     lv_area_t a={r.x,r.y,r.x+r.w-1,r.y+r.h-1};
     lv_draw_rect(layer,&d,&a);
 }
+/* Reciprocal alpha normalizes straight-alpha edges with MULHU, never DIVU.
+ * Opaque wall/halo blending uses two packed RGB multiplications per source.
+ */
+static const uint32_t alpha_reciprocal[256]={
+    0,16843009,8421504,5614336,4210752,3368601,2807168,2406144,
+    2105376,1871445,1684300,1531182,1403584,1295616,1203072,1122867,
+    1052688,990765,935722,886474,842150,802048,765591,732304,
+    701792,673720,647808,623815,601536,580793,561433,543322,
+    526344,510394,495382,481228,467861,455216,443237,431872,
+    421075,410805,401024,391697,382795,374289,366152,358361,
+    350896,343734,336860,330255,323904,317792,311907,306236,
+    300768,295491,290396,285474,280716,276114,271661,267349,
+    263172,259123,255197,251388,247691,244101,240614,237225,
+    233930,230726,227608,224573,221618,218740,215936,213202,
+    210537,207938,205402,202927,200512,198153,195848,193597,
+    191397,189247,187144,185088,183076,181107,179180,177294,
+    175448,173639,171867,170131,168430,166762,165127,163524,
+    161952,160409,158896,157411,155953,154523,153118,151738,
+    150384,149053,147745,146460,145198,143957,142737,141537,
+    140358,139198,138057,136935,135830,134744,133674,132622,
+    131586,130565,129561,128572,127598,126639,125694,124763,
+    123845,122941,122050,121172,120307,119453,118612,117783,
+    116965,116158,115363,114578,113804,113040,112286,111543,
+    110809,110085,109370,108664,107968,107280,106601,105930,
+    105268,104614,103969,103331,102701,102078,101463,100856,
+    100256,99662,99076,98497,97924,97358,96798,96245,
+    95698,95158,94623,94095,93572,93055,92544,92038,
+    91538,91043,90553,90069,89590,89116,88647,88183,
+    87724,87269,86819,86374,85933,85497,85065,84638,
+    84215,83796,83381,82970,82563,82161,81762,81367,
+    80976,80588,80204,79824,79448,79075,78705,78339,
+    77976,77617,77261,76908,76559,76212,75869,75529,
+    75192,74857,74526,74198,73872,73550,73230,72913,
+    72599,72287,71978,71672,71368,71067,70768,70472,
+    70179,69888,69599,69312,69028,68746,68467,68190,
+    67915,67642,67372,67103,66837,66573,66311,66051,
+};
+static const uint16_t falloff[256]={
+    65025,64009,63001,62500,61504,61009,60025,59049,
+    58564,57600,57121,56169,55696,54756,53824,53361,
+    52441,51984,51076,50625,49729,48841,48400,47524,
+    47089,46225,45796,44944,44100,43681,42849,42436,
+    41616,41209,40401,39601,39204,38416,38025,37249,
+    36864,36100,35344,34969,34225,33856,33124,32761,
+    32041,31329,30976,30276,29929,29241,28900,28224,
+    27556,27225,26569,26244,25600,24964,24649,24025,
+    23716,23104,22801,22201,21609,21316,20736,20449,
+    19881,19600,19044,18496,18225,17689,17424,16900,
+    16641,16129,15625,15376,14884,14641,14161,13924,
+    13456,12996,12769,12321,12100,11664,11449,11025,
+    10609,10404,10000,9801,9409,9216,8836,8464,
+    8281,7921,7744,7396,7225,6889,6561,6400,
+    6084,5929,5625,5329,5184,4900,4761,4489,
+    4356,4096,3844,3721,3481,3364,3136,3025,
+    2809,2601,2500,2304,2209,2025,1936,1764,
+    1600,1521,1369,1296,1156,1089,961,841,
+    784,676,625,529,484,400,324,289,
+    225,196,144,121,81,49,36,16,
+    9,1,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+};
+static unsigned divide255(unsigned value)
+{
+    return (value+1+(value>>8))>>8;
+}
 static uint32_t blend(uint32_t dest,uint32_t src)
 {
-    unsigned alpha=src>>24, back=dest>>24;
+    unsigned alpha=src>>24,back=dest>>24;
     if (!alpha) return dest;
-    if (alpha==255) return src;
-    unsigned out=alpha+back*(255-alpha)/255;
+    if (alpha==255 || !back) return src;
+    if (back==255) {
+        unsigned amount=alpha+(alpha>>7),inverse=256-amount;
+        uint32_t rb=(((src&0xff00ff)*amount+(dest&0xff00ff)*inverse)>>8)&0xff00ff;
+        uint32_t g=(((src&0x00ff00)*amount+(dest&0x00ff00)*inverse)>>8)&0x00ff00;
+        return 0xff000000|rb|g;
+    }
+    unsigned background=back*(255-alpha);
+    unsigned out=alpha+divide255(background);
     uint32_t value=out<<24;
     for (unsigned shift=0;shift<24;shift+=8) {
-        unsigned c=(((src>>shift)&255)*alpha*255+
-                    ((dest>>shift)&255)*back*(255-alpha))/(out*255);
+        unsigned numerator=((src>>shift)&255)*alpha*255+
+                           ((dest>>shift)&255)*background;
+        unsigned c=(unsigned)(((uint64_t)numerator*alpha_reciprocal[out])>>32);
         value|=c<<shift;
     }
     return value;
 }
-enum { LIGHT_RADIUS=144, LIGHT_RADIUS2=144*144 };
+enum { LIGHT_RADIUS=144, LIGHT_RADIUS2=144*144, CACHE_BUDGET=6, MAP_COLS=133, MAP_ROWS=79, FRAME_CYCLES=380000 };
 static struct { int x,y; } lights[WS_BLOCKS];
 static unsigned light_count;
-static bool changed_tiles[WS_ROWS+2][WS_COLS+2];
-#ifndef __riscv
-static unsigned shaded_pixels, light_samples, lit_samples;
-#endif
+/* 2 = local edit due this frame; 1 = queued lighting/sky refresh. */
+static uint8_t changed_tiles[WS_ROWS+2][WS_COLS+2];
+static uint32_t weighted_falloff[256];
+static uint8_t coarse_light[MAP_ROWS][MAP_COLS];
+static unsigned map_row=MAP_ROWS;
+static uint8_t lighting[48*48];
+static bool lighting_ready;
 static bool light_item(unsigned item) { return item==WS_LAMP || item==WS_WINDOW; }
 static unsigned ambient(unsigned sky)
 {
     static const unsigned values[]={255,179,102};
     return values[sky];
 }
-static unsigned brightness(int x,int y)
+static void light_row(unsigned row)
 {
-    unsigned base=ambient(next.sky),value=base;
-#ifndef __riscv
-    ++shaded_pixels;
-#endif
-    for (unsigned i=0;i<light_count;++i) {
-        int dx=x-lights[i].x,dy=y-lights[i].y;
-        unsigned distance=(unsigned)(dx*dx+dy*dy);
-#ifndef __riscv
-        ++light_samples;
-#endif
-        if (distance>=LIGHT_RADIUS2) continue;
-#ifndef __riscv
-        ++lit_samples;
-#endif
-        unsigned t=(LIGHT_RADIUS2-distance)*255/LIGHT_RADIUS2;
-        unsigned restored=base+(255-base)*t*t/(255*255);
-        if (restored>value) value=restored;
+    unsigned base=ambient(next.sky);
+    int y=WS_Y-48+(int)row*8;
+    for (unsigned col=0;col<MAP_COLS;++col) {
+        int x=WS_X-48+(int)col*8;
+        unsigned value=base;
+        for (unsigned i=0;i<light_count;++i) {
+            int dx=x-lights[i].x,dy=y-lights[i].y;
+            unsigned distance=(unsigned)(dx*dx+dy*dy);
+            if (distance>=LIGHT_RADIUS2) continue;
+            unsigned index=distance>>7;
+            unsigned weighted=weighted_falloff[index]-
+                (((weighted_falloff[index]-weighted_falloff[index+1])*
+                  (distance&127)+64)>>7);
+            unsigned restored=base+(unsigned)(((uint64_t)weighted*
+                                               alpha_reciprocal[255])>>32);
+            if (restored>value) value=restored;
+        }
+        coarse_light[row][col]=(uint8_t)value;
     }
-    return value;
+}
+static void light_tile(int col,int row)
+{
+    int mx=col*6,my=row*6;
+    for (int y=0;y<48;++y) {
+        unsigned fraction=(unsigned)y&7;
+        const uint8_t *top=&coarse_light[my+y/8][mx];
+        const uint8_t *bottom=top+MAP_COLS;
+        for (int x=0;x<48;x+=8) {
+            int a=top[x/8]*(int)(8-fraction)+bottom[x/8]*(int)fraction;
+            int b=top[x/8+1]*(int)(8-fraction)+bottom[x/8+1]*(int)fraction;
+            int value=a*8,step=b-a;
+            for (int j=0;j<8;++j) {
+                lighting[y*48+x+j]=(uint8_t)((value+32)>>6);
+                value+=step;
+            }
+        }
+    }
 }
 static uint32_t shade(uint32_t pixel,unsigned amount)
 {
-    unsigned r=((pixel>>16)&255)*amount/255;
-    unsigned g=((pixel>>8)&255)*amount/255;
-    unsigned b=(pixel&255)*amount/255;
-    return (pixel&0xff000000)|(r<<16)|(g<<8)|b;
+    unsigned gain=amount+(amount>>7);
+    uint32_t rb=(((pixel&0xff00ff)*gain)>>8)&0xff00ff;
+    uint32_t g=(((pixel&0x00ff00)*gain)>>8)&0x00ff00;
+    return (pixel&0xff000000)|rb|g;
 }
 static void tile_blit(int col,int row,const lv_image_dsc_t *image,int x,int y,
                       bool illuminate,bool source)
@@ -290,12 +391,16 @@ static void tile_blit(int col,int row,const lv_image_dsc_t *image,int x,int y,
     if (right>tx+48) right=tx+48;
     if (bottom>ty+48) bottom=ty+48;
     if (left>=right || top>=bottom) return;
+    if (illuminate && !source && !lighting_ready) {
+        light_tile(col,row);
+        lighting_ready=true;
+    }
     const uint32_t *src=(const uint32_t *)image->data;
     for (int yy=top;yy<bottom;++yy)
         for (int xx=left;xx<right;++xx) {
             uint32_t pixel=src[(yy-y)*image->header.w+xx-x];
             if (!(pixel>>24)) continue;
-            if (illuminate && !source) pixel=shade(pixel,brightness(xx,yy));
+            if (illuminate && !source) pixel=shade(pixel,lighting[(yy-ty)*48+xx-tx]);
             uint32_t *p=&tiles[row][col][(yy-ty)*48+xx-tx];
             *p=blend(*p,pixel);
             tile_used[row][col]=true;
@@ -305,47 +410,91 @@ static bool fixed(const workshop_snapshot *s,int i)
 {
     return s->blocks[i].used && !s->blocks[i].group && i!=s->held;
 }
-static void cache_region(ws_rect r)
+static void cache_region(ws_rect r,unsigned priority)
 {
-    for (int row=0;row<WS_ROWS+2;++row) for (int col=0;col<WS_COLS+2;++col) {
-        int x=WS_X+(col-1)*48,y=WS_Y+(row-1)*48;
-        if (x<r.x+r.w && x+48>r.x && y<r.y+r.h && y+48>r.y)
-            changed_tiles[row][col]=true;
-    }
+    const int origin_x=WS_X-48,origin_y=WS_Y-48;
+    int left=r.x>origin_x ? r.x : origin_x;
+    int top=r.y>origin_y ? r.y : origin_y;
+    int right=r.x+r.w,bottom=r.y+r.h;
+    if (right>WS_X+(WS_COLS+1)*48) right=WS_X+(WS_COLS+1)*48;
+    if (bottom>WS_Y+(WS_ROWS+1)*48) bottom=WS_Y+(WS_ROWS+1)*48;
+    if (left>=right || top>=bottom) return;
+    for (int y=(top-origin_y)/48;y<=(bottom-1-origin_y)/48;++y)
+        for (int x=(left-origin_x)/48;x<=(right-1-origin_x)/48;++x)
+            if (changed_tiles[y][x]<priority) changed_tiles[y][x]=(uint8_t)priority;
 }
 static void cache_update(void)
 {
     bool full=shown.menu!=next.menu || shown.scene!=next.scene || shown.sky!=next.sky;
-#ifndef __riscv
-    clock_t started=clock();
-    shaded_pixels=light_samples=lit_samples=0;
-#endif
+    unsigned gain=255-ambient(next.sky);
+    for (unsigned i=0;i<256;++i) weighted_falloff[i]=gain*falloff[i];
+    unsigned previous_count=light_count;
+    bool light_changed=shown.sky!=next.sky;
     light_count=0;
     if (next.sky) for (int i=0;i<WS_BLOCKS;++i)
         if (next.blocks[i].used && light_item(next.blocks[i].item)) {
             ws_rect r=workshop_block_rect(&next,i);
+            if (lights[light_count].x!=r.x+24 || lights[light_count].y!=r.y+24)
+                light_changed=true;
             lights[light_count].x=r.x+24;
             lights[light_count++].y=r.y+24;
         }
-    memset(changed_tiles,0,sizeof changed_tiles);
-    if (full) cache_region((ws_rect){WS_X-48,WS_Y-48,1056,624});
-    else for (int i=0;i<WS_BLOCKS;++i) {
+    if (light_changed || previous_count!=light_count) map_row=0;
+    if (full) {
+        for (int y=0;y<WS_ROWS+2;++y) for (int x=0;x<WS_COLS+2;++x)
+            if (tile_used[y][x]) changed_tiles[y][x]=1;
+        for (int i=0;i<WS_BLOCKS;++i)
+            if (fixed(&next,i)) cache_region(workshop_block_rect(&next,i),1);
+        for (unsigned i=0;i<light_count;++i)
+            cache_region((ws_rect){lights[i].x-72,lights[i].y-72,144,144},1);
+    } else for (int i=0;i<WS_BLOCKS;++i) {
         bool old=fixed(&shown,i),now=fixed(&next,i);
         ws_rect a=workshop_block_rect(&shown,i),b=workshop_block_rect(&next,i);
         if (old==now && !memcmp(&shown.blocks[i],&next.blocks[i],sizeof(ws_block)) &&
             !memcmp(&a,&b,sizeof a)) continue;
-        if (old) cache_region(a);
-        if (now) cache_region(b);
+        if (old) cache_region(a,2);
+        if (now) cache_region(b,2);
         if (!next.sky) continue;
         if (shown.blocks[i].used && light_item(shown.blocks[i].item))
-            cache_region((ws_rect){a.x-144,a.y-144,a.w+288,a.h+288});
+            cache_region((ws_rect){a.x-144,a.y-144,a.w+288,a.h+288},1);
         if (next.blocks[i].used && light_item(next.blocks[i].item))
-            cache_region((ws_rect){b.x-144,b.y-144,b.w+288,b.h+288});
+            cache_region((ws_rect){b.x-144,b.y-144,b.w+288,b.h+288},1);
     }
+}
+unsigned ui_workshop_pending(void)
+{
+    unsigned count=MAP_ROWS-map_row;
+    for (int y=0;y<WS_ROWS+2;++y) for (int x=0;x<WS_COLS+2;++x)
+        if (changed_tiles[y][x]) ++count;
+    return count;
+}
+static void cache_process(void)
+{
+    unsigned count=0,cycles=0;
+    unsigned row_cycles=MAP_COLS*(12+30*light_count);
+    while (map_row<MAP_ROWS && cycles+row_cycles<=FRAME_CYCLES) {
+        light_row(map_row++);
+        cycles+=row_cycles;
+    }
+    for (unsigned priority=2;priority>0;--priority)
     for (int row=0;row<WS_ROWS+2;++row) for (int col=0;col<WS_COLS+2;++col) {
-        if (!changed_tiles[row][col]) continue;
+        if (changed_tiles[row][col]!=priority) continue;
+        if (priority==1 && map_row<MAP_ROWS) continue;
+        int tx=WS_X+(col-1)*48,ty=WS_Y+(row-1)*48;
+        unsigned estimated=51000;
+        for (unsigned i=0;i<light_count;++i) {
+            int left=tx>lights[i].x-72 ? tx : lights[i].x-72;
+            int top=ty>lights[i].y-72 ? ty : lights[i].y-72;
+            int right=tx+48<lights[i].x+72 ? tx+48 : lights[i].x+72;
+            int bottom=ty+48<lights[i].y+72 ? ty+48 : lights[i].y+72;
+            if (left<right && top<bottom) estimated+=(right-left)*(bottom-top)*20;
+        }
+        if (priority==1 && cycles+estimated>FRAME_CYCLES) continue;
+        cycles+=estimated;
+        changed_tiles[row][col]=map_row<MAP_ROWS ? 1 : 0;
         memset(tiles[row][col],0,sizeof tiles[row][col]);
         tile_used[row][col]=false;
+        lighting_ready=false;
         for (int i=0;i<WS_BLOCKS;++i) {
             if (!fixed(&next,i)) continue;
             ws_rect r=workshop_block_rect(&next,i);
@@ -353,15 +502,14 @@ static void cache_update(void)
             tile_blit(col,row,block_image(item,next.blocks[i].orientation,next.sky),
                       r.x,r.y,next.sky!=WS_DAY,light_item(item));
         }
-        /* The warm halo is composited after the opaque wall pixels. */
         for (unsigned i=0;i<light_count;++i)
             tile_blit(col,row,&ws_glow,lights[i].x-72,lights[i].y-72,false,false);
+        lv_area_t area={WS_X+(col-1)*48,WS_Y+(row-1)*48,
+                        WS_X+col*48-1,WS_Y+row*48-1};
+        lv_obj_invalidate_area(frame,&area);
+        lv_obj_invalidate_area(overlay,&area);
+        if (++count==CACHE_BUDGET) return;
     }
-#ifndef __riscv
-    if (full) printf("workshop cache sky=%u scene=%u us=%lu pixels=%u samples=%u lit=%u\n",
-        next.sky,next.scene,(unsigned long)((clock()-started)*1000000/CLOCKS_PER_SEC),
-        shaded_pixels,light_samples,lit_samples);
-#endif
 }
 static void shaded_picture(lv_layer_t *layer,const lv_image_dsc_t *image,ws_rect r,
                            bool source,lv_opa_t opacity)
@@ -562,7 +710,7 @@ static void damage(ws_rect r,void *unused)
 void ui_workshop_update(void)
 {
     if (painted) { game_loop_drawn(); painted=false; }
-    if (!game_loop_read(&next)) return;
+    if (!game_loop_read(&next)) { cache_process(); return; }
     cache_update();
     workshop_dirty(&shown,&next,damage,NULL);
     bool menu_changed=shown.menu!=next.menu,inventory_changed=shown.inventory!=next.inventory;
@@ -595,6 +743,7 @@ void ui_workshop_update(void)
         lv_arc_set_value(hold_arc,(int)shown.hold);
         lv_obj_set_pos(hold_arc,shown.hand.x-32,shown.hand.y-32);
     }
+    cache_process();
 }
 static void tick(lv_timer_t *t) { (void)t; ui_workshop_update(); }
 static void deleted(lv_event_t *e)
@@ -641,6 +790,11 @@ void ui_page_workshop(lv_obj_t *p)
     painted=false;
     memset(tiles,0,sizeof tiles);
     memset(tile_used,0,sizeof tile_used);
+    memset(changed_tiles,0,sizeof changed_tiles);
+    next=shown;
+    light_count=0;
+    map_row=MAP_ROWS;
+    memset(coarse_light,255,sizeof coarse_light);
     maps();
     const uint32_t *source=(const uint32_t *)ws_cursor_pick_swing.data;
     for (int y=0;y<64;++y) for (int x=0;x<64;++x)
