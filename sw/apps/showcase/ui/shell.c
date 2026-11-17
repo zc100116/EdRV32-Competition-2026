@@ -35,7 +35,9 @@ bool ui_restore_interface(void)
 {
     if(!interface_hidden) return false;
     interface_hidden=false;
-    lv_obj_set_hidden(top,false); lv_obj_set_hidden(bottom,false); lv_obj_set_hidden(content,false);
+    bool compact=(ui_page>=1 && ui_page<=3) || (ui_page>=9 && ui_page<=13);
+    lv_obj_set_hidden(top,compact); lv_obj_set_hidden(bottom,compact);
+    lv_obj_set_hidden(content,false);
     lv_obj_set_hidden(restore_surface,true);
     ui_monitor_suppress(false);
     lv_group_focus_obj(hidden_focus);
@@ -238,6 +240,11 @@ void ui_open(unsigned page)
         ui_page_face, ui_page_doodle, ui_page_helmet, ui_page_grab, ui_page_motion,
         ui_page_settings, ui_page_tower};
     if(page==5) ui_data_games(&game_count);
+    bool compact=(page>=1 && page<=3) || (page>=9 && page<=13);
+    if(compact) {
+        lv_obj_set_hidden(top,true); lv_obj_set_hidden(bottom,true);
+        lv_obj_set_size(content,1280,720); lv_obj_set_pos(content,0,0);
+    }
     if(ui_detection_settings) ui_page_detection_settings(content);
     else pages[page](content);
     session_box=ui_box(content,340,200,600,164,PANEL);
@@ -290,7 +297,7 @@ static void activate(unsigned action)
     } else if((ui_page==1 || ui_page==2) && ui_detection_settings) {
         ui_detection_settings_action(action);
     } else if((ui_page==1 || ui_page==2) && action==2) {
-        ui_detection_settings=true; ui_open(ui_page);
+        ui_camera_drawer_toggle();
     } else if(ui_page == 17) {
         ui_tower_action(action);
     } else if(ui_page == 15) {
@@ -367,6 +374,7 @@ void ui_back(void)
         }
         lv_group_set_editing(group,false); return;
     }
+    if(ui_camera_drawer_close()) return;
     if(ui_page == MOTION_PAGE || ui_page == 17) {
         ui_home_select_tab(1); ui_open(0); return;
     }

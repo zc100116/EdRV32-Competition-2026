@@ -3,7 +3,7 @@
  */
 #include "widgets.h"
 #include <stddef.h>
-static bool collapsed;
+static lv_obj_t *metrics;
 static lv_obj_t *view_switch;
 static lv_obj_t *enables[12];
 static lv_obj_t *controls[10];
@@ -30,7 +30,7 @@ void ui_process_update(void)
     (void)ui_data_process(0);
     ui_process_config_t c=ui_data_process_config();
     lv_obj_set_state(view_switch,LV_STATE_CHECKED,c.original);
-    if(collapsed) return;
+    ui_camera_metrics_update(metrics);
     for(unsigned i=0;i<12;++i) lv_obj_set_state(enables[i],LV_STATE_CHECKED,
         (c.enabled&(1u<<i))!=0);
     for(unsigned i=0;i<10;++i) {
@@ -77,25 +77,20 @@ static void enabled_changed(lv_event_t *e)
 }
 void ui_process_action(unsigned action)
 {
-    if(action==0) { collapsed=!collapsed; ui_open(3); return; }
+    if(action==0) { ui_camera_drawer_toggle(); return; }
     if(action==2) ui_data_process_defaults(UI_PROC_ALL);
     else if(action>=100) ui_data_process_defaults(1u<<(action-100));
     ui_process_update();
 }
 void ui_page_process(lv_obj_t *p)
 {
-    lv_obj_t *header=ui_page_layout(p,"图像处理",true);
-    ui_action_button(header,collapsed ? "展开参数" : "收起参数",0);
+    lv_obj_t *header=ui_camera_layout(p,"图像处理");
+    metrics=ui_camera_metrics(header);
     view_switch=ui_flex_switch(header,"原图",false);
     lv_obj_set_width(lv_obj_get_parent(view_switch),180);
     lv_obj_add_event_cb(view_switch,enabled_changed,LV_EVENT_VALUE_CHANGED,(void *)12);
     ui_action_button(header,"全部恢复默认",2);
-    if(collapsed) return;
-    lv_obj_t *body=ui_stack(p,LV_FLEX_FLOW_ROW,0);
-    lv_obj_set_flex_grow(body,1);
-    lv_obj_set_flex_align(body,LV_FLEX_ALIGN_END,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_START);
-    lv_obj_t *panel=ui_panel(body,430);
-    lv_obj_set_height(panel,LV_PCT(100));
+    lv_obj_t *panel=ui_camera_drawer(p,header,"设置");
     lv_obj_set_scrollable(panel,true); lv_obj_set_scroll_dir(panel,LV_DIR_VER);
     const char *names[]={"亮度 / 对比度","伽马","第一级滤波 S1","第二级滤波 S2",
         "灰度","二值化","反色","旋转","缩放","平移","水平镜像","垂直镜像"};

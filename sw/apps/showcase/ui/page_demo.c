@@ -10,7 +10,8 @@ static ui_demo_t shown;
 static sticker_state_t stickers;
 static int selected[STICKER_PARTS];
 static unsigned preset, revision, frame_tick;
-static lv_obj_t *sticker_name, *part_select[STICKER_PARTS], *preset_select;
+static lv_obj_t *sticker_name, *part_select[STICKER_PARTS], *preset_buttons[4];
+static const char *part_maps[STICKER_PARTS][STICKER_SETS+2];
 static int choices[STICKER_PARTS][STICKER_SETS+1];
 static unsigned choice_count[STICKER_PARTS];
 static lv_obj_t *result_name, *helmet_count, *head_count;
@@ -152,23 +153,29 @@ static void selection_changed(lv_event_t *event)
     unsigned part=(unsigned)(uintptr_t)lv_event_get_user_data(event);
     invalidate();
     if(part==STICKER_PARTS) {
-        preset=lv_dropdown_get_selected(preset_select);
+        preset=(unsigned)lv_obj_get_index(lv_event_get_target_obj(event));
         if(preset<4) memcpy(selected,presets[preset],sizeof selected);
         for(unsigned p=0;p<STICKER_PARTS;++p)
             for(unsigned i=0;i<choice_count[p];++i)
-                if(choices[p][i]==selected[p]) lv_dropdown_set_selected(part_select[p],i);
+                if(choices[p][i]==selected[p]) {
+                    lv_buttonmatrix_set_selected_button(part_select[p],i);
+                    lv_buttonmatrix_set_button_ctrl(part_select[p],i,LV_BUTTONMATRIX_CTRL_CHECKED);
+                }
     } else {
-        selected[part]=choices[part][lv_dropdown_get_selected(part_select[part])];
-        preset=4; lv_dropdown_set_selected(preset_select,4);
+        selected[part]=choices[part][lv_buttonmatrix_get_selected_button(part_select[part])];
+        preset=4;
     }
+    for(unsigned i=0;i<4;++i)
+        lv_obj_set_state(preset_buttons[i],LV_STATE_CHECKED,preset==i);
+    for(unsigned p=0;p<STICKER_PARTS;++p)
+        lv_obj_scroll_to_x(lv_obj_get_parent(part_select[p]),
+            (int)lv_buttonmatrix_get_selected_button(part_select[p])*82,LV_ANIM_OFF);
     selection_text(); invalidate();
 }
 static void page(lv_obj_t *p, const char *title)
 {
-    lv_obj_t *header=ui_page_layout(p,title,true);
-    if(ui_page==12) {
-        ui_action_button(header,"阈值 -8",1); ui_action_button(header,"阈值 +8",2);
-    }
+    lv_obj_t *header=ui_camera_layout(p,title);
+    metrics=ui_camera_metrics(header);
     lv_obj_t *pause=ui_action_button(header,"暂停画面",0);
     pause_label=lv_obj_get_child(pause,0);
     if(ui_page==11) {
@@ -187,48 +194,65 @@ static void page(lv_obj_t *p, const char *title)
         lv_obj_set_style_bg_opa(tags[i], LV_OPA_COVER, 0);
         lv_obj_set_hidden(tags[i], true);
     }
-    lv_obj_t *body=ui_stack(p,LV_FLEX_FLOW_ROW,UI_SPACE_MD);
-    lv_obj_set_flex_grow(body,1);
-    lv_obj_set_flex_align(body,LV_FLEX_ALIGN_END,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_START);
+    lv_obj_t *picker=ui_camera_drawer(p,header,ui_page==11 ? "贴纸" : "设置");
     if(ui_page==11) {
-        lv_obj_t *picker=ui_panel(body,290);
-        lv_obj_set_height(picker,LV_PCT(100)); lv_obj_set_scrollable(picker,true);
-        preset_select=ui_select(picker,"猫咪\n派对\n酷\n兔子\n自选");
-        lv_obj_add_event_cb(preset_select,selection_changed,LV_EVENT_VALUE_CHANGED,
-                            (void *)STICKER_PARTS);
+        lv_obj_t *presets_row=ui_stack(picker,LV_FLEX_FLOW_ROW,4);
+        for(unsigned i=0;i<4;++i) {
+            lv_obj_t *button=lv_button_create(presets_row);
+            ui_widget_style(button); lv_obj_set_size(button,70,84);
+            lv_obj_set_flex_flow(button,LV_FLEX_FLOW_COLUMN);
+            lv_obj_set_style_pad_all(button,4,0);
+            lv_obj_t *image=lv_image_create(button);
+            unsigned art=i==0 ? 0 : i==1 ? 4 : i==2 ? 2 : 1;
+            lv_image_set_src(image,artwork[art][2]);
+            lv_obj_set_size(image,54,44);
+            lv_image_set_inner_align(image,LV_IMAGE_ALIGN_CONTAIN);
+            ui_text_label(button,preset_names[i],&sim_font_14,TEXT);
+            lv_obj_add_event_cb(button,selection_changed,LV_EVENT_CLICKED,
+                                (void *)STICKER_PARTS);
+            ui_control(button); preset_buttons[i]=button;
+            lv_obj_set_state(button,LV_STATE_CHECKED,i==preset);
+        }
         for(unsigned part=0;part<STICKER_PARTS;++part) {
             ui_text_label(picker,part_names[part],&sim_font_14,MUTED);
-            char options[512]="无"; unsigned n=1; int style=sticker_next(part,-1);
-            choices[part][0]=-1;
+            unsigned n=1,selected_index=0; int style=sticker_next(part,-1);
+            choices[part][0]=-1; part_maps[part][0]="无";
             while(style>=0) {
-                choices[part][n++]=style;
-                strcat(options,"\n"); strcat(options,sticker_styles[style].name);
-                style=sticker_next(part,style);
+                choices[part][n]=style;
+                part_maps[part][n]=sticker_styles[style].name;
+                if(style==selected[part]) selected_index=n;
+                ++n; style=sticker_next(part,style);
             }
-            choice_count[part]=n; part_select[part]=ui_select(picker,options);
-            for(unsigned i=0;i<n;++i) if(choices[part][i]==selected[part])
-                lv_dropdown_set_selected(part_select[part],i);
+            choice_count[part]=n; part_maps[part][n]="";
+            lv_obj_t *scroll=ui_stack(picker,LV_FLEX_FLOW_ROW,0);
+            lv_obj_set_height(scroll,46); lv_obj_set_scrollable(scroll,true);
+            lv_obj_set_scroll_dir(scroll,LV_DIR_HOR);
+            part_select[part]=ui_segment(scroll,part_maps[part],selected_index);
+            lv_obj_set_width(part_select[part],n*82);
             lv_obj_add_event_cb(part_select[part],selection_changed,LV_EVENT_VALUE_CHANGED,
                                 (void *)(uintptr_t)part);
         }
+        sticker_name=ui_text_label(picker,"",&sim_font_14,TEXT); selection_text();
+        ui_action_button(picker,"关键点",1);
     }
-    lv_obj_t *side=ui_panel(body,300);
-    metrics=ui_text_label(side,"",&sim_font_20,TEXT);
-    if(ui_page==11) {
-        sticker_name=ui_text_label(side,"",&sim_font_16,TEXT); selection_text();
+    if(ui_page==12) {
+        ui_action_button(picker,"阈值 -8",1); ui_action_button(picker,"阈值 +8",2);
     }
+    lv_obj_t *side=ui_camera_card(p);
+    if(ui_page==11) lv_obj_set_hidden(side,true);
     if(ui_page==12) {
         result_name=ui_text_label(side,"",&showcase_bold_32,ACCENT);
         lv_obj_set_width(result_name,LV_PCT(100));
     }
     if(ui_page==13) {
-        ui_live_badge(side,"已戴安全帽",TEAL); helmet_count=ui_number(side,"0",false);
+        ui_live_badge(side,"已戴安全帽",TEAL); helmet_count=ui_text_label(side,"0",&sim_font_20,TEAL);
         ui_live_badge(side,"未戴安全帽",0xdc2626); head_count=ui_number(side,"0",false);
     }
     warning=ui_live_badge(p,"警示：有人未戴安全帽",0xdc2626);
     lv_obj_set_ignore_layout(warning,true);
-    lv_obj_set_width(warning,LV_PCT(65));
-    lv_obj_align(warning,LV_ALIGN_BOTTOM_LEFT,0,0);
+    lv_obj_set_width(warning,224);
+    lv_obj_set_style_text_font(warning,&sim_font_16,0);
+    lv_obj_set_pos(warning,12,260);
     lv_obj_set_hidden(warning,true);
     ui_hint(ui_page == 12 ? "白底黑线 · 摄像头 → 灰度二值化 → 内存源 → NPU" :
             ui_page == 11 ? "五个部位独立选贴纸 · 同步镜像画面 · 调试显示关键点" :
@@ -260,7 +284,6 @@ void ui_demo_action(unsigned action)
 }
 void ui_demo_update(void)
 {
-    ui_vision_t stats = ui_data_vision();
     const ui_demo_t *d = ui_data_demo();
     bool fresh = ui_page == 11 && revision != sticker_revision;
     if (fresh || memcmp(&shown, d, sizeof shown)) {
@@ -293,14 +316,7 @@ void ui_demo_update(void)
         lv_snprintf(detail,sizeof detail,"%u",d->head); ui_text(head_count,detail);
     }
     if(ui_page==12) ui_text(result_name,d->count ? d->objects[0].category : "等待识别");
-    if (ui_page == 13) lv_snprintf(detail, sizeof detail, "安全帽 %u 人\n未戴 %u 人",
-                                  d->helmet, d->head);
-    else if (ui_page == 12) lv_snprintf(detail, sizeof detail, "目标 %u\n阈值 %u",
-                                       d->count, ui_data_doodle_threshold());
-    else lv_snprintf(detail, sizeof detail, "人脸 %u\n最大框 %u px", d->count, d->size/2);
-    lv_label_set_text_fmt(metrics, "%s\n\nNPU %u.%u ms\n\n帧率 %u fps\n\n延迟 %u.%u ms",
-        detail, stats.npu_tenths/10, stats.npu_tenths%10, stats.fps,
-        stats.latency_tenths/10, stats.latency_tenths%10);
+    ui_camera_metrics_update(metrics);
     lv_obj_set_hidden(warning, ui_page != 13 || !d->head);
     ui_text(pause_label, ui_data_session().state == UI_STATE_PAUSED ? "继续画面" : "暂停画面");
 }

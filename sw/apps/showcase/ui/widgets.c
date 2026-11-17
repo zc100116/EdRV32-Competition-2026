@@ -314,3 +314,96 @@ void ui_game_instruction(lv_obj_t *parent, const lv_image_dsc_t *icon,
     lv_obj_t *label = ui_text_label(row,text,&sim_font_16,TEXT);
     lv_obj_set_width(label,width-52);
 }
+
+/* Camera chrome is static and opaque; only the small text areas invalidate. */
+static lv_obj_t *camera_drawer, *drawer_button;
+static unsigned drawer_page;
+lv_obj_t *ui_camera_metrics(lv_obj_t *header)
+{
+    camera_drawer=NULL;
+    lv_obj_t *label=ui_text_label(header,"",&sim_font_16,MUTED);
+    lv_obj_set_flex_grow(label,1);
+    ui_camera_metrics_update(label);
+    return label;
+}
+void ui_camera_metrics_update(lv_obj_t *label)
+{
+    ui_vision_t d=ui_data_vision();
+    char text[120];
+    lv_snprintf(text,sizeof text,"%u fps · NPU %u.%u ms · 延迟 %u.%u ms",
+        d.fps,d.npu_tenths/10,d.npu_tenths%10,
+        d.latency_tenths/10,d.latency_tenths%10);
+    ui_text(label,text);
+}
+lv_obj_t *ui_camera_card(lv_obj_t *parent)
+{
+    lv_obj_t *card=ui_panel(parent,224);
+    lv_obj_set_ignore_layout(card,true);
+    lv_obj_set_pos(card,12,60);
+    lv_obj_set_style_pad_all(card,8,0);
+    lv_obj_set_style_pad_gap(card,4,0);
+    return card;
+}
+static void drawer_x(void *object,int32_t x) { lv_obj_set_x(object,x); }
+bool ui_camera_drawer_close(void)
+{
+    if(drawer_page!=ui_page || !camera_drawer || lv_obj_is_hidden(camera_drawer)) return false;
+    lv_anim_delete(camera_drawer,drawer_x);
+    lv_obj_set_hidden(camera_drawer,true);
+    lv_group_set_editing(lv_group_get_default(),false);
+    lv_group_focus_obj(drawer_button);
+    return true;
+}
+void ui_camera_drawer_toggle(void)
+{
+    if(ui_camera_drawer_close()) return;
+    lv_obj_set_hidden(camera_drawer,false);
+    lv_obj_move_to_index(camera_drawer,-1);
+    lv_anim_t animation;
+    lv_anim_init(&animation);
+    lv_anim_set_var(&animation,camera_drawer);
+    lv_anim_set_exec_cb(&animation,drawer_x);
+    lv_anim_set_values(&animation,1280,960);
+    lv_anim_set_duration(&animation,160);
+    lv_anim_start(&animation);
+}
+static void drawer_toggle_event(lv_event_t *event)
+{ (void)event; ui_camera_drawer_toggle(); }
+lv_obj_t *ui_camera_drawer(lv_obj_t *parent,lv_obj_t *header,const char *name)
+{
+    drawer_page=ui_page;
+    camera_drawer=ui_panel(parent,320);
+    lv_obj_set_ignore_layout(camera_drawer,true);
+    lv_obj_set_pos(camera_drawer,960,48);
+    lv_obj_set_height(camera_drawer,672);
+    lv_obj_set_style_radius(camera_drawer,0,0);
+    lv_obj_set_style_pad_all(camera_drawer,12,0);
+    lv_obj_set_scrollable(camera_drawer,true);
+    lv_obj_set_scroll_dir(camera_drawer,LV_DIR_VER);
+    lv_obj_set_hidden(camera_drawer,true);
+    lv_obj_t *tools=ui_stack(camera_drawer,LV_FLEX_FLOW_ROW,8);
+    ui_action_button(tools,"性能浮窗",1001);
+    ui_action_button(tools,"隐藏界面",1005);
+    drawer_button=ui_action_button(header,name,0);
+    lv_obj_remove_event_cb(drawer_button,action);
+    lv_obj_add_event_cb(drawer_button,drawer_toggle_event,LV_EVENT_CLICKED,NULL);
+    return camera_drawer;
+}
+
+lv_obj_t *ui_camera_layout(lv_obj_t *parent,const char *title)
+{
+    lv_obj_set_flex_flow(parent,LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_all(parent,0,0);
+    lv_obj_set_style_pad_gap(parent,0,0);
+    lv_obj_set_style_bg_opa(lv_obj_get_parent(parent),LV_OPA_TRANSP,0);
+    lv_obj_t *header=ui_stack(parent,LV_FLEX_FLOW_ROW,16);
+    lv_obj_set_size(header,1280,48);
+    lv_obj_set_style_pad_hor(header,12,0);
+    lv_obj_set_style_pad_ver(header,4,0);
+    lv_obj_set_style_bg_color(header,lv_color_hex(PANEL),0);
+    lv_obj_set_style_bg_opa(header,LV_OPA_COVER,0);
+    lv_obj_set_flex_align(header,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_CENTER,LV_FLEX_ALIGN_CENTER);
+    ui_action_button(header,"‹ 返回",1000);
+    ui_text_label(header,title,&showcase_bold_24,TEXT);
+    return header;
+}

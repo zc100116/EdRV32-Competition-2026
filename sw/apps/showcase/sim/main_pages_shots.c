@@ -15,6 +15,7 @@
 static uint16_t framebuffer[1280*720];
 static uint32_t drawbuffer[1280*720];
 static const char *output;
+static uint64_t composition_ns;
 static uint64_t host_ns(void)
 {
     struct timespec time;
@@ -23,6 +24,7 @@ static uint64_t host_ns(void)
 }
 static void flush(lv_display_t *display, const lv_area_t *area, uint8_t *pixels)
 {
+    uint64_t start=host_ns();
     const uint32_t *source = (const uint32_t *)pixels;
     const lv_image_dsc_t *background = sim_l0_image();
     for (int y = area->y1; y <= area->y2; ++y)
@@ -31,6 +33,7 @@ static void flush(lv_display_t *display, const lv_area_t *area, uint8_t *pixels)
             framebuffer[y*1280+x] = (uint16_t)(((c >> 8)&0xf800) |
                 ((c >> 5)&0x07e0) | ((c >> 3)&31));
         }
+    composition_ns+=host_ns()-start;
     lv_display_flush_ready(display);
 }
 static void check_labels(lv_obj_t *parent)
@@ -76,12 +79,15 @@ static void capture(const char *name)
 }
 static void measure(const char *name)
 {
-    uint64_t total=0;
+    uint64_t total=0,composition=0;
     for(unsigned f=0;f<30;++f) {
         lv_obj_invalidate(lv_screen_active());
+        uint64_t before=composition_ns;
         uint64_t start=host_ns(); lv_refr_now(NULL); total+=host_ns()-start;
+        composition+=composition_ns-before;
     }
-    printf("mean %s draw_us=%.2f frames=30 full redraw+composition\n",name,total/30000.0);
+    printf("mean %s draw_us=%.2f lvgl_us=%.2f composition_us=%.2f frames=30\n",
+        name,total/30000.0,(total-composition)/30000.0,composition/30000.0);
 }
 #ifndef PAGES_BASELINE
 static lv_obj_t *find_label(lv_obj_t *parent, const char *text)
@@ -103,11 +109,21 @@ static lv_obj_t *find_type(lv_obj_t *parent,const lv_obj_class_t *type)
     }
     return NULL;
 }
-static lv_obj_t *named_switch(const char *name)
+static lv_obj_t *switch_row(lv_obj_t *parent,const char *name)
 {
-    lv_obj_t *label=find_label(lv_screen_active(),name); assert(label);
-    return find_type(lv_obj_get_parent(label),&lv_switch_class);
+    if(lv_obj_check_type(parent,&lv_label_class) &&
+       !lv_strcmp(lv_label_get_text(parent),name)) {
+        lv_obj_t *control=find_type(lv_obj_get_parent(parent),&lv_switch_class);
+        if(control) return control;
+    }
+    for(unsigned i=0;i<lv_obj_get_child_count(parent);++i) {
+        lv_obj_t *control=switch_row(lv_obj_get_child(parent,(int)i),name);
+        if(control) return control;
+    }
+    return NULL;
 }
+static lv_obj_t *named_switch(const char *name)
+{ return switch_row(lv_screen_active(),name); }
 static void toggle(lv_obj_t *control,bool checked)
 {
     assert(control); lv_obj_set_state(control,LV_STATE_CHECKED,checked);
@@ -119,8 +135,8 @@ static void interactions(void)
     ui_open(10); assert(ui_debug_overlay);
     assert(!find_label(lv_screen_active(),"关键点 开关"));
     ui_open(11); assert(ui_debug_overlay); assert(!find_label(lv_screen_active(),"调试"));
-    lv_obj_t *preset=find_type(lv_screen_active(),&lv_dropdown_class); assert(preset);
-    lv_dropdown_set_selected(preset,1); lv_obj_send_event(preset,LV_EVENT_VALUE_CHANGED,NULL);
+    lv_obj_t *preset=find_label(lv_screen_active(),"派对"); assert(preset);
+    lv_obj_send_event(lv_obj_get_parent(preset),LV_EVENT_CLICKED,NULL);
     assert(find_label(lv_screen_active(),"套装：派对\n头饰：派对帽\n眼睛：星星眼\n鼻子：无\n嘴巴：无\n脸颊：腮红"));
     ui_open(16); assert(lv_obj_has_state(named_switch("调试叠加"),LV_STATE_CHECKED));
     toggle(named_switch("调试叠加"),false); assert(!ui_debug_overlay);
@@ -135,7 +151,7 @@ static void interactions(void)
         lv_area_t area; lv_obj_get_coords(category,&area); assert(area.y2<680);
     }
     sim_data_many_categories(false);
-    ui_activate(2); assert(ui_detection_settings);
+    ui_activate(2); lv_tick_inc(200); lv_timer_handler();
     lv_obj_t *threshold=find_type(lv_screen_active(),&lv_spinbox_class); assert(threshold);
     lv_spinbox_set_value(threshold,55); lv_obj_send_event(threshold,LV_EVENT_VALUE_CHANGED,NULL);
     assert(ui_data_detection_config().threshold==55);

@@ -5,5 +5,6 @@
 extern const char *const ui_coco_names[80];
 void ui_detection_filter(ui_vision_t *out,const ui_detection_t *raw,unsigned count);
 void ui_page_detection_settings(lv_obj_t *parent);
+void ui_detection_controls(lv_obj_t *parent);
 void ui_detection_settings_action(unsigned action);
 #endif

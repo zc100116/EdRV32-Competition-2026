@@ -34,5 +34,12 @@ lv_obj_t *ui_game_button(lv_obj_t *parent, const char *text,
                          int x, int y, int width, unsigned action);
 void ui_game_instruction(lv_obj_t *parent, const lv_image_dsc_t *icon,
                          const char *text, int x, int y, int width);
+lv_obj_t *ui_camera_layout(lv_obj_t *parent,const char *title);
+lv_obj_t *ui_camera_metrics(lv_obj_t *header);
+void ui_camera_metrics_update(lv_obj_t *label);
+lv_obj_t *ui_camera_card(lv_obj_t *parent);
+lv_obj_t *ui_camera_drawer(lv_obj_t *parent, lv_obj_t *header, const char *name);
+bool ui_camera_drawer_close(void);
+void ui_camera_drawer_toggle(void);
 extern bool ui_debug_overlay;
 #endif

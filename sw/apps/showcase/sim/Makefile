@@ -154,3 +154,14 @@ games-shots: $(BUILD)/showcase_games_shots
 	rm $(addprefix $(GAMES_OUTPUT)/,$(addsuffix .rgb565,$(GAMES_SHOTS)))
 $(BUILD)/showcase_games_shots: main_games_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_games_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
+
+COMPACT_NAMES := vision image process pose hand face doodle helmet
+COMPACT_OUTPUT ?= $(ROOT)/build/sim/ui-compact
+.PHONY: compact-shots
+compact-shots: $(BUILD)/showcase_compact_shots
+	mkdir -p $(BUILD)/ui-compact $(COMPACT_OUTPUT)
+	$(BUILD)/showcase_compact_shots $(BUILD)/ui-compact
+	$(foreach name,$(COMPACT_NAMES) $(addsuffix -drawer,$(COMPACT_NAMES)),python3 $(ROOT)/tools/sw/raw2png.py $(BUILD)/ui-compact/$(name).rgb565 $(COMPACT_OUTPUT)/$(name).png;)
+	rm $(BUILD)/ui-compact/*.rgb565
+$(BUILD)/showcase_compact_shots: main_compact_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
+	$(CC) $(FLAGS) -Werror main_compact_shots.c $(COMMON) $(LINUX_LV) -lm -o $@

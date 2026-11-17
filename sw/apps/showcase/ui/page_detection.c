@@ -36,29 +36,35 @@ static void class_mode_changed(lv_event_t *event)
     if(mode) ui_data_detection_all(mode==1);
     update();
 }
-void ui_page_detection_settings(lv_obj_t *p)
+void ui_detection_controls(lv_obj_t *p)
 {
-    lv_obj_t *header=ui_page_layout(p,"检测设置",false);
+    lv_obj_t *header=p;
     class_mode=ui_select(header,"自选类别\n全选\n全不选");
     lv_obj_set_width(class_mode,240);
     lv_obj_add_event_cb(class_mode,class_mode_changed,LV_EVENT_VALUE_CHANGED,NULL);
     lv_obj_t *panel=ui_panel(p,LV_PCT(100));
     threshold=ui_text_label(panel,"",&sim_font_20,TEXT);
-    threshold_spinbox=ui_flex_number(panel,"置信度 %",50);
+    threshold_spinbox=ui_flex_number(panel,"%",50);
+    lv_obj_set_width(threshold_spinbox,88);
     lv_spinbox_set_range(threshold_spinbox,25,90); lv_spinbox_set_step(threshold_spinbox,5);
     lv_obj_add_event_cb(threshold_spinbox,changed,LV_EVENT_VALUE_CHANGED,(void *)80);
     selected=ui_text_label(panel,"",&sim_font_16,MUTED);
     lv_obj_t *grid=ui_stack(p,LV_FLEX_FLOW_ROW_WRAP,UI_SPACE_SM);
-    lv_obj_set_flex_grow(grid,1);
+
     lv_obj_set_scrollable(grid,true); lv_obj_set_scroll_dir(grid,LV_DIR_VER);
     for(unsigned i=0;i<80;++i) {
         lv_obj_t *cell=ui_stack(grid,LV_FLEX_FLOW_COLUMN,0);
-        lv_obj_set_width(cell,LV_PCT(24));
+        lv_obj_set_width(cell,LV_PCT(100));
         classes[i]=ui_flex_switch(cell,ui_coco_names[i],false);
         lv_obj_add_event_cb(classes[i],changed,LV_EVENT_VALUE_CHANGED,(void *)(uintptr_t)i);
     }
     update();
     ui_hint("前后键选择 · Enter 切换类别 / 编辑门槛 · Esc 返回识别画面");
+}
+void ui_page_detection_settings(lv_obj_t *p)
+{
+    ui_page_layout(p,"检测设置",false);
+    ui_detection_controls(p);
 }
 void ui_detection_settings_action(unsigned action)
 {

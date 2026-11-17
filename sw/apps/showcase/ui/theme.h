@@ -24,6 +24,7 @@ enum {
     UI_FONT_BODY = 16, UI_FONT_CARD = 20, UI_FONT_TITLE = 32, UI_FONT_HERO = 48,
     UI_FONT_NUMBER = 64, UI_FONT_SCORE = 96
 };
+LV_FONT_DECLARE(showcase_bold_24);
 LV_FONT_DECLARE(showcase_bold_32);
 LV_FONT_DECLARE(showcase_bold_48);
 LV_FONT_DECLARE(showcase_digits_64);

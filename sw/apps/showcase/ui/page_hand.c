@@ -143,7 +143,8 @@ void ui_page_hand(lv_obj_t *p)
         line_unit->evaluate_cb = line_evaluate;
         line_unit->dispatch_cb = line_dispatch;
     }
-    lv_obj_t *header=ui_page_layout(p,"手势识别",true);
+    lv_obj_t *header=ui_camera_layout(p,"手势识别");
+    metrics=ui_camera_metrics(header);
     lv_obj_t *pause=ui_action_button(header,"暂停画面",0);
     pause_label=lv_obj_get_child(pause,0);
     memset(&shown, 0, sizeof shown);
@@ -158,17 +159,14 @@ void ui_page_hand(lv_obj_t *p)
         lv_obj_set_style_bg_opa(tags[i], LV_OPA_COVER, 0);
         lv_obj_set_hidden(tags[i], true);
     }
-    lv_obj_t *body=ui_stack(p,LV_FLEX_FLOW_ROW,0);
-    lv_obj_set_flex_grow(body,1);
-    lv_obj_set_flex_align(body,LV_FLEX_ALIGN_END,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_START);
-    lv_obj_t *side=ui_panel(body,300);
-    metrics=ui_text_label(side,"",&sim_font_20,TEXT);
+    lv_obj_t *drawer=ui_camera_drawer(p,header,"设置");
+    ui_action_button(drawer,"关键点",1);
+    lv_obj_t *side=ui_camera_card(p);
     hands=ui_live_badge(side,"",ACCENT);
     ui_hint("最大手连续 3 帧确认 · 设置中控制调试叠加");
 }
 void ui_hand_update(void)
 {
-    ui_vision_t stats = ui_data_vision();
     const ui_hand_t *data = ui_data_hand();
     char text[400];
     if (memcmp(&shown, data, sizeof shown)) {
@@ -188,16 +186,10 @@ void ui_hand_update(void)
         lv_obj_update_layout(frame);
         invalidate_people();
     }
-    lv_snprintf(text, sizeof text,
-        "手数  %u\n\nNPU  %u.%u ms\n\n帧率  %u fps\n\n延迟  %u.%u ms",
-        data->count, stats.npu_tenths / 10, stats.npu_tenths % 10, stats.fps,
-        stats.latency_tenths / 10, stats.latency_tenths % 10);
-    ui_text(metrics, text);
+    ui_camera_metrics_update(metrics);
     if (data->count && data->state.cls >= 0) {
         unsigned cls = (unsigned)data->state.cls;
-        lv_snprintf(text, sizeof text, "%s %u%%\n数字 %s\n猜拳 %s", ui_gesture_names[cls],
-                    data->confidence,
-                    ui_gesture_numbers[cls], ui_gesture_rps[cls]);
+        lv_snprintf(text, sizeof text, "%s %u%%", ui_gesture_names[cls], data->confidence);
         lv_obj_set_style_bg_color(hands, lv_color_hex(cls == 5 ? 0xdc2626 : ACCENT), 0);
         lv_obj_set_style_bg_opa(hands, LV_OPA_COVER, 0);
         lv_obj_set_style_text_color(hands, lv_color_hex(PANEL), 0);

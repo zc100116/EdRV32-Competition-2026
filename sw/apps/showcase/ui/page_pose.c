@@ -127,7 +127,8 @@ void ui_page_pose(lv_obj_t *p)
         line_unit->evaluate_cb = line_evaluate;
         line_unit->dispatch_cb = line_dispatch;
     }
-    lv_obj_t *header=ui_page_layout(p,"人体姿态",true);
+    lv_obj_t *header=ui_camera_layout(p,"人体姿态");
+    metrics=ui_camera_metrics(header);
     lv_obj_t *pause=ui_action_button(header,"暂停画面",0);
     pause_label=lv_obj_get_child(pause,0);
     memset(&shown, 0, sizeof shown);
@@ -142,17 +143,13 @@ void ui_page_pose(lv_obj_t *p)
         lv_obj_set_style_bg_opa(tags[i], LV_OPA_COVER, 0);
         lv_obj_set_hidden(tags[i], true);
     }
-    lv_obj_t *body=ui_stack(p,LV_FLEX_FLOW_ROW,0);
-    lv_obj_set_flex_grow(body,1);
-    lv_obj_set_flex_align(body,LV_FLEX_ALIGN_END,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_START);
-    lv_obj_t *side=ui_panel(body,300);
-    metrics=ui_text_label(side,"",&sim_font_20,TEXT);
+    ui_camera_drawer(p,header,"设置");
+    lv_obj_t *side=ui_camera_card(p);
     hands=ui_live_badge(side,"",ACCENT);
     ui_hint("最大行人 · 手腕高于同侧肩膀且两点可见时，显示举手");
 }
 void ui_pose_update(void)
 {
-    ui_vision_t stats = ui_data_vision();
     const ui_pose_t *data = ui_data_pose();
     char text[200];
     if (memcmp(&shown, data, sizeof shown)) {
@@ -169,16 +166,12 @@ void ui_pose_update(void)
         lv_obj_update_layout(frame);
         invalidate_people();
     }
-    lv_snprintf(text, sizeof text,
-        "人数  %u\n\nNPU  %u.%u ms\n\n帧率  %u fps\n\n延迟  %u.%u ms",
-        data->count, stats.npu_tenths / 10, stats.npu_tenths % 10, stats.fps,
-        stats.latency_tenths / 10, stats.latency_tenths % 10);
-    ui_text(metrics, text);
+    ui_camera_metrics_update(metrics);
     unsigned largest=0;
     for(unsigned i=1;i<data->count;++i)
         if(data->people[i].width*data->people[i].height >
            data->people[largest].width*data->people[largest].height) largest=i;
-    lv_snprintf(text, sizeof text, "最大行人 %u%%\n\n左手举起  %s\n右手举起  %s",
+    lv_snprintf(text, sizeof text, "行人 %u%%\n左手举起 %s · 右手举起 %s",
         data->people[largest].confidence,
         data->left_up ? "是" : "否", data->right_up ? "是" : "否");
     ui_text(hands, text);

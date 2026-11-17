@@ -10,11 +10,11 @@ static bool box_visible[5];
 static uint32_t metrics_tick;
 static bool metrics_ready;
 static lv_obj_t *tags[5];
-static lv_obj_t *metrics[4];
+static lv_obj_t *metrics;
 static lv_obj_t *counts[5];
 static lv_obj_t *results, *status_led, *spinner;
 static lv_obj_t *categories[5];
-static lv_obj_t *image_status;
+static lv_obj_t *image_status, *image_detail;
 static lv_obj_t *pause_label;
 
 static lv_obj_t *filter_label;
@@ -62,17 +62,19 @@ static void boxes_changed(lv_event_t *e)
 { (void)e; ui_data_boxes(); ui_refresh(); }
 void ui_vision_build(lv_obj_t *p, bool batch)
 {
-    lv_obj_t *header=ui_page_layout(p,batch ? "图片识别" : "目标检测计数",true);
-    filter_label=ui_text_label(header,"",&sim_font_14,MUTED);
+    lv_obj_t *header=ui_camera_layout(p,batch ? "图片识别" : "目标检测计数");
+    metrics=ui_camera_metrics(header);
     previous_button=ui_action_button(header,batch ? "上一张" : "暂停画面",0);
     pause_label=lv_obj_get_child(previous_button,0);
     if(batch) next_button=ui_action_button(header,"下一张",1);
-    else {
-        box_switch=ui_flex_switch(header,"检测框",true);
+    lv_obj_t *drawer=ui_camera_drawer(p,header,"检测设置");
+    filter_label=ui_text_label(drawer,"",&sim_font_14,MUTED);
+    if(!batch) {
+        box_switch=ui_flex_switch(drawer,"检测框",true);
         lv_obj_set_width(lv_obj_get_parent(box_switch),210);
         lv_obj_add_event_cb(box_switch,boxes_changed,LV_EVENT_VALUE_CHANGED,NULL);
     }
-    ui_action_button(header,"检测设置",2);
+    ui_detection_controls(drawer);
     metrics_ready=false;
     frame=ui_box(lv_screen_active(),0,0,1280,720,BG);
     lv_obj_set_style_bg_opa(frame,LV_OPA_TRANSP,0);
@@ -85,38 +87,29 @@ void ui_vision_build(lv_obj_t *p, bool batch)
         lv_obj_set_style_bg_color(tags[i],lv_color_hex(TEAL),0);
         lv_obj_set_style_bg_opa(tags[i],LV_OPA_COVER,0);
     }
-    lv_obj_t *body=ui_stack(p,LV_FLEX_FLOW_ROW,0);
-    lv_obj_set_flex_grow(body,1);
-    lv_obj_set_flex_align(body,LV_FLEX_ALIGN_END,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_START);
-    lv_obj_t *side=ui_panel(body,320);
+    lv_obj_t *side=ui_camera_card(p);
     lv_obj_set_style_pad_all(side,UI_SPACE_SM,0);
     lv_obj_set_style_pad_gap(side,4,0);
     if(batch) {
         results=ui_data_table(side,2,6);
-        lv_table_set_column_width(results,0,175); lv_table_set_column_width(results,1,105);
+        lv_obj_set_style_pad_ver(results,3,LV_PART_ITEMS);
+        lv_table_set_column_width(results,0,120); lv_table_set_column_width(results,1,80);
         lv_table_set_cell_value(results,0,0,"目标");
         lv_table_set_cell_value(results,0,1,"置信度");
-        lv_obj_t *state=ui_stack(side,LV_FLEX_FLOW_ROW,12);
+        lv_obj_t *state=ui_stack(drawer,LV_FLEX_FLOW_ROW,12);
         status_led=lv_led_create(state); lv_obj_set_size(status_led,18,18);
         spinner=lv_spinner_create(state); lv_obj_set_size(spinner,24,24);
-        image_status=ui_text_label(side,"",&sim_font_16,MUTED);
+        image_detail=ui_text_label(drawer,"",&sim_font_16,MUTED);
+        image_status=ui_text_label(side,"",&sim_font_14,MUTED);
         lv_obj_set_width(image_status,LV_PCT(100));
     } else {
-        lv_obj_t *stats=ui_stack(side,LV_FLEX_FLOW_ROW_WRAP,8);
-        const char *titles[]={"识别帧率","NPU / 每帧","后处理","端到端延迟"};
-        for(unsigned i=0;i<4;++i) {
-            lv_obj_t *cell=ui_stack(stats,LV_FLEX_FLOW_COLUMN,4);
-            lv_obj_set_width(cell,LV_PCT(48));
-            ui_text_label(cell,titles[i],&sim_font_14,MUTED);
-            metrics[i]=ui_text_label(cell,"",&sim_font_20,ACCENT);
-        }
         for(unsigned i=0;i<5;++i) {
             lv_obj_t *row=ui_stack(side,LV_FLEX_FLOW_ROW,12);
             lv_obj_set_flex_align(row,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_CENTER,
                                   LV_FLEX_ALIGN_CENTER);
-            categories[i]=ui_live_badge(row,"",TEAL);
-            lv_obj_set_width(categories[i],160);
-            counts[i]=ui_number(row,"0",false);
+            categories[i]=ui_text_label(row,"",&sim_font_16,TEAL);
+            lv_obj_set_width(categories[i],150);
+            counts[i]=ui_text_label(row,"0",&sim_font_20,ACCENT);
         }
     }
 }
@@ -147,6 +140,7 @@ void ui_vision_update(bool batch)
     lv_snprintf(s,sizeof(s),"≥%u.%02u · %u 类",config.threshold/100,
         config.threshold%100,selected); ui_text(filter_label,s);
     ui_vision_frame(batch);
+    ui_camera_metrics_update(metrics);
     if(batch) {
         bool busy=d.image_status==UI_IMAGE_RECEIVING || d.image_status==UI_IMAGE_DETECTING;
         lv_obj_set_state(previous_button,LV_STATE_DISABLED,busy);
@@ -164,7 +158,8 @@ void ui_vision_update(bool batch)
         const char *states[]={"等待","接收中","识别中","完成","失败"};
         lv_snprintf(s,sizeof s,"%s\n\n%u / %u 张 · %s\n\n往返时间  %u ms",
             d.image_name,d.image_index,d.image_total,states[d.image_status],d.roundtrip_ms);
-        ui_text(image_status, s);
+        ui_text(image_detail,s);
+        ui_text(image_status,states[d.image_status]);
         lv_led_set_color(status_led,lv_color_hex(
             d.image_status==UI_IMAGE_FAILED ? 0xdc2626 : TEAL));
         lv_led_set_brightness(status_led,busy ? 120 : 255);
@@ -174,15 +169,10 @@ void ui_vision_update(bool batch)
         lv_obj_set_state(box_switch,LV_STATE_CHECKED,d.boxes);
         if(metrics_ready && lv_tick_elaps(metrics_tick)<1000) return;
         metrics_ready=true; metrics_tick=lv_tick_get();
-        lv_snprintf(s, sizeof(s), "%u fps", d.fps); ui_text(metrics[0], s);
-        lv_snprintf(s, sizeof(s), "%u.%u ms", d.npu_tenths / 10, d.npu_tenths % 10);
-        ui_text(metrics[1], s);
-        lv_snprintf(s, sizeof(s), "%u.%u ms", d.post_tenths / 10, d.post_tenths % 10);
-        ui_text(metrics[2], s);
-        lv_snprintf(s, sizeof(s), "%u.%u ms", d.latency_tenths/10, d.latency_tenths%10);
-        ui_text(metrics[3], s);
+        ui_camera_metrics_update(metrics);
         for(unsigned i = 0; i < 5; ++i) {
             bool used=i<d.category_used;
+            lv_obj_set_hidden(lv_obj_get_parent(categories[i]),!used);
             ui_text(categories[i],used ? ui_coco_names[d.category_id[i]] : "—");
             if(used) lv_snprintf(s, sizeof(s), "%u", d.category_count[i]);
             else s[0]=0;
