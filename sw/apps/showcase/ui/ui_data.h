@@ -81,6 +81,8 @@ void ui_data_app_retry(void);
 void ui_show_app(ui_app_t app, unsigned arg);
 /* Return the current camera or PC image and detection results. */
 ui_vision_t ui_data_vision(void);
+/* All postprocessed detections, independent of display filters; valid this GUI pass. */
+const ui_detection_t *ui_data_detections(unsigned *count);
 /* Pose page owns all retained people, independently of detection display filters. */
 typedef struct { float x, y, visibility; } ui_pose_point_t;
 typedef struct {

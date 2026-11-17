@@ -3,6 +3,7 @@
 #define SIM_DATA_H
 #include "ui_data.h"
 void sim_data_init(void);
+void sim_data_farm(const ui_detection_t *boxes, unsigned count);
 void sim_data_pose(unsigned count, unsigned frame);
 void sim_data_many_categories(bool enabled);
 void sim_data_session(ui_app_t app,ui_state_t state,const char *error);

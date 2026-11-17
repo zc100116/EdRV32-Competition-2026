@@ -6,6 +6,7 @@
 ICON(detection); ICON(helmet); ICON(pose); ICON(gesture); ICON(stickers);
 ICON(image); ICON(tower); ICON(sling); ICON(rps); ICON(mole); ICON(slice); ICON(catch);
 ICON(process); ICON(graphics); ICON(nes); ICON(monitor); ICON(chip); ICON(debug); ICON(settings);
+ICON(farm);
 ICON(scene_vision); ICON(scene_tower);
 typedef struct {
     const char *name;
@@ -18,6 +19,7 @@ typedef struct {
 #define MOTION (CAMERA | UI_RND)
 static const application_t applications[] = {
     {"目标检测计数","实时识别与数量统计",&home_detection,1,CAMERA},
+    {"智慧农场","分栏计数与农场告警",&home_farm,19,CAMERA},
     {"安全帽检测","看见安全，及时提醒",&home_helmet,13,CAMERA},
     {"人体姿态","骨骼关键点与动作",&home_pose,9,CAMERA},
     {"手势识别","让双手成为控制器",&home_gesture,10,CAMERA},
@@ -38,8 +40,8 @@ static const application_t applications[] = {
     {"调试助手","串口与网络工具",&home_debug,8,0},
     {"设置","显示与抓取判定",&home_settings,16,0}
 };
-static const unsigned starts[] = {0,6,13,16,20};
-static lv_obj_t *tabs, *cards[22];
+static const unsigned starts[] = {0,7,14,17,21};
+static lv_obj_t *tabs, *cards[23];
 static unsigned selected_tab, selected_card;
 static void card_focused(lv_event_t *event)
 {
@@ -72,7 +74,7 @@ bool ui_home_key(uint32_t key)
 {
     if (key != LV_KEY_NEXT && key != LV_KEY_PREV) return false;
     int direction = key == LV_KEY_NEXT ? 1 : -1;
-    selected_card = (selected_card+22+direction)%22;
+    selected_card = (selected_card+23+direction)%23;
     lv_group_focus_obj(cards[selected_card]);
     lv_obj_add_state(cards[selected_card],LV_STATE_FOCUS_KEY);
     return true;
@@ -115,7 +117,7 @@ void ui_page_home(lv_obj_t *parent)
                                      app->hardware,app->action);
         }
     }
-    for (unsigned i = 0; i < 22; ++i)
+    for (unsigned i = 0; i < 23; ++i)
         lv_obj_add_event_cb(cards[i],card_focused,LV_EVENT_FOCUSED,(void *)(uintptr_t)i);
     lv_tabview_set_active(tabs,selected_tab,LV_ANIM_OFF);
     lv_obj_add_event_cb(tabs,tab_changed,LV_EVENT_VALUE_CHANGED,NULL);

@@ -16,6 +16,8 @@
 #include "mem_xbar.h"
 #include "demos/lv_demos.h"
 #include "../ui/theme.h"
+#include "../ui/farm.h"
+#include "../ui/widgets.h"
 #include "include/lvgl/debugging/lv_sysmon.h"
 #include "../board/board.h"
 #include "../board/fabric.h"
@@ -283,7 +285,7 @@ static uint64_t result_render_start;
 static bool rendering_result;
 static bool visual_page(void)
 {
-    return ui_page == 1 || ui_page == 2 || (ui_page >= 9 && ui_page <= 15);
+    return ui_page == FARM_PAGE || ui_page == 1 || ui_page == 2 || (ui_page >= 9 && ui_page <= 15);
 }
 void smooth_gui_take(struct smooth_gui *out)
 {
@@ -610,6 +612,7 @@ void showcase_gui_step(struct sched_task *task)
             lv_indev_read(input);
     }
     if(!ui_detection_settings && (ui_page==1 || ui_page==2)) ui_vision_frame(ui_page==2);
+    else if(ui_page==FARM_PAGE) ui_farm_update();
     else if(ui_page==9) ui_pose_update();
     else if(ui_page==10) ui_hand_update();
     else if(ui_page==14) ui_grab_update();

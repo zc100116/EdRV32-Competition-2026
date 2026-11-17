@@ -3,6 +3,7 @@
  */
 #include "widgets.h"
 #include "detection.h"
+#include "farm.h"
 #include "renderer.h"
 #include "game_view.h"
 #include "workshop.h"
@@ -39,7 +40,8 @@ bool ui_restore_interface(void)
 {
     if(!interface_hidden) return false;
     interface_hidden=false;
-    bool compact=(ui_page>=1 && ui_page<=3) || (ui_page>=9 && ui_page<=13) || ui_page==15;
+    bool compact=(ui_page>=1 && ui_page<=3) || (ui_page>=9 && ui_page<=13) ||
+        ui_page==15 || ui_page==FARM_PAGE;
     lv_obj_set_hidden(top,compact); lv_obj_set_hidden(bottom,compact);
     lv_obj_set_hidden(content,false);
     lv_obj_set_hidden(restore_surface,true);
@@ -161,6 +163,7 @@ void ui_refresh(void)
     switch(ui_page) {
         case 1: if(!ui_detection_settings) ui_vision_update(false); break;
         case 2: if(!ui_detection_settings) ui_vision_update(true); break;
+        case FARM_PAGE: ui_farm_update(); break;
         case 9: ui_pose_update(); break;
         case 10: ui_hand_update(); break;
         case 14: ui_grab_update(); break;
@@ -188,7 +191,7 @@ void ui_open(unsigned page)
         static const ui_app_t apps[]={UI_APP_NONE,UI_APP_CAMERA,UI_APP_IMAGE,
             UI_APP_PROCESS,UI_APP_GRAPHICS,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,
             UI_APP_POSE, UI_APP_HAND, UI_APP_FACE, UI_APP_NONE, UI_APP_HELMET,
-            UI_APP_GRAB, UI_APP_GRAB, UI_APP_NONE, UI_APP_GRAB, UI_APP_GRAB};
+            UI_APP_GRAB, UI_APP_GRAB, UI_APP_NONE, UI_APP_GRAB, UI_APP_GRAB, UI_APP_CAMERA};
         if(apps[old_page]!=UI_APP_NONE || game_active ||
            ui_data_session().app==UI_APP_COREMARK) ui_data_app_open(UI_APP_NONE,0);
         game_active=false;
@@ -221,7 +224,8 @@ void ui_open(unsigned page)
     ui_text_label(top,"EdRV32",&sim_font_20,ACCENT);
     const char *names[] = {"首页", "目标检测计数", "图片识别", "图像处理", "图形引擎",
         "经典游戏", "系统监控", "芯片信息", "调试助手", "人体姿态", "手势识别",
-        "人脸贴纸", "", "安全帽检测", "抓取测试", "体感互动", "设置", "方块工坊", "抓取实验"};
+        "人脸贴纸", "", "安全帽检测", "抓取测试", "体感互动", "设置", "方块工坊",
+        "抓取实验", "智慧农场"};
     ui_text_label(top,names[page],&sim_font_16,TEXT);
     status = ui_text_label(top,"",&sim_font_14,MUTED);
     lv_obj_set_flex_grow(status,1);
@@ -244,9 +248,10 @@ void ui_open(unsigned page)
         ui_page_process, ui_page_graphics, ui_page_games, NULL,
         ui_page_chip, ui_page_debug, ui_page_pose, ui_page_hand,
         ui_page_face, NULL, ui_page_helmet, ui_page_grab, ui_page_motion,
-        ui_page_settings, ui_page_workshop, ui_page_tower};
+        ui_page_settings, ui_page_workshop, ui_page_tower, ui_page_farm};
     if(page==5) ui_data_games(&game_count);
-    bool compact=(page>=1 && page<=3) || (page>=9 && page<=13) || page==15 || page==17 || page==18;
+    bool compact=(page>=1 && page<=3) || (page>=9 && page<=13) || page==15 ||
+        page==17 || page==18 || page==FARM_PAGE;
     if(compact) {
         lv_obj_set_hidden(top,true); lv_obj_set_hidden(bottom,true);
         lv_obj_set_size(content,1280,720); lv_obj_set_pos(content,0,0);
@@ -270,7 +275,7 @@ void ui_open(unsigned page)
     if(page == 3) lv_group_focus_obj(lv_group_get_obj_by_index(group, ui_mode+2));
     if(page == 4 || page == 8)
         lv_group_focus_obj(lv_group_get_obj_by_index(group, ui_tab+2));
-    if((page>=1 && page<=3) || (page>=9 && page<=15)) {
+    if((page>=1 && page<=3) || (page>=9 && page<=15) || page==FARM_PAGE) {
         ui_button(bottom,"隐藏界面",1104,0,160,1005);
         lv_obj_set_height(lv_obj_get_child(bottom,-1),36);
         restore_surface=ui_box(screen,0,0,1280,720,0);
@@ -304,6 +309,8 @@ static void activate(unsigned action)
         ui_detection_settings_action(action);
     } else if((ui_page==1 || ui_page==2) && action==2) {
         ui_camera_drawer_toggle();
+    } else if(ui_page == FARM_PAGE) {
+        ui_farm_action(action);
     } else if(ui_page == 17) {
         ui_workshop_action(action);
     } else if(ui_page == 15) {

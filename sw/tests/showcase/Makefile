@@ -159,3 +159,9 @@ tower:
 	    -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/bsp/include -DLV_CONF_INCLUDE_SIMPLE \
 	    tower_loop.c $(GAME_UI)/game_loop.c -o $(BUILD)/tower_loop
 	$(BUILD)/tower_loop
+
+.PHONY: farm
+farm:
+	mkdir -p $(BUILD)
+	$(CC) $(FLAGS) -I$(GAME_UI) farm.c $(GAME_UI)/farm.c -o $(BUILD)/farm
+	$(BUILD)/farm

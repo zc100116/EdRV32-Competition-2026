@@ -584,6 +584,11 @@ ui_vision_t ui_data_vision(void)
     sched_port_unlock(lock);
     return result;
 }
+const ui_detection_t *ui_data_detections(unsigned *count)
+{
+    *count=sessions[v.page].count;
+    return sessions[v.page].raw;
+}
 void ui_data_boxes(void) { boxes = !boxes; }
 ui_process_config_t ui_data_process_config(void) { return process; }
 void ui_data_process_set(const ui_process_config_t *config)

@@ -79,6 +79,18 @@ void ui_data_image_step(int direction)
     if(status==UI_IMAGE_RECEIVING || status==UI_IMAGE_DETECTING) return;
     image_direction+=direction; image_override=-1;
 }
+static ui_detection_t farm_raw[100];
+static unsigned farm_raw_count;
+void sim_data_farm(const ui_detection_t *boxes, unsigned count)
+{
+    memcpy(farm_raw,boxes,count*sizeof *boxes);
+    farm_raw_count=count;
+}
+const ui_detection_t *ui_data_detections(unsigned *count)
+{
+    *count=farm_raw_count;
+    return farm_raw;
+}
 static bool many_categories;
 void sim_data_many_categories(bool enabled) { many_categories=enabled; }
 ui_vision_t ui_data_vision(void)

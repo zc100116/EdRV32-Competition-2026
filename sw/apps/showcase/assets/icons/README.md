@@ -45,3 +45,10 @@ final 96x96 pixels. Save the generated image.”
 
 - `scene_vision.png`: Use case: stylized-concept. Asset type: wide 560x200 illustration for an embedded showcase scene card. Subject: a friendly smart camera inspecting a conveyor of coral, blue and amber geometric objects, subtle cyan detection brackets, clean inventive composition. Original soft 3D clay editorial illustration, navy blue #2563eb and teal #0d9488 with warm coral and amber accents, crisp simple silhouettes, airy horizontal composition, transparent background. No text, no letters, no logos or watermark.
 - `scene_tower.png`: Use case: stylized-concept. Asset type: wide 560x200 illustration for an embedded showcase scene card. Subject: a playful tower of wood, blue glass and teal building blocks, with a stylized floating hand carefully balancing the top block. Original soft 3D clay editorial illustration, navy blue #2563eb and teal #0d9488 with warm coral and amber accents, crisp simple silhouettes, airy horizontal composition, transparent background. No text, no letters, no logos or watermark.
+
+## Smart farm (2026-11-17)
+
+`farm.png` was generated with built-in imagegen, transparent background, then
+resized to 96×96 with Pillow LANCZOS. Prompt:
+
+> Use case: stylized-concept. Asset type: original app icon for an embedded showcase. Subject: a friendly cream cow head beside a tiny teal barn and amber fence, a smart farm symbol. Single centered object, orthographic soft 3D clay illustration with crisp simple silhouette, navy outlines, blue #2563eb and teal #0d9488 palette with warm coral and amber accents. No text, no letters, no brand logos, no watermark. Transparent background, square composition, generous 12% padding. Designed to remain recognizable at 96x96 pixels.
