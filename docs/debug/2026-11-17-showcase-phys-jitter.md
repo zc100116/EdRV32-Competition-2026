@@ -6,7 +6,7 @@
 
 ## 2. 复现
 
-恢复源 `a1b6fd783`，集成基线 `6346f5c18`，修复代码为本记录的同批实现提交。Ubuntu GCC 13.3.0、Python 3.12.3，原生 C 主机测试，不使用 SoC 仿真器；固定种子 42，60 Hz，重力 900 px/s²。
+恢复源 `a1b6fd783`，集成基线 `6346f5c18`，修复代码 `e3608a516`。Ubuntu GCC 13.3.0、Python 3.12.3，原生 C 主机测试，不使用 SoC 仿真器；固定种子 42，60 Hz，重力 900 px/s²。
 
 ```sh
 flock /tmp/edrv32-sw-build.lock make -C sw/tests/showcase phys tower
