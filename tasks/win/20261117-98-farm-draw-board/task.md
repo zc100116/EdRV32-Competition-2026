@@ -22,7 +22,7 @@
 | 代码 | 从 `origin/zc100116/b3` 拉出 `win/20261117-98-farm-draw-board`，记录 HEAD |
 | 比特流 | 卡 75 |
 | 程序 | `src/showcase-r5c-hw.elf`，由 b3 `59ea15655` 构建，HELLO 应为 `59ea15655` |
-| 平板 | 把 `tools/demo/farm-sim/farm-sim.html` 拷到平板（或手机）上，用浏览器打开。平板横放并全屏 |
+| 平板 | 把 `tools/demo/farm-sim/farm-sim.html` 拷到平板（或手机）上，用浏览器打开。平板横放，点右下角"全屏"。<br>网页取 b3 `4f710df4b` 或更新的版本：已按屏幕等比缩放，手机竖屏时整页旋转 90°，横过来即可正常看 |
 | 其他 | 智慧农场、空中画板各录一段视频 |
 
 ## 4. 环境、IP
