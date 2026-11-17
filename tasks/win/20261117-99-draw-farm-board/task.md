@@ -20,7 +20,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 代码 | 从 `origin/zc100116/b3` 拉出 `win/20261117-99-draw-farm-board`，记录 HEAD |
+| 代码 | 从 b3 的提交 `8619c7797` 拉出 `win/20261117-99-draw-farm-board`。不要用 b3 的最新提交：之后合入的 APK 会删掉农场网页 |
 | 比特流 | 卡 75 |
 | 程序 | `src/showcase-r5d-hw.elf`，由 b3 `e146915c1` 构建，HELLO 应为 `e146915c1` |
 | 动物画面 | 在 Windows 电脑的浏览器（Chrome 或 Edge）中打开 `tools/demo/farm-sim/farm-sim.html`，按 F11 全屏，让摄像头对着显示器。网页中的分栏线与板上无关，只用其中的动物 |
@@ -34,7 +34,7 @@ PG2L200H-6 FBB676 开发板，PDS 只用于下载比特流；不需要新的 IP�
 
 | 步骤 | 执行者 | 内容 |
 |---|---|---|
-| 0 | Windows Codex（C） | `git fetch origin`，`git switch -c win/20261117-99-draw-farm-board origin/zc100116/b3`，记录 HEAD |
+| 0 | Windows Codex（C） | `git fetch origin`，`git switch -c win/20261117-99-draw-farm-board 8619c7797` |
 | 1 | 用户（U） | 下载卡 75 比特流，经网口加载 `src/showcase-r5d-hw.elf`，记录 HELLO |
 | 2 | U + C | **空中画板**：<br>a. 食指竖起，在脸前横着画 5 条直线，看有没有往下拉的 V 形；<br>b. 画线时手指左右侧一点，看会不会断；<br>c. 写 3 个字；<br>d. 张开手掌，确认能提笔；<br>e. 评分：跟手、平滑、V 形、断线；录视频，记下出问题的大致时刻 |
 | 3 | U + C | **智慧农场**：<br>a. 摄像头对着显示器上的农场网页，确认计数为牛 2、马 1、羊 3、鸟 3，按"盘点"；<br>b. 用鼠标把一只羊拖出网页农场，等走失告警，再拖回来，看能否解除；<br>c. 一个人走进摄像头画面，停留几秒，看闯入告警；离开后看能否解除；<br>d. 打开看板，看今日次数和最近事件；<br>e. 评分：计数准确、走失告警、闯入告警、看板；录视频 |
