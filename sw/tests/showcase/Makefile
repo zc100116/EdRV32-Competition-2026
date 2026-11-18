@@ -3,7 +3,7 @@ ROOT := ../../..
 BUILD := $(ROOT)/build/sw/tests/showcase
 FLAGS := -std=c11 -Wall -Wextra -Werror -I$(ROOT)/sw/apps/showcase/board -I$(ROOT)/sw/lib
 .PHONY: test
-test: grab
+test: grab helmet
 	mkdir -p $(BUILD)
 	$(CC) $(FLAGS) main.c $(ROOT)/sw/apps/showcase/board/records.c \
 	    $(ROOT)/sw/apps/showcase/board/protocol.c $(ROOT)/sw/lib/virtual_input.c -o $(BUILD)/protocol
@@ -174,3 +174,10 @@ draw:
 	$(CC) -I$(GAME_UI) $(FLAGS) $(ROOT)/tools/demo/draw-replay/replay.c \
 	    $(GAME_UI)/draw.c -lm -o $(BUILD)/draw-replay
 	python3 draw_replay.py $(BUILD)/draw-replay
+
+.PHONY: helmet
+helmet:
+	mkdir -p $(BUILD)
+	$(CC) $(FLAGS) -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \
+	    -I$(GAME_UI) -DLV_CONF_INCLUDE_SIMPLE helmet.c $(GAME_UI)/track.c -o $(BUILD)/helmet
+	$(BUILD)/helmet

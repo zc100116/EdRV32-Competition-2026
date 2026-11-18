@@ -8,6 +8,7 @@
 #include "motion.h"
 #include "grab.h"
 #include "sticker.h"
+#include "track.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -188,7 +189,9 @@ int main(int argc,char **argv)
             demo.objects[0].category=pages[i]==11 ? "人脸" : "安全帽";
             demo.size=240;
             sim_data_demo(&demo,&hand,&sim_indoor);
-            for(unsigned f=0;f<8;++f) { ++sticker_revision; lv_tick_inc(33); ui_refresh(); }
+            for(unsigned f=0;f<8;++f) { ++sticker_revision;
+                if (pages[i] == 13) ++helmet_revision;
+                lv_tick_inc(33); ui_refresh(); }
         }
         capture(names[i]);
         assert(covered*100<=1280*720*15);

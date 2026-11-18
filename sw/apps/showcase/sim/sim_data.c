@@ -1,6 +1,7 @@
 /* sim_data.c — showcase design §4.3/5.1; deterministic scripted page data.
  * LVGL tick clock; game loader supplies names/icons without opening ROMs.
  */
+#include "track.h"
 #include "sim_data.h"
 #include "detection.h"
 #include "renderer.h"
@@ -303,6 +304,7 @@ const ui_demo_t *ui_data_demo(void) { return &demo; }
 void sim_data_demo(const ui_demo_t *data, const ui_hand_t *gesture, const lv_image_dsc_t *image)
 {
     demo = *data; hand = *gesture; demo_image = image;
+    ++helmet_revision;
 }
 const lv_image_dsc_t *sim_data_demo_image(void) { return demo_image; }
 

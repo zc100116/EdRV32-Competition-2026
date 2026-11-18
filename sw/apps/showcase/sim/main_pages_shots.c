@@ -8,6 +8,7 @@
 #include "motion.h"
 #include "grab.h"
 #include "sticker.h"
+#include "track.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -207,7 +208,9 @@ int main(int argc, char **argv)
             demo.objects[0].category=pages[i]==11 ? "人脸" : "安全帽";
             demo.size=240;
             sim_data_demo(&demo,&hand,&sim_indoor);
-            for(unsigned f=0;f<8;++f) { ++sticker_revision; lv_tick_inc(33); ui_refresh(); }
+            for(unsigned f=0;f<8;++f) { ++sticker_revision;
+                if (pages[i] == 13) ++helmet_revision;
+                lv_tick_inc(33); ui_refresh(); }
         }
         capture(names[i]);
         measure(names[i]);
@@ -226,7 +229,11 @@ int main(int argc, char **argv)
     demo.objects[0].category="安全帽";
     demo.objects[1]=demo.objects[0]; demo.objects[1].x+=240;
     demo.objects[1].class_id=1; demo.objects[1].category="未戴";
-    ui_open(13); sim_data_demo(&demo,&hand,&sim_indoor); capture("helmet-warning");
+    ui_open(13);
+    for (unsigned f = 0; f < 2; ++f) {
+        sim_data_demo(&demo,&hand,&sim_indoor); lv_tick_inc(50); ui_refresh();
+    }
+    lv_tick_inc(300); ui_refresh(); capture("helmet-warning");
     lv_obj_t *warning=find_label(lv_screen_active(),"警示：有人未戴安全帽"); assert(warning);
     assert(!lv_obj_is_hidden(warning));
     lv_area_t warning_area; lv_obj_get_coords(warning,&warning_area);

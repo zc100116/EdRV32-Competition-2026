@@ -78,6 +78,12 @@ int main(int argc, char **argv)
         }
         sim_data_demo(&demo,&hand,&image);
         ui_open(model==2 ? 13 : 10+model); lv_tick_inc(200); ui_refresh();
+        if (model == 2) {
+            for (unsigned f = 0; f < 2; ++f) {
+                sim_data_demo(&demo,&hand,&image); lv_tick_inc(50); ui_refresh();
+            }
+            lv_tick_inc(300); ui_refresh();
+        }
         lv_obj_update_layout(lv_screen_active()); lv_obj_invalidate(lv_screen_active());
         lv_refr_now(NULL);
         snprintf(path,sizeof path,"shots/demo-%s.rgb565",names[model]);

@@ -129,17 +129,21 @@ int main(void)
 {
     assert(mmap((void *)(uintptr_t)EDRV32_NPU_BASE,4096,PROT_READ|PROT_WRITE,
         MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED,-1,0)!=MAP_FAILED);
+    assert(mmap((void *)(uintptr_t)EDRV32_VIN_BASE,4096,PROT_READ|PROT_WRITE,
+        MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED,-1,0)!=MAP_FAILED);
     /* Keep runtime fixture helpers available without executing its standalone suite. */
     (void)camera_test; (void)parallel_test; (void)interrupt_restart_test;
     (void)image_test; (void)cancel_test;
     (void)process_test; (void)model_test; (void)matrix_test;
+    (void)pose_test; (void)hand_test; (void)grab_test; (void)demos_test;
+    (void)sync_test; (void)sync_stop_pending_test; (void)even_pace_test; (void)sync_timing_test;
     (void)window_reopened; (void)reopened_base; (void)reopened_bytes; (void)accept_send;
     (void)bulk_completions;
     assert(mmap((void *)(uintptr_t)EDRV32_DDR_BASE,0x02000000,PROT_READ|PROT_WRITE,
         MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED,-1,0)!=MAP_FAILED);
     assert(mmap((void *)(uintptr_t)(EDRV32_DDR_BASE+VISION_POST_BASE),VISION_OUTPUT_BYTES,
         PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED,-1,0)!=MAP_FAILED);
-    assert(mmap((void *)(uintptr_t)EDRV32_DDR_UNCACHED_BASE,0x0b000000,PROT_READ|PROT_WRITE,
+    assert(mmap((void *)(uintptr_t)EDRV32_DDR_UNCACHED_BASE,0x0cc00000,PROT_READ|PROT_WRITE,
         MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED,-1,0)!=MAP_FAILED);
     assert(mmap((void *)(uintptr_t)EDRV32_ETH_BASE,4096,PROT_READ|PROT_WRITE,
         MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED,-1,0)!=MAP_FAILED);

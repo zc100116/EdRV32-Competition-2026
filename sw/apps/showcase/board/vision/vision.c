@@ -2,6 +2,7 @@
  * VIN/NPU IRQs pair inputs and restart live inference; tasks consume candidates.
  * Clock domain: clk_sys; accelerator data/interrupts originate in clk_mem.
  */
+#include "ui/track.h"
 #include "vision_hooks.h"
 #include "memory.h"
 #include "metrics.h"
@@ -1120,7 +1121,8 @@ static void timing_step(void)
         char detail[96];
         if (v.page == PAGE_FACE)
             snprintf(detail, sizeof detail, "faces=%u size=%u", demo.count, demo.size/2);
-        else snprintf(detail, sizeof detail, "helmet=%u head=%u", demo.helmet, demo.head);
+        else snprintf(detail, sizeof detail, "helmet=%u head=%u helmet_s=%u head_s=%u",
+                      demo.helmet, demo.head, helmet_stable.helmet, helmet_stable.head);
         static const char *const names[] = {"face", "helmet"};
         snprintf(report, sizeof report,
             "%s fps=%u shown=%u disp=%u npu=%u.%u wait=%u.%u decode=%u.%u "
@@ -1445,6 +1447,7 @@ int vision_service(void)
                 }
             }
             if (v.page == PAGE_FACE) ++sticker_revision;
+            else ++helmet_revision;
             timing.kpt_ticks += platform_ticks() - start;
         }
         if (complete && v.page == PAGE_POSE && !timing.cancelled) {

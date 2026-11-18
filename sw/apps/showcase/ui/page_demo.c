@@ -4,6 +4,8 @@
 #include "widgets.h"
 #include <string.h>
 #include "sticker.h"
+#include "track.h"
+static unsigned helmet_seen;
 static lv_obj_t *surface, *tags[100], *metrics, *warning, *pause_label;
 static ui_demo_t shown;
 #define points_enabled ui_debug_overlay
@@ -175,6 +177,10 @@ static void page(lv_obj_t *p, const char *title)
         memset(&stickers,0,sizeof stickers); memcpy(selected,presets[0],sizeof selected);
         preset=0; revision=sticker_revision; frame_tick=lv_tick_get();
     }
+    if (ui_page == 13) {
+        memset(&helmet_stable, 0, sizeof helmet_stable);
+        helmet_seen = helmet_revision;
+    }
     memset(&shown, 0, sizeof shown);
 
     surface = ui_box(lv_screen_active(), 0, 0, 1280, 720, BG);
@@ -269,8 +275,17 @@ void ui_demo_update(void)
 {
     const ui_demo_t *d = ui_data_demo();
     bool fresh = ui_page == 11 && revision != sticker_revision;
-    if (fresh || memcmp(&shown, d, sizeof shown)) {
-        invalidate(); shown = *d;
+    bool helmet_frame = ui_page == 13 && helmet_seen != helmet_revision;
+    if (helmet_frame || (ui_page == 11 && (fresh || memcmp(&shown, d, sizeof shown)))) {
+        invalidate();
+        if (ui_page == 13) {
+            helmet_step(&helmet_stable, d->objects, d->count);
+            helmet_seen = helmet_revision;
+            shown.count = 0;
+            for (unsigned i = 0; i < HELMET_TRACKS; ++i)
+                if (helmet_stable.tracks[i].visible)
+                    shown.objects[shown.count++] = helmet_stable.tracks[i].box;
+        } else shown = *d;
         if (ui_page == 11) {
             static sticker_detection_t detections[100];
             for (unsigned i = 0; i < d->count; ++i)
@@ -295,10 +310,10 @@ void ui_demo_update(void)
     }
     char detail[80];
     if(ui_page==13) {
-        lv_snprintf(detail,sizeof detail,"%u",d->helmet); ui_text(helmet_count,detail);
-        lv_snprintf(detail,sizeof detail,"%u",d->head); ui_text(head_count,detail);
+        lv_snprintf(detail,sizeof detail,"%u",helmet_stable.helmet); ui_text(helmet_count,detail);
+        lv_snprintf(detail,sizeof detail,"%u",helmet_stable.head); ui_text(head_count,detail);
     }
     ui_camera_metrics_update(metrics);
-    lv_obj_set_hidden(warning, ui_page != 13 || !d->head);
+    lv_obj_set_hidden(warning, ui_page != 13 || !helmet_warning(&helmet_stable, lv_tick_get()));
     ui_text(pause_label, ui_data_session().state == UI_STATE_PAUSED ? "继续画面" : "暂停画面");
 }

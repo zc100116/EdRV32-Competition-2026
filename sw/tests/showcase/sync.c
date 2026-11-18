@@ -10,6 +10,7 @@ void ui_pose_update(void) {}
 void ui_hand_update(void) {}
 void ui_grab_update(void) {}
 void ui_demo_update(void) {}
+void ui_farm_update(void) {}
 static ui_app_t active_app;
 static unsigned consumes, submits, page_ready, refreshes;
 static bool timers_enabled;

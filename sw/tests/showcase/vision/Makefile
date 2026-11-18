@@ -35,7 +35,7 @@ runtime: $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c \
 	    $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c \
 	    $(addprefix $(ROOT)/build/showcase/,$(addsuffix _model.c,gesture face helmet)) \
 	    $(ROOT)/sw/apps/showcase/ui/gesture.c $(ROOT)/sw/apps/showcase/ui/grab.c \
-	    $(addprefix $(ROOT)/sw/apps/showcase/ui/,$(addsuffix .c,sticker motion rps mole slice catch sling)) \
+	    $(addprefix $(ROOT)/sw/apps/showcase/ui/,$(addsuffix .c,sticker track motion rps mole slice catch sling)) \
     $(ROOT)/sw/apps/showcase/board/session.c \
 	    $(ROOT)/sw/apps/showcase/board/protocol.c $(ROOT)/sw/apps/showcase/board/records.c \
 	    $(ROOT)/sw/apps/showcase/board/state.c -lm \
