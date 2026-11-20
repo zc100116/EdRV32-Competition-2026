@@ -36,7 +36,9 @@ class Model:
         self.plan, self.rows, self.memory, self.registers, self.heads, self.names = kit.setup(name)
         if name == 'detect':
             self.names = self.names | {0: 'person', 14: 'bird', 16: 'dog', 17: 'horse',
-                                       18: 'sheep', 19: 'cow'}
+                                       18: 'sheep', 19: 'cow', 15: 'cat', 13: 'bench',
+                                       58: 'potted plant',
+                                       25: 'umbrella', 24: 'backpack', 11: 'stop sign'}
 
     def run(self, frame, name):
         photograph = kit.photograph(frame)
@@ -209,6 +211,52 @@ def user_videos():
     kit.contact_sheet('user-videos', samples)
 
 
+def visible_targets(actors):
+    """Alpha contours with frame clipping and nearer full-body occlusion removed."""
+    foreground = np.zeros((1125, 2000), dtype=bool)
+    targets = []
+    for actor in reversed(actors):
+        width, height = int(actor['width']), int(actor['height'])
+        image = Image.open(ASSETS / actor['sprite']).resize((width, height))
+        if actor['facing'] < 0:
+            image = ImageOps.mirror(image)
+        mask = np.asarray(image.getchannel('A')) >= 64
+        x, y = int(actor['x']-actor['width']/2), int(actor['y']-actor['height']/2)
+        left, top, right, bottom = max(0, x), max(0, y), min(2000, x+width), min(1125, y+height)
+        # Scripted off-screen actors still occlude nothing and have zero exposed area.
+        if left >= right or top >= bottom:
+            continue
+        part = mask.copy()
+        if actor['part'] == 'head':
+            part[int(height*.24):] = False
+            part[:, :int(width*.25)] = False
+            part[:, int(width*.75):] = False
+        parts = [(actor['category'], part)]
+        for category, contour in parts:
+            exposed = contour[top-y:bottom-y, left-x:right-x] & ~foreground[top:bottom, left:right]
+            ratio = float(np.count_nonzero(exposed) / np.count_nonzero(contour))
+            ys, xs = np.nonzero(contour[top-y:bottom-y, left-x:right-x])
+            box = None if len(xs) == 0 else projected_box(
+                [left+int(xs.min()), top+int(ys.min()), int(xs.max()-xs.min()+1),
+                 int(ys.max()-ys.min()+1)], 2000, 1125).tolist()
+            targets.append(dict(id=actor['id'], category=category, exposed=ratio, box=box))
+        foreground[top:bottom, left:right] |= mask[top-y:bottom-y, left-x:right-x]
+    return targets
+
+
+def counted_detections(boxes, ids, targets):
+    kept, ignored = [], []
+    for i, (box, category) in enumerate(zip(boxes, ids)):
+        matches = [t for t in targets if t['category'] == int(category) and t['box'] is not None]
+        match = max(matches, key=lambda t: overlap(box, np.array(t['box']))) if matches else None
+        if (match is not None and match['exposed'] < .7 and
+                overlap(box, np.array(match['box'])) >= .5):
+            ignored.append(i)
+        else:
+            kept.append(int(category))
+    return Counter(kept), ignored
+
+
 def farm():
     model = Model('detect')
     rows = json.loads((BUILD / 'farm-frames.json').read_text())
@@ -219,24 +267,28 @@ def farm():
     for i, row in enumerate(rows):
         frame = cv2.imread(str(BUILD / 'farm-frames' / row['file']))
         boxes, scores, ids, _, annotated = model.run(frame, row['file'][:-4])
-        counts = Counter(map(int, ids))
+        visibility = visible_targets(row['targets'])
+        counts, ignored = counted_detections(boxes, ids, visibility)
+        person_visible = any(t['category'] == 0 and t['exposed'] >= .7 for t in visibility)
         if row['static']:
             nstatic += 1
             static += all(counts[c] == count for c, count in expected.items())
-        if row['person']:
+        if person_visible:
             npeople += 1
             people += counts[0] > 0
         else:
             nabsent += 1
             absent += counts[0] == 0
         clean += not (set(counts) - {0, 14, 17, 18, 19})
-        results.append(row | dict(counts=dict(counts), boxes=boxes.tolist(),
+        results.append(row | dict(counts=dict(counts), visibility=visibility, ignored=ignored,
+                                  boxes=boxes.tolist(),
                                   scores=scores.tolist(), classes=ids.tolist()))
         if i % 4 == 0:
             samples.append((row['file'][:-4], annotated))
         print('farm', row['file'], dict(counts), flush=True)
     summary = dict(static=[static, nstatic], person=[people, npeople],
-                   no_person=[absent, nabsent], classes_only=[clean, len(rows)])
+                   no_person=[absent, nabsent], classes_only=[clean, len(rows)],
+                   ignored=sum(len(r['ignored']) for r in results))
     (BUILD / 'farm-results.json').write_text(json.dumps(dict(summary=summary, frames=results),
                                                        indent=2))
     kit.contact_sheet('farm', samples)
@@ -256,13 +308,17 @@ def site():
     for i, row in enumerate(rows):
         frame = cv2.imread(str(BUILD / 'site-frames' / row['file']))
         boxes, scores, ids, _, annotated = model.run(frame, row['file'][:-4])
-        counts = Counter(model.names[int(cls)] for cls in ids)
+        visibility = visible_targets(row['targets'])
+        measured, ignored = counted_detections(boxes, ids, visibility)
+        counts = Counter({model.names[cls]: count for cls, count in measured.items()})
+        row['head'] = sum(t['category'] == 1 and t['exposed'] >= .7 for t in visibility)
         group = 'static' if row['static'] else 'warning' if row['head'] else 'clear'
         passed = (counts['helmet'] == 4 and counts['head'] == 2) if row['static'] else (
             counts['head'] >= 1 if row['head'] else counts['head'] == 0)
         good[group] += passed
         total[group] += 1
-        results.append(row | dict(counts=dict(counts), passed=passed, boxes=boxes.tolist(),
+        results.append(row | dict(counts=dict(counts), ignored=ignored, visibility=visibility,
+                                  passed=passed, boxes=boxes.tolist(),
                                   scores=scores.tolist(), classes=ids.tolist()))
         if i < 25 or i % 4 == 0:
             samples.append((row['file'][:-4] + ' ' + str(dict(counts)), annotated))
@@ -271,7 +327,7 @@ def site():
     (BUILD / 'site-results.json').write_text(json.dumps(dict(summary=summary, frames=results),
                                                        indent=2))
     kit.contact_sheet('site', samples)
-    print('site summary', summary, flush=True)
+    print('site summary', summary, 'ignored', sum(len(r['ignored']) for r in results), flush=True)
     if any(good[group] / total[group] < .9 for group in summary):
         raise SystemExit('FAIL: site acceptance')
     print('PASS site', flush=True)

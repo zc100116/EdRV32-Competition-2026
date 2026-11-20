@@ -27,6 +27,10 @@ class SiteArt(repository: MediaRepository) {
     val background = repository.image("site/background.jpg")
     val workers = (0..5).associateWith { id -> listOf(repository.image("site/$id-head.webp"),
         repository.image("site/$id-helmet.webp")) }
+    val walking = (0..5).associateWith { id -> (0..1).map { pose ->
+        listOf(repository.image("site/$id-head-walk-$pose.webp"),
+            repository.image("site/$id-helmet-walk-$pose.webp")) } }
+    val walkingWipe = (0..1).map { repository.image("site/wipe-walk-$it.webp") }
     val visitor = repository.image("site/visitor.webp")
     val wipe = repository.image("site/wipe.webp")
     val caps = (0..5).associateWith { repository.image("site/$it-cap.webp") }
@@ -79,8 +83,11 @@ fun SiteCanvas(repository: MediaRepository, frame: SiteFrame, modifier: Modifier
                     Color.Transparent), center = Offset(worker.x, worker.y + h * .46f),
                     radius = w * .55f), Offset(worker.x - w * .55f, worker.y + h * .4f),
                     Size(w * 1.1f, h * .16f))
-                val sprite = if (worker.id == 6) art.visitor else if (worker.wiping) art.wipe else
-                    art.workers.getValue(worker.sprite)[if (worker.wearing) 1 else 0]
+                val pose = (frame.seconds * 2.5 + worker.id).toInt() % 2
+                val sprite = if (worker.id == 6) art.visitor else if (worker.wiping)
+                    art.walkingWipe[pose] else if (worker.walking)
+                    art.walking.getValue(worker.sprite)[pose][if (worker.wearing) 1 else 0]
+                else art.workers.getValue(worker.sprite)[if (worker.wearing) 1 else 0]
                 val columns = 24
                 val rows = 32
                 val vertices = FloatArray((columns + 1) * (rows + 1) * 2)

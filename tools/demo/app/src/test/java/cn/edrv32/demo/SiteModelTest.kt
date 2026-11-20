@@ -11,8 +11,7 @@ class SiteModelTest {
         assertEquals(4, reset.workers.count { it.wearing })
         for (second in 0..4) {
             assertEquals(6, SiteModel.frame(second.toDouble(), true).workers.count { it.wearing })
-            assertEquals(SiteModel.initial.map { it.x },
-                SiteModel.frame(second.toDouble(), true).workers.map { it.x })
+            assertTrue(SiteModel.frame(second.toDouble(), true).workers.all { it.walking })
         }
         assertEquals(1, SiteModel.frame(8.0, true).workers.count { !it.wearing })
         assertEquals(0, SiteModel.frame(12.0, true).workers.count { !it.wearing })

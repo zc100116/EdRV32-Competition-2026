@@ -40,20 +40,19 @@ object FarmModel {
                 else -> 3
             }
             var a = animal.copy(
-                x = animal.x + if (animal.category == 14) 0f else
-                    (sin(seconds * .38 + animal.id) * 18).toFloat(),
-                y = animal.y + if (animal.category == 14) 0f else
-                    (sin(seconds * .24 + animal.id) * 6).toFloat(),
-                pose = if (animal.category == 14) 3 else pose,
+                x = animal.x + (sin(seconds * .38 + animal.id) *
+                    if (animal.category == 14) 24 else 18).toFloat(),
+                y = animal.y + (sin(seconds * .24 + animal.id) *
+                    if (animal.category == 14) 8 else 6).toFloat(),
+                pose = if (animal.category == 14) 2 else pose,
             )
-            if (demo && seconds < 5) a = animal.copy(pose = 3)
             if (demo && animal.id == 3) {
                 val x = when {
-                    seconds < 5 -> animal.x
+                    seconds < 5 -> a.x
                     seconds < 7 -> interpolate((seconds - 5) / 2, animal.x, 2300f)
                     seconds < 11 -> 2300f
                     seconds < 13 -> interpolate((seconds - 11) / 2, 2300f, animal.x)
-                    else -> animal.x
+                    else -> a.x
                 }
                 a = a.copy(x = x, pose = if (seconds in 5.0..13.0) {
                     (seconds * 4).toInt() % 2
@@ -65,12 +64,12 @@ object FarmModel {
         val personTime = if (demo) seconds - 13 else intrusion?.let { seconds - it }
         val person = personTime?.takeIf { it >= 0 && it < 11 }?.let { t ->
             val x = when {
-                t < 1 -> interpolate(t, -260f, 150f)
+                t < 1 -> interpolate(t, -160f, 150f)
                 t < 3 -> interpolate((t - 1) / 2, 150f, 770f)
                 t < 8 -> 770f
                 else -> interpolate((t - 8) / 3, 770f, 2300f)
             }
-            FarmAnimal(9, "person", 0, x, 620f, 420f, .551724f,
+            FarmAnimal(9, "person", 0, x, 850f, 420f, .551724f,
                 if (t < 1) 2 else if (t < 3 || t >= 8) (seconds * 4).toInt() % 2 else 3)
         }
         return FarmFrame(seconds, animals, person)

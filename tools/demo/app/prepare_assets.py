@@ -92,6 +92,26 @@ def site():
             sprite.save(output / f'{i}-{name}.webp', lossless=True)
         cap = frames[1].crop((180, 0, 300, 58))
         cap.save(output / f'{i}-cap.webp', lossless=True)
+    sheets = [Image.open(source / name) for name in
+              ('walk-sheet.webp', 'walk-helmet-sheet.webp')]
+    cw, ch = sheets[0].width // 6, sheets[0].height // 2
+    for i in range(6):
+        for pose in range(2):
+            frames = [im.crop((i*cw, pose*ch, (i+1)*cw, (pose+1)*ch)) for im in sheets]
+            bounds = [f.getchannel('A').point(lambda a: 255 if a >= 64 else 0).getbbox()
+                      for f in frames]
+            left, top = min(b[0] for b in bounds), min(b[1] for b in bounds)
+            right, bottom = max(b[2] for b in bounds), max(b[3] for b in bounds)
+            for state, frame in zip(('head', 'helmet'), frames):
+                body = frame.crop((left, top, right, bottom))
+                body.thumbnail((318, 490))
+                canvas = Image.new('RGBA', (318, 490))
+                canvas.paste(body, ((318-body.width)//2, 490-body.height))
+                canvas.save(output / f'{i}-{state}-walk-{pose}.webp', lossless=True)
+                if i == 0 and state == 'head':
+                    wipe = Image.open(output / 'wipe.webp')
+                    wipe.paste(canvas.crop((0, 270, 318, 490)), (0, 270))
+                    wipe.save(output / f'wipe-walk-{pose}.webp', lossless=True)
     poster = Image.open(output / 'background.jpg').convert('RGBA')
     positions = [(360, 385), (940, 360), (1530, 365), (520, 865), (1100, 865), (1680, 865)]
     for i, (x, y) in enumerate(positions):

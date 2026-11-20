@@ -19,6 +19,12 @@ import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
 
+private fun target(id: Int, sprite: String, category: Int, x: Float, y: Float,
+    width: Float, height: Float, facing: Float = 1f, part: String = "body") =
+    JSONObject().put("id", id).put("sprite", sprite).put("category", category)
+        .put("x", x).put("y", y).put("width", width).put("height", height)
+        .put("facing", facing).put("part", part)
+
 private class ExportSnapshots : SnapshotHandler {
     override fun newFrameHandler(snapshot: Snapshot, frameCount: Int, fps: Int) =
         object : SnapshotHandler.FrameHandler {
@@ -116,8 +122,17 @@ class DemoSnapshots {
         fun render(name: String, seconds: Double, demo: Boolean) {
             val state = SiteModel.frame(seconds, demo)
             paparazzi.snapshot(name) { SiteCanvas(repository, state, Modifier.fillMaxSize()) }
+            val targets = JSONArray()
+            state.workers.sortedBy { it.y + it.height / 2 }.forEach { w ->
+                val pose = (seconds * 2.5 + w.id).toInt() % 2
+                val path = if (w.id == 6) "visitor.webp" else if (w.wiping)
+                    "wipe-walk-$pose.webp" else
+                    "${w.sprite}-${if (w.wearing) "helmet" else "head"}-walk-$pose.webp"
+                targets.put(target(w.id, "site/$path", if (w.wearing) 0 else 1,
+                    w.x, w.y, w.width, w.height, part = "head"))
+            }
             frames.put(JSONObject().put("file", "$name.png").put("seconds", seconds)
-                .put("static", !demo).put("head", state.workers.count {
+                .put("targets", targets).put("static", !demo).put("head", state.workers.count {
                     !it.wearing && it.x in 0f..2000f })
                 .put("helmet", state.workers.count { it.wearing }))
         }
@@ -147,8 +162,16 @@ class DemoSnapshots {
             paparazzi.snapshot(name) {
                 FarmCanvas(repository, state, Modifier.fillMaxSize())
             }
+            val targets = JSONArray()
+            (state.animals + listOfNotNull(state.person)).sortedBy { it.y + it.height / 2 }
+                .forEach { a ->
+                    val pose = if (a.kind == "person") a.pose else if (a.kind == "sheep") 2 else 3
+                    targets.put(target(a.id, "farm/${a.kind}-$pose.webp", a.category,
+                        a.x, a.y, a.width, a.height, a.facing))
+                }
             frames.put(JSONObject().put("file", "$name.png").put("seconds", seconds)
-                .put("static", still).put("person", state.person?.visible == true))
+                .put("targets", targets).put("static", still)
+                .put("person", state.person?.visible == true))
         }
         for (second in 0..24) render("frame-demo-%02d".format(second), second.toDouble(),
             demo = true, still = false)

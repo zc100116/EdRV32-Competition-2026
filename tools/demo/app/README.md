@@ -14,7 +14,7 @@
 | 工地 | 安全帽检测 | 互动工地，复位四戴两未戴；点人摘戴、拖动与剧本演示，Mixkit 视频保留为第二项 |
 | 人脸 | 人脸贴纸 | 4 张原创虚构成人照片，分别 1、1、2、3 人 |
 
-农场脚本：0–5 秒静止盘点，5–7 秒羊走出，7–11 秒走失等待，11–13 秒羊归来，13–16 秒人翻越围栏走进，16–21 秒停留，21–24 秒离开。画外动物停留；从它离开的对应画面边缘往里拖可带回，或按“复位”。云影、草木、角色动作、时间戳和噪点完全由时间决定，不使用随机数；拖动坐标也可独立重放。FarmModel.kt 和 FarmCanvas.kt 为运行与 JVM 截图共用的状态及绘制实现。
+农场脚本：0–5 秒运动盘点，5–7 秒羊走出，7–11 秒走失等待，11–13 秒羊归来，13–16 秒人翻越围栏走进，16–21 秒停留，21–24 秒离开。画外动物停留；从它离开的对应画面边缘往里拖可带回，或按“复位”。云影、草木、角色动作、时间戳和噪点完全由时间决定，不使用随机数；拖动坐标也可独立重放。FarmModel.kt 和 FarmCanvas.kt 为运行与 JVM 截图共用的状态及绘制实现。
 
 ## 手机遥控
 
@@ -55,13 +55,13 @@ prepare_assets.py 可指定 art、video、catalog 阶段，validate.py 可指定
 
 ## 验证与来源
 
-Paparazzi 在 JVM 调用实际界面及 Canvas，生成首页、七场景、来源页、每秒农场帧、20 秒静止段及翻越动作帧。界面截图为 1280×720，写入 outputs/demo-app/；逐秒帧和标签在 build/demo-app/farm-frames/ 及 farm-frames.json。用户视频每秒取一帧，人工核对单人片段 1 人、群舞片段 6 人。复用既有拍屏透视、模糊、亮度、种子 17 噪声和 INT8 模型，confidence >0.25、NMS IoU >0.45，不调整阈值。
+Paparazzi 在 JVM 调用实际界面及 Canvas，生成首页、七场景、来源页、每秒农场帧、20 秒运动盘点段及翻越动作帧。界面截图为 1280×720，写入 outputs/demo-app/；逐秒帧和标签在 build/demo-app/farm-frames/ 及 farm-frames.json。用户视频每秒取一帧，人工核对单人片段 1 人、群舞片段 6 人。复用既有拍屏透视、模糊、亮度、种子 17 噪声和 INT8 模型，confidence >0.25、NMS IoU >0.45，不调整阈值。
 
 COCO 只筛官方许可 id 4、5、7、8，最终 24 张为 CC BY / CC BY-SA；统计标注面积占图像至少 2% 的目标召回，小目标正确检出不计误检。HaGRID 官方许可允许署名等条件下再分发，全文随 APK 打包：licenses/hagrid.txt；原许可 https://github.com/hukenovs/hagrid/blob/master/license/en_us.pdf 。APK catalog.json 逐张保留来源与许可，并注明图像缩放、留边、JPEG 转码及改动沿用原许可；Mixkit 来源在 ../kit/clips.json，旧原创图提示词在 ../kit/README.md。用户视频仅按原文件标注来源，用于本次现场演示。未使用 WIDER FACE。
 
 ## 农场原创生成提示词
 
-内置 imagegen 生成，背景压 JPEG，角色图集保留透明度并压 WebP。牛为荷斯坦和赫里福德两头不同角色；腿、尾和头通过连续网格运动，羊保留低头采食姿态，母鸡原地轻动头尾，人物使用四帧行走和翻越动作。图标为原生 VectorDrawable 摄像机与镜头图形。
+内置 imagegen 生成，背景压 JPEG，角色图集保留透明度并压 WebP。牛为荷斯坦和赫里福德两头不同角色；腿、尾和头通过连续网格运动，羊保留低头采食姿态，母鸡缓慢游走并轻动头尾，人物使用四帧行走和翻越动作。图标为原生 VectorDrawable 摄像机与镜头图形。
 
 ### background
 
@@ -216,3 +216,29 @@ NES 主体高 192dp，方向键 64dp、确认/返回 56dp、Select/Start 64dp、
 5→farm，其余（含 6–11、0、255）→home。没有场景变化的周期消息不会覆盖手动平板切换。
 Paparazzi 的 907×420dp 标签页证据为 `screenshots/phone-mirror-{controls,navigation,nes}.png`；
 这些视口展示滚动到场景网格下方后的控件区域；六列网格见 `phone-compact-grid.png`。
+
+## 持续运动（versionCode 7 / 1.6）
+
+工人持续游走，点人摘戴安全帽、拖动和演示时序保留；使用整身原创步态和戴帽编辑。
+农场动物持续缓慢游走，鸡啄食时也移动；0–5 秒为运动盘点，走失/归来/闯入时间不变。
+闯入人物改走前景，避免持续被动物遮挡。FarmModel/Canvas 与 SiteModel/Canvas 仍由运行和 JVM 共用。
+此发布版场景 1 仍跟随马路车流，首页不含动态街景；既有素材和用户视频不入库。
+
+```sh
+flock /tmp/edrv32-sw-build.lock env OPENBLAS_NUM_THREADS=1 $P tools/demo/app/prepare_assets.py site
+```
+
+### 工地身体步态提示词（内置 imagegen，参考既有 head-sheet）
+
+Use case: photorealistic-natural. Reference: identities and work clothes of these six construction workers. Generate a BODY WALKING ANIMATION atlas on actual transparent alpha background, EXACTLY 6 columns and 2 rows of equal cells. Each column corresponds to one reference worker in reading order (stocky orange gray, black man lime navy, older man orange beige, woman lime navy, young man orange navy, older white man lime gray). Full bodies same elevated 30 degree three-quarter camera, rightward walking, bare heads no hats. Row 1: each worker left foot well forward and right foot back, arms swinging naturally. Row 2: SAME six people opposite stride right foot forward left foot back. Same heads, outfits, proportions and size in each pair. All twelve figures separate, fully visible feet to head, generous transparent gutters. No tools, brick, shovel or hammer needed; normal unoccupied walking hands. Sharp realistic photographic human anatomy and cloth folds. True transparent background including between limbs. No ground, floor, cast shadows, backdrop, text, grid lines or watermark.
+
+最终素材选择：轿车使用 car-sheet；living 图集保留行人与狗；公交、卡车使用 traffic-sheet，
+摩托使用 motorcycle-sheet，骑车人使用 bicycle-sheet。工地使用整身步态和戴帽编辑，避免身体拼接。
+
+### 工地整身步态戴帽编辑
+
+Precise object edit of this exact 6-column by 2-row walking worker photographic sprite sheet. Change ONLY their heads by fitting real construction hard hats snugly onto every head. Column 1 yellow hardhat, column 2 white hardhat, column 3 blue hardhat, column 4 white hardhat, column 5 yellow hardhat, column 6 orange hardhat, repeat these exact colors in both rows. Industrial rigid plastic shell and protective brim covering all top hair, natural elevated perspective. Keep every worker's body, walking pose, clothes, arms, hands, boots, face, size, position and exact 6 by 2 arrangement unchanged. Every whole person and hat fully visible. Remove all background to TRUE ALPHA transparency, including gray matte and shadows, retain empty transparent gutters. No ground, no backdrop, no text or watermarks. Exactly these twelve workers in their exact positions, only add correctly fitted hard hats.
+
+### 工地裸头辨识编辑
+
+Precise object edit of this EXACT six columns by two rows walking worker sprite sheet. Change ONLY the HAIR COLOR on the worker in the SIXTH (rightmost) COLUMN in BOTH ROWS: replace his gray-white scalp hair with clearly visible dark brown short natural HAIR with individual strands. This man must be bareheaded, absolutely NO helmet, hat or headwear. Keep his face, gray beard, age, lime safety vest, light blue shirt, gray trousers, walking poses, all body details, positions and sizes unchanged. All other five columns remain completely unchanged. Preserve EXACT 6x2 grid and original body positions, no resizing or recropping. True alpha transparent empty background, remove all gray matte or ground shadows, no background, text or extra objects.

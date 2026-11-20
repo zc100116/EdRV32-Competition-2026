@@ -12,7 +12,7 @@ data class SiteWorker(
 ) {
     val width get() = height * .65f
 }
-data class SiteFrame(val seconds: Double, val workers: List<SiteWorker>, val still: Boolean)
+data class SiteFrame(val seconds: Double, val workers: List<SiteWorker>)
 
 object SiteModel {
     val initial = listOf(
@@ -29,17 +29,13 @@ object SiteModel {
     fun frame(seconds: Double, demo: Boolean = false,
         hats: Map<Int, SiteHatAction> = emptyMap(),
         dragged: Map<Int, FarmPoint> = emptyMap()): SiteFrame {
-        val still = demo && seconds < 5
         val workers = initial.map { original ->
-            val moving = !still && original.id in listOf(0, 1, 4)
             var worker = original.copy(
-                x = original.x + if (moving) (sin(seconds * .32 + original.id) * 32).toFloat()
-                    else 0f,
-                y = original.y + if (moving) (sin(seconds * .28 + original.id) * 9).toFloat()
-                    else 0f,
+                x = original.x + (sin(seconds * .32 + original.id) * 65).toFloat(),
+                y = original.y + (sin(seconds * .28 + original.id) * 16).toFloat(),
                 wearing = if (demo) !(original.id == 0 && seconds >= 5.5 && seconds < 10.5)
                     else original.wearing,
-                walking = moving, working = !still && original.id in listOf(2, 3),
+                walking = true, working = original.id in listOf(2, 3),
             )
             var action: SiteHatAction? = if (demo && original.id == 0) when {
                 seconds >= 10 -> SiteHatAction(10.0, true)
@@ -71,7 +67,7 @@ object SiteModel {
             workers += SiteWorker(6, 4, x, 850f, 490f, false,
                 walking = seconds < 16 || seconds >= 21)
         }
-        return SiteFrame(seconds, workers, still)
+        return SiteFrame(seconds, workers)
     }
 
     fun hit(frame: SiteFrame, x: Float, y: Float): SiteWorker? =
