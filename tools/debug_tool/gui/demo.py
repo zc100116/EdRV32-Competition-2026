@@ -146,20 +146,26 @@ class DemoPanel(QWidget):
                     control.setChecked(bool(item['value']))
                     control.clicked.connect(lambda checked=False, n=ident: self.act(n, 0))
                 elif item['kind'] == 2:
-                    label = QLabel(f"{item['label']}：{item['value']}")
-                    row.addWidget(label)
-                    control = QSlider(Qt.Horizontal)
-                    control.setRange(item['min'], item['max'])
-                    control.setValue(item['value'])
-                    control.valueChanged.connect(
-                        lambda value, label=label, name=item['label']: label.setText(f'{name}：{value}'))
-                    control.sliderReleased.connect(
-                        lambda n=ident, slider=control: self.act(n, 1, slider.value()))
+                    if item['min'] >= item['max']:
+                        control = QLabel(f"{item['label']}：{item['value']}")
+                    else:
+                        label = QLabel(f"{item['label']}：{item['value']}")
+                        row.addWidget(label)
+                        control = QSlider(Qt.Horizontal)
+                        control.setRange(item['min'], item['max'])
+                        control.setValue(item['value'])
+                        control.valueChanged.connect(
+                            lambda value, label=label, name=item['label']:
+                            label.setText(f'{name}：{value}'))
+                        control.sliderReleased.connect(
+                            lambda n=ident, slider=control: self.act(n, 1, slider.value()))
                 else:
                     row.addWidget(QLabel(item['label']))
                     control = QComboBox()
                     control.addItems(item['options'])
-                    control.setCurrentIndex(item['value'])
+                    control.setPlaceholderText('未选')
+                    value = item['value']
+                    control.setCurrentIndex(value if 0 <= value < len(item['options']) else -1)
                     control.activated.connect(lambda value, n=ident: self.act(n, 1, value))
                 row.addWidget(control)
                 grid.addWidget(cell, index, 0)

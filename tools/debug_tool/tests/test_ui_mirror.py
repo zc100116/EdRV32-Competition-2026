@@ -104,6 +104,26 @@ class UiMirrorTest(unittest.TestCase):
             act.assert_called_with(42, 3, 1, 0)
         app.processEvents()
 
+    def test_unselected_choices_and_read_only_ranges(self):
+        from PySide6.QtWidgets import QApplication, QComboBox, QSlider, QLabel
+        from gui.demo import DemoPanel
+        app = QApplication.instance() or QApplication([])
+        self.eth.showcase.ui.receive(ui_part(0, 1,
+            ui_item(0, 3, -1, 0, 0, 0, '快捷档', '原始\n降噪'),
+            ui_item(1, 3, 9, 0, 0, 0, '模式', '线框\n实体'),
+            ui_item(2, 2, 8, 0, 0, 1, '只读值'),
+            ui_item(3, 2, -1, 5, -5, 1, '反向范围')))
+        panel = DemoPanel(self.engine)
+        self.addCleanup(panel.close)
+        choices = panel.mirror.findChildren(QComboBox)
+        self.assertEqual([control.currentIndex() for control in choices], [-1, -1])
+        self.assertEqual([control.placeholderText() for control in choices], ['未选', '未选'])
+        self.assertEqual(panel.mirror.findChildren(QSlider), [])
+        labels = [label.text() for label in panel.mirror.findChildren(QLabel)]
+        self.assertIn('只读值：8', labels)
+        self.assertIn('反向范围：-1', labels)
+        app.processEvents()
+
     def test_phone_ui_changes_periodic_and_act(self):
         listener = socket.socket()
         listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

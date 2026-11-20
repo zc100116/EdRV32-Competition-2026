@@ -223,6 +223,19 @@ class MirrorRemoteSnapshots {
         orientation = ScreenOrientation.LANDSCAPE, softButtons = false),
         appCompatEnabled = false, snapshotHandler = ExportSnapshots(), useDeviceResolution = true)
 
+    @Test fun mirrorUnselectedAndReadOnly() {
+        val ui = LiveUi(43, 1, "自定义前处理", listOf(
+            LiveUiItem(0, 3, -1, 0, 0, "快捷档", livePresets, 0),
+            LiveUiItem(1, 3, 9, 0, 0, "模式", listOf("线框", "实体"), 0),
+            LiveUiItem(2, 2, 8, 0, 0, "只读值", emptyList(), 1),
+            LiveUiItem(3, 2, -1, 5, -5, "反向范围", emptyList(), 1)))
+        paparazzi.snapshot("phone-mirror-unselected") {
+            DemoTheme {
+                androidx.compose.foundation.layout.Column { LiveMirror(ui, true) }
+            }
+        }
+    }
+
     @Test fun mirrorPages() {
         val ui = LiveUi(42, 4, "图形引擎", listOf(
             LiveUiItem(0, 0, 0, 0, 0, "开始图形引擎跑分", emptyList(), 0),

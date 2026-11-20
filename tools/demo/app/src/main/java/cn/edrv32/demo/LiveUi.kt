@@ -12,6 +12,9 @@ import kotlin.math.roundToInt
 
 data class LiveUiItem(val id: Int, val kind: Int, val value: Int, val min: Int,
     val max: Int, val label: String, val options: List<String>, val area: Int)
+// L13.4: a custom preset has no selected option on the board.
+val LiveUiItem.selectedLabel: String get() = options.getOrNull(value) ?: "未选"
+
 data class LiveUi(val revision: Long = 0, val page: Int = 0, val title: String = "等待板端控件",
     val items: List<LiveUiItem> = emptyList())
 data class LiveUiAction(val revision: Long, val id: Int, val action: Int, val value: Int = 0)
@@ -66,7 +69,10 @@ fun LiveMirror(ui: LiveUi, connected: Boolean, send: (LiveUiAction) -> Unit = {}
                         Text(item.label, Modifier.weight(1f))
                         Switch(item.value != 0, { act(0, 0) }, enabled = connected)
                     }
-                    2 -> {
+                    2 -> if (item.min >= item.max) {
+                        Text("${item.label}：${item.value}",
+                            Modifier.fillMaxWidth().heightIn(min = 48.dp))
+                    } else {
                         var value by remember(ui.revision, item.id, item.value) {
                             mutableFloatStateOf(item.value.toFloat())
                         }
@@ -83,7 +89,7 @@ fun LiveMirror(ui: LiveUi, connected: Boolean, send: (LiveUiAction) -> Unit = {}
                         Box {
                             OutlinedButton({ expanded = true }, enabled = connected,
                                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                                Text("${item.label}：${item.options[item.value]} ▾")
+                                Text("${item.label}：${item.selectedLabel} ▾")
                             }
                             DropdownMenu(expanded, { expanded = false }) {
                                 item.options.forEachIndexed { index, option ->

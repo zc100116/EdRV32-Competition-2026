@@ -9,6 +9,13 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class LiveDemoTest {
+    @Test fun unselectedMirrorChoice() {
+        val item = LiveUiItem(3, 3, -1, 0, 0, "快捷档", listOf("原始", "降噪"), 1)
+        assertEquals("未选", item.selectedLabel)
+        assertEquals("未选", item.copy(value = 2).selectedLabel)
+        assertEquals("降噪", item.copy(value = 1).selectedLabel)
+    }
+
     @Test fun simultaneousPadKeysAndIndependentRelease() {
         var keys = livePadKeys(0, 3, true)
         keys = livePadKeys(keys, 4, true)
