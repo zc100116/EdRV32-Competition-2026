@@ -170,6 +170,16 @@ static struct {
                     .exposure=SHOWCASE_DEFAULT_EXPOSURE, .auto_levels=true, .auto_gamma=true},
           .shadow=SHOWCASE_DEFAULT_PRESET, .exposure=SHOWCASE_DEFAULT_EXPOSURE,
           .msrc_image=-1, .loop_image=-1};
+/* L4/L9: bypass and identity gamma need neither a LUT nor a bank switch. */
+static bool recognition_gamma(void)
+{
+    return (platform_hardware() & APP_HW_PIX) && prep.config.preset &&
+        prep.config.gamma_tenths != 10;
+}
+static bool gamma_page(void)
+{
+    return v.page == PAGE_PROCESS || (live_page() && recognition_gamma());
+}
 static void preprocess_configure(void);
 ui_preprocess_t ui_data_preprocess(void)
 {
@@ -841,7 +851,7 @@ static void pix_mode(void)
 }
 static void preprocess_configure(void)
 {
-    if (v.gamma_target != (unsigned)prep.config.gamma_tenths) {
+    if (recognition_gamma() && v.gamma_target != (unsigned)prep.config.gamma_tenths) {
         v.gamma_target = prep.config.gamma_tenths;
         v.gamma_index = 0;
     }
@@ -849,15 +859,15 @@ static void preprocess_configure(void)
         prep.shadow = 0; prep.shadow_revision = prep.revision; return;
     }
     const ui_preprocess_t *p = &prep.config;
-    if (v.gamma_loaded != -p->gamma_tenths) {
+    if (recognition_gamma() && v.gamma_loaded != -p->gamma_tenths) {
         if (v.gamma_index < 256) return;
         if (!(engine_poll(ENGINE_PIX).status & EDRV32_PIX_STATUS_IDLE_MASK)) return;
         v.gamma_bank ^= 1;
         pix_gamma_load(v.gamma_bank, v.gamma_table);
         v.gamma_loaded = -p->gamma_tenths;
     }
-    uint32_t flags = p->preset ? EDRV32_PIX_CFG_BC_EN_MASK |
-        EDRV32_PIX_CFG_GAMMA_EN_MASK : 0;
+    uint32_t flags = p->preset ? EDRV32_PIX_CFG_BC_EN_MASK : 0;
+    if (recognition_gamma()) flags |= EDRV32_PIX_CFG_GAMMA_EN_MASK;
     struct pix_config config = {flags, p->filter, PIX_BYPASS, v.gamma_bank,
         (unsigned)p->contrast, p->brightness, 128};
     pix_configure(&config);
@@ -1325,14 +1335,14 @@ int vision_service(void)
     }
     unsigned gamma = v.page == PAGE_PROCESS ? (unsigned)process.gamma_tenths :
         (unsigned)prep.config.gamma_tenths;
-    if ((v.page == PAGE_PROCESS || live_page()) &&
+    if (gamma_page() &&
         (v.gamma_target != gamma || v.gamma_recognition != live_page())) {
         v.gamma_recognition = live_page();
         v.gamma_target = gamma;
         v.gamma_index = 0;
     }
     /* Design 4.5.2: software floating-point gamma work is one sample per slice. */
-    if ((v.page == PAGE_PROCESS || live_page()) && v.gamma_index < 256) {
+    if (gamma_page() && v.gamma_index < 256) {
         v.gamma_table[v.gamma_index] = live_page() ?
             preprocess_gamma_value(v.gamma_index, v.gamma_target) :
             pix_gamma_value(v.gamma_index, v.gamma_target);
@@ -1710,7 +1720,7 @@ int vision_service(void)
     if (v.state == PIPE_STARTING) {
         unsigned model = page_models[v.page];
         if (model != v.model) select_model(model);
-        if ((v.page == PAGE_PROCESS || live_page()) && v.gamma_index < 256) {
+        if (gamma_page() && v.gamma_index < 256) {
             sched_port_unlock(lock); return 1;
         }
         /* Capture is stopped and drained before changing sensor frame timing. */
@@ -1750,7 +1760,7 @@ int vision_service(void)
     int busy = v.state == PIPE_STARTING || v.state == PIPE_STOPPING ||
         v.state == PIPE_PAUSING || v.state == PIPE_CONFIGURE || v.model_pending ||
         v.job != JOB_IDLE || v.npu_busy || v.done_mask || v.geo_source >= 0 ||
-        ((v.page == PAGE_PROCESS || live_page()) && v.gamma_index < 256);
+        (gamma_page() && v.gamma_index < 256);
     sched_port_unlock(lock);
     return busy;
 }
@@ -1760,7 +1770,7 @@ static void step(void)
     int busy = vision_service();
     /* IRQ events wake idle camera work; sliced CPU work resumes immediately. */
     unsigned cpu = v.job == JOB_POST ||
-                   ((v.page == PAGE_PROCESS || live_page()) && v.gamma_index < 256) ||
+                   (gamma_page() && v.gamma_index < 256) ||
                    v.model_pending;
     app_wake_at(busy ? platform_ticks() + (cpu ? 0 : platform_clock_hz() / 1000) :
                       UINT64_MAX);

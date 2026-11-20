@@ -78,7 +78,7 @@ static uint32_t display_current, display_next, display_released;
 static unsigned display_enabled, display_scanned, display_frames, memory_starts;
 static unsigned l0_submissions;
 static uint32_t memory_base;
-static unsigned gamma_loads, pix_busy;
+static unsigned gamma_loads, gamma_mid, pix_busy;
 static struct pix_config last_pix;
 void platform_gui_wake(void) {}
 uint32_t showcase_gui_frames(void) { return display_frames; }
@@ -252,6 +252,7 @@ void pix_gamma_load(unsigned bank, const uint8_t values[256])
 {
     assert(hardware & APP_HW_PIX);
     assert(bank <= 1 && bank != last_pix.gamma_bank && values[255] == 255);
+    gamma_mid = values[128];
     ++gamma_loads;
 }
 int32_t geo_q16(int32_t n, int32_t d) { return (int32_t)((int64_t)n * 65536 / d); }
@@ -336,7 +337,11 @@ static void camera_test(void)
 {
     vision_app_camera.enter();
     assert(sensor_initializations == 1);
+    assert(!(hardware & APP_HW_PIX));
+    ui_preprocess_t prep = ui_data_preprocess();
+    assert(prep.preset == 0 && !prep.auto_levels && !prep.auto_gamma);
     vision_service();
+    assert(vision_ready(UI_STATE_RUNNING) && sources[2] == VIN_CAM0);
     camera(0, 10);
     display_frame(); display_frame();
     vision_detection_changed(); assert(!vision_detection_applied());
@@ -1064,7 +1069,7 @@ static void preprocessing_test(void)
     assert(!ui_data_preprocess_applied());
     vision_app_camera.enter(); drain();
     assert(sources[2] == VIN_MEMORY);
-    assert(last_pix.flags == (EDRV32_PIX_CFG_BC_EN_MASK | EDRV32_PIX_CFG_GAMMA_EN_MASK) &&
+    assert(last_pix.flags == EDRV32_PIX_CFG_BC_EN_MASK &&
            last_pix.contrast == 256);
     unsigned before = memory_starts, runs = npu_runs;
     frames[0] = (struct vin_frame){0,2000};
@@ -1099,6 +1104,39 @@ static void preprocessing_test(void)
     puts("PASS preprocessing: MSRC busy skip, retained surface, CH2 frame pairing and frame ACK");
 }
 #ifndef NETWORK_INTEGRATION
+static void gamma_bypass_test(void)
+{
+    unsigned loads = gamma_loads, bank = last_pix.gamma_bank;
+    ui_data_preprocess_set(2);
+    vision_app_camera.enter(); drain();
+    assert(gamma_loads == loads && last_pix.gamma_bank == bank);
+    assert(!(last_pix.flags & EDRV32_PIX_CFG_GAMMA_EN_MASK));
+    ui_preprocess_t custom = ui_data_preprocess();
+    custom.auto_gamma = false; custom.gamma_tenths = 6;
+    ui_data_preprocess_custom(&custom); drain();
+    frames[0] = (struct vin_frame){0,1998};
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_FRAME_MASK); drain();
+    assert(gamma_loads == loads+1 && last_pix.gamma_bank == (bank^1) && gamma_mid > 128);
+    assert(last_pix.flags & EDRV32_PIX_CFG_GAMMA_EN_MASK);
+    /* Drain the processed frame before switching back to identity gamma. */
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_DONE_MASK);
+    frames[2] = (struct vin_frame){0,6};
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
+    event(ENGINE_NPU,EDRV32_NPU_IRQ_STAT_DONE_MASK); drain();
+    custom.gamma_tenths = 10;
+    ui_data_preprocess_custom(&custom); drain();
+    frames[0] = (struct vin_frame){1u << EDRV32_VIN_CH_DONE_INFO_SLOT_POS,1999};
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_FRAME_MASK); drain();
+    assert(gamma_loads == loads+1 && last_pix.gamma_bank == (bank^1));
+    assert(!(last_pix.flags & EDRV32_PIX_CFG_GAMMA_EN_MASK));
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_DONE_MASK);
+    frames[2] = (struct vin_frame){1u << EDRV32_VIN_CH_DONE_INFO_SLOT_POS,7};
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
+    event(ENGINE_NPU,EDRV32_NPU_IRQ_STAT_DONE_MASK); drain();
+    vision_app_camera.exit(); display_frame(); display_frame(); drain();
+    display_frame(); display_frame();
+    puts("PASS recognition gamma: identity keeps bank, nonidentity loads inactive bank");
+}
 int main(void)
 {
     assert(mmap((void *)(uintptr_t)EDRV32_NPU_BASE, 4096,
@@ -1143,6 +1181,7 @@ int main(void)
     even_pace_test();
     sync_timing_test();
     preprocessing_test();
+    gamma_bypass_test();
     assert(invalidates >= 3);
     return 0;
 }
