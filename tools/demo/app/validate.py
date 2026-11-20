@@ -280,7 +280,7 @@ def street():
     rows = json.loads((BUILD / 'street-frames.json').read_text())
     results, samples = [], []
     correct = foreign = 0
-    allowed = {0, 1, 2, 3, 5, 7, 9, 11, 16, 58}
+    allowed = {0, 1, 2, 5, 7, 9, 11, 16}
     for row in rows:
         expected, visibility = street_truth(row)
         frame = cv2.imread(str(BUILD / 'street-frames' / row['file']))

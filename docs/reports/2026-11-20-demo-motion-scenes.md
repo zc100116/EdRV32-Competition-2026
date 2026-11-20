@@ -48,3 +48,13 @@ flock /tmp/edrv32-sw-build.lock env QT_QPA_PLATFORM=offscreen PYTHONPATH=.:tools
 - 场景截图：street-{4,17,31}.png、site-{hat-off,visitor-entered}.png、farm-{missing,intruder}.png。
 - 手机证据：tools/demo/app/screenshots/phone-single-{engine,recognition,nes}.png。
 - 已按要求复制 b3-int/build/demo-app/assets；用户/已有素材不入库，仅新增原创 art 和界面证据入库。
+
+## T-STREET-2：APK 1.7
+
+- 基线 0c42b5b43；实现为本追加节所在提交；从 24/40（10类）提高到 **38/40（8类，95%）**，域外 **1/40**、忽略 1，达标。
+- 移除仍不稳定的摩托车和盆栽；复用原创 art，无新增素材；模型/阈值、工地/农场/手机界面未改。
+- 1秒入/出画、屏内100坐标边距、错峰骑行与行人/狗间距调整；残余第18/19秒自行车漏检，第18秒漏灯并误报网球拍。
+- `flock /tmp/edrv32-sw-build.lock $P tools/demo/app/validate.py street`：通过，36.45 s；退化、真值与忽略规则沿用1.6。
+- `flock /tmp/edrv32-sw-build.lock tools/demo/app/gradlew -p tools/demo/app --no-daemon --max-workers=1 testDebugUnitTest assembleDebug`：通过，106.26 s，22项零失败/错误。
+- APK `build/demo-app/edrv32-demo.apk`：versionCode 8 / versionName 1.7，**256 assets**，76,401,149 B；两条命令均沿用上文工具链和 OPENBLAS_NUM_THREADS=1。
+- 数据/日志 `build/demo-app/street2/{results.json,iteration2-validation.log,final-gradle.log}`；逐秒帧和联系表沿用上文路径。

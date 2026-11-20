@@ -27,14 +27,11 @@ object StreetModel {
         Route("car", 2, 30.0, 18.0, 385f, 600f, 240f),
         Route("bus", 5, 20.0, 20.0, 385f, 800f, 310f),
         Route("truck", 7, 0.0, 20.0, 660f, 650f, 300f, -1f),
-        Route("bicycle", 1, 0.0, 24.0, 190f, 380f, 380f),
-        Route("bicycle", 1, 18.0, 22.0, 190f, 380f, 380f, -1f),
-        Route("motorcycle", 3, 20.0, 20.0, 660f, 460f, 460f, -1f),
+        Route("bicycle", 1, 0.0, 20.0, 190f, 380f, 380f),
+        Route("bicycle", 1, 22.0, 18.0, 190f, 380f, 380f, -1f),
         Route("person", 0, 0.0, 38.0, 970f, 172f, 260f),
-        Route("person", 0, 12.0, 36.0, 160f, 172f, 260f, -1f),
         Route("person", 0, 24.0, 39.0, 970f, 172f, 260f),
-        Route("dog", 16, 4.0, 40.0, 1000f, 290f, 150f),
-        Route("plant", 58, 0.0, 40.0, 150f, 300f, 300f, stationaryX = 1450f),
+        Route("dog", 16, 8.0, 40.0, 1000f, 290f, 150f),
         Route("light", 9, 0.0, 40.0, 165f, 160f, 330f, stationaryX = 1880f),
         Route("stop", 11, 0.0, 40.0, 150f, 190f, 300f, stationaryX = 110f),
     )
@@ -43,7 +40,15 @@ object StreetModel {
         val actors = routes.mapIndexedNotNull { id, route ->
             val elapsed = (time - route.start + 40.0) % 40.0
             if (elapsed >= route.duration) null else {
-                val distance = (elapsed / route.duration).toFloat() * (2000 + route.width)
+                // One-second edges leave a clear margin for the full visible traversal.
+                val entry = route.width + 100f
+                val span = 1800f - route.width
+                val distance = when {
+                    elapsed < 1 -> elapsed.toFloat() * entry
+                    elapsed > route.duration - 1 -> entry + span +
+                        (elapsed - route.duration + 1).toFloat() * entry
+                    else -> entry + ((elapsed - 1) / (route.duration - 2)).toFloat() * span
+                }
                 val x = route.stationaryX ?: if (route.facing > 0) -route.width / 2 + distance
                     else 2000 + route.width / 2 - distance
                 StreetActor(id, route.kind, route.category, x, route.y, route.width,

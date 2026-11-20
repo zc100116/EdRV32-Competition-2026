@@ -7,7 +7,7 @@
 | 场景 | 板端应用 | 内容与现场操作 |
 |---|---|---|
 | 智慧农场 | 智慧农场 | 一整块监控牧场，2 牛、1 马、3 羊、3 鸡；盘点后按“演示”观察走失与人闯入，也可拖动物或按“闯入” |
-| 动态街景 | 目标检测计数 | 40 秒确定性循环，车、人、狗移动，10 类；翻拍完全正确率 24/40，详见报告 |
+| 动态街景 | 目标检测计数 | 40 秒确定性循环，车、人、狗移动，8 类；翻拍完全正确率 38/40，详见报告 |
 | 马路车流 | 目标检测计数 | 用户 2 段与 Mixkit 2 段，观察车辆框及分类计数 |
 | 舞蹈 | 人体姿态 | 用户 2 段与 Mixkit 2 段，观察全身关键点 |
 | 检测图集 | 目标检测计数 | 24 张 COCO 图像和 6 张原创动物园照片 |
@@ -314,3 +314,14 @@ Use case: photorealistic-natural. Transparent street simulation PHOTO sprite atl
 ### 最终轿车图集
 
 Use case: photorealistic-natural. Actual alpha transparent TWO-FRAME car sprite sheet, exactly TWO equal cells side by side. SAME bright RED ordinary four-door modern sedan in both cells, front-three-quarter SIDE view facing RIGHT, camera elevated 20 degrees, front grille and both headlights clearly visible as well as full passenger side and two wheels. The viewing direction is 35 degrees forward from a pure side view, NOT frontal. Extremely clear unmistakable passenger CAR proportions, realistic glossy red body, dark tires, silver rims, blue-gray windows, visible dark front grille, sharp headlight assemblies. Original natural daylight photography, soft even lighting, real vehicle proportions. Left and right cells differ only in wheel rotation, identical car scale and foot baseline. Whole car including all bumpers and tires centered well inside each cell, generous empty transparent margins and gutter. Genuine ALPHA TRANSPARENCY outside the two cars. No floor, ground, cast shadow, scene, gray matte, backdrop, words, license-plate text, logos or watermark.
+
+
+## 街景续调（versionCode 8 / 1.7）
+
+街景保留人、自行车、轿车、公交车、卡车、狗、红绿灯和停车牌，共 8 类。
+依据本轮授权去掉仍不稳定的摩托车和盆栽；不修改板端模型、置信度或 NMS 阈值。
+车辆/行人采用 1 秒进入、1 秒离开，中间在屏内留 100 场景坐标的边距；骑行路线错峰，
+移除与骑手重叠的上方行人，并将狗的出发时间后移，避免狗头被行人遮挡。
+完整 40 秒逐秒验证为 38/40（95%），域外类别 1/40，忽略检测 1；第 18/19 秒仍有自行车漏检。
+本轮沿用已有原创 art，没有新增素材；打包不再输出摩托车和盆栽的未使用切片。
+工地、农场、手机界面保持原实现。构建命令和新增测量见报告的 APK 1.7 节。

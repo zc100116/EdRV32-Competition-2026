@@ -149,8 +149,7 @@ def street():
     sources = [('car', [(0, 'car')], 1),
                ('living', [(2, 'person'), (3, 'dog')], 4),
                ('traffic', [(0, 'bus'), (1, 'truck')], 3),
-               ('bicycle', [(0, 'bicycle')], 1),
-               ('motorcycle', [(0, 'motorcycle')], 1)]
+               ('bicycle', [(0, 'bicycle')], 1)]
     for sheet, kinds, rows in sources:
         image = Image.open(ROOT / 'art/street' / (sheet + '-sheet.webp'))
         cell_w, cell_h = image.width // 2, image.height // rows
@@ -162,7 +161,7 @@ def street():
             street_sprites(output, kind, frames)
     extras = Image.open(ROOT / 'art/street/extras-sheet.webp')
     cw, ch = extras.width // 4, extras.height // 3
-    for kind, row, columns in [('plant', 1, [1]), ('light', 1, [2]), ('stop', 1, [3])]:
+    for kind, row, columns in [('light', 1, [2]), ('stop', 1, [3])]:
         frames = [extras.crop((col*cw, row*ch, (col+1)*cw, (row+1)*ch)) for col in columns]
         street_sprites(output, kind, frames)
     poster = Image.new('RGB', (480, 270), '#55585a')
