@@ -218,6 +218,10 @@
 | B3-30 | 卡 23 `tasks/win/20261031-23-b3-converged`：B3R/B3N/B3V 用收敛 RTL 重新实现并完整上板；新 IP：`ip_rom_boot`、`ip_ram_sram`、`ip_ram_dcache_tag`（20 位）；含 LAYERS、B3V 网口诊断、复位副本与 recovery/removal 核对 | 用户 + Windows Codex | T-RST2 | [~] 已下发 b3 2a3ee2e0；卡 22 由本卡取代 |
 | T-S3LAYER | S3 新增 LAYERS 演示页（DS-20、RN-30），统一上板卡 B3R 中拍照对照 | Codex · GPT-6.1 Sol（medium） | — | [x] b3 b86d99b6：S3 第 5 项 LAYERS（5 画面，UART 打印预期）；新增 6 MiB Surface；RN-17 仍为已知 15/16 |
 | T-RNDOPT3 | RND 统计计数器打拍、写副作用打拍、APB 本地寄存（SoC 7.1、4.3） | Codex · GPT-6.1 Sol（medium） | T-RNDOPT2 | [x] b3 c9ddfbcf：RND APB 本地寄存、写副作用/PERF 打拍；paddr[2]/pwdata[0] 负载 6/2→1/1，RN-18/29 不变 |
+| T-LIVE-BOARD | 现场演示应用（5 章 10 场景）、EDSC DEMO/proto 4、识别前处理 4 档（PIX + 内存源回环 + 自动增益）；设计记录 `2026-11-20-live-demo-app.md` L1–L6；task_4c4641bd6c67 | Codex gpt-6.1-sol medium | 设计记录 | [x] 2026-11-20 合入 b3 09b186632；协调者修正增益上限为 PIX 9 位 CONTRAST（85ff0a00a），追加手势关键点默认显示、抓取实验默认模式 C（aed43fb06、742893af9）；严格构建 0 告警、主机/截图测试 PASS；上板见卡 103 |
+| T-LIVE-REMOTE | 调试工具“演示”页、`/api/demo`、手机中继 TCP 47633；APK 1.3 遥控端场景网格、档位、NES 手柄；task_81e4ed7d3be9 + 返工 task_71255c6e7323 | Codex gpt-6.1-sol medium | 设计记录 L3 | [x] 2026-11-20 合入 b3 91dc488ec..c4ec37e28；PC 145 项、APK 14 项 PASS；上板见卡 103 |
+| T-HAND-EDGE | 板端 gesture 模型在画面边缘的离线检出实验（17 位置 × 120/180 px × 40 手）；task_858cc6d3d584 | Codex gpt-6.1-sol medium | — | [x] 2026-11-20 合入 b3 a245befea，报告 `reports/2026-11-20-hand-edge-eval.md`：出画截断和尺寸是主因；合成样本与真实画面差异大，绝对检出率不可用（协调者补注 d643bb622） |
+| 卡 103 | `tasks/win/20261120-103-live-demo-board`：卡 75 比特流上验收现场演示、前处理 4 档暗/亮对比、手机切换和 NES 手柄、默认值；程序 b3 `c8dfa90d0`，APK 1.3 | 用户 + Windows Codex | T-LIVE-* | [ ] 已下发；结果用于定稿 L5 默认档位和目标亮度 |
 
 ### 待确认事项（2026-10-31 梳理，逐项问用户）
 
