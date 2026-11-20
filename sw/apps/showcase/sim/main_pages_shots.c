@@ -101,6 +101,18 @@ static lv_obj_t *find_label(lv_obj_t *parent, const char *text)
     }
     return NULL;
 }
+/* Visible-only search: the closed drawer also lists class names. */
+static lv_obj_t *find_shown_label(lv_obj_t *parent, const char *text)
+{
+    if(lv_obj_is_hidden(parent)) return NULL;
+    if(lv_obj_check_type(parent,&lv_label_class) &&
+       !lv_strcmp(lv_label_get_text(parent),text)) return parent;
+    for(unsigned i=0;i<lv_obj_get_child_count(parent);++i) {
+        lv_obj_t *found=find_shown_label(lv_obj_get_child(parent,(int)i),text);
+        if(found) return found;
+    }
+    return NULL;
+}
 static lv_obj_t *find_type(lv_obj_t *parent,const lv_obj_class_t *type)
 {
     if(lv_obj_check_type(parent,type)) return parent;
@@ -148,7 +160,7 @@ static void interactions(void)
     capture("vision-categories");
     const char *classes[]={"卡车","汽车","公交车","自行车","行人"};
     for(unsigned i=0;i<5;++i) {
-        lv_obj_t *category=find_label(lv_screen_active(),classes[i]); assert(category);
+        lv_obj_t *category=find_shown_label(lv_screen_active(),classes[i]); assert(category);
         lv_area_t area; lv_obj_get_coords(category,&area); assert(area.y2<680);
     }
     sim_data_many_categories(false);
@@ -223,7 +235,7 @@ int main(int argc, char **argv)
     interactions();
     ui_open(2); sim_data_image_status(UI_IMAGE_DETECTING); capture("image-loading");
     ui_open(7); ui_activate(0); capture("chip-running");
-    ui_open(10); ui_hand_toggle(); capture("hand-debug"); measure("hand-debug");
+    ui_open(10); capture("hand-debug"); measure("hand-debug");
     ui_open(11); capture("face-debug"); measure("face-debug");
     demo.count=2; demo.head=1; demo.helmet=1;
     demo.objects[0].category="安全帽";
