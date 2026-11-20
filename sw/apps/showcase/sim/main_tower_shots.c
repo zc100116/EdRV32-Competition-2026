@@ -143,6 +143,13 @@ int main(int argc, char **argv)
     publish();
     tower_snapshot keyshot;
     assert(game_loop_read(&keyshot) && keyshot.bodies == 7);
+    lv_obj_t *modes = find_modes(lv_screen_active());
+    assert(modes && ui_grab.mode == 2); /* Grab lab opens in mode C (fist/grip). */
+    /* opening_transition exercises mode A's pinch hysteresis. */
+    lv_buttonmatrix_set_selected_button(modes,0);
+    lv_buttonmatrix_set_button_ctrl(modes,0,LV_BUTTONMATRIX_CTRL_CHECKED);
+    lv_obj_send_event(modes,LV_EVENT_VALUE_CHANGED,NULL);
+    assert(ui_grab.mode == 0);
     opening_transition();
     game_loop_stop();
     tower_init(&fixture,42);

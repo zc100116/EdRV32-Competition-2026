@@ -338,7 +338,7 @@ void ui_page_tower(lv_obj_t *p)
 {
     grab_init(&ui_grab);
     ui_settings_apply_grab();
-    selected_mode = ui_grab.mode = 0;
+    selected_mode = ui_grab.mode = 2;  // fist/grip grab by default (user 2026-11-20)
     closed = false;
     tower_init(&state,42);
     tower_snapshot_copy(&state,&shown);
@@ -349,7 +349,7 @@ void ui_page_tower(lv_obj_t *p)
     lv_obj_t *selector = ui_segment(header,modes,selected_mode);
     lv_obj_set_size(selector,220,40);
     lv_obj_add_event_cb(selector,mode_changed,LV_EVENT_VALUE_CHANGED,NULL);
-    mode_text = ui_text_label(header,"A 捏合",&sim_font_14,MUTED);
+    mode_text = ui_text_label(header,"C 手势分类",&sim_font_14,MUTED);
     ui_text_label(header,"点赞：掉落 · 剪刀手：旋转",&sim_font_14,MUTED);
     frame = ui_box(lv_screen_active(),0,0,1280,720,0);
     lv_obj_set_clickable(frame,false);
