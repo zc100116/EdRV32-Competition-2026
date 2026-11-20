@@ -88,6 +88,7 @@ class UiMirrorTest(unittest.TestCase):
         self.engine.board.board_state.update(demo_scene=11, preset=255)
         panel = DemoPanel(self.engine)
         self.addCleanup(panel.close)
+        self.assertEqual(panel.address.text(), '192.168.43.1')
         self.assertIn('自定义', panel.status.text())
         self.assertIn('11/11', panel.status.text())
         with patch.object(self.eth.showcase, 'ui_act') as act:
@@ -115,6 +116,7 @@ class UiMirrorTest(unittest.TestCase):
             ui_item(3, 2, -1, 5, -5, 1, '反向范围')))
         panel = DemoPanel(self.engine)
         self.addCleanup(panel.close)
+        self.assertEqual(panel.address.text(), '192.168.43.1')
         choices = panel.mirror.findChildren(QComboBox)
         self.assertEqual([control.currentIndex() for control in choices], [-1, -1])
         self.assertEqual([control.placeholderText() for control in choices], ['未选', '未选'])

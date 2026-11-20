@@ -60,7 +60,7 @@ class DemoPanel(QWidget):
         controls_layout.addWidget(presets)
         phone = QGroupBox('手机中继 · TCP 47633')
         row = QHBoxLayout(phone)
-        self.address = QLineEdit()
+        self.address = QLineEdit('192.168.43.1')
         self.address.setPlaceholderText('手机遥控界面顶部的热点地址')
         row.addWidget(self.address)
         connect = QPushButton('连接手机')
