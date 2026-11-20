@@ -30,7 +30,7 @@ static int between(const uint8_t *p, int low, int high, int signed_value)
 }
 static unsigned validate(unsigned type, const uint8_t *p, unsigned n)
 {
-    static const unsigned lengths[] = {0, 0, 0, 0, 4, 0, 24, 16, 0};
+    static const unsigned lengths[] = {0, 0, 0, 0, 4, 0, 24, 16, 0, 4};
     if (type != 5 && n != lengths[type]) return 1;
     if (type == 4) {
         if (p[0] > 12 || p[1] > 3 || (p[0] != 5 && record_u16(p + 2))) return 2;
@@ -52,6 +52,9 @@ static unsigned validate(unsigned type, const uint8_t *p, unsigned n)
         if (p[0] < 25 || p[0] > 90 || p[1] || p[2] || p[3] ||
             record_u32(p+12) & 0xffff0000u) return 2;
     }
+    if (type == 9 && (p[0] > 4 || p[2] || p[3] ||
+        (p[0] == 0 ? p[1] < 1 || p[1] > 10 : p[0] == 3 ? p[1] > 3 : p[1] != 0)))
+        return 2;
     return 0;
 }
 void edsc_cancel(struct edsc *s)
@@ -64,7 +67,7 @@ void edsc_cancel(struct edsc *s)
 void edsc_message(struct edsc *s, const uint8_t *d, unsigned bytes)
 {
     if (bytes == 1 && d[0] == 0) {
-        uint8_t p[76] = {3};
+        uint8_t p[76] = {4};
         if (s->build) memcpy(p + 4, s->build, strlen(s->build) < 16 ? strlen(s->build) : 16);
         s->ops.state(p + 20); s->peer = 1; s->seq = 0;
         reply(s, 0x84, p, sizeof p); return;
@@ -96,17 +99,17 @@ void edsc_message(struct edsc *s, const uint8_t *d, unsigned bytes)
             uint8_t ready[4] = {(uint8_t)kind}; reply(s, 0x81, ready, 4);
         }
     } else if (type == 3 && n <= 1000) reply(s, 0x83, p, n);
-    else if (type >= 4 && type <= 8) {
+    else if (type >= 4 && type <= 9) {
         unsigned error = validate(type, p, n);
         if (error) { ack(s, type, 3, error); return; }
         if (type == 8) {
             uint32_t seq = s->seq; edsc_cancel(s); s->seq = seq;
             ack(s, type, 2, 0); return;
         }
-        if (type == 4) ack(s, type, 1, 0);
+        if (type == 4 || type == 9) ack(s, type, 1, 0);
         unsigned result = s->ops.command(type, p, n, s->seq);
         if (result == EDSC_PENDING) {
-            unsigned slot = type == 4 ? 0 : type == 6 ? 1 : 2;
+            unsigned slot = type == 4 ? 0 : type == 6 ? 1 : type == 7 ? 2 : 3;
             s->pending[slot] = type; s->pending_seq[slot] = s->seq;
         } else {
             if (type == 5 && !result) s->image_info = 1;
@@ -130,7 +133,7 @@ void edsc_bulk(struct edsc *s, uint32_t bytes)
 }
 void edsc_poll(struct edsc *s, uint64_t now, uint32_t hz)
 {
-    for (unsigned i = 0; i < 3; ++i) if (s->pending[i]) {
+    for (unsigned i = 0; i < 4; ++i) if (s->pending[i]) {
         unsigned result = s->ops.progress(s->pending[i]);
         if (result != EDSC_PENDING) {
             s->seq = s->pending_seq[i]; ack(s, s->pending[i], result ? 3 : 2, result);

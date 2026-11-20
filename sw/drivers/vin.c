@@ -85,3 +85,11 @@ void vin_surface_base(unsigned int channel, unsigned int slot, uint32_t address)
 {
     mmio_write32(EDRV32_VIN_BASE + EDRV32_VIN_CH_SURF_BASE_OFFSET(channel, slot), address);
 }
+
+/* VIN 4.3: change only source selection; ring ownership and enables are retained. */
+void vin_channel_source(unsigned int channel, enum vin_source source)
+{
+    uintptr_t address = EDRV32_VIN_BASE + EDRV32_VIN_CH_CTRL_OFFSET(channel);
+    uint32_t control = mmio_read32(address) & ~EDRV32_VIN_CH_CTRL_SRC_MASK;
+    mmio_write32(address, control | ((uint32_t)source << EDRV32_VIN_CH_CTRL_SRC_POS));
+}

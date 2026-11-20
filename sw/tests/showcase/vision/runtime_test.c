@@ -94,6 +94,11 @@ void showcase_rnd_run(const struct rnd_batch *batch)
 { (void)batch; assert(0); }
 void engine_dma_invalidate(uintptr_t address, uint32_t bytes)
 {
+    if (bytes == VISION_STRIDE) {
+        assert(address >= EDRV32_DDR_BASE+VISION_IMAGE_BASE &&
+               address < EDRV32_DDR_BASE+VISION_IMAGE_BASE+6*VISION_IMAGE_SPACING);
+        return;
+    }
     if (bytes == VISION_POSE_OUTPUT_BYTES || bytes == VISION_FACE_OUTPUT_BYTES) {
         assert(address == EDRV32_DDR_BASE + VISION_OUTPUT_BASE ||
                address == EDRV32_DDR_BASE + VISION_OUTPUT_BASE + VISION_OUTPUT_SPACING);
@@ -191,6 +196,9 @@ void vin_channel_configure(unsigned channel, const struct vin_channel *c)
 }
 void vin_channel_enable(unsigned channel, unsigned enabled)
 { assert(channel == 0 || channel == 2); assert(!enabled); }
+void vin_channel_source(unsigned channel, enum vin_source source) { sources[channel] = source; }
+uint32_t vin_memory_status(void) { return 0; }
+uint32_t vin_write_status(unsigned channel) { (void)channel; return 0; }
 void vin_slots_busy(unsigned channel, uint32_t slots) { busy[channel] = slots; }
 void vin_surface_base(unsigned channel, unsigned slot, uint32_t address)
 {
@@ -1047,6 +1055,46 @@ static void matrix_test(void)
     assert(gamma[0] == 0 && gamma[255] == 255 && gamma[128] > 128);
     puts("PASS centered GEO inverse matrices, scale bounds, mirrors and gamma extremes");
 }
+static void preprocessing_test(void)
+{
+    hardware |= APP_HW_PIX | APP_HW_GEO;
+    ui_data_preprocess_set(1);
+    assert(!ui_data_preprocess_applied());
+    vision_app_camera.enter(); drain();
+    assert(sources[2] == VIN_MEMORY);
+    assert(last_pix.flags == EDRV32_PIX_CFG_BC_EN_MASK && last_pix.contrast == 256);
+    unsigned before = memory_starts, runs = npu_runs;
+    frames[0] = (struct vin_frame){0,2000};
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_FRAME_MASK); vision_service();
+    assert(memory_starts == before+1 && memory_base == VISION_IMAGE_BASE);
+    assert(ui_data_preprocess_applied());
+    frames[0] = (struct vin_frame){1u << EDRV32_VIN_CH_DONE_INFO_SLOT_POS,2001};
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_FRAME_MASK); vision_service();
+    assert(memory_starts == before+1); /* Busy MSRC/CH2 skips instead of queueing. */
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_DONE_MASK);
+    assert_retained(VISION_IMAGE_BASE); /* CH2 pairing still owns the input image. */
+    frames[2] = (struct vin_frame){0,7}; /* MSRC has its own unrelated frame counter. */
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
+    assert(npu_runs == runs+1 && last_input == VISION_INPUT_BASE);
+    event(ENGINE_NPU,EDRV32_NPU_IRQ_STAT_DONE_MASK); drain();
+    ui_data_preprocess_set(0);
+    assert(!ui_data_preprocess_applied());
+    frames[0] = (struct vin_frame){2u << EDRV32_VIN_CH_DONE_INFO_SLOT_POS,2002};
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_FRAME_MASK); vision_service();
+    assert(!ui_data_preprocess_applied()); /* This frame was already using preset 1. */
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_DONE_MASK);
+    frames[2] = (struct vin_frame){1u << EDRV32_VIN_CH_DONE_INFO_SLOT_POS,8};
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
+    event(ENGINE_NPU,EDRV32_NPU_IRQ_STAT_DONE_MASK); drain();
+    assert(sources[2] == VIN_CAM0);
+    frames[0] = (struct vin_frame){3u << EDRV32_VIN_CH_DONE_INFO_SLOT_POS,2003};
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_FRAME_MASK); vision_service();
+    assert(ui_data_preprocess_applied() && ui_data_preprocess().luma == 0);
+    vision_app_camera.exit(); display_frame(); display_frame(); drain();
+    display_frame(); display_frame();
+    assert(vision_ready(UI_STATE_IDLE));
+    puts("PASS preprocessing: MSRC busy skip, retained surface, CH2 frame pairing and frame ACK");
+}
 #ifndef NETWORK_INTEGRATION
 int main(void)
 {
@@ -1054,6 +1102,9 @@ int main(void)
                 PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
            != MAP_FAILED);
     assert(mmap((void *)(uintptr_t)EDRV32_VIN_BASE, 4096,
+                PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
+           != MAP_FAILED);
+    assert(mmap((void *)(uintptr_t)(EDRV32_DDR_BASE+VISION_IMAGE_BASE), 0x00c00000,
                 PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
            != MAP_FAILED);
     matrix_test();
@@ -1088,6 +1139,7 @@ int main(void)
     sync_stop_pending_test();
     even_pace_test();
     sync_timing_test();
+    preprocessing_test();
     assert(invalidates >= 3);
     return 0;
 }

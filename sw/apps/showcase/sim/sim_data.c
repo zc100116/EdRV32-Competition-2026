@@ -321,3 +321,10 @@ void ui_data_exposure_toggle(void)
     ui_data_grab_output(short_exposure ? "camera exposure=short\r\n" :
                                        "camera exposure=std\r\n");
 }
+
+/* Live demo L4 simulation snapshot uses the same initial preset as the board. */
+#include "../board/vision/preprocess.h"
+static ui_preprocess_t preprocessing = {SHOWCASE_DEFAULT_PRESET,62,461};
+ui_preprocess_t ui_data_preprocess(void) { return preprocessing; }
+void ui_data_preprocess_set(unsigned preset) { preprocessing.preset = preset; }
+bool ui_data_preprocess_applied(void) { return true; }

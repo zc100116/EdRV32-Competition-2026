@@ -2,6 +2,7 @@
  * One group per active page; 2 Hz counters and 1 Hz monitoring curves.
  */
 #include "widgets.h"
+#include "live_demo.h"
 #include "detection.h"
 #include "farm.h"
 #include "renderer.h"
@@ -83,6 +84,7 @@ static lv_key_t remap(lv_indev_t *input,lv_key_t key)
     if(interface_hidden && lv_indev_get_state(input)==LV_INDEV_STATE_PRESSED) {
         ui_restore_interface(); lv_indev_wait_release(input); return 0;
     }
+    if(ui_live_scene() && key==LV_KEY_ESC) return (lv_key_t)KEY_BACK;
     if(input && ui_page==17 && ui_workshop_key(key)) return 0;
     if(input && ui_page==18 && ui_tower_keypad(input,key)) return 0;
     lv_obj_t *o=lv_group_get_focused(group);
@@ -154,7 +156,7 @@ void ui_refresh(void)
     ui_text(status, s);
     ui_session_t session=ui_data_session();
     if(game_active && session.app==UI_APP_GAME && session.state==UI_STATE_IDLE) {
-        game_active=false; ui_open(5); return;
+        game_active=false; if(!ui_live_back()) ui_open(5); return;
     }
     bool show=session.app!=UI_APP_NONE && (session.state==UI_STATE_STARTING ||
         session.state==UI_STATE_STOPPING || session.state==UI_STATE_FAILED);
@@ -162,7 +164,9 @@ void ui_refresh(void)
     lv_obj_set_hidden(retry,session.state!=UI_STATE_FAILED);
     if(show) ui_text(session_text,session.state==UI_STATE_FAILED ? session.error :
         session.state==UI_STATE_STARTING ? "正在启动" : "正在停止");
+    ui_preprocess_refresh();
     switch(ui_page) {
+        case LIVE_DEMO_PAGE: ui_live_refresh(); break;
         case 1: if(!ui_detection_settings) ui_vision_update(false); break;
         case 2: if(!ui_detection_settings) ui_vision_update(true); break;
         case FARM_PAGE: ui_farm_update(); break;
@@ -194,7 +198,7 @@ void ui_open(unsigned page)
             UI_APP_PROCESS,UI_APP_GRAPHICS,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,
             UI_APP_POSE, UI_APP_HAND, UI_APP_FACE, UI_APP_NONE, UI_APP_HELMET,
             UI_APP_GRAB, UI_APP_GRAB, UI_APP_NONE, UI_APP_GRAB, UI_APP_GRAB,
-            UI_APP_CAMERA, UI_APP_GRAB};
+            UI_APP_CAMERA, UI_APP_GRAB, UI_APP_NONE};
         if(apps[old_page]!=UI_APP_NONE || game_active ||
            ui_data_session().app==UI_APP_COREMARK) ui_data_app_open(UI_APP_NONE,0);
         game_active=false;
@@ -228,7 +232,7 @@ void ui_open(unsigned page)
     const char *names[] = {"首页", "目标检测计数", "图片识别", "图像处理", "图形引擎",
         "经典游戏", "系统监控", "芯片信息", "调试助手", "人体姿态", "手势识别",
         "人脸贴纸", "", "安全帽检测", "抓取测试", "体感互动", "设置", "方块工坊",
-        "抓取实验", "智慧农场", "空中画板"};
+        "抓取实验", "智慧农场", "空中画板", "演示目录"};
     ui_text_label(top,names[page],&sim_font_16,TEXT);
     status = ui_text_label(top,"",&sim_font_14,MUTED);
     lv_obj_set_flex_grow(status,1);
@@ -251,13 +255,19 @@ void ui_open(unsigned page)
         ui_page_process, ui_page_graphics, ui_page_games, NULL,
         ui_page_chip, ui_page_debug, ui_page_pose, ui_page_hand,
         ui_page_face, NULL, ui_page_helmet, ui_page_grab, ui_page_motion,
-        ui_page_settings, ui_page_workshop, ui_page_tower, ui_page_farm, ui_page_draw};
+        ui_page_settings, ui_page_workshop, ui_page_tower, ui_page_farm, ui_page_draw, ui_live_directory};
     if(page==5) ui_data_games(&game_count);
     bool compact=(page>=1 && page<=3) || (page>=9 && page<=13) || page==15 ||
         page==17 || page==18 || page==FARM_PAGE || page==DRAW_PAGE;
     if(compact) {
         lv_obj_set_hidden(top,true); lv_obj_set_hidden(bottom,true);
         lv_obj_set_size(content,1280,720); lv_obj_set_pos(content,0,0);
+    }
+    if(ui_live_scene() >= 1 && ui_live_scene() <= 10) {
+        /* Reserve a full-width strip above the existing page without duplicating it. */
+        lv_obj_set_pos(content,0,compact ? 32 : 80);
+        lv_obj_set_height(content,compact ? 688 : 600);
+        if(!compact) lv_obj_set_y(top,32);
     }
     if(ui_detection_settings) ui_page_detection_settings(content);
     else pages[page](content);
@@ -268,7 +278,7 @@ void ui_open(unsigned page)
     ui_button(session_box,"重试",24,102,160,1002);
     retry=lv_obj_get_child(session_box,-1);
     lv_obj_set_hidden(session_box,true);
-    if(page!=0 && page!=MOTION_PAGE && (page!=5 || !game_active))
+    if(page!=0 && page!=LIVE_DEMO_PAGE && page!=MOTION_PAGE && (page!=5 || !game_active))
         lv_group_focus_obj(lv_group_get_obj_by_index(group,2));
     if(page == 0) ui_home_focus();
     if(page == MOTION_PAGE && !ui_motion.waiting)
@@ -288,6 +298,7 @@ void ui_open(unsigned page)
         lv_obj_add_event_cb(restore_surface,restore_pressed,LV_EVENT_PRESSED,NULL);
         lv_obj_set_hidden(restore_surface,true);
     }
+    if(ui_live_scene() >= 1 && ui_live_scene() <= 10) ui_live_banner(screen);
     ui_monitor_controls();
     ui_refresh();
 }
@@ -297,13 +308,17 @@ static void activate(unsigned action)
     if(action==1000) { ui_back(); return; }
     if(action==1001) { ui_monitor_toggle(); return; }
     if(action==1003) { ui_monitor_corner(); return; }
-    if(action==1004) { ui_data_benchmark_stop(); return; }
+    if(action==1004) {
+        if(ui_live_scene()) ui_back(); else ui_data_benchmark_stop();
+        return;
+    }
     if(action==1002) { ui_data_app_retry(); ui_refresh(); return; }
     if(ui_page == 0) {
         ui_tab = 0;
         ui_mode = 0;
         game_focus = 0;
-        if(action==6) ui_monitor_toggle();
+        if(action==LIVE_DEMO_PAGE) ui_live_command(4,0);
+        else if(action==6) ui_monitor_toggle();
         else if(action>=101 && action<=105) {
             ui_motion_entry = action-100;
             ui_open(MOTION_PAGE);
@@ -360,6 +375,7 @@ void ui_activate(unsigned action) { activate(action); }
 void ui_key(uint32_t key)
 {
     if(ui_restore_interface()) return;
+    if(ui_live_scene() && key==LV_KEY_ESC) { ui_back(); return; }
     if(ui_page==17 && ui_workshop_key(key)) return;
     if(ui_page==18 && ui_tower_key(key)) return;
     key=remap(NULL,key);
@@ -393,6 +409,7 @@ void ui_back(void)
         lv_group_set_editing(group,false); return;
     }
     if(ui_camera_drawer_close()) return;
+    if(ui_live_back()) return;
     if(ui_page == MOTION_PAGE || ui_page == 17 || ui_page == DRAW_PAGE) {
         ui_home_select_tab(1); ui_open(0); return;
     }

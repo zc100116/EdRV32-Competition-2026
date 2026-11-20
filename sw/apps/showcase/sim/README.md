@@ -41,3 +41,9 @@ P5 截图程序使用真实 LVGL keypad 的 NEXT / PREV / ENTER / ESC，遍历�
 处理预览遵循 enabled 位，逐项默认保留启用状态，全部默认清除全部启用位。
 截图还包含 process-stage-off、process-editing、image-*、keyboard-focus、mouse-hover
 及 session-failed / session-starting / session-stopping。
+
+现场演示截图和导航断言：`make -C sw/apps/showcase/sim -j1 live-shots`。
+输出 `outputs/live-demo/{home,directory,helmet-banner,preset-drawer}.png`，不入库。
+目录共五章十场景，复用原有场景页；横幅、返回目录、下一场景聚焦、远程
+上一/下一场景回绕、抽屉优先关闭和自定义 ESC 都在该入口验证。
+识别前处理的数值、协议边界和 STATE 编码运行 `make -C sw/tests/showcase live`。

@@ -383,7 +383,7 @@ void platform_init(void)
     const enum engine_id engines[]={ENGINE_VIN,ENGINE_NPU,ENGINE_PIX,ENGINE_GEO};
     const unsigned bits[]={APP_HW_VIN,APP_HW_NPU,APP_HW_PIX,APP_HW_GEO};
     const uint32_t masks[]={EDRV32_VIN_IRQ_EN_ERROR_MASK|EDRV32_VIN_IRQ_EN_FRAME_MASK|
-        EDRV32_VIN_IRQ_EN_CH2_FRAME_MASK,EDRV32_NPU_IRQ_EN_ERROR_MASK|EDRV32_NPU_IRQ_EN_DONE_MASK,
+        EDRV32_VIN_IRQ_EN_CH2_FRAME_MASK|EDRV32_VIN_IRQ_EN_DONE_MASK,EDRV32_NPU_IRQ_EN_ERROR_MASK|EDRV32_NPU_IRQ_EN_DONE_MASK,
         EDRV32_PIX_IRQ_EN_ERROR_MASK,EDRV32_GEO_IRQ_EN_ERROR_MASK|EDRV32_GEO_IRQ_EN_DONE_MASK};
     for(unsigned i=0;i<4;++i) if(hardware&bits[i])
         engine_irq_register(engines[i],masks[i],1,vision_event,(void *)(uintptr_t)engines[i]);

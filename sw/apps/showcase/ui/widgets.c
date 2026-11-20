@@ -3,6 +3,7 @@
  * Dynamic widgets deliberately use opaque fills without shadows or blur.
  */
 #include "widgets.h"
+#include "live_demo.h"
 /* R4 explicitly requires lv_menu, deprecated in the locked LVGL 9.6 API. */
 LV_DEPRECATIONS_IGNORE_BEGIN
 static void action(lv_event_t *event)
@@ -80,7 +81,7 @@ lv_obj_t *ui_scene_card(lv_obj_t *parent, const lv_image_dsc_t *art,
     lv_obj_set_style_bg_color(o,lv_color_hex(SELECTED),0);
     lv_obj_t *copy = ui_stack(o,LV_FLEX_FLOW_COLUMN,UI_SPACE_SM);
     lv_obj_set_width(copy,LV_PCT(57));
-    lv_obj_t *label = ui_emphasis(copy,title,false);
+    lv_obj_t *label = ui_text_label(copy,title,&sim_font_40,TEXT);
     lv_obj_set_width(label,LV_PCT(100));
     label = ui_text_label(copy,description,&sim_font_16,MUTED);
     lv_obj_set_width(label,LV_PCT(100));
@@ -345,7 +346,7 @@ lv_obj_t *ui_camera_card(lv_obj_t *parent)
 {
     lv_obj_t *card=ui_panel(parent,224);
     lv_obj_set_ignore_layout(card,true);
-    lv_obj_set_pos(card,12,60);
+    lv_obj_set_pos(card,12,ui_page!=2 && ui_page!=3 ? 88 : 60);
     lv_obj_set_style_pad_all(card,8,0);
     lv_obj_set_style_pad_gap(card,4,0);
     return card;
@@ -381,7 +382,8 @@ lv_obj_t *ui_camera_drawer(lv_obj_t *parent,lv_obj_t *header,const char *name)
     camera_drawer=ui_panel(parent,320);
     lv_obj_set_ignore_layout(camera_drawer,true);
     lv_obj_set_pos(camera_drawer,960,48);
-    lv_obj_set_height(camera_drawer,672);
+    lv_obj_set_height(camera_drawer,
+        ui_live_scene()>=1 && ui_live_scene()<=10 ? 640 : 672);
     lv_obj_set_style_radius(camera_drawer,0,0);
     lv_obj_set_style_pad_all(camera_drawer,12,0);
     lv_obj_set_scrollable(camera_drawer,true);
@@ -393,15 +395,18 @@ lv_obj_t *ui_camera_drawer(lv_obj_t *parent,lv_obj_t *header,const char *name)
     drawer_button=ui_action_button(header,name,0);
     lv_obj_remove_event_cb(drawer_button,action);
     lv_obj_add_event_cb(drawer_button,drawer_toggle_event,LV_EVENT_CLICKED,NULL);
+    if(ui_page!=2 && ui_page!=3) ui_preset_controls(camera_drawer);
     return camera_drawer;
 }
 
 lv_obj_t *ui_camera_layout(lv_obj_t *parent,const char *title)
 {
+    camera_drawer=NULL;
     lv_obj_set_flex_flow(parent,LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_all(parent,0,0);
     lv_obj_set_style_pad_gap(parent,0,0);
     lv_obj_set_style_bg_opa(lv_obj_get_parent(parent),LV_OPA_TRANSP,0);
+    if(ui_page!=2 && ui_page!=3) ui_preprocess_tag(parent);
     lv_obj_t *header=ui_stack(parent,LV_FLEX_FLOW_ROW,16);
     lv_obj_set_size(header,1280,48);
     lv_obj_set_style_pad_hor(header,12,0);

@@ -213,3 +213,13 @@ $(BUILD)/showcase_farm_bench: main_farm_bench.c $(COMMON) $(FARM_PAGE_SOURCE) $(
 	    -Wl,--wrap=lv_obj_invalidate,--wrap=lv_obj_invalidate_area,--wrap=lv_label_set_text \
 	    -Wl,--wrap=lv_obj_set_style_bg_color,--wrap=lv_obj_class_create_obj \
 	    -Wl,--wrap=lv_obj_delete,--wrap=farm_frame,--wrap=ui_data_vision -o $@
+
+LIVE_OUTPUT ?= $(ROOT)/outputs/live-demo
+.PHONY: live-shots
+live-shots: $(BUILD)/showcase_live_shots
+	mkdir -p $(LIVE_OUTPUT)
+	$(BUILD)/showcase_live_shots $(LIVE_OUTPUT)
+	$(foreach name,home directory helmet-banner preset-drawer,python3 $(ROOT)/tools/sw/raw2png.py $(LIVE_OUTPUT)/$(name).rgb565 $(LIVE_OUTPUT)/$(name).png;)
+	rm $(LIVE_OUTPUT)/*.rgb565
+$(BUILD)/showcase_live_shots: main_live_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
+	$(CC) $(FLAGS) -Werror main_live_shots.c $(COMMON) $(LINUX_LV) -lm -o $@

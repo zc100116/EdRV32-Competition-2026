@@ -181,3 +181,13 @@ helmet:
 	$(CC) $(FLAGS) -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \
 	    -I$(GAME_UI) -DLV_CONF_INCLUDE_SIMPLE helmet.c $(GAME_UI)/track.c -o $(BUILD)/helmet
 	$(BUILD)/helmet
+
+# Live demo L3–L5 host acceptance.
+.PHONY: live
+live:
+	mkdir -p $(BUILD)
+	$(CC) $(FLAGS) -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \
+	    -DLV_CONF_INCLUDE_SIMPLE live.c $(ROOT)/sw/apps/showcase/board/protocol.c \
+	    $(ROOT)/sw/apps/showcase/board/records.c $(ROOT)/sw/apps/showcase/board/state.c \
+	    -o $(BUILD)/live
+	$(BUILD)/live

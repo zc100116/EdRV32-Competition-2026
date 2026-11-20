@@ -2,6 +2,7 @@
  * GUI clock; focus follows the same card order across all four tab pages.
  */
 #include "widgets.h"
+#include "live_demo.h"
 #define ICON(name) LV_IMAGE_DECLARE(home_##name)
 ICON(detection); ICON(helmet); ICON(pose); ICON(gesture); ICON(stickers);
 ICON(image); ICON(tower); ICON(sling); ICON(rps); ICON(mole); ICON(slice); ICON(catch);
@@ -43,13 +44,13 @@ static const application_t applications[] = {
     {"设置","显示与抓取判定",&home_settings,16,0}
 };
 static const unsigned starts[] = {0,7,15,18,22};
-static lv_obj_t *tabs, *cards[24];
+static lv_obj_t *tabs, *cards[23];
 static unsigned selected_tab, selected_card;
 static void card_focused(lv_event_t *event)
 {
     selected_card = (unsigned)(uintptr_t)lv_event_get_user_data(event);
-    if (selected_card >= 2) {
-        unsigned app = selected_card-2;
+    if (selected_card >= 1) {
+        unsigned app = selected_card-1;
         for (unsigned tab = 0; tab < 4; ++tab)
             if (app >= starts[tab] && app < starts[tab+1]) {
                 selected_tab = tab;
@@ -62,12 +63,12 @@ static void tab_changed(lv_event_t *event)
 {
     (void)event;
     selected_tab = lv_tabview_get_tab_active(tabs);
-    selected_card = starts[selected_tab]+2;
+    selected_card = starts[selected_tab]+1;
 }
 void ui_home_select_tab(unsigned tab)
 {
     selected_tab = tab;
-    selected_card = starts[tab]+2;
+    selected_card = starts[tab]+1;
     if (ui_page == 0) lv_tabview_set_active(tabs,tab,LV_ANIM_OFF);
 }
 unsigned ui_home_tab(void) { return selected_tab; }
@@ -76,7 +77,7 @@ bool ui_home_key(uint32_t key)
 {
     if (key != LV_KEY_NEXT && key != LV_KEY_PREV) return false;
     int direction = key == LV_KEY_NEXT ? 1 : -1;
-    selected_card = (selected_card+24+direction)%24;
+    selected_card = (selected_card+23+direction)%23;
     lv_group_focus_obj(cards[selected_card]);
     lv_obj_add_state(cards[selected_card],LV_STATE_FOCUS_KEY);
     return true;
@@ -89,10 +90,9 @@ void ui_page_home(lv_obj_t *parent)
     lv_obj_t *scenes = ui_stack(parent,LV_FLEX_FLOW_ROW,UI_SPACE_MD);
     lv_obj_set_flex_align(scenes,LV_FLEX_ALIGN_SPACE_BETWEEN,
                           LV_FLEX_ALIGN_CENTER,LV_FLEX_ALIGN_CENTER);
-    cards[0] = ui_scene_card(scenes,&home_scene_vision,"智能视觉 · 检测计数",
-                             "看见目标，读懂现场",CAMERA,1);
-    cards[1] = ui_scene_card(scenes,&home_scene_tower,"体感积木",
-                             "手势搭房子、挖方块",MOTION,17);
+    cards[0] = ui_scene_card(scenes,&home_scene_vision,"现场演示",
+                             "五章十个场景 · 从自研芯片到体感交互",CAMERA,LIVE_DEMO_PAGE);
+    lv_obj_set_width(cards[0],LV_PCT(100));
     tabs = lv_tabview_create(parent);
     lv_obj_set_width(tabs,LV_PCT(100));
     lv_obj_set_flex_grow(tabs,1);
@@ -115,11 +115,11 @@ void ui_page_home(lv_obj_t *parent)
         lv_obj_set_style_text_color(button,lv_color_hex(ACCENT),LV_STATE_CHECKED);
         for (unsigned i = starts[tab]; i < starts[tab+1]; ++i) {
             const application_t *app = &applications[i];
-            cards[i+2] = ui_app_card(page,app->icon,app->name,app->description,
+            cards[i+1] = ui_app_card(page,app->icon,app->name,app->description,
                                      app->hardware,app->action);
         }
     }
-    for (unsigned i = 0; i < 24; ++i)
+    for (unsigned i = 0; i < 23; ++i)
         lv_obj_add_event_cb(cards[i],card_focused,LV_EVENT_FOCUSED,(void *)(uintptr_t)i);
     lv_tabview_set_active(tabs,selected_tab,LV_ANIM_OFF);
     lv_obj_add_event_cb(tabs,tab_changed,LV_EVENT_VALUE_CHANGED,NULL);

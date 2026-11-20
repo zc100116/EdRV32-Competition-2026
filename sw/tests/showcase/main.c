@@ -33,7 +33,7 @@ int main(int argc,char **argv)
 {
     struct edsc s={.ops={reserve,complete,reply,state,command,progress,cancel},.build="abc123"};
     uint8_t connect=0; edsc_message(&s,&connect,1);
-    assert(response[4]==0x84 && response_bytes==88 && record_u16(response+12)==3);
+    assert(response[4]==0x84 && response_bytes==88 && record_u16(response+12)==4);
     assert(!memcmp(response+16,"abc123",6) && response[32]==2 && response[33]==2);
     edsc_poll(&s,100,100); assert(response[4]==0x85 && response_bytes==68);
     assert(!memcmp(response+12,current,56));

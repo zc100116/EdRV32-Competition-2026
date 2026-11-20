@@ -63,6 +63,10 @@ typedef struct {
     unsigned echo_count, echo_replies;
     bool hex, link;
 } ui_debug_t;
+typedef struct { unsigned preset, luma, gain_q8; } ui_preprocess_t;
+ui_preprocess_t ui_data_preprocess(void);
+void ui_data_preprocess_set(unsigned preset);
+bool ui_data_preprocess_applied(void);
 /* Return the modules available to this hardware configuration. */
 unsigned ui_data_hardware(void);
 /* Return status, task occupancy and seven DDR port counters. */

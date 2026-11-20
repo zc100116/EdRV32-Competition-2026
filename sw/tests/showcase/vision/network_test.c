@@ -17,6 +17,11 @@ ui_app_t board_session_target(void) { return UI_APP_IMAGE; }
 void ui_data_app_open(ui_app_t app, unsigned arg) { (void)app; (void)arg; }
 void ui_data_app_retry(void) {}
 void ui_data_app_pause(bool paused) { vision_pause(paused); }
+unsigned ui_data_hardware(void) { return UI_PIX | UI_VIN | UI_NPU; }
+void ui_live_exit(void) {}
+void ui_refresh(void) {}
+unsigned ui_live_scene(void) { return 0; }
+void ui_live_command(unsigned action,unsigned arg) { (void)action; (void)arg; }
 void ui_show_app(ui_app_t app, unsigned arg) { (void)app; (void)arg; }
 const ui_game_t *ui_data_games(unsigned *count) { *count=0; return NULL; }
 uint32_t board_game_destination(void) { return 0; }
@@ -132,7 +137,7 @@ int main(void)
     assert(mmap((void *)(uintptr_t)EDRV32_VIN_BASE,4096,PROT_READ|PROT_WRITE,
         MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED,-1,0)!=MAP_FAILED);
     /* Keep runtime fixture helpers available without executing its standalone suite. */
-    (void)camera_test; (void)parallel_test; (void)interrupt_restart_test;
+    (void)preprocessing_test; (void)camera_test; (void)parallel_test; (void)interrupt_restart_test;
     (void)image_test; (void)cancel_test;
     (void)process_test; (void)model_test; (void)matrix_test;
     (void)pose_test; (void)hand_test; (void)grab_test; (void)demos_test;

@@ -22,6 +22,8 @@ struct vin_frame {
 void vin_camera_size(unsigned int camera, unsigned int width, unsigned int height);
 /* VIN 4.3: configure bases/stride/ownership before enabling the selected channel. */
 void vin_channel_configure(unsigned int channel, const struct vin_channel *config);
+/* VIN 4.3: change source at SOF while preserving ring configuration and ownership. */
+void vin_channel_source(unsigned int channel, enum vin_source source);
 /* VIN 4.3, 5.2: enable/disable one channel, retaining its source and ring settings. */
 void vin_channel_enable(unsigned int channel, unsigned int enabled);
 /* VIN 4.3: write the complete ownership bitmap; caller serializes IRQ/main updates. */

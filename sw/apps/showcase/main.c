@@ -8,6 +8,7 @@
 #include "apps.h"
 #include "lvgl/showcase_lvgl.h"
 #include "ui/theme.h"
+#include "ui/live_demo.h"
 #include "board/session.h"
 #include "board/games.h"
 #include "board/vision_hooks.h"
@@ -154,8 +155,9 @@ static void application_step(struct sched_task *task)
 {
     step_events = sched_take(task);
     showcase_input_dispatch();
-    if (ui_data_benchmark_running() && (platform_pressed() & PLATFORM_BACK))
-        ui_data_benchmark_stop();
+    if (ui_data_benchmark_running() && (platform_pressed() & PLATFORM_BACK)) {
+        if (ui_live_scene()) ui_back(); else ui_data_benchmark_stop();
+    }
     if (vision_service()) app_wake_at(platform_ticks());
     session_step(&media);
     board_games_step(); board_step();

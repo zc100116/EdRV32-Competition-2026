@@ -9,6 +9,7 @@
 #include "model.h"
 #include "wire.h"
 #include "post.h"
+#include "preprocess.h"
 #include "pose.h"
 #include <math.h>
 #include "disp.h"
@@ -39,7 +40,8 @@ static grab_state_t motion_cursor;
 
 enum { REF_PAIR = 1, REF_JOB = 2, REF_READY = 4, REF_DISPLAY = 8,
        REF_NPU = 16, REF_GEO = 32, REF_RESULT = 64, REF_TAKEN = 128,
-       REF_CAPTURE = 256, REF_FRAME = 512 };
+       REF_CAPTURE = 256, REF_FRAME = 512, REF_MSRC = 1024, REF_LUMA = 2048,
+       REF_LOOP = 4096 };
 enum { PAGE_NONE, PAGE_CAMERA, PAGE_IMAGE, PAGE_PROCESS, PAGE_POSE, PAGE_HAND,
        PAGE_FACE, PAGE_HELMET, PAGE_GRAB, PAGE_COUNT };
 enum { JOB_IDLE, JOB_CH2, JOB_NPU, JOB_POST, JOB_SEND, JOB_TX };
@@ -156,6 +158,30 @@ static bool live_page(void)
 {
     return v.page == PAGE_CAMERA || v.page >= PAGE_POSE;
 }
+static struct {
+    unsigned preset, shadow, active, gain, luma, frames;
+    uint32_t revision, shadow_revision, applied_revision;
+    int msrc_image, loop_image;
+    uint32_t loop_frame;
+    uint64_t loop_tick;
+} prep = {.preset = SHOWCASE_DEFAULT_PRESET, .shadow = SHOWCASE_DEFAULT_PRESET,
+          .gain = 256, .msrc_image = -1, .loop_image = -1};
+static void preprocess_configure(void);
+ui_preprocess_t ui_data_preprocess(void)
+{
+    return (ui_preprocess_t){prep.preset, live_page() && v.capture ? prep.luma : 0,
+                            prep.gain};
+}
+void ui_data_preprocess_set(unsigned preset)
+{
+    uint32_t lock = sched_port_lock();
+    prep.preset = preset;
+    ++prep.revision;
+    app_wake_at(platform_ticks());
+    sched_port_unlock(lock);
+}
+bool ui_data_preprocess_applied(void)
+{ return prep.applied_revision == prep.revision; }
 static volatile uint32_t irq_flags[ENGINE_NPU + 1];
 static volatile uint32_t irq_errors[ENGINE_NPU + 1];
 static volatile uint64_t vin_done_tick[3];
@@ -410,6 +436,7 @@ static int free_image(unsigned first, unsigned end)
 static void initialize(void)
 {
     if (v.initialized) return;
+    if (!(platform_hardware() & APP_HW_PIX)) prep.preset = prep.shadow = 0;
     for (unsigned i = 0; i < 10; ++i) {
         v.images[i] = (lv_image_dsc_t){
             .header = {.magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565,
@@ -428,14 +455,22 @@ void vision_irq(const struct engine_event *event, void *context)
     irq_errors[engine] |= event->error;
     if (engine == ENGINE_VIN) {
         uint64_t now = platform_ticks();
+        if ((event->irq & EDRV32_VIN_IRQ_STAT_DONE_MASK) && prep.msrc_image >= 0) {
+            reference(prep.msrc_image, 0, REF_MSRC);
+            prep.msrc_image = -1;
+        }
         if (event->irq & EDRV32_VIN_IRQ_STAT_FRAME_MASK) vin_done_tick[0] = now;
         if (event->irq & EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK) vin_done_tick[2] = now;
         if (v.capture &&
             live_page() &&
             !event->error &&
             !(event->irq & EDRV32_VIN_IRQ_STAT_ERROR_MASK)) {
-            if (event->irq & EDRV32_VIN_IRQ_STAT_FRAME_MASK) camera_frame(0);
             if (event->irq & EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK) camera_frame(2);
+            if (event->irq & EDRV32_VIN_IRQ_STAT_FRAME_MASK) camera_frame(0);
+            /* Keep the old source until both the MSRC read and CH2 writes drain. */
+            if (prep.loop_image < 0 && prep.msrc_image < 0 &&
+                !(vin_write_status(2) & EDRV32_VIN_CH_WR_STAT_ACTIVE_MASK))
+                vin_channel_source(2, prep.shadow ? VIN_MEMORY : VIN_CAM0);
             camera_start();
         }
     }
@@ -782,10 +817,21 @@ static void pix_mode(void)
     v.shadow_revision = v.process_revision;
     v.process_dirty = 0;
 }
+static void preprocess_configure(void)
+{
+    bool gain = prep.preset == 1 || prep.preset == 3;
+    struct pix_config config = {gain ? EDRV32_PIX_CFG_BC_EN_MASK : 0,
+        prep.preset >= 2 ? PIX_GAUSSIAN : PIX_BYPASS, PIX_BYPASS, v.gamma_bank,
+        gain ? prep.gain : 256, gain ? (int)(prep.gain-256+1)/2 : 0, 128};
+    pix_configure(&config);
+    engine_control(ENGINE_PIX, EDRV32_PIX_CTRL_ENABLE_MASK);
+    prep.shadow = prep.preset;
+    prep.shadow_revision = prep.revision;
+}
 static void configure_capture(void)
 {
     struct vin_channel image = {VIN_CAM0, 4, VISION_STRIDE, {0}, 0};
-    struct vin_channel input = {VIN_CAM0, 3, VISION_STRIDE, {0}, 0};
+    struct vin_channel input = {prep.preset ? VIN_MEMORY : VIN_CAM0, 3, VISION_STRIDE, {0}, 0};
     v.capture_busy = 0;
     for (unsigned slot = 0; slot < 4; ++slot) {
         if (sync_page()) {
@@ -809,9 +855,7 @@ static void configure_capture(void)
         if (v.process_dirty) return;
     }
     else if (platform_hardware() & APP_HW_PIX) {
-        struct pix_config bypass = {0, PIX_BYPASS, PIX_BYPASS, v.gamma_bank, 256, 0, 128};
-        pix_configure(&bypass);
-        engine_control(ENGINE_PIX, EDRV32_PIX_CTRL_ENABLE_MASK);
+        preprocess_configure();
     }
     vin_camera_size(0, VISION_WIDTH, VISION_HEIGHT);
     vin_channel_configure(0, &image);
@@ -880,17 +924,42 @@ static void camera_frame_data(unsigned channel, int slot, struct vin_frame frame
         }
         return;
     }
-    if (channel == 0 && !sync_page()) queue_image(slot);
     if (channel == 0) {
-        reference(v.pair_image, 0, REF_PAIR);
-        v.pair_image = slot;
-        v.image_id = frame.frame_id;
-        v.image_tick = vin_done_tick[0];
-        reference(slot, REF_PAIR, 0);
+        prep.active = prep.shadow;
+        prep.applied_revision = prep.shadow_revision;
+        reference(slot, REF_LUMA, 0);
+        if (!sync_page()) queue_image(slot);
+        if (!prep.active) {
+            reference(v.pair_image, 0, REF_PAIR);
+            v.pair_image = slot;
+            v.image_id = frame.frame_id;
+            v.image_tick = vin_done_tick[0];
+            reference(slot, REF_PAIR, 0);
+        } else if (prep.loop_image < 0 && prep.msrc_image < 0 &&
+                   !(vin_memory_status() & EDRV32_VIN_MSRC_STAT_BUSY_MASK) &&
+                   v.input_busy != 7 &&
+                   !(vin_write_status(2) & EDRV32_VIN_CH_WR_STAT_ACTIVE_MASK)) {
+            prep.msrc_image = prep.loop_image = slot;
+            prep.loop_frame = frame.frame_id;
+            prep.loop_tick = vin_done_tick[0];
+            reference(slot, REF_MSRC | REF_LOOP, 0);
+            vin_memory_start(image_address((unsigned)slot), VISION_STRIDE,
+                             VISION_WIDTH, VISION_HEIGHT);
+        }
+        if (prep.shadow_revision != prep.revision) {
+            preprocess_configure();
+        }
     } else {
         if (v.pair_input >= 0) v.input_busy &= ~(1u << v.pair_input);
         v.pair_input = slot;
-        v.input_id = frame.frame_id;
+        if (prep.loop_image >= 0) {
+            reference(v.pair_image, 0, REF_PAIR);
+            v.pair_image = prep.loop_image;
+            reference(v.pair_image, REF_PAIR, REF_LOOP);
+            v.image_id = v.input_id = prep.loop_frame;
+            v.image_tick = prep.loop_tick;
+            prep.loop_image = -1;
+        } else v.input_id = frame.frame_id;
         v.input_busy |= 1u << slot;
         vin_slots_busy(2, v.input_busy);
     }
@@ -1215,6 +1284,25 @@ int vision_service(void)
         v.gamma_table[v.gamma_index] = pix_gamma_value(v.gamma_index, v.gamma_target);
         ++v.gamma_index;
     }
+    /* Surfaces remain owned while CPU samples the completed CH0 frame. */
+    for (unsigned image = 0; image < 6; ++image) {
+        uint32_t sample_lock = sched_port_lock();
+        bool sample = (v.refs[image] & REF_LUMA) != 0;
+        sched_port_unlock(sample_lock);
+        if (!sample) continue;
+        uint32_t address = EDRV32_DDR_BASE + image_address(image);
+        for (unsigned row = 0; row < 45; ++row)
+            engine_dma_invalidate(address+row*16*VISION_STRIDE, VISION_STRIDE);
+        unsigned mean = preprocess_luma((const uint16_t *)(uintptr_t)address, VISION_WIDTH);
+        sample_lock = sched_port_lock();
+        prep.luma = mean;
+        if (++prep.frames % 4 == 0 && (prep.preset == 1 || prep.preset == 3)) {
+            prep.gain = preprocess_gain(prep.gain, mean, SHOWCASE_TARGET_LUMA);
+            if (prep.shadow_revision == prep.revision) preprocess_configure();
+        }
+        reference((int)image, 0, REF_LUMA);
+        sched_port_unlock(sample_lock);
+    }
     uint32_t flags[ENGINE_NPU + 1];
     uint32_t errors[ENGINE_NPU + 1];
     uint32_t lock = sched_port_lock();
@@ -1531,6 +1619,8 @@ int vision_service(void)
             v.capture = 0;
             for (unsigned i = 0; i < 6; ++i) v.refs[i] &= ~REF_CAPTURE;
         }
+        reference(prep.loop_image, 0, REF_LOOP);
+        prep.loop_image = -1;
         pair_release(); v.capture = 0;
         if (v.state == PIPE_STOPPING) {
             if (v.display_owned) { sched_port_unlock(lock); return 1; }
