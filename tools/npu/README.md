@@ -588,3 +588,28 @@ FP32 与 INT8 均使用 640×384 letterbox；INT8 执行 `npu_ref`、硬件后�
 关键点偏差对同类 IoU≥0.5 配对框的 FP32 可见点（confidence>0.5）统计，缩放到 1280×720。
 手势混淆矩阵行是真值、列是 INT8 预测，末行/列 background 包括误检/漏检。
 完整预测与矩阵在 `build/npu/models_eval/<model>/{predictions,summary}.json`。
+
+## 手部画面边缘离线实验（T-HAND-EDGE）
+
+直接执行 `sw/apps/showcase/models/gesture/` 的板端模型/描述符/量化快照，不重新标定；
+FP 对照使用卡 83 HaGRID `best.pt`（14 类、21 点），固定随机抽取 hand-keypoints val
+中 40 张单手、21 点全可见图。
+每只手贴到独立种子抽取的 COCO val2017 背景，框长边为 120/180 px；
+中心、四边、四角完整贴边（4 px）、四边出画 25%/50%，共 1360 帧。
+整帧按 VIN 的 2×2 整数平均半缩后上下补 12 行，比较 INT8 与 FP384；
+检测采用画内真值框 IoU≥0.5，点误差以原始 1280×720 像素计，仅统计检出框的画内点。
+任一手势类别均可匹配真值框；类别一致率比较同手、同尺寸、同路径的中心预测，
+仅统计两处均检出的配对，并列出配对数。
+
+```sh
+git submodule update --init third_party/ultralytics
+export PYTHONPATH="$PWD/third_party/ultralytics"
+export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
+mkdir -p build/npu/hand_edge_eval
+flock /tmp/edrv32-sw-build.lock ~/.local/opt/edrv32-py/bin/python \
+    tools/npu/hand_edge_eval.py > build/npu/hand_edge_eval/eval.log 2>&1
+```
+
+原始预测和分组统计：`build/npu/hand_edge_eval/{predictions,summary}.json`；
+六张中心、左贴边、左出画 50% 的示例在 `outputs/hand-edge/`，均不入库。
+结论见 [实验报告](../../docs/reports/2026-11-20-hand-edge-eval.md)。
