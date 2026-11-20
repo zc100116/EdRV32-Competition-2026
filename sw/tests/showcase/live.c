@@ -22,8 +22,64 @@ static void send(struct edsc *s, unsigned action, unsigned arg, unsigned reserve
                           (uint8_t)action,(uint8_t)arg,(uint8_t)reserved,0};
     replies = 0; edsc_message(s,message,12+n);
 }
+static void input_inverse_test(void)
+{
+    const int contrasts[] = {128,256,511}, brightness[] = {-40,0,48};
+    const unsigned gammas[] = {4,10,15};
+    for (unsigned c=0;c<3;++c) for (unsigned b=0;b<3;++b)
+        for (unsigned g=0;g<3;++g) {
+            uint8_t table[256];
+            for (unsigned u=0;u<256;++u) table[u]=preprocess_gamma_value(u,gammas[g]);
+            for (unsigned u=0;u<256;++u) {
+                unsigned output = table[preprocess_bc(u,contrasts[c],brightness[b])];
+                unsigned input = preprocess_input(output,contrasts[c],brightness[b],table);
+                assert(input <= u);
+                assert(table[preprocess_bc(input,contrasts[c],brightness[b])] >= output);
+                if (input) assert(
+                    table[preprocess_bc(input-1,contrasts[c],brightness[b])] < output);
+            }
+        }
+    assert(preprocess_input(80,256,20,NULL) == 60);
+    int contrast = 256, offset = 0;
+    preprocess_levels_update(16,239,&contrast,&offset);
+    assert(contrast == 256 && offset == 0);
+}
+static void input_closed_loop_test(void)
+{
+    static uint16_t output[1280*720];
+    int contrast = 256, brightness = 0;
+    unsigned gamma = 10;
+    int history[30][3];
+    /* One fixed input image: 2% dark, 96% middle, 2% light, through real RGB565. */
+    for (unsigned iteration=0;iteration<30;++iteration) {
+        uint8_t table[256];
+        for (unsigned u=0;u<256;++u) table[u]=preprocess_gamma_value(u,gamma);
+        for (unsigned i=0;i<3600;++i) {
+            unsigned input = i<72 ? 20 : i<3528 ? 60 : 100;
+            unsigned value = table[preprocess_bc(input,contrast,brightness)];
+            output[(i/80)*16*1280+(i%80)*16] =
+                (uint16_t)(((value>>3)<<11)|((value>>2)<<5)|(value>>3));
+        }
+        struct preprocess_stats stats = preprocess_measure(output,1280);
+        stats = preprocess_input_stats(stats,contrast,brightness,table);
+        preprocess_levels_update(stats.lo,stats.hi,&contrast,&brightness);
+        gamma = preprocess_gamma(preprocess_bc(stats.mean,contrast,brightness),gamma);
+        history[iteration][0] = contrast;
+        history[iteration][1] = brightness;
+        history[iteration][2] = (int)gamma;
+    }
+    assert(contrast>400 && brightness>40);
+    for (unsigned i=20;i<30;++i) {
+        assert(history[i][0] == contrast && history[i][1] == brightness);
+        assert(history[i][2] == (int)gamma);
+    }
+    printf("PASS input-domain feedback: 30 iterations, final BC=%d/%d gamma=%u, "
+           "last 10 identical\n",contrast,brightness,gamma);
+}
 int main(void)
 {
+    input_inverse_test();
+    input_closed_loop_test();
     assert(SHOWCASE_DEFAULT_PRESET == 1 && SHOWCASE_TARGET_LUMA == 110);
     static uint16_t frame[1280*720];
     struct preprocess_stats stats = preprocess_measure(frame,1280);

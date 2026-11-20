@@ -161,6 +161,10 @@ static bool live_page(void)
 }
 static struct {
     ui_preprocess_t config;
+    ui_preprocess_t shadow_config;
+    ui_preprocess_t frame_config[6];
+    uint8_t shadow_gamma[256];
+    uint8_t frame_gamma[6][256];
     unsigned shadow, active, luma, frames, exposure;
     uint32_t revision, shadow_revision, applied_revision;
     int msrc_image, loop_image;
@@ -856,6 +860,8 @@ static void preprocess_configure(void)
         v.gamma_index = 0;
     }
     if (!(platform_hardware() & APP_HW_PIX)) {
+        prep.shadow_config = prep.config;
+        prep.shadow_config.preset = 0;
         prep.shadow = 0; prep.shadow_revision = prep.revision; return;
     }
     const ui_preprocess_t *p = &prep.config;
@@ -864,6 +870,7 @@ static void preprocess_configure(void)
         if (!(engine_poll(ENGINE_PIX).status & EDRV32_PIX_STATUS_IDLE_MASK)) return;
         v.gamma_bank ^= 1;
         pix_gamma_load(v.gamma_bank, v.gamma_table);
+        memcpy(prep.shadow_gamma,v.gamma_table,sizeof prep.shadow_gamma);
         v.gamma_loaded = -p->gamma_tenths;
     }
     uint32_t flags = p->preset ? EDRV32_PIX_CFG_BC_EN_MASK : 0;
@@ -872,6 +879,7 @@ static void preprocess_configure(void)
         (unsigned)p->contrast, p->brightness, 128};
     pix_configure(&config);
     engine_control(ENGINE_PIX, EDRV32_PIX_CTRL_ENABLE_MASK);
+    prep.shadow_config = *p;
     prep.shadow = prep.config.preset;
     prep.shadow_revision = prep.revision;
 }
@@ -974,6 +982,9 @@ static void camera_frame_data(unsigned channel, int slot, struct vin_frame frame
         return;
     }
     if (channel == 0) {
+        /* The completed surface keeps its own transform through CPU sampling. */
+        prep.frame_config[slot] = prep.shadow_config;
+        memcpy(prep.frame_gamma[slot],prep.shadow_gamma,sizeof prep.shadow_gamma);
         prep.active = prep.shadow;
         prep.applied_revision = prep.shadow_revision;
         reference(slot, REF_LUMA, 0);
@@ -1363,16 +1374,22 @@ int vision_service(void)
         prep.luma = stats.mean;
         if (++prep.frames % 4 == 0 && (prep.config.auto_levels || prep.config.auto_gamma) &&
             (platform_hardware() & APP_HW_PIX)) {
-            if (prep.config.auto_levels) {
-                int contrast, brightness;
-                preprocess_levels(stats.lo, stats.hi, &contrast, &brightness);
-                prep.config.contrast = (prep.config.contrast+contrast)/2;
-                prep.config.brightness = (prep.config.brightness+brightness)/2;
-            }
+            const ui_preprocess_t *applied = &prep.frame_config[image];
+            struct preprocess_stats input = preprocess_input_stats(stats,
+                applied->preset ? applied->contrast : 256,
+                applied->preset ? applied->brightness : 0,
+                applied->preset && applied->gamma_tenths != 10 ? prep.frame_gamma[image] : NULL);
+            int contrast = prep.config.contrast;
+            int brightness = prep.config.brightness;
+            int gamma = prep.config.gamma_tenths;
+            if (prep.config.auto_levels)
+                preprocess_levels_update(input.lo,input.hi,
+                    &prep.config.contrast,&prep.config.brightness);
             if (prep.config.auto_gamma)
-                prep.config.gamma_tenths = preprocess_gamma(preprocess_bc(stats.mean,
+                prep.config.gamma_tenths = preprocess_gamma(preprocess_bc(input.mean,
                     prep.config.contrast, prep.config.brightness), prep.config.gamma_tenths);
-            ++prep.revision;
+            if (contrast != prep.config.contrast || brightness != prep.config.brightness ||
+                gamma != prep.config.gamma_tenths) ++prep.revision;
         }
         reference((int)image, 0, REF_LUMA);
         sched_port_unlock(sample_lock);

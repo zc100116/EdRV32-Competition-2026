@@ -1,4 +1,4 @@
-/* preprocess.h — live demo L9; grid histogram, percentile levels and gamma.
+/* preprocess.h — live demo L9/L13; grid histogram, percentile levels and gamma.
  * Pure CPU calculations shared by board and host tests; clk_sys.
  */
 #ifndef SHOWCASE_PREPROCESS_H
@@ -50,9 +50,43 @@ static inline unsigned preprocess_gamma(unsigned mean, unsigned current)
         log(SHOWCASE_TARGET_LUMA/255.0)/log(mean/255.0);
     if (gamma < 0.4) gamma = 0.4;
     if (gamma > 1.0) gamma = 1.0;
-    if (fabs(gamma-current/10.0) < 0.05) return current;
+    if (fabs(gamma-current/10.0) < 0.1) return current;
     return (unsigned)(gamma*10+0.5);
 }
 static inline uint8_t preprocess_gamma_value(unsigned value, unsigned tenths)
 { return (uint8_t)(255*pow(value/255.0,tenths/10.0)+0.5); }
+/* L13.1: lower-bound inverse of the monotonic, currently applied point transform. */
+static inline unsigned preprocess_input(unsigned output, int contrast, int brightness,
+                                        const uint8_t *gamma)
+{
+    unsigned low = 0, high = 255;
+    while (low < high) {
+        unsigned middle = (low+high)/2;
+        unsigned value = preprocess_bc(middle,contrast,brightness);
+        if (gamma) value = gamma[value];
+        if (value >= output) high = middle;
+        else low = middle+1;
+    }
+    return low;
+}
+static inline struct preprocess_stats preprocess_input_stats(struct preprocess_stats output,
+                                                             int contrast, int brightness,
+                                                             const uint8_t *gamma)
+{
+    return (struct preprocess_stats){
+        preprocess_input(output.mean,contrast,brightness,gamma),
+        preprocess_input(output.lo,contrast,brightness,gamma),
+        preprocess_input(output.hi,contrast,brightness,gamma)};
+}
+static inline void preprocess_levels_update(unsigned lo, unsigned hi,
+                                             int *contrast, int *brightness)
+{
+    int c, b;
+    preprocess_levels(lo,hi,&c,&b);
+    c = (*contrast+c)/2;
+    b = (*brightness+b)/2;
+    if (c >= *contrast+16 || c <= *contrast-16) *contrast = c;
+    if (b >= *brightness+8 || b <= *brightness-8) *brightness = b;
+}
+
 #endif
