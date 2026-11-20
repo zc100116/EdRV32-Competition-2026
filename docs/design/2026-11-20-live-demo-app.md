@@ -260,6 +260,11 @@
 | 0x89 UI_ITEMS | 板 → PC | `revision`(u32) + `part`(u8) + `parts`(u8) + `page`(u8，`ui_page`) + 1 字节 0 + 标题（u8 长度 + UTF-8，最多 48 B）+ 若干控件 | 页面切换或控件值变化时发送，此外每 1 s 发一次。每条 payload 不超过 1024 B，放不下就按 `part/parts` 分几条发。`revision` 在页面或控件结构变化时加 1，只是值变化时不变 |
 | 0x0A UI_ACT | PC → 板 | `revision`(u32) + `id`(u8) + `action`(u8) + `value`(i16) | `action`：0 点击（按钮发 CLICKED，开关切换）；1 设值（滑块、分段、下拉框设成 `value`，并发 VALUE_CHANGED）。`revision` 与当前不一致时回复 ACK(3, 5)。执行后回复 ACK(2)，之后板端发一次新的 UI_ITEMS |
 
+- 编码（小端，与现有 EDSC payload 一致；worker 提问，协调者 2026-11-20 冻结）：
+  - UI_ITEMS 固定头：`revision` u32、`part` u8（从 0 开始）、`parts` u8、`page` u8、1 字节 0、`title_len` u8、标题。每个分片都重复固定头和标题。
+  - 之后逐项排列控件，没有项数字段，一直解码到 payload 结束：`id` u8、`kind` u8、`value` i16、`min` i16、`max` i16、`area` u8、`label_len` u8、名称、`options_len` u8、选项。
+  - 一个控件不跨分片。
+  - UI_ACT 共 8 B：`revision` u32、`id` u8、`action` u8、`value` i16。
 - 执行效果与用板上按键聚焦后操作该控件完全相同，页面代码不需要为此改动。
 - 游戏运行中由应用接管输入时（P5 8.5 输入所有权），UI_ACT 回复 ACK(3, 5)。这时手机用导航键或 NES 手柄操作。
 
