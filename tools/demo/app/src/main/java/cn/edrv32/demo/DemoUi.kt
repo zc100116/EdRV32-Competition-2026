@@ -70,15 +70,21 @@ fun DemoApp(repository: MediaRepository) {
         command(RemoteCommand(RemoteAction.SCENE))
     }
     BackHandler(session.state.scene != "home" || sources) { sources = false; home() }
+    var settingsExpanded by remember { mutableStateOf(!preferences.contains("phone")) }
     val role: (Boolean) -> Unit = {
+        settingsExpanded = false
         phone = it
         preferences.edit().putBoolean("phone", it).apply()
+    }
+    val phoneHeader: @Composable () -> Unit = {
+        PhoneHeader(session.connected, session.error, address, settingsExpanded, role) {
+            settingsExpanded = !settingsExpanded
+        }
     }
     if (sources) SourcesScreen(repository) { sources = false }
     else if (session.state.scene == "home" || (phone && phoneHome)) {
         Column {
-            RoleBar(phone, role)
-            if (phone) ConnectionBar(session.connected, session.error, address)
+            if (phone) phoneHeader() else RoleBar(phone, role)
             liveBar()
             HomeScreen(repository, {
                 phoneHome = false
@@ -88,7 +94,7 @@ fun DemoApp(repository: MediaRepository) {
         }
     } else {
         val scene = repository.scenes.first { it.id == session.state.scene }
-        ControlledScreen(repository, scene, session, address, home, liveBar)
+        ControlledScreen(repository, scene, session, address, home, liveBar, phoneHeader)
     }
 }
 
@@ -112,6 +118,33 @@ fun ConnectionBar(connected: Boolean, error: String = "", address: String = "") 
     }
     if (error.isNotEmpty()) Text(error, color = Color(0xFFFF9F8C), fontSize = 12.sp,
         modifier = Modifier.background(Ink).fillMaxWidth().padding(horizontal = 20.dp))
+}
+
+@Composable
+fun PhoneHeader(connected: Boolean, error: String = "", address: String = "",
+    expanded: Boolean = false, choose: (Boolean) -> Unit = {}, toggle: () -> Unit = {}) {
+    val addresses = address.split(" / ")
+    Column(Modifier.fillMaxWidth().background(Ink)) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp).height(40.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            Text(if (connected) "已连接平板" else "等待平板连接", color = Gold, fontSize = 12.sp)
+            Text("热点 ${addresses.first()} : $REMOTE_PORT", Modifier.weight(1f),
+                color = Muted, fontSize = 12.sp, maxLines = 1)
+            TextButton(toggle, contentPadding = PaddingValues(horizontal = 12.dp)) {
+                Text(if (expanded) "设置 ▴" else "设置 ▾")
+            }
+        }
+        if (expanded) {
+            RoleBar(true, choose)
+            addresses.drop(1).forEach {
+                Text("其他热点地址 $it : $REMOTE_PORT", color = Muted, fontSize = 12.sp,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 2.dp))
+            }
+        }
+        if (error.isNotEmpty()) Text(error, color = Color(0xFFFF9F8C), fontSize = 12.sp,
+            modifier = Modifier.padding(horizontal = 12.dp))
+    }
 }
 
 @Composable
@@ -192,7 +225,10 @@ fun SourcesScreen(repository: MediaRepository, back: () -> Unit = {}) {
 
 @Composable
 fun ControlledScreen(repository: MediaRepository, scene: DemoScene, session: RemoteSession,
-    address: String, back: () -> Unit, liveBar: @Composable () -> Unit = {}) {
+    address: String, back: () -> Unit, liveBar: @Composable () -> Unit = {},
+    phoneHeader: @Composable () -> Unit = {
+        ConnectionBar(session.connected, session.error, address)
+    }) {
     var controls by remember(scene.id) { mutableStateOf(true) }
     var interaction by remember { mutableIntStateOf(0) }
     var now by remember { mutableLongStateOf(remoteClock()) }
@@ -229,7 +265,8 @@ fun ControlledScreen(repository: MediaRepository, scene: DemoScene, session: Rem
         toggle = { act(RemoteAction.TOGGLE) }, reveal = { reveal() },
         reset = { act(RemoteAction.RESET) }, runDemo = { act(RemoteAction.DEMO) },
         intrude = { act(RemoteAction.INTRUDE) }, drag = drag,
-        hat = { session.command(RemoteCommand(RemoteAction.HAT, id = it)) }, liveBar = liveBar)
+        hat = { session.command(RemoteCommand(RemoteAction.HAT, id = it)) },
+        liveBar = liveBar, phoneHeader = phoneHeader)
 }
 
 @Composable
@@ -239,12 +276,13 @@ fun RemoteSceneScreen(repository: MediaRepository, scene: DemoScene, state: Remo
     next: () -> Unit = {}, toggle: () -> Unit = {}, reveal: () -> Unit = {},
     reset: () -> Unit = {}, runDemo: () -> Unit = {}, intrude: () -> Unit = {},
     drag: (Int, FarmPoint) -> Unit = { _, _ -> }, hat: (Int) -> Unit = {},
-    liveBar: @Composable () -> Unit = {}) {
+    liveBar: @Composable () -> Unit = {},
+    phoneHeader: @Composable () -> Unit = { ConnectionBar(connected, error, address) }) {
     val item = scene.items[state.index]
     val farm = if (scene.id == "farm") state.farm() else null
     val site = if (item.type == "site") state.site() else null
     if (phone) Column(Modifier.fillMaxSize().background(Ink)) {
-        ConnectionBar(connected, error, address)
+        phoneHeader()
         liveBar()
         Box(Modifier.weight(1f).fillMaxWidth().clipToBounds(),
             contentAlignment = Alignment.Center) {

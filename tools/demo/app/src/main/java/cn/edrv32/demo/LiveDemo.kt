@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -25,8 +24,8 @@ import java.util.concurrent.Executors
 import org.json.JSONObject
 
 const val LIVE_DEMO_PORT = 47633
-val liveScenes = listOf("目标检测（80 类）", "手势识别", "人体姿态", "工地安全帽检测",
-    "智慧农场", "图形引擎", "抓取实验", "弹弓打靶", "CoreMark 跑分（芯片信息）", "NES 经典游戏")
+val liveScenes = listOf("目标检测", "手势识别", "人体姿态", "工地安全帽检测",
+    "智慧农场", "图形引擎", "抓取实验", "弹弓打靶", "CoreMark 跑分", "NES 经典游戏")
 val liveChapters = listOf("自研 NPU · 多模型部署", "自研 NPU · 多模型部署",
     "自研 NPU · 多模型部署", "落地应用", "落地应用", "自研渲染器", "体感交互", "体感交互",
     "自研 CPU · 跑分与经典游戏", "自研 CPU · 跑分与经典游戏")
@@ -113,24 +112,27 @@ fun LiveDemoBar(board: LiveBoard, connected: Boolean, error: String = "",
     var expanded by remember(board.scene) { mutableStateOf(false) }
     val enabled = connected && !board.busy
     Surface(tonalElevation = 4.dp) {
-        Column(Modifier.fillMaxWidth().padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text("现场演示 · PC ${if (connected) "已连接" else "未连接"}" +
                 " · 板端${if (board.connected) "已连接" else "未连接"} · $scene" +
                 " · 档位 ${board.preset} · 亮度 ${board.luma}" +
-                if (board.busy) " · 切换中" else "")
+                if (board.busy) " · 切换中" else "",
+                style = MaterialTheme.typography.bodySmall, maxLines = 1)
             if (error.isNotEmpty()) Text(error, color = MaterialTheme.colorScheme.error)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically) {
-                OutlinedButton({ command(2, 0) }, enabled = enabled) { Text("上一场景") }
-                OutlinedButton({ command(1, 0) }, enabled = enabled) { Text("下一场景") }
+                OutlinedButton({ command(2, 0) }, enabled = enabled,
+                    contentPadding = PaddingValues(horizontal = 12.dp)) { Text("上一场景") }
+                OutlinedButton({ command(1, 0) }, enabled = enabled,
+                    contentPadding = PaddingValues(horizontal = 12.dp)) { Text("下一场景") }
                 livePresets.forEachIndexed { index, label ->
                     FilterChip(board.preset == index, { command(3, index) },
                         { Text("$index $label") }, enabled = enabled)
                 }
             }
             if (board.scene == 10) {
-                OutlinedButton({ expanded = !expanded }, Modifier.fillMaxWidth()) {
+                OutlinedButton({ expanded = !expanded }, Modifier.fillMaxWidth().height(36.dp)) {
                     Text("场景 10/10 · NES 经典游戏 ${if (expanded) "▴" else "▾"}")
                 }
             }
@@ -142,12 +144,12 @@ fun LiveDemoBar(board: LiveBoard, connected: Boolean, error: String = "",
 
 @Composable
 private fun LiveSceneGrid(scene: Int, enabled: Boolean, command: (Int, Int) -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         sceneGroups.forEachIndexed { chapter, indices ->
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("第 ${chapter + 1} 章 · ${chapterShort[chapter]}",
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text("${chapter + 1} · ${chapterShort[chapter]}",
                     style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.padding(vertical = 4.dp))
+                    modifier = Modifier.padding(vertical = 2.dp), maxLines = 1)
                 indices.forEach { index ->
                     val selected = scene == index + 1
                     val colors = if (selected) ButtonDefaults.filledTonalButtonColors(
@@ -155,16 +157,12 @@ private fun LiveSceneGrid(scene: Int, enabled: Boolean, command: (Int, Int) -> U
                         contentColor = MaterialTheme.colorScheme.onPrimary)
                     else ButtonDefaults.filledTonalButtonColors()
                     FilledTonalButton({ command(0, index + 1) },
-                        modifier = Modifier.fillMaxWidth().height(80.dp), enabled = enabled,
+                        modifier = Modifier.fillMaxWidth().height(48.dp), enabled = enabled,
                         shape = RoundedCornerShape(12.dp), colors = colors,
                         contentPadding = PaddingValues(8.dp)) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(chapterShort[chapter], style = MaterialTheme.typography.labelSmall)
-                            Text("${index + 1}. ${liveScenes[index]}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
-                        }
+                        Text("${index + 1} ${liveScenes[index]}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold, maxLines = 1)
                     }
                 }
             }
@@ -183,36 +181,36 @@ fun LiveGamepad(connected: Boolean, send: (Int) -> Unit = {}) {
     DisposableEffect(connected) {
         onDispose { keys = 0; currentSend(0) }
     }
-    Row(Modifier.fillMaxWidth().height(288.dp).padding(horizontal = 24.dp),
+    Row(Modifier.fillMaxWidth().height(192.dp).padding(horizontal = 24.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(240.dp)) {
+        Box(Modifier.size(192.dp)) {
             PadKey("↑", 0, keys, connected, change,
-                Modifier.align(Alignment.TopCenter), 80.dp)
+                Modifier.align(Alignment.TopCenter), 64.dp)
             PadKey("↓", 1, keys, connected, change,
-                Modifier.align(Alignment.BottomCenter), 80.dp)
+                Modifier.align(Alignment.BottomCenter), 64.dp)
             PadKey("←", 2, keys, connected, change,
-                Modifier.align(Alignment.CenterStart), 80.dp)
+                Modifier.align(Alignment.CenterStart), 64.dp)
             PadKey("→", 3, keys, connected, change,
-                Modifier.align(Alignment.CenterEnd), 80.dp)
+                Modifier.align(Alignment.CenterEnd), 64.dp)
             Text("方向", Modifier.align(Alignment.Center),
                 style = MaterialTheme.typography.labelLarge)
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp)) {
+            verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                PadKey("确认", 8, keys, connected, change, size = 72.dp)
-                PadKey("返回", 9, keys, connected, change, size = 72.dp)
+                PadKey("确认", 8, keys, connected, change, size = 56.dp)
+                PadKey("返回", 9, keys, connected, change, size = 56.dp)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                PadKey("Select", 6, keys, connected, change, size = 80.dp)
-                PadKey("Start", 7, keys, connected, change, size = 80.dp)
+                PadKey("Select", 6, keys, connected, change, size = 64.dp)
+                PadKey("Start", 7, keys, connected, change, size = 64.dp)
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(24.dp),
             verticalAlignment = Alignment.CenterVertically) {
-            PadKey("B", 5, keys, connected, change, size = 112.dp, round = true)
-            PadKey("A", 4, keys, connected, change, size = 112.dp, round = true)
+            PadKey("B", 5, keys, connected, change, size = 96.dp, round = true)
+            PadKey("A", 4, keys, connected, change, size = 96.dp, round = true)
         }
     }
 }

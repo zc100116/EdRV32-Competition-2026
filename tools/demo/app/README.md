@@ -191,3 +191,15 @@ PY
 入库证据见 [控制条](screenshots/phone-live-demo.png)、[NES 手柄](screenshots/phone-live-nes-gamepad.png)。
 构建继续使用上文 JAVA_HOME / ANDROID_HOME，所有 Gradle 命令加
 `flock /tmp/edrv32-sw-build.lock`、`--no-daemon --max-workers=1`。
+
+## 矮屏手机遥控布局（versionCode 5 / 1.4）
+
+907×420dp 横屏：选择手机角色后默认收起角色栏，顶部 40dp 细条显示平板连接、
+第一个热点地址和“设置”；点击设置展开/收起角色栏，其他热点地址只在展开时显示。
+五章网格每列独立排列，按钮仅显示“序号 场景名”，高 48dp、单行文字；
+场景 1 为“1 目标检测”，场景 9 为“9 CoreMark 跑分”。状态和切换/四档共两行。
+NES 主体高 192dp，方向键 64dp、确认/返回 56dp、Select/Start 64dp、A/B 96dp。
+
+`testDebugUnitTest` 导出 `phone-compact-grid.png`、`phone-compact-settings.png`、
+`phone-compact-nes.png`（907×420），以及 `phone-live-demo.png`（1280×720）；
+入库截图位于 `screenshots/`。构建命令仍使用上文工具链、共享 flock 锁和单 worker。

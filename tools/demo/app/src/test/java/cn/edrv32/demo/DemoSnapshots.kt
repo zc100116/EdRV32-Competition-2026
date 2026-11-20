@@ -95,7 +95,7 @@ class DemoSnapshots {
         paparazzi.snapshot("phone-live-demo") {
             DemoTheme {
                 androidx.compose.foundation.layout.Column {
-                    ConnectionBar(true, address = "192.168.43.1")
+                    PhoneHeader(true, address = "192.168.43.1 / 10.0.0.2")
                     LiveDemoBar(LiveBoard(true, 4, 1, 110), true)
                 }
             }
@@ -103,7 +103,7 @@ class DemoSnapshots {
         paparazzi.snapshot("phone-live-nes-gamepad") {
             DemoTheme {
                 androidx.compose.foundation.layout.Column {
-                    ConnectionBar(true, address = "192.168.43.1")
+                    PhoneHeader(true, address = "192.168.43.1 / 10.0.0.2")
                     LiveDemoBar(LiveBoard(true, 10, 0, 0), true)
                 }
             }
@@ -162,6 +162,31 @@ class DemoSnapshots {
             paparazzi.snapshot("farm-$name") {
                 FarmCanvas(repository, FarmModel.frame(second.toDouble(), true),
                     Modifier.fillMaxSize())
+            }
+        }
+    }
+}
+
+// The photographed phone viewport in dp, including the production settings strip.
+class CompactRemoteSnapshots {
+    @get:Rule
+    val paparazzi = Paparazzi(deviceConfig = DeviceConfig(screenWidth = 907,
+        screenHeight = 420, xdpi = 160, ydpi = 160, density = Density.MEDIUM,
+        orientation = ScreenOrientation.LANDSCAPE, softButtons = false),
+        appCompatEnabled = false, snapshotHandler = ExportSnapshots(), useDeviceResolution = true)
+
+    @Test fun compactRemote() {
+        listOf("grid" to 4, "settings" to 4, "nes" to 10).forEach { (name, scene) ->
+            paparazzi.snapshot("phone-compact-$name") {
+                DemoTheme {
+                    androidx.compose.material3.Surface(Modifier.fillMaxSize()) {
+                        androidx.compose.foundation.layout.Column {
+                            PhoneHeader(true, address = "192.168.43.1 / 10.0.0.2",
+                                expanded = name == "settings")
+                            LiveDemoBar(LiveBoard(true, scene, 1, 110), true)
+                        }
+                    }
+                }
             }
         }
     }

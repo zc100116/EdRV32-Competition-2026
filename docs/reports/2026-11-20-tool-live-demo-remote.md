@@ -55,3 +55,16 @@ Android SDK 35 / build-tools 37.0.0、Gradle 8.14.3；无 RTL/板端改动。
 - 截图自查：十项文字完整且无重叠；十字键/中部功能键/右侧大圆键布局符合要求。
 - 两张 Paparazzi 截图更新于 `tools/demo/app/screenshots/phone-live-{demo,nes-gamepad}.png`。
 - 日志：`build/demo-app/live-layout-tests.log`；APK：`build/demo-app/edrv32-demo.apk`。
+
+## T-LIVE-REMOTE-3 矮屏手机排布（2026-11-20）
+- 基线 e11aa57c7；本节随修复提交，工具链沿用上述 JDK17 / SDK35 / Gradle8.14.3 / Paparazzi1.3.5。
+- 手机顶部 40dp 状态条；选角色后默认收起，设置可切换；第一热点常显，其他地址随角色栏展开。
+- 场景五列十项，按钮高 48dp、仅序号与场景名；状态与上一/下一/四档共两行。
+- NES 主体 192dp，方向键 64dp、确认/返回 56dp、Select/Start 64dp、A/B 96dp。
+- 截图自查：907×420dp 下十项完整，展开设置仍完整，手柄完整，文字均无重叠或截断；1280×720 亦正常。
+- 证据：`tools/demo/app/screenshots/phone-compact-{grid,settings,nes}.png`、`phone-live-demo.png`（大屏）。
+- 环境：`JAVA_HOME=$HOME/.local/opt/android/jdk17 ANDROID_HOME=$HOME/.local/opt/android/sdk`。
+- 命令：`flock /tmp/edrv32-sw-build.lock tools/demo/app/gradlew -p tools/demo/app --no-daemon --max-workers=1 testDebugUnitTest`；15 项 PASS。
+- 同一入口 `assembleDebug` 成功；素材复制自 `b3-int/build/demo-app/assets`；APK 内 assets/ 实测 215 项。
+- `aapt dump badging build/demo-app/edrv32-demo.apk`：versionCode 5、versionName 1.4；APK 71,388,182 B。
+- 日志：`build/demo-app/compact-{tests,build}.log`；APK：`build/demo-app/edrv32-demo.apk`；`git diff --check` PASS，未改 RTL。
