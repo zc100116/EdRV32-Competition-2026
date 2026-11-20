@@ -265,6 +265,8 @@
   - 之后逐项排列控件，没有项数字段，一直解码到 payload 结束：`id` u8、`kind` u8、`value` i16、`min` i16、`max` i16、`area` u8、`label_len` u8、名称、`options_len` u8、选项。
   - 一个控件不跨分片。
   - UI_ACT 共 8 B：`revision` u32、`id` u8、`action` u8、`value` i16。
+- 其他控件类型（worker 提问，协调者确认）：spinbox 和 arc 按 kind 2；可勾选按钮和其他可聚焦对象按 kind 0，点击时发 CLICKED。
+- UI_ACT 出错时：id 不存在、控件已禁用、action 与 kind 不匹配，都回复 ACK(3, 5)；设值越界回复 ACK(3, 2)。两种情况都不做修改。
 - 执行效果与用板上按键聚焦后操作该控件完全相同，页面代码不需要为此改动。
 - 游戏运行中由应用接管输入时（P5 8.5 输入所有权），UI_ACT 回复 ACK(3, 5)。这时手机用导航键或 NES 手柄操作。
 
