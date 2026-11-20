@@ -46,3 +46,12 @@ JVM Paparazzi 调用实际 Compose/Canvas；视频页截图以该视频实际首
 - JDK 17 / Gradle 8.14.3 / Paparazzi 1.3.5；`testDebugUnitTest` 全套 7/7，通过后红衣访客版工地/首页重跑 4/4；`validate.py site` 和 `assembleDebug` 通过，均使用指定 flock / --no-daemon。
 - APK：71,322,578 B（68.02 MiB），小于 95 MB；构建日志 `build/demo-app/site-apk-build.log`，验证日志与逐帧结果 `build/demo-app/site-final-validation.log`、`site-results.json`。
 - 首页、五个剧本时刻、复位图、验证联系表、逐帧结果及新 APK 已覆盖到 `/home/workspace/orca/workspaces/EdRV32-Competition-2026/SOC系统设计/outputs/demo-app/`；美术与复现命令见 `tools/demo/app/README.md`。
+
+## 手机遥控
+
+- 实现 commit `af1081dba`（基线 `165293bf6`）；versionCode 3 / versionName 1.2；经协调者同意 targetSdk 36，只新增 INTERNET / ACCESS_NETWORK_STATE。
+- 同 APK 记住角色；手机热点 TCP 47632，平板取 Wi-Fi 默认网关并每秒重连；平板权威状态、完整 JSON 快照与同一 FarmModel / SiteModel 保持一致，手机拖动合并至 ≤30 Hz，视频仅显示封面。
+- JDK 17 / Gradle 8.14.3 / Paparazzi 1.3.5；`flock /tmp/edrv32-sw-build.lock tools/demo/app/gradlew -p tools/demo/app --no-daemon testDebugUnitTest assembleDebug` 成功，10/10（含 2 项遥控测试、4 项 Paparazzi）。
+- 真实 localhost TCP 验证指定操作序列、逐字段快照及同一时刻模型帧相同、断线重连恢复、协议解析失败断开并报错；日志 `build/demo-app/phone-validation.log`，XML 在 `build/demo-app/gradle/test-results/testDebugUnitTest/`。
+- APK 71,495,504 B（68.18 MiB，<95 MB）；`aapt dump permissions` 对比旧包仅新增指定两项，结果 `build/demo-app/phone-permissions.txt`。
+- 六张截图及覆盖的新 `edrv32-demo.apk`：`/home/workspace/orca/workspaces/EdRV32-Competition-2026/SOC系统设计/outputs/demo-app/`；截图为 `phone-role-home.png`、`phone-remote-{farm,helmet,traffic}.png`、`phone-disconnected.png`、`tablet-remote-indicator.png`。
