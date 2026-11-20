@@ -16,11 +16,13 @@ static const unsigned bones[][2] = {
     {0,17},{17,18},{18,19},{19,20}
 };
 
+/* Gesture keypoints are shown by default (user 2026-11-20); drawer button toggles. */
+static bool show_points = true;
 void ui_hand_toggle(void)
 {
-    ui_debug_overlay=!ui_debug_overlay;
+    show_points=!show_points;
     for(unsigned i=0;i<100;++i)
-        lv_obj_set_hidden(tags[i],!ui_debug_overlay || i>=shown.count);
+        lv_obj_set_hidden(tags[i],!show_points || i>=shown.count);
     lv_obj_invalidate(frame);
 }
 static uint32_t class_color(unsigned cls)
@@ -115,8 +117,8 @@ static void draw(lv_event_t *event)
         lv_area_t box = {person->x, person->y, person->x + person->width - 1,
                          person->y + person->height - 1};
         rect.border_color = lv_color_hex(class_color(person->class_id));
-        if (ui_debug_overlay) lv_draw_rect(layer, &rect, &box);
-        if (!ui_debug_overlay) continue;
+        if (show_points) lv_draw_rect(layer, &rect, &box);
+        if (!show_points) continue;
         const ui_pose_point_t *points = shown.points[i];
         for (unsigned b = 0; b < sizeof bones / sizeof bones[0]; ++b) {
             const ui_pose_point_t *a = &points[bones[b][0]], *c = &points[bones[b][1]];
@@ -173,7 +175,7 @@ void ui_hand_update(void)
         invalidate_people();
         shown = *data;
         for (unsigned i = 0; i < 100; ++i) {
-            lv_obj_set_hidden(tags[i], i >= shown.count || !ui_debug_overlay);
+            lv_obj_set_hidden(tags[i], i >= shown.count || !show_points);
             if (i >= shown.count) continue;
             lv_snprintf(text, sizeof text, "%s %u%%",
                         shown.people[i].category, shown.people[i].confidence);
