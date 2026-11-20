@@ -1,2 +1,4 @@
 初赛/视频/*.mp4 filter=lfs diff=lfs merge=lfs -text
 决赛/*.mp4 filter=lfs diff=lfs merge=lfs -text
+决赛/*.apk filter=lfs diff=lfs merge=lfs -text
+决赛/*.pptx filter=lfs diff=lfs merge=lfs -text
