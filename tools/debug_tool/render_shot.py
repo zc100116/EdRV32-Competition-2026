@@ -68,8 +68,10 @@ def seed(engine, console, state):
     application = 2 if state == 'detection' else 3
     payload = (struct.pack('<5B3x3I', application, 2, 0, 1, 50, 0xffffffff, 0xffffffff, 0xffff)
                + pack_process(DEFAULTS) + struct.pack('<IIB3x', 0, 0, 0))
+    if state == 'vision':
+        payload = payload[:5] + bytes((4, 1, 110)) + payload[8:]
     engine.ethernet.showcase.receive(control_message(
-        HELLO, 0, struct.pack('<H2x16s', 3, b'SIMULATED') + payload))
+        HELLO, 0, struct.pack('<H2x16s', 4, b'SIMULATED') + payload))
     console.output.setCurrentIndex(2)
     console.scene.setCurrentIndex(1 if state == 'vision' else 0)
     # Feed a 60 s timeline using the same encoder and real socket as telemetry_sim.py.
@@ -147,6 +149,9 @@ def main():
         window.rail_group.button(args.main_page).setChecked(True)
         window._select_page(args.main_page)
         window.soc.refresh()
+        if args.main_page == 7:
+            window.demo.address.setText('192.168.43.1')
+            window.demo.refresh()
         app.processEvents()
         if args.scroll_bottom or args.scroll_position:
             scroll = (window.soc.pages.currentWidget() if args.main_page == 4 else

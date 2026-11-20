@@ -175,3 +175,27 @@ QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/ren
 `--page 0/1/2` 选择设备 / 处理 / 图片，`--scroll-bottom` 或 `--scroll-position 0.5`
 显示其他滚动区域，`--main-page 5` 显示输入，`--state detection` 生成图片回传。
 P5 验收截图保存在任务指定的 `SOC系统设计/outputs/p5-tool/`，不提交。
+
+## 现场演示与手机中继（proto 4）
+
+工具只接受 HELLO proto 4；STATE 的 `state.demo_scene`、`state.preset`、`state.luma`
+分别为当前场景（0 未进入、255 目录、1–10 场景）、前处理档位和亮度。
+“演示”页提供 5 章 10 场景、上一/下一/回目录、4 档前处理；同类 DEMO 在 ACK(2/3)
+前不发送下一条。等待完成时按钮禁用；手机忙时重复命令明确报错，不排队，连接保持。
+
+1. 手机开启热点并在 APK 选择“手机遥控端”；平板和 PC 加入热点。
+2. PC 有线网卡仍用 `192.168.1.2/24` 连板端 `192.168.1.10`，建立网口连接。
+3. 在“现场演示”填写手机界面顶部的热点地址，点“连接手机”。PC 主动连接 TCP 47633。
+4. 手机操作场景和档位；PC 可最小化。断线每秒重连，格式错误关闭连接并显示原因。
+5. 板端处于场景 10 时，手机显示 NES 手柄；按键变化发送，PC 每 100 ms 重发快照。
+   手机断开清空手机按键，保留 PC 本地按键。
+
+按行 UTF-8 JSON：手机发 `{"demo":{"action":0,"arg":10}}` 或 `{"pad":{"keys":16}}`；
+PC 发 `{"board":{"connected":true,"scene":10,"preset":1,"luma":110,"busy":false}}`，
+状态变化及每秒发送；busy 表示 DEMO 尚未完成，变化时也立即回传。
+
+REST：`POST /api/demo {"action":0,"arg":10}`，`GET /api/board` 获取上述 STATE 字段。
+CLI：`python tools/debug_tool/cli.py demo 0 10`。action 0 跳转、1 下一、2 上一、3 档位、4 目录。
+
+截图（模拟板端状态）：[1366×768](assets/live-demo-1366x768.png)、
+[1920×1080](assets/live-demo-1920x1080.png)。

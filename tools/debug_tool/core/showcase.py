@@ -7,7 +7,7 @@ import time
 
 MESSAGE = struct.Struct('<4sHHI')
 BULK_BEGIN, ECHO = 1, 3
-APP, IMAGE_INFO, PROCESS, DETECT, CANCEL = range(4, 9)
+APP, IMAGE_INFO, PROCESS, DETECT, CANCEL, DEMO = range(4, 10)
 HELLO, STATE, ACK, IMAGE_STEP = range(0x84, 0x88)
 READY, DONE, ECHO_REPLY = 0x81, 0x82, 0x83
 MODEL, IMAGE, GAME = 1, 2, 3
@@ -27,11 +27,11 @@ def decode(data):
     if magic != b'EDSC' or length > 1000 or len(data) != MESSAGE.size + length:
         raise ValueError('EDSC invalid magic or payload length')
     expected = {READY: 4, DONE: 8, BULK_BEGIN: 8, APP: 4, PROCESS: 24,
-                DETECT: 16, CANCEL: 0, HELLO: 76, STATE: 56, ACK: 4, IMAGE_STEP: 4}
+                DETECT: 16, CANCEL: 0, DEMO: 4, HELLO: 76, STATE: 56, ACK: 4, IMAGE_STEP: 4}
     if message_type in expected and length != expected[message_type]:
         raise ValueError(f'EDSC invalid payload length for type {message_type:#x}')
     if message_type not in (BULK_BEGIN, ECHO, READY, DONE, ECHO_REPLY, APP, IMAGE_INFO,
-                            PROCESS, DETECT, CANCEL, HELLO, STATE, ACK, IMAGE_STEP):
+                            PROCESS, DETECT, CANCEL, DEMO, HELLO, STATE, ACK, IMAGE_STEP):
         raise ValueError(f'EDSC unknown message type {message_type:#x}')
     return message_type, seq, bytes(data[MESSAGE.size:])
 
@@ -124,6 +124,10 @@ class ShowcaseTool:
 
     def app(self, app, action=0, arg=0, destination=None):
         return self.command(APP, struct.pack('<BBH', app, action, arg), destination)
+
+    def demo(self, action, arg):
+        command = self.command(DEMO, struct.pack("<BB2x", action, arg))
+        return dict(seq=command["seq"], phase=command["phase"])
 
     def cancel(self):
         self.cancelled = True

@@ -36,7 +36,7 @@ class BoardSession:
         self.last_state = None
         self.last_request = None
         from .processing import DEFAULTS
-        self.board_state = dict(app=0, state=0, error=0, boxes=0, threshold=25,
+        self.board_state = dict(app=0, state=0, error=0, boxes=0, threshold=25, demo_scene=0, preset=0, luma=0,
                                 classes=[0xffffffff, 0xffffffff, 0xffff],
                                 process=dict(DEFAULTS), request=0, frame=0, image_status=0)
         self.steps = {key: dict(done=False, time=None) for key in
@@ -112,8 +112,8 @@ class BoardSession:
         with self.lock:
             if message_type == HELLO:
                 proto, = struct.unpack_from('<H', payload)
-                if proto != 3:
-                    raise ValueError(f'HELLO protocol {proto}, expected 3')
+                if proto != 4:
+                    raise ValueError(f'HELLO protocol {proto}, expected 4')
                 self.build = payload[4:20].split(b'\0', 1)[0].decode('ascii')
                 payload = payload[20:]
                 self.mark('peer')
@@ -122,10 +122,12 @@ class BoardSession:
             self.state_generation += 1
             self.last_state = time.monotonic()
             app, state, error, boxes, threshold = struct.unpack_from('<5B', payload)
+            demo_scene, preset, luma = struct.unpack_from('<3B', payload, 5)
             classes = list(struct.unpack_from('<3I', payload, 8))
             request, frame, image_status = struct.unpack_from('<IIB', payload, 44)
             self.board_state = dict(app=app, state=state, error=error, boxes=boxes,
                                     threshold=threshold, classes=classes,
+                                    demo_scene=demo_scene, preset=preset, luma=luma,
                                     process=unpack_process(payload[20:44]),
                                     request=request, frame=frame, image_status=image_status)
         self.notify()

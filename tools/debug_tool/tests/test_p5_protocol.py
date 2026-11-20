@@ -26,7 +26,7 @@ def state_payload(app=2, state=2, process=None, threshold=50, classes=(1, 2, 4),
 
 
 def hello():
-    return encode(HELLO, 0, struct.pack('<H2x16s', 3, b'a30c3ee3') + state_payload())
+    return encode(HELLO, 0, struct.pack('<H2x16s', 4, b'a30c3ee3') + state_payload())
 
 
 class ProtocolTest(unittest.TestCase):

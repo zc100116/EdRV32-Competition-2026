@@ -1210,7 +1210,8 @@ class MainWindow(QMainWindow):
                 ("网口", "UDP 文件收发", ICON_NETWORK),
                 ("调试", "烧录、图像与检测", ICON_DASHBOARD),
                 ("输入", "虚拟按键与触控板", ICON_TERMINAL),
-                ("游戏", "上传游戏与封面", ICON_DASHBOARD))):
+                ("游戏", "上传游戏与封面", ICON_DASHBOARD),
+                ("演示", "现场演示与手机中继", ICON_DASHBOARD))):
             btn = QToolButton()
             btn.setObjectName("railBtn")
             btn.setCheckable(True)
@@ -1376,6 +1377,9 @@ class MainWindow(QMainWindow):
         game_scroll.setWidgetResizable(True)
         game_scroll.setWidget(self.games)
         self.body_stack.addWidget(game_scroll)
+        from .demo import DemoPanel
+        self.demo = DemoPanel(engine)
+        self.body_stack.addWidget(self.demo)
         body.addWidget(rail)
         body.addSpacing(8)
         body.addWidget(self.body_stack, 1)
@@ -1485,10 +1489,12 @@ class MainWindow(QMainWindow):
 
     def _select_page(self, index):
         console = index == 4
-        self.body_stack.setCurrentIndex(3 if index == 6 else 2 if index == 5 else 1 if console else 0)
+        self.body_stack.setCurrentIndex(4 if index == 7 else 3 if index == 6 else 2 if index == 5 else 1 if console else 0)
         if index == 5:
             self.virtual_input.refresh()
             self.virtual_input.setFocus()
+        elif index == 7:
+            self.demo.refresh()
         elif index == 6:
             self.games.refresh()
         elif not console:
@@ -1528,6 +1534,7 @@ class MainWindow(QMainWindow):
         self.rules.reload()
 
     def closeEvent(self, event):
+        self.engine.phone_relay.close()
         self.soc.close()
         self.virtual_input.hide()
         self.engine.virtual_input.close()
