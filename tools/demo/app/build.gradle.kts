@@ -14,9 +14,9 @@ android {
     defaultConfig {
         applicationId = "cn.edrv32.demo"
         minSdk = 24
-        targetSdk = 37
-        versionCode = 2
-        versionName = "1.1"
+        targetSdk = 36
+        versionCode = 3
+        versionName = "1.2"
     }
     buildFeatures { compose = true }
     sourceSets["main"].assets.srcDir(file("../../../build/demo-app/assets"))

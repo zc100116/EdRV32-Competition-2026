@@ -1,6 +1,6 @@
 # 视界 · Android 演示 APK
 
-原生 Kotlin / Jetpack Compose Material 3，Media3 播放本地视频；不使用 WebView，不申请网络权限。横屏、沉浸式全屏、常亮，minSdk 24，首次交付 versionCode 1，后续交付递增。
+原生 Kotlin / Jetpack Compose Material 3，Media3 播放本地视频；不使用 WebView，仅申请 INTERNET 和 ACCESS_NETWORK_STATE 用于局域网 TCP，不访问外网。横屏、沉浸式全屏、常亮，minSdk 24，首次交付 versionCode 1，后续交付递增。
 
 安装 `build/demo-app/edrv32-demo.apk`，选择首页场景。平板横放，占开发板摄像头画面宽度约 65%，再对焦。点画面显示控制栏，3 秒后隐藏；左右滑动或按前后按钮切换，视频循环，图片播放时每 5 秒切换。来源页逐项列出原作者或来源、许可和地址，地址不会触发网络访问。
 
@@ -16,9 +16,21 @@
 
 农场脚本：0–5 秒静止盘点，5–7 秒羊走出，7–11 秒走失等待，11–13 秒羊归来，13–16 秒人翻越围栏走进，16–21 秒停留，21–24 秒离开。画外动物停留；从它离开的对应画面边缘往里拖可带回，或按“复位”。云影、草木、角色动作、时间戳和噪点完全由时间决定，不使用随机数；拖动坐标也可独立重放。FarmModel.kt 和 FarmCanvas.kt 为运行与 JVM 截图共用的状态及绘制实现。
 
+## 手机遥控
+
+1. 手机先打开热点，平板连到这个热点；两台设备安装同一份 APK。
+2. 两边打开 APK，在首页分别选择「手机遥控端」和「平板显示端」；会记住上次角色。
+3. 手机出现「已连接平板」后选择场景，直接拖动物、点工人，或用下方按钮操作。
+4. 手机监听 TCP **47632**，平板自动连接当前 Wi-Fi 默认网关；断线后每秒重连。
+5. 视频在手机上显示当前条目的封面，图片显示当前图片；暂停/播放控制平板。
+6. 手机顶部显示热点 IP 和端口；平板连接标记在控制栏内，随控制栏 3 秒隐藏。
+7. 连不上先确认手机热点已开、平板确实连到该热点、角色各选一个，并检查热点的设备隔离设置。
+8. 连接或协议错误会显示原因；保持两边 APK 在前台，连接恢复后自动取得平板完整状态。
+9. targetSdk 设为 36；[Android 17 对 target≥37 要求本地网络运行时权限](https://developer.android.com/privacy-and-security/local-network-permission)，本 APK 保持只新增上述两项权限。
+
 ## 工具链与构建
 
-安装见 `docs/guides/env-setup.md` Android 一节。JDK 17、Gradle wrapper 8.14.3、AGP 8.13.2、Kotlin 2.0.21、Compose BOM 2024.11.00、Media3 1.5.1、Paparazzi 1.3.5。compileSdk 35 用于 JDK 17 的 JVM 渲染兼容，targetSdk 37 使用当前稳定的 Android 行为；测试编译启用 java.desktop 导出图像，不进入 APK。
+安装见 `docs/guides/env-setup.md` Android 一节。JDK 17、Gradle wrapper 8.14.3、AGP 8.13.2、Kotlin 2.0.21、Compose BOM 2024.11.00、Media3 1.5.1、Paparazzi 1.3.5。compileSdk 35 用于 JDK 17 的 JVM 渲染兼容，targetSdk 36 允许仅用 INTERNET 进行局域网连接；测试编译启用 java.desktop 导出图像，不进入 APK。
 
 从仓库根目录执行；用户原始视频位于任务指定的 `b3-int/build/card98/`，只读复制。需要既有 NPU 权重及本机官方图集，不需要账号或 API key。
 

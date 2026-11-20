@@ -61,6 +61,36 @@ class DemoSnapshots {
         paparazzi.snapshot("sources") { DemoTheme { SourcesScreen(repository) } }
     }
 
+    @Test fun phoneRemote() {
+        val repository = MediaRepository(paparazzi.context)
+        paparazzi.snapshot("phone-role-home") {
+            DemoTheme {
+                androidx.compose.foundation.layout.Column {
+                    RoleBar(true)
+                    ConnectionBar(false, address = "192.168.43.1")
+                    HomeScreen(repository)
+                }
+            }
+        }
+        listOf("farm", "helmet", "traffic").forEach { id ->
+            val scene = repository.scenes.first { it.id == id }
+            paparazzi.snapshot("phone-remote-$id") {
+                DemoTheme { RemoteSceneScreen(repository, scene,
+                    RemoteState(scene = id, seconds = 2.0), true, true,
+                    address = "192.168.43.1") }
+            }
+        }
+        val farm = repository.scenes.first { it.id == "farm" }
+        paparazzi.snapshot("phone-disconnected") {
+            DemoTheme { RemoteSceneScreen(repository, farm, RemoteState(scene = "farm"),
+                true, false, "连接错误：连接已断开", "192.168.43.1") }
+        }
+        paparazzi.snapshot("tablet-remote-indicator") {
+            DemoTheme { RemoteSceneScreen(repository, farm, RemoteState(scene = "farm"),
+                false, true) }
+        }
+    }
+
     @Test fun siteSequence() {
         val repository = MediaRepository(paparazzi.context)
         val frames = JSONArray()
