@@ -54,6 +54,11 @@ fun DemoApp(repository: MediaRepository) {
     var phone by remember { mutableStateOf(preferences.getBoolean("phone", false)) }
     val session = remember(phone) { RemoteSession(repository, phone) }
     DisposableEffect(session) { onDispose { session.close() } }
+    val live = remember(phone) { if (phone) LiveDemoSession() else null }
+    DisposableEffect(live) { onDispose { live?.close() } }
+    val liveBar: @Composable () -> Unit = {
+        live?.let { LiveDemoBar(it.board, it.connected, it.error, it::command, it::pad) }
+    }
     var phoneHome by remember(phone) { mutableStateOf(false) }
     var sources by remember { mutableStateOf(false) }
     val address by produceState("", phone) {
@@ -74,6 +79,7 @@ fun DemoApp(repository: MediaRepository) {
         Column {
             RoleBar(phone, role)
             if (phone) ConnectionBar(session.connected, session.error, address)
+            liveBar()
             HomeScreen(repository, {
                 phoneHome = false
                 command(RemoteCommand(RemoteAction.SCENE, scene = it))
@@ -82,7 +88,7 @@ fun DemoApp(repository: MediaRepository) {
         }
     } else {
         val scene = repository.scenes.first { it.id == session.state.scene }
-        ControlledScreen(repository, scene, session, address, home)
+        ControlledScreen(repository, scene, session, address, home, liveBar)
     }
 }
 
@@ -186,7 +192,7 @@ fun SourcesScreen(repository: MediaRepository, back: () -> Unit = {}) {
 
 @Composable
 fun ControlledScreen(repository: MediaRepository, scene: DemoScene, session: RemoteSession,
-    address: String, back: () -> Unit) {
+    address: String, back: () -> Unit, liveBar: @Composable () -> Unit = {}) {
     var controls by remember(scene.id) { mutableStateOf(true) }
     var interaction by remember { mutableIntStateOf(0) }
     var now by remember { mutableLongStateOf(remoteClock()) }
@@ -223,7 +229,7 @@ fun ControlledScreen(repository: MediaRepository, scene: DemoScene, session: Rem
         toggle = { act(RemoteAction.TOGGLE) }, reveal = { reveal() },
         reset = { act(RemoteAction.RESET) }, runDemo = { act(RemoteAction.DEMO) },
         intrude = { act(RemoteAction.INTRUDE) }, drag = drag,
-        hat = { session.command(RemoteCommand(RemoteAction.HAT, id = it)) })
+        hat = { session.command(RemoteCommand(RemoteAction.HAT, id = it)) }, liveBar = liveBar)
 }
 
 @Composable
@@ -232,12 +238,14 @@ fun RemoteSceneScreen(repository: MediaRepository, scene: DemoScene, state: Remo
     controls: Boolean = true, back: () -> Unit = {}, previous: () -> Unit = {},
     next: () -> Unit = {}, toggle: () -> Unit = {}, reveal: () -> Unit = {},
     reset: () -> Unit = {}, runDemo: () -> Unit = {}, intrude: () -> Unit = {},
-    drag: (Int, FarmPoint) -> Unit = { _, _ -> }, hat: (Int) -> Unit = {}) {
+    drag: (Int, FarmPoint) -> Unit = { _, _ -> }, hat: (Int) -> Unit = {},
+    liveBar: @Composable () -> Unit = {}) {
     val item = scene.items[state.index]
     val farm = if (scene.id == "farm") state.farm() else null
     val site = if (item.type == "site") state.site() else null
     if (phone) Column(Modifier.fillMaxSize().background(Ink)) {
         ConnectionBar(connected, error, address)
+        liveBar()
         Box(Modifier.weight(1f).fillMaxWidth().clipToBounds(),
             contentAlignment = Alignment.Center) {
             SceneScreen(repository, scene, item, state.playing, false, farm,

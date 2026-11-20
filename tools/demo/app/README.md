@@ -170,3 +170,22 @@ PY
 ```
 
 访客：Use case: photorealistic-natural. ONE full body isolated male construction-site visitor, fictional adult Asian man aged 45 wearing a dark red long sleeve polo shirt, tan work trousers and dark work shoes, small clipboard held at waist. NO HELMET, NO HAT, short black hair clearly visible. Average slender build, distinct moustache, dark rectangular eyeglasses. Elevated 30 degree security camera looking down, three quarter front stance facing slightly to right, both feet and full head visible. Natural overcast daylight, sharp real photography detailed skin and cloth. Generous actual alpha transparent margin around full body. No ground, no shadow, no scene, no other people, no lettering or watermark.
+
+## 现场演示与 NES 手柄（versionCode 4 / 1.3）
+
+手机遥控端新增现场演示控制条：按冻结设计 L1 的 5 章 10 场景跳转、上一/下一、
+原始/自动亮度/降噪/自动亮度 + 降噪四档，显示板端场景、档位、亮度、PC 连接及切换中状态。
+场景列表可横向滑动；busy 时禁用场景和档位操作。板端当前场景 10 显示 NES 手柄，
+支持方向、A/B、Select/Start、确认/返回，多指按下与松开均发送完整位图。
+
+手机热点 → 平板和 PC 连入 → PC 调试工具建立有线板端连接 → “现场演示”填写手机顶部
+热点地址并连接。手机独立监听 TCP 47633，与既有平板 TCP 47632 互不影响；PC 最小化后
+继续转发。JSON 每行一条，手机发 `demo {action,arg}` / `pad {keys}`，PC 发
+`board {connected,scene,preset,luma,busy}`；错误关闭该连接并显示原因。
+权限仍为 INTERNET 和 ACCESS_NETWORK_STATE，平板显示端保持原有行为。
+
+新增 JVM 协议/双监听测试随 `testDebugUnitTest` 执行，Paparazzi 输出
+`outputs/demo-app/phone-live-demo.png`、`phone-live-nes-gamepad.png`，
+入库证据见 [控制条](screenshots/phone-live-demo.png)、[NES 手柄](screenshots/phone-live-nes-gamepad.png)。
+构建继续使用上文 JAVA_HOME / ANDROID_HOME，所有 Gradle 命令加
+`flock /tmp/edrv32-sw-build.lock`、`--no-daemon --max-workers=1`。

@@ -31,17 +31,18 @@ class RemoteTransport(
     private val phone: Boolean, private val gateway: () -> String,
     private val connected: (RemotePeer) -> Unit,
     private val receive: (String) -> Unit, private val status: (String) -> Unit,
+    private val port: Int = REMOTE_PORT,
     private val socketFactory: () -> Socket = { Socket() },
 ) : Closeable {
     @Volatile private var running = true
     @Volatile private var socket: Socket? = null
-    private val server = if (phone) ServerSocket(REMOTE_PORT) else null
+    private val server = if (phone) ServerSocket(port) else null
     private val thread = Thread({
         while (running) {
             try {
                 val connection = if (phone) server!!.accept() else socketFactory().also {
                     socket = it
-                    it.connect(InetSocketAddress(gateway(), REMOTE_PORT), 1000)
+                    it.connect(InetSocketAddress(gateway(), port), 1000)
                 }
                 socket = connection
                 RemotePeer(connection).use { peer ->

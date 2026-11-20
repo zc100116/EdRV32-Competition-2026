@@ -91,6 +91,25 @@ class DemoSnapshots {
         }
     }
 
+    @Test fun liveDemoControls() {
+        paparazzi.snapshot("phone-live-demo") {
+            DemoTheme {
+                androidx.compose.foundation.layout.Column {
+                    ConnectionBar(true, address = "192.168.43.1")
+                    LiveDemoBar(LiveBoard(true, 4, 1, 110), true)
+                }
+            }
+        }
+        paparazzi.snapshot("phone-live-nes-gamepad") {
+            DemoTheme {
+                androidx.compose.foundation.layout.Column {
+                    ConnectionBar(true, address = "192.168.43.1")
+                    LiveDemoBar(LiveBoard(true, 10, 0, 0), true)
+                }
+            }
+        }
+    }
+
     @Test fun siteSequence() {
         val repository = MediaRepository(paparazzi.context)
         val frames = JSONArray()
