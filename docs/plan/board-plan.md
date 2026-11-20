@@ -221,7 +221,10 @@
 | T-LIVE-BOARD | 现场演示应用（5 章 10 场景）、EDSC DEMO/proto 4、识别前处理 4 档（PIX + 内存源回环 + 自动增益）；设计记录 `2026-11-20-live-demo-app.md` L1–L6；task_4c4641bd6c67 | Codex gpt-6.1-sol medium | 设计记录 | [x] 2026-11-20 合入 b3 09b186632；协调者修正增益上限为 PIX 9 位 CONTRAST（85ff0a00a），追加手势关键点默认显示、抓取实验默认模式 C（aed43fb06、742893af9）；严格构建 0 告警、主机/截图测试 PASS；上板见卡 103 |
 | T-LIVE-REMOTE | 调试工具“演示”页、`/api/demo`、手机中继 TCP 47633；APK 1.3 遥控端场景网格、档位、NES 手柄；task_81e4ed7d3be9 + 返工 task_71255c6e7323 | Codex gpt-6.1-sol medium | 设计记录 L3 | [x] 2026-11-20 合入 b3 91dc488ec..c4ec37e28；PC 145 项、APK 14 项 PASS；上板见卡 103 |
 | T-HAND-EDGE | 板端 gesture 模型在画面边缘的离线检出实验（17 位置 × 120/180 px × 40 手）；task_858cc6d3d584 | Codex gpt-6.1-sol medium | — | [x] 2026-11-20 合入 b3 a245befea，报告 `reports/2026-11-20-hand-edge-eval.md`：出画截断和尺寸是主因；合成样本与真实画面差异大，绝对检出率不可用（协调者补注 d643bb622） |
-| 卡 103 | `tasks/win/20261120-103-live-demo-board`：卡 75 比特流上验收现场演示、前处理 4 档暗/亮对比、手机切换和 NES 手柄、默认值；程序 b3 `c8dfa90d0`，APK 1.3 | 用户 + Windows Codex | T-LIVE-* | [ ] 已下发；结果用于定稿 L5 默认档位和目标亮度 |
+| 卡 103 | `tasks/win/20261120-103-live-demo-board`：卡 75 比特流上验收现场演示、前处理 4 档暗/亮对比、手机切换和 NES 手柄、默认值；程序 b3 `c8dfa90d0`，APK 1.3 | 用户 + Windows Codex | T-LIVE-* | [!] 被卡 104 取代 |
+| T-LIVE-*-2 | L7 镜像、L8 平板跟随、L9 前处理快捷档 + 高级、L10 第 6 章图像处理；task_2ccd94bffa93、task_5a3518d66ac9、task_f57caa2d5ed3 | Codex gpt-6.1-sol medium | 设计记录 L7–L10 | [x] 2026-11-20 合入 b3 至 29ab38736；上板见卡 104 |
+| 卡 104 | `tasks/win/20261120-104-live-mirror-board`：取代卡 103；程序 b3 `29ab38736`，APK 1.5 | 用户 + Windows Codex | T-LIVE-*-2 | [ ] 已下发 |
+| T-DEMO-MOTION / T-PROCESS-AUTOPLAY | 平板动态街景/工地/农场（L11）；图像处理自动演示（L12） | Codex gpt-6.1-sol medium | 设计记录 L11、L12 | [~] 开发中，完成后出卡 105 |
 
 ### 待确认事项（2026-10-31 梳理，逐项问用户）
 
