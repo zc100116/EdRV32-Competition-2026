@@ -195,4 +195,4 @@ live:
 	$(CC) $(FLAGS) -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/bsp/include \
 	    -ffunction-sections -Wl,--gc-sections ae.c $(ROOT)/sw/drivers/ov5640.c -o $(BUILD)/ae
 	$(BUILD)/ae
-	$(MAKE) -C $(ROOT)/sw/apps/showcase/sim -j1 mirror-test
+	$(MAKE) -C $(ROOT)/sw/apps/showcase/sim -j1 mirror-test process-autoplay-test

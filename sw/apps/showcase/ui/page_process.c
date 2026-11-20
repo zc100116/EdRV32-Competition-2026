@@ -1,8 +1,88 @@
 /* page_process.c — P5 design 3.6/8.3; PIX → GEO stages and retained parameters.
- * L1 scroll panel; changes use the frozen backend contract on the UI thread.
+ * Live demo L12: timed PIX/GEO sequence, snapshot restore and manual takeover.
  */
 #include "widgets.h"
+#include "live_demo.h"
 #include <stddef.h>
+static lv_obj_t *autoplay_switch;
+static lv_obj_t *step_label;
+static lv_timer_t *autoplay_timer;
+static bool autoplay;
+static uint32_t autoplay_start;
+static unsigned autoplay_step;
+static ui_process_config_t saved_config;
+static void autoplay_apply(void);
+static void autoplay_stop(bool restore)
+{
+    if (!autoplay) return;
+    autoplay = false;
+    lv_timer_pause(autoplay_timer);
+    if (restore) ui_data_process_set(&saved_config);
+    lv_obj_remove_state(autoplay_switch,LV_STATE_CHECKED);
+    lv_obj_set_hidden(step_label,true);
+}
+/* Each step starts from defaults, so the labelled effect is isolated. */
+static void autoplay_apply(void)
+{
+    static const char *const names[] = {
+        "原图", "亮度 / 对比度", "Gamma", "3×3 均值滤波", "3×3 高斯平滑",
+        "锐化", "Sobel 边缘", "腐蚀", "膨胀", "灰度", "二值化", "反色",
+        "旋转", "缩放", "平移", "水平镜像", "垂直镜像",
+        "组合：高斯 + Sobel + 旋转", "回到原图"
+    };
+    static const uint32_t stages[] = {
+        0, UI_PROC_LEVEL, UI_PROC_GAMMA, UI_PROC_S1, UI_PROC_S1, UI_PROC_S1,
+        UI_PROC_S1, UI_PROC_S1, UI_PROC_S1, UI_PROC_GRAY, UI_PROC_BINARY,
+        UI_PROC_INVERT, UI_PROC_ROTATE, UI_PROC_SCALE, UI_PROC_TRANSLATE,
+        UI_PROC_MIRROR_X, UI_PROC_MIRROR_Y, UI_PROC_S1|UI_PROC_S2|UI_PROC_ROTATE, 0
+    };
+    uint32_t elapsed = lv_tick_get()-autoplay_start;
+    unsigned step = elapsed/3000%19;
+    unsigned phase = elapsed%3000;
+    if (step==autoplay_step && step!=12 && step!=13) return;
+    autoplay_step = step;
+    ui_process_config_t c = {.enabled=stages[step], .contrast=256, .gamma_tenths=10,
+        .stage1=2, .stage2=2, .threshold=128, .scale_percent=100};
+    c.original = step==0 || step==18;
+    if (step==1) { c.brightness=48; c.contrast=320; }
+    if (step==2) c.gamma_tenths=18;
+    if (step>=3 && step<=8) c.stage1=(int)step-2;
+    if (step==12) {
+        c.angle=(int)(phase*360/3000);
+        if (c.angle>180) c.angle-=360;
+    }
+    if (step==13) c.scale_percent=50+(int)((phase<=1500 ? phase : 3000-phase)*150/1500);
+    if (step==14) { c.translate_x=160; c.translate_y=80; }
+    if (step==17) { c.stage2=4; c.angle=30; }
+    ui_data_process_set(&c);
+    char text[120];
+    lv_snprintf(text,sizeof text,"%u / 19  %s",step+1,names[step]);
+    ui_text(step_label,text);
+}
+static void autoplay_changed(lv_event_t *e)
+{
+    if (lv_obj_has_state(lv_event_get_target_obj(e),LV_STATE_CHECKED)) {
+        saved_config = ui_data_process_config();
+        autoplay = true;
+        autoplay_start = lv_tick_get();
+        autoplay_step = 19;
+        lv_timer_resume(autoplay_timer);
+        autoplay_apply();
+        lv_obj_set_hidden(step_label,false);
+    } else autoplay_stop(true);
+    ui_process_update();
+}
+static void autoplay_tick(lv_timer_t *timer)
+{
+    (void)timer;
+    ui_process_update();
+}
+static void process_deleted(lv_event_t *e)
+{
+    (void)e;
+    autoplay_stop(true);
+    lv_timer_delete(autoplay_timer);
+}
 static lv_obj_t *metrics;
 static lv_obj_t *view_switch;
 static lv_obj_t *enables[12];
@@ -27,6 +107,7 @@ static int *field(ui_process_config_t *c,unsigned i)
 { return (int *)((char *)c+parameters[i].offset); }
 void ui_process_update(void)
 {
+    if (autoplay) autoplay_apply();
     (void)ui_data_process(0);
     ui_process_config_t c=ui_data_process_config();
     lv_obj_set_state(view_switch,LV_STATE_CHECKED,c.original);
@@ -59,6 +140,7 @@ void ui_process_update(void)
 }
 static void parameter_changed(lv_event_t *e)
 {
+    autoplay_stop(false);
     unsigned i=(unsigned)(uintptr_t)lv_event_get_user_data(e);
     ui_process_config_t c=ui_data_process_config();
     lv_obj_t *o=lv_event_get_target_obj(e);
@@ -67,6 +149,7 @@ static void parameter_changed(lv_event_t *e)
 }
 static void enabled_changed(lv_event_t *e)
 {
+    autoplay_stop(false);
     unsigned stage=(unsigned)(uintptr_t)lv_event_get_user_data(e);
     ui_process_config_t c=ui_data_process_config();
     bool on=lv_obj_has_state(lv_event_get_target_obj(e),LV_STATE_CHECKED);
@@ -78,6 +161,7 @@ static void enabled_changed(lv_event_t *e)
 void ui_process_action(unsigned action)
 {
     if(action==0) { ui_camera_drawer_toggle(); return; }
+    autoplay_stop(false);
     if(action==2) ui_data_process_defaults(UI_PROC_ALL);
     else if(action>=100) ui_data_process_defaults(1u<<(action-100));
     ui_process_update();
@@ -89,7 +173,19 @@ void ui_page_process(lv_obj_t *p)
     view_switch=ui_flex_switch(header,"原图",false);
     lv_obj_set_width(lv_obj_get_parent(view_switch),180);
     lv_obj_add_event_cb(view_switch,enabled_changed,LV_EVENT_VALUE_CHANGED,(void *)12);
+    autoplay_switch=ui_flex_switch(header,"自动演示",false);
+    lv_obj_set_width(lv_obj_get_parent(autoplay_switch),184);
+    lv_obj_add_event_cb(autoplay_switch,autoplay_changed,LV_EVENT_VALUE_CHANGED,NULL);
     ui_action_button(header,"全部恢复默认",2);
+    step_label=ui_label(p,"",24,72,&sim_font_40,TEXT);
+    lv_obj_set_ignore_layout(step_label,true);
+    lv_obj_set_style_bg_color(step_label,lv_color_hex(PANEL),0);
+    lv_obj_set_style_bg_opa(step_label,LV_OPA_COVER,0);
+    lv_obj_set_style_pad_all(step_label,12,0);
+    lv_obj_set_hidden(step_label,true);
+    autoplay_timer=lv_timer_create(autoplay_tick,50,NULL);
+    lv_timer_pause(autoplay_timer);
+    lv_obj_add_event_cb(p,process_deleted,LV_EVENT_DELETE,NULL);
     lv_obj_t *panel=ui_camera_drawer(p,header,"设置");
     lv_obj_set_style_pad_row(panel,6,0);
     lv_obj_set_scrollable(panel,true); lv_obj_set_scroll_dir(panel,LV_DIR_VER);
@@ -120,6 +216,10 @@ void ui_page_process(lv_obj_t *p)
                                 (void *)(uintptr_t)i);
         }
         ui_action_button(row,"本项恢复默认",100+stage);
+    }
+    if (ui_live_scene()==6) {
+        lv_obj_add_state(autoplay_switch,LV_STATE_CHECKED);
+        lv_obj_send_event(autoplay_switch,LV_EVENT_VALUE_CHANGED,NULL);
     }
     ui_hint("前后键选择 · Enter 编辑 · 编辑时前后键调整 · Enter / Esc 退出编辑");
 }

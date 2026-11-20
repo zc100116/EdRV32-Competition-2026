@@ -127,6 +127,15 @@ int main(int argc,char **argv)
     ui_live_command(0,8); ui_key(LV_KEY_ESC); assert(ui_page==LIVE_DEMO_PAGE);
     ui_back(); assert(ui_page==0 && ui_live_scene()==0);
     ui_live_command(2,0); assert(ui_live_scene()==11);
+    ui_live_command(0,6);
+    uint32_t process_start=lv_tick_get();
+    lv_tick_inc(18000-200); capture("process-sobel");
+    assert(ui_data_process_config().stage1==4);
+    lv_tick_inc(process_start+36750-lv_tick_get()-200); capture("process-rotation");
+    assert(ui_data_process_config().angle==90);
+    lv_tick_inc(process_start+51000-lv_tick_get()-200); capture("process-combined");
+    assert(ui_data_process_config().stage2==4);
+    ui_back();
     puts("PASS live UI: eleven scenes, wrap, drawer priority, custom ESC and directory return");
     return 0;
 }
