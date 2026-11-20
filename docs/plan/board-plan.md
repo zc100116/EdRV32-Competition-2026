@@ -223,8 +223,10 @@
 | T-HAND-EDGE | 板端 gesture 模型在画面边缘的离线检出实验（17 位置 × 120/180 px × 40 手）；task_858cc6d3d584 | Codex gpt-6.1-sol medium | — | [x] 2026-11-20 合入 b3 a245befea，报告 `reports/2026-11-20-hand-edge-eval.md`：出画截断和尺寸是主因；合成样本与真实画面差异大，绝对检出率不可用（协调者补注 d643bb622） |
 | 卡 103 | `tasks/win/20261120-103-live-demo-board`：卡 75 比特流上验收现场演示、前处理 4 档暗/亮对比、手机切换和 NES 手柄、默认值；程序 b3 `c8dfa90d0`，APK 1.3 | 用户 + Windows Codex | T-LIVE-* | [!] 被卡 104 取代 |
 | T-LIVE-*-2 | L7 镜像、L8 平板跟随、L9 前处理快捷档 + 高级、L10 第 6 章图像处理；task_2ccd94bffa93、task_5a3518d66ac9、task_f57caa2d5ed3 | Codex gpt-6.1-sol medium | 设计记录 L7–L10 | [x] 2026-11-20 合入 b3 至 29ab38736；上板见卡 104 |
-| 卡 104 | `tasks/win/20261120-104-live-mirror-board`：取代卡 103；程序 b3 `29ab38736`，APK 1.5 | 用户 + Windows Codex | T-LIVE-*-2 | [ ] 已下发 |
-| T-DEMO-MOTION / T-PROCESS-AUTOPLAY | 平板动态街景/工地/农场（L11）；图像处理自动演示（L12） | Codex gpt-6.1-sol medium | 设计记录 L11、L12 | [~] 开发中，完成后出卡 105 |
+| 卡 104 | `tasks/win/20261120-104-live-mirror-board`：取代卡 103；程序 b3 `29ab38736`，APK 1.5 | 用户 + Windows Codex | T-LIVE-*-2 | [x] 用户上板反馈 → L13；被卡 105 取代 |
+| T-DEMO-MOTION / T-PROCESS-AUTOPLAY | 平板动态街景/工地/农场（L11）；图像处理自动演示（L12）；L13 修正 | Codex gpt-6.1-sol medium | 设计记录 L11–L13 | [x] 2026-11-20 合入 b3 至 dc24b2533；报告 2026-11-20-sw-process-autoplay.md、2026-11-20-demo-motion-scenes.md；街景 10 类全对帧 24/40（60%），未达 L11 的 85% |
+| 卡 105 | `tasks/win/20261120-105-live-final-board`：取代卡 104；按讲稿完整走查 + 卡 104 问题复查；程序 b3 `dc24b2533`，APK 1.6；附讲稿和答辩问答 | 用户 + Windows Codex | T-DEMO-MOTION、T-PROCESS-AUTOPLAY | [ ] 已下发 |
+| T-STREET-2 | 街景继续调优至 L11 验收（10 类全对帧 ≥85%），答辩前同步 | Codex gpt-6.1-sol medium | 卡 105 现场反馈 | [ ] |
 
 ### 待确认事项（2026-10-31 梳理，逐项问用户）
 
