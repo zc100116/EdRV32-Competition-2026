@@ -90,7 +90,7 @@ VIN DONE is enabled independently of CH0/CH2 completion interrupts.
 
 The application task invalidates the 45 sampled rows through BSP DMA cache APIs,
 measures the 80×45 RGB565 grid and updates Q8 gain every four frames. The gain uses
-a ±8 deadband, half correction and [256,640] limits; a black frame selects 640.
+a ±8 deadband, half correction and [256,511] limits (PIX CONTRAST is 9-bit Q8); a black frame selects 511.
 `preprocess.h` contains `SHOWCASE_DEFAULT_PRESET` (1) and `SHOWCASE_TARGET_LUMA` (110).
 Hardware without PIX starts at preset 0 and disables presets 1–3 explicitly.
 Image processing and uploaded-image recognition keep their existing settings.

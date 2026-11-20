@@ -28,10 +28,10 @@ int main(void)
     assert(preprocess_gain(384,102,110) == 384);
     assert(preprocess_gain(384,118,110) == 384);
     assert(preprocess_gain(256,55,110) == 384);
-    assert(preprocess_gain(640,220,110) == 480);
+    assert(preprocess_gain(511,220,110) == 383);
     assert(preprocess_gain(256,255,110) == 256);
-    assert(preprocess_gain(600,20,110) == 640);
-    assert(preprocess_gain(256,0,110) == 640);
+    assert(preprocess_gain(500,20,110) == 511);
+    assert(preprocess_gain(256,0,110) == 511);
     static uint16_t frame[1280*720];
     assert(preprocess_luma(frame,1280) == 0);
     memset(frame,255,sizeof frame);

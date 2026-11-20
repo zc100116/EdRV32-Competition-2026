@@ -8,9 +8,9 @@ enum { SHOWCASE_DEFAULT_PRESET = 1, SHOWCASE_TARGET_LUMA = 110 };
 static inline unsigned preprocess_gain(unsigned gain, unsigned mean, unsigned target)
 {
     if (mean+8 >= target && mean <= target+8) return gain;
-    if (!mean) return 640;
+    if (!mean) return 511;
     unsigned next = (gain*(mean+target)+mean)/(2*mean);
-    return next < 256 ? 256 : next > 640 ? 640 : next;
+    return next < 256 ? 256 : next > 511 ? 511 : next;
 }
 static inline unsigned preprocess_luma(const uint16_t *pixels, unsigned stride)
 {

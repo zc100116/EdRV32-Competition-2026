@@ -101,8 +101,8 @@ void ui_live_directory(lv_obj_t *parent)
         lv_obj_t *column = ui_panel(rows,232);
         lv_obj_set_height(column,LV_PCT(100));
         char title[120];
-        const char *name = chapter==1 ? "自研 NPU ·\n多模型部署" :
-            chapter==5 ? "自研 CPU ·\n跑分与经典游戏" : chapters[chapter];
+        const char *name = chapter==1 ? "自研 NPU\n多模型部署" :
+            chapter==5 ? "自研 CPU\n跑分与经典游戏" : chapters[chapter];
         lv_snprintf(title,sizeof title,"第 %u 章\n%s",chapter,name);
         lv_obj_t *heading = ui_text_label(column,title,&sim_font_20,ACCENT);
         lv_obj_set_size(heading,LV_PCT(100),80);
