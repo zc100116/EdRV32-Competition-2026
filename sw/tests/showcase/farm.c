@@ -16,44 +16,57 @@ static void missing(void)
     farm_t f;
     farm_init(&f,0,event);
     farm_frame(&f,boxes,5,0);
+    assert(f.counts[0]==0);
+    farm_frame(&f,boxes,5,999);
+    assert(f.counts[0]==0);
+    farm_frame(&f,boxes,5,1000);
     assert(f.counts[0]==2 && f.counts[1]==1 && f.counts[2]==1 && f.counts[3]==1);
     assert(!f.person && !farm_alerts(&f));
-    farm_inventory(&f,0);
+    farm_inventory(&f,1000);
     assert(!memcmp(f.counts,f.expected,sizeof f.counts));
-    boxes[0].class_id=9; /* Other COCO objects do not count as animals or people. */
-    farm_frame(&f,boxes,5,100);
+    boxes[0].class_id=9;
+    farm_frame(&f,boxes,5,1100);
     farm_frame(&f,boxes,5,2099);
-    assert(!farm_alerts(&f));
+    assert(f.counts[0]==2);
     farm_frame(&f,boxes,5,2100);
+    assert(f.counts[0]==1 && !farm_alerts(&f));
+    farm_frame(&f,boxes,5,5099);
+    assert(!farm_alerts(&f));
+    farm_frame(&f,boxes,5,5100);
     assert(farm_alerts(&f)==1 && f.missing[0].active && f.missing_today==1);
-    assert(f.events[0].time_ms==2100 && f.events[0].amount==1);
+    assert(f.events[0].time_ms==5100 && f.events[0].amount==1);
     assert(f.events[0].class_id==19 && f.events[0].type==FARM_MISSING);
     char text[100];
     farm_event_text(&f.events[0],text,sizeof text);
-    assert(!strcmp(text,"牛 少 1 头"));
+    assert(!strcmp(text,"牛 走失：少 1 头"));
     boxes[0].class_id=19;
-    farm_frame(&f,boxes,5,2200);
+    farm_frame(&f,boxes,5,5200);
+    farm_frame(&f,boxes,5,6199);
+    assert(f.missing[0].active);
+    farm_frame(&f,boxes,5,6200);
     assert(!farm_alerts(&f) && f.events[1].type==FARM_MISSING_CLEAR);
     farm_event_text(&f.events[1],text,sizeof text);
     assert(!strcmp(text,"牛 走失解除"));
+    for (unsigned i=0;i<15;++i) {
+        boxes[0].class_id=i%2 ? 19 : 9;
+        farm_frame(&f,boxes,5,6300+i*100);
+        assert(f.counts[0]==2 && !farm_alerts(&f));
+    }
+    boxes[0].class_id=19; farm_frame(&f,boxes,5,7800);
     boxes[0].class_id=9;
-    farm_frame(&f,boxes,5,2300);
-    boxes[0].class_id=19;
-    farm_frame(&f,boxes,5,2400);
-    boxes[0].class_id=9;
-    farm_frame(&f,boxes,5,3000);
-    farm_frame(&f,boxes,5,4999);
+    farm_frame(&f,boxes,5,8000);
+    farm_frame(&f,boxes,5,9000);
+    farm_frame(&f,boxes,5,11999);
     assert(!farm_alerts(&f));
-    farm_frame(&f,boxes,5,5000);
+    farm_frame(&f,boxes,5,12000);
     assert(farm_alerts(&f)==1 && f.missing_today==2);
-    farm_inventory(&f,5001);
+    farm_inventory(&f,12001);
     assert(!farm_alerts(&f) && f.expected[0]==1);
     boxes[0].class_id=19;
-    /* Position no longer assigns animals to a pen. */
     boxes[3].x=0;
-    farm_frame(&f,boxes,5,5100);
+    farm_frame(&f,boxes,5,12100);
     boxes[3].x=1200;
-    farm_frame(&f,boxes,5,6100);
+    farm_frame(&f,boxes,5,13100);
     assert(f.counts[2]==1 && !farm_alerts(&f));
 }
 static void intrusion(void)
@@ -67,7 +80,7 @@ static void intrusion(void)
     assert(!farm_alerts(&f));
     farm_frame(&f,boxes,6,600);
     assert(f.intrude.active && farm_alerts(&f)==1 && f.intrude_today==1);
-    assert(f.person==1 && f.counts[0]==2 && f.counts[2]==1);
+    assert(f.person==1 && f.counts[0]==0 && f.counts[2]==0);
     assert(f.events[0].type==FARM_INTRUDE && f.events[0].class_id==0);
     char text[100];
     farm_event_text(&f.events[0],text,sizeof text);
@@ -101,18 +114,22 @@ static void history(void)
     farm_t f;
     farm_init(&f,0,event);
     farm_frame(&f,boxes,5,0);
-    farm_inventory(&f,0);
+    farm_frame(&f,boxes,5,1000);
+    farm_inventory(&f,1000);
     for(unsigned i=0;i<12;++i) {
-        uint32_t now=100+i*4000;
+        uint32_t now=2000+i*6000;
         farm_frame(&f,boxes+1,4,now);
-        farm_frame(&f,boxes+1,4,now+2000);
-        farm_frame(&f,boxes,5,now+2100);
+        farm_frame(&f,boxes+1,4,now+1000);
+        farm_frame(&f,boxes+1,4,now+4000);
+        farm_frame(&f,boxes,5,now+4100);
+        farm_frame(&f,boxes,5,now+5100);
     }
     assert(f.event_count==20 && f.event_revision==24 && f.event_head==4);
-    assert(f.events[f.event_head].time_ms==10100);
+    assert(f.events[f.event_head].time_ms==18000);
     assert(f.events[(f.event_head+19)%20].type==FARM_MISSING_CLEAR);
     assert(f.missing_today==12 && !f.intrude_today);
     farm_init(&f,0,event);
+    farm_frame(&f,boxes,5,0);
     farm_frame(&f,boxes,5,9999);
     assert(!f.sample_count);
     farm_frame(&f,boxes,5,10000);
@@ -132,7 +149,7 @@ int main(void)
     assert(!strcmp(farm_event_name(FARM_MISSING_CLEAR),"missing_clear"));
     assert(!strcmp(farm_event_name(FARM_INTRUDE),"intrude"));
     assert(!strcmp(farm_event_name(FARM_INTRUDE_CLEAR),"intrude_clear"));
-    puts("PASS farm: whole-area counts, inventory, 2 s loss/recovery, 0.5 s intrusion, "
+    puts("PASS farm: whole-area counts, inventory, 1 s stability, 3 s loss/recovery, 0.5 s intrusion, "
          "1 s clear, 0.3 s rejection, daily counts, 20 events and 60 samples");
     return 0;
 }

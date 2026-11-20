@@ -3,7 +3,7 @@ ROOT := ../../..
 BUILD := $(ROOT)/build/sw/tests/showcase
 FLAGS := -std=c11 -Wall -Wextra -Werror -I$(ROOT)/sw/apps/showcase/board -I$(ROOT)/sw/lib
 .PHONY: test
-test: grab helmet
+test: grab helmet farm
 	mkdir -p $(BUILD)
 	$(CC) $(FLAGS) main.c $(ROOT)/sw/apps/showcase/board/records.c \
 	    $(ROOT)/sw/apps/showcase/board/protocol.c $(ROOT)/sw/lib/virtual_input.c -o $(BUILD)/protocol

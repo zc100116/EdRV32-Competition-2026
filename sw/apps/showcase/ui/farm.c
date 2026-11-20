@@ -1,4 +1,4 @@
-/* farm.c — R5-11; whole-frame animal inventory and timed intrusion alerts.
+/* farm.c — R5-11; stable animal inventory and timed intrusion alerts.
  * Pure C, monotonic caller clock; event/sample rings retain newest entries.
  */
 #include "farm.h"
@@ -47,7 +47,7 @@ static void evaluate(farm_t *f, uint32_t now)
             *alarm=(farm_alarm_t){0};
         } else {
             if(!alarm->pending) { alarm->since=now; alarm->pending=true; }
-            if(!alarm->active && now-alarm->since>=2000) {
+            if(!alarm->active && now-alarm->since>=3000) {
                 alarm->active=true;
                 record(f,FARM_MISSING,farm_class_ids[a],f->expected[a]-f->counts[a],now);
             }
@@ -77,12 +77,20 @@ void farm_frame(farm_t *f, const farm_box_t *boxes, unsigned count, uint32_t now
         f->day=day;
         f->missing_today=f->intrude_today=0;
     }
-    memset(f->counts,0,sizeof f->counts);
+    unsigned raw[FARM_CLASSES]={0};
     f->person=0;
     for(unsigned i=0;i<count;++i) {
         int a=farm_animal(boxes[i].class_id);
-        if(a>=0) ++f->counts[a];
+        if(a>=0) ++raw[a];
         if(boxes[i].class_id==0) ++f->person;
+    }
+    /* L13.2: display, inventory and history all consume the same stable counts. */
+    for (unsigned a=0;a<FARM_CLASSES;++a) {
+        if (raw[a]!=f->candidate_counts[a]) {
+            f->candidate_counts[a]=raw[a];
+            f->count_since[a]=now;
+        }
+        if (now-f->count_since[a]>=1000) f->counts[a]=raw[a];
     }
     evaluate(f,now);
     intrusion(f,now);
@@ -116,6 +124,6 @@ void farm_event_text(const farm_event_t *e, char *text, size_t size)
         if(e->type==FARM_MISSING_CLEAR)
             snprintf(text,size,"%s 走失解除",animals[a]);
         else
-            snprintf(text,size,"%s 少 %u %s",animals[a],e->amount,units[a]);
+            snprintf(text,size,"%s 走失：少 %u %s",animals[a],e->amount,units[a]);
     }
 }

@@ -20,6 +20,8 @@ typedef struct { uint32_t time_ms; unsigned total[FARM_CLASSES]; } farm_sample_t
 typedef struct { uint32_t since; bool pending, active; } farm_alarm_t;
 typedef struct {
     unsigned counts[FARM_CLASSES];
+    unsigned candidate_counts[FARM_CLASSES];
+    uint32_t count_since[FARM_CLASSES];
     unsigned expected[FARM_CLASSES];
     unsigned person;
     farm_alarm_t missing[FARM_CLASSES];

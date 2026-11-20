@@ -139,7 +139,10 @@ int main(int argc,char **argv)
     ui_open(FARM_PAGE);
     /* Use full raw boxes even when the other application's display filter excludes them. */
     ui_data_detection_all(false);
-    for(unsigned i=0;i<60;++i) frame(7+i%3,10000);
+    for(unsigned i=0;i<60;++i) {
+        frame(7+i%3,9000);
+        frame(7+i%3,1000);
+    }
     frame(9,33);
     ui_activate(0);
     capture("normal");
@@ -163,13 +166,18 @@ int main(int argc,char **argv)
     frame(9,1000);
     assert(hidden(warning));
     frame(8,33);
-    frame(8,2000);
+    frame(8,1000);
+    frame(8,3000);
     capture("missing");
-    assert(find_label(lv_screen_active(),"羊 少 1 只"));
+    assert(find_label(lv_screen_active(),"羊 走失：少 1 只"));
     assert(find_label(lv_screen_active(),"羊 #dc2626 2# / 3"));
     lv_obj_t *label=find_label(lv_screen_active(),"看板"); assert(label);
     lv_obj_send_event(lv_obj_get_parent(label),LV_EVENT_CLICKED,NULL);
     lv_tick_inc(200); lv_timer_handler();
+    lv_obj_update_layout(lv_screen_active());
+    lv_obj_t *inventory=find_label(lv_screen_active(),"动物盘点 · 当前 / 基准");
+    assert(inventory);
+    lv_obj_scroll_to_y(lv_obj_get_parent(inventory),lv_obj_get_y(inventory),LV_ANIM_OFF);
     capture("dashboard");
     assert(find_label(lv_screen_active(),"今日走失 1 次 · 闯入 1 次"));
     assert(find_label(lv_screen_active(),"动物盘点 · 当前 / 基准"));
@@ -184,7 +192,7 @@ int main(int argc,char **argv)
     ui_back(); assert(ui_page==FARM_PAGE);
     frame(9,33);
     frame(9,3000);
-    assert(hidden(find_label(lv_screen_active(),"羊 少 1 只")));
+    assert(hidden(find_label(lv_screen_active(),"羊 走失：少 1 只")));
     ui_hide_interface(); assert(ui_restore_interface());
     ui_back(); assert(ui_page==0);
     ui_home_select_tab(0);
