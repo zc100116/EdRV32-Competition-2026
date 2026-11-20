@@ -28,7 +28,7 @@ class LiveDemoTest {
     }
 
     @Test fun protocol() {
-        for (scene in 1..10) {
+        for (scene in 1..11) {
             val message = JSONObject(LiveDemoJson.command(0, scene)).getJSONObject("demo")
             assertEquals(0, message.getInt("action"))
             assertEquals(scene, message.getInt("arg"))
@@ -40,8 +40,8 @@ class LiveDemoTest {
         }
         for (bit in 0..11) assertEquals(1 shl bit,
             JSONObject(LiveDemoJson.pad(1 shl bit)).getJSONObject("pad").getInt("keys"))
-        assertEquals(LiveBoard(true, 10, 3, 110), LiveDemoJson.readBoard(
-            """{"board":{"connected":true,"scene":10,"preset":3,"luma":110,"busy":false}}"""))
+        assertEquals(LiveBoard(true, 11, 3, 110), LiveDemoJson.readBoard(
+            """{"board":{"connected":true,"scene":11,"preset":3,"luma":110,"busy":false}}"""))
         listOf("{}", "{bad",
             """{"board":{"connected":"true","scene":1,"preset":0,
                 "luma":0,"busy":false}}""",
@@ -49,8 +49,32 @@ class LiveDemoTest {
                 "luma":0,"busy":false}}""").forEach {
             assertThrows(Exception::class.java) { LiveDemoJson.readBoard(it) }
         }
-        assertEquals(10, liveScenes.size)
-        assertEquals(10, liveChapters.size)
+        assertEquals(11, liveScenes.size)
+        assertEquals(11, liveChapters.size)
+    }
+
+    @Test fun mirrorJsonAndTabletMapping() {
+        val action = JSONObject(LiveUiJson.action(LiveUiAction(123, 9, 1, -256)))
+            .getJSONObject("ui_act")
+        assertEquals(setOf("revision", "id", "action", "value"),
+            action.keys().asSequence().toSet())
+        assertEquals(123, action.getInt("revision"))
+        assertEquals(9, action.getInt("id"))
+        assertEquals(1, action.getInt("action"))
+        assertEquals(-256, action.getInt("value"))
+        assertEquals(4294967295L, JSONObject(LiveUiJson.action(
+            LiveUiAction(4294967295L, 1, 0))).getJSONObject("ui_act").getLong("revision"))
+        val ui = LiveUiJson.read("""{"ui":{"revision":7,"page":4,"title":"图形引擎",
+            "items":[{"id":3,"kind":3,"value":1,"min":0,"max":0,"label":"模式",
+            "options":["立方体","球体"],"area":1}]}}""")
+        assertEquals(LiveUi(7, 4, "图形引擎", listOf(
+            LiveUiItem(3, 3, 1, 0, 0, "模式", listOf("立方体", "球体"), 1))), ui)
+        assertEquals(listOf("traffic", "gesture", "dance", "helmet", "farm"),
+            (1..5).map(::liveTabletScene))
+        (6..11).plus(listOf(0, 255)).forEach { assertEquals("home", liveTabletScene(it)) }
+        val manual = reduceRemote(RemoteState(scene = liveTabletScene(1)),
+            RemoteCommand(RemoteAction.SCENE, scene = "detect"), 1)
+        assertEquals("detect", manual.scene)
     }
 
     private fun <T> LinkedBlockingQueue<T>.await(): T =
@@ -70,13 +94,13 @@ class LiveDemoTest {
                         Socket("127.0.0.1", LIVE_DEMO_PORT).use { pc ->
                             RemotePeer(pc).use { pcPeer ->
                                 val phone = peers.await()
-                                phone.send(LiveDemoJson.command(0, 10))
+                                phone.send(LiveDemoJson.command(0, 11))
                                 val command = pc.getInputStream().bufferedReader().readLine()
-                                assertEquals(10, JSONObject(command)
+                                assertEquals(11, JSONObject(command)
                                     .getJSONObject("demo").getInt("arg"))
-                                pcPeer.send("""{"board":{"connected":true,"scene":10,
+                                pcPeer.send("""{"board":{"connected":true,"scene":11,
                                     "preset":1,"luma":90,"busy":false}}""".replace("\n", ""))
-                                assertEquals(LiveBoard(true, 10, 1, 90), pcStates.await())
+                                assertEquals(LiveBoard(true, 11, 1, 90), pcStates.await())
                                 pcPeer.send("{bad")
                                 assertTrue(errors.await().startsWith("协议错误"))
                                 assertEquals(-1, pc.getInputStream().read())

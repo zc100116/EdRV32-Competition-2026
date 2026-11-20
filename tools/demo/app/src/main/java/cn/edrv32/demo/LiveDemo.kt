@@ -25,11 +25,11 @@ import org.json.JSONObject
 
 const val LIVE_DEMO_PORT = 47633
 val liveScenes = listOf("目标检测", "手势识别", "人体姿态", "工地安全帽检测",
-    "智慧农场", "图形引擎", "抓取实验", "弹弓打靶", "CoreMark 跑分", "NES 经典游戏")
+    "智慧农场", "图像处理", "图形引擎", "抓取实验", "弹弓打靶", "CoreMark 跑分", "NES 经典游戏")
 val liveChapters = listOf("自研 NPU · 多模型部署", "自研 NPU · 多模型部署",
-    "自研 NPU · 多模型部署", "落地应用", "落地应用", "自研渲染器", "体感交互", "体感交互",
+    "自研 NPU · 多模型部署", "落地应用", "落地应用", "自研图像处理", "自研渲染器", "体感交互", "体感交互",
     "自研 CPU · 跑分与经典游戏", "自研 CPU · 跑分与经典游戏")
-val livePresets = listOf("原始", "自动亮度", "降噪", "自动亮度 + 降噪")
+val livePresets = listOf("原始", "暗光增强", "降噪", "暗光增强 + 降噪")
 data class LiveBoard(val connected: Boolean = false, val scene: Int = 0,
     val preset: Int = 0, val luma: Int = 0, val busy: Boolean = false)
 
@@ -56,7 +56,9 @@ object LiveDemoJson {
     }
 }
 
-class LiveDemoSession : Closeable {
+class LiveDemoSession(private val follow: (String) -> Unit = {}) : Closeable {
+    var ui by mutableStateOf(LiveUi())
+        private set
     var board by mutableStateOf(LiveBoard())
         private set
     var connected by mutableStateOf(false)
@@ -71,12 +73,29 @@ class LiveDemoSession : Closeable {
     private val transport = RemoteTransport(true, { "" }, { connection ->
         post { peer = connection; connected = true; error = "" }
     }, { line ->
-        val snapshot = LiveDemoJson.readBoard(line)
-        post { board = snapshot }
+        when (JSONObject(line).keys().asSequence().toSet()) {
+            setOf("board") -> {
+                val snapshot = LiveDemoJson.readBoard(line)
+                post {
+                    if (snapshot.scene != board.scene) follow(liveTabletScene(snapshot.scene))
+                    board = snapshot
+                }
+            }
+            setOf("ui") -> {
+                val snapshot = LiveUiJson.read(line)
+                post { ui = snapshot }
+            }
+            setOf("ui_error") -> {
+                val message = JSONObject(line).getJSONObject("ui_error").getString("message")
+                post { error = message }
+            }
+            else -> throw IllegalArgumentException("需要 board、ui 或 ui_error 对象")
+        }
     }, { message -> post { peer = null; connected = false; error = message } },
         port = LIVE_DEMO_PORT)
     fun command(action: Int, arg: Int) = send(LiveDemoJson.command(action, arg))
     fun pad(keys: Int) = send(LiveDemoJson.pad(keys))
+    fun uiAct(action: LiveUiAction) = send(LiveUiJson.action(action))
     private fun send(line: String) {
         val connection = peer ?: return
         outgoing.execute {
@@ -98,27 +117,28 @@ class LiveDemoSession : Closeable {
 fun livePadKeys(keys: Int, bit: Int, pressed: Boolean): Int =
     if (pressed) keys or (1 shl bit) else keys and (1 shl bit).inv()
 
-private val sceneGroups = listOf(0..2, 3..4, 5..5, 6..7, 8..9)
-private val chapterShort = listOf("自研 NPU", "落地应用", "自研渲染器", "体感交互", "自研 CPU")
+private val sceneGroups = listOf(0..2, 3..4, 5..5, 6..6, 7..8, 9..10)
+private val chapterShort = listOf("自研 NPU", "落地应用", "图像处理", "渲染器", "体感交互", "自研 CPU")
 
 @Composable
 fun LiveDemoBar(board: LiveBoard, connected: Boolean, error: String = "",
-    command: (Int, Int) -> Unit = { _, _ -> }, pad: (Int) -> Unit = {}) {
+    command: (Int, Int) -> Unit = { _, _ -> }, pad: (Int) -> Unit = {},
+    ui: LiveUi = LiveUi(), uiAct: (LiveUiAction) -> Unit = {}) {
     val scene = when (board.scene) {
         0 -> "未进入演示"
         255 -> "演示目录"
-        else -> "${board.scene}/10 ${liveScenes[board.scene - 1]}"
+        else -> "${board.scene}/11 ${liveScenes[board.scene - 1]}"
     }
-    var expanded by remember(board.scene) { mutableStateOf(false) }
+    var tab by remember { mutableIntStateOf(0) }
     val enabled = connected && !board.busy
     Surface(tonalElevation = 4.dp) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text("现场演示 · PC ${if (connected) "已连接" else "未连接"}" +
                 " · 板端${if (board.connected) "已连接" else "未连接"} · $scene" +
-                " · 档位 ${board.preset} · 亮度 ${board.luma}" +
+                " · 档位 ${if (board.preset == 255) "自定义" else livePresets[board.preset]} · 亮度 ${board.luma}" +
                 if (board.busy) " · 切换中" else "",
-                style = MaterialTheme.typography.bodySmall, maxLines = 1)
+                style = MaterialTheme.typography.bodySmall)
             if (error.isNotEmpty()) Text(error, color = MaterialTheme.colorScheme.error)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically) {
@@ -131,13 +151,8 @@ fun LiveDemoBar(board: LiveBoard, connected: Boolean, error: String = "",
                         { Text("$index $label") }, enabled = enabled)
                 }
             }
-            if (board.scene == 10) {
-                OutlinedButton({ expanded = !expanded }, Modifier.fillMaxWidth().height(36.dp)) {
-                    Text("场景 10/10 · NES 经典游戏 ${if (expanded) "▴" else "▾"}")
-                }
-            }
-            if (board.scene != 10 || expanded) LiveSceneGrid(board.scene, enabled, command)
-            if (board.scene == 10 && !expanded) LiveGamepad(connected, pad)
+            LiveSceneGrid(board.scene, enabled, command)
+            LiveControlTabs(ui, board.scene, connected, tab, { tab = it }, pad, uiAct)
         }
     }
 }
@@ -149,7 +164,7 @@ private fun LiveSceneGrid(scene: Int, enabled: Boolean, command: (Int, Int) -> U
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("${chapter + 1} · ${chapterShort[chapter]}",
                     style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.padding(vertical = 2.dp), maxLines = 1)
+                    modifier = Modifier.padding(vertical = 2.dp))
                 indices.forEach { index ->
                     val selected = scene == index + 1
                     val colors = if (selected) ButtonDefaults.filledTonalButtonColors(
@@ -157,12 +172,12 @@ private fun LiveSceneGrid(scene: Int, enabled: Boolean, command: (Int, Int) -> U
                         contentColor = MaterialTheme.colorScheme.onPrimary)
                     else ButtonDefaults.filledTonalButtonColors()
                     FilledTonalButton({ command(0, index + 1) },
-                        modifier = Modifier.fillMaxWidth().height(48.dp), enabled = enabled,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = enabled,
                         shape = RoundedCornerShape(12.dp), colors = colors,
                         contentPadding = PaddingValues(8.dp)) {
                         Text("${index + 1} ${liveScenes[index]}",
                             style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold, maxLines = 1)
+                            fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -216,7 +231,7 @@ fun LiveGamepad(connected: Boolean, send: (Int) -> Unit = {}) {
 }
 
 @Composable
-private fun PadKey(label: String, bit: Int, keys: Int, connected: Boolean,
+fun PadKey(label: String, bit: Int, keys: Int, connected: Boolean,
     change: (Int, Boolean) -> Unit, modifier: Modifier = Modifier, size: Dp,
     round: Boolean = false) {
     val pressed = keys and (1 shl bit) != 0

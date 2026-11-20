@@ -54,10 +54,12 @@ fun DemoApp(repository: MediaRepository) {
     var phone by remember { mutableStateOf(preferences.getBoolean("phone", false)) }
     val session = remember(phone) { RemoteSession(repository, phone) }
     DisposableEffect(session) { onDispose { session.close() } }
-    val live = remember(phone) { if (phone) LiveDemoSession() else null }
+    val live = remember(phone) { if (phone) LiveDemoSession { scene ->
+        session.command(RemoteCommand(RemoteAction.SCENE, scene = scene))
+    } else null }
     DisposableEffect(live) { onDispose { live?.close() } }
     val liveBar: @Composable () -> Unit = {
-        live?.let { LiveDemoBar(it.board, it.connected, it.error, it::command, it::pad) }
+        live?.let { LiveDemoBar(it.board, it.connected, it.error, it::command, it::pad, it.ui, it::uiAct) }
     }
     var phoneHome by remember(phone) { mutableStateOf(false) }
     var sources by remember { mutableStateOf(false) }
@@ -83,14 +85,21 @@ fun DemoApp(repository: MediaRepository) {
     }
     if (sources) SourcesScreen(repository) { sources = false }
     else if (session.state.scene == "home" || (phone && phoneHome)) {
-        Column {
-            if (phone) phoneHeader() else RoleBar(phone, role)
-            liveBar()
-            HomeScreen(repository, {
-                phoneHome = false
-                command(RemoteCommand(RemoteAction.SCENE, scene = it))
-            },
-                { sources = true })
+        val enter: (String) -> Unit = {
+            phoneHome = false
+            command(RemoteCommand(RemoteAction.SCENE, scene = it))
+        }
+        if (phone) LazyColumn(Modifier.fillMaxSize()) {
+            item { phoneHeader() }
+            item { liveBar() }
+            item {
+                Box(Modifier.fillMaxWidth().height(720.dp)) {
+                    HomeScreen(repository, enter, { sources = true })
+                }
+            }
+        } else Column {
+            RoleBar(phone, role)
+            HomeScreen(repository, enter, { sources = true })
         }
     } else {
         val scene = repository.scenes.first { it.id == session.state.scene }
@@ -281,17 +290,17 @@ fun RemoteSceneScreen(repository: MediaRepository, scene: DemoScene, state: Remo
     val item = scene.items[state.index]
     val farm = if (scene.id == "farm") state.farm() else null
     val site = if (item.type == "site") state.site() else null
-    if (phone) Column(Modifier.fillMaxSize().background(Ink)) {
-        phoneHeader()
-        liveBar()
-        Box(Modifier.weight(1f).fillMaxWidth().clipToBounds(),
+    if (phone) LazyColumn(Modifier.fillMaxSize().background(Ink)) {
+        item { phoneHeader() }
+        item { liveBar() }
+        item { Box(Modifier.height(300.dp).fillMaxWidth().clipToBounds(),
             contentAlignment = Alignment.Center) {
             SceneScreen(repository, scene, item, state.playing, false, farm,
                 previous = previous, next = next, drag = drag, site = site, hat = hat,
                 posterOnly = true)
-        }
-        SceneControls(farm != null, site != null, state.playing, back, previous, next,
-            toggle, reset, runDemo, intrude)
+        } }
+        item { SceneControls(farm != null, site != null, state.playing, back, previous, next,
+            toggle, reset, runDemo, intrude) }
     } else SceneScreen(repository, scene, item, state.playing, controls, farm,
         back, previous, next, toggle, reveal, reset, runDemo, intrude, drag, site, hat,
         connection = if (connected) "● 已连接遥控" else

@@ -104,7 +104,7 @@ class DemoSnapshots {
             DemoTheme {
                 androidx.compose.foundation.layout.Column {
                     PhoneHeader(true, address = "192.168.43.1 / 10.0.0.2")
-                    LiveDemoBar(LiveBoard(true, 10, 0, 0), true)
+                    LiveDemoBar(LiveBoard(true, 11, 0, 0), true)
                 }
             }
         }
@@ -176,7 +176,7 @@ class CompactRemoteSnapshots {
         appCompatEnabled = false, snapshotHandler = ExportSnapshots(), useDeviceResolution = true)
 
     @Test fun compactRemote() {
-        listOf("grid" to 4, "settings" to 4, "nes" to 10).forEach { (name, scene) ->
+        listOf("grid" to 4, "settings" to 4, "nes" to 11).forEach { (name, scene) ->
             paparazzi.snapshot("phone-compact-$name") {
                 DemoTheme {
                     androidx.compose.material3.Surface(Modifier.fillMaxSize()) {
@@ -184,6 +184,37 @@ class CompactRemoteSnapshots {
                             PhoneHeader(true, address = "192.168.43.1 / 10.0.0.2",
                                 expanded = name == "settings")
                             LiveDemoBar(LiveBoard(true, scene, 1, 110), true)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// L7 focused phone viewports after scrolling below the retained scene grid.
+class MirrorRemoteSnapshots {
+    @get:Rule
+    val paparazzi = Paparazzi(deviceConfig = DeviceConfig(screenWidth = 907,
+        screenHeight = 420, xdpi = 160, ydpi = 160, density = Density.MEDIUM,
+        orientation = ScreenOrientation.LANDSCAPE, softButtons = false),
+        appCompatEnabled = false, snapshotHandler = ExportSnapshots(), useDeviceResolution = true)
+
+    @Test fun mirrorPages() {
+        val ui = LiveUi(42, 4, "图形引擎", listOf(
+            LiveUiItem(0, 0, 0, 0, 0, "开始图形引擎跑分", emptyList(), 0),
+            LiveUiItem(1, 1, 1, 0, 0, "显示性能统计", emptyList(), 0),
+            LiveUiItem(2, 2, 35, 0, 100, "旋转速度", emptyList(), 1),
+            LiveUiItem(3, 3, 1, 0, 0, "渲染模式", listOf("线框", "实体", "纹理"), 1)))
+        for (page in listOf("controls", "navigation", "nes")) {
+            paparazzi.snapshot("phone-mirror-$page") {
+                DemoTheme {
+                    androidx.compose.material3.Surface(Modifier.fillMaxSize()) {
+                        androidx.compose.foundation.layout.Column(
+                            Modifier.fillMaxSize()) {
+                            PhoneHeader(true, address = "192.168.43.1")
+                            LiveControlTabs(ui, if (page == "nes") 11 else 7, true,
+                                if (page == "controls") 0 else 1)
                         }
                     }
                 }

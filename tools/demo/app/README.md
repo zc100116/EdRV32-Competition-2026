@@ -203,3 +203,16 @@ NES 主体高 192dp，方向键 64dp、确认/返回 56dp、Select/Start 64dp、
 `testDebugUnitTest` 导出 `phone-compact-grid.png`、`phone-compact-settings.png`、
 `phone-compact-nes.png`（907×420），以及 `phone-live-demo.png`（1280×720）；
 入库截图位于 `screenshots/`。构建命令仍使用上文工具链、共享 flock 锁和单 worker。
+
+## 界面镜像与平板跟随（versionCode 6 / 1.5）
+
+六章 11 场景网格下方提供“画面控件”和“导航”两个标签页；遥控页可纵向滚动。
+镜像按“页面”和“抽屉”分组，按钮、开关、滑块、下拉使用 Compose 原生控件；
+滑块仅在松手后发送设值，触控区至少 48dp，文字允许换行。
+导航含方向、上一个、下一个、确认、返回，走 pad 位图；场景 11 为 NES 手柄。
+前处理 255 显示“自定义”，高级参数直接来自镜像。
+中继新增 `ui`、`ui_act {revision,id,action,value}` 和 `ui_error {message}`；错误显示且不重试。
+收到 board.scene 变化时复用 SCENE 命令：1→traffic、2→gesture、3→dance、4→helmet、
+5→farm，其余（含 6–11、0、255）→home。没有场景变化的周期消息不会覆盖手动平板切换。
+Paparazzi 的 907×420dp 标签页证据为 `screenshots/phone-mirror-{controls,navigation,nes}.png`；
+这些视口展示滚动到场景网格下方后的控件区域；六列网格见 `phone-compact-grid.png`。

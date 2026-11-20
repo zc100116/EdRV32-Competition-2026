@@ -68,3 +68,24 @@ Android SDK 35 / build-tools 37.0.0、Gradle 8.14.3；无 RTL/板端改动。
 - 同一入口 `assembleDebug` 成功；素材复制自 `b3-int/build/demo-app/assets`；APK 内 assets/ 实测 215 项。
 - `aapt dump badging build/demo-app/edrv32-demo.apk`：versionCode 5、versionName 1.4；APK 71,388,182 B。
 - 日志：`build/demo-app/compact-{tests,build}.log`；APK：`build/demo-app/edrv32-demo.apk`；`git diff --check` PASS，未改 RTL。
+
+## T-LIVE-REMOTE-4：L7/L8/L9/L10（2026-11-20）
+- 基线 17bdd2e24；PC 实现 41f5e47b4，APK 与本节见所在提交；工具版本沿用上节。
+- PC：UI_ITEMS 分片重组、UI_ACT、页面/抽屉镜像、`GET /api/ui`、`POST /api/ui/act`。
+- 中继：ui 变化/每秒发送，ui_act 转发；ACK(3) 用 ui_error 回传原因，不重试。
+- ask 冻结：UI_ITEMS payload 上限改为 1000 B，控件不跨分片；新增 ui_error 消息。
+- 手机：六列 11 场景；画面控件/导航标签页、四种控件、滑块松手设值；场景 11 为 NES。
+- L8：board.scene 变化时发送既有 SCENE 命令；1–5 映射 traffic/gesture/dance/helmet/farm，其余 home。
+- 手动平板切换保留；周期 board 消息不覆盖手动选择；preset=255 显示“自定义”。
+- PC：`QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python -m unittest discover -s tools/debug_tool/tests`。
+- 结果：149 项中 147 PASS、2 项超时；构建结束后仅复验这两项，2/2 PASS（8.935s）；未改测试时限。
+- 复验：同 Python 加 `PYTHONPATH=tools/debug_tool/tests -m unittest test_showcase_detection.ShowcaseDetectionTest.test_three_second_return_waits_for_done_without_auto_advance test_virtual_input.VirtualInputTest.test_udp_loopback_repeat`。
+- 初次缺 LVGL 字体；从 b3-int 的同一子模块提交 80ca777e3 恢复后，字体相关测试通过。
+- APK：`JAVA_HOME=$HOME/.local/opt/android/jdk17 ANDROID_HOME=$HOME/.local/opt/android/sdk flock /tmp/edrv32-sw-build.lock tools/demo/app/gradlew -p tools/demo/app --no-daemon --max-workers=1 testDebugUnitTest assembleDebug`。
+- 结果：17/17 PASS，assembleDebug 成功；素材预先复制自 b3-int/build/demo-app/assets。
+- APK：build/demo-app/edrv32-demo.apk，71,420,946 B，assets/ 215 项，versionCode 6 / versionName 1.5。
+- aapt 权限：INTERNET、ACCESS_NETWORK_STATE 及既有 AndroidX 私有签名权限，无新增权限。
+- 截图：tools/debug_tool/assets/live-demo-1366x768.png；tools/demo/app/screenshots/phone-mirror-{controls,navigation,nes}.png（907×420dp）。
+- 六列网格：screenshots/phone-compact-grid.png；镜像页截图为滚动到网格下方后的视口，文字完整、触控区至少 48dp。
+- 日志：build/debug-tool-tests.log、build/debug-tool-timeout-retest.log、build/demo-app/mirror-tests-build.log。
+- `git diff --check`、Python compileall PASS；无 RTL，Verilator 不适用；实板现场联调未执行。
