@@ -76,7 +76,7 @@ class LiveDemoTest {
             "options":["立方体","球体"],"area":1}]}}""")
         assertEquals(LiveUi(7, 4, "图形引擎", listOf(
             LiveUiItem(3, 3, 1, 0, 0, "模式", listOf("立方体", "球体"), 1))), ui)
-        assertEquals(listOf("traffic", "gesture", "dance", "helmet", "farm"),
+        assertEquals(listOf("street", "gesture", "dance", "helmet", "farm"),
             (1..5).map(::liveTabletScene))
         (6..11).plus(listOf(0, 255)).forEach { assertEquals("home", liveTabletScene(it)) }
         val manual = reduceRemote(RemoteState(scene = liveTabletScene(1)),

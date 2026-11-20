@@ -290,6 +290,7 @@ fun RemoteSceneScreen(repository: MediaRepository, scene: DemoScene, state: Remo
     val item = scene.items[state.index]
     val farm = if (scene.id == "farm") state.farm() else null
     val site = if (item.type == "site") state.site() else null
+    val street = if (item.type == "street") StreetModel.frame(state.seconds) else null
     if (phone) LazyColumn(Modifier.fillMaxSize().background(Ink)) {
         item { phoneHeader() }
         item { liveBar() }
@@ -297,12 +298,13 @@ fun RemoteSceneScreen(repository: MediaRepository, scene: DemoScene, state: Remo
             contentAlignment = Alignment.Center) {
             SceneScreen(repository, scene, item, state.playing, false, farm,
                 previous = previous, next = next, drag = drag, site = site, hat = hat,
-                posterOnly = true)
+                posterOnly = true, street = street)
         } }
         item { SceneControls(farm != null, site != null, state.playing, back, previous, next,
             toggle, reset, runDemo, intrude) }
     } else SceneScreen(repository, scene, item, state.playing, controls, farm,
         back, previous, next, toggle, reveal, reset, runDemo, intrude, drag, site, hat,
+        street = street,
         connection = if (connected) "● 已连接遥控" else
             if (error.isEmpty()) "○ 等待遥控" else "○ $error")
 }
@@ -335,7 +337,7 @@ fun SceneScreen(repository: MediaRepository, scene: DemoScene, item: DemoMedia,
     toggle: () -> Unit = {}, reveal: () -> Unit = {}, reset: () -> Unit = {},
     runDemo: () -> Unit = {}, intrude: () -> Unit = {},
     drag: (Int, FarmPoint) -> Unit = { _, _ -> }, site: SiteFrame? = null,
-    hat: (Int) -> Unit = {}, posterOnly: Boolean = false, connection: String = "") {
+    hat: (Int) -> Unit = {}, posterOnly: Boolean = false, connection: String = "", street: StreetFrame? = null) {
     Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
         var displacement by remember { mutableFloatStateOf(0f) }
         val gestures = if (farm == null && site == null) Modifier.pointerInput(item.id) {
@@ -353,6 +355,8 @@ fun SceneScreen(repository: MediaRepository, scene: DemoScene, item: DemoMedia,
                 FarmCanvas(repository, farm, Modifier.fillMaxSize(), reveal, drag)
             } else if (site != null) {
                 SiteCanvas(repository, site, Modifier.fillMaxSize(), reveal, hat, drag)
+            } else if (street != null) {
+                StreetCanvas(repository, street, Modifier.fillMaxSize())
             } else if (item.type == "video/mp4" && !posterOnly && !LocalInspectionMode.current) {
                 VideoSurface(repository, item, playing, Modifier.fillMaxSize())
             } else {

@@ -30,7 +30,9 @@ private class ExportSnapshots : SnapshotHandler {
         object : SnapshotHandler.FrameHandler {
             override fun handle(image: BufferedImage) {
                 val name = snapshot.name!!
-                val directory = if (name.startsWith("site-frame-")) {
+                val directory = if (name.startsWith("street-frame-")) {
+                    File(System.getProperty("demo.build"), "street-frames")
+                } else if (name.startsWith("site-frame-")) {
                     File(System.getProperty("demo.build"), "site-frames")
                 } else if (name.startsWith("frame-")) {
                     File(System.getProperty("demo.build"), "farm-frames")
@@ -112,6 +114,32 @@ class DemoSnapshots {
                     PhoneHeader(true, address = "192.168.43.1 / 10.0.0.2")
                     LiveDemoBar(LiveBoard(true, 11, 0, 0), true)
                 }
+            }
+        }
+    }
+
+    @Test fun streetSequence() {
+        val repository = MediaRepository(paparazzi.context)
+        val frames = JSONArray()
+        for (second in 0..39) {
+            val state = StreetModel.frame(second.toDouble())
+            val name = "street-frame-%02d".format(second)
+            paparazzi.snapshot(name) { StreetCanvas(repository, state, Modifier.fillMaxSize()) }
+            val actors = JSONArray()
+            state.drawingOrder.forEach { a ->
+                actors.put(JSONObject().put("id", a.id).put("kind", a.kind)
+                    .put("category", a.category).put("x", a.x).put("y", a.y)
+                    .put("width", a.width).put("height", a.height)
+                    .put("facing", a.facing).put("pose", a.pose))
+            }
+            frames.put(JSONObject().put("file", "$name.png").put("seconds", second)
+                .put("actors", actors))
+        }
+        File(System.getProperty("demo.build"), "street-frames.json").writeText(frames.toString(2))
+        for (second in listOf(4, 17, 31)) {
+            paparazzi.snapshot("street-$second") {
+                StreetCanvas(repository, StreetModel.frame(second.toDouble()),
+                    Modifier.fillMaxSize())
             }
         }
     }

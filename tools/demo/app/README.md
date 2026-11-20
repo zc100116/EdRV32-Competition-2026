@@ -7,6 +7,7 @@
 | 场景 | 板端应用 | 内容与现场操作 |
 |---|---|---|
 | 智慧农场 | 智慧农场 | 一整块监控牧场，2 牛、1 马、3 羊、3 鸡；盘点后按“演示”观察走失与人闯入，也可拖动物或按“闯入” |
+| 动态街景 | 目标检测计数 | 40 秒确定性循环，车、人、狗移动，10 类；翻拍完全正确率 24/40，详见报告 |
 | 马路车流 | 目标检测计数 | 用户 2 段与 Mixkit 2 段，观察车辆框及分类计数 |
 | 舞蹈 | 人体姿态 | 用户 2 段与 Mixkit 2 段，观察全身关键点 |
 | 检测图集 | 目标检测计数 | 24 张 COCO 图像和 6 张原创动物园照片 |
@@ -55,7 +56,7 @@ prepare_assets.py 可指定 art、video、catalog 阶段，validate.py 可指定
 
 ## 验证与来源
 
-Paparazzi 在 JVM 调用实际界面及 Canvas，生成首页、七场景、来源页、每秒农场帧、20 秒运动盘点段及翻越动作帧。界面截图为 1280×720，写入 outputs/demo-app/；逐秒帧和标签在 build/demo-app/farm-frames/ 及 farm-frames.json。用户视频每秒取一帧，人工核对单人片段 1 人、群舞片段 6 人。复用既有拍屏透视、模糊、亮度、种子 17 噪声和 INT8 模型，confidence >0.25、NMS IoU >0.45，不调整阈值。
+Paparazzi 在 JVM 调用实际界面及 Canvas，生成首页、八场景、来源页、每秒农场帧、20 秒运动盘点段及翻越动作帧。界面截图为 1280×720，写入 outputs/demo-app/；逐秒帧和标签在 build/demo-app/farm-frames/ 及 farm-frames.json。用户视频每秒取一帧，人工核对单人片段 1 人、群舞片段 6 人。复用既有拍屏透视、模糊、亮度、种子 17 噪声和 INT8 模型，confidence >0.25、NMS IoU >0.45，不调整阈值。
 
 COCO 只筛官方许可 id 4、5、7、8，最终 24 张为 CC BY / CC BY-SA；统计标注面积占图像至少 2% 的目标召回，小目标正确检出不计误检。HaGRID 官方许可允许署名等条件下再分发，全文随 APK 打包：licenses/hagrid.txt；原许可 https://github.com/hukenovs/hagrid/blob/master/license/en_us.pdf 。APK catalog.json 逐张保留来源与许可，并注明图像缩放、留边、JPEG 转码及改动沿用原许可；Mixkit 来源在 ../kit/clips.json，旧原创图提示词在 ../kit/README.md。用户视频仅按原文件标注来源，用于本次现场演示。未使用 WIDER FACE。
 
@@ -222,7 +223,7 @@ Paparazzi 的 907×420dp 标签页证据为 `screenshots/phone-mirror-{controls,
 工人持续游走，点人摘戴安全帽、拖动和演示时序保留；使用整身原创步态和戴帽编辑。
 农场动物持续缓慢游走，鸡啄食时也移动；0–5 秒为运动盘点，走失/归来/闯入时间不变。
 闯入人物改走前景，避免持续被动物遮挡。FarmModel/Canvas 与 SiteModel/Canvas 仍由运行和 JVM 共用。
-此发布版场景 1 仍跟随马路车流，首页不含动态街景；既有素材和用户视频不入库。
+场景 1 跟随动态街景；首页可手动选择马路车流和检测图集。既有素材和用户视频不入库。
 
 ```sh
 flock /tmp/edrv32-sw-build.lock env OPENBLAS_NUM_THREADS=1 $P tools/demo/app/prepare_assets.py site
@@ -251,3 +252,65 @@ Precise object edit of this EXACT six columns by two rows walking worker sprite 
 kind 3 的 −1/越界值不高亮选项；kind 2 的 min≥max 只显示只读数值。
 Paparazzi 证据：[图形引擎](screenshots/phone-single-engine.png)、
 [识别及高级区](screenshots/phone-single-recognition.png)、[NES](screenshots/phone-single-nes.png)。
+
+## 动态识别场景（L11，versionCode 7 / 1.6）
+
+新增“动态街景”，现场演示场景 1 跟随到 street；手机首页仍可选择马路车流、检测图集。
+StreetModel/StreetCanvas 为运行和 JVM 截图共用实现，40 秒确定性循环；双向不同速度的
+轿车、公交车、卡车、自行车及骑车人、摩托车及骑手、行人与狗随时间进入、离开；
+扩展盆栽、红绿灯和停车牌，共 10 类。猫、鸟、长椅、雨伞、背包的翻拍识别不稳定，已移除。
+工人持续游走并使用原创身体步态图集，点人摘戴和演示时序保留；动物持续缓慢游走，
+鸡啄食时也移动。协调确认剧本前 5 秒照常游走，原有数量、帽子状态和告警时序不变。
+没有新增权限或运动开关。只将本次 imagegen 新生成的 art 入库，其余媒体仍在 build/。
+
+```sh
+cp -a /home/workspace/orca/workspaces/EdRV32-Competition-2026/b3-int/build/demo-app/assets build/demo-app/
+flock /tmp/edrv32-sw-build.lock env OPENBLAS_NUM_THREADS=1 $P tools/demo/app/prepare_assets.py site street motion-catalog
+flock /tmp/edrv32-sw-build.lock env OPENBLAS_NUM_THREADS=1 tools/demo/app/gradlew -p tools/demo/app --no-daemon --max-workers=1 testDebugUnitTest
+flock /tmp/edrv32-sw-build.lock env OPENBLAS_NUM_THREADS=1 $P tools/demo/app/validate.py street
+flock /tmp/edrv32-sw-build.lock env OPENBLAS_NUM_THREADS=1 $P tools/demo/app/validate.py site
+flock /tmp/edrv32-sw-build.lock env OPENBLAS_NUM_THREADS=1 $P tools/demo/app/validate.py farm
+flock /tmp/edrv32-sw-build.lock env OPENBLAS_NUM_THREADS=1 tools/demo/app/gradlew -p tools/demo/app --no-daemon --max-workers=1 assembleDebug
+```
+
+Paparazzi 在 build/demo-app/street-frames/ 导出 0–39 秒共 40 帧，输出 street-{4,17,31}.png；
+工地、农场继续导出逐秒剧本与 20 秒运动盘点段及选定时刻。逐秒标签与检测结果在
+build/demo-app/{street,site,farm}-{frames,results}.json，联系表在 outputs/demo-app/。
+街景按透明轮廓扣除画外和前景遮挡，露出 ≥70% 才计入真值；骑手另计 person，
+和独立行人合计。骑手轮廓用对应 sprite 上的人工多边形与 alpha 交集标注；工地头部用上方中央区域的 alpha。
+不足 70% 的目标为忽略目标，同类别完整原始轮廓框（裁到屏内）的投影框 IoU≥0.5 匹配的检测不计对错，
+原始框和分数仍全部保留，每场景记录忽略检测数。
+沿用原拍屏退化、板端 INT8 权重、置信度和 NMS 阈值。
+
+### 街景骑行、行走图集提示词（内置 imagegen，透明背景）
+
+Use case: photorealistic-natural. Transparent photographic walking sprite atlas, EXACTLY 2 columns by 4 rows of equal rectangular cells, generous empty gutters, no lines. Same fixed 20 degree elevated broadside view, all face RIGHT. Row 1: SAME adult man casually riding a black city bicycle, left cell left pedal down right cell right pedal down. Row 2: SAME rider in dark jacket and white motorcycle helmet riding a red ordinary road motorcycle, two subtly different riding poses. Row 3: SAME adult woman in bright orange casual jacket and dark blue trousers, full body, left cell left leg forward right cell right leg forward walking, natural arms. Row 4: SAME golden retriever DOG full body, left and right opposite walking strides. Each cell exactly one full object/person/group, complete wheels, limbs, feet and tail clearly visible, no cropping. Photorealistic detailed natural textures, anatomically accurate, consistent lighting and scale within each pair, clearly recognizable real street subjects. Actual alpha transparent background, no ground, shadows, buildings, scenery, text, logos, other objects, watermark.
+
+
+### 街景 traffic 图集（识别尺寸与视角调整）
+
+Use case: photorealistic-natural. Actual transparent alpha photographic vehicle animation sprite atlas, exactly TWO columns by THREE rows equal cells. No grid. Fixed camera elevated 20 degrees, view mostly from SIDE with FRONT visible at 25 degrees toward camera, all moving RIGHT. Row1: SAME full sized WHITE CITY BUS with blue stripe, large tall passenger windows, two axles, clearly a public BUS, left and right frames slight wheel rotation. Row2: SAME conventional heavy cargo delivery TRUCK, blue cab and white cargo box, prominent large cab grille, rear dual wheels, clear truck proportions, two wheel rotation frames. Row3: SAME large heavy BLACK MOTORCYCLE with clearly visible thick fuel tank, chrome engine, exhaust pipes, fat rubber motorcycle tires, adult rider in black leather jacket, white motorcycle helmet; two subtly different riding frames. Very realistic original detailed commercial vehicle photography, not toys or illustrations. Each cell one complete vehicle with no cropping, generous EMPTY TRANSPARENT gutters, same size between a pair. Keep the front grille and three-dimensional body readily recognizable in addition to side profile. True alpha transparent outside subjects and in gutters. No ground, floor, shadows, scene, backdrop, gray matte, text, logos, borders, other objects or watermark.
+
+### 街景自行车图集（去车筐，明确车架轮廓）
+
+Use case: photorealistic-natural. Actual alpha transparent photographic two-frame animation sprite sheet, EXACTLY 2 equal cells side by side. Same adult male rider wearing plain light gray short sleeve shirt, dark trousers, no backpack, no bag, on SAME bright blue ordinary city BICYCLE. Bicycle has two large thin black rubber wheels with clearly visible silver spokes, blue diamond frame with obvious triangle, pedals, straight handlebar; NO basket, NO rack, no luggage. Both subjects complete head to tire, generously inside each cell. Side profile facing RIGHT, camera elevated 20 degrees with front angle slightly toward camera, soft daylight, crisp recognizable real photographic bicycle and rider. Left cell left pedal down and right knee bent, right cell opposite pedaling phase. Identical scale and foot baseline. No ground, no scene, no shadows, no gray matte, no text, logos or watermark. True transparent background, ample transparent empty gutters.
+
+
+### 踏板摩托车（减少与自行车的混淆）
+
+Use case: photorealistic-natural. Transparent photographic two-frame MOTOR SCOOTER and rider sprite sheet, exactly 2 equal cells side by side. SAME bright RED modern large motor scooter with thick solid front fairing, broad footwell platform, enclosed engine body, large integrated headlight, thick small motorcycle tires and visible motorcycle license plate with no readable text; absolutely NO pedals or bicycle diamond frame. Clearly recognizable MOTORCYCLE type city motor scooter, realistic original street photography. SAME adult rider in dark navy jacket and white full-face motorcycle helmet sitting upright with both feet on scooter platform, both hands on handlebar. Entire rider and scooter from helmet to tires fully visible with transparent margins. Side view facing RIGHT with front turned 35 degrees toward camera, camera elevated 20 degrees. Two subtle riding poses and wheel rotations, same scale and baseline. Soft natural daylight sharp photo textures. Actual alpha transparent background. No floor, ground shadows, background, scenery, gray matte, lettering, logos, watermarks or extra objects.
+
+
+### 新增街景类别图集（协调者追加要求）
+
+Use case: photorealistic-natural. Transparent street simulation PHOTO sprite atlas, EXACTLY 4 columns by 3 rows of equal cells, no lines. All objects completely inside individual cells, generous transparent gutters. Camera elevated 20 degrees, side/three-quarter view, soft daylight, crisp realistic original photography. Row1 col1: one orange tabby CAT walking RIGHT left legs forward. Row1 col2: SAME cat opposite walking step. Row1 col3: one gray pigeon BIRD flying RIGHT with wings raised. Row1 col4: SAME pigeon flying with wings lowered. Row2 col1: one empty public wooden park BENCH with black metal legs and full backrest. Row2 col2: one big leafy green POTTED PLANT in a visible terracotta flower pot. Row2 col3: one urban TRAFFIC LIGHT facing toward camera with vertical RED YELLOW GREEN circular lenses on a short black pole. Row2 col4: one red octagonal STOP SIGN on a short gray pole, clear white STOP letters. Row3 col1: full body fictional adult woman walking RIGHT, plain blue top dark jeans shoes, holding a large open bright RED UMBRELLA overhead, left foot forward. Row3 col2: SAME woman SAME umbrella opposite walking step. Row3 col3: full body fictional adult man walking RIGHT, plain gray t-shirt black trousers shoes, LARGE clearly visible bright blue BACKPACK worn on back, left foot forward. Row3 col4: SAME man SAME backpack opposite walking step. Exactly one subject/group per cell, natural correct anatomy, all heads, feet, wings, tails and object edges fully visible, identical scale within each pair. Actual alpha TRANSPARENT BACKGROUND everywhere outside subjects, no ground, floor, cast shadows, scene, backdrop, gray matte, watermarks or other objects.
+
+固定盆栽、红绿灯和停车牌不改变位置、不凭空显隐；前景遮挡改变可见计数。
+最终保留类别及裁减原因见测量报告。
+
+农场动物横向游走幅度为 ±18，鸡为 ±24（2000×1125 场景坐标），工人为 ±65。
+闯入人物的横向事件时序不变，路径移至前景 y=850，避免牛只持续遮挡其主体。
+
+### 最终轿车图集
+
+Use case: photorealistic-natural. Actual alpha transparent TWO-FRAME car sprite sheet, exactly TWO equal cells side by side. SAME bright RED ordinary four-door modern sedan in both cells, front-three-quarter SIDE view facing RIGHT, camera elevated 20 degrees, front grille and both headlights clearly visible as well as full passenger side and two wheels. The viewing direction is 35 degrees forward from a pure side view, NOT frontal. Extremely clear unmistakable passenger CAR proportions, realistic glossy red body, dark tires, silver rims, blue-gray windows, visible dark front grille, sharp headlight assemblies. Original natural daylight photography, soft even lighting, real vehicle proportions. Left and right cells differ only in wheel rotation, identical car scale and foot baseline. Whole car including all bumpers and tires centered well inside each cell, generous empty transparent margins and gutter. Genuine ALPHA TRANSPARENCY outside the two cars. No floor, ground, cast shadow, scene, gray matte, backdrop, words, license-plate text, logos or watermark.

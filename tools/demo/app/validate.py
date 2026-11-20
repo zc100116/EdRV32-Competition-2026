@@ -232,6 +232,17 @@ def visible_targets(actors):
             part[:, :int(width*.25)] = False
             part[:, int(width*.75):] = False
         parts = [(actor['category'], part)]
+        if actor['part'] == 'rider':
+            from PIL import ImageDraw
+            rider = Image.new('1', (width, height))
+            polygon = [(.28, 0), (.64, 0), (.78, .42), (.69, .55),
+                       (.73, .9), (.52, .96), (.39, .68), (.29, .48)]
+            if actor['facing'] < 0:
+                polygon = [(1-px, py) for px, py in polygon]
+            ImageDraw.Draw(rider).polygon([(int(px*width), int(py*height))
+                                          for px, py in polygon], fill=1)
+            rider_mask = mask & np.asarray(rider)
+            parts = [(actor['category'], mask & ~rider_mask), (0, rider_mask)]
         for category, contour in parts:
             exposed = contour[top-y:bottom-y, left-x:right-x] & ~foreground[top:bottom, left:right]
             ratio = float(np.count_nonzero(exposed) / np.count_nonzero(contour))
@@ -255,6 +266,44 @@ def counted_detections(boxes, ids, targets):
         else:
             kept.append(int(category))
     return Counter(kept), ignored
+
+
+def street_truth(row):
+    actors = [a | dict(sprite=f"street/{a['kind']}-{a['pose']}.webp",
+        part='rider' if a['kind'] in ('bicycle', 'motorcycle') else 'body') for a in row['actors']]
+    targets = visible_targets(actors)
+    return Counter(t['category'] for t in targets if t['exposed'] >= .7), targets
+
+
+def street():
+    model = Model('detect')
+    rows = json.loads((BUILD / 'street-frames.json').read_text())
+    results, samples = [], []
+    correct = foreign = 0
+    allowed = {0, 1, 2, 3, 5, 7, 9, 11, 16, 58}
+    for row in rows:
+        expected, visibility = street_truth(row)
+        frame = cv2.imread(str(BUILD / 'street-frames' / row['file']))
+        boxes, scores, ids, _, annotated = model.run(frame, row['file'][:-4])
+        counts, ignored = counted_detections(boxes, ids, visibility)
+        passed = all(counts[c] == expected[c] for c in allowed)
+        correct += passed
+        foreign += bool(set(counts) - allowed)
+        results.append(row | dict(expected=dict(expected), visibility=visibility,
+            counts=dict(counts), ignored=ignored, passed=passed, boxes=boxes.tolist(),
+            scores=scores.tolist(),
+            classes=ids.tolist()))
+        samples.append((row['file'][:-4] + (' OK' if passed else ' FAIL'), annotated))
+        print('street', row['seconds'], dict(expected), dict(counts), passed, flush=True)
+    summary = dict(correct=[correct, len(rows)], foreign=[foreign, len(rows)],
+                   ignored=sum(len(r['ignored']) for r in results))
+    (BUILD / 'street-results.json').write_text(json.dumps(dict(summary=summary, frames=results),
+                                                        indent=2))
+    kit.contact_sheet('street', samples)
+    print('street summary', summary, flush=True)
+    if correct / len(rows) < .85 or foreign / len(rows) > .05:
+        raise SystemExit('FAIL: street acceptance')
+    print('PASS street', flush=True)
 
 
 def farm():
@@ -347,6 +396,8 @@ def main():
             farm()
         elif stage == 'site':
             site()
+        elif stage == 'street':
+            street()
         else:
             raise ValueError(stage)
 

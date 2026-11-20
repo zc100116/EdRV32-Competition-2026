@@ -130,6 +130,67 @@ def site_catalog(scenes):
     ] + [item for item in scene['items'] if item['id'] != 'site']
 
 
+def street_sprites(output, kind, frames):
+    bounds = [f.getchannel('A').point(lambda a: 255 if a >= 64 else 0).getbbox()
+              for f in frames]
+    width = max(b[2]-b[0] for b in bounds)
+    height = max(b[3]-b[1] for b in bounds)
+    for i, (frame, bound) in enumerate(zip(frames, bounds)):
+        canvas = Image.new('RGBA', (width, height))
+        cutout = frame.crop(bound)
+        canvas.paste(cutout, ((width-cutout.width)//2, height-cutout.height))
+        canvas.thumbnail((700, 700))
+        canvas.save(output / f'{kind}-{i}.webp', lossless=True)
+
+
+def street():
+    output = ASSETS / 'street'
+    output.mkdir(parents=True, exist_ok=True)
+    sources = [('car', [(0, 'car')], 1),
+               ('living', [(2, 'person'), (3, 'dog')], 4),
+               ('traffic', [(0, 'bus'), (1, 'truck')], 3),
+               ('bicycle', [(0, 'bicycle')], 1),
+               ('motorcycle', [(0, 'motorcycle')], 1)]
+    for sheet, kinds, rows in sources:
+        image = Image.open(ROOT / 'art/street' / (sheet + '-sheet.webp'))
+        cell_w, cell_h = image.width // 2, image.height // rows
+        edges = [0, 400, 770, 1165, 1448] if sheet == 'living' else [
+            row*cell_h for row in range(rows+1)]
+        for row, kind in kinds:
+            frames = [image.crop((col*cell_w, edges[row], (col+1)*cell_w,
+                                  edges[row+1])) for col in range(2)]
+            street_sprites(output, kind, frames)
+    extras = Image.open(ROOT / 'art/street/extras-sheet.webp')
+    cw, ch = extras.width // 4, extras.height // 3
+    for kind, row, columns in [('plant', 1, [1]), ('light', 1, [2]), ('stop', 1, [3])]:
+        frames = [extras.crop((col*cw, row*ch, (col+1)*cw, (row+1)*ch)) for col in columns]
+        street_sprites(output, kind, frames)
+    poster = Image.new('RGB', (480, 270), '#55585a')
+    car = Image.open(output / 'car-0.webp')
+    car.thumbnail((360, 200))
+    poster.paste(car, ((480-car.width)//2, (270-car.height)//2), car)
+    poster.save(output / 'poster.jpg', quality=90)
+
+
+def street_catalog(scenes):
+    item = dict(id='street', name='动态街景', path='street/poster.jpg', type='street',
+        poster='street/poster.jpg', author='本项目 · imagegen 原创',
+        source='原创透明街景动作图集；提示词见 README.md',
+        license='本项目原创素材，可随演示使用与修改', license_url='无第三方素材许可')
+    scenes[:] = [s for s in scenes if s['id'] != 'street']
+    scenes.insert(1, dict(id='street', name='动态街景', app='目标检测计数',
+        thumbnail='street/poster.jpg', items=[item]))
+
+
+def motion_catalog():
+    """Update the restored APK catalog with newly prepared motion scenes."""
+    path = ASSETS / 'catalog.json'
+    data = json.loads(path.read_text())
+    site_catalog(data['scenes'])
+    street_catalog(data['scenes'])
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2))
+
+
 def video():
     output = ASSETS / 'videos'
     downloads = BUILD / 'user-sources'
@@ -195,6 +256,7 @@ def catalog():
         source='原创监控背景及逐帧角色；提示词见 README.md',
         license='本项目原创素材，可随演示使用与修改', license_url='无第三方素材许可')]
     site_catalog(scenes)
+    street_catalog(scenes)
     for scene in scenes:
         for item in scene['items']:
             if item['type'] == 'video/mp4':
@@ -204,7 +266,7 @@ def catalog():
                 if not ok:
                     raise RuntimeError('Cannot decode '+item['path'])
                 cv2.imwrite(str(ASSETS / item['poster']), frame)
-            elif item['type'] not in ('farm', 'site'):
+            elif item['type'] not in ('farm', 'site', 'street'):
                 shutil.copy2(ASSETS / item['path'], ASSETS / item['poster'])
         poster = ASSETS / scene['items'][0]['poster']
         ImageOps.fit(Image.open(poster).convert('RGB'), (480, 270)).save(
@@ -221,5 +283,6 @@ def catalog():
 
 
 if __name__ == '__main__':
-    for stage in (sys.argv[1:] or ['art', 'site', 'video', 'catalog']):
-        {'art': art, 'site': site, 'video': video, 'catalog': catalog}[stage]()
+    for stage in (sys.argv[1:] or ['art', 'site', 'street', 'video', 'catalog']):
+        {'art': art, 'site': site, 'street': street, 'video': video, 'catalog': catalog,
+         'motion-catalog': motion_catalog}[stage]()

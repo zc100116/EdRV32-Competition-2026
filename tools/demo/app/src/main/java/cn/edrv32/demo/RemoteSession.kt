@@ -80,7 +80,7 @@ class RemoteSession(private val repository: MediaRepository, val phone: Boolean)
         val scene = repository.scenes.firstOrNull { it.id == state.scene }
         val item = scene?.items?.get(state.index)
         return state.at(now + if (phone) offset else 0,
-            state.scene == "farm" || item?.type == "site")
+            state.scene == "farm" || item?.type == "site" || item?.type == "street")
     }
     private fun send(line: String) {
         val connection = peer ?: return

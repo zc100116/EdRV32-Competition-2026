@@ -42,7 +42,7 @@ object LiveUiJson {
 }
 
 fun liveTabletScene(scene: Int): String = when (scene) {
-    1 -> "traffic"
+    1 -> "street"
     2 -> "gesture"
     3 -> "dance"
     4 -> "helmet"
