@@ -9,8 +9,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.Alignment
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
@@ -91,6 +95,13 @@ class LiveDemoSession : Closeable {
     }
 }
 
+// Shared by the independent touch targets: releasing one finger retains the others.
+fun livePadKeys(keys: Int, bit: Int, pressed: Boolean): Int =
+    if (pressed) keys or (1 shl bit) else keys and (1 shl bit).inv()
+
+private val sceneGroups = listOf(0..2, 3..4, 5..5, 6..7, 8..9)
+private val chapterShort = listOf("自研 NPU", "落地应用", "自研渲染器", "体感交互", "自研 CPU")
+
 @Composable
 fun LiveDemoBar(board: LiveBoard, connected: Boolean, error: String = "",
     command: (Int, Int) -> Unit = { _, _ -> }, pad: (Int) -> Unit = {}) {
@@ -99,35 +110,64 @@ fun LiveDemoBar(board: LiveBoard, connected: Boolean, error: String = "",
         255 -> "演示目录"
         else -> "${board.scene}/10 ${liveScenes[board.scene - 1]}"
     }
+    var expanded by remember(board.scene) { mutableStateOf(false) }
+    val enabled = connected && !board.busy
     Surface(tonalElevation = 4.dp) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 4.dp)) {
+        Column(Modifier.fillMaxWidth().padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("现场演示 · PC ${if (connected) "已连接" else "未连接"}" +
                 " · 板端${if (board.connected) "已连接" else "未连接"} · $scene" +
                 " · 档位 ${board.preset} · 亮度 ${board.luma}" +
                 if (board.busy) " · 切换中" else "")
             if (error.isNotEmpty()) Text(error, color = MaterialTheme.colorScheme.error)
-            Row(Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton({ command(2, 0) }, enabled = connected && !board.busy) {
-                    Text("上一场景")
-                }
-                OutlinedButton({ command(1, 0) }, enabled = connected && !board.busy) {
-                    Text("下一场景")
-                }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                OutlinedButton({ command(2, 0) }, enabled = enabled) { Text("上一场景") }
+                OutlinedButton({ command(1, 0) }, enabled = enabled) { Text("下一场景") }
                 livePresets.forEachIndexed { index, label ->
                     FilterChip(board.preset == index, { command(3, index) },
-                        { Text("$index $label") }, enabled = connected && !board.busy)
+                        { Text("$index $label") }, enabled = enabled)
                 }
             }
-            Row(Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                liveScenes.forEachIndexed { index, label ->
-                    FilterChip(board.scene == index + 1, { command(0, index + 1) },
-                        { Text("${index + 1} · ${liveChapters[index]} · $label") },
-                        enabled = connected && !board.busy)
+            if (board.scene == 10) {
+                OutlinedButton({ expanded = !expanded }, Modifier.fillMaxWidth()) {
+                    Text("场景 10/10 · NES 经典游戏 ${if (expanded) "▴" else "▾"}")
                 }
             }
-            if (board.scene == 10) LiveGamepad(connected, pad)
+            if (board.scene != 10 || expanded) LiveSceneGrid(board.scene, enabled, command)
+            if (board.scene == 10 && !expanded) LiveGamepad(connected, pad)
+        }
+    }
+}
+
+@Composable
+private fun LiveSceneGrid(scene: Int, enabled: Boolean, command: (Int, Int) -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        sceneGroups.forEachIndexed { chapter, indices ->
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text("第 ${chapter + 1} 章 · ${chapterShort[chapter]}",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(vertical = 4.dp))
+                indices.forEach { index ->
+                    val selected = scene == index + 1
+                    val colors = if (selected) ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary)
+                    else ButtonDefaults.filledTonalButtonColors()
+                    FilledTonalButton({ command(0, index + 1) },
+                        modifier = Modifier.fillMaxWidth().height(80.dp), enabled = enabled,
+                        shape = RoundedCornerShape(12.dp), colors = colors,
+                        contentPadding = PaddingValues(8.dp)) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(chapterShort[chapter], style = MaterialTheme.typography.labelSmall)
+                            Text("${index + 1}. ${liveScenes[index]}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -136,27 +176,67 @@ fun LiveDemoBar(board: LiveBoard, connected: Boolean, error: String = "",
 fun LiveGamepad(connected: Boolean, send: (Int) -> Unit = {}) {
     var keys by remember { mutableIntStateOf(0) }
     val currentSend by rememberUpdatedState(send)
+    val change: (Int, Boolean) -> Unit = { bit, pressed ->
+        keys = livePadKeys(keys, bit, pressed)
+        currentSend(keys)
+    }
     DisposableEffect(connected) {
         onDispose { keys = 0; currentSend(0) }
     }
-    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        listOf("↑", "↓", "←", "→", "A", "B", "Select", "Start", "确认", "返回")
-            .forEachIndexed { index, label ->
-                Box(Modifier.size(64.dp, 48.dp)
-                    .background(if (keys and (1 shl index) != 0)
-                        MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.surfaceVariant)
-                    .pointerInput(connected) {
-                        if (connected) detectTapGestures(onPress = {
-                            keys = keys or (1 shl index)
-                            currentSend(keys)
-                            try { awaitRelease() } finally {
-                                keys = keys and (1 shl index).inv()
-                                currentSend(keys)
-                            }
-                        })
-                    }, contentAlignment = Alignment.Center) { Text(label) }
+    Row(Modifier.fillMaxWidth().height(288.dp).padding(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(240.dp)) {
+            PadKey("↑", 0, keys, connected, change,
+                Modifier.align(Alignment.TopCenter), 80.dp)
+            PadKey("↓", 1, keys, connected, change,
+                Modifier.align(Alignment.BottomCenter), 80.dp)
+            PadKey("←", 2, keys, connected, change,
+                Modifier.align(Alignment.CenterStart), 80.dp)
+            PadKey("→", 3, keys, connected, change,
+                Modifier.align(Alignment.CenterEnd), 80.dp)
+            Text("方向", Modifier.align(Alignment.Center),
+                style = MaterialTheme.typography.labelLarge)
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(32.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                PadKey("确认", 8, keys, connected, change, size = 72.dp)
+                PadKey("返回", 9, keys, connected, change, size = 72.dp)
             }
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                PadKey("Select", 6, keys, connected, change, size = 80.dp)
+                PadKey("Start", 7, keys, connected, change, size = 80.dp)
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(24.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            PadKey("B", 5, keys, connected, change, size = 112.dp, round = true)
+            PadKey("A", 4, keys, connected, change, size = 112.dp, round = true)
+        }
+    }
+}
+
+@Composable
+private fun PadKey(label: String, bit: Int, keys: Int, connected: Boolean,
+    change: (Int, Boolean) -> Unit, modifier: Modifier = Modifier, size: Dp,
+    round: Boolean = false) {
+    val pressed = keys and (1 shl bit) != 0
+    val currentChange by rememberUpdatedState(change)
+    val shape = if (round) CircleShape else RoundedCornerShape(16.dp)
+    val background = if (pressed) MaterialTheme.colorScheme.primary
+        else MaterialTheme.colorScheme.surfaceVariant
+    val foreground = if (pressed) MaterialTheme.colorScheme.onPrimary
+        else MaterialTheme.colorScheme.onSurfaceVariant
+    Box(modifier.size(size).clip(shape).background(background)
+        .pointerInput(connected) {
+            if (connected) detectTapGestures(onPress = {
+                currentChange(bit, true)
+                try { awaitRelease() } finally { currentChange(bit, false) }
+            })
+        }, contentAlignment = Alignment.Center) {
+        Text(label, color = foreground, fontWeight = FontWeight.Bold,
+            style = if (round) MaterialTheme.typography.headlineLarge
+                else MaterialTheme.typography.titleMedium)
     }
 }

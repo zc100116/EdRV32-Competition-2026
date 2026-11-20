@@ -43,3 +43,15 @@ Android SDK 35 / build-tools 37.0.0、Gradle 8.14.3；无 RTL/板端改动。
 4. 工具“演示”页填写手机热点地址并点“连接手机”，确认 PC/板端状态。
 5. 从手机选场景、切档位；PC 可最小化；场景 10 用 NES 手柄，确认进入、返回退出。
 6. 实板现场联调尚未执行；协议与后台行为由本机假板和假手机验证。
+
+## T-LIVE-REMOTE-2 布局返工（2026-11-20）
+- 基线：8868d558b；仅手机端布局、位图组合测试、README 和截图调整。
+- 场景改为五章分组网格，十项完整展示，短章名/场景名分行，当前场景高亮。
+- NES 默认收起场景列表；点“场景 10/10 · NES 经典游戏 ▾”展开网格。
+- 手柄主体：左十字、右 112dp A/B 圆键、中间 Select/Start，确认/返回独立。
+- 最小触控区域 72dp；按下反色高亮；多点组合与独立松开共用生产位图函数。
+- 命令：`JAVA_HOME=$HOME/.local/opt/android/jdk17 ANDROID_HOME=$HOME/.local/opt/android/sdk flock /tmp/edrv32-sw-build.lock tools/demo/app/gradlew -p tools/demo/app --no-daemon --max-workers=1 testDebugUnitTest assembleDebug`。
+- 结果：14 项测试全部 PASS、assembleDebug 成功；右+A（bit3|bit4）、右+A+B 和独立释放通过。
+- 截图自查：十项文字完整且无重叠；十字键/中部功能键/右侧大圆键布局符合要求。
+- 两张 Paparazzi 截图更新于 `tools/demo/app/screenshots/phone-live-{demo,nes-gamepad}.png`。
+- 日志：`build/demo-app/live-layout-tests.log`；APK：`build/demo-app/edrv32-demo.apk`。

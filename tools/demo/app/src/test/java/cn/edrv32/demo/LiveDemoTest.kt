@@ -9,6 +9,24 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class LiveDemoTest {
+    @Test fun simultaneousPadKeysAndIndependentRelease() {
+        var keys = livePadKeys(0, 3, true)
+        keys = livePadKeys(keys, 4, true)
+        assertEquals((1 shl 3) or (1 shl 4), keys)
+        assertEquals(keys, JSONObject(LiveDemoJson.pad(keys)).getJSONObject("pad").getInt("keys"))
+        keys = livePadKeys(keys, 5, true)
+        assertEquals((1 shl 3) or (1 shl 4) or (1 shl 5), keys)
+        keys = livePadKeys(keys, 4, false)
+        assertEquals((1 shl 3) or (1 shl 5), keys)
+        keys = livePadKeys(keys, 3, false)
+        assertEquals(1 shl 5, keys)
+        assertEquals(0, livePadKeys(keys, 5, false))
+        for (bit in 0..9) {
+            assertEquals(1 shl bit, livePadKeys(0, bit, true))
+            assertEquals(0, livePadKeys(1 shl bit, bit, false))
+        }
+    }
+
     @Test fun protocol() {
         for (scene in 1..10) {
             val message = JSONObject(LiveDemoJson.command(0, scene)).getJSONObject("demo")
