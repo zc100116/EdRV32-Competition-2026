@@ -1,4 +1,4 @@
-/* live.c — live demo L3–L5; gain limits, protocol validation and STATE bytes. */
+/* live.c — live demo L3/L9/L10; levels and gamma, protocol validation and STATE bytes. */
 #include "protocol.h"
 #include "state.h"
 #include "vision/preprocess.h"
@@ -25,20 +25,34 @@ static void send(struct edsc *s, unsigned action, unsigned arg, unsigned reserve
 int main(void)
 {
     assert(SHOWCASE_DEFAULT_PRESET == 1 && SHOWCASE_TARGET_LUMA == 110);
-    assert(preprocess_gain(384,102,110) == 384);
-    assert(preprocess_gain(384,118,110) == 384);
-    assert(preprocess_gain(256,55,110) == 384);
-    assert(preprocess_gain(511,220,110) == 383);
-    assert(preprocess_gain(256,255,110) == 256);
-    assert(preprocess_gain(500,20,110) == 511);
-    assert(preprocess_gain(256,0,110) == 511);
     static uint16_t frame[1280*720];
-    assert(preprocess_luma(frame,1280) == 0);
+    struct preprocess_stats stats = preprocess_measure(frame,1280);
+    assert(stats.mean == 0 && stats.lo == 0 && stats.hi == 0);
     memset(frame,255,sizeof frame);
-    assert(preprocess_luma(frame,1280) == 255);
+    stats = preprocess_measure(frame,1280);
+    assert(stats.mean == 255 && stats.lo == 255 && stats.hi == 255);
+    /* 2% black, 96% middle gray and 2% white: exact percentile ranks. */
+    for (unsigned i = 0; i < 3600; ++i)
+        frame[(i/80)*16*1280+(i%80)*16] = i < 72 ? 0 : i < 3528 ? 0x8410 : 0xffff;
+    stats = preprocess_measure(frame,1280);
+    assert(stats.lo == 0 && stats.hi == 130);
+    int c, b;
+    preprocess_levels(0,80,&c,&b); assert(c == 511 && b == 144);
+    preprocess_levels(150,250,&c,&b); assert(c == 511 && b == -155);
+    preprocess_levels(100,105,&c,&b); assert(c == 511 && b == -56);
+    preprocess_levels(255,255,&c,&b); assert(c == 511 && b == -256);
+    preprocess_levels(16,240,&c,&b); assert(c == 256 && b == 0);
+    assert(preprocess_gamma(0,10) == 4 && preprocess_gamma(255,4) == 10);
+    assert(preprocess_gamma(55,10) == 5);
+    assert(preprocess_gamma(80,7) == 7); /* gamma=0.719 lies inside deadband */
+    assert(preprocess_gamma(80,9) == 7);
+    assert(preprocess_gamma_value(0,4) == 0 && preprocess_gamma_value(255,4) == 255);
+    assert(preprocess_gamma_value(128,4) == 194 && preprocess_gamma_value(128,10) == 128);
+    assert(preprocess_bc(0,511,-256) == 0);
+    assert(preprocess_bc(255,511,255) == 255);
     struct edsc s = {.ops = {.reply=reply,.state=state,.command=command,.progress=progress}};
     for (unsigned action = 0; action <= 4; ++action) {
-        unsigned arg = action == 0 ? 10 : action == 3 ? 3 : 0;
+        unsigned arg = action == 0 ? 11 : action == 3 ? 3 : 0;
         send(&s,action,arg,0,4);
         assert(replies == 1 && phase[0] == 1 && !error);
         result = EDSC_PENDING; edsc_poll(&s,0,100);
@@ -47,7 +61,7 @@ int main(void)
         assert(replies == 2 && phase[1] == 2 && !error);
     }
     unsigned accepted = commands;
-    const unsigned bad[][3] = {{0,0,0},{0,11,0},{3,4,0},{5,0,0},{1,1,0},{2,1,0},
+    const unsigned bad[][3] = {{0,0,0},{0,12,0},{3,4,0},{5,0,0},{1,1,0},{2,1,0},
                                {4,1,0},{0,1,1}};
     for (unsigned i = 0; i < sizeof bad/sizeof bad[0]; ++i) {
         send(&s,bad[i][0],bad[i][1],bad[i][2],4);
@@ -58,7 +72,7 @@ int main(void)
     struct board_state snapshot = {.demo_scene=255,.preset=3,.luma=62};
     board_state_encode(payload,&snapshot);
     assert(payload[5] == 255 && payload[6] == 3 && payload[7] == 62);
-    snapshot.demo_scene = 10; board_state_encode(payload,&snapshot); assert(payload[5] == 10);
+    snapshot.demo_scene = 11; board_state_encode(payload,&snapshot); assert(payload[5] == 11);
     snapshot.demo_scene = 0; board_state_encode(payload,&snapshot); assert(payload[5] == 0);
-    puts("PASS live demo: deadband, half-step, clamps, black/white luma, actions, ACK and STATE");
+    puts("PASS live demo: percentiles, BC, gamma deadband, clamps, black/white luma, actions, ACK and STATE");
 }

@@ -324,7 +324,17 @@ void ui_data_exposure_toggle(void)
 
 /* Live demo L4 simulation snapshot uses the same initial preset as the board. */
 #include "../board/vision/preprocess.h"
-static ui_preprocess_t preprocessing = {SHOWCASE_DEFAULT_PRESET,62,461};
+static ui_preprocess_t preprocessing = {.preset=SHOWCASE_DEFAULT_PRESET, .luma=62,
+    .contrast=384, .brightness=40, .gamma_tenths=7, .exposure=SHOWCASE_DEFAULT_EXPOSURE,
+    .auto_levels=true, .auto_gamma=true};
 ui_preprocess_t ui_data_preprocess(void) { return preprocessing; }
-void ui_data_preprocess_set(unsigned preset) { preprocessing.preset = preset; }
+void ui_data_preprocess_set(unsigned preset)
+{
+    int exposure = preset ? preprocessing.exposure : SHOWCASE_DEFAULT_EXPOSURE;
+    preprocessing = (ui_preprocess_t){.preset=preset, .luma=62, .contrast=256,
+        .gamma_tenths=10, .filter=preset >= 2 ? 2 : 0, .exposure=exposure,
+        .auto_levels=preset == 1 || preset == 3, .auto_gamma=preset == 1 || preset == 3};
+}
+void ui_data_preprocess_custom(const ui_preprocess_t *config)
+{ preprocessing = *config; preprocessing.preset = 255; }
 bool ui_data_preprocess_applied(void) { return true; }

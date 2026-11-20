@@ -103,16 +103,30 @@ int main(int argc,char **argv)
     ui_camera_drawer_toggle();
     lv_tick_inc(200); lv_timer_handler();
     capture("preset-drawer");
+    ui_preprocess_t config = ui_data_preprocess();
+    config.auto_levels = true; config.auto_gamma = false;
+    ui_data_preprocess_custom(&config);
+    /* Show the complete advanced section, including the exposure and filter rows. */
+    lv_obj_t *advanced = NULL;
+    lv_group_t *group = lv_group_get_default();
+    for (unsigned i = 0; i < lv_group_get_obj_count(group); ++i) {
+        lv_obj_t *o = lv_group_get_obj_by_index(group,i);
+        if (lv_obj_check_type(o,&lv_dropdown_class) && ui_camera_drawer_contains(o))
+            advanced = o;
+    }
+    assert(advanced);
+    lv_obj_scroll_to_view_recursive(advanced,LV_ANIM_OFF);
+    capture("advanced-drawer");
     ui_back(); assert(ui_page==13);
     ui_back(); assert(ui_page==LIVE_DEMO_PAGE);
     /* Directory focus is next scene; remote NEXT still uses last entered scene 4. */
     ui_live_command(1,0); assert(ui_page==19 && ui_live_scene()==5);
-    ui_live_command(0,10); ui_live_command(1,0); assert(ui_live_scene()==1);
-    ui_live_command(2,0); assert(ui_live_scene()==10);
-    ui_live_command(0,6); ui_tab=1; ui_back(); assert(ui_page==LIVE_DEMO_PAGE);
-    ui_live_command(0,7); ui_key(LV_KEY_ESC); assert(ui_page==LIVE_DEMO_PAGE);
+    ui_live_command(0,11); ui_live_command(1,0); assert(ui_live_scene()==1);
+    ui_live_command(2,0); assert(ui_live_scene()==11);
+    ui_live_command(0,7); ui_tab=1; ui_back(); assert(ui_page==LIVE_DEMO_PAGE);
+    ui_live_command(0,8); ui_key(LV_KEY_ESC); assert(ui_page==LIVE_DEMO_PAGE);
     ui_back(); assert(ui_page==0 && ui_live_scene()==0);
-    ui_live_command(2,0); assert(ui_live_scene()==10);
-    puts("PASS live UI: ten scenes, wrap, drawer priority, custom ESC and directory return");
+    ui_live_command(2,0); assert(ui_live_scene()==11);
+    puts("PASS live UI: eleven scenes, wrap, drawer priority, custom ESC and directory return");
     return 0;
 }

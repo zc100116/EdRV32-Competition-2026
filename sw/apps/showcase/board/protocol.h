@@ -27,5 +27,6 @@ void edsc_finish(struct edsc *s, unsigned kind, uint32_t index);
 void edsc_bulk(struct edsc *s, uint32_t bytes);
 void edsc_cancel(struct edsc *s);
 void edsc_poll(struct edsc *s, uint64_t now, uint32_t hz);
+void edsc_ui_items(struct edsc *s, const uint8_t *payload, unsigned bytes);
 void edsc_image_step(struct edsc *s, int direction);
 #endif

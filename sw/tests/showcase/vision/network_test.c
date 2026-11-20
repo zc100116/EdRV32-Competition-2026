@@ -6,6 +6,12 @@
 #define BUILD_COMMIT "p5c-test"
 #include "runtime_test.c"
 #include "../../../apps/showcase/board/network.c"
+unsigned ui_mirror_act(uint32_t revision, unsigned id, unsigned action, int value,
+                       bool application_input)
+{ (void)revision; (void)id; (void)action; (void)value; (void)application_input; return 0; }
+void ui_mirror_poll(void (*send)(const uint8_t *, unsigned), uint64_t now, uint32_t hz)
+{ (void)send; (void)now; (void)hz; }
+enum input_owner showcase_input_current_owner(void) { return INPUT_GUI; }
 static uint32_t network_irq, receive_bytes;
 static unsigned tx_busy, rx_busy, ignore_next, ignored, rings, states, hellos, image_sends;
 static uint32_t hardware_desc, hardware_count;

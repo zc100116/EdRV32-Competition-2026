@@ -1,31 +1,58 @@
-/* preprocess.h — live demo L4/L5; integer Q8 gain and RGB565 grid luminance.
- * Pure CPU routines shared by the board and host acceptance tests.
+/* preprocess.h — live demo L9; grid histogram, percentile levels and gamma.
+ * Pure CPU calculations shared by board and host tests; clk_sys.
  */
 #ifndef SHOWCASE_PREPROCESS_H
 #define SHOWCASE_PREPROCESS_H
 #include <stdint.h>
-enum { SHOWCASE_DEFAULT_PRESET = 1, SHOWCASE_TARGET_LUMA = 110 };
-static inline unsigned preprocess_gain(unsigned gain, unsigned mean, unsigned target)
+#include <math.h>
+enum { SHOWCASE_DEFAULT_PRESET = 1, SHOWCASE_TARGET_LUMA = 110,
+       SHOWCASE_DEFAULT_EXPOSURE = 44 };
+struct preprocess_stats { unsigned mean, lo, hi; };
+static inline struct preprocess_stats preprocess_measure(const uint16_t *pixels, unsigned stride)
 {
-    if (mean+8 >= target && mean <= target+8) return gain;
-    if (!mean) return 511;
-    unsigned next = (gain*(mean+target)+mean)/(2*mean);
-    return next < 256 ? 256 : next > 511 ? 511 : next;
-}
-static inline unsigned preprocess_luma(const uint16_t *pixels, unsigned stride)
-{
-    unsigned sum = 0;
+    unsigned histogram[256] = {0}, sum = 0;
     for (unsigned y = 0; y < 45; ++y)
         for (unsigned x = 0; x < 80; ++x) {
-            unsigned c = pixels[(y*16)*stride+x*16];
-            unsigned r = (c >> 11)&31;
-            unsigned g = (c >> 5)&63;
-            unsigned b = c&31;
+            unsigned c = pixels[y*16*stride+x*16];
+            unsigned r = (c >> 11)&31, g = (c >> 5)&63, b = c&31;
             r = (r << 3)|(r >> 2);
             g = (g << 2)|(g >> 4);
             b = (b << 3)|(b >> 2);
-            sum += (77*r+150*g+29*b) >> 8;
+            unsigned luma = (77*r+150*g+29*b) >> 8;
+            ++histogram[luma]; sum += luma;
         }
-    return (sum+1800)/3600;
+    unsigned count = 0, lo = 0, hi = 0;
+    for (unsigned i = 0; i < 256; ++i) {
+        unsigned previous = count; count += histogram[i];
+        if (previous < 72 && count >= 72) lo = i;
+        if (previous < 3528 && count >= 3528) hi = i;
+    }
+    return (struct preprocess_stats){(sum+1800)/3600,lo,hi};
 }
+static inline void preprocess_levels(unsigned lo, unsigned hi, int *contrast, int *brightness)
+{
+    unsigned span = hi-lo < 32 ? 32 : hi-lo;
+    int c = (256*224+span/2)/span;
+    if (c > 511) c = 511;
+    /* PIX 2.2 arithmetic shift: choose B so lo maps exactly to 16. */
+    int b = 16-128-(((int)lo-128)*c >> 8);
+    *contrast = c;
+    *brightness = b < -256 ? -256 : b > 255 ? 255 : b;
+}
+static inline unsigned preprocess_bc(unsigned mean, int contrast, int brightness)
+{
+    int value = (((int)mean-128)*contrast >> 8)+128+brightness;
+    return value < 0 ? 0 : value > 255 ? 255 : (unsigned)value;
+}
+static inline unsigned preprocess_gamma(unsigned mean, unsigned current)
+{
+    double gamma = mean == 0 ? 0.4 : mean == 255 ? 1.0 :
+        log(SHOWCASE_TARGET_LUMA/255.0)/log(mean/255.0);
+    if (gamma < 0.4) gamma = 0.4;
+    if (gamma > 1.0) gamma = 1.0;
+    if (fabs(gamma-current/10.0) < 0.05) return current;
+    return (unsigned)(gamma*10+0.5);
+}
+static inline uint8_t preprocess_gamma_value(unsigned value, unsigned tenths)
+{ return (uint8_t)(255*pow(value/255.0,tenths/10.0)+0.5); }
 #endif

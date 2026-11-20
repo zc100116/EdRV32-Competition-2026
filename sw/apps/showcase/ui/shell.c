@@ -3,6 +3,7 @@
  */
 #include "widgets.h"
 #include "live_demo.h"
+#include "mirror.h"
 #include "detection.h"
 #include "farm.h"
 #include "renderer.h"
@@ -204,6 +205,7 @@ void ui_open(unsigned page)
         game_active=false;
         if(apps[page]!=UI_APP_NONE) ui_data_app_open(apps[page],0);
     }
+    ui_preprocess_reset();
     ui_page = page;
     if(page!=1 && page!=2) ui_detection_settings=false;
     if(group) lv_group_delete(group);
@@ -234,6 +236,7 @@ void ui_open(unsigned page)
         "人脸贴纸", "", "安全帽检测", "抓取测试", "体感互动", "设置", "方块工坊",
         "抓取实验", "智慧农场", "空中画板", "演示目录"};
     ui_text_label(top,names[page],&sim_font_16,TEXT);
+    ui_mirror_page(page,names[page]);
     status = ui_text_label(top,"",&sim_font_14,MUTED);
     lv_obj_set_flex_grow(status,1);
     ui_action_button(top,"性能浮窗",1001);
@@ -263,7 +266,7 @@ void ui_open(unsigned page)
         lv_obj_set_hidden(top,true); lv_obj_set_hidden(bottom,true);
         lv_obj_set_size(content,1280,720); lv_obj_set_pos(content,0,0);
     }
-    if(ui_live_scene() >= 1 && ui_live_scene() <= 10) {
+    if(ui_live_scene() >= 1 && ui_live_scene() <= 11) {
         /* Reserve a full-width strip above the existing page without duplicating it. */
         lv_obj_set_pos(content,0,compact ? 32 : 80);
         lv_obj_set_height(content,compact ? 688 : 600);
@@ -298,7 +301,7 @@ void ui_open(unsigned page)
         lv_obj_add_event_cb(restore_surface,restore_pressed,LV_EVENT_PRESSED,NULL);
         lv_obj_set_hidden(restore_surface,true);
     }
-    if(ui_live_scene() >= 1 && ui_live_scene() <= 10) ui_live_banner(screen);
+    if(ui_live_scene() >= 1 && ui_live_scene() <= 11) ui_live_banner(screen);
     ui_monitor_controls();
     ui_refresh();
 }

@@ -359,3 +359,18 @@ int ov5640_exposure_limit(unsigned int camera, uint32_t clock_hz, int short_expo
         if (i2c_sccb_write(0x3cu, limits[i].address, limits[i].value)) return -1;
     return 0;
 }
+
+/* Live demo L9: Linux ov5640 AEC stable and fast windows, integer truncation. */
+int ov5640_set_ae_target(unsigned int camera, uint32_t clock_hz, unsigned target)
+{
+    unsigned high = target*27/25;
+    unsigned low = target*23/25;
+    const struct ov5640_register values[] = {
+        {0x3a0f, high}, {0x3a1b, high}, {0x3a10, low}, {0x3a1e, low},
+        {0x3a11, high*2 > 255 ? 255 : high*2}, {0x3a1f, low/2}
+    };
+    i2c_init(camera, clock_hz, 100000u);
+    for (unsigned i = 0; i < sizeof values/sizeof values[0]; ++i)
+        if (i2c_sccb_write(0x3cu, values[i].address, values[i].value)) return -1;
+    return 0;
+}

@@ -63,9 +63,14 @@ typedef struct {
     unsigned echo_count, echo_replies;
     bool hex, link;
 } ui_debug_t;
-typedef struct { unsigned preset, luma, gain_q8; } ui_preprocess_t;
+typedef struct {
+    unsigned preset, luma;
+    int brightness, contrast, gamma_tenths, filter, exposure;
+    bool auto_levels, auto_gamma;
+} ui_preprocess_t;
 ui_preprocess_t ui_data_preprocess(void);
 void ui_data_preprocess_set(unsigned preset);
+void ui_data_preprocess_custom(const ui_preprocess_t *config);
 bool ui_data_preprocess_applied(void);
 /* Return the modules available to this hardware configuration. */
 unsigned ui_data_hardware(void);

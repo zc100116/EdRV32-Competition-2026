@@ -189,5 +189,10 @@ live:
 	$(CC) $(FLAGS) -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \
 	    -DLV_CONF_INCLUDE_SIMPLE live.c $(ROOT)/sw/apps/showcase/board/protocol.c \
 	    $(ROOT)/sw/apps/showcase/board/records.c $(ROOT)/sw/apps/showcase/board/state.c \
-	    -o $(BUILD)/live
+	    -lm -o $(BUILD)/live
 	$(BUILD)/live
+
+	$(CC) $(FLAGS) -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/bsp/include \
+	    -ffunction-sections -Wl,--gc-sections ae.c $(ROOT)/sw/drivers/ov5640.c -o $(BUILD)/ae
+	$(BUILD)/ae
+	$(MAKE) -C $(ROOT)/sw/apps/showcase/sim -j1 mirror-test

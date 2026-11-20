@@ -214,12 +214,20 @@ $(BUILD)/showcase_farm_bench: main_farm_bench.c $(COMMON) $(FARM_PAGE_SOURCE) $(
 	    -Wl,--wrap=lv_obj_set_style_bg_color,--wrap=lv_obj_class_create_obj \
 	    -Wl,--wrap=lv_obj_delete,--wrap=farm_frame,--wrap=ui_data_vision -o $@
 
-LIVE_OUTPUT ?= $(ROOT)/outputs/live-demo
+LIVE_OUTPUT ?= $(ROOT)/outputs/live-demo-2
 .PHONY: live-shots
 live-shots: $(BUILD)/showcase_live_shots
 	mkdir -p $(LIVE_OUTPUT)
 	$(BUILD)/showcase_live_shots $(LIVE_OUTPUT)
-	$(foreach name,home directory helmet-banner preset-drawer,python3 $(ROOT)/tools/sw/raw2png.py $(LIVE_OUTPUT)/$(name).rgb565 $(LIVE_OUTPUT)/$(name).png;)
+	$(foreach name,home directory helmet-banner preset-drawer advanced-drawer,python3 $(ROOT)/tools/sw/raw2png.py $(LIVE_OUTPUT)/$(name).rgb565 $(LIVE_OUTPUT)/$(name).png;)
 	rm $(LIVE_OUTPUT)/*.rgb565
 $(BUILD)/showcase_live_shots: main_live_shots.c $(COMMON) $(UI_HEADERS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_live_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
+
+.PHONY: mirror-test
+mirror-test: $(BUILD)/showcase_mirror_test
+	$(BUILD)/showcase_mirror_test
+$(BUILD)/showcase_mirror_test: $(ROOT)/sw/tests/showcase/mirror.c ../ui/mirror.c \
+    ../ui/mirror.h ../ui/widgets.h $(LINUX_LV)
+	$(CC) $(FLAGS) -Werror -I../board $(ROOT)/sw/tests/showcase/mirror.c ../ui/mirror.c \
+	    ../board/protocol.c ../board/records.c $(LINUX_LV) -lm -o $@

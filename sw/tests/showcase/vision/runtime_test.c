@@ -29,6 +29,8 @@ void smooth_tasks(uint64_t busy[3], uint64_t maximum[3])
 { memset(busy,0,3*sizeof *busy); memset(maximum,0,3*sizeof *maximum); }
 void smooth_irqs(struct smooth_irq out[7]) { memset(out,0,7*sizeof *out); }
 void smooth_gui_take(struct smooth_gui *out) { *out = (struct smooth_gui){0}; }
+int ov5640_set_ae_target(unsigned camera, uint32_t hz, unsigned target)
+{ assert(camera == 0 && hz != 0 && target >= 24 && target <= 120); return 0; }
 int ov5640_exposure_limit(unsigned camera, uint32_t hz, int short_exposure)
 { (void)camera; (void)hz; (void)short_exposure; return 0; }
 unsigned ui_page;
@@ -1062,7 +1064,8 @@ static void preprocessing_test(void)
     assert(!ui_data_preprocess_applied());
     vision_app_camera.enter(); drain();
     assert(sources[2] == VIN_MEMORY);
-    assert(last_pix.flags == EDRV32_PIX_CFG_BC_EN_MASK && last_pix.contrast == 256);
+    assert(last_pix.flags == (EDRV32_PIX_CFG_BC_EN_MASK | EDRV32_PIX_CFG_GAMMA_EN_MASK) &&
+           last_pix.contrast == 256);
     unsigned before = memory_starts, runs = npu_runs;
     frames[0] = (struct vin_frame){0,2000};
     event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_FRAME_MASK); vision_service();

@@ -30,7 +30,7 @@ static int between(const uint8_t *p, int low, int high, int signed_value)
 }
 static unsigned validate(unsigned type, const uint8_t *p, unsigned n)
 {
-    static const unsigned lengths[] = {0, 0, 0, 0, 4, 0, 24, 16, 0, 4};
+    static const unsigned lengths[] = {0, 0, 0, 0, 4, 0, 24, 16, 0, 4, 8};
     if (type != 5 && n != lengths[type]) return 1;
     if (type == 4) {
         if (p[0] > 12 || p[1] > 3 || (p[0] != 5 && record_u16(p + 2))) return 2;
@@ -53,7 +53,7 @@ static unsigned validate(unsigned type, const uint8_t *p, unsigned n)
             record_u32(p+12) & 0xffff0000u) return 2;
     }
     if (type == 9 && (p[0] > 4 || p[2] || p[3] ||
-        (p[0] == 0 ? p[1] < 1 || p[1] > 10 : p[0] == 3 ? p[1] > 3 : p[1] != 0)))
+        (p[0] == 0 ? p[1] < 1 || p[1] > 11 : p[0] == 3 ? p[1] > 3 : p[1] != 0)))
         return 2;
     return 0;
 }
@@ -99,7 +99,7 @@ void edsc_message(struct edsc *s, const uint8_t *d, unsigned bytes)
             uint8_t ready[4] = {(uint8_t)kind}; reply(s, 0x81, ready, 4);
         }
     } else if (type == 3 && n <= 1000) reply(s, 0x83, p, n);
-    else if (type >= 4 && type <= 9) {
+    else if (type >= 4 && type <= 10) {
         unsigned error = validate(type, p, n);
         if (error) { ack(s, type, 3, error); return; }
         if (type == 8) {
@@ -150,3 +150,6 @@ void edsc_image_step(struct edsc *s, int direction)
 {
     uint8_t p[4] = {(uint8_t)direction}; s->seq = 0; reply(s, 0x87, p, 4);
 }
+
+void edsc_ui_items(struct edsc *s, const uint8_t *payload, unsigned bytes)
+{ s->seq = 0; reply(s,0x89,payload,bytes); }

@@ -13,4 +13,6 @@ bool ui_live_back(void);
 void ui_preset_controls(lv_obj_t *parent);
 void ui_preprocess_tag(lv_obj_t *parent);
 void ui_preprocess_refresh(void);
+void ui_preprocess_reset(void);
+void ui_preprocess_advanced(lv_obj_t *parent);
 #endif

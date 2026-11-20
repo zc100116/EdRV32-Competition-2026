@@ -41,6 +41,7 @@ lv_obj_t *ui_camera_card(lv_obj_t *parent);
 lv_obj_t *ui_camera_drawer(lv_obj_t *parent, lv_obj_t *header, const char *name);
 bool ui_camera_drawer_close(void);
 void ui_camera_drawer_toggle(void);
+bool ui_camera_drawer_contains(lv_obj_t *object);
 void ui_page_farm(lv_obj_t *parent);
 void ui_farm_update(void);
 void ui_farm_action(unsigned action);

@@ -383,7 +383,7 @@ lv_obj_t *ui_camera_drawer(lv_obj_t *parent,lv_obj_t *header,const char *name)
     lv_obj_set_ignore_layout(camera_drawer,true);
     lv_obj_set_pos(camera_drawer,960,48);
     lv_obj_set_height(camera_drawer,
-        ui_live_scene()>=1 && ui_live_scene()<=10 ? 640 : 672);
+        ui_live_scene()>=1 && ui_live_scene()<=11 ? 640 : 672);
     lv_obj_set_style_radius(camera_drawer,0,0);
     lv_obj_set_style_pad_all(camera_drawer,12,0);
     lv_obj_set_scrollable(camera_drawer,true);
@@ -395,7 +395,10 @@ lv_obj_t *ui_camera_drawer(lv_obj_t *parent,lv_obj_t *header,const char *name)
     drawer_button=ui_action_button(header,name,0);
     lv_obj_remove_event_cb(drawer_button,action);
     lv_obj_add_event_cb(drawer_button,drawer_toggle_event,LV_EVENT_CLICKED,NULL);
-    if(ui_page!=2 && ui_page!=3) ui_preset_controls(camera_drawer);
+    if(ui_page!=2 && ui_page!=3) {
+        ui_preset_controls(camera_drawer);
+        ui_preprocess_advanced(camera_drawer);
+    }
     return camera_drawer;
 }
 
@@ -417,4 +420,13 @@ lv_obj_t *ui_camera_layout(lv_obj_t *parent,const char *title)
     ui_action_button(header,"‹ 返回",1000);
     ui_text_label(header,title,&showcase_bold_24,TEXT);
     return header;
+}
+
+/* L7 includes closed drawer controls; visibility does not affect area. */
+bool ui_camera_drawer_contains(lv_obj_t *object)
+{
+    if (drawer_page != ui_page) return false;
+    for (; object; object = lv_obj_get_parent(object))
+        if (object == camera_drawer) return true;
+    return false;
 }

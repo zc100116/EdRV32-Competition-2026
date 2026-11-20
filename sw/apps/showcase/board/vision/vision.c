@@ -70,6 +70,7 @@ static struct {
     uint32_t process_revision, shadow_revision, applied_revision;
     int gamma_loaded;
     unsigned gamma_target, gamma_index;
+    bool gamma_recognition;
     uint8_t gamma_table[256];
     int32_t matrix[6];
     unsigned capture;
@@ -159,26 +160,44 @@ static bool live_page(void)
     return v.page == PAGE_CAMERA || v.page >= PAGE_POSE;
 }
 static struct {
-    unsigned preset, shadow, active, gain, luma, frames;
+    ui_preprocess_t config;
+    unsigned shadow, active, luma, frames, exposure;
     uint32_t revision, shadow_revision, applied_revision;
     int msrc_image, loop_image;
     uint32_t loop_frame;
     uint64_t loop_tick;
-} prep = {.preset = SHOWCASE_DEFAULT_PRESET, .shadow = SHOWCASE_DEFAULT_PRESET,
-          .gain = 256, .msrc_image = -1, .loop_image = -1};
+} prep = {.config = {.preset=SHOWCASE_DEFAULT_PRESET, .contrast=256, .gamma_tenths=10,
+                    .exposure=SHOWCASE_DEFAULT_EXPOSURE, .auto_levels=true, .auto_gamma=true},
+          .shadow=SHOWCASE_DEFAULT_PRESET, .exposure=SHOWCASE_DEFAULT_EXPOSURE,
+          .msrc_image=-1, .loop_image=-1};
 static void preprocess_configure(void);
 ui_preprocess_t ui_data_preprocess(void)
 {
-    return (ui_preprocess_t){prep.preset, live_page() && v.capture ? prep.luma : 0,
-                            prep.gain};
+    ui_preprocess_t config = prep.config;
+    config.luma = live_page() && v.capture ? prep.luma : 0;
+    return config;
 }
-void ui_data_preprocess_set(unsigned preset)
+static void preprocess_set(const ui_preprocess_t *config)
 {
     uint32_t lock = sched_port_lock();
-    prep.preset = preset;
+    prep.config = *config;
     ++prep.revision;
     app_wake_at(platform_ticks());
     sched_port_unlock(lock);
+}
+void ui_data_preprocess_custom(const ui_preprocess_t *config)
+{
+    ui_preprocess_t custom = *config;
+    custom.preset = 255;
+    preprocess_set(&custom);
+}
+void ui_data_preprocess_set(unsigned preset)
+{
+    ui_preprocess_t config = {.preset=preset, .contrast=256, .gamma_tenths=10,
+        .filter=preset >= 2 ? PIX_GAUSSIAN : PIX_BYPASS,
+        .auto_levels=preset == 1 || preset == 3, .auto_gamma=preset == 1 || preset == 3,
+        .exposure=preset ? prep.config.exposure : SHOWCASE_DEFAULT_EXPOSURE};
+    preprocess_set(&config);
 }
 bool ui_data_preprocess_applied(void)
 { return prep.applied_revision == prep.revision; }
@@ -436,7 +455,10 @@ static int free_image(unsigned first, unsigned end)
 static void initialize(void)
 {
     if (v.initialized) return;
-    if (!(platform_hardware() & APP_HW_PIX)) prep.preset = prep.shadow = 0;
+    if (!(platform_hardware() & APP_HW_PIX)) {
+        prep.config.preset = prep.shadow = 0;
+        prep.config.auto_levels = prep.config.auto_gamma = false;
+    }
     for (unsigned i = 0; i < 10; ++i) {
         v.images[i] = (lv_image_dsc_t){
             .header = {.magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565,
@@ -819,19 +841,35 @@ static void pix_mode(void)
 }
 static void preprocess_configure(void)
 {
-    bool gain = prep.preset == 1 || prep.preset == 3;
-    struct pix_config config = {gain ? EDRV32_PIX_CFG_BC_EN_MASK : 0,
-        prep.preset >= 2 ? PIX_GAUSSIAN : PIX_BYPASS, PIX_BYPASS, v.gamma_bank,
-        gain ? prep.gain : 256, gain ? (int)(prep.gain-256+1)/2 : 0, 128};
+    if (v.gamma_target != (unsigned)prep.config.gamma_tenths) {
+        v.gamma_target = prep.config.gamma_tenths;
+        v.gamma_index = 0;
+    }
+    if (!(platform_hardware() & APP_HW_PIX)) {
+        prep.shadow = 0; prep.shadow_revision = prep.revision; return;
+    }
+    const ui_preprocess_t *p = &prep.config;
+    if (v.gamma_loaded != -p->gamma_tenths) {
+        if (v.gamma_index < 256) return;
+        if (!(engine_poll(ENGINE_PIX).status & EDRV32_PIX_STATUS_IDLE_MASK)) return;
+        v.gamma_bank ^= 1;
+        pix_gamma_load(v.gamma_bank, v.gamma_table);
+        v.gamma_loaded = -p->gamma_tenths;
+    }
+    uint32_t flags = p->preset ? EDRV32_PIX_CFG_BC_EN_MASK |
+        EDRV32_PIX_CFG_GAMMA_EN_MASK : 0;
+    struct pix_config config = {flags, p->filter, PIX_BYPASS, v.gamma_bank,
+        (unsigned)p->contrast, p->brightness, 128};
     pix_configure(&config);
     engine_control(ENGINE_PIX, EDRV32_PIX_CTRL_ENABLE_MASK);
-    prep.shadow = prep.preset;
+    prep.shadow = prep.config.preset;
     prep.shadow_revision = prep.revision;
 }
 static void configure_capture(void)
 {
     struct vin_channel image = {VIN_CAM0, 4, VISION_STRIDE, {0}, 0};
-    struct vin_channel input = {prep.preset ? VIN_MEMORY : VIN_CAM0, 3, VISION_STRIDE, {0}, 0};
+    bool processed = prep.config.preset && (platform_hardware() & APP_HW_PIX);
+    struct vin_channel input = {processed ? VIN_MEMORY : VIN_CAM0, 3, VISION_STRIDE, {0}, 0};
     v.capture_busy = 0;
     for (unsigned slot = 0; slot < 4; ++slot) {
         if (sync_page()) {
@@ -854,8 +892,9 @@ static void configure_capture(void)
         pix_mode();
         if (v.process_dirty) return;
     }
-    else if (platform_hardware() & APP_HW_PIX) {
+    else {
         preprocess_configure();
+        if (prep.shadow_revision != prep.revision) return;
     }
     vin_camera_size(0, VISION_WIDTH, VISION_HEIGHT);
     vin_channel_configure(0, &image);
@@ -1279,9 +1318,24 @@ bool vision_post_active(void) { return v.job == JOB_POST; }
 
 int vision_service(void)
 {
+    if (prep.exposure != (unsigned)prep.config.exposure) {
+        if (ov5640_set_ae_target(0, platform_clock_hz(), prep.config.exposure))
+            fail("OV5640 AEC target");
+        prep.exposure = prep.config.exposure;
+    }
+    unsigned gamma = v.page == PAGE_PROCESS ? (unsigned)process.gamma_tenths :
+        (unsigned)prep.config.gamma_tenths;
+    if ((v.page == PAGE_PROCESS || live_page()) &&
+        (v.gamma_target != gamma || v.gamma_recognition != live_page())) {
+        v.gamma_recognition = live_page();
+        v.gamma_target = gamma;
+        v.gamma_index = 0;
+    }
     /* Design 4.5.2: software floating-point gamma work is one sample per slice. */
-    if (v.page == PAGE_PROCESS && v.gamma_index < 256) {
-        v.gamma_table[v.gamma_index] = pix_gamma_value(v.gamma_index, v.gamma_target);
+    if ((v.page == PAGE_PROCESS || live_page()) && v.gamma_index < 256) {
+        v.gamma_table[v.gamma_index] = live_page() ?
+            preprocess_gamma_value(v.gamma_index, v.gamma_target) :
+            pix_gamma_value(v.gamma_index, v.gamma_target);
         ++v.gamma_index;
     }
     /* Surfaces remain owned while CPU samples the completed CH0 frame. */
@@ -1293,12 +1347,22 @@ int vision_service(void)
         uint32_t address = EDRV32_DDR_BASE + image_address(image);
         for (unsigned row = 0; row < 45; ++row)
             engine_dma_invalidate(address+row*16*VISION_STRIDE, VISION_STRIDE);
-        unsigned mean = preprocess_luma((const uint16_t *)(uintptr_t)address, VISION_WIDTH);
+        struct preprocess_stats stats = preprocess_measure(
+            (const uint16_t *)(uintptr_t)address, VISION_WIDTH);
         sample_lock = sched_port_lock();
-        prep.luma = mean;
-        if (++prep.frames % 4 == 0 && (prep.preset == 1 || prep.preset == 3)) {
-            prep.gain = preprocess_gain(prep.gain, mean, SHOWCASE_TARGET_LUMA);
-            if (prep.shadow_revision == prep.revision) preprocess_configure();
+        prep.luma = stats.mean;
+        if (++prep.frames % 4 == 0 && (prep.config.auto_levels || prep.config.auto_gamma) &&
+            (platform_hardware() & APP_HW_PIX)) {
+            if (prep.config.auto_levels) {
+                int contrast, brightness;
+                preprocess_levels(stats.lo, stats.hi, &contrast, &brightness);
+                prep.config.contrast = (prep.config.contrast+contrast)/2;
+                prep.config.brightness = (prep.config.brightness+brightness)/2;
+            }
+            if (prep.config.auto_gamma)
+                prep.config.gamma_tenths = preprocess_gamma(preprocess_bc(stats.mean,
+                    prep.config.contrast, prep.config.brightness), prep.config.gamma_tenths);
+            ++prep.revision;
         }
         reference((int)image, 0, REF_LUMA);
         sched_port_unlock(sample_lock);
@@ -1646,7 +1710,7 @@ int vision_service(void)
     if (v.state == PIPE_STARTING) {
         unsigned model = page_models[v.page];
         if (model != v.model) select_model(model);
-        if (v.page == PAGE_PROCESS && v.gamma_index < 256) {
+        if ((v.page == PAGE_PROCESS || live_page()) && v.gamma_index < 256) {
             sched_port_unlock(lock); return 1;
         }
         /* Capture is stopped and drained before changing sensor frame timing. */
@@ -1655,7 +1719,8 @@ int vision_service(void)
             v.mirror_pending = false;
         }
         if (v.page != PAGE_IMAGE) configure_capture();
-        if (v.page == PAGE_PROCESS && v.process_dirty) {
+        if ((v.page == PAGE_PROCESS && v.process_dirty) ||
+            (live_page() && prep.shadow_revision != prep.revision)) {
             sched_port_unlock(lock); return 1;
         }
         v.state = PIPE_LIVE;
@@ -1684,7 +1749,8 @@ int vision_service(void)
     lock = sched_port_lock();
     int busy = v.state == PIPE_STARTING || v.state == PIPE_STOPPING ||
         v.state == PIPE_PAUSING || v.state == PIPE_CONFIGURE || v.model_pending ||
-        v.job != JOB_IDLE || v.npu_busy || v.done_mask || v.geo_source >= 0;
+        v.job != JOB_IDLE || v.npu_busy || v.done_mask || v.geo_source >= 0 ||
+        ((v.page == PAGE_PROCESS || live_page()) && v.gamma_index < 256);
     sched_port_unlock(lock);
     return busy;
 }
@@ -1693,7 +1759,8 @@ static void step(void)
 {
     int busy = vision_service();
     /* IRQ events wake idle camera work; sliced CPU work resumes immediately. */
-    unsigned cpu = v.job == JOB_POST || (v.page == PAGE_PROCESS && v.gamma_index < 256) ||
+    unsigned cpu = v.job == JOB_POST ||
+                   ((v.page == PAGE_PROCESS || live_page()) && v.gamma_index < 256) ||
                    v.model_pending;
     app_wake_at(busy ? platform_ticks() + (cpu ? 0 : platform_clock_hz() / 1000) :
                       UINT64_MAX);
