@@ -54,7 +54,9 @@ static void describe(struct item *item, lv_obj_t *o, unsigned id)
         item->kind = 2; item->value = lv_arc_get_value(o);
         item->min = lv_arc_get_min_value(o); item->max = lv_arc_get_max_value(o);
     } else if (lv_obj_check_type(o,&lv_buttonmatrix_class)) {
-        item->kind = 3; item->value = lv_buttonmatrix_get_selected_button(o);
+        uint32_t selected = lv_buttonmatrix_get_selected_button(o);
+        item->kind = 3;
+        item->value = selected == LV_BUTTONMATRIX_BUTTON_NONE ? -1 : (int16_t)selected;
         const char *const *map = lv_buttonmatrix_get_map(o);
         unsigned used = 0;
         for (unsigned i = 0; map[i][0]; ++i) {
@@ -65,7 +67,8 @@ static void describe(struct item *item, lv_obj_t *o, unsigned id)
             memcpy(item->options+used,map[i],n); used += n;
         }
     } else if (lv_obj_check_type(o,&lv_dropdown_class)) {
-        item->kind = 3; item->value = lv_dropdown_get_selected(o);
+        item->kind = 3;
+        item->value = lv_dropdown_get_option_count(o) ? (int16_t)lv_dropdown_get_selected(o) : -1;
         copy_text(item->options,lv_dropdown_get_options(o),96);
     }
     if (!label) {

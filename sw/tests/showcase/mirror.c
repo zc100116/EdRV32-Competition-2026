@@ -8,6 +8,7 @@
 #include <string.h>
 static unsigned parts, next_part, items, clicks, changes, error, phase;
 static uint32_t revision;
+static int selected = -1;
 static bool app_input;
 static struct edsc protocol;
 bool ui_camera_drawer_contains(lv_obj_t *object) { (void)object; return true; }
@@ -37,8 +38,10 @@ static void reply(const uint8_t *p, unsigned bytes)
         }
         if (items == 3) {
             assert(item[1] == 3 && item[10+item[9]] == 7);
+            assert((int16_t)record_u16(item+2) == selected);
             assert(!memcmp(item+11+item[9],"one\ntwo",7));
         }
+        if (items == 4) assert(item[1] == 3 && (int16_t)record_u16(item+2) == -1);
         offset += 11+item[9]+item[10+item[9]];
         ++items;
     }
@@ -61,7 +64,7 @@ static void poll(unsigned now)
 {
     next_part = items = 0;
     ui_mirror_poll(send_items,now,1000);
-    if (next_part) assert(next_part == parts && items == 74);
+    if (next_part) assert(next_part == parts && items == 75);
 }
 int main(void)
 {
@@ -78,8 +81,10 @@ int main(void)
     static const char *const map[] = {"one","two",""};
     lv_buttonmatrix_set_map(segment,map);
     lv_buttonmatrix_set_one_checked(segment,true);
-    lv_obj_t *objects[] = {button,toggle,slider,segment};
-    for (unsigned i = 0; i < 4; ++i) {
+    lv_obj_t *dropdown = lv_dropdown_create(screen);
+    lv_dropdown_clear_options(dropdown);
+    lv_obj_t *objects[] = {button,toggle,slider,segment,dropdown};
+    for (unsigned i = 0; i < 5; ++i) {
         lv_group_add_obj(group,objects[i]);
         lv_obj_add_event_cb(objects[i],event,LV_EVENT_ALL,NULL);
     }
@@ -99,10 +104,15 @@ int main(void)
     act(revision,1,0,0); assert(phase == 2 && lv_obj_has_state(toggle,LV_STATE_CHECKED));
     act(revision,2,1,-123); assert(phase == 2 && lv_slider_get_value(slider) == -123);
     act(revision,3,1,1); assert(phase == 2 && lv_buttonmatrix_get_selected_button(segment) == 1);
+    selected = 1;
     assert(changes == 3);
     poll(1); assert(revision == original); /* Values preserve revision; action forces send. */
     poll(2); assert(next_part == 0);
     poll(1001); assert(next_part == parts && revision == original);
+    lv_buttonmatrix_clear_button_ctrl_all(segment,LV_BUTTONMATRIX_CTRL_CHECKED);
+    lv_buttonmatrix_set_selected_button(segment,LV_BUTTONMATRIX_BUTTON_NONE);
+    selected = -1;
+    poll(1002); assert(revision == original && next_part == parts);
     act(revision,2,1,256); assert(phase == 3 && error == 2);
     act(revision,0,1,0); assert(phase == 3 && error == 5);
     act(revision,200,0,0); assert(phase == 3 && error == 5);
