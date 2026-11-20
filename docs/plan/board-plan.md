@@ -226,7 +226,7 @@
 | 卡 104 | `tasks/win/20261120-104-live-mirror-board`：取代卡 103；程序 b3 `29ab38736`，APK 1.5 | 用户 + Windows Codex | T-LIVE-*-2 | [x] 用户上板反馈 → L13；被卡 105 取代 |
 | T-DEMO-MOTION / T-PROCESS-AUTOPLAY | 平板动态街景/工地/农场（L11）；图像处理自动演示（L12）；L13 修正 | Codex gpt-6.1-sol medium | 设计记录 L11–L13 | [x] 2026-11-20 合入 b3 至 dc24b2533；报告 2026-11-20-sw-process-autoplay.md、2026-11-20-demo-motion-scenes.md；街景 10 类全对帧 24/40（60%），未达 L11 的 85% |
 | 卡 105 | `tasks/win/20261120-105-live-final-board`：取代卡 104；按讲稿完整走查 + 卡 104 问题复查；程序 b3 `dc24b2533`，APK 1.6；附讲稿和答辩问答 | 用户 + Windows Codex | T-DEMO-MOTION、T-PROCESS-AUTOPLAY | [ ] 已下发 |
-| T-STREET-2 | 街景继续调优至 L11 验收（10 类全对帧 ≥85%），答辩前同步 | Codex gpt-6.1-sol medium | 卡 105 现场反馈 | [ ] |
+| T-STREET-2 | 街景继续调优至 L11 验收（全对帧 ≥85%）；task_b6d5aea7feb4 | Codex gpt-6.1-sol medium | 卡 105 现场反馈 | [x] 2026-11-20 合入 b3 685c3b547：8 类 38/40，APK 1.7 换入卡 105 |
 
 ### 待确认事项（2026-10-31 梳理，逐项问用户）
 
