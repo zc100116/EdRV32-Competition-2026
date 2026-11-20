@@ -57,6 +57,8 @@ def make_handler(engine):
         def do_GET(self):
             path = urllib.parse.urlsplit(self.path).path
             try:
+                if path == "/api/ui":
+                    return self._json(200, engine.ethernet.showcase.ui.snapshot)
                 if path == "/api/board":
                     return self._json(200, engine.board.status())
                 if path == "/api/telemetry":
@@ -109,6 +111,8 @@ def make_handler(engine):
                             "/api/ethernet/receive/start", "/api/yolo/model",
                             "/api/yolo/image") and "localIp" in body:
                     engine.ethernet.local_ip = body["localIp"]
+                if path == "/api/ui/act":
+                    return self._json(200, engine.ethernet.showcase.ui_act(**body))
                 if path == "/api/demo":
                     return self._json(200, engine.ethernet.showcase.demo(
                         body["action"], body["arg"]))

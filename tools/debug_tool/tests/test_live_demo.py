@@ -19,9 +19,16 @@ class LiveDemoTest(unittest.TestCase):
     reply = p5.ProtocolTest.reply
     request = p5.ProtocolTest.request
 
+    @staticmethod
+    def read_board(reader):
+        while True:
+            message = json.loads(reader.readline())
+            if 'board' in message:
+                return message
+
     def test_demo_ack_serialization_and_error(self):
         tool = self.eth.showcase
-        for action, arg in ((0, 10), (1, 0), (2, 0), (3, 3), (4, 0)):
+        for action, arg in ((0, 11), (1, 0), (2, 0), (3, 3), (4, 0)):
             command = tool.demo(action, arg)
             kind, seq, payload = self.request()
             self.assertEqual((kind, payload), (DEMO, struct.pack('<BB2x', action, arg)))
@@ -32,7 +39,7 @@ class LiveDemoTest(unittest.TestCase):
                 tool.demo(1, 0)
             self.reply(ACK, seq, struct.pack('<HBB', DEMO, 2, 0))
             wait_for(self, lambda: DEMO not in tool.pending)
-        tool.demo(0, 11)
+        tool.demo(0, 12)
         _, seq, _ = self.request()
         self.reply(ACK, seq, struct.pack('<HBB', DEMO, 3, 2))
         wait_for(self, lambda: DEMO not in tool.pending)
@@ -55,11 +62,11 @@ class LiveDemoTest(unittest.TestCase):
         with urllib.request.urlopen(url + '/api/board') as response:
             state = json.load(response)['state']
         self.assertEqual([state[k] for k in ('demo_scene', 'preset', 'luma')], [255, 3, 123])
-        request = urllib.request.Request(url + '/api/demo', b'{"action":0,"arg":10}',
+        request = urllib.request.Request(url + '/api/demo', b'{"action":0,"arg":11}',
                                          {'Content-Type': 'application/json'})
         with urllib.request.urlopen(request) as response:
             self.assertIn('seq', json.load(response))
-        self.assertEqual(self.request()[2], bytes((0, 10, 0, 0)))
+        self.assertEqual(self.request()[2], bytes((0, 11, 0, 0)))
 
     def test_phone_lines_state_periodic_pad_disconnect_reconnect(self):
         listener = socket.socket()
@@ -74,29 +81,29 @@ class LiveDemoTest(unittest.TestCase):
         phone, _ = listener.accept()
         phone.settimeout(3)
         with phone, phone.makefile('rb') as reader:
-            snapshot = json.loads(reader.readline())
+            snapshot = self.read_board(reader)
             self.assertEqual(snapshot, dict(board=dict(
                 connected=False, scene=0, preset=0, luma=0, busy=False)))
-            self.assertEqual(json.loads(reader.readline()), snapshot)
+            self.assertEqual(self.read_board(reader), snapshot)
             payload = bytearray(state_payload())
-            payload[5:8] = bytes((10, 2, 99))
+            payload[5:8] = bytes((11, 2, 99))
             with patch.object(self.engine.virtual_input, 'start'):
                 self.engine.board.receive_state(HELLO, struct.pack('<H2x16s', 4, b'new') + payload)
-            snapshot = json.loads(reader.readline())
+            snapshot = self.read_board(reader)
             self.assertEqual(snapshot['board'], dict(
-                connected=True, scene=10, preset=2, luma=99, busy=False))
+                connected=True, scene=11, preset=2, luma=99, busy=False))
             # Fragmented JSON and multiple lines use exactly the same framing.
             phone.sendall(b'{"demo":{"action":0,')
-            phone.sendall(b'"arg":10}}\n')
+            phone.sendall(b'"arg":11}}\n')
             kind, seq, payload = self.request()
-            self.assertEqual((kind, payload), (DEMO, bytes((0, 10, 0, 0))))
-            self.assertTrue(json.loads(reader.readline())['board']['busy'])
+            self.assertEqual((kind, payload), (DEMO, bytes((0, 11, 0, 0))))
+            self.assertTrue(self.read_board(reader)['board']['busy'])
             phone.sendall(b'{"demo":{"action":1,"arg":0}}\n')
             wait_for(self, lambda: '同类命令' in relay.error)
             self.assertTrue(relay.connected)
             self.reply(ACK, seq, struct.pack('<HBB', DEMO, 2, 0))
             wait_for(self, lambda: DEMO not in self.eth.showcase.pending)
-            self.assertFalse(json.loads(reader.readline())['board']['busy'])
+            self.assertFalse(self.read_board(reader)['board']['busy'])
             phone.sendall(b'{"pad":{"keys":17}}\n')
             def pad_frame():
                 from tools.debug_tool.core.ethernet import unpack
@@ -113,7 +120,7 @@ class LiveDemoTest(unittest.TestCase):
             self.assertEqual(reader.readline(), b'')
         reconnected, _ = listener.accept()
         with reconnected, reconnected.makefile('rb') as reader:
-            self.assertTrue(json.loads(reader.readline())['board']['connected'])
+            self.assertTrue(self.read_board(reader)['board']['connected'])
 
     def test_malformed_relay_json(self):
         for line in ('[]', '{}', '{"demo":{}}', '{"demo":{"action":true,"arg":0}}',
@@ -151,5 +158,5 @@ class LiveDemoTest(unittest.TestCase):
         self.engine.phone_relay.connect('127.0.0.1')
         phone, _ = listener.accept()
         with phone:
-            phone.sendall(b'{"demo":{"action":0,"arg":10}}\n')
-            self.assertEqual(self.request()[2], bytes((0, 10, 0, 0)))
+            phone.sendall(b'{"demo":{"action":0,"arg":11}}\n')
+            self.assertEqual(self.request()[2], bytes((0, 11, 0, 0)))

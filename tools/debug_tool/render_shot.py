@@ -150,6 +150,21 @@ def main():
         window._select_page(args.main_page)
         window.soc.refresh()
         if args.main_page == 7:
+            # L7 mirror example uses the same wire decoder as a real board.
+            from core.showcase import UI_ITEMS, encode as control_message
+            title = '图形引擎'.encode()
+            controls = []
+            for ident, kind, value, low, high, area, label, options in (
+                    (0, 0, 0, 0, 0, 0, '开始跑分', ''),
+                    (1, 1, 1, 0, 0, 0, '性能统计', ''),
+                    (2, 2, 35, 0, 100, 1, '旋转速度', ''),
+                    (3, 3, 1, 0, 0, 1, '渲染模式', '线框\n实体\n纹理')):
+                label, options = label.encode(), options.encode()
+                controls.append(struct.pack('<BBhhhBB', ident, kind, value, low, high,
+                                            area, len(label)) + label + bytes((len(options),)) + options)
+            engine.ethernet.showcase.receive(control_message(UI_ITEMS, 0,
+                struct.pack('<IBBBBB', 42, 0, 1, 4, 0, len(title)) + title + b''.join(controls)))
+            engine.board.board_state.update(demo_scene=7, preset=255)
             window.demo.address.setText('192.168.43.1')
             window.demo.refresh()
         app.processEvents()

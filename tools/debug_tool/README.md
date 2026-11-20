@@ -199,3 +199,15 @@ CLI：`python tools/debug_tool/cli.py demo 0 10`。action 0 跳转、1 下一、
 
 截图（模拟板端状态）：[1366×768](assets/live-demo-1366x768.png)、
 [1920×1080](assets/live-demo-1920x1080.png)。
+
+## 界面镜像（L7/L10）
+
+“演示”页显示六章 11 个场景；图像处理为场景 6，NES 为场景 11。
+前处理快捷档为原始、暗光增强、降噪、暗光增强 + 降噪，STATE preset=255 显示“自定义”。
+板端 UI_ITEMS（0x89）按 revision/part/parts 合并，镜像列表分“页面”和“抽屉”；
+按钮和开关点击发送 UI_ACT（0x0A），滑块松手和下拉选中后发送设值。
+REST：`GET /api/ui` 返回 `{revision,page,title,items}`；
+`POST /api/ui/act` 接受 `{revision,id,action,value}`，返回命令 seq/phase。
+每条 UI_ITEMS payload 最多 1000 B（协调端确认的 EDSC 单包上限）。
+中继将完整列表作为 `{"ui":{...}}` 在变化时和每秒发送；接收 `{"ui_act":{...}}`。
+UI_ACT 的 ACK(3) 原因用 `{"ui_error":{"message":"…"}}` 回传手机，不重试。

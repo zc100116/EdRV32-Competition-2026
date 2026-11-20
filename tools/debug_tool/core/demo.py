@@ -7,17 +7,24 @@ import threading
 import time
 
 SCENES = ('目标检测（80 类）', '手势识别', '人体姿态', '工地安全帽检测',
-          '智慧农场', '图形引擎', '抓取实验', '弹弓打靶',
+          '智慧农场', '图像处理（PIX + GEO）', '图形引擎', '抓取实验', '弹弓打靶',
           'CoreMark 跑分（芯片信息）', 'NES 经典游戏')
-CHAPTERS = (('自研 NPU · 多模型部署',) * 3 + ('落地应用',) * 2 + ('自研渲染器',) +
+CHAPTERS = (('自研 NPU · 多模型部署',) * 3 + ('落地应用',) * 2 + ('自研图像处理',) + ('自研渲染器',) +
             ('体感交互',) * 2 + ('自研 CPU · 跑分与经典游戏',) * 2)
-PRESETS = ('原始', '自动亮度', '降噪', '自动亮度 + 降噪')
+PRESETS = ('原始', '暗光增强', '降噪', '暗光增强 + 降噪')
 
 
 def read_demo(line):
     value = json.loads(line)
-    if not isinstance(value, dict) or set(value) not in ({'demo'}, {'pad'}):
-        raise ValueError('需要 demo 或 pad 对象')
+    if not isinstance(value, dict) or set(value) not in ({'demo'}, {'pad'}, {'ui_act'}):
+        raise ValueError('需要 demo、pad 或 ui_act 对象')
+    if 'ui_act' in value:
+        act = value['ui_act']
+        fields = {'revision', 'id', 'action', 'value'}
+        if (not isinstance(act, dict) or set(act) != fields
+                or any(type(act[key]) is not int for key in fields)):
+            raise ValueError('ui_act 需要整数 revision、id、action、value')
+        return value
     if 'pad' in value:
         pad = value['pad']
         if (not isinstance(pad, dict) or set(pad) != {'keys'}
@@ -69,12 +76,22 @@ class PhoneRelay:
                     buffer = b''
                     previous = None
                     sent = 0
+                    previous_ui = None
+                    ui_sent = 0
                     while not self.stop.is_set():
                         snapshot = self.snapshot()
                         now = time.monotonic()
                         if snapshot != previous or now - sent >= 1:
                             connection.sendall((json.dumps(snapshot) + '\n').encode())
                             previous, sent = snapshot, now
+                        ui = self.board.ethernet.showcase.ui.snapshot
+                        if ui != previous_ui or now - ui_sent >= 1:
+                            connection.sendall((json.dumps(dict(ui=ui)) + '\n').encode())
+                            previous_ui, ui_sent = ui, now
+                        errors = self.board.ethernet.showcase.ui_errors
+                        while not errors.empty():
+                            error = dict(ui_error=dict(message=errors.get()))
+                            connection.sendall((json.dumps(error) + '\n').encode())
                         if not select.select([connection], [], [], .05)[0]:
                             continue
                         data = connection.recv(4096)
@@ -87,6 +104,11 @@ class PhoneRelay:
                             if 'demo' in message:
                                 try:
                                     self.board.ethernet.showcase.demo(**message['demo'])
+                                except RuntimeError as exc:
+                                    self.error = f'命令错误：{exc}'
+                            elif 'ui_act' in message:
+                                try:
+                                    self.board.ethernet.showcase.ui_act(**message['ui_act'])
                                 except RuntimeError as exc:
                                     self.error = f'命令错误：{exc}'
                             else:
