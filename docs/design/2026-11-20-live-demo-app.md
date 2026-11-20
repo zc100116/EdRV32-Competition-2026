@@ -143,6 +143,11 @@
   - 手机 → PC：`{"demo":{"action":n,"arg":m}}`；PC 收到后发 EDSC DEMO。
   - PC → 手机：`{"board":{"connected":bool,"scene":n,"preset":n,"luma":n}}`；STATE 变化时发送，此外每 1 s 发一次。
   - 格式错误时关闭连接，并在界面上显示原因（与 APK 的 RemoteTransport 一致）。
+  - 忙状态（worker 提问，协调者 2026-11-20 确认）：
+    - board 消息另带 `"busy":bool`，表示有 DEMO 命令在等待 ACK(2/3)；busy 变化时立即发送。
+    - PC 在 busy 期间收到新的 DEMO（来自手机或面板），不排队、不发送，界面显示“同类命令正在等待设备完成”。
+    - 手机在 busy 期间把场景和档位按钮显示为禁用，并显示“切换中”。
+    - 手柄 pad 不受 busy 影响。
 
 **手机遥控端 APK**：
 
