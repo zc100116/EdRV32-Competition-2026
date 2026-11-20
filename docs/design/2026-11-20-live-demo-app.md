@@ -280,6 +280,7 @@
 
 - PC 把 UI_ITEMS 合并成一条，用 `{"ui":{"revision":n,"page":n,"title":s,"items":[{"id","kind","value","min","max","label","options":[...],"area"}]}}` 发给手机。页面或控件有变化时发送，此外每 1 s 发一次。
 - 手机发 `{"ui_act":{"revision":n,"id":n,"action":n,"value":n}}`，PC 收到后转成 UI_ACT。
+- UI_ACT 收到 ACK(3) 时，PC 给手机发一行 `{"ui_error":{"message":s}}`，手机把原因显示在错误行，不重试。
 - PC 调试工具的“演示”页也显示同一份控件列表，可以直接点击。
 
 **手机界面**：
