@@ -127,32 +127,56 @@ fun LiveDemoBar(board: LiveBoard, connected: Boolean, error: String = "",
     val scene = when (board.scene) {
         0 -> "未进入演示"
         255 -> "演示目录"
-        else -> "${board.scene}/11 ${liveScenes[board.scene - 1]}"
+        else -> "${board.scene}/11 · ${liveScenes[board.scene - 1]}"
     }
-    var tab by remember { mutableIntStateOf(0) }
+    var expanded by remember { mutableStateOf(false) }
     val enabled = connected && !board.busy
     Surface(tonalElevation = 4.dp) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+        Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text("现场演示 · PC ${if (connected) "已连接" else "未连接"}" +
-                " · 板端${if (board.connected) "已连接" else "未连接"} · $scene" +
-                " · 档位 ${if (board.preset == 255) "自定义" else livePresets[board.preset]} · 亮度 ${board.luma}" +
-                if (board.busy) " · 切换中" else "",
+                " · 板端${if (board.connected) "已连接" else "未连接"}" +
+                " · 档位 ${if (board.preset == 255) "自定义" else livePresets[board.preset]}" +
+                " · 亮度 ${board.luma}" + if (board.busy) " · 切换中" else "",
                 style = MaterialTheme.typography.bodySmall)
             if (error.isNotEmpty()) Text(error, color = MaterialTheme.colorScheme.error)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp),
+            Row(Modifier.fillMaxWidth().height(44.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically) {
+                OutlinedButton({ expanded = !expanded }, enabled = enabled,
+                    modifier = Modifier.width(240.dp).fillMaxHeight(),
+                    contentPadding = PaddingValues(6.dp)) {
+                    Text("场景 $scene ▾", style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1)
+                }
                 OutlinedButton({ command(2, 0) }, enabled = enabled,
-                    contentPadding = PaddingValues(horizontal = 12.dp)) { Text("上一场景") }
+                    modifier = Modifier.width(76.dp).fillMaxHeight(),
+                    contentPadding = PaddingValues(4.dp)) {
+                    Text("上一场景", style = MaterialTheme.typography.labelSmall)
+                }
                 OutlinedButton({ command(1, 0) }, enabled = enabled,
-                    contentPadding = PaddingValues(horizontal = 12.dp)) { Text("下一场景") }
+                    modifier = Modifier.width(76.dp).fillMaxHeight(),
+                    contentPadding = PaddingValues(4.dp)) {
+                    Text("下一场景", style = MaterialTheme.typography.labelSmall)
+                }
                 livePresets.forEachIndexed { index, label ->
                     FilterChip(board.preset == index, { command(3, index) },
-                        { Text("$index $label") }, enabled = enabled)
+                        { Text(label, style = MaterialTheme.typography.labelSmall) },
+                        enabled = enabled)
                 }
             }
-            LiveSceneGrid(board.scene, enabled, command)
-            LiveControlTabs(ui, board.scene, connected, tab, { tab = it }, pad, uiAct)
+            if (expanded) LiveSceneGrid(board.scene, enabled) { action, arg ->
+                expanded = false; command(action, arg)
+            }
+            Row(Modifier.fillMaxWidth().height(288.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                LiveMirror(ui, connected, Modifier.weight(1f).fillMaxHeight(), uiAct)
+                Box(Modifier.width(if (board.scene == 11) 440.dp else 208.dp).fillMaxHeight(),
+                    contentAlignment = Alignment.Center) {
+                    if (board.scene == 11) LiveGamepad(connected, pad)
+                    else LiveNavigation(connected, pad)
+                }
+            }
         }
     }
 }
@@ -193,26 +217,21 @@ fun LiveGamepad(connected: Boolean, send: (Int) -> Unit = {}) {
         keys = livePadKeys(keys, bit, pressed)
         currentSend(keys)
     }
-    DisposableEffect(connected) {
-        onDispose { keys = 0; currentSend(0) }
-    }
-    Row(Modifier.fillMaxWidth().height(192.dp).padding(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+    DisposableEffect(connected) { onDispose { keys = 0; currentSend(0) } }
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(192.dp)) {
-            PadKey("↑", 0, keys, connected, change,
-                Modifier.align(Alignment.TopCenter), 64.dp)
-            PadKey("↓", 1, keys, connected, change,
-                Modifier.align(Alignment.BottomCenter), 64.dp)
-            PadKey("←", 2, keys, connected, change,
-                Modifier.align(Alignment.CenterStart), 64.dp)
-            PadKey("→", 3, keys, connected, change,
-                Modifier.align(Alignment.CenterEnd), 64.dp)
-            Text("方向", Modifier.align(Alignment.Center),
-                style = MaterialTheme.typography.labelLarge)
+            PadKey("↑", 0, keys, connected, change, Modifier.align(Alignment.TopCenter), 64.dp)
+            PadKey("↓", 1, keys, connected, change, Modifier.align(Alignment.BottomCenter), 64.dp)
+            PadKey("←", 2, keys, connected, change, Modifier.align(Alignment.CenterStart), 64.dp)
+            PadKey("→", 3, keys, connected, change, Modifier.align(Alignment.CenterEnd), 64.dp)
         }
-        Column(horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(Modifier.width(216.dp), horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                PadKey("B", 5, keys, connected, change, size = 96.dp, round = true)
+                PadKey("A", 4, keys, connected, change, size = 96.dp, round = true)
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 PadKey("确认", 8, keys, connected, change, size = 56.dp)
                 PadKey("返回", 9, keys, connected, change, size = 56.dp)
@@ -221,11 +240,6 @@ fun LiveGamepad(connected: Boolean, send: (Int) -> Unit = {}) {
                 PadKey("Select", 6, keys, connected, change, size = 64.dp)
                 PadKey("Start", 7, keys, connected, change, size = 64.dp)
             }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(24.dp),
-            verticalAlignment = Alignment.CenterVertically) {
-            PadKey("B", 5, keys, connected, change, size = 96.dp, round = true)
-            PadKey("A", 4, keys, connected, change, size = 96.dp, round = true)
         }
     }
 }

@@ -242,3 +242,12 @@ Precise object edit of this exact 6-column by 2-row walking worker photographic 
 ### 工地裸头辨识编辑
 
 Precise object edit of this EXACT six columns by two rows walking worker sprite sheet. Change ONLY the HAIR COLOR on the worker in the SIXTH (rightmost) COLUMN in BOTH ROWS: replace his gray-white scalp hair with clearly visible dark brown short natural HAIR with individual strands. This man must be bareheaded, absolutely NO helmet, hat or headwear. Keep his face, gray beard, age, lime safety vest, light blue shirt, gray trousers, walking poses, all body details, positions and sizes unchanged. All other five columns remain completely unchanged. Preserve EXACT 6x2 grid and original body positions, no resizing or recropping. True alpha transparent empty background, remove all gray matte or ground shadows, no background, text or extra objects.
+
+## 手机单页控件（L13，1.6）
+
+顶部一行提供场景选择、前后场景和四个快捷档；场景网格点击标题 ▾ 才展开。
+镜像按页面/抽屉分组，三列、每格 44dp，右侧固定导航；NES 场景显示完整手柄。
+907×420dp 下 12 个控件可同时显示，滑块仅松手发送，快捷档自定义时下拉显示“未选”。
+kind 3 的 −1/越界值不高亮选项；kind 2 的 min≥max 只显示只读数值。
+Paparazzi 证据：[图形引擎](screenshots/phone-single-engine.png)、
+[识别及高级区](screenshots/phone-single-recognition.png)、[NES](screenshots/phone-single-nes.png)。
