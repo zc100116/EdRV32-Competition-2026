@@ -1,16 +1,29 @@
 /* shell.c — showcase design §4.2; page lifetime, linear focus and four keys.
  * One group per active page; 2 Hz counters and 1 Hz monitoring curves.
  */
-#include "theme.h"
+#include "widgets.h"
+#include "live_demo.h"
+#include "mirror.h"
 #include "detection.h"
+#include "farm.h"
 #include "renderer.h"
+#include "game_view.h"
+#include "workshop.h"
+#include "draw.h"
+void ui_page_draw(lv_obj_t *parent);
+void ui_page_workshop(lv_obj_t *parent);
+void ui_page_tower(lv_obj_t *parent);
+bool ui_tower_key(uint32_t key);
+bool ui_tower_keypad(lv_indev_t *input, uint32_t key);
+void ui_workshop_action(unsigned action);
+bool ui_workshop_key(uint32_t key);
 unsigned ui_page;
 unsigned ui_tab;
 unsigned ui_mode;
 static bool game_active;
 bool ui_game_active(void) { return game_active; }
 bool ui_detection_settings;
-static unsigned home_focus;
+unsigned ui_motion_entry = MOTION_SLING;
 static unsigned game_focus;
 static unsigned game_count;
 
@@ -31,7 +44,10 @@ bool ui_restore_interface(void)
 {
     if(!interface_hidden) return false;
     interface_hidden=false;
-    lv_obj_set_hidden(top,false); lv_obj_set_hidden(bottom,false); lv_obj_set_hidden(content,false);
+    bool compact=(ui_page>=1 && ui_page<=3) || (ui_page>=9 && ui_page<=13) ||
+        ui_page==15 || ui_page==FARM_PAGE;
+    lv_obj_set_hidden(top,compact); lv_obj_set_hidden(bottom,compact);
+    lv_obj_set_hidden(content,false);
     lv_obj_set_hidden(restore_surface,true);
     ui_monitor_suppress(false);
     lv_group_focus_obj(hidden_focus);
@@ -61,19 +77,27 @@ static void clicked(lv_event_t *e)
 enum { KEY_EDIT=0x100, KEY_BACK=0x101 };
 static bool editable(lv_obj_t *o)
 {
-    return lv_obj_check_type(o,&lv_slider_class) || lv_obj_check_type(o,&lv_dropdown_class);
+    return lv_obj_check_type(o,&lv_slider_class) || lv_obj_check_type(o,&lv_dropdown_class) ||
+        lv_obj_check_type(o,&lv_spinbox_class) || lv_obj_check_type(o,&lv_buttonmatrix_class);
 }
 static lv_key_t remap(lv_indev_t *input,lv_key_t key)
 {
     if(interface_hidden && lv_indev_get_state(input)==LV_INDEV_STATE_PRESSED) {
         ui_restore_interface(); lv_indev_wait_release(input); return 0;
     }
+    if(ui_live_scene() && key==LV_KEY_ESC) return (lv_key_t)KEY_BACK;
+    if(input && ui_page==17 && ui_workshop_key(key)) return 0;
+    if(input && ui_page==18 && ui_tower_keypad(input,key)) return 0;
     lv_obj_t *o=lv_group_get_focused(group);
     if(key==LV_KEY_ESC) return (lv_key_t)KEY_BACK;
     if(key==LV_KEY_ENTER && o && editable(o)) return (lv_key_t)KEY_EDIT;
     bool editing=lv_group_get_editing(group);
-    if(key==LV_KEY_NEXT || key==LV_KEY_RIGHT) return editing ? LV_KEY_RIGHT : LV_KEY_NEXT;
-    if(key==LV_KEY_PREV || key==LV_KEY_LEFT) return editing ? LV_KEY_LEFT : LV_KEY_PREV;
+    if(key==LV_KEY_NEXT || key==LV_KEY_RIGHT)
+        return editing ? (lv_obj_check_type(o,&lv_spinbox_class) ? LV_KEY_UP : LV_KEY_RIGHT) :
+            LV_KEY_NEXT;
+    if(key==LV_KEY_PREV || key==LV_KEY_LEFT)
+        return editing ? (lv_obj_check_type(o,&lv_spinbox_class) ? LV_KEY_DOWN : LV_KEY_LEFT) :
+            LV_KEY_PREV;
     return key;
 }
 static void key_event(lv_event_t *e)
@@ -133,7 +157,7 @@ void ui_refresh(void)
     ui_text(status, s);
     ui_session_t session=ui_data_session();
     if(game_active && session.app==UI_APP_GAME && session.state==UI_STATE_IDLE) {
-        game_active=false; ui_open(5); return;
+        game_active=false; if(!ui_live_back()) ui_open(5); return;
     }
     bool show=session.app!=UI_APP_NONE && (session.state==UI_STATE_STARTING ||
         session.state==UI_STATE_STOPPING || session.state==UI_STATE_FAILED);
@@ -141,9 +165,16 @@ void ui_refresh(void)
     lv_obj_set_hidden(retry,session.state!=UI_STATE_FAILED);
     if(show) ui_text(session_text,session.state==UI_STATE_FAILED ? session.error :
         session.state==UI_STATE_STARTING ? "正在启动" : "正在停止");
+    ui_preprocess_refresh();
     switch(ui_page) {
+        case LIVE_DEMO_PAGE: ui_live_refresh(); break;
         case 1: if(!ui_detection_settings) ui_vision_update(false); break;
         case 2: if(!ui_detection_settings) ui_vision_update(true); break;
+        case FARM_PAGE: ui_farm_update(); break;
+        case 9: ui_pose_update(); break;
+        case 10: ui_hand_update(); break;
+        case 14: ui_grab_update(); break;
+        case 11: case 13: ui_demo_update(); break;
         case 3: ui_process_update(); break;
         case 4: ui_graphics_update(); break;
         case 5: {
@@ -165,12 +196,16 @@ void ui_open(unsigned page)
     if(old_page!=page) {
         ui_mode=0;
         static const ui_app_t apps[]={UI_APP_NONE,UI_APP_CAMERA,UI_APP_IMAGE,
-            UI_APP_PROCESS,UI_APP_GRAPHICS,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE};
+            UI_APP_PROCESS,UI_APP_GRAPHICS,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,
+            UI_APP_POSE, UI_APP_HAND, UI_APP_FACE, UI_APP_NONE, UI_APP_HELMET,
+            UI_APP_GRAB, UI_APP_GRAB, UI_APP_NONE, UI_APP_GRAB, UI_APP_GRAB,
+            UI_APP_CAMERA, UI_APP_GRAB, UI_APP_NONE};
         if(apps[old_page]!=UI_APP_NONE || game_active ||
            ui_data_session().app==UI_APP_COREMARK) ui_data_app_open(UI_APP_NONE,0);
         game_active=false;
         if(apps[page]!=UI_APP_NONE) ui_data_app_open(apps[page],0);
     }
+    ui_preprocess_reset();
     ui_page = page;
     if(page!=1 && page!=2) ui_detection_settings=false;
     if(group) lv_group_delete(group);
@@ -188,45 +223,75 @@ void ui_open(unsigned page)
     lv_obj_set_style_bg_color(screen, lv_color_hex(BG), 0);
     lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
     lv_obj_set_scrollable(screen, false);
-    top = ui_box(screen, 0, 0, 1280, 48, PANEL);
-    lv_obj_set_style_radius(top, 0, 0);
-    ui_label(top, "EdRV32", 140, 9, &sim_font_20, ACCENT);
-    const char *names[] = {"首页", "视觉识别", "图片识别", "图像处理", "图形引擎",
-        "游戏", "系统监控", "芯片信息", "调试助手"};
-    ui_label(top, names[page], 260, 12, &sim_font_16, TEXT);
-    status = ui_label(top, "", 420, 14, &sim_font_14, MUTED);
-    ui_button(top,"‹ 返回",12,6,108,1000);
-    lv_obj_set_height(lv_obj_get_child(top,-1),36);
-    ui_button(top,"性能浮窗",1140,6,124,1001);
-    lv_obj_set_height(lv_obj_get_child(top,-1),36);
-    bottom = ui_box(screen, 0, 680, 1280, 40, PANEL);
-    lv_obj_set_style_radius(bottom, 0, 0);
-    hint = ui_label(bottom, "← → 选择    Enter 确认    Esc 返回上一级", 40, 10,
-                    &sim_font_14, MUTED);
-    content = ui_box(screen, 0, 48, 1280, 632, BG);
-    lv_obj_set_style_border_width(content, 0, 0);
-    lv_obj_set_style_radius(content, 0, 0);
+    top = ui_stack(screen,LV_FLEX_FLOW_ROW,UI_SPACE_MD);
+    lv_obj_set_size(top,1280,48);
+    lv_obj_set_style_pad_hor(top,UI_SPACE_SM,0);
+    lv_obj_set_style_bg_color(top,lv_color_hex(PANEL),0);
+    lv_obj_set_style_bg_opa(top,LV_OPA_COVER,0);
+    lv_obj_set_flex_align(top,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_CENTER,LV_FLEX_ALIGN_CENTER);
+    ui_action_button(top,"‹ 返回",1000);
+    ui_text_label(top,"EdRV32",&sim_font_20,ACCENT);
+    const char *names[] = {"首页", "目标检测计数", "图片识别", "图像处理", "图形引擎",
+        "经典游戏", "系统监控", "芯片信息", "调试助手", "人体姿态", "手势识别",
+        "人脸贴纸", "", "安全帽检测", "抓取测试", "体感互动", "设置", "方块工坊",
+        "抓取实验", "智慧农场", "空中画板", "演示目录"};
+    ui_text_label(top,names[page],&sim_font_16,TEXT);
+    ui_mirror_page(page,names[page]);
+    status = ui_text_label(top,"",&sim_font_14,MUTED);
+    lv_obj_set_flex_grow(status,1);
+    ui_action_button(top,"性能浮窗",1001);
+    bottom = ui_stack(screen,LV_FLEX_FLOW_ROW,UI_SPACE_MD);
+    lv_obj_set_size(bottom,1280,40);
+    lv_obj_align(bottom,LV_ALIGN_BOTTOM_MID,0,0);
+    lv_obj_set_style_pad_hor(bottom,40,0);
+    lv_obj_set_style_bg_color(bottom,lv_color_hex(PANEL),0);
+    lv_obj_set_style_bg_opa(bottom,LV_OPA_COVER,0);
+    lv_obj_set_flex_align(bottom,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_CENTER,LV_FLEX_ALIGN_CENTER);
+    hint = ui_text_label(bottom,"← → 选择    Enter 确认    Esc 返回上一级",&sim_font_14,MUTED);
+    lv_obj_set_flex_grow(hint,1);
+    content = ui_stack(screen,LV_FLEX_FLOW_COLUMN,0);
+    lv_obj_set_size(content,1280,632);
+    lv_obj_align(content,LV_ALIGN_TOP_MID,0,48);
+    /* Legacy pages still position their own children; only new pages opt into flex. */
+    lv_obj_set_layout(content,LV_LAYOUT_NONE);
     void (*pages[])(lv_obj_t *) = {ui_page_home, ui_page_vision, ui_page_image,
         ui_page_process, ui_page_graphics, ui_page_games, NULL,
-        ui_page_chip, ui_page_debug};
+        ui_page_chip, ui_page_debug, ui_page_pose, ui_page_hand,
+        ui_page_face, NULL, ui_page_helmet, ui_page_grab, ui_page_motion,
+        ui_page_settings, ui_page_workshop, ui_page_tower, ui_page_farm, ui_page_draw, ui_live_directory};
     if(page==5) ui_data_games(&game_count);
+    bool compact=(page>=1 && page<=3) || (page>=9 && page<=13) || page==15 ||
+        page==17 || page==18 || page==FARM_PAGE || page==DRAW_PAGE;
+    if(compact) {
+        lv_obj_set_hidden(top,true); lv_obj_set_hidden(bottom,true);
+        lv_obj_set_size(content,1280,720); lv_obj_set_pos(content,0,0);
+    }
+    if(ui_live_scene() >= 1 && ui_live_scene() <= 11) {
+        /* Reserve a full-width strip above the existing page without duplicating it. */
+        lv_obj_set_pos(content,0,compact ? 32 : 80);
+        lv_obj_set_height(content,compact ? 688 : 600);
+        if(!compact) lv_obj_set_y(top,32);
+    }
     if(ui_detection_settings) ui_page_detection_settings(content);
     else pages[page](content);
     session_box=ui_box(content,340,200,600,164,PANEL);
+    lv_obj_set_ignore_layout(session_box,true);
     session_text=ui_label(session_box,"",24,22,&sim_font_20,TEXT);
     lv_obj_set_width(session_text,552);
     ui_button(session_box,"重试",24,102,160,1002);
     retry=lv_obj_get_child(session_box,-1);
     lv_obj_set_hidden(session_box,true);
-    if(page!=5 || !game_active)
+    if(page!=0 && page!=LIVE_DEMO_PAGE && page!=MOTION_PAGE && (page!=5 || !game_active))
         lv_group_focus_obj(lv_group_get_obj_by_index(group,2));
-    if(page == 0) lv_group_focus_obj(lv_group_get_obj_by_index(group, home_focus+2));
+    if(page == 0) ui_home_focus();
+    if(page == MOTION_PAGE && !ui_motion.waiting)
+        lv_group_focus_obj(lv_group_get_obj_by_index(group,2));
     if(page == 5 && !game_active)
         lv_group_focus_obj(lv_group_get_obj_by_index(group, game_focus+2));
     if(page == 3) lv_group_focus_obj(lv_group_get_obj_by_index(group, ui_mode+2));
     if(page == 4 || page == 8)
         lv_group_focus_obj(lv_group_get_obj_by_index(group, ui_tab+2));
-    if(page>=1 && page<=3) {
+    if((page>=1 && page<=3) || (page>=9 && page<=15) || page==FARM_PAGE) {
         ui_button(bottom,"隐藏界面",1104,0,160,1005);
         lv_obj_set_height(lv_obj_get_child(bottom,-1),36);
         restore_surface=ui_box(screen,0,0,1280,720,0);
@@ -236,6 +301,7 @@ void ui_open(unsigned page)
         lv_obj_add_event_cb(restore_surface,restore_pressed,LV_EVENT_PRESSED,NULL);
         lv_obj_set_hidden(restore_surface,true);
     }
+    if(ui_live_scene() >= 1 && ui_live_scene() <= 11) ui_live_banner(screen);
     ui_monitor_controls();
     ui_refresh();
 }
@@ -245,24 +311,38 @@ static void activate(unsigned action)
     if(action==1000) { ui_back(); return; }
     if(action==1001) { ui_monitor_toggle(); return; }
     if(action==1003) { ui_monitor_corner(); return; }
-    if(action==1004) { ui_data_benchmark_stop(); return; }
+    if(action==1004) {
+        if(ui_live_scene()) ui_back(); else ui_data_benchmark_stop();
+        return;
+    }
     if(action==1002) { ui_data_app_retry(); ui_refresh(); return; }
     if(ui_page == 0) {
-        home_focus = action - 1;
-        const unsigned required[]={0,UI_VIN|UI_NPU,UI_VIN|UI_NPU|UI_ETH,
-            UI_VIN|UI_PIX|UI_GEO,UI_RND|UI_DISP,UI_RND|UI_DISP,0,0,0};
-        if((ui_data_hardware()&required[action])!=required[action]) return;
         ui_tab = 0;
         ui_mode = 0;
         game_focus = 0;
-        if(action==6) ui_monitor_toggle();
-        else ui_open(action);
+        if(action==LIVE_DEMO_PAGE) ui_live_command(4,0);
+        else if(action==6) ui_monitor_toggle();
+        else if(action>=101 && action<=105) {
+            ui_motion_entry = action-100;
+            ui_open(MOTION_PAGE);
+        } else ui_open(action);
     } else if((ui_page==1 || ui_page==2) && ui_detection_settings) {
         ui_detection_settings_action(action);
     } else if((ui_page==1 || ui_page==2) && action==2) {
-        ui_detection_settings=true; ui_open(ui_page);
-    } else if(ui_page == 1) {
+        ui_camera_drawer_toggle();
+    } else if(ui_page == FARM_PAGE) {
+        ui_farm_action(action);
+    } else if(ui_page == 17) {
+        ui_workshop_action(action);
+    } else if(ui_page == 15) {
+        ui_motion_action(action);
+    } else if(ui_page == 14) {
+        ui_grab_action(action);
+    } else if(ui_page >= 11) {
+        ui_demo_action(action); ui_refresh();
+    } else if(ui_page == 1 || ui_page == 9 || ui_page == 10) {
         if(action == 0) ui_data_app_pause(ui_data_session().state!=UI_STATE_PAUSED);
+        else if(ui_page==10) ui_hand_toggle();
         else ui_data_boxes();
         ui_refresh();
     } else if(ui_page == 2) {
@@ -294,11 +374,16 @@ static void activate(unsigned action)
         }
     }
 }
+void ui_activate(unsigned action) { activate(action); }
 void ui_key(uint32_t key)
 {
     if(ui_restore_interface()) return;
+    if(ui_live_scene() && key==LV_KEY_ESC) { ui_back(); return; }
+    if(ui_page==17 && ui_workshop_key(key)) return;
+    if(ui_page==18 && ui_tower_key(key)) return;
     key=remap(NULL,key);
     if(key==KEY_BACK) { ui_back(); return; }
+    if(ui_page==0 && ui_home_key(key)) return;
     if(key==LV_KEY_NEXT) lv_group_focus_next(group);
     else if(key==LV_KEY_PREV) lv_group_focus_prev(group);
     else {
@@ -326,6 +411,11 @@ void ui_back(void)
         }
         lv_group_set_editing(group,false); return;
     }
+    if(ui_camera_drawer_close()) return;
+    if(ui_live_back()) return;
+    if(ui_page == MOTION_PAGE || ui_page == 17 || ui_page == DRAW_PAGE) {
+        ui_home_select_tab(1); ui_open(0); return;
+    }
     if(ui_detection_settings) { ui_detection_settings=false; ui_open(ui_page); }
     else if(game_active) { game_active=false; ui_data_app_open(UI_APP_NONE,0); ui_open(5); }
     else if(ui_page==4 && ui_data_benchmark_running()) {
@@ -347,7 +437,7 @@ void ui_start(void)
 
 void ui_show_app(ui_app_t app,unsigned arg)
 {
-    static const unsigned pages[]={0,1,2,3,4,5,7};
+    static const unsigned pages[]={0,1,2,3,4,5,7,9,10,11,12,13,14};
     ui_detection_settings=false; ui_tab=0; ui_mode=0;
     game_active=app==UI_APP_GAME;
     if(game_active) { game_focus=arg; ui_mode=arg; }

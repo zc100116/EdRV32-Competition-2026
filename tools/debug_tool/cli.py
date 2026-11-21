@@ -74,6 +74,9 @@ def main():
                         help="print raw JSON responses")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
+    p = sub.add_parser("demo", help="现场演示 action 0–4 / arg")
+    p.add_argument("action", type=int)
+    p.add_argument("arg", type=int)
     sub.add_parser("ports")
     sub.add_parser("status")
     p = sub.add_parser("connect")
@@ -197,7 +200,9 @@ def main():
     global BASE
     BASE = args.url.rstrip("/")
 
-    if args.cmd == "telemetry":
+    if args.cmd == "demo":
+        print_json(request("POST", "/api/demo", {"action": args.action, "arg": args.arg}))
+    elif args.cmd == "telemetry":
         if args.action == "latest":
             print_json(request("GET", "/api/telemetry"))
         else:

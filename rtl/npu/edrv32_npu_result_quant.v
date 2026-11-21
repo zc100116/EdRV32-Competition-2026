@@ -159,8 +159,8 @@ module edrv32_npu_result_quant (
             wire [9:0] unused_param_reserved_w;
             integer shift_stage;
 
-            // Each capture control drives only four INT32 hold entries, as in T-NPU1.
-            for (hold_bank = 0; hold_bank < 4; hold_bank = hold_bank + 1) begin : g_hold
+            // Each capture control drives one INT32 hold entry, as in T-NPU1.
+            for (hold_bank = 0; hold_bank < 16; hold_bank = hold_bank + 1) begin : g_hold
                 (* keep = "true", syn_preserve = 1 *) reg capture_r;
                 integer group_idx;
 
@@ -177,7 +177,7 @@ module edrv32_npu_result_quant (
 
                 always @(posedge clk_i) begin
                     if (capture_r) begin
-                        for (group_idx = 4*hold_bank; group_idx < 4*hold_bank+4;
+                        for (group_idx = hold_bank; group_idx < hold_bank+1;
                             group_idx = group_idx + 1) begin
                             hold_acc_r[group_idx] <= accum_data_i[32*(32*((group_idx/2)%2)
                                 + 8*(group_idx/4) + 4*(group_idx%2) + index) +: 32];

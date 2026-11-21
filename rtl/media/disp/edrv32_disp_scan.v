@@ -34,10 +34,7 @@ module edrv32_disp_scan (
     output wire [9:0] read_cnt_o,
     output wire [9:0] read1_cnt_o,
     output wire [31:0] perf0_o,
-    output wire [31:0] perf1_o,
-    output wire [31:0] perf2_o,
-    output wire [31:0] perf5_o,
-    output wire [31:0] perf6_o
+    output wire [31:0] perf1_o
 );
     localparam [55:0] RESET_PARAMS = {1'b1, 4'd0, 1'b0, 11'd0, 10'd0,
         11'd1280, 10'd720, 8'd255};
@@ -54,12 +51,9 @@ module edrv32_disp_scan (
     reg [31:0] debt1_r;
     reg [9:0] read_cnt_r;
     reg [9:0] read1_cnt_r;
-    reg [4:0] perf_event_r;
+    reg [1:0] perf_event_r;
     reg [31:0] perf0_r;
     reg [31:0] perf1_r;
-    reg [31:0] perf2_r;
-    reg [31:0] perf5_r;
-    reg [31:0] perf6_r;
     // S0 captures raster; S1 compares row/column; S2 combines registered decisions.
     wire frame_begin_w;
     // Detect the last pixel at S1 and count completion with its S10 RGB output.
@@ -202,9 +196,6 @@ module edrv32_disp_scan (
     assign read1_cnt_o = read1_cnt_r;
     assign perf0_o = perf0_r;
     assign perf1_o = perf1_r;
-    assign perf2_o = perf2_r;
-    assign perf5_o = perf5_r;
-    assign perf6_o = perf6_r;
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
@@ -237,9 +228,6 @@ module edrv32_disp_scan (
             read1_cnt_r <= 10'd0;
             perf0_r <= 32'd0;
             perf1_r <= 32'd0;
-            perf2_r <= 32'd0;
-            perf5_r <= 32'd0;
-            perf6_r <= 32'd0;
         end else begin
             frame_last_pipe_r <= {frame_last_pipe_r[7:0],
                 raster_active_r && raster_x_r == 11'd1279 && raster_y_r == 10'd719};
@@ -293,15 +281,6 @@ module edrv32_disp_scan (
             end
             if (perf_event_r[1]) begin
                 perf1_r <= perf1_r + 32'd1;
-            end
-            if (perf_event_r[2]) begin
-                perf5_r <= perf5_r + 32'd1;
-            end
-            if (perf_event_r[3]) begin
-                perf2_r <= perf2_r + 32'd1;
-            end
-            if (perf_event_r[4]) begin
-                perf6_r <= perf6_r + 32'd1;
             end
             if (missing_w != discard_w) begin
                 debt_r <= missing_w ? debt_r + 32'd1 : debt_r - 32'd1;
@@ -357,9 +336,9 @@ module edrv32_disp_scan (
     // SoC 7.1: terminate scan events before the performance adders.
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i)
-            perf_event_r <= 5'd0;
+            perf_event_r <= 2'd0;
         else
-            perf_event_r <= {missing1_w, missing_w, underflow1_o, underflow_o,
+            perf_event_r <= {underflow_o,
                 frame_last_pipe_r[8]};
     end
 endmodule

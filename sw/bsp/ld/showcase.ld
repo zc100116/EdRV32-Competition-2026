@@ -1,6 +1,6 @@
 /* File: showcase.ld
  * Spec: edrv32-soc-spec 6.1; CLAUDE.md 9.2
- * Description: Link a BIOS-loaded DDR application into the 64 MiB application window at
+ * Description: Link a BIOS-loaded DDR application into the 128 MiB application window at
  *              DDR + 256 MiB (b2-software 3.3), clear of the engine buffers below it.
  *              Addresses are generated from the shared SoC address map.
  * Clock domain: clk_sys.
@@ -8,10 +8,10 @@
 INCLUDE build/sw/soc_memory.ld
 OUTPUT_ARCH(riscv)
 ENTRY(_start)
-/* b2-software 3.3: application window, physical 0x1000_0000, 64 MiB. */
+/* b2-software 3.3: application window, physical [0x1000_0000,0x1800_0000), 128 MiB. */
 MEMORY
 {
-    DDR_APP (rwx) : ORIGIN = ORIGIN(DDR) + 0x10000000, LENGTH = 0x04000000
+    DDR_APP (rwx) : ORIGIN = ORIGIN(DDR) + 0x10000000, LENGTH = 0x08000000
 }
 PHDRS
 {

@@ -194,10 +194,6 @@ module edrv32_geo (
     reg [31:0] pack_strb_r;
     reg [255:0] pack_next_w;
     wire pixel_fire_w;
-    wire [4:0] write_pixels_w;
-    reg [2:0] write_group_r [0:3];
-    reg write_fire_r;
-    genvar write_group;
     assign busy_w = state_r != S_IDLE || !rd_idle_w || !wr_idle_w;
     assign stop_w = busy_w && (abort_w || error_w != 0);
     assign clear_w = stop_w || state_r == S_DRAIN || soft_reset_w;
@@ -239,31 +235,6 @@ module edrv32_geo (
     assign sample_fire_w = coord_valid_w && advance_w &&
         state_r == S_RUN && compute_state_r == 3 && !stop_w;
     assign pixel_fire_w = pixel_valid_w && advance_w && !clear_w;
-    // PERF1 counts pixels that actually cross the DDR write channel, including ABORT tails.
-    // Count four independent groups before the counter event stage. The AXI
-    // handshake is registered alongside the byte enables, outside the sum tree.
-    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
-        if (!rst_mem_ctrl_n_w)
-            write_fire_r <= 1'b0;
-        else
-            write_fire_r <= p5_wvalid_o && p5_wready_i;
-    end
-    generate
-        for (write_group = 0; write_group < 4; write_group = write_group + 1) begin : g_count
-            wire [1:0] low_w;
-            wire [1:0] high_w;
-            assign low_w = {1'b0, p5_wstrb_o[write_group*8]}
-                + {1'b0, p5_wstrb_o[write_group*8+2]};
-            assign high_w = {1'b0, p5_wstrb_o[write_group*8+4]}
-                + {1'b0, p5_wstrb_o[write_group*8+6]};
-            always @(posedge clk_mem_i) begin
-                write_group_r[write_group] <= {1'b0, low_w} + {1'b0, high_w};
-            end
-        end
-    endgenerate
-    assign write_pixels_w = write_fire_r
-        ? (({2'd0, write_group_r[0]} + {2'd0, write_group_r[1]})
-        + ({2'd0, write_group_r[2]} + {2'd0, write_group_r[3]})) : 5'd0;
     always @(*) begin
         pack_next_w = accumulator_r;
         pack_next_w[{pack_lane_r, 4'd0} +: 16] = pixel_w;
@@ -495,12 +466,6 @@ module edrv32_geo (
         .desc_done_i(desc_done_w),
         .cur_desc_i(cur_desc_r),
         .error_i(error_w),
-        .pixel_i(write_pixels_w),
-        .read_beat_i(p5_rvalid_i && p5_rready_o),
-        .write_beat_i(p5_wvalid_o && p5_wready_i),
-        .source_wait_i(state_r == S_RUN && compute_state_r == 0 &&
-            !source_ready_r[compute_group_r]),
-        .writer_wait_i(state_r == S_RUN && !advance_w),
         .start_o(start_w),
         .abort_o(abort_w),
         .soft_reset_o(soft_reset_w),

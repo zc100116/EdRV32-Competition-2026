@@ -1,5 +1,5 @@
-/* post.c — npu-spec 2.2; B2 software design 3.4/3.5a.
- * DFL Q8, deterministic score ordering and integer class-aware IoU suppression.
+/* post.c — npu-spec 2.6/4.5; SoC 7.4/8.9.
+ * Optional CPU decode, candidate ordering, integer class-aware NMS and display mapping.
  * Clock domain: CPU. Numerical contract: sw/lib/README.md.
  */
 #include "post.h"
@@ -16,6 +16,7 @@ static int32_t maximum(int32_t a, int32_t b)
     return a > b ? a : b;
 }
 
+#ifdef SHOWCASE_POST_CPU
 static uint32_t distance_q8(const int8_t *bins, const yolo_head *head,
                             yolo_post_stats *stats)
 {
@@ -34,6 +35,8 @@ static uint32_t distance_q8(const int8_t *bins, const yolo_head *head,
     stats->exp_lookups += 16;
     return (uint32_t)(((uint64_t)numerator * 256 + denominator / 2) / denominator);
 }
+
+#endif
 
 static int better(const yolo_candidate *a, const yolo_candidate *b, yolo_post_stats *stats)
 {
@@ -88,14 +91,25 @@ static int16_t display_coordinate(int32_t coordinate, int32_t padding, int32_t l
     return (int16_t)((mapped + 128) / 256);
 }
 
+#ifdef SHOWCASE_POST_CPU
 void vision_post_begin(struct vision_post *p, const int8_t *output,
                        yolo_candidate *workspace, yolo_detection *detections)
 {
-    *p = (struct vision_post){.output = output, .workspace = workspace,
+    *p = (struct vision_post){.heads = yolo_default_heads, .classes = 80, .output = output, .workspace = workspace,
                               .detections = detections};
 }
 
-/* Eight anchors from one head/row, one heap root, or sixteen NMS comparisons.
+#else
+void vision_post_begin(struct vision_post *p, yolo_candidate *candidates, uint32_t count,
+                       yolo_detection *detections)
+{
+    *p = (struct vision_post){.workspace = candidates, .count = count,
+        .detections = detections, .stats = {.decoded_anchors = count}};
+}
+
+#endif
+
+/* Eight anchors (CPU) or candidate handoff (HW), one heap root, or sixteen NMS comparisons.
  * Every phase returns to the scheduler, including sorting and suppression.
  */
 int vision_post_step(struct vision_post *p)
@@ -103,7 +117,8 @@ int vision_post_step(struct vision_post *p)
     yolo_candidate *workspace = p->workspace;
     yolo_post_stats *stats = &p->stats;
     if (p->phase == 0) {
-        const yolo_head *head = &yolo_default_heads[p->head];
+#ifdef SHOWCASE_POST_CPU
+        const yolo_head *head = &p->heads[p->head];
         uint32_t cells = (uint32_t)head->width * head->height;
         uint32_t row_end = (p->cell / head->width + 1) * head->width;
         for (unsigned part = 0; part < 8 && p->cell < row_end; ++part, ++p->cell) {
@@ -111,16 +126,11 @@ int vision_post_step(struct vision_post *p)
             int32_t best = -129;
             uint16_t class_id = 0;
             const int8_t *classes = p->output + head->class_offset + cell * 16;
-            for (uint32_t plane = 0; plane < 5; ++plane) {
-                for (uint32_t lane = 0; lane < 16; ++lane) {
-                    int32_t value = classes[plane * head->plane_stride + lane];
-                    if (value > best) {
-                        best = value;
-                        class_id = (uint16_t)(plane * 16 + lane);
-                    }
-                }
+            for (unsigned cls = 0; cls < p->classes; ++cls) {
+                int32_t value = classes[cls / 16 * head->plane_stride + cls % 16];
+                if (value > best) { best = value; class_id = (uint16_t)cls; }
             }
-            stats->class_comparisons += 81;
+            stats->class_comparisons += p->classes + 1;
             if (best < head->class_threshold) {
                 continue;
             }
@@ -149,6 +159,12 @@ int vision_post_step(struct vision_post *p)
                 p->end = p->count;
             }
         }
+#else
+        /* decode now measures candidate handoff; class selection/DFL run in NPU. */
+        p->phase = 1;
+        p->root = p->count / 2;
+        p->end = p->count;
+#endif
     } else if (p->phase == 1) {
         if (p->root) {
             sift(workspace, p->count, --p->root, stats);
@@ -172,6 +188,7 @@ int vision_post_step(struct vision_post *p)
             ++p->i;
             return 0;
         }
+        p->anchors[p->kept] = candidate->anchor;
         yolo_detection *result = &p->detections[p->kept++];
         result->x0 = display_coordinate(candidate->xyxy_q8[0], 0, 1280);
         result->y0 = display_coordinate(candidate->xyxy_q8[1], 12, 720);

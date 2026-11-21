@@ -37,3 +37,9 @@
 ../common/edrv32_apb_async_bridge.v
 ../common/edrv32_cdc_handshake.v
 ../common/edrv32_cdc_sync_bit.v
+../tech/edrv32_ram_npu_post_best.v
+../tech/edrv32_ram_npu_post_queue.v
+../tech/edrv32_ram_npu_post_table.v
+../npu/edrv32_npu_post_classify.v
+../npu/edrv32_npu_post_dfl.v
+../npu/edrv32_npu_post.v

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "traffic-1",
+    "source": "https://mixkit.co/free-stock-video/busy-street-in-the-city-4000/",
+    "file_url": "https://assets.mixkit.co/videos/4000/4000-720.mp4",
+    "author": "dubassy",
+    "license": "Mixkit Stock Video Free License",
+    "license_url": "https://mixkit.co/license/#videoFree",
+    "start": 0,
+    "duration": 12,
+    "speed": 0.6,
+    "playback_duration": 20
+  },
+  {
+    "id": "traffic-2",
+    "source": "https://mixkit.co/free-stock-video/traffic-jam-on-a-highway-in-a-pine-forest-3304/",
+    "file_url": "https://assets.mixkit.co/videos/3304/3304-720.mp4",
+    "author": "rubenvelasco",
+    "license": "Mixkit Stock Video Free License",
+    "license_url": "https://mixkit.co/license/#videoFree",
+    "start": 0,
+    "duration": 12,
+    "speed": 0.6,
+    "playback_duration": 20
+  },
+  {
+    "id": "dance-1",
+    "source": "https://mixkit.co/free-stock-video/man-breakdancing-452/",
+    "file_url": "https://assets.mixkit.co/videos/452/452-720.mp4",
+    "author": "franklandgrave",
+    "license": "Mixkit Stock Video Free License",
+    "license_url": "https://mixkit.co/license/#videoFree",
+    "start": 0,
+    "duration": 20,
+    "speed": 1.0,
+    "playback_duration": 20
+  },
+  {
+    "id": "dance-2",
+    "source": "https://mixkit.co/free-stock-video/man-dancing-under-changing-lights-1240/",
+    "file_url": "https://assets.mixkit.co/videos/1240/1240-720.mp4",
+    "author": "franklandgrave",
+    "license": "Mixkit Stock Video Free License",
+    "license_url": "https://mixkit.co/license/#videoFree",
+    "start": 0,
+    "duration": 20,
+    "speed": 1,
+    "playback_duration": 20
+  },
+  {
+    "id": "helmet-1",
+    "source": "https://mixkit.co/free-stock-video/man-puts-on-hard-hat-1440/",
+    "file_url": "https://assets.mixkit.co/videos/1440/1440-720.mp4",
+    "author": "joshjanssen",
+    "license": "Mixkit Stock Video Free License",
+    "license_url": "https://mixkit.co/license/#videoFree",
+    "start": 0,
+    "duration": 12,
+    "speed": 0.6,
+    "playback_duration": 20
+  }
+]

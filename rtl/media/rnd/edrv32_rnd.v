@@ -120,7 +120,7 @@ module edrv32_rnd (
     localparam [3:0] S_BLIT = 4'd13;
     localparam [3:0] S_CLIP = 4'd14;
     reg [3:0] state_r;
-    reg [3:0] mux_state_r [0:3] /* synthesis syn_preserve=1 */;
+    (* keep = "true", syn_preserve = 1 *) reg [3:0] mux_state_r [0:3];
     reg signed [17:0] rect_left_r;
     reg signed [17:0] rect_top_r;
     reg signed [17:0] rect_right_r;
@@ -246,30 +246,63 @@ module edrv32_rnd (
     wire [31:0] blit_blend_tag_w;
     wire blend_ready_w;
     wire blend_valid_w;
+    wire [7:0] blend_slice_valid_w;
+    wire [7:0] blend_slice_bank_w;
+    wire [7:0] blend_result_valid_w;
+    wire [3:0] fill_argb_w;
     wire [63:0] blend_pixel_w;
     wire [31:0] blend_tag_w;
     wire [39:0] blend_offset_w;
     wire unused_geometry_w;
 
+    genvar result_slice;
+    generate for (result_slice = 0; result_slice < 8;
+        result_slice = result_slice + 1) begin : g_result_state
+        (* keep = "true", syn_preserve = 1 *) reg [3:0] result_state_r;
+        always @(posedge clk_mem_i or negedge rst_ctrl_n_w) begin
+            if (!rst_ctrl_n_w)
+                result_state_r <= S_IDLE;
+            else
+                result_state_r <= state_next_w;
+        end
+        (* keep = "true", syn_keep = 1 *) wire valid_w;
+        assign valid_w = blend_slice_valid_w[result_slice] &&
+            result_state_r == (result_slice < 4 ? S_DRAW : S_BLIT);
+        assign blend_result_valid_w[result_slice] = valid_w;
+    end endgenerate
+
     genvar consumer;
-    generate for (consumer = 0; consumer < 6; consumer = consumer + 1) begin : g_command
-        reg [31:0] control_r /* synthesis syn_preserve=1 */;
+    generate for (consumer = 0; consumer < 10; consumer = consumer + 1) begin : g_command
+        (* keep = "true", syn_preserve = 1 *) reg [3:0] capture_state_r;
+        always @(posedge clk_mem_i or negedge rst_ctrl_n_w) begin
+            if (!rst_ctrl_n_w)
+                capture_state_r <= S_IDLE;
+            else
+                capture_state_r <= state_next_w;
+        end
+        (* keep = "true", syn_preserve = 1 *) reg [31:0] control_r;
         reg half_r /* synthesis syn_preserve=1 */;
         always @(posedge clk_mem_i or negedge rst_ctrl_n_w) begin
             if (!rst_ctrl_n_w)
                 half_r <= 1'b0;
             else if (cancel_w)
                 half_r <= 1'b0;
-            else if (state_r == S_FETCH && rd_desc_ready_w)
+            else if (capture_state_r == S_FETCH && rd_desc_ready_w)
                 half_r <= 1'b0;
-            else if (state_r == S_FETCH_WAIT && rd_data_valid_w)
+            else if (capture_state_r == S_FETCH_WAIT && rd_data_valid_w)
                 half_r <= 1'b1;
         end
         always @(posedge clk_mem_i) begin
-            if (state_r == S_FETCH_WAIT && rd_data_valid_w && !half_r)
+            if (capture_state_r == S_FETCH_WAIT && rd_data_valid_w && !half_r)
                 control_r <= rd_data_w[31:0];
         end
-        assign command_control_w[consumer] = control_r;
+        if (consumer < 6) begin : g_command_word
+            assign command_control_w[consumer] = control_r;
+        end else begin : g_fill_format
+            assign fill_argb_w[consumer-6] = control_r[8];
+            wire unused_control_w;
+            assign unused_control_w = ^{control_r[31:9], control_r[7:0]};
+        end
     end endgenerate
     assign row_pixels_w = clip_right_r - clip_left_r + 18'd1;
     assign source_offset_w = command_r[322:320] + clip_left_r[2:0] - command_r[162:160];
@@ -380,6 +413,8 @@ module edrv32_rnd (
         .blend_dst_o(draw_blend_dst_w),
         .blend_tag_o(draw_blend_tag_w),
         .blend_tag_i(blend_tag_w),
+        .blend_slice_valid_i(blend_result_valid_w[3:0]),
+        .blend_slice_bank_i(blend_slice_bank_w[3:0]),
         .blend_valid_i(blend_valid_w && state_r == S_DRAW),
         .blend_pixel_i(blend_pixel_w),
         .blend_offset_i(blend_offset_w)
@@ -415,6 +450,7 @@ module edrv32_rnd (
         .start_i(state_r == S_BEGIN && fast_fill_w),
         .cancel_i(cancel_region_w[2]),
         .command_i({command_r[511:32], command_control_w[2]}),
+        .argb_slice_i(fill_argb_w),
         .done_o(fill_done_w),
         .pixel_count_o(fill_pixels_w),
         .wr_valid_o(fill_wr_valid_w),
@@ -462,6 +498,8 @@ module edrv32_rnd (
         .blend_valid_i(blend_valid_w && state_r == S_BLIT),
         .blend_pixel_i(blend_pixel_w),
         .blend_tag_i(blend_tag_w),
+        .blend_slice_valid_i(blend_result_valid_w[7:4]),
+        .blend_slice_bank_i(blend_slice_bank_w[7:4]),
         .blend_offset_i({blend_offset_w[16:15], blend_offset_w[11:10],
             blend_offset_w[6:5], blend_offset_w[1:0]})
     );
@@ -476,6 +514,8 @@ module edrv32_rnd (
         .in_argb_i(command_control_w[4][8]),
         .in_tag_i(state_r == S_BLIT ? blit_blend_tag_w : draw_blend_tag_w),
         .out_valid_o(blend_valid_w),
+        .out_slice_valid_o(blend_slice_valid_w),
+        .out_slice_bank_o(blend_slice_bank_w),
         .out_ready_i(1'b1),
         .out_pixel_o(blend_pixel_w),
         .out_tag_o(blend_tag_w),
@@ -583,17 +623,24 @@ module edrv32_rnd (
     );
     genvar capture;
     generate for (capture = 0; capture < 8; capture = capture + 1) begin : g_capture
+        (* keep = "true", syn_preserve = 1 *) reg [3:0] capture_state_r;
+        always @(posedge clk_mem_i or negedge rst_ctrl_n_w) begin
+            if (!rst_ctrl_n_w)
+                capture_state_r <= S_IDLE;
+            else
+                capture_state_r <= state_next_w;
+        end
         reg half_r /* synthesis syn_preserve=1 */;
         always @(posedge clk_mem_i or negedge rst_ctrl_n_w) begin
             if (!rst_ctrl_n_w)
                 half_r <= 1'b0;
-            else if (cancel_w || (state_r == S_FETCH && rd_desc_ready_w))
+            else if (cancel_w || (capture_state_r == S_FETCH && rd_desc_ready_w))
                 half_r <= 1'b0;
-            else if (state_r == S_FETCH_WAIT && rd_data_valid_w)
+            else if (capture_state_r == S_FETCH_WAIT && rd_data_valid_w)
                 half_r <= 1'b1;
         end
         always @(posedge clk_mem_i) begin
-            if (state_r == S_FETCH_WAIT && rd_data_valid_w && half_r == (capture >= 4))
+            if (capture_state_r == S_FETCH_WAIT && rd_data_valid_w && half_r == (capture >= 4))
                 command_r[capture*64 +: 64] <= rd_data_w[(capture%4)*64 +: 64];
         end
     end endgenerate

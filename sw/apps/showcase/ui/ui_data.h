@@ -23,7 +23,8 @@ typedef struct { unsigned threshold; uint32_t classes[3]; } ui_detection_config_
 /* Media applications and session states: design 2026-11-03-showcase-p5-replan 8.1.
  * Values equal the EDSC `app` and `state` fields. */
 typedef enum { UI_APP_NONE, UI_APP_CAMERA, UI_APP_IMAGE, UI_APP_PROCESS,
-               UI_APP_GRAPHICS, UI_APP_GAME, UI_APP_COREMARK } ui_app_t;
+               UI_APP_GRAPHICS, UI_APP_GAME, UI_APP_COREMARK, UI_APP_POSE, UI_APP_HAND = 8,
+               UI_APP_FACE, UI_APP_HELMET = 11, UI_APP_GRAB } ui_app_t;
 typedef enum { UI_STATE_IDLE, UI_STATE_STARTING, UI_STATE_RUNNING, UI_STATE_PAUSED,
                UI_STATE_STOPPING, UI_STATE_FAILED } ui_state_t;
 typedef struct {
@@ -62,6 +63,15 @@ typedef struct {
     unsigned echo_count, echo_replies;
     bool hex, link;
 } ui_debug_t;
+typedef struct {
+    unsigned preset, luma;
+    int brightness, contrast, gamma_tenths, filter, exposure;
+    bool auto_levels, auto_gamma;
+} ui_preprocess_t;
+ui_preprocess_t ui_data_preprocess(void);
+void ui_data_preprocess_set(unsigned preset);
+void ui_data_preprocess_custom(const ui_preprocess_t *config);
+bool ui_data_preprocess_applied(void);
 /* Return the modules available to this hardware configuration. */
 unsigned ui_data_hardware(void);
 /* Return status, task occupancy and seven DDR port counters. */
@@ -80,6 +90,36 @@ void ui_data_app_retry(void);
 void ui_show_app(ui_app_t app, unsigned arg);
 /* Return the current camera or PC image and detection results. */
 ui_vision_t ui_data_vision(void);
+/* All postprocessed detections, independent of display filters; valid this GUI pass. */
+const ui_detection_t *ui_data_detections(unsigned *count);
+/* Pose page owns all retained people, independently of detection display filters. */
+typedef struct { float x, y, visibility; } ui_pose_point_t;
+typedef struct {
+    unsigned count;
+    ui_detection_t people[100];
+    ui_pose_point_t points[100][17];
+    bool left_up, right_up;
+} ui_pose_t;
+const ui_pose_t *ui_data_pose(void);
+typedef struct { int cls, candidate; unsigned frames; } ui_hand_state_t;
+typedef struct {
+    unsigned count, size, confidence;
+    ui_detection_t people[100];
+    ui_pose_point_t points[100][21];
+    ui_hand_state_t state;
+} ui_hand_t;
+const ui_hand_t *ui_data_hand(void);
+bool ui_gesture_debounce(ui_hand_state_t *state, int cls);
+extern const char *const ui_gesture_names[14];
+extern const char *const ui_gesture_ids[14];
+extern const char *const ui_gesture_numbers[14];
+extern const char *const ui_gesture_rps[14];
+typedef struct {
+    unsigned count, size, helmet, head;
+    ui_detection_t objects[100];
+    ui_pose_point_t points[100][5];
+} ui_demo_t;
+const ui_demo_t *ui_data_demo(void);
 /* Ask the PC for the previous (-1) or next (+1) image of its list (EDSC IMAGE_STEP). */
 void ui_data_image_step(int direction);
 ui_detection_config_t ui_data_detection_config(void);

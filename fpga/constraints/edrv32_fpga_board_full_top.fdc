@@ -8,7 +8,7 @@ create_clock -name {clk_cam0} [get_ports {cam0_pclk_i}] -period {10} -waveform {
 create_clock -name {clk_cam1} [get_ports {cam1_pclk_i}] -period {10} -waveform {0 5}
 create_clock -name {clk_rgmii_ref} [get_ports {rgmii_rxc_i}] -period {8} -waveform {0 4}
 create_generated_clock -name {clk_sys} -source [get_ports {clk_i}] [get_pins {u_pll_sys/clkout0}] -multiply_by {125} -divide_by {27}
-create_generated_clock -name {clk_npu} -source [get_ports {clk_i}] [get_pins {u_pll_npu/clkout0}] -multiply_by {50} -divide_by {9}
+create_generated_clock -name {clk_npu} -source [get_ports {clk_i}] [get_pins {u_pll_npu/clkout0}] -multiply_by {20} -divide_by {3}
 create_generated_clock -name {clk_pix} -source [get_ports {clk_i}] [get_pins {u_pll_video/clkout0}] -multiply_by {11} -divide_by {4}
 create_generated_clock -name {clk_serial} -source [get_ports {clk_i}] [get_pins {u_pll_video/clkout1}] -multiply_by {55} -divide_by {4}
 # DDR PHY clocks, timing and physical placement from vendor pnr/ddr_test.fdc.

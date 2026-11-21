@@ -260,9 +260,6 @@ module edrv32_pix (
 
         .busy_i(busy_r),
         .frame_done_i(frame_done_w),
-        .input_stall_i(pix_in_valid_i && !pix_in_ready_o),
-        .output_stall_i(pix_out_valid_o && !pix_out_ready_i),
-        .discard_i(discard_r),
         .soft_pending_o(soft_pending_w),
         .soft_reset_o(soft_reset_w),
 

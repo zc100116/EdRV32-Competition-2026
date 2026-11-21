@@ -122,7 +122,7 @@ class SessionTest(unittest.TestCase):
                 self.assertIsNone(self.engine.yolo.snapshot()[1])
                 send(0, bytes(INPUT_BYTES), False)
                 send(3, wire(2))
-                send(1, bytes(OUTPUT_BYTES), False)
+                send(1, bytes(4), False)
                 send(2, detection_wire())
                 wait_for(self, lambda: self.engine.yolo.snapshot()[1] is not None)
                 send(0, frame_header(11) + bytes(1280))

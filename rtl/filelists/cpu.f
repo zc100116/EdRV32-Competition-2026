@@ -3,7 +3,6 @@
 ../cpu/edrv32_cpu_frontend.v
 ../cpu/edrv32_cpu_ib.v
 ../cpu/edrv32_cpu_predictor.v
-../cpu/edrv32_cpu_rvc.v
 ../cpu/edrv32_cpu_decode.v
 ../cpu/edrv32_cpu_regfile.v
 ../cpu/edrv32_cpu_alu.v
@@ -12,3 +11,8 @@
 ../cpu/edrv32_cpu_div.v
 ../cpu/edrv32_cpu_csr.v
 ../tech/edrv32_mul_s33x33.v
+../tech/edrv32_ram_cpu_btb.v
+../tech/edrv32_ram_cpu_direction.v
+../tech/edrv32_ram_cpu_local_history.v
+../tech/edrv32_ram_cpu_local_direction.v
+../tech/edrv32_ram_cpu_chooser.v

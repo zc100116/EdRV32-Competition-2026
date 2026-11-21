@@ -43,7 +43,7 @@ def _video_process(sock, name, connection, stop, capture_event, capture_epoch,
 def _video_loop(sock, storage, connection, stop, capture_event, capture_epoch,
                 mode, counts):
     from .video import VideoReceiver
-    from .yolo import YoloTool, INPUT_BYTES, OUTPUT_BYTES
+    from .yolo import YoloTool, INPUT_BYTES
 
     free = list(range(VIDEO_SLOTS))
     active = None
@@ -123,8 +123,8 @@ def _video_loop(sock, storage, connection, stop, capture_event, capture_epoch,
                         start = slot * VIDEO_SLOT_BYTES
                         ch2, output, _ = yolo.capture
                         storage[start:start + INPUT_BYTES] = ch2
-                        storage[start + INPUT_BYTES:start + INPUT_BYTES + OUTPUT_BYTES] = output
-                        connection.send(('yolo', epoch, slot, yolo.blocks[2].data()))
+                        storage[start + INPUT_BYTES:start + INPUT_BYTES + len(output)] = output
+                        connection.send(('yolo', epoch, slot, len(output), yolo.blocks[2].data()))
                 # These packets are accounted here, rather than again on bulk delivery.
                 count += 1
                 byte_count += len(data)
@@ -419,13 +419,13 @@ class EthernetTool:
                             self.yolo.capture_error = message[2]
                         continue
                     if message[0] == 'yolo':
-                        from .yolo import INPUT_BYTES, OUTPUT_BYTES
-                        _, epoch, slot, detections = message
+                        from .yolo import INPUT_BYTES
+                        _, epoch, slot, output_bytes, detections = message
                         if epoch != self.rx_capture_epoch.value:
                             connection.send(slot)
                             continue
                         start = slot * VIDEO_SLOT_BYTES
-                        raw = bytes(self.rx_memory.buf[start:start + INPUT_BYTES + OUTPUT_BYTES])
+                        raw = bytes(self.rx_memory.buf[start:start + INPUT_BYTES + output_bytes])
                         connection.send(slot)
                         for window, block in enumerate((raw[:INPUT_BYTES], raw[INPUT_BYTES:],
                                                         detections)):

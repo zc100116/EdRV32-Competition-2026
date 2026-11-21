@@ -1,13 +1,14 @@
-/* yolo_post.h — npu-spec 2.2; B2 software design 3.4/3.5a.
- * Integer YOLOv8n postprocessing; numerical contract: sw/lib/README.md.
- * Clock domain: CPU, caller owns OUTPUT and DDR workspace.
+/* yolo_post.h — npu-spec 2.6/4.5; SoC 7.4/8.9.
+ * Hardware candidate YOLO postprocessing; numerical contract: sw/lib/README.md.
+ * Clock domain: CPU, caller owns DMA candidate buffers after successful DONE.
  */
 #ifndef YOLO_POST_H
 #define YOLO_POST_H
 
 #include <stdint.h>
 
-enum { YOLO_ANCHORS = 5040, YOLO_MAX_DETECTIONS = 100, YOLO_OUTPUT_BYTES = 725760 };
+enum { YOLO_ANCHORS = 5040, YOLO_MAX_DETECTIONS = 100, YOLO_OUTPUT_BYTES = 725760,
+       YOLO_CANDIDATE_BYTES = YOLO_ANCHORS * 24 };
 
 typedef struct {
     int16_t x0;
@@ -52,7 +53,15 @@ typedef struct {
 /* Generated from build/npu/quantized/quantization.json; see tools/gen/yolo_post.py. */
 extern const yolo_head yolo_default_heads[3];
 
-/* Valid fixed-model OUTPUT, three heads, 5040 candidates and 100 results are required.
+/* npu-spec 2.6/4.5: consumes and sorts the DMA-owned candidates in place after DONE.
+ * The caller invalidates count * 24 bytes before calling; no raw cls is accessed.
+ */
+uint32_t yolo_post_candidates(yolo_candidate workspace[YOLO_ANCHORS], uint32_t count,
+                             yolo_detection detections[YOLO_MAX_DETECTIONS],
+                             yolo_post_stats *stats);
+
+/* Offline host reference only: fixed-model raw OUTPUT, three heads,
+ * 5040 candidates and 100 results are required.
  * No allocation or hardware/cache access. All inputs are trusted internal contracts.
  * Statistics are required and count algorithmic work, not measured CPU cycles.
  */

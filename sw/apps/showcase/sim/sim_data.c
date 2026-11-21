@@ -1,11 +1,13 @@
 /* sim_data.c — showcase design §4.3/5.1; deterministic scripted page data.
  * LVGL tick clock; game loader supplies names/icons without opening ROMs.
  */
+#include "track.h"
 #include "sim_data.h"
 #include "detection.h"
 #include "renderer.h"
 #include "theme.h"
 #include <string.h>
+#include <stdio.h>
 #include "src/misc/cache/instance/lv_image_cache.h"
 extern const lv_image_dsc_t sim_street;
 extern const lv_image_dsc_t sim_indoor;
@@ -77,6 +79,18 @@ void ui_data_image_step(int direction)
     ui_image_status_t status=ui_data_vision().image_status;
     if(status==UI_IMAGE_RECEIVING || status==UI_IMAGE_DETECTING) return;
     image_direction+=direction; image_override=-1;
+}
+static ui_detection_t farm_raw[100];
+static unsigned farm_raw_count;
+void sim_data_farm(const ui_detection_t *boxes, unsigned count)
+{
+    memcpy(farm_raw,boxes,count*sizeof *boxes);
+    farm_raw_count=count;
+}
+const ui_detection_t *ui_data_detections(unsigned *count)
+{
+    *count=farm_raw_count;
+    return farm_raw;
 }
 static bool many_categories;
 void sim_data_many_categories(bool enabled) { many_categories=enabled; }
@@ -258,3 +272,69 @@ void ui_data_render_start(unsigned test)
     }
     ui_open(4);
 }
+
+/* T-POSE-GUI: deterministic people and two-pixel motion for host GUI measurement. */
+static ui_hand_t hand;
+const ui_hand_t *ui_data_hand(void) { return &hand; }
+static ui_pose_t pose;
+const ui_pose_t *ui_data_pose(void) { return &pose; }
+void sim_data_pose(unsigned count, unsigned frame)
+{
+    static const int points[17][2] = {
+        {100,30},{90,20},{110,20},{80,30},{120,30},{60,100},{140,100},
+        {30,180},{170,180},{10,260},{190,70},{70,250},{130,250},
+        {60,350},{140,350},{50,450},{150,450}
+    };
+    memset(&pose, 0, sizeof pose);
+    pose.count = count;
+    pose.right_up = count != 0;
+    for (unsigned i = 0; i < count; ++i) {
+        int x = 100 + (int)i * 290 + (int)(frame % 3) - 1;
+        int y = 150 + (int)((frame + i) % 3) - 1;
+        pose.people[i] = (ui_detection_t){.confidence = 95 - i * 3,
+            .x = x, .y = y, .width = 200, .height = 470};
+        for (unsigned k = 0; k < 17; ++k)
+            pose.points[i][k] = (ui_pose_point_t){x + points[k][0], y + points[k][1], 1};
+    }
+}
+
+static ui_demo_t demo;
+static const lv_image_dsc_t *demo_image;
+const ui_demo_t *ui_data_demo(void) { return &demo; }
+void sim_data_demo(const ui_demo_t *data, const ui_hand_t *gesture, const lv_image_dsc_t *image)
+{
+    demo = *data; hand = *gesture; demo_image = image;
+    ++helmet_revision;
+}
+const lv_image_dsc_t *sim_data_demo_image(void) { return demo_image; }
+
+/* T-GRAB-TEST: native simulator has no sensor bus. */
+void ui_data_grab_mirror(bool enabled) { (void)enabled; }
+void ui_data_grab_output(const char *text) { fputs(text, stdout); }
+
+/* T-SMOOTH-P0: native UI preserves the A/B selection without a sensor bus. */
+static bool short_exposure;
+bool ui_data_exposure_short(void) { return short_exposure; }
+void ui_data_exposure_toggle(void)
+{
+    short_exposure = !short_exposure;
+    ui_data_grab_output(short_exposure ? "camera exposure=short\r\n" :
+                                       "camera exposure=std\r\n");
+}
+
+/* Live demo L4 simulation snapshot uses the same initial preset as the board. */
+#include "../board/vision/preprocess.h"
+static ui_preprocess_t preprocessing = {.preset=SHOWCASE_DEFAULT_PRESET, .luma=62,
+    .contrast=384, .brightness=40, .gamma_tenths=7, .exposure=SHOWCASE_DEFAULT_EXPOSURE,
+    .auto_levels=true, .auto_gamma=true};
+ui_preprocess_t ui_data_preprocess(void) { return preprocessing; }
+void ui_data_preprocess_set(unsigned preset)
+{
+    int exposure = preset ? preprocessing.exposure : SHOWCASE_DEFAULT_EXPOSURE;
+    preprocessing = (ui_preprocess_t){.preset=preset, .luma=62, .contrast=256,
+        .gamma_tenths=10, .filter=preset >= 2 ? 2 : 0, .exposure=exposure,
+        .auto_levels=preset == 1 || preset == 3, .auto_gamma=preset == 1 || preset == 3};
+}
+void ui_data_preprocess_custom(const ui_preprocess_t *config)
+{ preprocessing = *config; preprocessing.preset = 255; }
+bool ui_data_preprocess_applied(void) { return true; }

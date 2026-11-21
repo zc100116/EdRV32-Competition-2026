@@ -252,6 +252,127 @@
             "spec": "npu-spec.md 4",
             "dimensions": [],
             "fields": []
+        },
+        {
+            "name": "POST_CTRL",
+            "offset": "0x114",
+            "access": "RW",
+            "reset": 0,
+            "spec": "npu-spec.md 4",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "EN",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "npu-spec.md 4"
+                },
+                {
+                    "name": "RAW_CLS_WRITE",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "npu-spec.md 4"
+                }
+            ],
+            "note": "Configure only in IDLE; raw box is always written."
+        },
+        {
+            "name": "POST_BASE",
+            "offset": "0x118",
+            "access": "RW",
+            "reset": 0,
+            "spec": "npu-spec.md 4",
+            "dimensions": [],
+            "fields": [],
+            "note": "4 KiB aligned; exclusive fixed 120960-byte candidate region."
+        },
+        {
+            "name": "POST_INT8_TH0",
+            "offset": "0x11C",
+            "access": "RW",
+            "reset": 0,
+            "spec": "npu-spec.md 4",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 9,
+                    "spec": "npu-spec.md 4"
+                }
+            ],
+            "note": "Signed threshold -128..128; best >= threshold; 128 rejects all."
+        },
+        {
+            "name": "POST_INT8_TH1",
+            "offset": "0x120",
+            "access": "RW",
+            "reset": 0,
+            "spec": "npu-spec.md 4",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 9,
+                    "spec": "npu-spec.md 4"
+                }
+            ],
+            "note": "Signed threshold -128..128; best >= threshold; 128 rejects all."
+        },
+        {
+            "name": "POST_INT8_TH2",
+            "offset": "0x124",
+            "access": "RW",
+            "reset": 0,
+            "spec": "npu-spec.md 4",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 9,
+                    "spec": "npu-spec.md 4"
+                }
+            ],
+            "note": "Signed threshold -128..128; best >= threshold; 128 rejects all."
+        },
+        {
+            "name": "POST_PROB_TH",
+            "offset": "0x128",
+            "access": "RW",
+            "reset": 0,
+            "spec": "npu-spec.md 4",
+            "dimensions": [],
+            "fields": [],
+            "note": "Unsigned Q24; probability must be strictly greater than threshold."
+        },
+        {
+            "name": "POST_COUNT",
+            "offset": "0x12C",
+            "access": "RO",
+            "reset": 0,
+            "spec": "npu-spec.md 4",
+            "dimensions": [],
+            "fields": [],
+            "note": "Cleared by DOORBELL; final candidate count published on successful completion."
+        },
+        {
+            "name": "POST_STATUS",
+            "offset": "0x130",
+            "access": "RO",
+            "reset": 0,
+            "spec": "npu-spec.md 4",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "POST_DONE",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "npu-spec.md 4"
+                }
+            ],
+            "note": "Cleared by DOORBELL; set only after successful post-processing completion."
         }
     ],
     "layouts": [
@@ -449,9 +570,30 @@
                     "lsb": 0,
                     "width": 20,
                     "spec": "npu-spec.md 4.1"
+                },
+                {
+                    "offset": "0x34",
+                    "name": "POST_KIND",
+                    "lsb": 0,
+                    "width": 2,
+                    "spec": "npu-spec.md 4.1"
+                },
+                {
+                    "offset": "0x34",
+                    "name": "HEAD_ID",
+                    "lsb": 2,
+                    "width": 2,
+                    "spec": "npu-spec.md 4.1"
+                },
+                {
+                    "offset": "0x38",
+                    "name": "POST_LUT_OFFSET",
+                    "lsb": 0,
+                    "width": 32,
+                    "spec": "npu-spec.md 4.1"
                 }
             ],
-            "note": "Words 13–15 are reserved; write zero. Layout is a development initial value."
+            "note": "Reserved: word 13 bits 31:4 and word 15. Ordinary word 13/14: zero."
         }
     ]
 }

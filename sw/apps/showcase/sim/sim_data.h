@@ -3,6 +3,8 @@
 #define SIM_DATA_H
 #include "ui_data.h"
 void sim_data_init(void);
+void sim_data_farm(const ui_detection_t *boxes, unsigned count);
+void sim_data_pose(unsigned count, unsigned frame);
 void sim_data_many_categories(bool enabled);
 void sim_data_session(ui_app_t app,ui_state_t state,const char *error);
 void sim_data_image_status(int status);
@@ -10,4 +12,6 @@ void sim_data_toggle_hardware(void);
 const lv_image_dsc_t *sim_process_image(const ui_process_config_t *config);
 const lv_image_dsc_t *sim_l0_image(void);
 uint32_t sim_composite(const lv_image_dsc_t *l0, uint32_t foreground, unsigned x, unsigned y);
+void sim_data_demo(const ui_demo_t *data, const ui_hand_t *gesture, const lv_image_dsc_t *image);
+const lv_image_dsc_t *sim_data_demo_image(void);
 #endif

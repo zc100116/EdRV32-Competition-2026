@@ -68,8 +68,10 @@ def seed(engine, console, state):
     application = 2 if state == 'detection' else 3
     payload = (struct.pack('<5B3x3I', application, 2, 0, 1, 50, 0xffffffff, 0xffffffff, 0xffff)
                + pack_process(DEFAULTS) + struct.pack('<IIB3x', 0, 0, 0))
+    if state == 'vision':
+        payload = payload[:5] + bytes((4, 1, 110)) + payload[8:]
     engine.ethernet.showcase.receive(control_message(
-        HELLO, 0, struct.pack('<H2x16s', 3, b'SIMULATED') + payload))
+        HELLO, 0, struct.pack('<H2x16s', 4, b'SIMULATED') + payload))
     console.output.setCurrentIndex(2)
     console.scene.setCurrentIndex(1 if state == 'vision' else 0)
     # Feed a 60 s timeline using the same encoder and real socket as telemetry_sim.py.
@@ -147,6 +149,24 @@ def main():
         window.rail_group.button(args.main_page).setChecked(True)
         window._select_page(args.main_page)
         window.soc.refresh()
+        if args.main_page == 7:
+            # L7 mirror example uses the same wire decoder as a real board.
+            from core.showcase import UI_ITEMS, encode as control_message
+            title = '图形引擎'.encode()
+            controls = []
+            for ident, kind, value, low, high, area, label, options in (
+                    (0, 0, 0, 0, 0, 0, '开始跑分', ''),
+                    (1, 1, 1, 0, 0, 0, '性能统计', ''),
+                    (2, 2, 35, 0, 100, 1, '旋转速度', ''),
+                    (3, 3, 1, 0, 0, 1, '渲染模式', '线框\n实体\n纹理')):
+                label, options = label.encode(), options.encode()
+                controls.append(struct.pack('<BBhhhBB', ident, kind, value, low, high,
+                                            area, len(label)) + label + bytes((len(options),)) + options)
+            engine.ethernet.showcase.receive(control_message(UI_ITEMS, 0,
+                struct.pack('<IBBBBB', 42, 0, 1, 4, 0, len(title)) + title + b''.join(controls)))
+            engine.board.board_state.update(demo_scene=7, preset=255)
+            window.demo.address.setText('192.168.43.1')
+            window.demo.refresh()
         app.processEvents()
         if args.scroll_bottom or args.scroll_position:
             scroll = (window.soc.pages.currentWidget() if args.main_page == 4 else

@@ -3,9 +3,7 @@
 // Description: Connect the CPU core, instruction/data caches and APB cache control.
 //              Expose independent AXI64 masters and the PLIC source 6 interrupt.
 // Clock domain: clk_sys.
-module edrv32_cpu_subsys #(
-    parameter RVC_EN = 0
-) (
+module edrv32_cpu_subsys (
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
@@ -78,7 +76,6 @@ module edrv32_cpu_subsys #(
 
     // Parallel copies share the original reset and release on the same clock edge.
     wire rst_sys_core_n_w;
-    wire [7:0] rst_sys_direction_n_w;
     wire rst_sys_csr_n_w;
     wire [9:0] rst_sys_counter_n_w;
     wire rst_sys_icache_n_w;
@@ -92,46 +89,6 @@ module edrv32_cpu_subsys #(
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .rst_n_o(rst_sys_core_n_w)
-    );
-    edrv32_reset_copy u_reset_sys_direction_0_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[0])
-    );
-    edrv32_reset_copy u_reset_sys_direction_1_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[1])
-    );
-    edrv32_reset_copy u_reset_sys_direction_2_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[2])
-    );
-    edrv32_reset_copy u_reset_sys_direction_3_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[3])
-    );
-    edrv32_reset_copy u_reset_sys_direction_4_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[4])
-    );
-    edrv32_reset_copy u_reset_sys_direction_5_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[5])
-    );
-    edrv32_reset_copy u_reset_sys_direction_6_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[6])
-    );
-    edrv32_reset_copy u_reset_sys_direction_7_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[7])
     );
     edrv32_reset_copy u_reset_sys_csr_n (
         .clk_i(clk_i),
@@ -248,18 +205,25 @@ module edrv32_cpu_subsys #(
     wire [31:0] ic_req_addr_w;
     wire ic_req_ready_w;
     wire ic_resp_valid_w;
+    wire [7:0] ic_resp_valid_copy_w;
     wire [63:0] ic_resp_data_w;
     wire ic_resp_err_w;
     wire ic_kill_w;
     wire ic_inv_w;
     wire ic_inv_done_w;
+    wire dc_early_valid_w;
+    wire [31:0] dc_early_addr_w;
+    wire [1:0] dc_early_way_hit_w;
+    wire [63:0] dc_early_way_data_w;
     wire dc_req_valid_w;
+    wire dc_req_early_w;
     wire [31:0] dc_req_addr_w;
     wire dc_req_store_w;
     wire [1:0] dc_req_size_w;
     wire dc_req_ready_w;
     wire dc_resp_valid_w;
-    wire [31:0] dc_resp_data_w;
+    wire [63:0] dc_resp_way_data_w;
+    wire [1:0] dc_resp_way_hit_w;
     wire dc_resp_err_w;
     wire dc_resp_device_w;
     wire dc_kill_w;
@@ -279,15 +243,12 @@ module edrv32_cpu_subsys #(
     wire [31:0] wb_err_addr_w;
 
     // core interface connections.
-    edrv32_cpu_core #(
-        .RVC_EN(RVC_EN)
-    ) u_core (
+    edrv32_cpu_core u_core (
         // Clock.
         .clk_i(clk_i),
 
         // Reset.
         .rst_n_i(rst_sys_core_n_w),
-        .rst_sys_direction_n_i(rst_sys_direction_n_w),
         .rst_sys_csr_n_i(rst_sys_csr_n_w),
         .rst_sys_counter_n_i(rst_sys_counter_n_w),
 
@@ -297,6 +258,7 @@ module edrv32_cpu_subsys #(
         .ic_req_addr_o(ic_req_addr_w),
         .ic_req_ready_i(ic_req_ready_w),
         .ic_resp_valid_i(ic_resp_valid_w),
+        .ic_resp_valid_copy_i(ic_resp_valid_copy_w),
         .ic_resp_data_i(ic_resp_data_w),
         .ic_resp_err_i(ic_resp_err_w),
         .ic_kill_o(ic_kill_w),
@@ -304,13 +266,19 @@ module edrv32_cpu_subsys #(
         .ic_inv_done_i(ic_inv_done_w),
 
         // Core data interface.
+        .dc_early_valid_o(dc_early_valid_w),
+        .dc_early_addr_o(dc_early_addr_w),
+        .dc_early_way_hit_i(dc_early_way_hit_w),
+        .dc_early_way_data_i(dc_early_way_data_w),
         .dc_req_valid_o(dc_req_valid_w),
+        .dc_req_early_o(dc_req_early_w),
         .dc_req_addr_o(dc_req_addr_w),
         .dc_req_store_o(dc_req_store_w),
         .dc_req_size_o(dc_req_size_w),
         .dc_req_ready_i(dc_req_ready_w),
         .dc_resp_valid_i(dc_resp_valid_w),
-        .dc_resp_data_i(dc_resp_data_w),
+        .dc_resp_way_data_i(dc_resp_way_data_w),
+        .dc_resp_way_hit_i(dc_resp_way_hit_w),
         .dc_resp_err_i(dc_resp_err_w),
         .dc_resp_device_i(dc_resp_device_w),
         .dc_kill_o(dc_kill_w),
@@ -350,6 +318,7 @@ module edrv32_cpu_subsys #(
         .ic_req_addr_i(ic_req_addr_w),
         .ic_req_ready_o(ic_req_ready_w),
         .ic_resp_valid_o(ic_resp_valid_w),
+        .ic_resp_valid_copy_o(ic_resp_valid_copy_w),
         .ic_resp_data_o(ic_resp_data_w),
         .ic_resp_err_o(ic_resp_err_w),
         .ic_kill_i(ic_kill_w),
@@ -382,13 +351,19 @@ module edrv32_cpu_subsys #(
         .rst_sys_dlru_n_i(rst_sys_dlru_n_w),
 
         // Core data interface.
+        .dc_early_valid_i(dc_early_valid_w),
+        .dc_early_addr_i(dc_early_addr_w),
+        .dc_early_way_hit_o(dc_early_way_hit_w),
+        .dc_early_way_data_o(dc_early_way_data_w),
         .dc_req_valid_i(dc_req_valid_w),
+        .dc_req_early_i(dc_req_early_w),
         .dc_req_addr_i(dc_req_addr_w),
         .dc_req_store_i(dc_req_store_w),
         .dc_req_size_i(dc_req_size_w),
         .dc_req_ready_o(dc_req_ready_w),
         .dc_resp_valid_o(dc_resp_valid_w),
-        .dc_resp_data_o(dc_resp_data_w),
+        .dc_resp_way_data_o(dc_resp_way_data_w),
+        .dc_resp_way_hit_o(dc_resp_way_hit_w),
         .dc_resp_err_o(dc_resp_err_w),
         .dc_resp_device_o(dc_resp_device_w),
         .dc_kill_i(dc_kill_w),

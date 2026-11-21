@@ -18,7 +18,7 @@ from tools.debug_tool.core.ethernet import HEADER, packets
 from tools.debug_tool.core.video import FrameRate, VideoReceiver, parse_detections
 from tools.debug_tool.core.yolo import (
     INPUT_BYTES, OUTPUT_BYTES, YoloTool, byte_difference, detection_difference,
-    reference_input, reference_output,
+    reference_input, reference_output, reference_candidates,
 )
 from test_program import wait_for
 from test_telemetry import wire
@@ -235,7 +235,7 @@ class VideoTest(unittest.TestCase):
             engine.ethernet.stop_receive()
             _, (ch2, output, detections) = engine.yolo.snapshot()
             self.assertEqual(ch2, bytes(INPUT_BYTES))
-            self.assertEqual(output, bytes(OUTPUT_BYTES))
+            self.assertEqual(output, bytes(4))
             self.assertEqual(detections.frame_id, 42)
             self.assertEqual(len(detections.boxes), 3)
             for window, data in [(0, ch2), (1, output)]:
@@ -258,22 +258,22 @@ class ComparisonTest(unittest.TestCase):
 
     def test_yolo_capture_and_comparison_uses_returned_ch2(self):
         yolo = YoloTool(None)
-        ch2, output = bytes(INPUT_BYTES), bytes(OUTPUT_BYTES)
+        ch2, output = bytes(INPUT_BYTES), bytes(4)
         for window, data in [(0, ch2), (1, output), (2, detection_wire())]:
             for packet in packets(data, window, 0):
                 _, notify, _, offset = HEADER.unpack_from(packet)
                 yolo.receive(window, offset, packet[8:], bool(notify and window == 2))
-        reference = bytearray(output)
-        reference[123] = 1
+        reference = bytes(OUTPUT_BYTES)
         quant = {'convolutions': []}
         with (patch('tools.debug_tool.core.yolo.reference_output', return_value=reference) as npu,
               patch('tools.debug_tool.core.yolo.reference_input', return_value=ch2),
+              patch('tools.debug_tool.core.yolo.reference_candidates', return_value=bytes(4)),
               patch('tools.debug_tool.core.yolo.reference_detections',
                     return_value=parse_detections(detection_wire()).boxes) as post):
             result = yolo.compare('original.png', 'compiler', quant)
         npu.assert_called_once_with('compiler', ch2)
         post.assert_called_once_with(reference, quant)
-        self.assertEqual(result['output'], dict(count=1, first=123))
+        self.assertEqual(result['output'], dict(count=0, first=None))
         self.assertEqual(result['input']['count'], 0)
         self.assertEqual(result['detections']['count'], 0)
 
@@ -283,7 +283,7 @@ class ComparisonTest(unittest.TestCase):
         yolo.receive(2, 0, detection_wire(), True)
         with self.assertRaisesRegex(ValueError, '回传不完整'):
             yolo.complete_capture()
-        self.assertIn('window 0: missing 983040 B', yolo.error)
+        self.assertIn('window 1 missing candidate count', yolo.error)
         self.assertEqual(yolo.failed, 1)
         self.assertFalse(yolo.capture_pending)
 
@@ -333,7 +333,7 @@ class ComparisonTest(unittest.TestCase):
                        struct.pack('<4hHH', 10, 20, 100, 200, 0, 900))
         yolo = YoloTool(None)
         yolo.receive(0, 0, ch2, False)
-        yolo.receive(1, 0, output, False)
+        yolo.receive(1, 0, reference_candidates(output, quant), False)
         yolo.receive(2, 0, board_boxes, True)
         with TemporaryDirectory() as directory:
             upsample_case(directory)
@@ -343,5 +343,5 @@ class ComparisonTest(unittest.TestCase):
             self.assertTrue(image.save(str(path)))
             result = yolo.compare(path, directory, quant)
         self.assertEqual(result['input'], dict(count=1, first=INPUT_BYTES - 1))
-        self.assertEqual(result['output'], dict(count=1, first=125))
+        self.assertEqual(result['output'], dict(count=0, first=None))
         self.assertEqual(result['detections'], dict(count=1, expected=0, actual=1))

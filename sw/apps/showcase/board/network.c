@@ -11,6 +11,9 @@
 #include "../runtime.h"
 #include "../platform.h"
 #include "../ui/ui_data.h"
+#include "../ui/live_demo.h"
+#include "../ui/mirror.h"
+#include "input.h"
 #include "eth_monitor.h"
 #include "eth.h"
 #include "uart.h"
@@ -85,19 +88,35 @@ uint32_t board_image_request(void) { return vision_request(); }
 static void state(uint8_t p[56])
 {
     uint8_t vision[56] = {0}; vision_state(vision);
+    ui_preprocess_t prep = ui_data_preprocess();
     const struct board_state snapshot = {.session=ui_data_session(),
         .error=board_session_error(), .boxes=vision[3],
         .detection=ui_data_detection_config(), .process=ui_data_process_config(),
         .request=record_u32(vision+44), .frame=record_u32(vision+48),
-        .image_status=vision[52]};
+        .image_status=vision[52], .demo_scene=ui_live_scene(),
+        .preset=prep.preset, .luma=prep.luma};
     board_state_encode(p,&snapshot);
 }
 static ui_app_t app_target;
 static ui_state_t state_target;
+static unsigned demo_action;
 static unsigned command(unsigned type,const uint8_t *p,unsigned bytes,uint32_t seq)
 {
     (void)seq;
     ui_session_t s=ui_data_session();
+    if(type==10) {
+        unsigned result = ui_mirror_act(record_u32(p),p[4],p[5],(int16_t)record_u16(p+6),
+            showcase_input_current_owner()==INPUT_APP);
+        platform_gui_wake();
+        return result;
+    }
+    if(type==9) {
+        if(p[0]==3 && p[1] && !(ui_data_hardware() & UI_PIX)) return 4;
+        demo_action=p[0];
+        ui_live_command(p[0],p[1]);
+        platform_gui_wake();
+        return EDSC_PENDING;
+    }
     if(type==4) {
         app_target=(ui_app_t)p[0];
         if(p[0]==UI_APP_GAME && p[1]==0) {
@@ -110,10 +129,14 @@ static unsigned command(unsigned type,const uint8_t *p,unsigned bytes,uint32_t s
         if(p[1]==3 && s.state!=UI_STATE_FAILED) return 5;
         state_target=p[1]==1 ? UI_STATE_PAUSED :
             app_target==UI_APP_NONE ? UI_STATE_IDLE : UI_STATE_RUNNING;
-        if(p[1]==0) ui_data_app_open(app_target,record_u16(p+2));
+        if(p[1]==0) {
+            ui_live_exit();
+            ui_data_app_open(app_target,record_u16(p+2));
+        }
         else if(p[1]==3) ui_data_app_retry();
         else ui_data_app_pause(p[1]==1);
-        ui_show_app(app_target,record_u16(p+2));
+        if(p[1]==0) ui_show_app(app_target,record_u16(p+2));
+        else ui_refresh();
         return EDSC_PENDING;
     }
     if(type==5) {
@@ -141,6 +164,13 @@ static unsigned command(unsigned type,const uint8_t *p,unsigned bytes,uint32_t s
 static unsigned progress(unsigned type)
 {
     ui_session_t s=ui_data_session();
+    if(type==9) {
+        if(demo_action==3) return ui_data_preprocess_applied() ? 0 : EDSC_PENDING;
+        unsigned scene=ui_live_scene();
+        if(scene==LIVE_DEMO_DIRECTORY || scene==7 || scene==10 || scene==11) return 0;
+        if(s.state==UI_STATE_FAILED) return board_session_error();
+        return s.state==UI_STATE_RUNNING ? 0 : EDSC_PENDING;
+    }
     if(type==6) {
         if(s.app!=UI_APP_PROCESS || s.state!=UI_STATE_RUNNING) return 0;
         return vision_process_applied() ? 0 : EDSC_PENDING;
@@ -175,6 +205,8 @@ void board_network_init(void)
     protocol.ops=(struct edsc_ops){reserve,complete,enqueue,state,command,progress,cancel};
     protocol.build=BUILD_COMMIT;
 }
+static void send_ui(const uint8_t *payload, unsigned bytes)
+{ edsc_ui_items(&protocol,payload,bytes); }
 extern void board_memory_sample(const struct mem_xbar_stats *memory);
 void board_network_step(void)
 {
@@ -229,6 +261,7 @@ void board_network_step(void)
     }
     engine_irq_clear(ENGINE_ETH,e.irq);
     edsc_poll(&protocol,platform_ticks(),platform_clock_hz());
+    if (protocol.peer) ui_mirror_poll(send_ui,platform_ticks(),platform_clock_hz());
     static uint64_t next_monitor;
     uint64_t now=platform_ticks();
     if(now>=next_monitor) {

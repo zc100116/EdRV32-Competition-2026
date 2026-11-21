@@ -9,6 +9,8 @@ module edrv32_cpu_div (
     input wire rst_n_i,
     // Request accepted when busy_o is low; operation is funct3[1:0].
     input wire start_i,
+    // Identical start decisions, copied by the core for 16-bit payload regions.
+    input wire [7:0] start_payload_i,
     input wire [31:0] operand_a_i,
     input wire [31:0] operand_b_i,
     input wire [1:0] operation_i,
@@ -58,27 +60,47 @@ module edrv32_cpu_div (
             end
         end
     end
+    wire [31:0] absolute_a_w;
+    wire [31:0] absolute_b_w;
+    wire [31:0] exceptional_w;
+    wire [31:0] final_w;
+    assign absolute_a_w = signed_w && operand_a_i[31] ? -operand_a_i : operand_a_i;
+    assign absolute_b_w = signed_w && operand_b_i[31] ? -operand_b_i : operand_b_i;
+    assign exceptional_w = operation_i[1] ?
+        (operand_b_i == 0 ? operand_a_i : 32'b0) :
+        (operand_b_i == 0 ? 32'hffffffff : 32'h80000000);
+    assign final_w = remainder_select_r ?
+        (remainder_negative_r ? -remainder_w : remainder_w) :
+        (quotient_negative_r ? -quotient_w : quotient_w);
     always @(posedge clk_i) begin
         if (start_i && !busy_o) begin
-            quotient_r <= signed_w && operand_a_i[31] ? -operand_a_i : operand_a_i;
-            divisor_r <= signed_w && operand_b_i[31] ? -operand_b_i : operand_b_i;
-            remainder_r <= 0;
             quotient_negative_r <= signed_w && (operand_a_i[31] ^ operand_b_i[31]);
             remainder_negative_r <= signed_w && operand_a_i[31];
             remainder_select_r <= operation_i[1];
-            if (operand_b_i == 0)
-                result_o <= operation_i[1] ? operand_a_i : 32'hffffffff;
-            else if (signed_w && operand_a_i == 32'h80000000 && operand_b_i == 32'hffffffff)
-                result_o <= operation_i[1] ? 32'b0 : 32'h80000000;
-        end else if (busy_o) begin
-            quotient_r <= quotient_w;
-            remainder_r <= remainder_w;
-            if (count_r == 1) begin
-                if (remainder_select_r)
-                    result_o <= remainder_negative_r ? -remainder_w : remainder_w;
-                else
-                    result_o <= quotient_negative_r ? -quotient_w : quotient_w;
-            end
         end
     end
+    genvar payload_half;
+    generate
+        for (payload_half = 0; payload_half < 2;
+            payload_half = payload_half + 1) begin : g_payload
+            always @(posedge clk_i) begin
+                if (start_payload_i[payload_half] && !busy_o)
+                    quotient_r[payload_half*16 +: 16] <= absolute_a_w[payload_half*16 +: 16];
+                else if (busy_o)
+                    quotient_r[payload_half*16 +: 16] <= quotient_w[payload_half*16 +: 16];
+                if (start_payload_i[payload_half+2] && !busy_o)
+                    divisor_r[payload_half*16 +: 16] <= absolute_b_w[payload_half*16 +: 16];
+                if (start_payload_i[payload_half+4] && !busy_o)
+                    remainder_r[payload_half*16 +: 16] <= 0;
+                else if (busy_o)
+                    remainder_r[payload_half*16 +: 16] <= remainder_w[payload_half*16 +: 16];
+                // valid_o owns result visibility; a free-running result register
+                // keeps start/count enables out of its 32-bit capture network.
+                if (start_payload_i[payload_half+6] && !busy_o)
+                    result_o[payload_half*16 +: 16] <= exceptional_w[payload_half*16 +: 16];
+                else
+                    result_o[payload_half*16 +: 16] <= final_w[payload_half*16 +: 16];
+            end
+        end
+    endgenerate
 endmodule

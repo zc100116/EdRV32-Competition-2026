@@ -236,7 +236,7 @@
                     "spec": "edrv32-soc-spec.md 7.1; disp-spec.md 4.1; disp-spec.md 4.3"
                 }
             ],
-            "note": "PERF0 scan frames; PERF1/2 L0 underflow frames/beats; PERF3 urgent cycles; PERF4 delayed requests; PERF5/6 L1 underflow frames/beats; PERF7..15 unused."
+            "note": "PERF0 scan frames; PERF1 L0 underflow frames; PERF2..15 read as 0 (disp-spec v0.4)."
         },
         {
             "name": "NEXT_BASE",

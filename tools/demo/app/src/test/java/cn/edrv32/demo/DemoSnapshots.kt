@@ -1,0 +1,277 @@
+// DemoSnapshots.kt — R5-12/13; real JVM Compose renders, no emulator. Host clock.
+package cn.edrv32.demo
+
+import app.cash.paparazzi.DeviceConfig
+import app.cash.paparazzi.Paparazzi
+import app.cash.paparazzi.Snapshot
+import app.cash.paparazzi.SnapshotHandler
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
+import com.android.resources.Density
+import com.android.resources.ScreenOrientation
+import java.awt.image.BufferedImage
+import java.io.File
+import javax.imageio.ImageIO
+import org.json.JSONArray
+import org.json.JSONObject
+import org.junit.Rule
+import org.junit.Test
+
+private fun target(id: Int, sprite: String, category: Int, x: Float, y: Float,
+    width: Float, height: Float, facing: Float = 1f, part: String = "body") =
+    JSONObject().put("id", id).put("sprite", sprite).put("category", category)
+        .put("x", x).put("y", y).put("width", width).put("height", height)
+        .put("facing", facing).put("part", part)
+
+private class ExportSnapshots : SnapshotHandler {
+    override fun newFrameHandler(snapshot: Snapshot, frameCount: Int, fps: Int) =
+        object : SnapshotHandler.FrameHandler {
+            override fun handle(image: BufferedImage) {
+                val name = snapshot.name!!
+                val directory = if (name.startsWith("street-frame-")) {
+                    File(System.getProperty("demo.build"), "street-frames")
+                } else if (name.startsWith("site-frame-")) {
+                    File(System.getProperty("demo.build"), "site-frames")
+                } else if (name.startsWith("frame-")) {
+                    File(System.getProperty("demo.build"), "farm-frames")
+                } else File(System.getProperty("demo.output")!!)
+                directory.mkdirs()
+                ImageIO.write(image, "png", File(directory, "$name.png"))
+            }
+            override fun close() = Unit
+        }
+    override fun close() = Unit
+}
+
+class DemoSnapshots {
+    @get:Rule
+    val paparazzi = Paparazzi(deviceConfig = DeviceConfig(screenWidth = 1280,
+        screenHeight = 720, xdpi = 160, ydpi = 160, density = Density.MEDIUM,
+        orientation = ScreenOrientation.LANDSCAPE, softButtons = false),
+        appCompatEnabled = false, snapshotHandler = ExportSnapshots(), useDeviceResolution = true)
+
+    @Test fun gallery() {
+        val repository = MediaRepository(paparazzi.context)
+        paparazzi.snapshot("home") { DemoTheme { HomeScreen(repository) } }
+        repository.scenes.forEach { scene ->
+            paparazzi.snapshot("scene-${scene.id}") {
+                CompositionLocalProvider(LocalInspectionMode provides true) {
+                    DemoTheme {
+                        SceneScreen(repository, scene, scene.items.first(),
+                            farm = if (scene.id == "farm") FarmModel.frame(0.0) else null,
+                            site = if (scene.id == "helmet") SiteModel.frame(0.0) else null)
+                    }
+                }
+            }
+        }
+        paparazzi.snapshot("sources") { DemoTheme { SourcesScreen(repository) } }
+    }
+
+    @Test fun phoneRemote() {
+        val repository = MediaRepository(paparazzi.context)
+        paparazzi.snapshot("phone-role-home") {
+            DemoTheme {
+                androidx.compose.foundation.layout.Column {
+                    RoleBar(true)
+                    ConnectionBar(false, address = "192.168.43.1")
+                    HomeScreen(repository)
+                }
+            }
+        }
+        listOf("farm", "helmet", "traffic").forEach { id ->
+            val scene = repository.scenes.first { it.id == id }
+            paparazzi.snapshot("phone-remote-$id") {
+                DemoTheme { RemoteSceneScreen(repository, scene,
+                    RemoteState(scene = id, seconds = 2.0), true, true,
+                    address = "192.168.43.1") }
+            }
+        }
+        val farm = repository.scenes.first { it.id == "farm" }
+        paparazzi.snapshot("phone-disconnected") {
+            DemoTheme { RemoteSceneScreen(repository, farm, RemoteState(scene = "farm"),
+                true, false, "连接错误：连接已断开", "192.168.43.1") }
+        }
+        paparazzi.snapshot("tablet-remote-indicator") {
+            DemoTheme { RemoteSceneScreen(repository, farm, RemoteState(scene = "farm"),
+                false, true) }
+        }
+    }
+
+    @Test fun liveDemoControls() {
+        paparazzi.snapshot("phone-live-demo") {
+            DemoTheme {
+                androidx.compose.foundation.layout.Column {
+                    PhoneHeader(true, address = "192.168.43.1 / 10.0.0.2")
+                    LiveDemoBar(LiveBoard(true, 4, 1, 110), true)
+                }
+            }
+        }
+        paparazzi.snapshot("phone-live-nes-gamepad") {
+            DemoTheme {
+                androidx.compose.foundation.layout.Column {
+                    PhoneHeader(true, address = "192.168.43.1 / 10.0.0.2")
+                    LiveDemoBar(LiveBoard(true, 11, 0, 0), true)
+                }
+            }
+        }
+    }
+
+    @Test fun streetSequence() {
+        val repository = MediaRepository(paparazzi.context)
+        val frames = JSONArray()
+        for (second in 0..39) {
+            val state = StreetModel.frame(second.toDouble())
+            val name = "street-frame-%02d".format(second)
+            paparazzi.snapshot(name) { StreetCanvas(repository, state, Modifier.fillMaxSize()) }
+            val actors = JSONArray()
+            state.drawingOrder.forEach { a ->
+                actors.put(JSONObject().put("id", a.id).put("kind", a.kind)
+                    .put("category", a.category).put("x", a.x).put("y", a.y)
+                    .put("width", a.width).put("height", a.height)
+                    .put("facing", a.facing).put("pose", a.pose))
+            }
+            frames.put(JSONObject().put("file", "$name.png").put("seconds", second)
+                .put("actors", actors))
+        }
+        File(System.getProperty("demo.build"), "street-frames.json").writeText(frames.toString(2))
+        for (second in listOf(4, 17, 31)) {
+            paparazzi.snapshot("street-$second") {
+                StreetCanvas(repository, StreetModel.frame(second.toDouble()),
+                    Modifier.fillMaxSize())
+            }
+        }
+    }
+
+    @Test fun siteSequence() {
+        val repository = MediaRepository(paparazzi.context)
+        val frames = JSONArray()
+        fun render(name: String, seconds: Double, demo: Boolean) {
+            val state = SiteModel.frame(seconds, demo)
+            paparazzi.snapshot(name) { SiteCanvas(repository, state, Modifier.fillMaxSize()) }
+            val targets = JSONArray()
+            state.workers.sortedBy { it.y + it.height / 2 }.forEach { w ->
+                val pose = (seconds * 2.5 + w.id).toInt() % 2
+                val path = if (w.id == 6) "visitor.webp" else if (w.wiping)
+                    "wipe-walk-$pose.webp" else
+                    "${w.sprite}-${if (w.wearing) "helmet" else "head"}-walk-$pose.webp"
+                targets.put(target(w.id, "site/$path", if (w.wearing) 0 else 1,
+                    w.x, w.y, w.width, w.height, part = "head"))
+            }
+            frames.put(JSONObject().put("file", "$name.png").put("seconds", seconds)
+                .put("targets", targets).put("static", !demo).put("head", state.workers.count {
+                    !it.wearing && it.x in 0f..2000f })
+                .put("helmet", state.workers.count { it.wearing }))
+        }
+        for (second in 0..24) render("site-frame-demo-%02d".format(second),
+            second.toDouble(), true)
+        for (second in 0..19) render("site-frame-static-%02d".format(second),
+            second + 40.0, false)
+        File(System.getProperty("demo.build"), "site-frames.json").writeText(frames.toString(2))
+        val moments = mapOf("all-helmets" to 2, "hat-off" to 8, "hat-on" to 12,
+            "visitor-entered" to 18, "visitor-left" to 24)
+        moments.forEach { (name, second) ->
+            paparazzi.snapshot("site-$name") {
+                SiteCanvas(repository, SiteModel.frame(second.toDouble(), true),
+                    Modifier.fillMaxSize())
+            }
+        }
+        paparazzi.snapshot("site-reset") {
+            SiteCanvas(repository, SiteModel.frame(0.0), Modifier.fillMaxSize())
+        }
+    }
+
+    @Test fun farmSequence() {
+        val repository = MediaRepository(paparazzi.context)
+        val frames = JSONArray()
+        fun render(name: String, seconds: Double, demo: Boolean, still: Boolean) {
+            val state = FarmModel.frame(seconds, demo)
+            paparazzi.snapshot(name) {
+                FarmCanvas(repository, state, Modifier.fillMaxSize())
+            }
+            val targets = JSONArray()
+            (state.animals + listOfNotNull(state.person)).sortedBy { it.y + it.height / 2 }
+                .forEach { a ->
+                    val pose = if (a.kind == "person") a.pose else if (a.kind == "sheep") 2 else 3
+                    targets.put(target(a.id, "farm/${a.kind}-$pose.webp", a.category,
+                        a.x, a.y, a.width, a.height, a.facing))
+                }
+            frames.put(JSONObject().put("file", "$name.png").put("seconds", seconds)
+                .put("targets", targets).put("static", still)
+                .put("person", state.person?.visible == true))
+        }
+        for (second in 0..24) render("frame-demo-%02d".format(second), second.toDouble(),
+            demo = true, still = false)
+        render("frame-climb", 13.75, demo = true, still = false)
+        for (second in 0..19) render("frame-static-%02d".format(second), second + 40.0,
+            demo = false, still = true)
+        File(System.getProperty("demo.build"), "farm-frames.json").writeText(frames.toString(2))
+        val moments = mapOf("static" to 0, "sheep-leaving" to 6, "missing" to 9,
+            "sheep-return" to 13, "intruder" to 18, "person-left" to 24)
+        moments.forEach { (name, second) ->
+            paparazzi.snapshot("farm-$name") {
+                FarmCanvas(repository, FarmModel.frame(second.toDouble(), true),
+                    Modifier.fillMaxSize())
+            }
+        }
+    }
+}
+
+// L13.5: complete 907x420 phone viewports, with controls and navigation together.
+class CompactRemoteSnapshots {
+    @get:Rule
+    val paparazzi = Paparazzi(deviceConfig = DeviceConfig(screenWidth = 907,
+        screenHeight = 420, xdpi = 160, ydpi = 160, density = Density.MEDIUM,
+        orientation = ScreenOrientation.LANDSCAPE, softButtons = false),
+        appCompatEnabled = false, snapshotHandler = ExportSnapshots(), useDeviceResolution = true)
+
+    @Test fun singlePageControls() {
+        val engine = LiveUi(42, 7, "图形引擎", listOf(
+            LiveUiItem(0, 0, 0, 0, 0, "开始图形引擎跑分", emptyList(), 0),
+            LiveUiItem(1, 1, 1, 0, 0, "显示性能统计", emptyList(), 0),
+            LiveUiItem(2, 2, 35, 0, 100, "旋转速度", emptyList(), 0),
+            LiveUiItem(3, 3, 1, 0, 0, "渲染模式", listOf("线框", "实体", "纹理"), 1)))
+        val recognition = LiveUi(43, 1, "目标检测 · 前处理", listOf(
+            LiveUiItem(0, 3, -1, 0, 0, "快捷档", livePresets, 0),
+            LiveUiItem(1, 1, 1, 0, 0, "自动色阶", emptyList(), 0),
+            LiveUiItem(2, 1, 1, 0, 0, "自动 Gamma", emptyList(), 0),
+            LiveUiItem(3, 2, -10, -256, 255, "亮度", emptyList(), 0),
+            LiveUiItem(4, 2, 256, 0, 512, "对比度", emptyList(), 0),
+            LiveUiItem(5, 2, 100, 20, 400, "Gamma", emptyList(), 0),
+            LiveUiItem(6, 1, 1, 0, 0, "降噪", emptyList(), 1),
+            LiveUiItem(7, 2, 4, 0, 255, "空间阈值", emptyList(), 1),
+            LiveUiItem(8, 2, 8, 0, 255, "时间阈值", emptyList(), 1),
+            LiveUiItem(9, 1, 1, 0, 0, "统计显示", emptyList(), 1),
+            LiveUiItem(10, 2, 8, 0, 0, "只读参数", emptyList(), 1),
+            LiveUiItem(11, 0, 0, 0, 0, "复位参数", emptyList(), 1)))
+        val nes = LiveUi(44, 11, "NES 经典游戏", listOf(
+            LiveUiItem(0, 3, 0, 0, 0, "游戏", listOf("超级马里奥", "魂斗罗"), 0),
+            LiveUiItem(1, 0, 0, 0, 0, "开始游戏", emptyList(), 0)))
+        listOf(Triple("engine", 7, engine), Triple("recognition", 1, recognition),
+            Triple("nes", 11, nes)).forEach { (name, scene, ui) ->
+            paparazzi.snapshot("phone-single-$name") {
+                DemoTheme {
+                    androidx.compose.material3.Surface(Modifier.fillMaxSize()) {
+                        androidx.compose.foundation.layout.Column {
+                            PhoneHeader(true, address = "192.168.43.1")
+                            LiveDemoBar(LiveBoard(true, scene,
+                                if (scene == 1) 255 else 0, 110), true, ui = ui)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test fun mirrorUnselectedAndReadOnly() {
+        val ui = LiveUi(43, 1, "自定义前处理", listOf(
+            LiveUiItem(0, 3, -1, 0, 0, "快捷档", livePresets, 0),
+            LiveUiItem(1, 3, 9, 0, 0, "模式", listOf("线框", "实体"), 0),
+            LiveUiItem(2, 2, 8, 0, 0, "只读值", emptyList(), 1),
+            LiveUiItem(3, 2, -1, 5, -5, "反向范围", emptyList(), 1)))
+        paparazzi.snapshot("phone-mirror-unselected") {
+            DemoTheme { LiveMirror(ui, true, Modifier.fillMaxSize()) }
+        }
+    }
+}

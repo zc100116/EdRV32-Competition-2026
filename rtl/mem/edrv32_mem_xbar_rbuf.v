@@ -93,6 +93,7 @@ module edrv32_mem_xbar_rbuf (
     integer state_idx;
     integer skid_idx;
     genvar p;
+    genvar data_slice;
 
     function [2:0] first8;
         input [7:0] mask_i;
@@ -165,7 +166,26 @@ module edrv32_mem_xbar_rbuf (
     generate
         for (p = 0; p < 7; p = p + 1) begin : g_output
             wire [258:0] data_w;
-            assign data_w = skid_valid_r[p] ? skid_data_r[p] : pending_data_w;
+            // Payload selectors follow the original skid-valid edge and update priority.
+            for (data_slice = 0; data_slice < 4; data_slice = data_slice + 1) begin : g_data
+                (* keep = "true", syn_preserve = 1 *) reg skid_valid_copy_r;
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i) begin
+                        skid_valid_copy_r <= 1'b0;
+                    end else begin
+                        if (take_w[p]) begin
+                            skid_valid_copy_r <= 1'b0;
+                        end
+                        if (pending_valid_r[p] && !rready_i[p]) begin
+                            skid_valid_copy_r <= 1'b1;
+                        end
+                    end
+                end
+                assign data_w[data_slice*64 +: 64] = skid_valid_copy_r ?
+                    skid_data_r[p][data_slice*64 +: 64] : pending_data_w[data_slice*64 +: 64];
+            end
+            assign data_w[258:256] = skid_valid_r[p] ?
+                skid_data_r[p][258:256] : pending_data_w[258:256];
             assign rvalid_o[p] = skid_valid_r[p] || pending_valid_r[p];
             assign rid_o[p] = skid_valid_r[p] ? skid_id_r[p] : pending_id_r;
             assign rdata_o[p*256 +: 256] = data_w[255:0];

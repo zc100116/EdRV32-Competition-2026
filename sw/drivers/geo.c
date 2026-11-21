@@ -62,3 +62,23 @@ void geo_submit(uint32_t descriptors, uint32_t count)
     mmio_write32(EDRV32_GEO_BASE + EDRV32_GEO_DESC_COUNT_OFFSET, count);
     mmio_write32(EDRV32_GEO_BASE + EDRV32_GEO_DOORBELL_OFFSET, 1u);
 }
+
+/* GEO 5.1/6: synchronous caller owns completion; the shared IRQ dispatcher must
+ * not consume ERROR while this batch is being polled. Restore its IRQ mask afterwards.
+ */
+uint32_t geo_execute(struct geo_descriptor *table, uint32_t physical, unsigned count)
+{
+    (void)table;
+    uint32_t irq_enable = mmio_read32(EDRV32_GEO_BASE+EDRV32_GEO_IRQ_EN_OFFSET);
+    mmio_write32(EDRV32_GEO_BASE+EDRV32_GEO_IRQ_EN_OFFSET,0);
+    geo_submit(physical,count);
+    struct engine_event event;
+    do {
+        event = engine_poll(ENGINE_GEO);
+    } while (!(event.irq & (EDRV32_GEO_IRQ_STAT_DONE_MASK|
+                             EDRV32_GEO_IRQ_STAT_ERROR_MASK)));
+    uint32_t error = event.error;
+    engine_irq_clear(ENGINE_GEO,event.irq);
+    mmio_write32(EDRV32_GEO_BASE+EDRV32_GEO_IRQ_EN_OFFSET,irq_enable);
+    return error;
+}

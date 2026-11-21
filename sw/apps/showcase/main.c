@@ -1,11 +1,14 @@
 /* main.c — P5 3.1/3.2/8.1; exclusive application manager and service scheduling.
  * The shell consumes backend sessions, never UI page globals; clk_sys. */
 #include "platform.h"
+#include "ui/game_loop.h"
+#include "board/vision/metrics.h"
 #include "runtime.h"
 #include "board/input.h"
 #include "apps.h"
 #include "lvgl/showcase_lvgl.h"
 #include "ui/theme.h"
+#include "ui/live_demo.h"
 #include "board/session.h"
 #include "board/games.h"
 #include "board/vision_hooks.h"
@@ -23,6 +26,17 @@ struct sched_task application_task = {
     "当前应用", application_step, 1, 1, UINT64_MAX, 0, 0
 };
 struct sched_task gui_task = {"图形界面", showcase_gui_step, 2, 1, UINT64_MAX, 0, 0};
+void smooth_tasks(uint64_t busy[3], uint64_t maximum[3])
+{
+    static uint64_t previous[3];
+    struct sched_task *tasks[] = {&communication_task, &application_task, &gui_task};
+    for (unsigned i = 0; i < 3; ++i) {
+        busy[i] = tasks[i]->busy_ticks - previous[i];
+        previous[i] = tasks[i]->busy_ticks;
+        maximum[i] = tasks[i]->max_step_ticks;
+        tasks[i]->max_step_ticks = 0;
+    }
+}
 void app_wake_at(uint64_t t) { sched_wake_at(&application_task, t); }
 uint32_t app_events(void) { return step_events; }
 uint64_t app_busy_ticks(void) { return application_task.busy_ticks; }
@@ -94,6 +108,11 @@ void showcase_input_event(void)
 static void start(ui_app_t app, unsigned arg)
 {
     active = app == UI_APP_CAMERA ? &vision_app_camera :
+        app == UI_APP_POSE ? &vision_app_pose :
+        app == UI_APP_HAND ? &vision_app_hand :
+        app == UI_APP_GRAB ? &vision_app_grab :
+        app == UI_APP_FACE ? &vision_app_face :
+        app == UI_APP_HELMET ? &vision_app_helmet :
         app == UI_APP_IMAGE ? &vision_app_image : app == UI_APP_PROCESS ? &vision_app_process :
         app == UI_APP_GAME ? &nes_app : app == UI_APP_GRAPHICS && arg == 1 ? graphics : NULL;
     if (active && (active->needs & platform_hardware()) != active->needs) {
@@ -110,7 +129,7 @@ static void start(ui_app_t app, unsigned arg)
 }
 static void stop(ui_app_t app)
 {
-    if (app <= UI_APP_PROCESS) board_bulk_cancel();
+    if (app <= UI_APP_PROCESS || app >= UI_APP_POSE) board_bulk_cancel();
     if (active) active->exit();
     if (app == UI_APP_GRAPHICS) board_graphics_stop();
     if (app == UI_APP_COREMARK) board_coremark_stop();
@@ -119,7 +138,9 @@ static void pause_app(ui_app_t app, bool p) { (void)app; vision_pause(p); }
 static bool ready(ui_app_t app, ui_state_t target)
 {
     bool complete;
-    if (app >= UI_APP_CAMERA && app <= UI_APP_PROCESS) complete = vision_ready(target);
+    if ((app >= UI_APP_CAMERA && app <= UI_APP_PROCESS) ||
+        app >= UI_APP_POSE)
+        complete = vision_ready(target);
     else if (app == UI_APP_GAME) complete = board_nes_ready(target);
     else complete = !active || !active->owns_display || platform_display_idle();
     if (target == UI_STATE_IDLE && complete) {
@@ -134,11 +155,13 @@ static void application_step(struct sched_task *task)
 {
     step_events = sched_take(task);
     showcase_input_dispatch();
-    if (ui_data_benchmark_running() && (platform_pressed() & PLATFORM_BACK))
-        ui_data_benchmark_stop();
+    if (ui_data_benchmark_running() && (platform_pressed() & PLATFORM_BACK)) {
+        if (ui_live_scene()) ui_back(); else ui_data_benchmark_stop();
+    }
     if (vision_service()) app_wake_at(platform_ticks());
     session_step(&media);
     board_games_step(); board_step();
+    game_loop_step();
     if (active && (media.state == UI_STATE_STARTING || media.state == UI_STATE_RUNNING))
         active->step();
     if (media.state == UI_STATE_STARTING || media.state == UI_STATE_STOPPING || media.pausing)

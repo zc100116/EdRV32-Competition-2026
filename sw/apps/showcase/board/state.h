@@ -6,6 +6,7 @@ struct board_state {
     ui_session_t session;
     unsigned error;
     bool boxes;
+    unsigned demo_scene, preset, luma;
     ui_detection_config_t detection;
     ui_process_config_t process;
     uint32_t request, frame;

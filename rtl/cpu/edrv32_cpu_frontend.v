@@ -3,22 +3,22 @@
 // Description: Fetch aligned groups, join boundary-spanning instructions and feed the four-entry IB.
 // Reserve response storage before issuing requests and recover speculative fetch on redirect.
 // Clock domain: clk_sys.
-module edrv32_cpu_frontend #(
-    parameter RVC_EN = 1
-) (
+module edrv32_cpu_frontend (
     // Clock and reset to the SoC reset vector 0.
     input wire clk_i,
     input wire rst_n_i,
-    input wire [7:0] rst_sys_direction_n_i,
 
     // Backend: older M/E redirect wins over a D-stage JAL redirect.
     input wire redirect_valid_i,
+    // Same-cycle M/E/D restoration replicas: 16 RAS bytes and one pointer/count bank.
+    input wire [16:0] redirect_valid_copy_i,
     input wire [31:0] redirect_pc_i,
     input wire [36:0] redirect_ras_i,
     input wire redirect_push_i,
     input wire redirect_pop_i,
     input wire [31:0] redirect_return_pc_i,
     input wire d_redirect_valid_i,
+    input wire d_redirect_slot_i,
     input wire [31:0] d_redirect_pc_i,
     input wire [36:0] d_redirect_ras_i,
     input wire d_redirect_push_i,
@@ -28,16 +28,19 @@ module edrv32_cpu_frontend #(
     // Surviving E-stage branch training.
     input wire update_valid_i,
     input wire update_clear_i,
-    input wire [4:0] update_clear_index_i,
+    input wire [6:0] update_clear_index_i,
     input wire [31:0] update_pc_i,
     input wire [31:0] update_target_i,
     input wire [2:0] update_type_i,
     input wire update_taken_i,
-    input wire update_compressed_i,
-    input wire [143:0] update_index_i,
+    input wire [11:0] update_index_i,
+    input wire [11:0] update_tournament_i,
     // Decode consumes 0, 1 or 2 records; low record is oldest.
     input wire [1:0] decode_pop_count_i,
     output wire [357:0] decode_data_o,
+    output wire [139:0] decode_predecode_o,
+    output wire [5:0] decode_index_hi_o,
+    output wire [23:0] decode_tournament_o,
     output wire [79:0] decode_operand_addr_o,
     output wire [1:0] decode_valid_count_o,
     output wire [2:0] ib_count_o,
@@ -46,6 +49,7 @@ module edrv32_cpu_frontend #(
     output wire [31:0] ic_req_addr_o,
     input wire ic_req_ready_i,
     input wire ic_resp_valid_i,
+    input wire [7:0] ic_resp_valid_copy_i,
     input wire [63:0] ic_resp_data_i,
     input wire ic_resp_err_i,
     output wire ic_kill_o,
@@ -59,140 +63,185 @@ module edrv32_cpu_frontend #(
     output wire f2_valid_o,
     output wire fetch_wait_o
 );
-    // Shared frontend/backend instruction-record layout (cpu-spec 4.1).
+    // Fixed four-byte instructions: a response contributes one or two whole words.
     localparam REC_BITS = 179;
-    localparam REC_PC_LSB = 0;
-    localparam REC_INSTR_LSB = 32;
-    localparam REC_RAW_LSB = 64;
-    localparam REC_COMPRESSED = 96;
-    localparam REC_ILLEGAL = 97;
-    localparam REC_FETCH_ERR = 98;
-    localparam REC_PRED_HIT = 99;
-    localparam REC_PRED_TAKEN = 100;
-    localparam REC_PRED_TARGET_LSB = 101;
-    localparam REC_GHR_LSB = 133;
-    localparam REC_RAS_LSB = 142;
-    localparam HALFWORD_BITS = 130;
-    localparam HALFWORD_CAPACITY = 8;
-    localparam BLOCK_BITS = 112;
+    localparam STREAM_BITS = 160;
     reg [31:0] f1_pc_r;
-    reg f1_cross_r;
-    reg [31:0] f1_cross_target_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:1] f1_pc_copy1_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:3] f1_pc_copy2_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:3] f1_pc_copy3_r;
+    wire [31:0] query_valid_index_w;
     reg f2_pending_r;
-    reg [31:0] f2_pc_r;
-    reg [2:0] f2_count_r;
-    reg [3:0] f2_start_r;
-    reg f2_hit_r;
+    reg miss_wait_r;
+    reg replay_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg replay_valid_copy1_r;
+    reg [138:0] replay_payload_r;
+    reg replay_taken_r;
+    reg [31:0] replay_resume_pc_r;
+    reg [3:0] credit_r;
+    wire [31:0] replay_pc_w;
+    wire [31:0] owner_sequential_pc_w;
+    wire [138:0] owner_query_w;
+    wire owner_taken_w;
+    wire owner_accept_w;
+    wire new_request_w;
+    wire miss_notice_w;
+    wire [31:0] f2_pc_r;
+    wire [1:0] f2_count_w;
+    reg f2_checked_r;
+    wire f2_conditional_r;
+    wire [19:0] f2_local_history_r;
+    wire [1:0] f2_global_r;
+    reg [1:0] f2_local_r;
+    wire [1:0] f2_local_w;
+    wire [1:0] f2_branch_local_w;
+    reg [19:0] f2_direction_history_r;
+    wire [1:0] f2_saved_local_w;
+    wire f2_use_local_w;
+    wire f2_final_taken_w;
+    wire f2_taken_w;
+    wire f2_correct_w;
+    reg [31:0] f2_sequential_pc_r;
+    wire [31:0] f2_correct_pc_w;
+    reg f2_correct_eligible_r;
+    reg [11:0] f2_index_r;
+    wire [19:0] predict_local_history_w;
+    wire [1:0] predict_global_w;
+    wire predict_conditional_w;
+    wire f2_hit_r;
     reg f2_taken_r;
-    reg f2_compressed_r;
-    reg [1:0] f2_position_r;
-    reg [31:0] f2_target_r;
-    reg [8:0] f2_history_r;
-    reg [36:0] f2_ras_r;
-    // Halfword: {block index, position within block, error, data}; block metadata is shared.
-    reg [21:0] halfwords_r [0:HALFWORD_CAPACITY-1];
-    // Block: {compressed, RAS, GHR, target, taken, hit, position[1:0], PC[31:3]}.
-    reg [BLOCK_BITS-1:0] blocks_r [0:HALFWORD_CAPACITY-1];
-    reg [2:0] halfword_read_ptr_r;
-    reg [2:0] halfword_write_ptr_r;
-    reg [2:0] block_write_ptr_r;
-    reg [3:0] halfword_count_r;
+    wire [1:0] f2_position_r;
+    wire [31:0] f2_target_r;
+    wire [11:0] f2_history_r;
+    wire [36:0] f2_ras_r;
+    reg [STREAM_BITS-1:0] words_r [0:3];
+    reg [138:0] f2_payload_r;
+    wire [138:0] f2_query_w;
+    wire [8:0] f2_pending_copy_w;
+    reg [1:0] read_ptr_r;
+    reg [1:0] write_ptr_r;
+    reg [2:0] count_r;
     wire redirect_w;
-    wire redirect_ib_w /* synthesis syn_keep=1 */;
-    wire redirect_icache_w /* synthesis syn_keep=1 */;
-    wire redirect_predict_w /* synthesis syn_keep=1 */;
-    assign redirect_ib_w = redirect_valid_i || d_redirect_valid_i;
-    assign redirect_icache_w = redirect_valid_i || d_redirect_valid_i;
-    assign redirect_predict_w = redirect_valid_i || d_redirect_valid_i;
     wire [31:0] redirect_pc_w;
-    wire [36:0] restore_ras_w;
-    wire restore_push_w;
-    wire restore_pop_w;
-    wire [31:0] restore_return_pc_w;
     wire predict_hit_w;
     wire predict_taken_w;
+    wire [7:0] predict_taken_copy_w;
+    wire [7:0] query_bank_copy_w;
     wire [31:0] predict_target_w;
     wire [1:0] predict_position_w;
-    wire predict_compressed_w;
-    wire [8:0] predict_history_w;
+    wire [11:0] predict_history_w;
     wire [36:0] predict_ras_w;
     wire request_accept_w;
-    wire [2:0] request_end_w;
-    wire [2:0] branch_end_w;
     wire response_accept_w;
-    wire [2:0] response_count_w;
-    wire [2:0] append_count_w;
-    wire [2:0] ib_free_count_w;
-    wire [HALFWORD_BITS-1:0] stream_w [0:3];
-    wire [3:0] available_w;
-    reg [3:0] remaining_w;
-    reg [2:0] consume_w;
-    reg [1:0] push_count_w;
-    reg [357:0] push_data_w;
-    reg [HALFWORD_BITS-1:0] first_w;
-    reg [16:0] first_tail_w;
-    reg [HALFWORD_BITS-1:0] second_w;
-    reg [16:0] second_tail_w;
-    wire [31:0] first_expanded_w;
-    wire first_illegal_w;
-    wire [31:0] second_expanded_w;
-    wire second_illegal_w;
-    reg first_compressed_w;
-    reg second_compressed_w;
-    reg [2:0] first_length_w;
-    reg [2:0] second_length_w;
-    reg [31:0] first_raw_w;
-    reg [31:0] second_raw_w;
-    reg first_error_w;
-    reg second_error_w;
-    wire first_recover_w;
-    wire second_recover_w;
-    wire recover_w;
-    wire [31:0] recover_pc_w;
-    wire [36:0] recover_ras_w;
-    wire [4:0] recover_btb_index_w;
-    wire [1:0] unused_alignment_w;
-    assign unused_alignment_w = {update_pc_i[0], f2_pc_r[0]};
-    genvar read_idx;
-    genvar write_idx;
+    wire [1:0] append_count_w;
+    wire [2:0] remaining_w;
+    wire [2:0] response_available_w;
+    wire push_one_w;
+    wire push_two_w;
+    wire [2:0] buffered_remaining_w;
+    wire [2:0] response_remaining_w;
+    wire [31:0] sequential_pc_w;
+    wire [31:0] next_pc_w;
+    wire pc_advance_w;
+    (* keep = "true" *) wire [31:0] unpredicted_pc_w;
+    (* keep = "true" *) wire [31:0] predicted_pc_w;
+    wire ib_one_free_w;
+    wire ib_two_free_w;
+    wire [STREAM_BITS-1:0] stream_w [0:1];
+    wire [1:0] push_count_w;
+    wire [357:0] push_data_w;
+    wire [5:0] push_index_hi_w;
+    wire [23:0] push_tournament_w;
+    wire [2:0] unused_update_align_w;
+    assign unused_update_align_w = {update_pc_i[0], f2_pc_r[1:0]};
     assign redirect_w = redirect_valid_i || d_redirect_valid_i;
     assign redirect_pc_w = redirect_valid_i ? redirect_pc_i : d_redirect_pc_i;
-    assign restore_ras_w = redirect_valid_i ? redirect_ras_i :
-        d_redirect_valid_i ? d_redirect_ras_i : recover_ras_w;
-    assign restore_push_w = redirect_valid_i ? redirect_push_i :
-        d_redirect_valid_i && d_redirect_push_i;
-    assign restore_pop_w = redirect_valid_i ? redirect_pop_i :
-        d_redirect_valid_i && d_redirect_pop_i;
-    assign restore_return_pc_w = redirect_valid_i ?
-        redirect_return_pc_i : d_redirect_return_pc_i;
-    assign branch_end_w = {1'b0, predict_position_w} +
-        (RVC_EN && predict_compressed_w ? 3'd1 : 3'd2);
-    assign request_end_w = f1_cross_r ? 3'd1 : predict_taken_w ? branch_end_w : 3'd4;
+    assign f2_query_w = {f1_pc_r, predict_hit_w, predict_conditional_w,
+        predict_local_history_w, predict_global_w, predict_position_w, predict_target_w,
+        predict_history_w, predict_ras_w};
+    assign replay_pc_w = replay_payload_r[138:107];
+    assign owner_query_w = replay_valid_r ? replay_payload_r : f2_query_w;
+    assign owner_sequential_pc_w = {owner_query_w[138:110] + 29'd1, 3'b0};
+    assign owner_taken_w = replay_valid_r ? replay_taken_r : predict_taken_w;
+    assign {f2_pc_r, f2_hit_r, f2_conditional_r, f2_local_history_r, f2_global_r,
+        f2_position_r, f2_target_r, f2_history_r, f2_ras_r} = f2_payload_r;
+    // cpu-spec 4.4: evaluate once, even when the I$ response is delayed.
+    // The correction rejects this cycle's F1 request and preserves the older F2 response.
+    assign f2_local_w = f2_position_r[1] ?
+        {f2_branch_local_w[0], f2_branch_local_w[1]} : f2_branch_local_w;
+    assign f2_saved_local_w = f2_checked_r ? f2_local_r : f2_local_w;
+    assign f2_final_taken_w = f2_use_local_w ?
+        f2_branch_local_w[0] : f2_global_r[f2_position_r[1]];
+    assign f2_taken_w = !f2_checked_r && f2_hit_r && f2_conditional_r ?
+        f2_final_taken_w : f2_taken_r;
+    assign f2_correct_w = f2_pending_r && !f2_checked_r && f2_correct_eligible_r &&
+        f2_use_local_w && (f2_branch_local_w[0] != f2_taken_r) && !redirect_w;
+    assign f2_count_w = {!f2_pc_r[2] && (!f2_taken_w || f2_position_r[1]),
+        f2_pc_r[2] ^ (f2_taken_w && !f2_position_r[1])};
     assign response_accept_w = f2_pending_r && ic_resp_valid_i && !redirect_w;
-    assign response_count_w = f2_count_r;
-    assign append_count_w = response_accept_w ? response_count_w : 3'd0;
-    // Include the arriving response and this cycle's drain when reserving the next group.
-    assign ic_req_valid_o = rst_n_i && !halt_i && !redirect_icache_w && !recover_w &&
-        (!f2_pending_r || ic_resp_valid_i) && remaining_w <= 4;
-    assign ic_req_addr_o = {f1_pc_r[31:3], 3'b0};
+    assign append_count_w = response_accept_w ? f2_count_w : 2'd0;
+    // cpu-spec 4.9: compute both queue outcomes before the I$ response arrives.
+    // The late hit must select a result, never feed the add/push/subtract chain.
+    assign response_available_w = count_r + {1'b0, f2_count_w};
+    // Read occupancy directly: avoid subtracting it from four and comparing the result.
+    assign ib_one_free_w = ib_count_o < 4;
+    assign ib_two_free_w = ib_count_o <= 2;
+    // Constant decrements are parallel candidates, selected by the early IB occupancy.
+    assign buffered_remaining_w = ib_two_free_w ? (count_r >= 2 ? count_r - 3'd2 : 3'd0) :
+        ib_one_free_w ? (count_r != 0 ? count_r - 3'd1 : 3'd0) : count_r;
+    assign response_remaining_w = ib_two_free_w ?
+        (response_available_w >= 2 ? response_available_w - 3'd2 : 3'd0) :
+        ib_one_free_w ? (response_available_w != 0 ? response_available_w - 3'd1 : 3'd0) :
+        response_available_w;
+    // Encode only at the interface; buffered records never wait for an I$ hit.
+    assign push_one_w = !redirect_w && ib_one_free_w &&
+        (count_r != 0 || (f2_pending_r && ic_resp_valid_i && f2_count_w != 0));
+    assign push_two_w = !redirect_w && ib_two_free_w &&
+        (count_r >= 2 || (f2_pending_r && ic_resp_valid_i &&
+        (f2_count_w == 2 || (count_r == 1 && f2_count_w != 0))));
+    assign push_count_w = {push_two_w, push_one_w && !push_two_w};
+    assign remaining_w = response_accept_w ? response_remaining_w : buffered_remaining_w;
+    // cpu-spec v0.19 4.1: credit covers IB4 + stream4, with two slots reserved
+    // for every issued request. This cycle's D pop/response only affects next credit.
+    assign ic_req_valid_o = rst_n_i && !halt_i && !redirect_w && !f2_correct_w &&
+        (replay_valid_r || (!miss_wait_r && credit_r >= 2));
+    assign new_request_w = request_accept_w && !replay_valid_r;
+    assign owner_accept_w = request_accept_w && (!f2_pending_r || ic_resp_valid_i);
+    assign miss_notice_w = f2_pending_r && !miss_wait_r && !ic_resp_valid_i && !redirect_w;
+    assign sequential_pc_w = {f1_pc_copy3_r + 29'd1, 3'b0};
+    // cpu-spec 4.4/4.9: all addresses are parallel candidates. The late cache
+    // handshake only selects a candidate; it never enters a PC incrementer.
+    assign pc_advance_w = rst_n_i && !halt_i && !miss_wait_r &&
+        credit_r >= 2 && ic_req_ready_i;
+    // Both outcomes include replay/hold before the final prediction decision.
+    // A late BTB valid result selects complete candidates at the register boundary.
+    assign unpredicted_pc_w = replay_valid_r ?
+        (rst_n_i && !halt_i && ic_req_ready_i ? replay_resume_pc_r : replay_pc_w) :
+        pc_advance_w ? sequential_pc_w : f1_pc_r;
+    assign predicted_pc_w = replay_valid_r ?
+        (rst_n_i && !halt_i && ic_req_ready_i ? replay_resume_pc_r : replay_pc_w) :
+        pc_advance_w ? predict_target_w : f1_pc_r;
+    assign ic_req_addr_o = replay_valid_r ? {replay_pc_w[31:3], 3'b0} :
+        {f1_pc_copy2_r, 3'b0};
     assign request_accept_w = ic_req_valid_o && ic_req_ready_i;
-    assign ic_kill_o = (redirect_icache_w || recover_w) && f2_pending_r;
+    assign ic_kill_o = redirect_w && f2_pending_r;
     assign ic_inv_o = invalidate_i;
     assign invalidate_done_o = ic_inv_done_i;
     assign f1_valid_o = ic_req_valid_o;
-    assign f2_valid_o = f2_pending_r || halfword_count_r != 0;
-    assign fetch_wait_o = f2_pending_r && !ic_resp_valid_i;
+    assign f2_valid_o = f2_pending_r || replay_valid_r || count_r != 0;
+    assign fetch_wait_o = miss_wait_r;
     edrv32_cpu_predictor u_predictor (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_sys_direction_n_i(rst_sys_direction_n_i),
-        .query_pc_i(f1_pc_r[31:1]),
-        .query_accept_i(request_accept_w && !f1_cross_r),
+        .query_pc_i(f1_pc_copy1_r[31:1]),
+        .query_valid_index_i(query_valid_index_w),
+        .query_bank_copy_i(query_bank_copy_w),
+        .query_accept_i(new_request_w),
         .predict_hit_o(predict_hit_w),
         .predict_taken_o(predict_taken_w),
+        .predict_taken_copy_o(predict_taken_copy_w),
         .predict_target_o(predict_target_w),
         .predict_position_o(predict_position_w),
-        .predict_compressed_o(predict_compressed_w),
         .predict_history_o(predict_history_w),
         .predict_ras_o(predict_ras_w),
         .update_valid_i(update_valid_i),
@@ -200,287 +249,302 @@ module edrv32_cpu_frontend #(
         .update_target_i(update_target_i),
         .update_type_i(update_type_i),
         .update_taken_i(update_taken_i),
-        .update_compressed_i(update_compressed_i),
         .update_index_i(update_index_i),
-        .clear_valid_i(update_clear_i || recover_w),
-        .clear_index_i(update_clear_i ? update_clear_index_i : recover_btb_index_w),
-        .restore_valid_i(redirect_predict_w || recover_w),
-        .restore_ras_i(restore_ras_w),
-        .restore_push_i(restore_push_w),
-        .restore_pop_i(restore_pop_w),
-        .restore_return_pc_i(restore_return_pc_w)
+        .update_tournament_i(update_tournament_i),
+        .predict_conditional_o(predict_conditional_w),
+        .predict_local_history_o(predict_local_history_w),
+        .predict_global_o(predict_global_w),
+        .f2_local_history_i(f2_direction_history_r),
+        .f2_index_i(f2_index_r),
+        .f2_local_o(f2_branch_local_w),
+        .f2_use_local_o(f2_use_local_w),
+        .clear_valid_i(update_clear_i),
+        .clear_index_i(update_clear_index_i),
+        .restore_valid_i(redirect_valid_copy_i[16]),
+        .restore_valid_copy_i(redirect_valid_copy_i[15:0]),
+        .restore_ras_i(redirect_valid_i ? redirect_ras_i : d_redirect_ras_i),
+        .restore_push_i(redirect_valid_i ? redirect_push_i : d_redirect_push_i),
+        .restore_pop_i(redirect_valid_i ? redirect_pop_i : d_redirect_pop_i),
+        .restore_return_pc_i(redirect_valid_i ? redirect_return_pc_i : d_redirect_return_pc_i)
     );
     edrv32_cpu_ib u_ib (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .push_count_i(push_count_w),
         .push_data_i(push_data_w),
-        .free_count_o(ib_free_count_w),
+        .push_index_hi_i(push_index_hi_w),
+        .push_tournament_i(push_tournament_w),
+        .tournament_o(decode_tournament_o),
+        .index_hi_o(decode_index_hi_o),
         .pop_count_i(decode_pop_count_i),
         .data_o(decode_data_o),
+        .predecode_o(decode_predecode_o),
         .operand_addr_o(decode_operand_addr_o),
         .valid_count_o(decode_valid_count_o),
-        .flush_i(redirect_ib_w),
+        .flush_i(redirect_w),
         .keep_head_i(d_redirect_valid_i && !redirect_valid_i && decode_pop_count_i == 0),
+        .keep_pair_i(d_redirect_slot_i),
         .count_o(ib_count_o)
     );
-    edrv32_cpu_rvc u_expand_first (
-        .instr_i(first_w[15:0]),
-        .instr_o(first_expanded_w),
-        .illegal_o(first_illegal_w)
-    );
-    edrv32_cpu_rvc u_expand_second (
-        .instr_i(second_w[15:0]),
-        .instr_o(second_expanded_w),
-        .illegal_o(second_illegal_w)
-    );
-    // Eight block slots suffice: every live block owns at least one of eight halfwords.
-    // Reuse slots in response order; the reserved response and current drain bypass storage.
-    assign available_w = halfword_count_r + {1'b0, append_count_w};
+    genvar slot;
+    genvar entry;
+    genvar slice;
+    genvar f2_group;
+    genvar pc_group;
+    genvar bank_copy;
     generate
-        for (read_idx = 0; read_idx < 4; read_idx = read_idx + 1) begin : g_read
-            reg [3:0] halfword_count_r_copy /* synthesis syn_preserve=1 */;
+        for (bank_copy = 0; bank_copy < 8; bank_copy = bank_copy + 1) begin : g_query_bank
+            (* keep = "true", syn_preserve = 1 *) reg query_bank_copy1_r;
+            assign query_bank_copy_w[bank_copy] = query_bank_copy1_r;
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i)
-                    halfword_count_r_copy <= 0;
-                else if (redirect_w || recover_w)
-                    halfword_count_r_copy <= 0;
+                    query_bank_copy1_r <= 0;
                 else
-                    halfword_count_r_copy <= remaining_w;
+                    query_bank_copy1_r <= next_pc_w[9];
             end
-            wire [2:0] slot_w;
-            wire [21:0] halfword_w;
-            wire [BLOCK_BITS-1:0] block_w;
-            wire [1:0] response_position_w;
-            wire [1:0] response_rotation_w;
-            wire [3:0] response_rotate_one_w;
-            wire [3:0] response_select_w;
-            wire [15:0] response_data_w;
-            wire response_prediction_w;
-            wire [31:0] pc_w;
-            assign slot_w = halfword_read_ptr_r + read_idx[2:0];
-            assign halfword_w = halfwords_r[slot_w];
-            assign block_w = blocks_r[halfword_w[21:19]];
-            assign response_position_w = f2_pc_r[2:1] + read_idx[1:0] -
-                halfword_count_r_copy[1:0];
-            // F1 predecodes the response start. Rotate four selects locally instead
-            // of broadcasting the binary F2 PC through the instruction-data muxes.
-            assign response_rotation_w = halfword_count_r_copy[1:0] - read_idx[1:0];
-            assign response_rotate_one_w = response_rotation_w[0] ?
-                {f2_start_r[0], f2_start_r[3:1]} : f2_start_r;
-            assign response_select_w = response_rotation_w[1] ?
-                {response_rotate_one_w[1:0], response_rotate_one_w[3:2]} : response_rotate_one_w;
-            assign response_data_w = ({16{response_select_w[0]}} & ic_resp_data_i[15:0]) |
-                ({16{response_select_w[1]}} & ic_resp_data_i[31:16]) |
-                ({16{response_select_w[2]}} & ic_resp_data_i[47:32]) |
-                ({16{response_select_w[3]}} & ic_resp_data_i[63:48]);
-            assign response_prediction_w = response_select_w[f2_position_r];
-            assign pc_w = {block_w[28:0], halfword_w[18:17], 1'b0};
-            assign stream_w[read_idx] = halfword_count_r_copy > read_idx ?
-                {block_w[111:33], block_w[32] && halfword_w[18:17] == block_w[30:29],
-                block_w[31] && halfword_w[18:17] == block_w[30:29], halfword_w[16],
-                pc_w, halfword_w[15:0]} :
-                {f2_compressed_r, f2_ras_r, f2_history_r, f2_target_r,
-                f2_taken_r && response_prediction_w,
-                f2_hit_r && response_prediction_w, ic_resp_err_i,
-                f2_pc_r[31:3], response_position_w, 1'b0,
-                response_data_w};
         end
-        for (write_idx = 0; write_idx < HALFWORD_CAPACITY;
-            write_idx = write_idx + 1) begin : g_write
-            wire [2:0] offset_w;
-            wire [1:0] position_w;
-            assign offset_w = write_idx[2:0] - halfword_write_ptr_r;
-            assign position_w = f2_pc_r[2:1] + offset_w[1:0];
-            // Redirect/recovery discards ownership via pointers, without gating payload FFs.
+        for (pc_group = 0; pc_group < 8; pc_group = pc_group + 1) begin : g_pc
+            (* keep = "true", syn_preserve = 1 *) reg f2_taken_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg f2_target_select_copy1_r;
+            wire owner_target_select_w;
+            (* keep = "true", syn_preserve = 1 *) reg correct_active_copy1_r;
+            wire correct_w;
+            (* keep = "true" *) wire [3:0] unpredicted_w;
+            (* keep = "true" *) wire [3:0] predicted_w;
+            assign correct_w = correct_active_copy1_r && f2_use_local_w &&
+                (f2_branch_local_w[0] != f2_taken_copy1_r);
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    correct_active_copy1_r <= 0;
+                else
+                    correct_active_copy1_r <= owner_accept_w &&
+                        owner_query_w[106] && owner_query_w[105];
+            end
+            assign unpredicted_w = redirect_w ? redirect_pc_w[pc_group*4 +: 4] :
+                correct_w ? f2_correct_pc_w[pc_group*4 +: 4] :
+                unpredicted_pc_w[pc_group*4 +: 4];
+            assign predicted_w = redirect_w ? redirect_pc_w[pc_group*4 +: 4] :
+                correct_w ? f2_correct_pc_w[pc_group*4 +: 4] :
+                predicted_pc_w[pc_group*4 +: 4];
+            assign next_pc_w[pc_group*4 +: 4] = predict_taken_copy_w[pc_group] ?
+                predicted_w : unpredicted_w;
             always @(posedge clk_i) begin
-                if (f2_pending_r && ic_resp_valid_i && offset_w < response_count_w)
-                    halfwords_r[write_idx] <= {block_write_ptr_r, position_w,
-                        ic_resp_err_i, ic_resp_data_i[position_w * 16 +: 16]};
+                if (!replay_valid_copy1_r)
+                    replay_resume_pc_r[pc_group*4 +: 4] <= predict_taken_copy_w[pc_group] ?
+                        predict_target_w[pc_group*4 +: 4] : sequential_pc_w[pc_group*4 +: 4];
+            end
+            // Distinct initial-direction FFs prevent synthesis from expanding
+            // the late RAM comparison into every correction address bit.
+            assign owner_target_select_w = replay_valid_r ? replay_taken_r :
+                predict_taken_copy_w[pc_group];
+            assign f2_correct_pc_w[pc_group*4 +: 4] = f2_target_select_copy1_r ?
+                f2_sequential_pc_r[pc_group*4 +: 4] : f2_target_r[pc_group*4 +: 4];
+            always @(posedge clk_i) begin
+                f2_taken_copy1_r <= owner_taken_w;
+                f2_target_select_copy1_r <= owner_target_select_w;
+            end
+        end
+        for (f2_group = 0; f2_group < 8; f2_group = f2_group + 1) begin : g_query_index
+            (* keep = "true", syn_preserve = 1 *) reg [3:0] query_valid_index_copy1_r;
+            assign query_valid_index_w[f2_group*4 +: 4] = query_valid_index_copy1_r;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    query_valid_index_copy1_r <= 0;
+                else
+                    query_valid_index_copy1_r <= next_pc_w[6:3];
+            end
+        end
+        // Each capture group retains one owner bit and no more than sixteen data bits.
+        // Owner copies use their own registered state when computing the next request.
+        for (f2_group = 0; f2_group < 9; f2_group = f2_group + 1) begin : g_f2_capture
+            localparam WIDTH = f2_group == 8 ? 11 : 16;
+            (* keep = "true", syn_preserve = 1 *) reg f2_pending_copy1_r;
+            wire response_valid_w;
+            wire capture_accept_w;
+            assign f2_pending_copy_w[f2_group] = f2_pending_copy1_r;
+            assign response_valid_w = ic_resp_valid_copy_i[f2_group % 8];
+            assign capture_accept_w = request_accept_w &&
+                (!f2_pending_copy1_r || response_valid_w);
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    f2_pending_copy1_r <= 0;
+                else if (redirect_w)
+                    f2_pending_copy1_r <= 0;
+                else begin
+                    if (response_valid_w)
+                        f2_pending_copy1_r <= 0;
+                    if (capture_accept_w)
+                        f2_pending_copy1_r <= 1;
+                end
+            end
+            always @(posedge clk_i) begin
+                if (!f2_pending_copy1_r || response_valid_w)
+                    f2_payload_r[f2_group*16 +: WIDTH] <= owner_query_w[f2_group*16 +: WIDTH];
+            end
+        end
+        for (slot = 0; slot < 2; slot = slot + 1) begin : g_read
+            wire offset_w;
+            wire position_w;
+            wire [31:0] pc_w;
+            wire [STREAM_BITS-1:0] response_w;
+            assign offset_w = slot[0] ^ count_r[0];
+            assign position_w = f2_pc_r[2] ^ offset_w;
+            assign pc_w = {f2_pc_r[31:3], position_w, 2'b0};
+            // {RAS, history, target, taken, hit, error, PC, instruction}.
+            assign response_w = {f2_global_r[position_w], f2_saved_local_w[position_w],
+                f2_local_history_r[position_w*10 +: 10], f2_ras_r, f2_history_r, f2_target_r,
+                f2_taken_w && {position_w, 1'b0} == f2_position_r,
+                f2_hit_r && {position_w, 1'b0} == f2_position_r,
+                ic_resp_err_i, pc_w, ic_resp_data_i[position_w*32 +: 32]};
+            // Each eight-bit slice owns its queue-select registers. This bounds
+            // the fanout of the selects feeding the IB record write mux.
+            for (slice = 0; slice < 20; slice = slice + 1) begin : g_slice
+                localparam WIDTH = 8;
+                reg [1:0] read_ptr_copy_r /* synthesis syn_preserve=1 */;
+                reg [2:0] count_copy_r /* synthesis syn_preserve=1 */;
+                wire [1:0] read_w;
+                assign read_w = read_ptr_copy_r + slot[1:0];
+                assign stream_w[slot][slice*8 +: WIDTH] = count_copy_r > slot ?
+                    words_r[read_w][slice*8 +: WIDTH] : response_w[slice*8 +: WIDTH];
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i) begin
+                        read_ptr_copy_r <= 0;
+                        count_copy_r <= 0;
+                    end else if (redirect_w) begin
+                        read_ptr_copy_r <= 0;
+                        count_copy_r <= 0;
+                    end else begin
+                        read_ptr_copy_r <= read_ptr_r + push_count_w;
+                        count_copy_r <= remaining_w;
+                    end
+                end
+            end
+            assign push_tournament_w[slot*12 +: 12] = stream_w[slot][159:148];
+            assign push_index_hi_w[slot*3 +: 3] =
+                stream_w[slot][110:108] ^ stream_w[slot][45:43];
+            assign push_data_w[slot*REC_BITS +: REC_BITS] = {
+                stream_w[slot][147:111],
+                stream_w[slot][107:99] ^ stream_w[slot][42:34],
+                stream_w[slot][98:64], 2'b0,
+                stream_w[slot][31:0], stream_w[slot][31:0], stream_w[slot][63:32]};
+        end
+        for (entry = 0; entry < 4; entry = entry + 1) begin : g_write
+            wire [1:0] offset_w;
+            wire position_w;
+            wire [STREAM_BITS-1:0] response_w;
+            assign offset_w = entry[1:0] - write_ptr_r;
+            assign position_w = f2_pc_r[2] ^ offset_w[0];
+            assign response_w = {f2_global_r[position_w], f2_saved_local_w[position_w],
+                f2_local_history_r[position_w*10 +: 10], f2_ras_r,
+                f2_history_r, f2_target_r,
+                f2_taken_w && {position_w, 1'b0} == f2_position_r,
+                f2_hit_r && {position_w, 1'b0} == f2_position_r,
+                ic_resp_err_i, f2_pc_r[31:3], position_w, 2'b0,
+                ic_resp_data_i[position_w*32 +: 32]};
+            // Every request reserves two stream slots. Capture speculatively
+            // while it owns F2; append_count_w alone grants record ownership.
+            // A delayed response overwrites unowned data on its returning edge.
+            for (slice = 0; slice < 20; slice = slice + 1) begin : g_slice
+                localparam GROUP = entry*20 + slice;
+                always @(posedge clk_i) begin
+                    if (f2_pending_copy_w[GROUP % 9] && !offset_w[1])
+                        words_r[entry][slice*8 +: 8] <= response_w[slice*8 +: 8];
+                end
             end
         end
     endgenerate
-    always @(*) begin
-        first_w = stream_w[0];
-        first_tail_w = {stream_w[1][48], stream_w[1][15:0]};
-        first_compressed_w = RVC_EN && first_w[1:0] != 3;
-        first_length_w = first_compressed_w ? 3'd1 : 3'd2;
-        first_raw_w = first_compressed_w ? {16'b0, first_w[15:0]} :
-            {first_tail_w[15:0], first_w[15:0]};
-        first_error_w = first_w[48] || (!first_compressed_w && first_tail_w[16]);
-        second_w = first_compressed_w ? stream_w[1] : stream_w[2];
-        second_tail_w = first_compressed_w ? {stream_w[2][48], stream_w[2][15:0]} :
-            {stream_w[3][48], stream_w[3][15:0]};
-        second_compressed_w = RVC_EN && second_w[1:0] != 3;
-        second_length_w = second_compressed_w ? 3'd1 : 3'd2;
-        second_raw_w = second_compressed_w ? {16'b0, second_w[15:0]} :
-            {second_tail_w[15:0], second_w[15:0]};
-        second_error_w = second_w[48] || (!second_compressed_w && second_tail_w[16]);
-    end
-    // cpu-spec v0.3 4.4: only compressed fetch requires prediction boundary recovery.
-    generate
-        if (RVC_EN) begin : g_rvc_recover
-            wire [42:0] first_upper_prediction_w;
-            wire [42:0] second_upper_prediction_w;
-            wire first_length_mismatch_w;
-            wire second_length_mismatch_w;
-            assign first_upper_prediction_w = {stream_w[1][128:92],
-                stream_w[1][49], stream_w[1][23:19]};
-            assign second_upper_prediction_w = first_compressed_w ?
-                {stream_w[2][128:92], stream_w[2][49], stream_w[2][23:19]} :
-                {stream_w[3][128:92], stream_w[3][49], stream_w[3][23:19]};
-            assign first_length_mismatch_w = first_w[49] &&
-                first_w[129] != first_compressed_w;
-            assign second_length_mismatch_w = second_w[49] &&
-                second_w[129] != second_compressed_w;
-            assign first_recover_w = (available_w >= 1 && first_length_mismatch_w) ||
-                (available_w >= 2 && first_length_w == 2 && first_upper_prediction_w[5]);
-            assign second_recover_w =
-                (available_w >= {1'b0, first_length_w} + 1 && second_length_mismatch_w) ||
-                (available_w >= {1'b0, first_length_w} + 2 && second_length_w == 2 &&
-                second_upper_prediction_w[5]);
-            // A valid older first instruction may still enter IB while the second is retried.
-            assign recover_w = !redirect_w && (first_recover_w ||
-                (available_w >= {1'b0, first_length_w} && ib_free_count_w != 0 &&
-                second_recover_w));
-            assign recover_pc_w = first_recover_w ? first_w[47:16] : second_w[47:16];
-            assign recover_ras_w = first_recover_w ?
-                (first_length_mismatch_w ? first_w[128:92] : first_upper_prediction_w[42:6]) :
-                (second_length_mismatch_w ? second_w[128:92] : second_upper_prediction_w[42:6]);
-            assign recover_btb_index_w = first_recover_w ?
-                (first_length_mismatch_w ? first_w[23:19] : first_upper_prediction_w[4:0]) :
-                (second_length_mismatch_w ? second_w[23:19] : second_upper_prediction_w[4:0]);
-        end else begin : g_fixed_length
-            wire [1:0] unused_prediction_length_w;
-            assign unused_prediction_length_w = {first_w[129], second_w[129]};
-            assign first_recover_w = 1'b0;
-            assign second_recover_w = 1'b0;
-            assign recover_w = 1'b0;
-            assign recover_pc_w = 0;
-            assign recover_ras_w = 0;
-            assign recover_btb_index_w = 0;
+    // The discarded successor keeps its original prediction/RAS checkpoint.
+    // Reissuing that token consumes no second credit or speculative RAS action.
+    // Snapshot until replay owns it; the dedicated hold copy isolates the wide CE load.
+    always @(posedge clk_i) begin
+        if (!replay_valid_copy1_r) begin
+            replay_payload_r <= f2_query_w;
+            replay_taken_r <= predict_taken_w;
         end
-    endgenerate
-    // IB ownership already gates every write. Build record data before redirect/free-space
-    // selection so the late cancel only reaches the small write controls, not 358 payload muxes.
-    always @(*) begin
-        push_data_w = 0;
-        push_data_w[REC_RAS_LSB +: 37] = first_w[128:92];
-        push_data_w[REC_PRED_TARGET_LSB +: 32] = first_w[82:51];
-        push_data_w[REC_PRED_TAKEN] = first_w[50];
-        push_data_w[REC_PRED_HIT] = first_w[49];
-        push_data_w[REC_FETCH_ERR] = first_error_w;
-        push_data_w[REC_ILLEGAL] = first_compressed_w && first_illegal_w;
-        push_data_w[REC_COMPRESSED] = first_compressed_w;
-        push_data_w[REC_RAW_LSB +: 32] = first_raw_w;
-        push_data_w[REC_INSTR_LSB +: 32] = first_compressed_w ? first_expanded_w : first_raw_w;
-        push_data_w[REC_PC_LSB +: 32] = first_w[47:16];
-        // Each instruction combines F1 history with its own PC for training.
-        push_data_w[REC_GHR_LSB +: 9] = first_w[91:83] ^ first_w[25:17];
-        push_data_w[REC_BITS+REC_RAS_LSB +: 37] = second_w[128:92];
-        push_data_w[REC_BITS+REC_PRED_TARGET_LSB +: 32] = second_w[82:51];
-        push_data_w[REC_BITS+REC_PRED_TAKEN] = second_w[50];
-        push_data_w[REC_BITS+REC_PRED_HIT] = second_w[49];
-        push_data_w[REC_BITS+REC_FETCH_ERR] = second_error_w;
-        push_data_w[REC_BITS+REC_ILLEGAL] = second_compressed_w && second_illegal_w;
-        push_data_w[REC_BITS+REC_COMPRESSED] = second_compressed_w;
-        push_data_w[REC_BITS+REC_RAW_LSB +: 32] = second_raw_w;
-        push_data_w[REC_BITS+REC_INSTR_LSB +: 32] =
-            second_compressed_w ? second_expanded_w : second_raw_w;
-        push_data_w[REC_BITS+REC_PC_LSB +: 32] = second_w[47:16];
-        push_data_w[REC_BITS+REC_GHR_LSB +: 9] = second_w[91:83] ^ second_w[25:17];
     end
-    always @(*) begin
-        push_count_w = 0;
-        consume_w = 0;
-        if (!redirect_ib_w && !first_recover_w &&
-            available_w >= {1'b0, first_length_w} && ib_free_count_w != 0) begin
-            push_count_w = 1;
-            consume_w = first_length_w;
-            if (available_w >= {1'b0, first_length_w} + {1'b0, second_length_w} &&
-                ib_free_count_w >= 2 && !second_recover_w) begin
-                push_count_w = 2;
-                consume_w = first_length_w + second_length_w;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            miss_wait_r <= 0;
+            replay_valid_r <= 0;
+            replay_valid_copy1_r <= 0;
+            credit_r <= 8;
+        end else if (redirect_w) begin
+            miss_wait_r <= 0;
+            replay_valid_r <= 0;
+            replay_valid_copy1_r <= 0;
+            credit_r <= d_redirect_valid_i && !redirect_valid_i && decode_pop_count_i == 0 ?
+                (d_redirect_slot_i ? 4'd6 : 4'd7) : 4'd8;
+        end else begin
+            if (miss_notice_w) begin
+                miss_wait_r <= 1;
+                replay_valid_r <= new_request_w;
+                replay_valid_copy1_r <= new_request_w;
             end
+            if (response_accept_w)
+                miss_wait_r <= 0;
+            if (request_accept_w && replay_valid_r) begin
+                replay_valid_r <= 0;
+                replay_valid_copy1_r <= 0;
+            end
+            credit_r <= credit_r + {2'b0, decode_pop_count_i} -
+                (new_request_w ? 4'd2 : 4'd0) +
+                (response_accept_w ? 4'd2 - {2'b0, f2_count_w} : 4'd0);
         end
-        remaining_w = available_w - {1'b0, consume_w};
     end
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             f1_pc_r <= 0;
-            f1_cross_r <= 0;
-            f2_pending_r <= 0;
-            halfword_count_r <= 0;
-            halfword_read_ptr_r <= 0;
-            halfword_write_ptr_r <= 0;
-            block_write_ptr_r <= 0;
-        end else if (redirect_w) begin
-            f1_pc_r <= redirect_pc_w;
-            f1_cross_r <= 0;
-            f2_pending_r <= 0;
-            halfword_count_r <= 0;
-            halfword_read_ptr_r <= 0;
-            halfword_write_ptr_r <= 0;
-            block_write_ptr_r <= 0;
-        end else if (recover_w) begin
-            f1_pc_r <= recover_pc_w;
-            f1_cross_r <= 0;
-            f2_pending_r <= 0;
-            halfword_count_r <= 0;
-            halfword_read_ptr_r <= 0;
-            halfword_write_ptr_r <= 0;
-            block_write_ptr_r <= 0;
+            f1_pc_copy1_r <= 0;
+            f1_pc_copy2_r <= 0;
+            f1_pc_copy3_r <= 0;
         end else begin
-            halfword_count_r <= remaining_w;
-            halfword_read_ptr_r <= halfword_read_ptr_r + consume_w;
-            halfword_write_ptr_r <= halfword_write_ptr_r + append_count_w;
-            if (response_accept_w)
-                block_write_ptr_r <= block_write_ptr_r + 1'b1;
+            f1_pc_r <= next_pc_w;
+            f1_pc_copy1_r <= next_pc_w[31:1];
+            f1_pc_copy2_r <= next_pc_w[31:3];
+            f1_pc_copy3_r <= next_pc_w[31:3];
+        end
+    end
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            f2_pending_r <= 0;
+            f2_checked_r <= 0;
+            read_ptr_r <= 0;
+            write_ptr_r <= 0;
+            count_r <= 0;
+        end else if (redirect_w) begin
+            f2_pending_r <= 0;
+            f2_checked_r <= 0;
+            read_ptr_r <= 0;
+            write_ptr_r <= 0;
+            count_r <= 0;
+        end else begin
+            count_r <= remaining_w;
+            read_ptr_r <= read_ptr_r + push_count_w;
+            write_ptr_r <= write_ptr_r + append_count_w;
+            if (f2_pending_r)
+                f2_checked_r <= 1;
             if (response_accept_w)
                 f2_pending_r <= 0;
-            if (request_accept_w) begin
+            if (owner_accept_w) begin
                 f2_pending_r <= 1;
-                if (f1_cross_r) begin
-                    f1_pc_r <= f1_cross_target_r;
-                    f1_cross_r <= 0;
-                end else if (predict_taken_w) begin
-                    if (branch_end_w > 4) begin
-                        f1_pc_r <= {f1_pc_r[31:3], 3'b0} + 8;
-                        f1_cross_r <= 1;
-                    end else begin
-                        f1_pc_r <= predict_target_w;
-                    end
-                end else begin
-                    f1_pc_r <= {f1_pc_r[31:3], 3'b0} + 8;
-                end
+                f2_checked_r <= 0;
             end
         end
     end
+    // Both correction addresses and the chooser index are ready in F2 before
+    // the LUTRAM decision. Initial direction selects the opposite stored address.
     always @(posedge clk_i) begin
-        // Keep a frontend-local PC copy instead of sharing the I$ accepted-address
-        // FFs. Before acceptance there is no F2 owner; while a response is pending
-        // this holds its PC through the response edge, including simultaneous reissue.
-        if (!f2_pending_r || ic_resp_valid_i)
-            f2_pc_r <= f1_pc_r;
-        if (f2_pending_r && ic_resp_valid_i)
-            blocks_r[block_write_ptr_r] <= {f2_compressed_r, f2_ras_r, f2_history_r,
-                f2_target_r, f2_taken_r, f2_hit_r, f2_position_r, f2_pc_r[31:3]};
-        // cpu-spec 4.1: without a pending response owner, F2 payload may follow F1.
-        // A simultaneous response/reissue replaces the owner at this edge.
-        // Keep E redirect cancellation in f2_pending_r, outside these payload enables.
-        if (!f2_pending_r || ic_resp_valid_i) begin
-            f2_count_r <= (request_end_w > 4 ? 3'd4 : request_end_w) -
-                {1'b0, f1_pc_r[2:1]};
-            f2_start_r <= 4'b0001 << f1_pc_r[2:1];
-            f2_hit_r <= predict_hit_w && !f1_cross_r;
-            f2_taken_r <= predict_taken_w && !f1_cross_r;
-            f2_compressed_r <= predict_compressed_w;
-            f2_position_r <= predict_position_w;
-            f2_target_r <= predict_target_w;
-            f2_history_r <= predict_history_w;
-            f2_ras_r <= predict_ras_w;
-            if (!f1_cross_r && predict_taken_w && branch_end_w > 4)
-                f1_cross_target_r <= predict_target_w;
+        // These candidates are consumed only on an owner's first F2 cycle.
+        f2_sequential_pc_r <= owner_sequential_pc_w;
+        f2_correct_eligible_r <= owner_query_w[106] && owner_query_w[105];
+        f2_direction_history_r <= owner_query_w[82] ?
+            {owner_query_w[94:85], owner_query_w[104:95]} : owner_query_w[104:85];
+        f2_index_r <= {owner_query_w[120:110], owner_query_w[82]} ^ owner_query_w[48:37];
+        if (f2_pending_r && !f2_checked_r) begin
+            f2_taken_r <= f2_taken_w;
+            f2_local_r <= f2_local_w;
         end
+        if (!f2_pending_r || ic_resp_valid_i)
+            f2_taken_r <= owner_taken_w;
     end
 endmodule

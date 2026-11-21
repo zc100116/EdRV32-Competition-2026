@@ -17,6 +17,8 @@ class VirtualInput:
         self.send = send
         self.available = available
         self.state = (0, 0, 0, 0, 0)
+        self.relay_keys = 0
+        self.relay_active = False
         self.lock = threading.RLock()
         self.stopped = threading.Event()
         self.thread = None
@@ -32,6 +34,23 @@ class VirtualInput:
             self._send()
             self.start()
 
+    def update_relay(self, keys):
+        with self.lock:
+            if not self.available():
+                raise RuntimeError("网口未连接，虚拟设备不可用")
+            self.relay_active = True
+            self.relay_keys = keys
+            self._send()
+            self.start()
+
+    def clear_relay(self):
+        with self.lock:
+            if self.relay_active:
+                self.relay_active = False
+                self.relay_keys = 0
+                if self.available():
+                    self._send()
+
     def start(self):
         if self.thread is None or not self.thread.is_alive():
             self.stopped.clear()
@@ -41,10 +60,15 @@ class VirtualInput:
 
     def reset(self):
         with self.lock:
+            self.relay_active = False
+            self.relay_keys = 0
             self.state = (0, self.state[1], self.state[2], 0, self.state[4])
 
     def _send(self):
-        self.send(FRAME.pack(*self.state))
+        keys, x, y, mouse, wheel = self.state
+        if self.relay_active:
+            x = y = mouse = wheel = 0
+        self.send(FRAME.pack(keys | self.relay_keys, x, y, mouse, wheel))
 
     def _repeat(self):
         while not self.stopped.wait(.1):

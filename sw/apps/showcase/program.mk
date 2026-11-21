@@ -1,5 +1,10 @@
 # File: program.mk
 # Design: showcase 4.1--4.5; single BIOS-loaded DDR application.
+# Temporary card 68 R2 option; remove after card 75 board acceptance (CLAUDE.md 1.2).
+SHOWCASE_POST ?= hw
+ifeq ($(SHOWCASE_POST),cpu)
+OUT := $(ROOT)/build/sw/showcase-cpupost
+endif
 MEMORY := showcase
 PROGRAM_SOURCES := sw/apps/showcase/main.c sw/apps/showcase/platform.c sw/apps/showcase/input.c \
     sw/apps/showcase/layers.c $(patsubst $(ROOT)/%,%,$(wildcard $(ROOT)/sw/apps/showcase/board/*.c)) \
@@ -43,7 +48,7 @@ SHOWCASE_GAME_PACK := $(ROOT)/build/showcase/games.bin
 SHOWCASE_GAME_OBJECT := $(ROOT)/build/showcase/games.o
 $(SHOWCASE_GAME_PACK): $(ROOT)/tools/sw/game_record.py \
     $(ROOT)/sw/apps/showcase/games/games.txt FORCE
-	$(HOME)/.local/opt/edrv32-py/bin/python $(ROOT)/tools/sw/game_record.py pack \
+	python3 $(ROOT)/tools/sw/game_record.py pack \
 	    $(ROOT)/sw/apps/showcase/games/games.txt $@
 $(SHOWCASE_GAME_OBJECT): $(SHOWCASE_GAME_PACK)
 	riscv-none-elf-objcopy -I binary -O elf32-littleriscv -B riscv \
@@ -62,9 +67,103 @@ PROGRAM_SOURCES += sw/apps/showcase/board/coremark_stack.S
 # Keep the locked upstream list code unchanged; GCC 15 diagnoses its local search key.
 $(OUT)/obj/third_party/coremark/core_list_join.o: CORE_MAIN_FLAGS := -Wno-maybe-uninitialized
 
-# P5b 9.1: compiler model, decoded exactly like the PC EDNM uploader.
-SHOWCASE_MODEL_DIR := $(ROOT)/sw/apps/showcase/model
+# Spec npu 2.5/4.4: rebuild tags/tables from the checked-in offline snapshot.
+SHOWCASE_MODEL_SOURCE := $(ROOT)/sw/apps/showcase/models/yolov8n
+SHOWCASE_MODEL_DIR := $(ROOT)/build/npu/software_model
 PROGRAM_SOURCES += build/showcase/model.c
 $(ROOT)/build/showcase/model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
-    $(addprefix $(SHOWCASE_MODEL_DIR)/,mem_desc.hex mem_model.hex regs.txt)
-	python3 $< $(SHOWCASE_MODEL_DIR) $@
+    $(wildcard $(ROOT)/tools/npu/*.py) \
+    $(addprefix $(SHOWCASE_MODEL_SOURCE)/,mem_model.hex quantization.json)
+	python3 $(ROOT)/tools/npu/compile_yolo.py --model-source $(SHOWCASE_MODEL_SOURCE) \
+	    --out $(SHOWCASE_MODEL_DIR)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(SHOWCASE_MODEL_DIR) $@
+
+# T-POSE-BOARD: both immutable snapshots rebuild with standard-library Python only.
+SHOWCASE_POSE_SOURCE := $(ROOT)/sw/apps/showcase/models/yolov8n-pose
+SHOWCASE_POSE_DIR := $(ROOT)/build/npu/software_pose
+PROGRAM_SOURCES += build/showcase/pose_model.c
+$(ROOT)/build/showcase/pose_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/tools/npu/*.py) \
+    $(addprefix $(SHOWCASE_POSE_SOURCE)/,mem_model.hex quantization.json)
+	python3 $(ROOT)/tools/npu/compile_yolo.py --task pose \
+	    --model-source $(SHOWCASE_POSE_SOURCE) --out $(SHOWCASE_POSE_DIR)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(SHOWCASE_POSE_DIR) $@ \
+	    --pose-quantization $(SHOWCASE_POSE_SOURCE)/quantization.json
+
+# T-DEMO-PAGES: immutable gesture compiler snapshot.
+PROGRAM_SOURCES += build/showcase/gesture_model.c
+$(ROOT)/build/showcase/gesture_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/sw/apps/showcase/models/gesture/*)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py \
+	    $(ROOT)/sw/apps/showcase/models/gesture $@ --name gesture \
+	    --quantization $(ROOT)/sw/apps/showcase/models/gesture/quantization.json \
+	    --classes 14 --points 21
+
+# T-DEMO-PAGES: immutable face compiler snapshot.
+PROGRAM_SOURCES += build/showcase/face_model.c
+$(ROOT)/build/showcase/face_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/sw/apps/showcase/models/face/*)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py \
+	    $(ROOT)/sw/apps/showcase/models/face $@ --name face \
+	    --quantization $(ROOT)/sw/apps/showcase/models/face/quantization.json \
+	    --classes 1 --points 5
+
+# T-DEMO-PAGES: immutable helmet compiler snapshot.
+PROGRAM_SOURCES += build/showcase/helmet_model.c
+$(ROOT)/build/showcase/helmet_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/sw/apps/showcase/models/helmet/*)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py \
+	    $(ROOT)/sw/apps/showcase/models/helmet $@ --name helmet \
+	    --quantization $(ROOT)/sw/apps/showcase/models/helmet/quantization.json \
+	    --classes 2 --points 0
+
+# T-GAME-SLING: original alpha sprites, generated ARGB8888 descriptors.
+PROGRAM_SOURCES += build/showcase/sling_images.c
+$(ROOT)/build/showcase/sling_images.c: $(ROOT)/tools/sw/embed_showcase_images.py \
+    $(ROOT)/tools/sw/png2c.py $(wildcard $(ROOT)/sw/apps/showcase/assets/sling/*.png)
+	python3 $(ROOT)/tools/sw/embed_showcase_images.py \
+	    $(ROOT)/sw/apps/showcase/assets/sling $@ --prefix sling
+
+# T-FACE-STICKER-R2: offline rotations; RND scales immutable ARGB8888 art.
+SHOWCASE_STICKERS := $(ROOT)/sw/apps/showcase/assets/stickers
+PROGRAM_SOURCES += build/showcase/stickers.c
+$(ROOT)/build/showcase/stickers.c: $(wildcard $(SHOWCASE_STICKERS)/*.png) \
+    $(ROOT)/tools/sw/rotate_showcase_stickers.py $(ROOT)/tools/sw/embed_showcase_images.py \
+    $(ROOT)/tools/sw/png2c.py
+	python3 $(ROOT)/tools/sw/rotate_showcase_stickers.py $(SHOWCASE_STICKERS) \
+	    $(ROOT)/build/showcase/sticker-frames
+	python3 $(ROOT)/tools/sw/embed_showcase_images.py $(ROOT)/build/showcase/sticker-frames \
+	    $@ --prefix sticker
+
+# T-GAMES-MORE: separate original alpha packs for each arcade game.
+SHOWCASE_ARCADE_ART := rps mole slice catch
+PROGRAM_SOURCES += $(addprefix build/showcase/,$(addsuffix _images.c,$(SHOWCASE_ARCADE_ART)))
+define SHOWCASE_ARCADE_IMAGE_RULE
+$(ROOT)/build/showcase/$(1)_images.c: $(ROOT)/tools/sw/embed_showcase_images.py \
+    $(ROOT)/tools/sw/png2c.py $(wildcard $(ROOT)/sw/apps/showcase/assets/$(1)/*.png)
+	python3 $(ROOT)/tools/sw/embed_showcase_images.py \
+	    $(ROOT)/sw/apps/showcase/assets/$(1) $$@ --prefix $(1)
+endef
+$(foreach art,$(SHOWCASE_ARCADE_ART),$(eval $(call SHOWCASE_ARCADE_IMAGE_RULE,$(art))))
+
+# T-UI-FRAME: checked-in Bold subsets and original 96px application artwork.
+PROGRAM_SOURCES += $(patsubst $(ROOT)/%,%,$(wildcard $(ROOT)/sw/apps/showcase/fonts/showcase_*.c))
+PROGRAM_SOURCES += build/showcase/home_images.c
+$(ROOT)/build/showcase/home_images.c: $(ROOT)/tools/sw/embed_showcase_images.py \
+    $(ROOT)/tools/sw/png2c.py $(wildcard $(ROOT)/sw/apps/showcase/assets/icons/*.png)
+	python3 $(ROOT)/tools/sw/embed_showcase_images.py \
+	    $(ROOT)/sw/apps/showcase/assets/icons $@ --prefix home
+
+# T-WS-GAME: original block workshop sprites, no rotation atlas.
+PROGRAM_SOURCES += build/showcase/workshop_images.c
+$(ROOT)/build/showcase/workshop_images.c: $(ROOT)/tools/sw/embed_showcase_images.py \
+    $(ROOT)/tools/sw/png2c.py $(wildcard $(ROOT)/sw/apps/showcase/assets/workshop/*.png)
+	python3 $(ROOT)/tools/sw/embed_showcase_images.py \
+	    $(ROOT)/sw/apps/showcase/assets/workshop $@ --prefix ws
+
+# T-PHYS-BLOCKS: zero-degree art; GEO generates all rotation frames once per boot.
+PROGRAM_SOURCES += build/showcase/tower_images.c
+$(ROOT)/build/showcase/tower_images.c: $(ROOT)/tools/sw/embed_showcase_images.py \
+    $(ROOT)/tools/sw/png2c.py $(wildcard $(ROOT)/sw/apps/showcase/assets/tower/*.png)
+	python3 $(ROOT)/tools/sw/embed_showcase_images.py \
+	    $(ROOT)/sw/apps/showcase/assets/tower $@ --prefix tower

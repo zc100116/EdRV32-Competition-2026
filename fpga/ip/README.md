@@ -6,8 +6,8 @@
 |---|---|---|---|---|---|---|
 | `ip_ram_icache_tag` | DRM 简单双口 RAM | 512 × 18 | `edrv32_ram_icache_tag` | I$ ×2 | [ip_ram_icache_tag.md](ip_ram_icache_tag.md) | 32 KiB（用户 2026-10-31 采用），卡 21 重新生成（模块名不变） |
 | `ip_ram_icache_data` | DRM 简单双口 RAM | 2048 × 64 | `edrv32_ram_icache_data` | I$ ×2 | [ip_ram_icache_data.md](ip_ram_icache_data.md) | 32 KiB（用户 2026-10-31 采用），卡 21 重新生成（模块名不变） |
-| `ip_ram_dcache_tag` | DRM 简单双口 RAM | 512 × 20 | `edrv32_ram_dcache_tag` | D$ ×2 | [ip_ram_dcache_tag.md](ip_ram_dcache_tag.md) | 需重新生成（cache-spec v0.9：{valid, dirty, tag}） |
-| `ip_ram_dcache_data` | DRM 简单双口 RAM，字节写使能 | 2048 × 64 | `edrv32_ram_dcache_data` | D$ ×2 | [ip_ram_dcache_data.md](ip_ram_dcache_data.md) | 需重新生成（D$ 32 KiB） |
+| `ip_ram_dcache_tag` | DRM 简单双口 RAM | 512 × 20 | `edrv32_ram_dcache_tag` | D$ ×4（2 路 + 2 份提前查询副本，cache-spec v0.10） | [ip_ram_dcache_tag.md](ip_ram_dcache_tag.md) | 需重新生成（cache-spec v0.9：{valid, dirty, tag}） |
+| `ip_ram_dcache_data` | DRM 简单双口 RAM，字节写使能 | 2048 × 64 | `edrv32_ram_dcache_data` | D$ ×4（2 路 + 2 份提前查询副本） | [ip_ram_dcache_data.md](ip_ram_dcache_data.md) | 需重新生成（D$ 32 KiB） |
 | `ip_mul_s33x33` | APM 乘法器 | 33 × 33 有符号，2 级 | `edrv32_mul_s33x33` | CPU | [ip_mul_s33x33.md](ip_mul_s33x33.md) | 已生成（20261025-01） |
 | `ip_rom_boot` | DRM ROM，带初始化 | 2048 × 64 | `edrv32_rom_boot` | Boot ROM | [ip_rom_boot.md](ip_rom_boot.md) | 已生成（20261025-01） |
 | `ip_ram_sram` | DRM 单口 RAM，字节写使能，可初始化 | 8192 × 64 | `edrv32_ram_sram` | SRAM | [ip_ram_sram.md](ip_ram_sram.md) | 已生成（8192 深，20261027-02） |
@@ -23,6 +23,10 @@
 | `ip_mul_npu_quant_high` | APM 乘法器 | 16 × 16 有符号，2 级 | `edrv32_mul_npu_quant_high` | NPU 量化 ×16 | [ip_mul_npu_quant_high.md](ip_mul_npu_quant_high.md) | 已生成（20261027-02） |
 | `ip_ram_mem_xbar_r` | DRM 简单双口 RAM | 512 × 259（用 128 项） | `edrv32_ram_mem_xbar_r` | mem_xbar 共享读缓冲 | [ip_ram_mem_xbar_r.md](ip_ram_mem_xbar_r.md) | B2 待生成 |
 | `ip_lutram_mem_xbar_w` | 分布式 RAM，组合读 | 16 × 144（288 位拆 2 个） | `edrv32_ram_mem_xbar_w` | mem_xbar 写缓冲 ×6 | [ip_lutram_mem_xbar_w.md](ip_lutram_mem_xbar_w.md) | 已生成（卡 21） |
+| `ip_lutram_cpu_btb` | 分布式 RAM，组合读 | 128 × 58 | `edrv32_ram_cpu_btb` | CPU BTB ×1 | [ip_lutram_cpu_btb.md](ip_lutram_cpu_btb.md) | 待生成（CPU v0.15） |
+| `ip_lutram_cpu_direction` | 分布式 RAM，组合读，初始化 | 1024 × 4 | `edrv32_ram_cpu_direction` | CPU gshare ×4 份（2 份 × 2 bank，合成 2048 × 4） | [ip_lutram_cpu_direction.md](ip_lutram_cpu_direction.md) | 待生成（CPU v0.15） |
+| `ip_lutram_cpu_local_history` | 分布式 RAM，组合读，初始化 | 256 × 10 | `edrv32_ram_cpu_local_history` | CPU 局部历史 ×3 | [ip_lutram_cpu_local_history.md](ip_lutram_cpu_local_history.md) | 待生成（CPU v0.18） |
+| `ip_lutram_cpu_tournament` | 分布式 RAM，组合读，初始化 | 1024 × 2 | `edrv32_ram_cpu_local_direction` / `edrv32_ram_cpu_chooser` | CPU 局部方向 ×3、选择器 ×8 | [ip_lutram_cpu_tournament.md](ip_lutram_cpu_tournament.md) | 待生成（CPU v0.18） |
 | `ip_ram_vin_wfifo` | DRM 简单双口 RAM | 512 × 288 | `edrv32_ram_vin_wfifo` | VIN 写 FIFO ×2、内存源输入缓冲 ×1 | [ip_ram_vin_wfifo.md](ip_ram_vin_wfifo.md) | 已生成（20261028-04） |
 | `ip_ram_disp_scan` | DRM 简单双口 RAM，读写独立时钟 | 512 × 256 | `edrv32_ram_disp_scan` | DISP 扫描 FIFO ×1（B3 起 ×2：L0、L1，disp-spec v0.3） | [ip_ram_disp_scan.md](ip_ram_disp_scan.md) | 已生成（20261028-04） |
 | `ip_ram_pix_line` | DRM 简单双口 RAM | 1024 × 48 | `edrv32_ram_pix_line` | PIX 3×3 行缓存 ×4 | [ip_ram_pix_line.md](ip_ram_pix_line.md) | 已生成（20261028-04） |
@@ -31,13 +35,11 @@
 | `ip_ram_eth_fifo` | DRM 简单双口 RAM，独立时钟 | 512 × 10 | `edrv32_ram_eth_fifo` | ETH 接收、发送异步 FIFO ×2 | [ip_ram_eth_fifo.md](ip_ram_eth_fifo.md) | 已生成（20261028-04） |
 | `ip_ram_rnd_line` | DRM 简单双口 RAM，字节写使能 | 512 × 256 | `edrv32_ram_rnd_line` | RND 行缓冲 ×5 | [ip_ram_rnd_line.md](ip_ram_rnd_line.md) | 待生成（B3） |
 | `ip_ram_rnd_palette` | DRM 简单双口 RAM | 512 × 32（用 256 项） | `edrv32_ram_rnd_palette` | RND 调色板 ×2 | [ip_ram_rnd_palette.md](ip_ram_rnd_palette.md) | 待生成（B3） |
-| `ip_ram_rnd_window` | DRM 简单双口 RAM | 512 × 64（用256项） | `edrv32_ram_rnd_window` | AFFINE源窗口 ×4 | [ip_ram_rnd_window.md](ip_ram_rnd_window.md) | RND v2单独上板生成，不进卡21 |
 | `ip_pll_sys` | PLL（板级） | 27 MHz → clk_sys 100 MHz | 无（板级顶层直接例化，仿真用 `verif/models/ip_pll_sys.sv`） | B1/B2 板级顶层 | [ip_pll_sys.md](ip_pll_sys.md) | B1 已生成 |
 | `ip_ddr3` | DDR3 Controller + PHY | x32、1000 Mbps，core_clk 125 MHz、用户口 256 位 | 无（板级直接例化） | B2 DDR 及 clk_mem | [ip_ddr3.md](ip_ddr3.md) | B2 待生成 |
-| `ip_pll_npu` | PLL | 27 → 150 MHz | 无（板级直接例化） | B2 NPU | [ip_pll_npu.md](ip_pll_npu.md) | B2 待生成 |
+| `ip_pll_npu` | PLL | 27 → 180 MHz | 无（板级直接例化） | B2 NPU | [ip_pll_npu.md](ip_pll_npu.md) | B2 待生成 |
 | `ip_pll_video` | PLL | 27 → 74.25 / 371.25 MHz，同相 | 无（板级直接例化） | B2 DISP / TMDS | [ip_pll_video.md](ip_pll_video.md) | B2 待生成 |
 | `ip_pll_eth` | PLL | 125 → 125 MHz，0°，外部反馈 | 无（板级直接例化） | B2 RGMII RX/TX | [ip_pll_eth.md](ip_pll_eth.md) | B2 待生成 |
-| `ila_cpu` | 调试核（Inserter 插入，非 IP Compiler） | 400 位 × 1024，clk_sys | 无（探针：CSR 计数器） | B3F CPU 计数器核对与流水线效率 | [ila_cpu.md](ila_cpu.md) | 卡 33 首次插入 |
 
 B2 保留 `ip_pll_sys` 的 B1 配置，新增上表四个 IP；不要把视频输出合入系统 PLL，
 74.25/371.25 MHz 必须同 PLL 同相。摄像头模块自带时钟，板级不产生 XCLK。
@@ -129,3 +131,11 @@ python3 tools/fpga/mem_init.py build/sw/bootloader/rom.hex build/sw/monitor/sram
 未定义的尾部内容。HEX 的行顺序按地址 0 起递增使用；Windows B1 任务卡需确认 IP
 Compiler 接受这两份文件、ROM 最初几条指令和 SRAM 首字正确，并通过真实启动 logo
 与监控菜单验证。Linux 没有执行 PDS 初始化导入。
+
+后处理（npu-spec v0.10）：
+
+| IP | 创建说明 | 包装实例 |
+|---|---|---|
+| ip_ram_npu_post_best | [创建说明](ip_ram_npu_post_best.md) | classify ×2 |
+| ip_ram_npu_post_queue | [创建说明](ip_ram_npu_post_queue.md) | post ×2 |
+| ip_ram_npu_post_table | [创建说明](ip_ram_npu_post_table.md) | post exp/probability 各1 |

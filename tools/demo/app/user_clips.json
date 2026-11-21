@@ -1,0 +1,36 @@
+[
+  {
+    "id": "user-road1",
+    "name": "城市快速路 · 用户车流 1",
+    "source": "车流1.mp4",
+    "scene": "traffic",
+    "start": 20,
+    "duration": 20
+  },
+  {
+    "id": "user-road2",
+    "name": "林荫大道 · 用户车流 2",
+    "source": "车流2.mp4",
+    "scene": "traffic",
+    "start": 70,
+    "duration": 20
+  },
+  {
+    "id": "user-dance1",
+    "name": "单人舞蹈 · 用户视频 1",
+    "source": "跳舞1.mp4",
+    "scene": "dance",
+    "start": 16,
+    "duration": 20,
+    "people": 1
+  },
+  {
+    "id": "user-dance2",
+    "name": "夜间群舞 · 用户视频 2",
+    "source": "跳舞2.mp4",
+    "scene": "dance",
+    "start": 24,
+    "duration": 20,
+    "people": 6
+  }
+]

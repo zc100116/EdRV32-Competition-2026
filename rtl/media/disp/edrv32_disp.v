@@ -89,7 +89,7 @@ module edrv32_disp (
     wire reader_busy_w;
     wire fifo_pending_w;
     wire frame_start_w;
-    wire delayed_req_w;
+    wire unused_delayed_req_w;
     wire [31:0] req_cnt_w;
     wire [31:0] scan_cnt_w;
     // Eleven scan stages; the row/column predicates precede their combined rectangle decision.
@@ -152,14 +152,8 @@ module edrv32_disp (
     wire [31:0] perf0_mem_w;
     wire [31:0] perf1_pix_w;
     wire [31:0] perf1_mem_w;
-    wire [31:0] perf2_pix_w;
-    wire [31:0] perf2_mem_w;
 
-    wire [31:0] perf5_pix_w;
-    wire [31:0] perf5_mem_w;
 
-    wire [31:0] perf6_pix_w;
-    wire [31:0] perf6_mem_w;
 
     // X6 completion and FIFO accounting include late debt repayment in STATUS.IDLE.
     assign busy_w = scan_live_mem_w || reader_busy_w || fifo_pending_w || !params_ready_w ||
@@ -230,8 +224,6 @@ module edrv32_disp (
         .soft_clear_o(soft_clear_w),
         .busy_i(busy_w),
         .frame_start_i(frame_start_w),
-        .urgent_i(p0_urgent_o),
-        .delayed_req_i(delayed_req_w),
         .underflow_i(underflow_mem_w),
         .underflow1_i(underflow1_mem_w),
         .dma_err_i(dma_err_w),
@@ -239,9 +231,6 @@ module edrv32_disp (
         // Synchronized scan statistics.
         .perf0_i(perf0_mem_w),
         .perf1_i(perf1_mem_w),
-        .perf2_i(perf2_mem_w),
-        .perf5_i(perf5_mem_w),
-        .perf6_i(perf6_mem_w),
         .scan_cnt_o(scan_cnt_w),
 
         // Interrupt.
@@ -343,52 +332,13 @@ module edrv32_disp (
         .count_o(perf1_mem_w)
     );
 
-    edrv32_cdc_gray_cnt #(
-        .WIDTH(32)
-    ) u_perf2 (
-        // Clock domains and resets.
-        .clk_src_i(clk_pix_i),
-        .rst_src_n_i(rst_pix_scan_n_units_w[8]),
-        .clk_dst_i(clk_mem_i),
-        .rst_dst_n_i(rst_mem_ctrl_n_units_w[8]),
 
-        // Domain-local interface.
-        .count_i(perf2_pix_w),
-        .count_o(perf2_mem_w)
-    );
 
-    edrv32_cdc_gray_cnt #(
-        .WIDTH(32)
-    ) u_perf5 (
-        // Clock domains and resets.
-        .clk_src_i(clk_pix_i),
-        .rst_src_n_i(rst_pix_scan_n_units_w[9]),
-        .clk_dst_i(clk_mem_i),
-        .rst_dst_n_i(rst_mem_ctrl_n_units_w[9]),
-
-        // Domain-local interface.
-        .count_i(perf5_pix_w),
-        .count_o(perf5_mem_w)
-    );
-
-    edrv32_cdc_gray_cnt #(
-        .WIDTH(32)
-    ) u_perf6 (
-        // Clock domains and resets.
-        .clk_src_i(clk_pix_i),
-        .rst_src_n_i(rst_pix_scan_n_units_w[10]),
-        .clk_dst_i(clk_mem_i),
-        .rst_dst_n_i(rst_mem_ctrl_n_units_w[10]),
-
-        // Domain-local interface.
-        .count_i(perf6_pix_w),
-        .count_o(perf6_mem_w)
-    );
 
     edrv32_disp_reader u_reader (
         // Clock domains and resets.
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_ctrl_n_units_w[11]),
+        .rst_n_i(rst_mem_ctrl_n_units_w[8]),
 
         // Frame requests, configuration and FIFO accounting.
         .frame_req_i(frame_req_mem_w),
@@ -417,7 +367,7 @@ module edrv32_disp (
 
         // Frame status and scheduling.
         .frame_start_o(frame_start_w),
-        .delayed_req_o(delayed_req_w),
+        .delayed_req_o(unused_delayed_req_w),
         .req_cnt_o(req_cnt_w),
         .fifo_pending_o(fifo_pending_w),
         .busy_o(reader_busy_w),
@@ -429,7 +379,7 @@ module edrv32_disp (
     ) u_dma (
         // Clock domains and resets.
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_ctrl_n_units_w[12]),
+        .rst_n_i(rst_mem_ctrl_n_units_w[9]),
 
         // Line descriptor and reserved-space stream.
         .desc_valid_i(desc_valid_w),
@@ -472,9 +422,9 @@ module edrv32_disp (
     ) u_scan_fifo (
         // Clock domains and resets.
         .clk_write_i(clk_mem_i),
-        .rst_write_n_i(rst_mem_ctrl_n_units_w[13]),
+        .rst_write_n_i(rst_mem_ctrl_n_units_w[10]),
         .clk_read_i(clk_pix_i),
-        .rst_read_n_i(rst_pix_scan_n_units_w[11]),
+        .rst_read_n_i(rst_pix_scan_n_units_w[8]),
 
         // Reserved whole-line writes.
         .valid_i(dma_valid_w && !write_layer_w),
@@ -513,9 +463,9 @@ module edrv32_disp (
     ) u_scan1_fifo (
         // Clock domains and resets.
         .clk_write_i(clk_mem_i),
-        .rst_write_n_i(rst_mem_ctrl_n_units_w[14]),
+        .rst_write_n_i(rst_mem_ctrl_n_units_w[11]),
         .clk_read_i(clk_pix_i),
-        .rst_read_n_i(rst_pix_scan_n_units_w[12]),
+        .rst_read_n_i(rst_pix_scan_n_units_w[9]),
 
         // Reserved whole-line writes.
         .valid_i(dma_valid_w && write_layer_w),
@@ -551,7 +501,7 @@ module edrv32_disp (
     edrv32_disp_timing u_timing (
         // Clock domains and resets.
         .clk_i(clk_pix_i),
-        .rst_n_i(rst_pix_scan_n_units_w[13]),
+        .rst_n_i(rst_pix_scan_n_units_w[10]),
 
         // Domain-local interface.
         .hs_o(hs_w),
@@ -566,7 +516,7 @@ module edrv32_disp (
     edrv32_disp_scan u_scan (
         // Clock domains and resets.
         .clk_i(clk_pix_i),
-        .rst_n_i(rst_pix_scan_n_units_w[14]),
+        .rst_n_i(rst_pix_scan_n_units_w[11]),
 
         // Raster and frame enable.
         .enable_i(enable_pix_w),
@@ -594,10 +544,7 @@ module edrv32_disp (
         .read_cnt_o(read_cnt_pix_w),
         .read1_cnt_o(read1_cnt_pix_w),
         .perf0_o(perf0_pix_w),
-        .perf1_o(perf1_pix_w),
-        .perf2_o(perf2_pix_w),
-        .perf5_o(perf5_pix_w),
-        .perf6_o(perf6_pix_w)
+        .perf1_o(perf1_pix_w)
     );
 
     // spec 2.1/2.2/2.7: sync and DE travel with the same pixel through scan/blend.
@@ -617,7 +564,7 @@ module edrv32_disp (
     edrv32_disp_tmds_enc u_blue (
         // Clock domains and resets.
         .clk_i(clk_pix_i),
-        .rst_n_i(rst_pix_scan_n_units_w[15]),
+        .rst_n_i(rst_pix_scan_n_units_w[12]),
 
         // Pixel data and blanking controls.
         .data_i(rgb_w[7:0]),
@@ -632,7 +579,7 @@ module edrv32_disp (
     edrv32_disp_tmds_enc u_green (
         // Clock domains and resets.
         .clk_i(clk_pix_i),
-        .rst_n_i(rst_pix_scan_n_units_w[16]),
+        .rst_n_i(rst_pix_scan_n_units_w[13]),
 
         // Pixel data and blanking controls.
         .data_i(rgb_w[15:8]),
@@ -647,7 +594,7 @@ module edrv32_disp (
     edrv32_disp_tmds_enc u_red (
         // Clock domains and resets.
         .clk_i(clk_pix_i),
-        .rst_n_i(rst_pix_scan_n_units_w[17]),
+        .rst_n_i(rst_pix_scan_n_units_w[14]),
 
         // Pixel data and blanking controls.
         .data_i(rgb_w[23:16]),
@@ -660,10 +607,10 @@ module edrv32_disp (
     );
 
     // Parallel copies of the existing regional reset, with identical D and release edge.
-    wire [14:0] rst_mem_ctrl_n_units_w;
+    wire [11:0] rst_mem_ctrl_n_units_w;
     genvar rst_mem_ctrl_n_w_unit;
     generate
-        for (rst_mem_ctrl_n_w_unit = 0; rst_mem_ctrl_n_w_unit < 15;
+        for (rst_mem_ctrl_n_w_unit = 0; rst_mem_ctrl_n_w_unit < 12;
             rst_mem_ctrl_n_w_unit = rst_mem_ctrl_n_w_unit + 1) begin : g_rst_mem_ctrl_n_w_unit
             edrv32_reset_copy u_reset (
                 .clk_i(clk_mem_i),
@@ -673,10 +620,10 @@ module edrv32_disp (
         end
     endgenerate
     // Parallel copies of the existing regional reset, with identical D and release edge.
-    wire [17:0] rst_pix_scan_n_units_w;
+    wire [14:0] rst_pix_scan_n_units_w;
     genvar rst_pix_scan_n_w_unit;
     generate
-        for (rst_pix_scan_n_w_unit = 0; rst_pix_scan_n_w_unit < 18;
+        for (rst_pix_scan_n_w_unit = 0; rst_pix_scan_n_w_unit < 15;
             rst_pix_scan_n_w_unit = rst_pix_scan_n_w_unit + 1) begin : g_rst_pix_scan_n_w_unit
             edrv32_reset_copy u_reset (
                 .clk_i(clk_pix_i),

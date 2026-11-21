@@ -13,6 +13,8 @@ requests==2.34.2
 psutil==7.2.2
 polars==2.1.0
 ultralytics-thop==2.2.3
+# COCO keypoint evaluation in tools/npu/pose_eval.py.
+pycocotools==2.0.11
 # Windows debug tool (tools/debug_tool/) GUI and serial; also tools/board/uart_tool.py.
 pyserial==3.5
 PySide6

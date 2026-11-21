@@ -62,7 +62,8 @@ module edrv32_dma2d_wr #(
     wire desc_fire_w;
     wire address_fire_w;
     wire response_fire_w;
-    wire stop_w;
+    (* keep = "true", syn_keep = 1 *) wire [7:0] stop_w;
+    (* keep = "true", syn_keep = 1 *) wire abort_latch_w;
     wire [11:0] desc_beats_w;
     wire [7:0] page_beats_w;
     reg [4:0] burst_beats_w;
@@ -72,7 +73,12 @@ module edrv32_dma2d_wr #(
     assign desc_ready_o = !active_r;
     assign idle_o = !active_r;
     assign err_o = done_o && error_r;
-    assign stop_w = abort_r || abort_i;
+    genvar stop_group;
+    generate for (stop_group = 0; stop_group < 8;
+        stop_group = stop_group + 1) begin : g_stop
+        assign stop_w[stop_group] = abort_r || abort_i;
+    end endgenerate
+    assign abort_latch_w = active_r && abort_i;
     assign desc_beats_w = {1'b0, desc_width_bytes_i[15:5]} +
         {11'b0, (|desc_width_bytes_i[4:0])};
     assign page_beats_w = 8'd128 - {1'b0, addr_r[11:5]};
@@ -100,18 +106,24 @@ module edrv32_dma2d_wr #(
     assign axi_awlen_o = burst_beats_w[3:0] - 4'd1;
     // spec 5.4: recycle a retiring credit on the same edge to avoid burst gaps.
     assign axi_awvalid_o = address_hold_r ||
-        (active_r && !stop_w && !issued_all_r && !write_active_r &&
+        (active_r && !stop_w[0] && !issued_all_r && !write_active_r &&
             data_valid_i && (outstanding_r < LIMIT || response_fire_w));
     assign address_fire_w = axi_awvalid_o && axi_awready_i;
     assign response_fire_w = axi_bvalid_i && axi_bready_o;
     assign axi_bready_o = 1'b1;
     assign write_available_w = write_active_r || address_fire_w;
     assign axi_wvalid_o = write_hold_r ||
-        (write_available_w && (stop_w || data_valid_i));
+        (write_available_w && (stop_w[1] || data_valid_i));
     assign axi_wdata_o = write_hold_r ? write_data_r : data_i;
-    assign axi_wstrb_o = write_hold_r ? write_strb_r : (stop_w ? 32'd0 : data_strb_i);
+    genvar strb_slice;
+    generate for (strb_slice = 0; strb_slice < 4;
+        strb_slice = strb_slice + 1) begin : g_strb
+        assign axi_wstrb_o[strb_slice*8 +: 8] = write_hold_r ?
+            write_strb_r[strb_slice*8 +: 8] :
+            (stop_w[3+strb_slice] ? 8'd0 : data_strb_i[strb_slice*8 +: 8]);
+    end endgenerate
     assign axi_wlast_o = write_active_r ? write_left_r == 5'd1 : burst_beats_w == 5'd1;
-    assign data_ready_o = write_available_w && !stop_w && axi_wready_i;
+    assign data_ready_o = write_available_w && !stop_w[2] && axi_wready_i;
     assign write_fire_w = axi_wvalid_o && axi_wready_i;
 
     // Once WVALID is exposed, retain its payload through ABORT and backpressure.
@@ -178,7 +190,7 @@ module edrv32_dma2d_wr #(
                 address_left_r <= desc_beats_w;
                 address_rows_r <= desc_height_i;
             end
-            if (active_r && abort_i)
+            if (abort_latch_w)
                 abort_r <= 1'b1;
             if (active_r && (response_fire_w && axi_bresp_i != 2'b00))
                 error_r <= 1'b1;
@@ -192,13 +204,13 @@ module edrv32_dma2d_wr #(
                     address_left_r <= address_left_r - {7'd0, burst_beats_w};
                 end
             end
-            if (active_r && !stop_w && issued_all_r && response_fire_w &&
+            if (active_r && !stop_w[7] && issued_all_r && response_fire_w &&
                 outstanding_r == {{(COUNT_WIDTH-1){1'b0}}, 1'b1}) begin
                 active_r <= 1'b0;
                 done_o <= 1'b1;
             end
             // spec 5.3: a stalled address remains committed until it handshakes.
-            if (active_r && stop_w && outstanding_r == 0 && !axi_awvalid_o)
+            if (active_r && stop_w[7] && outstanding_r == 0 && !axi_awvalid_o)
                 active_r <= 1'b0;
             case ({address_fire_w, response_fire_w})
                 2'b10: outstanding_r <= outstanding_r + 1'b1;

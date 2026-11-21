@@ -22,11 +22,6 @@ module edrv32_geo_regs (
     input wire desc_done_i,
     input wire [15:0] cur_desc_i,
     input wire [1:0] error_i,
-    input wire [4:0] pixel_i,
-    input wire read_beat_i,
-    input wire write_beat_i,
-    input wire source_wait_i,
-    input wire writer_wait_i,
     output reg start_o,
     output reg abort_o,
     output reg soft_reset_o,
@@ -57,10 +52,8 @@ module edrv32_geo_regs (
     reg [1:0] irq_stat_r;
     reg [1:0] err_code_r;
     reg [31:0] done_count_r;
-    reg [31:0] perf_r [0:5];
-    integer counter;
-    reg [4:0] pixel_r;
-    reg [4:0] perf_event_r;
+    reg [31:0] perf0_r;
+    reg busy_event_r;
     assign unused_w = &apb_pstrb_r;
     assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_r;
 
@@ -79,12 +72,7 @@ module edrv32_geo_regs (
             12'h020: apb_prdata_o = desc_base_o;
             12'h024: apb_prdata_o = {16'd0, desc_count_o};
             12'h02c: apb_prdata_o = done_count_r;
-            12'h040: apb_prdata_o = perf_r[0];
-            12'h044: apb_prdata_o = perf_r[1];
-            12'h048: apb_prdata_o = perf_r[2];
-            12'h04c: apb_prdata_o = perf_r[3];
-            12'h050: apb_prdata_o = perf_r[4];
-            12'h054: apb_prdata_o = perf_r[5];
+            12'h040: apb_prdata_o = perf0_r;
             12'h100: apb_prdata_o = {16'd0, cur_desc_i};
             default: apb_prdata_o = 32'd0;
         endcase
@@ -98,8 +86,7 @@ module edrv32_geo_regs (
             done_count_r <= 32'd0;
             desc_base_o <= 32'd0;
             desc_count_o <= 16'd0;
-            for (counter = 0; counter < 6; counter = counter + 1)
-                perf_r[counter] <= 32'd0;
+            perf0_r <= 32'd0;
         end else if (soft_reset_o) begin
             enable_r <= 1'b0;
             irq_en_r <= 2'd0;
@@ -108,21 +95,10 @@ module edrv32_geo_regs (
             done_count_r <= 32'd0;
             desc_base_o <= 32'd0;
             desc_count_o <= 16'd0;
-            for (counter = 0; counter < 6; counter = counter + 1)
-                perf_r[counter] <= 32'd0;
+            perf0_r <= 32'd0;
         end else begin
-            if (perf_event_r[0])
-                perf_r[0] <= perf_r[0] + 32'd1;
-            if (pixel_r != 0)
-                perf_r[1] <= perf_r[1] + {27'd0, pixel_r};
-            if (perf_event_r[1])
-                perf_r[2] <= perf_r[2] + 32'd1;
-            if (perf_event_r[2])
-                perf_r[3] <= perf_r[3] + 32'd1;
-            if (perf_event_r[3])
-                perf_r[4] <= perf_r[4] + 32'd1;
-            if (perf_event_r[4])
-                perf_r[5] <= perf_r[5] + 32'd1;
+            if (busy_event_r)
+                perf0_r <= perf0_r + 32'd1;
             if (write_w) begin
                 case (apb_paddr_r)
                     12'h004: enable_r <= apb_pwdata_r[0];
@@ -140,8 +116,7 @@ module edrv32_geo_regs (
             if (desc_done_i)
                 done_count_r <= done_count_r + 32'd1;
             if (start_o) begin
-                for (counter = 0; counter < 6; counter = counter + 1)
-                    perf_r[counter] <= 32'd0;
+                perf0_r <= 32'd0;
             end
             // Hardware events win over simultaneous RW1C writes.
             if (done_i || (start_o && desc_count_o == 0))
@@ -156,14 +131,11 @@ module edrv32_geo_regs (
     // Clearing the event stage with DOORBELL prevents the previous run leaking in.
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
-            pixel_r <= 5'd0;
-            perf_event_r <= 5'd0;
+            busy_event_r <= 1'b0;
         end else if (soft_reset_o || start_o) begin
-            pixel_r <= 5'd0;
-            perf_event_r <= 5'd0;
+            busy_event_r <= 1'b0;
         end else begin
-            pixel_r <= pixel_i;
-            perf_event_r <= {writer_wait_i, source_wait_i, write_beat_i, read_beat_i, busy_i};
+            busy_event_r <= busy_i;
         end
     end
     // SoC 7.1: APB command decode ends at this register stage.

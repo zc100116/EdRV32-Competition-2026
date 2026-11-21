@@ -31,7 +31,13 @@ void vision_image_info(unsigned index, unsigned total, const uint8_t *name, unsi
 uint32_t vision_upload_base(void);
 /* DISP IRQ only latches events; task context releases L0 via REL_BASE. */
 void vision_display_irq(uint32_t irq);
+void vision_gui_submitted(void);
 void vision_gui_presented(uint64_t tick);
+extern const struct app vision_app_pose;
+extern const struct app vision_app_hand;
+extern const struct app vision_app_grab;
+extern const struct app vision_app_face;
+extern const struct app vision_app_helmet;
 extern const struct app vision_app_camera;
 extern const struct app vision_app_image;
 extern const struct app vision_app_process;

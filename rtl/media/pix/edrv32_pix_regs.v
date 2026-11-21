@@ -31,9 +31,6 @@ module edrv32_pix_regs (
     // Frame events and reset request.
     input wire busy_i,
     input wire frame_done_i,
-    input wire input_stall_i,
-    input wire output_stall_i,
-    input wire discard_i,
     output wire soft_pending_o,
     output reg soft_reset_o,
 
@@ -62,12 +59,6 @@ module edrv32_pix_regs (
     reg irq_en_r;
     reg irq_stat_r;
     reg [31:0] done_count_r;
-    reg discard_event_r;
-    reg input_stall_event_r;
-    reg output_stall_event_r;
-    reg [31:0] input_stalls_r;
-    reg [31:0] output_stalls_r;
-    reg [31:0] discarded_r;
 
     assign unused_pstrb_w = &apb_pstrb_r;
     assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_r;
@@ -76,14 +67,8 @@ module edrv32_pix_regs (
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             soft_reset_o <= 1'b0;
-            discard_event_r <= 1'b0;
-            input_stall_event_r <= 1'b0;
-            output_stall_event_r <= 1'b0;
         end else begin
             soft_reset_o <= soft_pending_r && !busy_i && !soft_reset_o;
-            discard_event_r <= discard_i && !soft_reset_o;
-            input_stall_event_r <= input_stall_i && !soft_reset_o;
-            output_stall_event_r <= output_stall_i && !soft_reset_o;
         end
     end
     assign gamma_wr_o = write_w && apb_paddr_r == 12'h10c;
@@ -102,9 +87,6 @@ module edrv32_pix_regs (
             12'h00c: apb_prdata_o = {29'd0, irq_en_r, 2'd0};
             12'h010: apb_prdata_o = {29'd0, irq_stat_r, 2'd0};
             12'h02c, 12'h040: apb_prdata_o = done_count_r;
-            12'h044: apb_prdata_o = input_stalls_r;
-            12'h048: apb_prdata_o = output_stalls_r;
-            12'h04c: apb_prdata_o = discarded_r;
             12'h100: apb_prdata_o = cfg_o;
             12'h104: apb_prdata_o = bc_o;
             12'h108: apb_prdata_o = {24'd0, thresh_o};
@@ -122,9 +104,6 @@ module edrv32_pix_regs (
             irq_en_r <= 1'b0;
             irq_stat_r <= 1'b0;
             done_count_r <= 32'd0;
-            input_stalls_r <= 32'd0;
-            output_stalls_r <= 32'd0;
-            discarded_r <= 32'd0;
         end else if (soft_reset_o) begin
             enable_o <= 1'b0;
             cfg_o <= 32'd0;
@@ -134,21 +113,9 @@ module edrv32_pix_regs (
             irq_en_r <= 1'b0;
             irq_stat_r <= 1'b0;
             done_count_r <= 32'd0;
-            input_stalls_r <= 32'd0;
-            output_stalls_r <= 32'd0;
-            discarded_r <= 32'd0;
         end else begin
             if (soft_request_w) begin
                 soft_pending_r <= 1'b1;
-            end
-            if (input_stall_event_r) begin
-                input_stalls_r <= input_stalls_r + 32'd1;
-            end
-            if (output_stall_event_r) begin
-                output_stalls_r <= output_stalls_r + 32'd1;
-            end
-            if (discard_event_r) begin
-                discarded_r <= discarded_r + 32'd1;
             end
             if (write_w) begin
                 case (apb_paddr_r)

@@ -58,7 +58,7 @@ void eth_monitor_pack(uint8_t out[ETH_MONITOR_BYTES], const struct eth_monitor *
     }
     put32(out + 280, r->idle_cycles);
     put32(out + 284, r->system_hz);
-    put32(out + 288, 150000000u);
+    put32(out + 288, 180000000u);
     put32(out + 292, r->video_skips);
 }
 

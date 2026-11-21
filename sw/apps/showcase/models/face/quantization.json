@@ -1,0 +1,1468 @@
+{
+  "calibration_images": [
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/29--Students_Schoolkids/29_Students_Schoolkids_Students_Schoolkids_29_312.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/44--Aerobics/44_Aerobics_Aerobics_44_688.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/53--Raid/53_Raid_policeraid_53_207.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/53--Raid/53_Raid_policeraid_53_6.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/46--Jockey/46_Jockey_Jockey_46_537.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/9--Press_Conference/9_Press_Conference_Press_Conference_9_933.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/32--Worker_Laborer/32_Worker_Laborer_Worker_Laborer_32_788.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/46--Jockey/46_Jockey_Jockey_46_352.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/26--Soldier_Drilling/26_Soldier_Drilling_Soldiers_Drilling_26_307.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/35--Basketball/35_Basketball_playingbasketball_35_366.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/40--Gymnastics/40_Gymnastics_Gymnastics_40_627.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/2--Demonstration/2_Demonstration_Demonstrators_2_329.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/41--Swimming/41_Swimming_Swimmer_41_935.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/4--Dancing/4_Dancing_Dancing_4_1000.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/52--Photographers/52_Photographers_taketouristphotos_52_97.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/13--Interview/13_Interview_Interview_On_Location_13_426.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/35--Basketball/35_Basketball_basketballgame_ball_35_64.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/4--Dancing/4_Dancing_Dancing_4_813.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/29--Students_Schoolkids/29_Students_Schoolkids_Students_Schoolkids_29_130.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/15--Stock_Market/15_Stock_Market_Stock_Market_15_706.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/49--Greeting/49_Greeting_peoplegreeting_49_589.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/38--Tennis/38_Tennis_Tennis_38_240.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/51--Dresses/51_Dresses_wearingdress_51_13.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/4--Dancing/4_Dancing_Dancing_4_915.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/37--Soccer/37_Soccer_soccer_ball_37_851.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/30--Surgeons/30_Surgeons_Surgeons_30_988.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/25--Soldier_Patrol/25_Soldier_Patrol_Soldier_Patrol_25_437.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/6--Funeral/6_Funeral_Funeral_6_696.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/61--Street_Battle/61_Street_Battle_streetfight_61_276.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/42--Car_Racing/42_Car_Racing_Nascar_42_823.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/0--Parade/0_Parade_Parade_0_218.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/25--Soldier_Patrol/25_Soldier_Patrol_Soldier_Patrol_25_747.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/45--Balloonist/45_Balloonist_Balloonist_45_939.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/52--Photographers/52_Photographers_taketouristphotos_52_266.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/54--Rescue/54_Rescue_firemanrescue_54_789.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/0--Parade/0_Parade_Parade_0_459.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/56--Voter/56_Voter_peoplevoting_56_717.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/23--Shoppers/23_Shoppers_Shoppers_23_880.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/26--Soldier_Drilling/26_Soldier_Drilling_Soldiers_Drilling_26_31.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/46--Jockey/46_Jockey_Jockey_46_409.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/46--Jockey/46_Jockey_Jockey_46_259.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/35--Basketball/35_Basketball_Basketball_35_393.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/2--Demonstration/2_Demonstration_Demonstrators_2_314.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/15--Stock_Market/15_Stock_Market_Stock_Market_15_526.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/0--Parade/0_Parade_Parade_0_29.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/5--Car_Accident/5_Car_Accident_Accident_5_177.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/51--Dresses/51_Dresses_wearingdress_51_233.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/58--Hockey/58_Hockey_icehockey_puck_58_469.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/41--Swimming/41_Swimming_Swimming_41_379.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/32--Worker_Laborer/32_Worker_Laborer_Worker_Laborer_32_134.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/12--Group/12_Group_Group_12_Group_Group_12_935.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/36--Football/36_Football_Football_36_194.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/1--Handshaking/1_Handshaking_Handshaking_1_380.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/0--Parade/0_Parade_marchingband_1_227.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/2--Demonstration/2_Demonstration_Political_Rally_2_451.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/34--Baseball/34_Baseball_Baseball_34_585.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/41--Swimming/41_Swimming_Swimmer_41_275.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/13--Interview/13_Interview_Interview_2_People_Visible_13_285.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/56--Voter/56_Voter_peoplevoting_56_714.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/56--Voter/56_Voter_peoplevoting_56_350.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/27--Spa/27_Spa_Spa_27_360.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/8--Election_Campain/8_Election_Campain_Election_Campaign_8_218.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/36--Football/36_Football_americanfootball_ball_36_257.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/43--Row_Boat/43_Row_Boat_Canoe_43_784.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/2--Demonstration/2_Demonstration_Protesters_2_542.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/21--Festival/21_Festival_Festival_21_395.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/39--Ice_Skating/39_Ice_Skating_Ice_Skating_39_658.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/55--Sports_Coach_Trainer/55_Sports_Coach_Trainer_sportcoaching_55_343.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/39--Ice_Skating/39_Ice_Skating_Ice_Skating_39_546.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/2--Demonstration/2_Demonstration_Political_Rally_2_171.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/26--Soldier_Drilling/26_Soldier_Drilling_Soldiers_Drilling_26_764.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/0--Parade/0_Parade_marchingband_1_490.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/2--Demonstration/2_Demonstration_Political_Rally_2_107.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/20--Family_Group/20_Family_Group_Family_Group_20_843.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/35--Basketball/35_Basketball_playingbasketball_35_449.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/9--Press_Conference/9_Press_Conference_Press_Conference_9_345.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/43--Row_Boat/43_Row_Boat_Rowboat_43_287.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/22--Picnic/22_Picnic_Picnic_22_208.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/2--Demonstration/2_Demonstration_Demonstration_Or_Protest_2_1.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/53--Raid/53_Raid_policeraid_53_599.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/33--Running/33_Running_Running_33_569.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/40--Gymnastics/40_Gymnastics_Gymnastics_40_887.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/0--Parade/0_Parade_marchingband_1_765.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/25--Soldier_Patrol/25_Soldier_Patrol_Soldier_Patrol_25_563.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/40--Gymnastics/40_Gymnastics_Gymnastics_40_197.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/12--Group/12_Group_Group_12_Group_Group_12_112.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/11--Meeting/11_Meeting_Meeting_11_Meeting_Meeting_11_865.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/35--Basketball/35_Basketball_basketballgame_ball_35_998.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/51--Dresses/51_Dresses_wearingdress_51_348.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/49--Greeting/49_Greeting_peoplegreeting_49_266.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/20--Family_Group/20_Family_Group_Family_Group_20_27.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/12--Group/12_Group_Group_12_Group_Group_12_315.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/59--people--driving--car/59_peopledrivingcar_peopledrivingcar_59_856.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/35--Basketball/35_Basketball_playingbasketball_35_495.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/0--Parade/0_Parade_Parade_0_854.jpg",
+    "/home/workspace/.local/share/edrv32/npu/wider-face/images/2--Demonstration/2_Demonstration_Protesters_2_779.jpg"
+  ],
+  "percentile": 95,
+  "margin": 1.05,
+  "torch_version": "2.14.1+cpu",
+  "convolutions": [
+    {
+      "index": 0,
+      "name": "L0",
+      "input_scales": [
+        0.007874015748031496
+      ],
+      "pre_scale": 0.4424809072900006,
+      "output_scale": 0.43582563738184654,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00011744446878328572,
+      "weight_scale_max": 0.001079309215045432,
+      "requant_ratio_max_rel_error": 2.2599721913652004e-05
+    },
+    {
+      "index": 1,
+      "name": "L1",
+      "input_scales": [
+        0.43582563738184654
+      ],
+      "pre_scale": 0.8892721484026571,
+      "output_scale": 0.8539284676078737,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.0009640041474938962,
+      "weight_scale_max": 0.004322221182625576,
+      "requant_ratio_max_rel_error": 2.5220707853379487e-05
+    },
+    {
+      "index": 2,
+      "name": "L2.split",
+      "input_scales": [
+        0.8539284676078737,
+        0.8539284676078737
+      ],
+      "pre_scale": 0.6462326823257086,
+      "output_scale": 0.281046916931633,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.001222776226266304,
+      "weight_scale_max": 0.009648396693545887,
+      "requant_ratio_max_rel_error": 2.9901104089624653e-05
+    },
+    {
+      "index": 3,
+      "name": "L2.b0.cv1",
+      "input_scales": [
+        0.281046916931633
+      ],
+      "pre_scale": 0.29661830241285914,
+      "output_scale": 0.10436315639751165,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.0005051964992967659,
+      "weight_scale_max": 0.00159531190126285,
+      "requant_ratio_max_rel_error": 2.0633781518730743e-05
+    },
+    {
+      "index": 4,
+      "name": "L2.b0.cv2",
+      "input_scales": [
+        0.10436315639751165
+      ],
+      "pre_scale": 0.19891096982430287,
+      "output_scale": 0.281046916931633,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00038562368661856005,
+      "weight_scale_max": 0.0012102743246495057,
+      "requant_ratio_max_rel_error": 2.7728354774048114e-05
+    },
+    {
+      "index": 6,
+      "name": "L2.fuse",
+      "input_scales": [
+        0.281046916931633,
+        0.281046916931633,
+        0.281046916931633
+      ],
+      "pre_scale": 0.1657742939596101,
+      "output_scale": 0.07765122126406572,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.0002372439465918279,
+      "weight_scale_max": 0.0011320777550808375,
+      "requant_ratio_max_rel_error": 2.651768781392061e-05
+    },
+    {
+      "index": 7,
+      "name": "L3",
+      "input_scales": [
+        0.07765122126406572,
+        0.07765122126406572
+      ],
+      "pre_scale": 0.07282679259307742,
+      "output_scale": 0.07125530505743552,
+      "output_zero_point": 0,
+      "weight_scale_min": 9.491143969174124e-05,
+      "weight_scale_max": 0.00028615217755197694,
+      "requant_ratio_max_rel_error": 2.7013512024609554e-05
+    },
+    {
+      "index": 8,
+      "name": "L4.split",
+      "input_scales": [
+        0.07125530505743552,
+        0.07125530505743552,
+        0.07125530505743552,
+        0.07125530505743552
+      ],
+      "pre_scale": 0.12072329661977574,
+      "output_scale": 0.21492133253202664,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00014492702401557497,
+      "weight_scale_max": 0.0006963720112033022,
+      "requant_ratio_max_rel_error": 2.7397752079938442e-05
+    },
+    {
+      "index": 9,
+      "name": "L4.b0.cv1",
+      "input_scales": [
+        0.21492133253202664,
+        0.21492133253202664
+      ],
+      "pre_scale": 0.07596112602339017,
+      "output_scale": 0.07595333987333643,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.0002778344093451029,
+      "weight_scale_max": 0.0008112747433741792,
+      "requant_ratio_max_rel_error": 2.914638217887955e-05
+    },
+    {
+      "index": 10,
+      "name": "L4.b0.cv2",
+      "input_scales": [
+        0.07595333987333643,
+        0.07595333987333643
+      ],
+      "pre_scale": 0.07081831871993899,
+      "output_scale": 0.21492133253202664,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.0001275998088248969,
+      "weight_scale_max": 0.00043250739010154893,
+      "requant_ratio_max_rel_error": 2.1594442093375577e-05
+    },
+    {
+      "index": 12,
+      "name": "L4.b1.cv1",
+      "input_scales": [
+        0.21492133253202664,
+        0.21492133253202664
+      ],
+      "pre_scale": 0.07704123455708423,
+      "output_scale": 0.07440845534557433,
+      "output_zero_point": 0,
+      "weight_scale_min": 9.402459025687077e-05,
+      "weight_scale_max": 0.0006549890157097236,
+      "requant_ratio_max_rel_error": 2.554435368229413e-05
+    },
+    {
+      "index": 13,
+      "name": "L4.b1.cv2",
+      "input_scales": [
+        0.07440845534557433,
+        0.07440845534557433
+      ],
+      "pre_scale": 0.1957459767033735,
+      "output_scale": 0.21492133253202664,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00031322041181113246,
+      "weight_scale_max": 0.0008752433407520832,
+      "requant_ratio_max_rel_error": 2.6223202063579976e-05
+    },
+    {
+      "index": 15,
+      "name": "L4.fuse",
+      "input_scales": [
+        0.21492133253202664,
+        0.21492133253202664,
+        0.21492133253202664,
+        0.21492133253202664,
+        0.21492133253202664,
+        0.21492133253202664,
+        0.21492133253202664,
+        0.21492133253202664
+      ],
+      "pre_scale": 0.10034039959194155,
+      "output_scale": 0.09274100478239886,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00021620453903358603,
+      "weight_scale_max": 0.0008464708674834372,
+      "requant_ratio_max_rel_error": 2.6216787319621737e-05
+    },
+    {
+      "index": 16,
+      "name": "L5",
+      "input_scales": [
+        0.09274100478239886,
+        0.09274100478239886,
+        0.09274100478239886,
+        0.09274100478239886
+      ],
+      "pre_scale": 0.09258308588989139,
+      "output_scale": 0.09124165050626741,
+      "output_zero_point": 0,
+      "weight_scale_min": 7.703328958822886e-05,
+      "weight_scale_max": 0.00033539726440745375,
+      "requant_ratio_max_rel_error": 2.524681483029312e-05
+    },
+    {
+      "index": 17,
+      "name": "L6.split",
+      "input_scales": [
+        0.09124165050626741,
+        0.09124165050626741,
+        0.09124165050626741,
+        0.09124165050626741,
+        0.09124165050626741,
+        0.09124165050626741,
+        0.09124165050626741,
+        0.09124165050626741
+      ],
+      "pre_scale": 0.13377481783468892,
+      "output_scale": 0.24548526730124406,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00016174486426533732,
+      "weight_scale_max": 0.00114386203462324,
+      "requant_ratio_max_rel_error": 2.7153943157331994e-05
+    },
+    {
+      "index": 18,
+      "name": "L6.b0.cv1",
+      "input_scales": [
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406
+      ],
+      "pre_scale": 0.10032161033059668,
+      "output_scale": 0.10032107219921324,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00022953471440346443,
+      "weight_scale_max": 0.0007782141178145778,
+      "requant_ratio_max_rel_error": 2.912625198836505e-05
+    },
+    {
+      "index": 19,
+      "name": "L6.b0.cv2",
+      "input_scales": [
+        0.10032107219921324,
+        0.10032107219921324,
+        0.10032107219921324,
+        0.10032107219921324
+      ],
+      "pre_scale": 0.08166384030514816,
+      "output_scale": 0.24548526730124406,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00012425083000708437,
+      "weight_scale_max": 0.0003817078854940401,
+      "requant_ratio_max_rel_error": 2.72554924579671e-05
+    },
+    {
+      "index": 21,
+      "name": "L6.b1.cv1",
+      "input_scales": [
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406
+      ],
+      "pre_scale": 0.10972800695990015,
+      "output_scale": 0.09722472138292208,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.0001020421292568678,
+      "weight_scale_max": 0.0007633500165005949,
+      "requant_ratio_max_rel_error": 2.8494348590091256e-05
+    },
+    {
+      "index": 22,
+      "name": "L6.b1.cv2",
+      "input_scales": [
+        0.09722472138292208,
+        0.09722472138292208,
+        0.09722472138292208,
+        0.09722472138292208
+      ],
+      "pre_scale": 0.21212093229368917,
+      "output_scale": 0.24548526730124406,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00029719589308884695,
+      "weight_scale_max": 0.0012088612585930464,
+      "requant_ratio_max_rel_error": 2.8390070015094082e-05
+    },
+    {
+      "index": 24,
+      "name": "L6.fuse",
+      "input_scales": [
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406,
+        0.24548526730124406
+      ],
+      "pre_scale": 0.1235807584965323,
+      "output_scale": 0.1235807111882788,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00015192148979139785,
+      "weight_scale_max": 0.0005750705741630174,
+      "requant_ratio_max_rel_error": 2.879851130543898e-05
+    },
+    {
+      "index": 25,
+      "name": "L7",
+      "input_scales": [
+        0.1235807111882788,
+        0.1235807111882788,
+        0.1235807111882788,
+        0.1235807111882788,
+        0.1235807111882788,
+        0.1235807111882788,
+        0.1235807111882788,
+        0.1235807111882788
+      ],
+      "pre_scale": 0.08648105249630186,
+      "output_scale": 0.08562233673305962,
+      "output_zero_point": 0,
+      "weight_scale_min": 8.106605122091008e-05,
+      "weight_scale_max": 0.0004897014303218997,
+      "requant_ratio_max_rel_error": 2.9396464162667613e-05
+    },
+    {
+      "index": 26,
+      "name": "L8.split",
+      "input_scales": [
+        0.08562233673305962,
+        0.08562233673305962,
+        0.08562233673305962,
+        0.08562233673305962,
+        0.08562233673305962,
+        0.08562233673305962,
+        0.08562233673305962,
+        0.08562233673305962,
+        0.08562233673305962,
+        0.08562233673305962,
+        0.08562233673305962,
+        0.08562233673305962,
+        0.08562233673305962,
+        0.08562233673305962,
+        0.08562233673305962,
+        0.08562233673305962
+      ],
+      "pre_scale": 0.2490653942889116,
+      "output_scale": 0.15954615844516304,
+      "output_zero_point": 0,
+      "weight_scale_min": 3.49090349129014e-05,
+      "weight_scale_max": 0.00046098473650774856,
+      "requant_ratio_max_rel_error": 3.0400619720372113e-05
+    },
+    {
+      "index": 27,
+      "name": "L8.b0.cv1",
+      "input_scales": [
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304
+      ],
+      "pre_scale": 0.09966242895351621,
+      "output_scale": 0.0944999985807524,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00016839448275866826,
+      "weight_scale_max": 0.0007891079605332995,
+      "requant_ratio_max_rel_error": 2.7407377579224956e-05
+    },
+    {
+      "index": 28,
+      "name": "L8.b0.cv2",
+      "input_scales": [
+        0.0944999985807524,
+        0.0944999985807524,
+        0.0944999985807524,
+        0.0944999985807524,
+        0.0944999985807524,
+        0.0944999985807524,
+        0.0944999985807524,
+        0.0944999985807524
+      ],
+      "pre_scale": 0.14886450279416064,
+      "output_scale": 0.15954615844516304,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00012868882211501093,
+      "weight_scale_max": 0.0008366009457978533,
+      "requant_ratio_max_rel_error": 2.7356181264370782e-05
+    },
+    {
+      "index": 30,
+      "name": "L8.fuse",
+      "input_scales": [
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304,
+        0.15954615844516304
+      ],
+      "pre_scale": 0.09784248832642564,
+      "output_scale": 0.09065277707858349,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00014902656272846102,
+      "weight_scale_max": 0.0004750697727320697,
+      "requant_ratio_max_rel_error": 2.9561307100633982e-05
+    },
+    {
+      "index": 31,
+      "name": "L9.cv1",
+      "input_scales": [
+        0.09065277707858349,
+        0.09065277707858349,
+        0.09065277707858349,
+        0.09065277707858349,
+        0.09065277707858349,
+        0.09065277707858349,
+        0.09065277707858349,
+        0.09065277707858349,
+        0.09065277707858349,
+        0.09065277707858349,
+        0.09065277707858349,
+        0.09065277707858349,
+        0.09065277707858349,
+        0.09065277707858349,
+        0.09065277707858349,
+        0.09065277707858349
+      ],
+      "pre_scale": 0.07431060019440539,
+      "output_scale": 0.07430132383436669,
+      "output_zero_point": 0,
+      "weight_scale_min": 8.639767092983145e-05,
+      "weight_scale_max": 0.00030263600309669603,
+      "requant_ratio_max_rel_error": 2.683305568940142e-05
+    },
+    {
+      "index": 35,
+      "name": "L9.cv2",
+      "input_scales": [
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669,
+        0.07430132383436669
+      ],
+      "pre_scale": 0.1491657183864924,
+      "output_scale": 0.07127058956566759,
+      "output_zero_point": 0,
+      "weight_scale_min": 2.4300019948531286e-05,
+      "weight_scale_max": 0.0002384344671850446,
+      "requant_ratio_max_rel_error": 2.9623560783065273e-05
+    },
+    {
+      "index": 37,
+      "name": "L12.split",
+      "input_scales": [
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.1235807111882788,
+        0.1235807111882788,
+        0.1235807111882788,
+        0.1235807111882788,
+        0.1235807111882788,
+        0.1235807111882788,
+        0.1235807111882788,
+        0.1235807111882788
+      ],
+      "pre_scale": 0.09921941278487678,
+      "output_scale": 0.0991001329084081,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00025950305011262907,
+      "weight_scale_max": 0.0011400292282762738,
+      "requant_ratio_max_rel_error": 2.9955351955601728e-05
+    },
+    {
+      "index": 38,
+      "name": "L12.b0.cv1",
+      "input_scales": [
+        0.0991001329084081,
+        0.0991001329084081,
+        0.0991001329084081,
+        0.0991001329084081
+      ],
+      "pre_scale": 0.09054907935810841,
+      "output_scale": 0.08982235756446058,
+      "output_zero_point": 0,
+      "weight_scale_min": 7.904084394288964e-05,
+      "weight_scale_max": 0.00026418777570183895,
+      "requant_ratio_max_rel_error": 2.797348287653101e-05
+    },
+    {
+      "index": 39,
+      "name": "L12.b0.cv2",
+      "input_scales": [
+        0.08982235756446058,
+        0.08982235756446058,
+        0.08982235756446058,
+        0.08982235756446058
+      ],
+      "pre_scale": 0.17327880615324487,
+      "output_scale": 0.17327880615324487,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.000128484029974342,
+      "weight_scale_max": 0.0007859403473678744,
+      "requant_ratio_max_rel_error": 2.9301100896828025e-05
+    },
+    {
+      "index": 40,
+      "name": "L12.fuse",
+      "input_scales": [
+        0.0991001329084081,
+        0.0991001329084081,
+        0.0991001329084081,
+        0.0991001329084081,
+        0.0991001329084081,
+        0.0991001329084081,
+        0.0991001329084081,
+        0.0991001329084081,
+        0.17327880615324487,
+        0.17327880615324487,
+        0.17327880615324487,
+        0.17327880615324487
+      ],
+      "pre_scale": 0.2035239581986675,
+      "output_scale": 0.18735234136656514,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.0001474268162636575,
+      "weight_scale_max": 0.0012121358742567432,
+      "requant_ratio_max_rel_error": 2.8680854510909626e-05
+    },
+    {
+      "index": 42,
+      "name": "L15.split",
+      "input_scales": [
+        0.18735234136656514,
+        0.18735234136656514,
+        0.18735234136656514,
+        0.18735234136656514,
+        0.18735234136656514,
+        0.18735234136656514,
+        0.18735234136656514,
+        0.18735234136656514,
+        0.09274100478239886,
+        0.09274100478239886,
+        0.09274100478239886,
+        0.09274100478239886
+      ],
+      "pre_scale": 0.11219207705475213,
+      "output_scale": 0.1121919311876372,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00020762871244678146,
+      "weight_scale_max": 0.0011075640470493882,
+      "requant_ratio_max_rel_error": 2.6553766564241243e-05
+    },
+    {
+      "index": 43,
+      "name": "L15.b0.cv1",
+      "input_scales": [
+        0.1121919311876372,
+        0.1121919311876372
+      ],
+      "pre_scale": 0.0684103936660947,
+      "output_scale": 0.0521297579205881,
+      "output_zero_point": 0,
+      "weight_scale_min": 8.169231045703019e-05,
+      "weight_scale_max": 0.0006292297085242021,
+      "requant_ratio_max_rel_error": 2.780505731614369e-05
+    },
+    {
+      "index": 44,
+      "name": "L15.b0.cv2",
+      "input_scales": [
+        0.0521297579205881,
+        0.0521297579205881
+      ],
+      "pre_scale": 0.08637948956076555,
+      "output_scale": 0.0851989337778467,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00014242236493877897,
+      "weight_scale_max": 0.0004133478773726375,
+      "requant_ratio_max_rel_error": 2.6841121260279266e-05
+    },
+    {
+      "index": 45,
+      "name": "L15.fuse",
+      "input_scales": [
+        0.1121919311876372,
+        0.1121919311876372,
+        0.1121919311876372,
+        0.1121919311876372,
+        0.0851989337778467,
+        0.0851989337778467
+      ],
+      "pre_scale": 0.11706176001255908,
+      "output_scale": 0.09766915088563453,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.0001657307083951519,
+      "weight_scale_max": 0.0008321610294235271,
+      "requant_ratio_max_rel_error": 2.653969717902882e-05
+    },
+    {
+      "index": 46,
+      "name": "L16",
+      "input_scales": [
+        0.09766915088563453,
+        0.09766915088563453,
+        0.09766915088563453,
+        0.09766915088563453
+      ],
+      "pre_scale": 0.10809831056069201,
+      "output_scale": 0.08239287231850813,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00012075842774085104,
+      "weight_scale_max": 0.0005829101664443784,
+      "requant_ratio_max_rel_error": 2.961135880896748e-05
+    },
+    {
+      "index": 47,
+      "name": "L18.split",
+      "input_scales": [
+        0.08239287231850813,
+        0.08239287231850813,
+        0.08239287231850813,
+        0.08239287231850813,
+        0.18735234136656514,
+        0.18735234136656514,
+        0.18735234136656514,
+        0.18735234136656514,
+        0.18735234136656514,
+        0.18735234136656514,
+        0.18735234136656514,
+        0.18735234136656514
+      ],
+      "pre_scale": 0.242107954738647,
+      "output_scale": 0.242107954738647,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00018820117654168764,
+      "weight_scale_max": 0.0018115953890104899,
+      "requant_ratio_max_rel_error": 2.6308507613648224e-05
+    },
+    {
+      "index": 48,
+      "name": "L18.b0.cv1",
+      "input_scales": [
+        0.242107954738647,
+        0.242107954738647,
+        0.242107954738647,
+        0.242107954738647
+      ],
+      "pre_scale": 0.14222277093121388,
+      "output_scale": 0.14222277093121388,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00021698770458466985,
+      "weight_scale_max": 0.000882014501657032,
+      "requant_ratio_max_rel_error": 2.422736201646014e-05
+    },
+    {
+      "index": 49,
+      "name": "L18.b0.cv2",
+      "input_scales": [
+        0.14222277093121388,
+        0.14222277093121388,
+        0.14222277093121388,
+        0.14222277093121388
+      ],
+      "pre_scale": 0.33357085017707405,
+      "output_scale": 0.33357085017707405,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.0002319801783452869,
+      "weight_scale_max": 0.0012454158209081144,
+      "requant_ratio_max_rel_error": 2.4870218419570378e-05
+    },
+    {
+      "index": 50,
+      "name": "L18.fuse",
+      "input_scales": [
+        0.242107954738647,
+        0.242107954738647,
+        0.242107954738647,
+        0.242107954738647,
+        0.242107954738647,
+        0.242107954738647,
+        0.242107954738647,
+        0.242107954738647,
+        0.33357085017707405,
+        0.33357085017707405,
+        0.33357085017707405,
+        0.33357085017707405
+      ],
+      "pre_scale": 0.3007516087509516,
+      "output_scale": 0.3007516087509516,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.0002719718476457395,
+      "weight_scale_max": 0.002380973384867364,
+      "requant_ratio_max_rel_error": 2.928397121404469e-05
+    },
+    {
+      "index": 51,
+      "name": "L19",
+      "input_scales": [
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516
+      ],
+      "pre_scale": 0.18852585019089105,
+      "output_scale": 0.15328116980124645,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00014851847210353063,
+      "weight_scale_max": 0.001203302749607134,
+      "requant_ratio_max_rel_error": 2.688795426597501e-05
+    },
+    {
+      "index": 52,
+      "name": "L21.split",
+      "input_scales": [
+        0.15328116980124645,
+        0.15328116980124645,
+        0.15328116980124645,
+        0.15328116980124645,
+        0.15328116980124645,
+        0.15328116980124645,
+        0.15328116980124645,
+        0.15328116980124645,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759,
+        0.07127058956566759
+      ],
+      "pre_scale": 0.2212704865012582,
+      "output_scale": 0.2212704865012582,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00011647561718860084,
+      "weight_scale_max": 0.0012061419787080688,
+      "requant_ratio_max_rel_error": 2.8368469060291446e-05
+    },
+    {
+      "index": 53,
+      "name": "L21.b0.cv1",
+      "input_scales": [
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582
+      ],
+      "pre_scale": 0.1427505851730587,
+      "output_scale": 0.1427505851730587,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00014774629580669625,
+      "weight_scale_max": 0.0008181102869767094,
+      "requant_ratio_max_rel_error": 2.6808029536584677e-05
+    },
+    {
+      "index": 54,
+      "name": "L21.b0.cv2",
+      "input_scales": [
+        0.1427505851730587,
+        0.1427505851730587,
+        0.1427505851730587,
+        0.1427505851730587,
+        0.1427505851730587,
+        0.1427505851730587,
+        0.1427505851730587,
+        0.1427505851730587
+      ],
+      "pre_scale": 0.1629092154540415,
+      "output_scale": 0.16087533901995563,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00013190849207915832,
+      "weight_scale_max": 0.000706593901449608,
+      "requant_ratio_max_rel_error": 2.4380379900490468e-05
+    },
+    {
+      "index": 55,
+      "name": "L21.fuse",
+      "input_scales": [
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.2212704865012582,
+        0.16087533901995563,
+        0.16087533901995563,
+        0.16087533901995563,
+        0.16087533901995563,
+        0.16087533901995563,
+        0.16087533901995563,
+        0.16087533901995563,
+        0.16087533901995563
+      ],
+      "pre_scale": 0.4192019034558394,
+      "output_scale": 0.4192019034558394,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00019051395178996876,
+      "weight_scale_max": 0.002251180330882734,
+      "requant_ratio_max_rel_error": 2.8203437949292365e-05
+    },
+    {
+      "index": 56,
+      "name": "D0.box.cv0",
+      "input_scales": [
+        0.09766915088563453,
+        0.09766915088563453,
+        0.09766915088563453,
+        0.09766915088563453
+      ],
+      "pre_scale": 0.4005997620229646,
+      "output_scale": 0.4005997620229646,
+      "output_zero_point": 0,
+      "weight_scale_min": 9.130983746935834e-05,
+      "weight_scale_max": 0.0007259244257960732,
+      "requant_ratio_max_rel_error": 2.66192341087379e-05
+    },
+    {
+      "index": 57,
+      "name": "D0.box.cv1",
+      "input_scales": [
+        0.4005997620229646,
+        0.4005997620229646,
+        0.4005997620229646,
+        0.4005997620229646
+      ],
+      "pre_scale": 0.502950379979892,
+      "output_scale": 0.40462764980286126,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.0002900325202173607,
+      "weight_scale_max": 0.005027004390564748,
+      "requant_ratio_max_rel_error": 2.8077599616760374e-05
+    },
+    {
+      "index": 58,
+      "name": "D0.box.out",
+      "input_scales": [
+        0.40462764980286126,
+        0.40462764980286126,
+        0.40462764980286126,
+        0.40462764980286126
+      ],
+      "pre_scale": 0.18914272532743567,
+      "output_scale": 0.18914272532743567,
+      "output_zero_point": 17,
+      "weight_scale_min": 0.00010850908346821778,
+      "weight_scale_max": 0.003951441892606067,
+      "requant_ratio_max_rel_error": 2.614088910646295e-05
+    },
+    {
+      "index": 59,
+      "name": "D0.cls.cv0",
+      "input_scales": [
+        0.09766915088563453,
+        0.09766915088563453,
+        0.09766915088563453,
+        0.09766915088563453
+      ],
+      "pre_scale": 0.11747313484432191,
+      "output_scale": 0.06687602339767096,
+      "output_zero_point": 0,
+      "weight_scale_min": 3.885189923954338e-05,
+      "weight_scale_max": 0.00039507311261814974,
+      "requant_ratio_max_rel_error": 2.5785687312152028e-05
+    },
+    {
+      "index": 60,
+      "name": "D0.cls.cv1",
+      "input_scales": [
+        0.06687602339767096,
+        0.06687602339767096,
+        0.06687602339767096,
+        0.06687602339767096
+      ],
+      "pre_scale": 0.5169996302897536,
+      "output_scale": 0.31394913703437866,
+      "output_zero_point": 0,
+      "weight_scale_min": 3.8155972189718645e-05,
+      "weight_scale_max": 0.002621607029594655,
+      "requant_ratio_max_rel_error": 2.7669231412730255e-05
+    },
+    {
+      "index": 61,
+      "name": "D0.cls.out",
+      "input_scales": [
+        0.31394913703437866,
+        0.31394913703437866,
+        0.31394913703437866,
+        0.31394913703437866
+      ],
+      "pre_scale": 0.23162875452462364,
+      "output_scale": 0.23162875452462364,
+      "output_zero_point": 115,
+      "weight_scale_min": 1e-12,
+      "weight_scale_max": 0.0017526380527725064,
+      "requant_ratio_max_rel_error": 0.0006593438374349336
+    },
+    {
+      "index": 62,
+      "name": "D0.kpt.cv0",
+      "input_scales": [
+        0.09766915088563453,
+        0.09766915088563453,
+        0.09766915088563453,
+        0.09766915088563453
+      ],
+      "pre_scale": 0.07231258538764293,
+      "output_scale": 0.07230107765498124,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00010247649284016686,
+      "weight_scale_max": 0.0005171799935225806,
+      "requant_ratio_max_rel_error": 2.1664774637275563e-05
+    },
+    {
+      "index": 63,
+      "name": "D0.kpt.cv1",
+      "input_scales": [
+        0.07230107765498124
+      ],
+      "pre_scale": 0.05275280367671036,
+      "output_scale": 0.030315767498466914,
+      "output_zero_point": 0,
+      "weight_scale_min": 4.202679597660936e-05,
+      "weight_scale_max": 0.00044404607583782183,
+      "requant_ratio_max_rel_error": 2.7435779025863916e-05
+    },
+    {
+      "index": 64,
+      "name": "D0.kpt.out",
+      "input_scales": [
+        0.030315767498466914
+      ],
+      "pre_scale": 0.04856020247235018,
+      "output_scale": 0.04856020247235018,
+      "output_zero_point": 15,
+      "weight_scale_min": 1e-12,
+      "weight_scale_max": 0.00047741366139317974,
+      "requant_ratio_max_rel_error": 7.12076830011732e-05
+    },
+    {
+      "index": 65,
+      "name": "D1.box.cv0",
+      "input_scales": [
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516
+      ],
+      "pre_scale": 0.3832544983841303,
+      "output_scale": 0.3832544983841303,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.0001945464599195213,
+      "weight_scale_max": 0.0009614071273467644,
+      "requant_ratio_max_rel_error": 2.480392575821e-05
+    },
+    {
+      "index": 66,
+      "name": "D1.box.cv1",
+      "input_scales": [
+        0.3832544983841303,
+        0.3832544983841303,
+        0.3832544983841303,
+        0.3832544983841303
+      ],
+      "pre_scale": 0.48668206507765405,
+      "output_scale": 0.4863334347882609,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.0002387048703029266,
+      "weight_scale_max": 0.00318028648357508,
+      "requant_ratio_max_rel_error": 2.640647403484575e-05
+    },
+    {
+      "index": 67,
+      "name": "D1.box.out",
+      "input_scales": [
+        0.4863334347882609,
+        0.4863334347882609,
+        0.4863334347882609,
+        0.4863334347882609
+      ],
+      "pre_scale": 0.5150044676836799,
+      "output_scale": 0.5150044676836799,
+      "output_zero_point": -6,
+      "weight_scale_min": 0.00014666422702080853,
+      "weight_scale_max": 0.00440904219684547,
+      "requant_ratio_max_rel_error": 2.2279256043034046e-05
+    },
+    {
+      "index": 68,
+      "name": "D1.cls.cv0",
+      "input_scales": [
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516
+      ],
+      "pre_scale": 0.13558869512062374,
+      "output_scale": 0.13528196811676027,
+      "output_zero_point": 0,
+      "weight_scale_min": 8.16114805343677e-05,
+      "weight_scale_max": 0.0010310038770995676,
+      "requant_ratio_max_rel_error": 2.9702432339906437e-05
+    },
+    {
+      "index": 69,
+      "name": "D1.cls.cv1",
+      "input_scales": [
+        0.13528196811676027,
+        0.13528196811676027,
+        0.13528196811676027,
+        0.13528196811676027
+      ],
+      "pre_scale": 0.789013911419966,
+      "output_scale": 0.42896588543268643,
+      "output_zero_point": 0,
+      "weight_scale_min": 7.780658718334942e-05,
+      "weight_scale_max": 0.004124714248647023,
+      "requant_ratio_max_rel_error": 2.6031281806671025e-05
+    },
+    {
+      "index": 70,
+      "name": "D1.cls.out",
+      "input_scales": [
+        0.42896588543268643,
+        0.42896588543268643,
+        0.42896588543268643,
+        0.42896588543268643
+      ],
+      "pre_scale": 0.3067637272266781,
+      "output_scale": 0.3067637272266781,
+      "output_zero_point": 115,
+      "weight_scale_min": 1e-12,
+      "weight_scale_max": 0.0025876886774263545,
+      "requant_ratio_max_rel_error": 0.00047650730804527086
+    },
+    {
+      "index": 71,
+      "name": "D1.kpt.cv0",
+      "input_scales": [
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516,
+        0.3007516087509516
+      ],
+      "pre_scale": 0.1696873409541573,
+      "output_scale": 0.1696873409541573,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00012332708977170546,
+      "weight_scale_max": 0.0007107520897563631,
+      "requant_ratio_max_rel_error": 2.810510007456024e-05
+    },
+    {
+      "index": 72,
+      "name": "D1.kpt.cv1",
+      "input_scales": [
+        0.1696873409541573
+      ],
+      "pre_scale": 0.12000538993069507,
+      "output_scale": 0.06608936697479309,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00011361347292273481,
+      "weight_scale_max": 0.00038674078756588317,
+      "requant_ratio_max_rel_error": 2.2338048739634075e-05
+    },
+    {
+      "index": 73,
+      "name": "D1.kpt.out",
+      "input_scales": [
+        0.06608936697479309
+      ],
+      "pre_scale": 0.09792810131521787,
+      "output_scale": 0.09792810131521787,
+      "output_zero_point": 53,
+      "weight_scale_min": 1e-12,
+      "weight_scale_max": 0.0012775949539756846,
+      "requant_ratio_max_rel_error": 0.00010520839566585671
+    },
+    {
+      "index": 74,
+      "name": "D2.box.cv0",
+      "input_scales": [
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394
+      ],
+      "pre_scale": 0.253041672706604,
+      "output_scale": 0.253041672706604,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00011607951829244599,
+      "weight_scale_max": 0.001044465038446846,
+      "requant_ratio_max_rel_error": 2.6659600769973757e-05
+    },
+    {
+      "index": 75,
+      "name": "D2.box.cv1",
+      "input_scales": [
+        0.253041672706604,
+        0.253041672706604,
+        0.253041672706604,
+        0.253041672706604
+      ],
+      "pre_scale": 0.42936951156676284,
+      "output_scale": 0.42936951156676284,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.0003019738688280986,
+      "weight_scale_max": 0.0020565673926421237,
+      "requant_ratio_max_rel_error": 2.9599776943722844e-05
+    },
+    {
+      "index": 76,
+      "name": "D2.box.out",
+      "input_scales": [
+        0.42936951156676284,
+        0.42936951156676284,
+        0.42936951156676284,
+        0.42936951156676284
+      ],
+      "pre_scale": 0.2563919614343082,
+      "output_scale": 0.2563919614343082,
+      "output_zero_point": -1,
+      "weight_scale_min": 8.666761256326529e-05,
+      "weight_scale_max": 0.0015402072861243146,
+      "requant_ratio_max_rel_error": 2.884325330576587e-05
+    },
+    {
+      "index": 77,
+      "name": "D2.cls.cv0",
+      "input_scales": [
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394
+      ],
+      "pre_scale": 0.1629662573806883,
+      "output_scale": 0.1629662573806883,
+      "output_zero_point": 0,
+      "weight_scale_min": 4.994847560624691e-05,
+      "weight_scale_max": 0.0014036001883097591,
+      "requant_ratio_max_rel_error": 2.7403339198039944e-05
+    },
+    {
+      "index": 78,
+      "name": "D2.cls.cv1",
+      "input_scales": [
+        0.1629662573806883,
+        0.1629662573806883,
+        0.1629662573806883,
+        0.1629662573806883
+      ],
+      "pre_scale": 0.5573872618787871,
+      "output_scale": 0.5573872618787871,
+      "output_zero_point": 0,
+      "weight_scale_min": 9.757124902059945e-05,
+      "weight_scale_max": 0.003008129436843727,
+      "requant_ratio_max_rel_error": 2.7753613957459677e-05
+    },
+    {
+      "index": 79,
+      "name": "D2.cls.out",
+      "input_scales": [
+        0.5573872618787871,
+        0.5573872618787871,
+        0.5573872618787871,
+        0.5573872618787871
+      ],
+      "pre_scale": 0.20442515525747748,
+      "output_scale": 0.20442515525747748,
+      "output_zero_point": 113,
+      "weight_scale_min": 1e-12,
+      "weight_scale_max": 0.002423739669909988,
+      "requant_ratio_max_rel_error": 0.000660673565160752
+    },
+    {
+      "index": 80,
+      "name": "D2.kpt.cv0",
+      "input_scales": [
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394,
+        0.4192019034558394
+      ],
+      "pre_scale": 0.11438984110599429,
+      "output_scale": 0.11438973072006947,
+      "output_zero_point": 0,
+      "weight_scale_min": 5.851552098168223e-05,
+      "weight_scale_max": 0.0001893528047300206,
+      "requant_ratio_max_rel_error": 2.3709663989901486e-05
+    },
+    {
+      "index": 81,
+      "name": "D2.kpt.cv1",
+      "input_scales": [
+        0.11438973072006947
+      ],
+      "pre_scale": 0.09460516679944016,
+      "output_scale": 0.08154668930008656,
+      "output_zero_point": 0,
+      "weight_scale_min": 0.00010575423367555286,
+      "weight_scale_max": 0.0003211870013066742,
+      "requant_ratio_max_rel_error": 2.723036695106984e-05
+    },
+    {
+      "index": 82,
+      "name": "D2.kpt.out",
+      "input_scales": [
+        0.08154668930008656
+      ],
+      "pre_scale": 0.0833733318833744,
+      "output_scale": 0.0833733318833744,
+      "output_zero_point": 48,
+      "weight_scale_min": 1e-12,
+      "weight_scale_max": 0.0010860518106218468,
+      "requant_ratio_max_rel_error": 2.414959602414779e-05
+    }
+  ]
+}

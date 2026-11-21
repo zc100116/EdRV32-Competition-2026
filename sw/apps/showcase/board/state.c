@@ -9,6 +9,7 @@ void board_state_encode(uint8_t p[56], const struct board_state *s)
     memset(p, 0, 56);
     p[0] = s->session.app; p[1] = s->session.state; p[2] = s->error;
     p[3] = s->boxes; p[4] = s->detection.threshold;
+    p[5] = s->demo_scene; p[6] = s->preset; p[7] = s->luma;
     for (unsigned i = 0; i < 3; ++i) record_put32(p+8+4*i, s->detection.classes[i]);
     record_put32(p+20, c->enabled);
     put16(p+24, c->brightness); put16(p+26, c->contrast); put16(p+28, c->gamma_tenths);

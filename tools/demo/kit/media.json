@@ -1,0 +1,352 @@
+[
+  {
+    "id": "farm",
+    "name": "智慧农场",
+    "app": "智慧农场 · 拖动与剧本",
+    "items": [],
+    "thumbnail_path": "tools/demo/kit/media/farm.jpg",
+    "credits": [
+      {
+        "name": "智慧农场 · 原文件嵌入",
+        "author": "本项目 · imagegen 原创素材",
+        "source": "tools/demo/farm-sim/farm-sim.html；原提示词见相邻 README.md",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可"
+      }
+    ]
+  },
+  {
+    "id": "traffic",
+    "name": "马路车流",
+    "app": "目标检测计数",
+    "items": [
+      {
+        "id": "traffic-1",
+        "name": "城市路口",
+        "path": "build/demo-kit/clips/traffic-1.mp4",
+        "type": "video/mp4"
+      },
+      {
+        "id": "traffic-2",
+        "name": "林间公路车流",
+        "path": "build/demo-kit/clips/traffic-2.mp4",
+        "type": "video/mp4"
+      }
+    ],
+    "thumbnail_path": "tools/demo/kit/media/traffic.jpg"
+  },
+  {
+    "id": "zoo",
+    "name": "动物园",
+    "app": "目标检测计数",
+    "items": [
+      {
+        "id": "zebra",
+        "name": "斑马",
+        "path": "tools/demo/kit/media/zebra.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可",
+        "expected": {
+          "22": 1
+        }
+      },
+      {
+        "id": "giraffe",
+        "name": "长颈鹿",
+        "path": "tools/demo/kit/media/giraffe.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可",
+        "expected": {
+          "23": 1
+        }
+      },
+      {
+        "id": "elephant",
+        "name": "大象",
+        "path": "tools/demo/kit/media/elephant.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可",
+        "expected": {
+          "20": 1
+        }
+      },
+      {
+        "id": "bear",
+        "name": "棕熊",
+        "path": "tools/demo/kit/media/bear.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可",
+        "expected": {
+          "21": 1
+        }
+      },
+      {
+        "id": "zoo-mixed",
+        "name": "斑马与长颈鹿",
+        "path": "tools/demo/kit/media/zoo-mixed.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可",
+        "expected": {
+          "22": 1,
+          "23": 1
+        }
+      },
+      {
+        "id": "zoo-herd",
+        "name": "斑马群与大象",
+        "path": "tools/demo/kit/media/zoo-herd.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可",
+        "expected": {
+          "22": 2,
+          "20": 1
+        }
+      }
+    ],
+    "thumbnail_path": "tools/demo/kit/media/zebra.jpg"
+  },
+  {
+    "id": "dance",
+    "name": "舞蹈",
+    "app": "人体姿态",
+    "items": [
+      {
+        "id": "dance-1",
+        "name": "单人舞蹈",
+        "path": "build/demo-kit/clips/dance-1.mp4",
+        "type": "video/mp4",
+        "people": 1
+      },
+      {
+        "id": "dance-2",
+        "name": "律动 · 独舞",
+        "path": "build/demo-kit/clips/dance-2.mp4",
+        "type": "video/mp4",
+        "people": 1
+      }
+    ],
+    "thumbnail_path": "tools/demo/kit/media/dance.jpg"
+  },
+  {
+    "id": "gesture",
+    "name": "手势",
+    "app": "手势识别",
+    "items": [
+      {
+        "id": "palm",
+        "name": "张开",
+        "path": "tools/demo/kit/media/palm.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可"
+      },
+      {
+        "id": "fist",
+        "name": "握拳",
+        "path": "tools/demo/kit/media/fist.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可"
+      },
+      {
+        "id": "peace",
+        "name": "剪刀手",
+        "path": "tools/demo/kit/media/peace.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可"
+      },
+      {
+        "id": "point",
+        "name": "指点",
+        "path": "tools/demo/kit/media/point.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可"
+      },
+      {
+        "id": "grabbing",
+        "name": "爪形",
+        "path": "tools/demo/kit/media/grabbing.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可"
+      },
+      {
+        "id": "grip",
+        "name": "抓紧",
+        "path": "tools/demo/kit/media/grip.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可"
+      },
+      {
+        "id": "thumb_index",
+        "name": "八",
+        "path": "tools/demo/kit/media/thumb_index.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可"
+      },
+      {
+        "id": "ok",
+        "name": "OK",
+        "path": "tools/demo/kit/media/ok.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可"
+      },
+      {
+        "id": "like",
+        "name": "点赞",
+        "path": "tools/demo/kit/media/like.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可"
+      },
+      {
+        "id": "dislike",
+        "name": "倒赞",
+        "path": "tools/demo/kit/media/dislike.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可"
+      },
+      {
+        "id": "three",
+        "name": "三",
+        "path": "tools/demo/kit/media/three.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可"
+      },
+      {
+        "id": "four",
+        "name": "四",
+        "path": "tools/demo/kit/media/four.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可"
+      },
+      {
+        "id": "call",
+        "name": "六",
+        "path": "tools/demo/kit/media/call.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可"
+      }
+    ],
+    "thumbnail_path": "tools/demo/kit/media/palm.jpg"
+  },
+  {
+    "id": "helmet",
+    "name": "工地",
+    "app": "安全帽检测",
+    "items": [
+      {
+        "id": "helmet-1",
+        "name": "工地现场",
+        "path": "build/demo-kit/clips/helmet-1.mp4",
+        "type": "video/mp4"
+      }
+    ],
+    "thumbnail_path": "tools/demo/kit/media/helmet.jpg"
+  },
+  {
+    "id": "face",
+    "name": "人脸",
+    "app": "人脸贴纸",
+    "items": [
+      {
+        "id": "face-one",
+        "name": "人像 · 晨光",
+        "path": "tools/demo/kit/media/face-one.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可",
+        "people": 1
+      },
+      {
+        "id": "face-two",
+        "name": "人像 · 从容",
+        "path": "tools/demo/kit/media/face-two.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可",
+        "people": 1
+      },
+      {
+        "id": "face-pair",
+        "name": "双人合影",
+        "path": "tools/demo/kit/media/face-pair.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可",
+        "people": 2
+      },
+      {
+        "id": "face-trio",
+        "name": "三人合影",
+        "path": "tools/demo/kit/media/face-trio.jpg",
+        "type": "image/jpeg",
+        "author": "本项目 · imagegen",
+        "source": "原创生成（提示词见 README.md）",
+        "license": "本项目原创素材，可随本演示包使用与修改",
+        "license_url": "无第三方素材许可",
+        "people": 3
+      }
+    ],
+    "thumbnail_path": "tools/demo/kit/media/face-pair.jpg"
+  }
+]

@@ -87,7 +87,7 @@ module edrv32_npu_datapath (
     output wire result_chunk_last_o,
     input wire result_release_i,
     input wire result_rd_en_i,
-    input wire [4:0] result_rd_index_i,
+    input wire [9:0] result_rd_index_i,
     input wire result_rd_plane_i,
     output wire result_rd_valid_o,
     output wire [255:0] result_rd_data_o,
@@ -149,7 +149,7 @@ module edrv32_npu_datapath (
     wire sum_first_w;
     wire sum_last_w;
     wire [48:0] sum_tag_w;
-    wire [31:0] sum_fold_w;
+    wire [63:0] sum_fold_w;
     wire [1215:0] sum_data_w;
     wire mac_array_idle_w;
     wire quant_prepare_valid_w;
@@ -557,7 +557,7 @@ module edrv32_npu_datapath (
         .result_chunk_last_o(result_chunk_last_o),
         .result_release_i(result_release_i),
 
-        // DMA read port; index is the absolute ring slot.
+        // DMA read port; low/high five-bit copies address the two 256-bit RAM halves.
         .result_rd_en_i(result_rd_en_i),
         .result_rd_index_i(result_rd_index_i),
         .result_rd_plane_i(result_rd_plane_i),

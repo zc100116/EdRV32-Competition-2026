@@ -22,6 +22,7 @@ module edrv32_npu_weight_store (
     genvar bank;
     genvar segment;
     genvar channel;
+    genvar slice;
     genvar beat;
     generate
         for (bank = 0; bank < 8; bank = bank + 1) begin : g_bank
@@ -29,7 +30,6 @@ module edrv32_npu_weight_store (
             reg [10:0] wr_addr_r;
             wire [255:0] wr_data_w;
             reg [1:0] rd_segment_array_r;
-            reg [1:0] rd_segment_output_r;
             wire [767:0] rd_segment_data_w;
             wire [255:0] rd_bank_data_w;
             wire rd_en_w;
@@ -69,7 +69,6 @@ module edrv32_npu_weight_store (
                 if (rd_en_w) begin
                     rd_segment_array_r <= rd_addr_w[10:9];
                 end
-                rd_segment_output_r <= rd_segment_array_r;
             end
 
             // Fixed slices expose a word enable instead of a 256-bit feedback mux.
@@ -98,10 +97,21 @@ module edrv32_npu_weight_store (
                 );
             end
 
-            // Selection is combinational after the RAM output boundary: no third read stage.
-            assign rd_bank_data_w = rd_segment_output_r == 2'd0 ?
-                rd_segment_data_w[0 +: 256] : rd_segment_output_r == 2'd1 ?
-                rd_segment_data_w[256 +: 256] : rd_segment_data_w[512 +: 256];
+            // Each 64-bit slice keeps the same RAM output boundary and latency.
+            for (slice = 0; slice < 4; slice = slice + 1) begin : g_read_slice
+                (* keep = "true", syn_preserve = 1 *) reg [1:0] rd_segment_output_r;
+                (* keep = "true", syn_keep = 1 *) wire rd_segment_zero_w;
+                (* keep = "true", syn_keep = 1 *) wire rd_segment_one_w;
+                always @(posedge clk_i) begin
+                    rd_segment_output_r <= rd_segment_array_r;
+                end
+                assign rd_segment_zero_w = rd_segment_output_r == 2'd0;
+                assign rd_segment_one_w = rd_segment_output_r == 2'd1;
+                assign rd_bank_data_w[64*slice +: 64] = rd_segment_zero_w ?
+                    rd_segment_data_w[64*slice +: 64] : rd_segment_one_w ?
+                    rd_segment_data_w[256+64*slice +: 64] :
+                    rd_segment_data_w[512+64*slice +: 64];
+            end
             for (channel = 0; channel < 32; channel = channel + 1) begin : g_channel
                 assign weight_rd_data_o[8*(8*channel+bank) +: 8] =
                     rd_bank_data_w[8*channel +: 8];

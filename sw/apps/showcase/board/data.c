@@ -21,7 +21,7 @@
 #include "uart.h"
 #include <string.h>
 static ui_system_t system_data;
-static char report_line[768];
+static char report_line[2048];
 static unsigned report_length;
 static uint64_t report_time,previous_busy[3],previous_idle;
 static uint32_t previous_frames,previous_display,previous_nes;
@@ -119,9 +119,9 @@ void board_memory_sample(const struct mem_xbar_stats *m)
     }
     static uint64_t rnd_before,npu_before;
     uint64_t rnd=board_rnd_cycles(),npu=board_npu_cycles();
-    /* RND clk_mem=125 MHz; NPU clk_npu=150 MHz, specified engine clocks. */
+    /* RND clk_mem=125 MHz; NPU clk_npu=180 MHz, specified engine clocks. */
     system_data.rnd_busy=(unsigned)((rnd-rnd_before)*100*platform_clock_hz()/elapsed/125000000);
-    system_data.npu_busy=(unsigned)((npu-npu_before)*100*platform_clock_hz()/elapsed/150000000);
+    system_data.npu_busy=(unsigned)((npu-npu_before)*100*platform_clock_hz()/elapsed/180000000);
     rnd_before=rnd; npu_before=npu; previous=now;
     cycles=0;
 }

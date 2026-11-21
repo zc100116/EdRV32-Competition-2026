@@ -475,6 +475,7 @@ module edrv32_mem_xbar (
     integer update_idx;
     integer payload_idx;
     genvar p;
+    genvar w_slice;
     function [2:0] violation;
         input [11:0] addr_i;
         input [3:0] len_i;
@@ -496,8 +497,26 @@ module edrv32_mem_xbar (
     assign ddr_araddr_o = cmd_addr_r;
     assign ddr_arlen_o = cmd_len_r;
     assign ddr_wvalid_o = w_active_r;
-    assign ddr_wdata_o = w_ram_data_w[w_port_r*288 +: 256];
-    assign ddr_wstrb_o = w_ram_data_w[w_port_r*288+256 +: 32];
+    // Keep the AW owner at the original edge, with one selector per 32-bit W slice.
+    generate
+        for (w_slice = 0; w_slice < 9; w_slice = w_slice + 1) begin : g_w_select
+            (* keep = "true", syn_preserve = 1 *) reg [2:0] w_port_copy_r;
+            wire [31:0] data_w;
+            always @(posedge clk_i or negedge rst_n_i[0]) begin
+                if (!rst_n_i[0]) begin
+                    w_port_copy_r <= 3'b0;
+                end else if (cmd_take_w && cmd_write_r) begin
+                    w_port_copy_r <= cmd_id_r[3:1];
+                end
+            end
+            assign data_w = w_ram_data_w[w_port_copy_r*288+w_slice*32 +: 32];
+            if (w_slice < 8) begin : g_data
+                assign ddr_wdata_o[w_slice*32 +: 32] = data_w;
+            end else begin : g_strb
+                assign ddr_wstrb_o = data_w;
+            end
+        end
+    endgenerate
     assign ddr_wlast_o = w_index_r == w_length_r;
     assign w_take_w = ddr_wvalid_o && ddr_wready_i;
     assign reserve_w = bad_read_do_w || (grant_w && !grant_write_w);

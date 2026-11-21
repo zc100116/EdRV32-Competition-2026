@@ -14,6 +14,21 @@
 #define ACCENT 0x2563EB
 #define TEAL 0x0D9488
 #define DISABLED 0xe4e9f0
+#define UI_HOVER 0xf0f6ff
+#define UI_HOVER_LINE 0x93b4f5
+#define UI_PRESSED 0xc9dcff
+#define UI_CHECKED 0xd9f2ed
+enum {
+    UI_SPACE_XS = 8, UI_SPACE_SM = 12, UI_SPACE_MD = 16, UI_SPACE_LG = 24,
+    UI_RADIUS_SM = 8, UI_RADIUS_MD = 12, UI_RADIUS_LG = 20,
+    UI_FONT_BODY = 16, UI_FONT_CARD = 20, UI_FONT_TITLE = 32, UI_FONT_HERO = 48,
+    UI_FONT_NUMBER = 64, UI_FONT_SCORE = 96
+};
+LV_FONT_DECLARE(showcase_bold_24);
+LV_FONT_DECLARE(showcase_bold_32);
+LV_FONT_DECLARE(showcase_bold_48);
+LV_FONT_DECLARE(showcase_digits_64);
+LV_FONT_DECLARE(showcase_digits_96);
 LV_FONT_DECLARE(sim_font_14);
 LV_FONT_DECLARE(sim_font_16);
 LV_FONT_DECLARE(sim_font_20);
@@ -51,7 +66,28 @@ void ui_process_update(void);
 void ui_button(lv_obj_t *p, const char *s, int x, int y, int w, unsigned action);
 void ui_hint(const char *s);
 void ui_page_home(lv_obj_t *p);
+void ui_page_settings(lv_obj_t *p);
+void ui_home_select_tab(unsigned tab);
+unsigned ui_home_tab(void);
+void ui_home_focus(void);
+bool ui_home_key(uint32_t key);
+void ui_activate(unsigned action);
+extern unsigned ui_motion_entry;
+void ui_settings_apply_grab(void);
 void ui_page_vision(lv_obj_t *p);
+void ui_page_pose(lv_obj_t *p);
+void ui_pose_update(void);
+void ui_page_hand(lv_obj_t *p);
+void ui_hand_update(void);
+void ui_hand_toggle(void);
+void ui_page_motion(lv_obj_t *p);
+void ui_page_grab(lv_obj_t *p);
+void ui_grab_update(void);
+void ui_grab_action(unsigned action);
+void ui_page_face(lv_obj_t *p);
+void ui_page_helmet(lv_obj_t *p);
+void ui_demo_update(void);
+void ui_demo_action(unsigned action);
 void ui_page_image(lv_obj_t *p);
 void ui_page_process(lv_obj_t *p);
 void ui_page_graphics(lv_obj_t *p);

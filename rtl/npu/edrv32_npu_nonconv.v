@@ -39,8 +39,7 @@ module edrv32_npu_nonconv (
 
     // Local completion; writer ownership must survive ABORT.
     output wire done_o,
-    output wire writer_idle_o,
-    output wire active_o
+    output wire writer_idle_o
 );
     localparam [4:0] S_IDLE = 5'd0;
     localparam [4:0] S_COUNT = 5'd1;
@@ -166,7 +165,6 @@ module edrv32_npu_nonconv (
         || (state_r == S_SEND) || (state_r == S_WRITE_DRAIN);
     assign writer_idle_o = !source_active_w && write_stream_idle_i;
     assign done_o = (state_r == S_DONE);
-    assign active_o = (state_r != S_IDLE) && (state_r != S_DONE) && (state_r != S_HALT);
     assign sample_x_w = $signed({2'd0, pair_r, pixel_r})
         + $signed({11'd0, kernel_x_r}) - 14'sd2;
     assign sample_y_w = $signed({2'd0, row_r})

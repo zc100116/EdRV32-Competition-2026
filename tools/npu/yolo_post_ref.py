@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""yolo_post_ref.py — npu-spec 2.2; B2 software design 3.4/3.5a.
+"""yolo_post_ref.py — npu-spec 2.6, 4.4/4.5; B2 software design 3.4/3.5a.
 
 Standard-library integer reference; contract: sw/lib/README.md.
 Clock domain: host. Input is the 725760-byte physical C16 OUTPUT buffer.
@@ -11,6 +11,7 @@ from pathlib import Path
 import struct
 
 TABLES = Path(__file__).resolve().parents[2] / "sw/lib/yolo_tables.json"
+DEFAULT_PROBABILITY_THRESHOLD = 4194304
 STAT_KEYS = ("class_comparisons", "decoded_anchors", "dfl_bin_comparisons", "exp_lookups",
              "sort_comparisons", "nms_class_comparisons", "iou_comparisons")
 
@@ -47,11 +48,23 @@ def load_heads(path=TABLES):
     return json.loads(Path(path).read_text())
 
 
-def decode_candidates(output, heads, stats):
+def int8_thresholds_for_probability(heads, probability_threshold=DEFAULT_PROBABILITY_THRESHOLD):
+    """Spec 2.6: derive safe signed INT8 prefilters from the exact Q24 tables."""
+    return [next((q for q in range(-128, 128)
+                  if head["probability_q24"][q + 128] > probability_threshold), 128)
+            for head in heads]
+
+
+def decode_candidates(output, heads, stats=None, int8_thresholds=None,
+                      probability_threshold=DEFAULT_PROBABILITY_THRESHOLD):
+    if stats is None:
+        stats = dict.fromkeys(STAT_KEYS, 0)
+    if int8_thresholds is None:
+        int8_thresholds = int8_thresholds_for_probability(heads, probability_threshold)
     raw = memoryview(output).cast("b")
     candidates = []
     anchor_base = 0
-    for head in heads:
+    for head, threshold in zip(heads, int8_thresholds, strict=True):
         plane_stride = head["plane_stride"]
         for cell in range(head["width"] * head["height"]):
             best = -129
@@ -62,7 +75,10 @@ def decode_candidates(output, heads, stats):
                 if value > best:
                     best, class_id = value, channel
             stats["class_comparisons"] += 81
-            if best < head["class_threshold"]:
+            if best < threshold:
+                continue
+            probability = head["probability_q24"][best + 128]
+            if probability <= probability_threshold:
                 continue
             xyxy = []
             for side in range(4):
@@ -79,8 +95,7 @@ def decode_candidates(output, heads, stats):
             stats["decoded_anchors"] += 1
             stats["dfl_bin_comparisons"] += 60
             stats["exp_lookups"] += 64
-            candidates.append([xyxy, head["probability_q24"][best + 128],
-                               class_id, anchor_base + cell])
+            candidates.append([xyxy, probability, class_id, anchor_base + cell])
         anchor_base += head["width"] * head["height"]
     return candidates
 
@@ -117,10 +132,26 @@ def suppresses(a, b):
     return intersection * 20 > (area_a + area_b - intersection) * 9
 
 
-def postprocess(output, heads):
+def pack_candidates(candidates):
+    """Spec 4.5: unpadded 24-byte records in classifier enqueue order."""
+    return b"".join(struct.pack("<4iIHH", *box, probability, class_id, anchor)
+                    for box, probability, class_id, anchor in candidates)
+
+
+def postprocess(output, heads, int8_thresholds=None,
+                probability_threshold=DEFAULT_PROBABILITY_THRESHOLD):
     """Return (EDDT tuples x0,y0,x1,y1,class,score, statistics), in score order."""
     stats = dict.fromkeys(STAT_KEYS, 0)
-    candidates = decode_candidates(output, heads, stats)
+    candidates = decode_candidates(output, heads, stats, int8_thresholds, probability_threshold)
+    return postprocess_candidates(candidates, stats)
+
+
+def postprocess_candidates(candidates, stats=None):
+    """CPU NMS/mapping path; preserve the caller's complete pre-NMS records."""
+    if stats is None:
+        stats = dict.fromkeys(STAT_KEYS, 0)
+    candidates = [[box, probability, class_id, anchor]
+                  for box, probability, class_id, anchor in candidates]
     integer_sort(candidates, stats)
     detections = []
     for i, candidate in enumerate(candidates):
@@ -144,13 +175,15 @@ def postprocess(output, heads):
     return detections, stats
 
 
-def run(output_bytes, quant_params):
+def run(output_bytes, quant_params, int8_thresholds=None,
+        probability_threshold=DEFAULT_PROBABILITY_THRESHOLD):
     """Debug-tool API: raw OUTPUT + unmodified quantization.json dict -> EDDT tuples.
 
     Construct tables offline with standard-library math, exactly as the C generator;
     all filtering, DFL, NMS and output conversion thereafter use integers only.
     """
-    return postprocess(output_bytes, make_heads(quant_params))[0]
+    return postprocess(output_bytes, make_heads(quant_params),
+                       int8_thresholds, probability_threshold)[0]
 
 
 def pack_detections(detections):
@@ -162,9 +195,20 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
     parser.add_argument("--tables", type=Path, default=TABLES)
+    parser.add_argument("--int8-thresholds", type=int, nargs=3)
+    parser.add_argument("--probability-threshold", type=int,
+                        default=DEFAULT_PROBABILITY_THRESHOLD)
+    parser.add_argument("--candidates-bin", type=Path)
     args = parser.parse_args()
-    detections, stats = postprocess(args.output.read_bytes(), load_heads(args.tables))
-    print(json.dumps(dict(detections=detections, stats=stats), indent=2))
+    stats = dict.fromkeys(STAT_KEYS, 0)
+    candidates = decode_candidates(args.output.read_bytes(), load_heads(args.tables), stats,
+                                   args.int8_thresholds, args.probability_threshold)
+    if args.candidates_bin is not None:
+        args.candidates_bin.write_bytes(pack_candidates(candidates))
+    detections, stats = postprocess_candidates(candidates, stats)
+    records = [dict(xyxy_q8=box, probability_q24=probability, class_id=class_id, anchor=anchor)
+               for box, probability, class_id, anchor in candidates]
+    print(json.dumps(dict(candidates=records, detections=detections, stats=stats), indent=2))
 
 
 if __name__ == "__main__":

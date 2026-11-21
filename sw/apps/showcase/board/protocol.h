@@ -1,4 +1,4 @@
-/* protocol.h — P5 8.2–8.5; host-testable EDSC v3 and asynchronous completion. */
+/* protocol.h — P5 8.2–8.5; host-testable EDSC v4 and asynchronous completion. */
 #ifndef SHOWCASE_PROTOCOL_H
 #define SHOWCASE_PROTOCOL_H
 #include <stdint.h>
@@ -16,8 +16,8 @@ struct edsc {
     struct edsc_ops ops;
     unsigned kind, active, peer, image_info;
     uint32_t total, base, seq, bulk_seq;
-    unsigned pending[3];
-    uint32_t pending_seq[3];
+    unsigned pending[4];
+    uint32_t pending_seq[4];
     uint8_t previous[EDSC_STATE_BYTES];
     uint64_t state_time;
     const char *build;
@@ -27,5 +27,6 @@ void edsc_finish(struct edsc *s, unsigned kind, uint32_t index);
 void edsc_bulk(struct edsc *s, uint32_t bytes);
 void edsc_cancel(struct edsc *s);
 void edsc_poll(struct edsc *s, uint64_t now, uint32_t hz);
+void edsc_ui_items(struct edsc *s, const uint8_t *payload, unsigned bytes);
 void edsc_image_step(struct edsc *s, int direction);
 #endif

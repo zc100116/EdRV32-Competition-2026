@@ -102,6 +102,8 @@ class SerialEngine:
                                       lambda text: self.add_entry("sys", text),
                                       self._program_baud)
         self.board = BoardSession(self)
+        from .demo import PhoneRelay
+        self.phone_relay = PhoneRelay(self.board)
         self.virtual_input = VirtualInput(lambda frame: send_frame(self, frame),
                                           lambda: self.board.steps['peer']['done'])
         self.telemetry = self.board.telemetry

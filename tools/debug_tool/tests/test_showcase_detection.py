@@ -120,7 +120,7 @@ class ShowcaseDetectionTest(unittest.TestCase):
     def return_result(self):
         boxes = ((20, 30, 100, 200, 15, 900),)
         detection = struct.pack('<4sHHII6H', b'EDDT', 1, 1, 7, self.seq, *boxes[0])
-        for window, data in enumerate((bytes(INPUT_BYTES), bytes(OUTPUT_BYTES), detection)):
+        for window, data in enumerate((bytes(INPUT_BYTES), bytes(4), detection)):
             for packet in packets(data, window, 0):
                 self.board.sendto(packet, self.peer)
                 time.sleep(.0002)
@@ -192,7 +192,7 @@ class ShowcaseDetectionTest(unittest.TestCase):
         self.choose(self.paths[0])
         self.upload()
         stale = struct.pack('<4sHHII', b'EDDT', 1, 0, 99, self.seq + 1)
-        for window, data in enumerate((bytes(INPUT_BYTES), bytes(OUTPUT_BYTES), stale)):
+        for window, data in enumerate((bytes(INPUT_BYTES), bytes(4), stale)):
             for packet in packets(data, window, 0):
                 self.board.sendto(packet, self.peer)
                 time.sleep(.0002)

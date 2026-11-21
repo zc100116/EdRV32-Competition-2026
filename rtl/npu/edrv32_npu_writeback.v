@@ -29,9 +29,9 @@ module edrv32_npu_writeback (
     output wire result_chunk_last_o,
     input wire result_release_i,
 
-    // DMA read port; index is the absolute ring slot.
+    // DMA read port; low/high five-bit copies address the two 256-bit RAM halves.
     input wire result_rd_en_i,
-    input wire [4:0] result_rd_index_i,
+    input wire [9:0] result_rd_index_i,
     input wire result_rd_plane_i,
     output wire result_rd_valid_o,
     output wire [255:0] result_rd_data_o,
@@ -52,7 +52,8 @@ module edrv32_npu_writeback (
     reg [5:0] chunk_queued_r;
     reg chunk_granted_r;
     reg [1:0] rd_valid_r;
-    reg [1:0] rd_plane_r;
+    reg rd_plane_array_r;
+    (* keep = "true", syn_preserve = 1 *) reg [3:0] rd_plane_output_r;
     wire complete_w;
     wire chunk_complete_w;
     wire chunk_grant_w;
@@ -78,7 +79,17 @@ module edrv32_npu_writeback (
         result_chunk_block_o, result_chunk_pair_o, result_chunk_half_o,
         result_chunk_last_o} = chunk_queue_r[chunk_head_r];
     assign result_rd_valid_o = rd_valid_r[1];
-    assign result_rd_data_o = rd_plane_r[1] ? rd_data_w[511:256] : rd_data_w[255:0];
+    genvar slice;
+    generate
+        for (slice = 0; slice < 4; slice = slice + 1) begin : g_read_slice
+            // Preserve the two-cycle plane tag separately from the classifier label.
+            always @(posedge clk_i) begin
+                rd_plane_output_r[slice] <= rd_plane_array_r;
+            end
+            assign result_rd_data_o[64*slice +: 64] = rd_plane_output_r[slice]
+                ? rd_data_w[256+64*slice +: 64] : rd_data_w[64*slice +: 64];
+        end
+    endgenerate
     assign idle_o = (credit_r == 6'd32) && (rd_valid_r == 2'b00);
 
     // Metadata is payload: ownership counters, not resets, determine its validity.
@@ -94,7 +105,7 @@ module edrv32_npu_writeback (
             cmd_done_row_o <= writeback_tag_i[11:0];
             cmd_done_block_o <= writeback_tag_i[14:12];
         end
-        rd_plane_r <= {rd_plane_r[0], result_rd_plane_i};
+        rd_plane_array_r <= result_rd_plane_i;
     end
 
     always @(posedge clk_i or negedge rst_n_i) begin

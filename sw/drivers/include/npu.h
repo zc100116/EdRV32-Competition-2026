@@ -20,4 +20,12 @@ void npu_configure(const struct npu_config *config);
 void npu_start(uint32_t input, uint32_t output);
 /* NPU 4: read current descriptor index for error reporting. */
 uint32_t npu_current_descriptor(void);
+/* npu-spec 2.6: normal mode EN=1, RAW_CLS_WRITE=0, thresholds 103/105/103, .25. */
+void npu_post_configure(void);
+/* SoC 7.4: release all dirty candidate lines, select POST_BASE, then ring DOORBELL. */
+void npu_post_start(uint32_t input, uint32_t output, uint32_t post);
+/* Call only after successful DONE; invalidate complete lines, then return POST_COUNT. */
+uint32_t npu_post_acquire(uint32_t post);
+uint32_t npu_post_count(void);
+uint32_t npu_post_status(void);
 #endif
