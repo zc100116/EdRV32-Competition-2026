@@ -226,7 +226,7 @@ class YoloTool:
             path = root / 'build/npu/software_model'
             subprocess.run([sys.executable, str(root / 'tools/npu/compile_yolo.py'),
                             '--model-source',
-                            str(root / 'tasks/win/20261029-09-b3-software/src/npu'),
+                            str(root / 'sw/apps/showcase/models/yolov8n'),
                             '--out', str(path)], check=True)
         data = pack_model(path)
         self.image_bytes = len(data)

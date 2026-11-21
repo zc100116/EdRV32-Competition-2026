@@ -1,2 +1,0 @@
-required_members 65123 members_to_download 2
-DOWNLOAD_COMPLETE 65123 26466 87.54584789276123

@@ -1,1 +1,0 @@
-COMPOSITE_COLOUR_PASS BGR/PNG round trip; core hue shift degrees 0 green core retained, hue shift degrees 0

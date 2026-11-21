@@ -1,7 +1,0 @@
-Source report: G:\codex_project\EdRV32-FPGA\card75-report-export\report_timing\edrv32_fpga_board_full_top.rtr
-
-set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
-report_timing -force_to_run -input_db_file {G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST/place_route/edrv32_fpga_board_full_top_pnr.adf} -delay_type max -max_path 100000 -slack_less_than 0.500001 -input_pins true
-
-Original report header:
-| Tcl Command  : report_timing -force_to_run -input_db_file {G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST/place_route/edrv32_fpga_board_full_top_pnr.adf} -delay_type {max} -max_path 100000 -input_pins true -slack_less_than 0.500001

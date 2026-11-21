@@ -48,7 +48,7 @@ SHOWCASE_GAME_PACK := $(ROOT)/build/showcase/games.bin
 SHOWCASE_GAME_OBJECT := $(ROOT)/build/showcase/games.o
 $(SHOWCASE_GAME_PACK): $(ROOT)/tools/sw/game_record.py \
     $(ROOT)/sw/apps/showcase/games/games.txt FORCE
-	$(HOME)/.local/opt/edrv32-py/bin/python $(ROOT)/tools/sw/game_record.py pack \
+	python3 $(ROOT)/tools/sw/game_record.py pack \
 	    $(ROOT)/sw/apps/showcase/games/games.txt $@
 $(SHOWCASE_GAME_OBJECT): $(SHOWCASE_GAME_PACK)
 	riscv-none-elf-objcopy -I binary -O elf32-littleriscv -B riscv \
@@ -68,7 +68,7 @@ PROGRAM_SOURCES += sw/apps/showcase/board/coremark_stack.S
 $(OUT)/obj/third_party/coremark/core_list_join.o: CORE_MAIN_FLAGS := -Wno-maybe-uninitialized
 
 # Spec npu 2.5/4.4: rebuild tags/tables from the checked-in offline snapshot.
-SHOWCASE_MODEL_SOURCE := $(ROOT)/tasks/win/20261029-09-b3-software/src/npu
+SHOWCASE_MODEL_SOURCE := $(ROOT)/sw/apps/showcase/models/yolov8n
 SHOWCASE_MODEL_DIR := $(ROOT)/build/npu/software_model
 PROGRAM_SOURCES += build/showcase/model.c
 $(ROOT)/build/showcase/model.c: $(ROOT)/tools/sw/embed_showcase_model.py \

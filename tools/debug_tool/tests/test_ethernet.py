@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
 from tools.debug_tool.core.ethernet import EthernetTool, packets, unpack
-from verif.block.eth import eth_ref
+import eth_ref
 from test_program import wait_for
 
 

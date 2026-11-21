@@ -1,8 +1,0 @@
-General 1, iteration 6, 255x123, maximum 72, positive cells 21387
-General 9, iteration 14, 255x123, maximum 41, positive cells 18887
-General 20, iteration 25, 255x123, maximum 24, positive cells 13671
-General 34, iteration 39, 255x123, maximum 21, positive cells 9543
-General 911, iteration 916, 255x123, maximum 0, positive cells 0
-
-Plot color scale: card 73 reference, magma, symmetric log, maximum 67. Values above 67 saturate; gray cells have value -1.
-Grid suffix = general round - 1. PDS stops exporting these grids after general routing.

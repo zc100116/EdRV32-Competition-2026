@@ -1,7 +1,0 @@
-Full local project: G:\codex_project\EdRV32-FPGA\EdRV32-MEDIA
-General paths: G:\codex_project\EdRV32-Competition-2026\build\win\20261028-05-media-r2\exports\media_top200\report_timing\edrv32_fpga_media_top.rtr
-Near-positive paths: G:\codex_project\EdRV32-Competition-2026\build\win\20261028-05-media-r2\exports\media_near\report_timing\edrv32_fpga_media_top.rtr
-Additional report commands: build/win/20261028-04-media-cpu-probes/exports/*/export.tcl
-No RTL, IP or routed databases were changed for report extraction.
-Clock/IO unconstrained warnings retained; board timing of unconstrained IO is not certified.
-ConstantProbeLoop warnings are constant-propagation diagnostics, not by themselves proof of an RTL combinational loop.

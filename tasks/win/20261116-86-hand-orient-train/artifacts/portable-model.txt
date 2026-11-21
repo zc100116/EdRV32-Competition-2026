@@ -1,4 +1,0 @@
-Plain Ultralytics load from /tmp, PYTHONPATH only points to the stock Ultralytics repo:
-PORTABLE_NATIVE_MODEL <class 'ultralytics.nn.tasks.PoseModel'> nc 14 kpt_shape [21, 3]
-OUTPUT_SHAPE torch.Size([1, 81, 8400])
-Checkpoint: /root/edrv32/runs/hand-orient-self-check-2/weights/best.pt

@@ -1,3 +1,0 @@
-`verilator_config
-// The monitor samples independently released DUT resets to count public transactions.
-lint_off -rule SYNCASYNCNET -file "*/verif/block/npu/post/tb_post.sv"

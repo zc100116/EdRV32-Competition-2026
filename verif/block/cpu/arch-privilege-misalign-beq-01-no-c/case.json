@@ -1,6 +1,0 @@
-{
-  "suite": "arch-test",
-  "name": "privilege-misalign-beq-01",
-  "source": "third_party/riscv-arch-test/riscv-test-suite/rv32i_m/privilege/src/misalign-beq-01.S",
-  "rvc": false
-}

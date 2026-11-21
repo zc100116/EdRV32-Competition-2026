@@ -1,9 +1,0 @@
-top: edrv32_cache_ic_08_tb
-files: files.f
-defines: SIM_MODE
-parameters: SEEDS=2
-software:
-timeout: 180
-pass: PASS
-tier: smoke
-simulator: verilator

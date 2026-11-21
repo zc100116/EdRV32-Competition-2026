@@ -1,6 +1,0 @@
-model ultralytics.nn.tasks PoseModel
-nc 14 kpt_shape [21, 3]
-output [1, 81, 8400]
-python 3.12.16 torch 2.14.1+cu130 ultralytics 8.4.160
-best_checkpoint_last_recorded_epoch 30
-names {"0": "palm", "1": "fist", "2": "peace", "3": "point", "4": "grabbing", "5": "grip", "6": "thumb_index", "7": "ok", "8": "like", "9": "dislike", "10": "three", "11": "four", "12": "call", "13": "no_gesture"}

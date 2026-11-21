@@ -1,9 +1,0 @@
-top: edrv32_dvp_camera_model_tb
-files: files.f
-defines: SIM_MODE
-parameters:
-software:
-timeout: 180
-pass: PASS
-tier: smoke full
-simulator: verilator

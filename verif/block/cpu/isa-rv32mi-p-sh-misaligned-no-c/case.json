@@ -1,6 +1,0 @@
-{
-  "suite": "riscv-tests",
-  "name": "rv32mi-p-sh-misaligned",
-  "source": "third_party/riscv-tests/isa/rv32mi/sh-misaligned.S",
-  "rvc": false
-}

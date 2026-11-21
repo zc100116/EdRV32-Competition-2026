@@ -1,2 +1,0 @@
--f ../post/sources.f
--f ../dut.f

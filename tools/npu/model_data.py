@@ -9,18 +9,14 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = Path.home() / ".local/share/edrv32/npu"
-ARTIFACTS = ROOT / "tasks/win/20261115-83-hagrid-train/artifacts"
+MODELS = ROOT / "sw/apps/showcase/models"
 WORKSPACES = ROOT.parent
 
 
 def weights_for(name):
     if name == "face":
         return DATA / "yolov8n-face.pt"
-    if name == "gesture":
-        return ARTIFACTS / "best.pt"
-    if name == "helmet":
-        return ROOT / "tasks/win/20261116-87-helmet-v2-train/artifacts/best.pt"
-    return ARTIFACTS / "extra" / name / "best.pt"
+    return MODELS / name / "best.pt"
 
 
 def dataset_root(name):

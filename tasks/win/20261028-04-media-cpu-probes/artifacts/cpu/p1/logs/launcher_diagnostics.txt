@@ -1,6 +1,0 @@
-E: error copying "report_timing/edrv32_fpga_cpu_sys_top.rtr": no such file or directory
-E: Flow-0163: Failed to parse file "G:/codex_project/EdRV32-Competition-2026/build/win/20261028-04-media-cpu-probes/cpu/p1/run.tcl" at line 57. Check if the command options or arguments are valid.
-E: error copying "report_timing/run.log": no such file or directory
-E: Flow-0163: Failed to parse file "G:/codex_project/EdRV32-Competition-2026/build/win/20261028-04-media-cpu-probes/cpu/p1/run.tcl" at line 58. Check if the command options or arguments are valid.
-E: error copying "report_timing/edrv32_fpga_cpu_sys_top.rtr": no such file or directory
-E: Flow-0163: Failed to parse file "G:/codex_project/EdRV32-Competition-2026/build/win/20261028-04-media-cpu-probes/cpu/p1/run.tcl" at line 60. Check if the command options or arguments are valid.

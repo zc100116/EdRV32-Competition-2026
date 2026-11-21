@@ -35,13 +35,11 @@
 | `ip_ram_eth_fifo` | DRM 简单双口 RAM，独立时钟 | 512 × 10 | `edrv32_ram_eth_fifo` | ETH 接收、发送异步 FIFO ×2 | [ip_ram_eth_fifo.md](ip_ram_eth_fifo.md) | 已生成（20261028-04） |
 | `ip_ram_rnd_line` | DRM 简单双口 RAM，字节写使能 | 512 × 256 | `edrv32_ram_rnd_line` | RND 行缓冲 ×5 | [ip_ram_rnd_line.md](ip_ram_rnd_line.md) | 待生成（B3） |
 | `ip_ram_rnd_palette` | DRM 简单双口 RAM | 512 × 32（用 256 项） | `edrv32_ram_rnd_palette` | RND 调色板 ×2 | [ip_ram_rnd_palette.md](ip_ram_rnd_palette.md) | 待生成（B3） |
-| `ip_ram_rnd_window` | DRM 简单双口 RAM | 512 × 64（用256项） | `edrv32_ram_rnd_window` | AFFINE源窗口 ×4 | [ip_ram_rnd_window.md](ip_ram_rnd_window.md) | RND v2单独上板生成，不进卡21 |
 | `ip_pll_sys` | PLL（板级） | 27 MHz → clk_sys 100 MHz | 无（板级顶层直接例化，仿真用 `verif/models/ip_pll_sys.sv`） | B1/B2 板级顶层 | [ip_pll_sys.md](ip_pll_sys.md) | B1 已生成 |
 | `ip_ddr3` | DDR3 Controller + PHY | x32、1000 Mbps，core_clk 125 MHz、用户口 256 位 | 无（板级直接例化） | B2 DDR 及 clk_mem | [ip_ddr3.md](ip_ddr3.md) | B2 待生成 |
 | `ip_pll_npu` | PLL | 27 → 180 MHz | 无（板级直接例化） | B2 NPU | [ip_pll_npu.md](ip_pll_npu.md) | B2 待生成 |
 | `ip_pll_video` | PLL | 27 → 74.25 / 371.25 MHz，同相 | 无（板级直接例化） | B2 DISP / TMDS | [ip_pll_video.md](ip_pll_video.md) | B2 待生成 |
 | `ip_pll_eth` | PLL | 125 → 125 MHz，0°，外部反馈 | 无（板级直接例化） | B2 RGMII RX/TX | [ip_pll_eth.md](ip_pll_eth.md) | B2 待生成 |
-| `ila_cpu` | 调试核（Inserter 插入，非 IP Compiler） | 400 位 × 1024，clk_sys | 无（探针：CSR 计数器） | B3F CPU 计数器核对与流水线效率 | [ila_cpu.md](ila_cpu.md) | 卡 33 首次插入 |
 
 B2 保留 `ip_pll_sys` 的 B1 配置，新增上表四个 IP；不要把视频输出合入系统 PLL，
 74.25/371.25 MHz 必须同 PLL 同相。摄像头模块自带时钟，板级不产生 XCLK。

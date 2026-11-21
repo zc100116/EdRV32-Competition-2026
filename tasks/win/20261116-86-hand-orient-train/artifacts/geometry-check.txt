@@ -1,1 +1,0 @@
-3D rotation and scale invariance PASS 560 {'uncertain': 558, 'grabbing': 2}

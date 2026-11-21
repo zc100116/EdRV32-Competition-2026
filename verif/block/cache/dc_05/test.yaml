@@ -1,9 +1,0 @@
-top: edrv32_cache_dc_05_tb
-files: files.f
-defines: SIM_MODE
-parameters:
-software:
-timeout: 180
-pass: PASS
-tier: smoke
-simulator: verilator

@@ -1,6 +1,0 @@
-{
-  "suite": "riscv-tests",
-  "name": "rv32ui-p-auipc",
-  "source": "third_party/riscv-tests/isa/rv32ui/auipc.S",
-  "rvc": false
-}

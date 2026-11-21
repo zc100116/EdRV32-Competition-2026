@@ -1,9 +1,0 @@
-top: edrv32_cache_mt_06_tb
-files: files.f
-defines: SIM_MODE
-parameters:
-software:
-timeout: 180
-pass: PASS
-tier: full
-simulator: verilator

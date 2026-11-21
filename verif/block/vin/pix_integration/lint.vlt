@@ -1,9 +1,0 @@
-// File: lint.vlt
-// Spec: CLAUDE.md 7, 9.1; vin-testplan VI-18.
-// Description: Behavioral testbench uses edge-sampled blocking updates.
-// Clock domain: host lint configuration.
-`verilator_config
-lint_off -rule UNUSEDSIGNAL -file "*/vin/pix_integration/edrv32_vin_pix_tb.sv"
-lint_off -rule SYNCASYNCNET -file "*/vin/pix_integration/edrv32_vin_pix_tb.sv"
-// Camera 1 is connected but receives no VI-18 stimulus.
-lint_off -rule UNUSEDSIGNAL -file "*/models/dvp_camera_model.sv"

@@ -1,3 +1,0 @@
-`verilator_config
-// Procedural verification stimulus and monitors deliberately use blocking updates.
-lint_off -rule BLKSEQ -file "*/verif/*"

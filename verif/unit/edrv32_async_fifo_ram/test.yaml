@@ -1,9 +1,0 @@
-top: tb
-files: files.f
-simulator: verilator iverilog
-defines: SIM_MODE
-parameters:
-software:
-timeout: 600
-pass: PASS
-tier: smoke full
