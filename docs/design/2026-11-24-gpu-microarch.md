@@ -368,6 +368,13 @@ LUT合计=未替换基础49984+2280+11872=64136；APM=未替换基础118+16+48=1
 
 FF为独立寄存配额：未替换基础55000；setup沿用8000（上下文、两乘法池完整积和控制）；像素估算28×70×5（平面相位/结果）+12×70×4（输入归一化）+48×36×3（乘积流水）+48×29×4（归一化/对齐）+4×256（控制）=24936。总FF=55000+8000+24936=87936；基础raster队列保守保留，宽负载停顿槽及扇出复制可能继续改变结果。保留模块未提供FF，故全芯片仅给显式公式，不虚构合计。LUTRAM位不重复算FF；几何和setup两份Q30低位ROM各384 LUT，像素P18种子无低位ROM。
 
+
+### 4.12 冻结后批准的补充（协调者 2026-11-23）
+
+- `quad` 也接收完整 `render_state`（tex/pixel/target/wide），按 SCISSOR 和目标范围裁剪；`raster`、`quad` 各自输出 `fragment`，同一命令只有一路活动，由 `edrv32_gpu` 顶层按当前命令选择。
+- TEX_LOAD：纹理 RAM 装入写全部提交并入 texture 的 `unit_done`；command 在 unpack 完成后才给 texture 拉高 `finish`；PAL_LOAD 以最后一项写握手为准。
+- 建立部分按 42 APM 实现（属性 II = 1、三角形 II = 8），预算 ≤ 44。
+
 ## 5. 影响
 
 - 本次只修改本设计记录；不改RTL、规格、gpu.json、文件列表或测试。纯文档不运行RTL lint/仿真；`git diff --check` 通过，4.8的纹理枚举实跑结果为 `PASS 783363 192KiB bounds; palette 8-read preload`。
