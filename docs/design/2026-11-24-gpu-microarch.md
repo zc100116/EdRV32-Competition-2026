@@ -372,6 +372,7 @@ FF为独立寄存配额：未替换基础55000；setup沿用8000（上下文、�
 ### 4.12 冻结后批准的补充（协调者 2026-11-23）
 
 - `quad` 也接收完整 `render_state`（tex/pixel/target/wide），按 SCISSOR 和目标范围裁剪；`raster`、`quad` 各自输出 `fragment`，同一命令只有一路活动，由 `edrv32_gpu` 顶层按当前命令选择。
+- `command` 的 `render_state` 去向：DRAW_TRI 发给 `raster`；DRAW_QUAD、OBJ_STEP 发给 `quad`（独立的 `quad_render_state_*` 一组，位宽与 `raster` 相同）；`texture`、`pixel` 两路每条绘制命令都发。每条绘制命令开始前发一次快照。
 - TEX_LOAD：纹理 RAM 装入写全部提交并入 texture 的 `unit_done`；command 在 unpack 完成后才给 texture 拉高 `finish`；PAL_LOAD 以最后一项写握手为准。
 - 建立部分按 42 APM 实现（属性 II = 1、三角形 II = 8），预算 ≤ 44。
 
