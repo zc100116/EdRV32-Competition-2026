@@ -14,6 +14,7 @@ class Case:
         self.axi_errors = {}
         self.abort = None
         self.sample_registers = []
+        self.reset_registers = []
         self.checked_registers = None
         self.expected_registers = {}
         self.compare_ddr = True

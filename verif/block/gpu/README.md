@@ -94,3 +94,7 @@ LFSR 随机扰动，R/B 延迟独立扰动。直接运行生成的 sim 时使用
 
 ABORT 后的像素内容/部分计数不作保证；错误后的已执行写入仍由对应场景定义观察范围。
 所有 hooks 都只观察公共 APB/AXI 和验证存储模型，不访问 RTL 内部信号。
+
+`case.reset_registers=['ID','STATUS','PERF[0]',...]`：复位释放后、任何 setup 写之前，
+按列表顺序读取 APB，并直接与 `gpu.json` 的复位值比较。`reset.txt` 是采样数和
+`offset expected`，`actual.reset.txt` 保存实际读回；模型对模型也走这两个文件的比对。

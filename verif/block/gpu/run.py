@@ -18,6 +18,7 @@ from tools.gpu.scene import BusError, Memory, SCHEMA
 from scene_support import Case
 
 REGISTERS = {}
+RESETS = {}
 for register in SCHEMA['registers']:
     dimensions = register['dimensions']
     count = dimensions[0]['count'] if dimensions else 1
@@ -25,6 +26,7 @@ for register in SCHEMA['registers']:
     for index in range(count):
         name = register['name'] + (f'[{index}]' if dimensions else '')
         REGISTERS[name] = int(register['offset'], 0) + index*stride
+        RESETS[name] = register['reset']
 CHECKED = ['STATUS', 'IRQ_STAT', 'ERR_CODE', 'DONE_COUNT', 'OBJ_HIT_COUNT',
            'OBJ_FREE_COUNT', 'OBJ_ALIVE_COUNT', 'OBJ_STAT'] + [f'PERF[{i}]' for i in range(1, 5)]
 SAMPLED = CHECKED + [f'PERF[{i}]' for i in (0, 5, 6, 7, 8)]
@@ -82,6 +84,10 @@ def model_export(out):
     offsets = [int(line, 16) for line in records[1+int(write_count):]]
     assert len(offsets) == int(sample_count)
     config = json.loads((out/'config.json').read_text())
+    reset_gpu = GPU(Memory.read_hex(out/'initial.hex', base))
+    (out/'actual.reset.txt').write_text(''.join(
+        f'{REGISTERS[name]:03x} {reset_gpu.regs[name]:08x}\n'
+        for name in config['reset_registers']))
     gpu = execute_model(out, writes, base, config)
     # Export numeric little-endian words exactly as the DDR BFM's dump task does.
     (out/'actual.ddr.hex').write_text(''.join(
@@ -122,8 +128,10 @@ def generate_case(case, out):
                                  list(case.expected_registers)))
     sampled = list(dict.fromkeys(checked + SAMPLED + case.sample_registers))
     config = dict(axi_errors=case.axi_errors, abort=case.abort,
-                  compare_ddr=case.compare_ddr, checked=checked)
+                  compare_ddr=case.compare_ddr, checked=checked, reset_registers=case.reset_registers)
     (out/'config.json').write_text(json.dumps(config, indent=2) + '\n')
+    (out/'reset.txt').write_text(str(len(case.reset_registers)) + '\n' + ''.join(
+        f'{REGISTERS[name]:03x} {RESETS[name]:08x}\n' for name in case.reset_registers))
     gpu = execute_model(out, writes, case.scene.memory.base, config)
     for check in case.checks:
         check(gpu)
@@ -165,6 +173,10 @@ def compare(out):
     if len(expected) != len(actual):
         raise AssertionError(f'DDR words expected={len(expected)} actual={len(actual)}')
     config = json.loads((out/'config.json').read_text())
+    expected_reset = (out/'reset.txt').read_text().splitlines()[1:]
+    actual_reset = (out/'actual.reset.txt').read_text().splitlines()
+    if expected_reset != actual_reset:
+        raise AssertionError(f'reset expected={expected_reset} actual={actual_reset}')
     pairs = zip(expected, actual) if config['compare_ddr'] else []
     for index, (left, right) in enumerate(pairs):
         if int(left, 16) != int(right, 16):

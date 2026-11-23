@@ -118,6 +118,10 @@ module edrv32_gpu_tb;
         int output_fd;
         int events;
         int timing;
+        int reset_fd;
+        int reset_output;
+        int reset_count;
+        bit [31:0] reset_expected;
         bit [31:0] base;
         int words;
         int writes;
@@ -147,6 +151,21 @@ module edrv32_gpu_tb;
         u_memory.load({directory, "/initial.hex"}, base, words);
         repeat (5) @(negedge clk_r);
         rst_n_r = 1;
+        reset_fd = $fopen({directory, "/reset.txt"}, "r");
+        reset_output = $fopen({directory, "/actual.reset.txt"}, "w");
+        if (reset_fd == 0 || reset_output == 0) $fatal(1, "FAIL reset file open");
+        if ($fscanf(reset_fd, "%d", reset_count) != 1) $fatal(1, "FAIL reset header");
+        for (int n = 0; n < reset_count; n++) begin
+            if ($fscanf(reset_fd, "%h %h", address, reset_expected) != 2)
+                $fatal(1, "FAIL reset sample=%0d", n);
+            u_apb_host.read_reg(address, value);
+            if (value != reset_expected)
+                $fatal(1, "FAIL reset address=%h expected=%h actual=%h time=%0t",
+                        address, reset_expected, value, $time);
+            $fdisplay(reset_output, "%03x %08x", address, value);
+        end
+        $fclose(reset_fd);
+        $fclose(reset_output);
         for (int n = 0; n < writes; n++) begin
             if ($fscanf(control, "%h %h", address, value) != 2)
                 $fatal(1, "FAIL APB write record=%0d", n);
