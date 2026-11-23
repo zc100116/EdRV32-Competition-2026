@@ -144,3 +144,6 @@ Compiler 接受这两份文件、ROM 最初几条指令和 SRAM 首字正确，�
 | ip_ram_npu_post_best | [创建说明](ip_ram_npu_post_best.md) | classify ×2 |
 | ip_ram_npu_post_queue | [创建说明](ip_ram_npu_post_queue.md) | post ×2 |
 | ip_ram_npu_post_table | [创建说明](ip_ram_npu_post_table.md) | post exp/probability 各1 |
+| ip_lutram_gpu_read_pool | [创建说明](ip_lutram_gpu_read_pool.md) | GPU 读 DMA 64×256，1 实例 |
+| ip_lutram_gpu_write_pool | [创建说明](ip_lutram_gpu_write_pool.md) | GPU 写 DMA、命令 FIFO 各 32×256，合计 2 实例 |
+| ip_ram_gpu_resolve_line | [创建说明](ip_ram_gpu_resolve_line.md) | GPU RESOLVE 512×72，3 实例 |

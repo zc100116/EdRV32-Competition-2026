@@ -1,0 +1,9 @@
+top: tb_gpu_command
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 120
+pass: PASS
+tier: smoke
+simulator: verilator
