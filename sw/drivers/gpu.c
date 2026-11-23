@@ -4,6 +4,7 @@
  * Clock domain: clk_sys CPU; GPU registers cross to clk_gpu.
  */
 #include "gpu.h"
+#include "mmio.h"
 #include "cache.h"
 #include "plic.h"
 
@@ -364,19 +365,17 @@ void gpu_object(struct gpu_object *out, const struct gpu_object_args *args)
 
 static uint32_t read_reg(uint32_t offset)
 {
-    return *(volatile uint32_t *)(uintptr_t)(EDRV32_GPU_BASE + offset);
+    return mmio_read32(EDRV32_GPU_BASE + offset);
 }
 
 static void write_reg(uint32_t offset, uint32_t value)
 {
-    *(volatile uint32_t *)(uintptr_t)(EDRV32_GPU_BASE + offset) = value;
+    mmio_write32(EDRV32_GPU_BASE + offset, value);
 }
 
 uint32_t gpu_physical(const void *address)
 {
-    uintptr_t cpu = (uintptr_t)address;
-    return (uint32_t)(cpu - (cpu >= EDRV32_DDR_UNCACHED_BASE ?
-                            EDRV32_DDR_UNCACHED_BASE : EDRV32_DDR_BASE));
+    return ddr_physical(address);
 }
 
 void gpu_submit(const struct gpu_batch *batch)
@@ -434,7 +433,7 @@ void gpu_irq_register(unsigned int priority, gpu_callback callback, void *contex
     write_reg(EDRV32_GPU_IRQ_EN_OFFSET,
               EDRV32_GPU_IRQ_EN_DONE_MASK | EDRV32_GPU_IRQ_EN_ERROR_MASK);
     plic_set_priority(EDRV32_PLIC_SOURCE_GPU, priority);
-    plic_set_enable(*(volatile uint32_t *)(uintptr_t)(EDRV32_PLIC_BASE + PLIC_ENABLE) |
+    plic_set_enable(mmio_read32(EDRV32_PLIC_BASE + PLIC_ENABLE) |
                     (1u << EDRV32_PLIC_SOURCE_GPU));
 }
 

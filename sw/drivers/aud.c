@@ -4,6 +4,7 @@
  * Clock domain: clk_sys CPU; registers in clk_mem, playback in clk_aud.
  */
 #include "aud.h"
+#include "mmio.h"
 #include "cache.h"
 #include "plic.h"
 
@@ -12,21 +13,18 @@ static void *refill_context;
 
 static uint32_t read_reg(uint32_t offset)
 {
-    return *(volatile uint32_t *)(uintptr_t)(EDRV32_AUD_BASE + offset);
+    return mmio_read32(EDRV32_AUD_BASE + offset);
 }
 
 static void write_reg(uint32_t offset, uint32_t value)
 {
-    *(volatile uint32_t *)(uintptr_t)(EDRV32_AUD_BASE + offset) = value;
+    mmio_write32(EDRV32_AUD_BASE + offset, value);
 }
 
 void aud_init(struct aud_ring *ring, uint32_t *samples, uint32_t bytes, uint32_t low_level)
 {
-    uintptr_t address = (uintptr_t)samples;
     *ring = (struct aud_ring){samples, bytes, 0u};
-    write_reg(EDRV32_AUD_RING_BASE_OFFSET,
-              (uint32_t)(address - (address >= EDRV32_DDR_UNCACHED_BASE ?
-                                   EDRV32_DDR_UNCACHED_BASE : EDRV32_DDR_BASE)));
+    write_reg(EDRV32_AUD_RING_BASE_OFFSET, ddr_physical(samples));
     write_reg(EDRV32_AUD_RING_SIZE_OFFSET, bytes);
     write_reg(EDRV32_AUD_WR_PTR_OFFSET, 0u);
     write_reg(EDRV32_AUD_LOW_LEVEL_OFFSET, low_level);
@@ -86,7 +84,7 @@ void aud_irq_register(unsigned int priority, aud_refill refill, void *context)
     write_reg(EDRV32_AUD_IRQ_EN_OFFSET,
               EDRV32_AUD_IRQ_EN_RX_NOTIFY0_MASK | EDRV32_AUD_IRQ_EN_ERROR_MASK);
     plic_set_priority(EDRV32_PLIC_SOURCE_AUD, priority);
-    plic_set_enable(*(volatile uint32_t *)(uintptr_t)(EDRV32_PLIC_BASE + PLIC_ENABLE) |
+    plic_set_enable(mmio_read32(EDRV32_PLIC_BASE + PLIC_ENABLE) |
                     (1u << EDRV32_PLIC_SOURCE_AUD));
 }
 
