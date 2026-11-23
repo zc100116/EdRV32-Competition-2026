@@ -23,8 +23,9 @@ verilator --lint-only --timing -Wall --timescale 1ns/1ps --top-module edrv32_gpu
 python3 tools/check/verilog_style.py verif/block/gpu
 ```
 
-真实 RTL 和文件列表到齐后，整体 lint 使用
-`verilator --lint-only --timing -Wall --timescale 1ns/1ps +define+SIM_MODE --top-module edrv32_gpu_tb -f verif/block/gpu/files.f`。
+真实 RTL 和文件列表到齐后，顶层 RTL lint 使用
+`verilator --lint-only -Wall --timescale 1ns/1ps +define+SIM_MODE --top-module edrv32_gpu -F rtl/filelists/gpu.f`。
+这里的 `-F` 按文件列表所在目录解析相对路径，与 runner 的展开规则一致。
 RTL 构建统一用 `--timescale 1ns/1ps` 为无 timescale 声明的可综合模块提供默认值，
 与 testbench 的时间单位一致，不豁免 DUT 告警。
 
