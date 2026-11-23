@@ -1,9 +1,12 @@
-# GPU reference model (gpu-spec v0.2)
+# GPU reference model (gpu-spec v0.3 numeric proposal)
 
 Python 3 standard library only. The model implements sections 2–6 with fixed arithmetic
-from 2.12; command/record layouts come from `rtl/include/regs/gpu.json`. There are no
-numeric study parameters. Historical numeric experiments are reproduced using the commit
-and commands in `docs/reports/2026-11-24-model-gpu-numeric.md`.
+from 2.12; command/record layouts come from `rtl/include/regs/gpu.json`. The default pixel
+algorithm is the v0.3 proposal in `docs/reports/2026-11-24-model-gpu-numeric-v03.md`:
+block-scaled integer planes and 18-bit normalized perspective/derivative products.
+Vertex arithmetic and all external APIs remain v0.2 compatible. `study_v03.py` alone
+retains the exact v0.2 fragment algorithm and temporary candidate width subclasses;
+remove that study in a separate task after v0.3 is finalized.
 
 The verification worker can create input DDR, commands and register writes with `Scene`
 (see `../scene/README.md`), then run the same image through the oracle:
@@ -54,7 +57,13 @@ The CLI exports `color.bin` and `depth.bin` as little-endian u16, `stencil.bin` 
 updated `ddr.hex`, and `registers.json`. Binary target buffers use physical row-major target
 coordinates; subtract SET_TARGET.TGT_X0/Y0 from screen coordinates to index them.
 Rendering is entirely integer: MVP s15.16, clip coordinates 40-bit Q16, q Q30 with a
-10-bit midpoint ROM and one Newton step, and Q8 LOD with an 8-bit-index log2 ROM.
+10-bit midpoint ROM and one Newton step at vertices; planes use 32 significant input
+bits for q/uq/vq, depth Q16, color Q24, and exact signed 70-bit accumulation.
+Per-pixel perspective and derivatives use
+18-bit sign/magnitude mantissas, three subtraction alignment guard bits, and a signed
+10-bit exponent. Span is rounded to Q16; LOD retains the 8-bit-index Q8 log2 ROM.
+Planes start at the integer bounding-box origin, independent of target/scissor; all
+step additions retain the entire accumulator, so direct evaluation and stripes agree.
 Bilinear filtering subtracts half a texel after selecting/scaling each mip level;
 trilinear filtering uses that same convention independently at both levels.
 
@@ -71,3 +80,14 @@ organization without clearing storage. PERF1–4 count functional events. The mo
 simulate APB/AXI cycles, transactions in flight, mid-command ABORT or timing counters
 PERF0/5–8, which remain zero. Only specified GPU errors are converted to ERR_CODE and stop
 the list; host/API errors raise exceptions.
+
+Reproduce the temporary three-width study (standard library, one process):
+
+```sh
+python3 tools/gpu/model/study_v03.py --output build/gpu/study-v03.json
+```
+
+The JSON compares full floating geometry and v0.2 on seed 20261124's original 146
+triangles plus four preprojected triangles for exact 1:1 mapping and a W-ratio-256
+trilinear ground. Color metrics distinguish interpolated vertex color from sampled
+trilinear RGB. Resource numbers are structural estimates, not synthesis measurements.

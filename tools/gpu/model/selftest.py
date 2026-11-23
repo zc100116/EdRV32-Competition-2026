@@ -13,7 +13,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from tools.gpu.model import GPU, interleave_texture
 from tools.gpu.model.layout import mip_layout, texel_address
-from tools.gpu.model.arithmetic import CLIP_FRAC, W_NEAR, d, divide, expand, p565
+from tools.gpu.model.arithmetic import CLIP_FRAC, W_NEAR, d, divide, edge, expand, p565
+from tools.gpu.model.planes import PixelArithmetic
 from tools.gpu.scene import LAYOUTS, Memory, Scene, pack, unpack
 
 
@@ -126,7 +127,8 @@ def test_strips():
         full.pixel_state = pixel_state(DEPTH_WRITE=1, ST_ZPASS=3)
         for item in rectangles:
             full.quad(item)
-        matrix = (256, 0, 0, -65536, 0, -256, 0, 65536, 0, 0, 256, 0, 0, 0, 0, 65536)
+        matrix = (256, 0, 0, -65536, 0, -256, 0, 65536,
+                  0, 0, 256, 0, 0, 0, 128, 65536)
         vertices = [dict(X=x, Y=y, Z=index * 64, NX=0, NY=0, NZ=127, U=x * 100,
                          V=y * 100, COLOR=(0xf800, 0x07e0, 0x001f)[index])
                     for index, (x, y) in enumerate(((1, 1), (500, 1), (200, 500)))]
@@ -150,6 +152,32 @@ def test_strips():
         assert full.color == stitched_color
         assert full.depth == stitched_depth
         assert full.stencil == stitched_stencil
+
+
+def test_plane_steps():
+    # Setup is global: restarting at a stripe or a four-lane group cannot round again.
+    vertices = [screen_vertex(x, y, z) for x, y, z in
+                ((-173, -91, 17), (2013, 83, 65535), (119, 3309, 19283))]
+    for i, vertex in enumerate(vertices):
+        vertex[3] >>= i * 3
+        vertex[4] = (i * 23117 + 19) * vertex[3]
+        vertex[5] = (65535 - i * 19001) * vertex[3]
+    arithmetic = PixelArithmetic(vertices, edge(*vertices[:2], *vertices[2][:2]))
+    row = arithmetic.at(-20, -11)
+    for y in range(-11, 241):
+        lanes = [arithmetic.at(-20 + lane, y) for lane in range(4)]
+        assert row == lanes[0]
+        for group in range(-20, 144, 4):
+            for lane in range(4):
+                assert lanes[lane] == arithmetic.at(group + lane, y)
+                lanes[lane] = [v + 4 * c[1] for v, c in
+                               zip(lanes[lane], arithmetic.coefficients)]
+        row = [v + c[2] for v, c in zip(row, arithmetic.coefficients)]
+    # Exact power-of-two reciprocal is required by the 1:1 triangle test.
+    for power in range(-25, 25):
+        value = arithmetic.normal(1, power)
+        product = arithmetic.multiply(value, arithmetic.inverse(value))
+        assert product == arithmetic.normal(1)
 
 
 def test_objects():
@@ -442,7 +470,7 @@ def test_clipping_and_arithmetic():
 
 def main():
     start = time.perf_counter()
-    for test in (test_shared_edges, test_hand_computed, test_strips, test_objects,
+    for test in (test_shared_edges, test_hand_computed, test_strips, test_plane_steps, test_objects,
                  test_texture, test_bilinear_triangle, test_viewport, test_texture_layout,
                  test_command_stream, test_stencil_blend_and_aa,
                  test_clipping_and_arithmetic):

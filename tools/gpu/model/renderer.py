@@ -7,9 +7,10 @@ import struct
 
 from ..scene import SCHEMA, LAYOUTS, OPCODES, BusError, pack, unpack
 from .arithmetic import (CLIP_BITS, CLIP_FRAC, GUARD, RECIPROCAL_FRAC, W_NEAR,
-                         d, divide, edge, expand, logarithm, p565, reciprocal, saturate,
+                         d, divide, edge, expand, p565, reciprocal, saturate,
                          shift, signed, top_left)
 from .texture import Texture
+from .planes import PixelArithmetic
 
 
 OBJECT_UPDATE_MASK = sum(((1 << field['width']) - 1)
@@ -25,6 +26,8 @@ class GPUError(Exception):
 
 
 class GPU:
+    _pixel_arithmetic = PixelArithmetic
+
     def __init__(self, memory, reference_size=None):
         self.memory = memory
         self.regs = {}
@@ -322,37 +325,22 @@ class GPU:
         y1 = min(y1, (max(a[1], b[1], c[1]) - 8) // 16 + 1)
         edges = ((b, c), (c, a), (a, b))
         inclusive = [top_left(start, end) for start, end in edges]
-        # Attribute gradients have units of one screen pixel, with area denominator.
-        dx = [(start[1] - end[1]) * 16 for start, end in edges]
-        dy = [(end[0] - start[0]) * 16 for start, end in edges]
-        derivatives = [[sum(weight * vertex[channel] for weight, vertex in
-                            zip(weights, (a, b, c))) for channel in (3, 4, 5)]
-                       for weights in (dx, dy)]
+        arithmetic = self._pixel_arithmetic((a, b, c), area)
+        # Canonical origin is independent of target/scissor. No step is rounded.
+        row = arithmetic.at(x0, y0)
         for y in range(y0, y1):
+            attrs = row.copy()
             for group in range((x0 // 4) * 4, x1, 4):
                 for x in range(max(x0, group), min(group + 4, x1)):
                     weights = [edge(start, end, x * 16 + 8, y * 16 + 8)
                                for start, end in edges]
-                    if any(value < 0 or (value == 0 and not include)
-                           for value, include in zip(weights, inclusive)):
-                        continue
-                    attrs = [divide(sum(weight * vertex[channel] for weight, vertex in
-                                        zip(weights, (a, b, c))), area)
-                             for channel in range(2, 9)]
-                    depth, q, uq, vq = attrs[:4]
-                    # The same normalized reciprocal unit is used for per-pixel correction.
-                    inverse_q = reciprocal(q, RECIPROCAL_FRAC)
-                    u = shift(uq * inverse_q, 2 * RECIPROCAL_FRAC)
-                    v = shift(vq * inverse_q, 2 * RECIPROCAL_FRAC)
-                    span = 0
-                    for dq, duq, dvq in derivatives:
-                        for numerator, attribute in ((duq, uq), (dvq, vq)):
-                            derivative = divide(abs(numerator * q - attribute * dq) << 8,
-                                                area * q * q)
-                            span = max(span, derivative)
-                    lod = logarithm(span) if span else 0
-                    colors = [saturate(shift(value, 16), 0, 255) for value in attrs[4:]]
-                    yield x, y, depth, u, v, lod, colors
+                    covered = all(value > 0 or (value == 0 and include)
+                                  for value, include in zip(weights, inclusive))
+                    if covered:
+                        yield x, y, *arithmetic.shade(attrs)
+                    attrs = [value + coeff[1] for value, coeff in
+                             zip(attrs, arithmetic.coefficients)]
+            row = [value + coeff[2] for value, coeff in zip(row, arithmetic.coefficients)]
 
     def register_rect(self, first, second):
         return (signed(self.regs[first], 16), signed(self.regs[first] >> 16, 16),
