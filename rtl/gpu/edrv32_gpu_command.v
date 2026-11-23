@@ -611,7 +611,8 @@ module edrv32_gpu_command (
                         || (is_object_w ? object_unit_done_i : read_done_r);
                     perspective_finish_o <= !is_draw_w
                         || (is_tri_w ? raster_unit_done_i : quad_unit_done_i);
-                    texture_finish_o <= opcode_w == 8'h30 ? read_done_r
+                    // read_done_r follows unpack's final consumer handshake for both loads.
+                    texture_finish_o <= (opcode_w == 8'h30 || opcode_w == 8'h31) ? read_done_r
                         : (!is_draw_w || perspective_unit_done_i);
                     pixel_finish_o <= !is_draw_w || texture_unit_done_i;
                     target_finish_o <= opcode_w == 8'h40 ? resolve_unit_done_i

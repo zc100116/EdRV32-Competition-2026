@@ -310,6 +310,8 @@ module tb_gpu_command;
     int feed_count=0;
     int feed_index=0;
     int data_delay=0;
+    int load_tail_delay=0;
+    bit load_pending=0;
     int write_delay=0;
     int request_count[7];
     int done_count=0,error_count=0;
@@ -368,10 +370,19 @@ module tb_gpu_command;
             command_read_data_keep_i=-1;
             command_read_data_last_i=feed_count==1;
             read_dma_idle_i=feed_count==0 && data_delay==0;
+            if(load_tail_delay>0) begin
+                load_tail_delay--;
+                if(load_tail_delay==0) begin
+                    unpack_done_i=1;
+                    load_pending=0;
+                end
+            end
             if(data_delay>0) data_delay--;
             object_read_done_i=0;
             if(data_delay==1) begin
-                unpack_done_i=1;
+                // Raw DMA can finish while unpack still owns output items.
+                if(load_pending) load_tail_delay=5;
+                else unpack_done_i=1;
                 if(matrix_pending) matrix_valid_i=1;
                 object_read_done_i=1;
             end
@@ -467,10 +478,10 @@ module tb_gpu_command;
                 write_delay=25;
             end
             if(texture_read_req_valid_o && texture_read_req_ready_i) begin
-                request_count[5]++; data_delay=9;
+                request_count[5]++; data_delay=9;load_pending=1;
             end
             if(palette_read_req_valid_o && palette_read_req_ready_i) begin
-                request_count[6]++; data_delay=9;
+                request_count[6]++; data_delay=9;load_pending=1;
             end
             if(geometry_cfg_valid_o && geometry_cfg_ready_i) begin
                 if(geometry_cfg_matrix_o!==expected_matrix || geometry_cfg_light_o!==expected_light
@@ -513,6 +524,8 @@ module tb_gpu_command;
             if(geometry_draw_valid_o && geometry_draw_ready_i) draw_count++;
             if(palette_prepare_valid_o && palette_prepare_ready_i && palette_prepare_group_o!=2)
                 $fatal(1,"FAIL palette group");
+            if(load_pending && texture_finish_o && !stop_o)
+                $fatal(1,"FAIL load finish before unpack final output");
             if(object_publish_o && !write_dma_idle_i) $fatal(1,"FAIL early object publish");
             if(done_o) begin
                 if(!read_dma_idle_i || !write_dma_idle_i) $fatal(1,"FAIL early DONE");

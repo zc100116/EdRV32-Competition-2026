@@ -61,3 +61,7 @@ SET_TEX 的 108 种宽高/格式组合均核对完整 9 级物理占用，并测
 `python3 tools/regress.py smoke --path verif/unit/gpu_command -j 1` 实测 1 PASS、0 FAIL。
 新增检查：DRAW_TRI 的 raster 快照 1 次，DRAW_QUAD/OBJ_STEP 的 quad 快照合计 2 次；
 quad 独立反压时快照保持；command 风格检查和 `--lint-only -Wall` 为 0 告警。
+
+装入完成补充：TEX_LOAD/PAL_LOAD 的 finish 均等待 unpack 最后一项输出握手。
+单测额外设置 5 拍 unpack 输出尾延迟，覆盖 DMA 已空闲但仍有待输出项的窗口，并检查 finish 保持低。
+该补充的同一单元回归为 1 PASS、0 FAIL；command 风格和 RTL lint 均为 0 告警。
