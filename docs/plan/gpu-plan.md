@@ -35,9 +35,9 @@
 | R-1 | GPU 前端：寄存器块、命令处理、DMA（命令、顶点、四边形、对象表、纹理装入）、RESOLVE 与后处理抗锯齿 | Codex | D-1、S-1 | 单元测试；lint 0 | [x] 48136be87、edd379254：7 个单元 PASS；包装评审通过 |
 | R-2 | 几何：顶点变换、光照、裁剪、透视除法、背面剔除、三角形建立 | Codex | D-1、S-1 | 单元测试对照参考模型逐位一致 | [~] ctx_fc77e129b729（建立 II ≤ 8） |
 | R-3 | 光栅化（三角形、四边形快速通道）与对象单元 | Codex | D-1、S-1 | 单元测试 | [~] 对象单元 R-3o 完成（8fb39eb19）；光栅化、四边形、透视 R-3r ctx_9e0c2dbe393c |
-| R-4 | 纹理单元（取样、mipmap、调色板）、像素运算（模板、深度、混合）、片上渲染目标 | Codex | D-1、S-1 | 单元测试 | [~] 像素运算和目标 R-4b 完成（1d788b9e4）；纹理 R-4a ctx_ef4885a8fc66 |
+| R-4 | 纹理单元（取样、mipmap、调色板）、像素运算（模板、深度、混合）、片上渲染目标 | Codex | D-1、S-1 | 单元测试 | [~] 像素运算和目标 R-4b 完成（1d788b9e4）；纹理 R-4a 完成（01de6cd72，评审通过；1024×20 真双口是否 1 块 DRM 待 Windows 生成确认） |
 | V-1 | GPU 模块级测试环境和 GT-01–GT-25（不读 RTL） | Codex（验证侧） | M-1、C-1 | 环境可运行；测试按验证方案实现 | [x] V-1a b851cc734、V-1b 4c0dde3c3、V-1c 6fccf92b4：GT-01–25 模型对模型全部 PASS；V-1b2 补时钟设置 |
-| I-1 | GPU 集成：`edrv32_gpu` 顶层，跑 GPU 模块级全部档位，按 11.3 分清 RTL、测试、规格问题 | Codex（集成） | R-1–R-4、V-1 | smoke、full 通过；perf 报告 | [~] ctx_f557084cfe68：先连已完成单元，其余到齐后跑 GT-01–25 |
+| I-1 | GPU 集成：`edrv32_gpu` 顶层，跑 GPU 模块级全部档位，按 11.3 分清 RTL、测试、规格问题 | Codex（集成） | R-1–R-4、V-1 | smoke、full 通过；perf 报告 | [~] ctx_f557084cfe68：先连已完成单元，其余到齐后跑 GT-01–25；兼改 command 的 quad render_state、block 环境 timescale |
 | A-1 | AUD RTL、单元测试，以及 AT-01–AT-09（RTL 和测试由两个 worker 分开写） | Codex × 2 | C-1 | smoke、full 通过 | [x] A-1r 0ea3c68b7（单元 5 项 PASS）；A-1v 04910154a（AT-01–09 在 RTL 上全部 PASS）；aud-spec v0.2 澄清 |
 | X-1 | mem_xbar 改为 5 个端口，相应测试改写（ST-01–03） | Codex；**协调者逐行评审** | — | ST-01–03 通过 | [x] gpu-dev b8cda862d，协调者逐行评审通过；47 项 PASS |
 | X-2 | DISP 增加 `L0_X2`；测试 ST-04–07 | Codex | — | ST-04–07 通过 | [x] gpu-dev 0a7a9ef1d；77 项 PASS |
