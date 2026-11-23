@@ -10,7 +10,7 @@ module edrv32_gpu_memory (
     edrv32_axi256_if bus
 );
     byte unsigned memory[bit [31:0]];
-    bit [31:0] random_r = 1;
+    bit [31:0] random_r;
     int latency = 3;
     int jitter = 5;
     int read_wait;
@@ -38,6 +38,7 @@ module edrv32_gpu_memory (
     int write_transactions;
 
     initial begin
+        random_r = 1;
         void'($value$plusargs("SEED=%d", random_r));
         void'($value$plusargs("MEM_LAT=%d", latency));
         void'($value$plusargs("MEM_JITTER=%d", jitter));
