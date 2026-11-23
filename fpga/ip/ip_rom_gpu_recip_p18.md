@@ -18,18 +18,18 @@
 | 时钟使能 | 勾选；使能为 0 时保持输出 |
 | 输出寄存器 | 不勾选；总读延迟 1 拍 |
 | 初始化 | `INIT_EN=true`，`INIT_FORMAT=HEX` |
-| 初始化文件 | `build/fpga/ip_rom_gpu_recip_p18.dat`，1024 行，每行 5 个 HEX 字符 |
+| 初始化文件 | `fpga/ip/gpu_recip_p18.dat`，1024 行，每行 5 个 HEX 字符 |
 | 复位 | 高有效，仅作用于读出通路；包装接常数 `1'b0` |
 
 生成文件：
 
 ```sh
-python3 tools/gpu/rom/gen_recip_p18.py build/fpga/ip_rom_gpu_recip_p18.dat
+python3 tools/gpu/rom/gen_recip_p18.py fpga/ip/gpu_recip_p18.dat
 ```
 
 地址 i 的内容为 `R(2^28 / (2049 + 2*i))`，R 为最近舍入、半值远离零。
 P18 种子全部存放在此 ROM，没有低位补充表。
-仿真同一文件由 `+GPU_RECIP_P18_HEX=build/fpga/ip_rom_gpu_recip_p18.dat` 指定。
+行为模型直接读取同一份入库文件 `fpga/ip/gpu_recip_p18.dat`，从仓库根目录启动仿真。
 行为模型在读使能上升沿后给出对应数据，未使能时保持输出，不复位存储或输出数据。
 
 ## 端口

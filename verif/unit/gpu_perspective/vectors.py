@@ -314,9 +314,6 @@ def run(kind):
         sources.append(str(ROOT/'rtl/tech/edrv32_rom_gpu_recip_p18.v'))
     subprocess.run(['iverilog', '-g2012', '-DSIM_MODE', '-s', 'tb', '-o', str(build/'sim'),
                     *sources, str(unit/'tb.sv')], check=True)
-    seed_path = build/'seed.hex'
-    subprocess.run([sys.executable, str(ROOT/'tools/gpu/rom/gen_recip_p18.py'),
-                    str(seed_path)], check=True)
     if kind == 'perspective':
         cases = [(0, 0, stall, False) for stall in (0, 1)]
     elif kind == 'quad':
@@ -336,4 +333,4 @@ def run(kind):
         subprocess.run(['vvp', str(build/'sim'), f'+INPUT={inp}', f'+EXPECTED={out}',
                         f'+INPUT_COUNT={len(inputs)}', f'+OUTPUT_COUNT={len(outputs)}',
                         f'+WIDE={wide}', f'+OBJECT={obj}', f'+STALL={stall}',
-                        f'+PERF={int(perf)}', f'+GPU_RECIP_P18_HEX={seed_path}'], check=True)
+                        f'+PERF={int(perf)}'], check=True)

@@ -24,15 +24,11 @@ module edrv32_rom_gpu_recip_p18 (
 `else
     reg [17:0] memory_r [0:1023];
     reg [17:0] rd_data_r;
-    reg [4095:0] image_path_r;
 
     assign rd_data_o = rd_data_r;
 
     initial begin
-        if (!$value$plusargs("GPU_RECIP_P18_HEX=%s", image_path_r)) begin
-            $fatal(1, "GPU_RECIP_P18_HEX is required");
-        end
-        $readmemh(image_path_r, memory_r);
+        $readmemh("fpga/ip/gpu_recip_p18.dat", memory_r);
     end
 
     always @(posedge clk_i) begin
