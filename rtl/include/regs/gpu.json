@@ -278,14 +278,14 @@
       "offset": "0x100",
       "access": "RW",
       "reset": 0,
-      "spec": "gpu-spec.md 4",
+      "spec": "gpu-spec.md 2.1, 4",
       "dimensions": [],
       "fields": [
         {
           "name": "WIDE",
           "lsb": 0,
           "width": 1,
-          "spec": "gpu-spec.md 4"
+          "spec": "gpu-spec.md 2.1, 4"
         }
       ]
     },
@@ -802,52 +802,80 @@
           "offset": "0x00",
           "lsb": 0,
           "width": 8,
-          "spec": "gpu-spec.md 2.3, 2.11"
+          "spec": "gpu-spec.md 2.1, 2.3, 2.4"
         },
         {
           "name": "TGT_X0",
           "offset": "0x04",
           "lsb": 0,
           "width": 16,
-          "spec": "gpu-spec.md 2.3, 2.11"
+          "spec": "gpu-spec.md 2.1, 2.3, 2.4"
         },
         {
           "name": "TGT_Y0",
           "offset": "0x04",
           "lsb": 16,
           "width": 16,
-          "spec": "gpu-spec.md 2.3, 2.11"
+          "spec": "gpu-spec.md 2.1, 2.3, 2.4"
         },
         {
           "name": "SC_X0",
           "offset": "0x08",
           "lsb": 0,
           "width": 16,
-          "spec": "gpu-spec.md 2.3, 2.11"
+          "spec": "gpu-spec.md 2.1, 2.3, 2.4"
         },
         {
           "name": "SC_Y0",
           "offset": "0x08",
           "lsb": 16,
           "width": 16,
-          "spec": "gpu-spec.md 2.3, 2.11"
+          "spec": "gpu-spec.md 2.1, 2.3, 2.4"
         },
         {
           "name": "SC_X1",
           "offset": "0x0C",
           "lsb": 0,
           "width": 16,
-          "spec": "gpu-spec.md 2.3, 2.11"
+          "spec": "gpu-spec.md 2.1, 2.3, 2.4"
         },
         {
           "name": "SC_Y1",
           "offset": "0x0C",
           "lsb": 16,
           "width": 16,
-          "spec": "gpu-spec.md 2.3, 2.11"
+          "spec": "gpu-spec.md 2.1, 2.3, 2.4"
+        },
+        {
+          "name": "VP_X0",
+          "offset": "0x10",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.1, 2.3, 2.4"
+        },
+        {
+          "name": "VP_Y0",
+          "offset": "0x10",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.1, 2.3, 2.4"
+        },
+        {
+          "name": "VP_W",
+          "offset": "0x14",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.1, 2.3, 2.4"
+        },
+        {
+          "name": "VP_H",
+          "offset": "0x14",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.1, 2.3, 2.4"
         }
       ],
-      "note": "All values s16 screen coordinates; scissor X1/Y1 exclusive."
+      "note": "TGT/SC/VP_X0/VP_Y0 are s16 screen pixels; TGT_X0 must be a multiple of 4; scissor X1/Y1 exclusive; VP_W/VP_H are u16 pixels."
     },
     {
       "name": "CMD_CLEAR",

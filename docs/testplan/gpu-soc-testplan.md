@@ -2,9 +2,9 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.1 |
+| 版本 | v0.2 |
 | 日期 | 2026-11-23 |
-| 对应规格 | `docs/spec/gpu-soc-spec.md` v0.1；`gpu-spec.md` v0.1；`aud-spec.md` v0.1；视觉规格中沿用的条款 |
+| 对应规格 | `docs/spec/gpu-soc-spec.md` v0.2；`gpu-spec.md` v0.2；`aud-spec.md` v0.1；视觉规格中沿用的条款 |
 
 ## 1. 验证对象和范围
 
@@ -33,7 +33,7 @@
 | ST-07 | DISP | `L0_X2` = 1 时的 `urgent_o` 阈值（40 beat） | 定向检查 | full |
 | ST-08 | SoC | 启动：bootloader 打印启动信息，CHIP_ID = 0xED32_0002；监控程序菜单 | UART 日志 | smoke |
 | ST-09 | SoC | 寄存器连通：媒体 APB 槽 1、5–8 的 ID；预留槽回 SLVERR；PLIC 源 8、12–15 | 软件自检 | smoke |
-| ST-10 | SoC | GPU 端到端：软件生成一帧 3D + 四边形 + 对象场景，GPU RESOLVE，DISP `L0_X2` = 1 显示 | HDMI 接收模型画面与 GPU 参考模型结果逐像素一致 | smoke |
+| ST-10 | SoC | GPU 端到端：软件生成一帧 3D + 四边形 + 对象场景，GPU 分 2 条 640 × 180 渲染并 RESOLVE，DISP `L0_X2` = 1 显示 | HDMI 接收模型画面与 GPU 参考模型结果逐像素一致 | smoke |
 | ST-11 | SoC | GPU 中断、DONE 计数、命中列表，按视觉规格 7.4 做 cache 维护后由 CPU 读取 | 软件自检 | smoke |
 | ST-12 | SoC | AUD 端到端：软件写正弦波和方波样本，LOW 中断补充；I2C0 端口 0 写 ES8156 配置序列 | I2S 接收模型得到的样本与软件写入一致；I2C 模型收到的寄存器序列 | smoke |
 | ST-13 | SoC | ETH 回归：视觉项目的 ETH SoC 测试（程序加载、接收窗口） | PASS | full |
@@ -58,4 +58,5 @@
 
 | 日期 | 版本 | 内容 |
 |---|---|---|
+| 2026-11-23 | v0.2 | ST-10 按 2 条渲染 |
 | 2026-11-23 | v0.1 | 初稿 |
