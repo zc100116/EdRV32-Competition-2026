@@ -98,3 +98,8 @@ ABORT 后的像素内容/部分计数不作保证；错误后的已执行写入�
 `case.reset_registers=['ID','STATUS','PERF[0]',...]`：复位释放后、任何 setup 写之前，
 按列表顺序读取 APB，并直接与 `gpu.json` 的复位值比较。`reset.txt` 是采样数和
 `offset expected`，`actual.reset.txt` 保存实际读回；模型对模型也走这两个文件的比对。
+
+`case.abort={'read_address':(first,last),'after':n}` 或
+`case.abort={'write_address':(first,last),'after':n}`：AR/AW **握手**覆盖闭区间后，
+经过 n 个周期再发起 ABORT；只取第一次命中。等待触发期间不会结束测试，始终受总超时约束。
+用于顶点/DMA/对象的首读，或 RESOLVE 的首个写地址；同一场景选择一种触发方式。

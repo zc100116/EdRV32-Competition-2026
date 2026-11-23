@@ -15,6 +15,9 @@ module edrv32_gpu_tb;
     int abort_cycle;
     int abort_command;
     int abort_after;
+    int abort_kind;
+    bit [31:0] abort_first;
+    bit [31:0] abort_last;
     bit [31:0] descriptor_base;
     bit [31:0] descriptor_count;
     bit [31:0] abort_address;
@@ -28,6 +31,12 @@ module edrv32_gpu_tb;
         if (abort_command != 0 && fetch_cycle < 0 && axi.arvalid && axi.arready &&
             axi.araddr <= abort_address &&
             abort_address < axi.araddr+32'(32*(int'(axi.arlen)+1))) fetch_cycle = cycle_r;
+        if (fetch_cycle < 0 && abort_kind == 1 && axi.arvalid && axi.arready &&
+            axi.araddr <= abort_last &&
+            abort_first < axi.araddr+32'(32*(int'(axi.arlen)+1))) fetch_cycle = cycle_r;
+        if (fetch_cycle < 0 && abort_kind == 2 && axi.awvalid && axi.awready &&
+            axi.awaddr <= abort_last &&
+            abort_first < axi.awaddr+32'(32*(int'(axi.awlen)+1))) fetch_cycle = cycle_r;
     end
     edrv32_axi256_if axi();
     edrv32_apb_if apb();
@@ -142,7 +151,8 @@ module edrv32_gpu_tb;
         $fclose(completion);
         events = $fopen({directory, "/events.txt"}, "r");
         if (events == 0) $fatal(1, "FAIL cannot open events.txt");
-        if ($fscanf(events, "%d %d %d", abort_cycle, abort_command, abort_after) != 3)
+        if ($fscanf(events, "%d %d %d %d %h %h", abort_cycle, abort_command,
+                    abort_after, abort_kind, abort_first, abort_last) != 6)
             $fatal(1, "FAIL events record");
         $fclose(events);
         timing = $fopen({directory, "/timing.txt"}, "w");
@@ -176,8 +186,8 @@ module edrv32_gpu_tb;
             if (address == 12'h024) descriptor_count = value;
             u_apb_host.write_reg(address, value);
             if (address == 12'h028) begin
-                if (abort_cycle >= 0 || abort_command != 0) begin
-                    if (abort_command != 0) begin
+                if (abort_cycle >= 0 || abort_command != 0 || abort_kind != 0) begin
+                    if (abort_command != 0 || abort_kind != 0) begin
                         wait (fetch_cycle >= 0);
                         wait (cycle_r >= fetch_cycle+abort_after);
                     end else wait (cycle_r >= doorbell_cycle+abort_cycle);

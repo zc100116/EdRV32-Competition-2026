@@ -154,7 +154,14 @@ def generate_case(case, out):
     abort = case.abort
     values = (-1, 0, 0) if abort is None else (
         abort.get('cycle', -1), abort.get('command', 0), abort.get('after', 0))
-    (out/'events.txt').write_text('%d %d %d\n' % values)
+    kind, first, last = 0, 0, 0
+    if abort is not None:
+        if 'read_address' in abort:
+            kind, (first, last) = 1, abort['read_address']
+        elif 'write_address' in abort:
+            kind, (first, last) = 2, abort['write_address']
+    (out/'events.txt').write_text(('%d %d %d %d %08x %08x\n') %
+                                  (*values, kind, first, last))
     arguments = []
     for channel, fault in case.axi_errors.items():
         tag = 'R' if channel == 'read' else 'W'
