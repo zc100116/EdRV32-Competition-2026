@@ -376,7 +376,7 @@ FF为独立寄存配额：未替换基础55000；setup沿用8000（上下文、�
 - TEX_LOAD：纹理 RAM 装入写全部提交并入 texture 的 `unit_done`；command 在 unpack 完成后才给 texture 拉高 `finish`；PAL_LOAD 以最后一项写握手为准。
 - `texture`、`texture_ram`、`palette` 在顶层分别例化，共用 texture 的 `finish` 和 `stop`；送 command 的 texture `unit_done` 为三者 `unit_done` 相与（均为 4.2 的电平语义）。
 - 建立部分按 42 APM 实现（属性 II = 1、三角形 II = 8），预算 ≤ 44。
-- 几何独立流水 87 APM（transform 27、clip 交点 18、project 40、剔除 2；4.11 原估 48 未计视口、UV、裁剪交点乘法），不做乘法器复用：GPU 约 221 APM，全芯片约 231/740（31%，估算），复用会增加 LUT。
+- 几何独立流水 87 APM（transform 27、clip 交点 18、project 40、剔除 2；4.11 原估 48 未计视口、UV、裁剪交点乘法），不做乘法器复用：连同建立 42（原估 16）一起，GPU 约 247 APM，全芯片约 192 + 39 + 26 = 257/740（34.7%，估算），复用会增加 LUT。
 
 ## 5. 影响
 
