@@ -1,0 +1,12 @@
+../common/edrv32_reset_copy.v
++incdir+../include
+../common/edrv32_async_fifo.v
+../common/edrv32_axi_async_bridge.v
+../mem/edrv32_mem_ddr_gw.v
+../tech/edrv32_ram_mem_xbar_r.v
+../tech/edrv32_ram_mem_xbar_w.v
+../mem/edrv32_mem_xbar_regs_gpu.v
+../mem/edrv32_mem_xbar_sched_gpu.v
+../mem/edrv32_mem_xbar_rbuf_gpu.v
+../mem/edrv32_mem_xbar_gpu.v
+../soc/edrv32_mem_subsys_gpu.v
