@@ -18,6 +18,10 @@ ISA_FLAGS := -march=$(ARCH) -mabi=ilp32
 CFLAGS := $(ISA_FLAGS) -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin \
           -ffunction-sections -fdata-sections -I$(ROOT)/sw/bsp/include
 CFLAGS += $(CFLAGS_EXTRA)
+# GPU builds reuse unchanged drivers while selecting their generated address map.
+ifeq ($(SOC),gpu)
+CFLAGS += -DEDRV32_SOC_MAP_H -include $(ROOT)/sw/bsp/include/gpu_soc_map.h
+endif
 LDFLAGS := -nostdlib -Wl,--gc-sections \
            -Wl,-T,sw/bsp/ld/$(MEMORY).ld -Wl,-Map,$(OUT)/$(PROGRAM).map
 BSP := sw/bsp/start.S sw/bsp/host.c

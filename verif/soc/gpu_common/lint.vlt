@@ -1,0 +1,11 @@
+`verilator_config
+// Timed external models deliberately update their protocol state with blocking assignments.
+lint_off -rule BLKSEQ -file "*/verif/models/*"
+lint_off -rule UNUSEDSIGNAL -file "*/verif/models/*"
+// The harness drives an asynchronous DUT reset and synchronous external model resets.
+lint_off -rule SYNCASYNCNET -file "*/verif/soc/gpu_common/edrv32_gpu_soc_tb.sv"
+// Newer simulators flag declaration initialization in the unchanged ETH peer.
+lint_off -file "*/verif/models/eth_peer_model.sv"
+    -match "Procedural assignment to declaration with initial value*"
+// The UART peer uses a positive baud-derived realtime period.
+lint_off -rule ZERODLY -file "*/verif/models/uart_model.sv"
