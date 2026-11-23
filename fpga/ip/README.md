@@ -10,6 +10,7 @@
 | `ip_ram_dcache_data` | DRM 简单双口 RAM，字节写使能 | 2048 × 64 | `edrv32_ram_dcache_data` | D$ ×4（2 路 + 2 份提前查询副本） | [ip_ram_dcache_data.md](ip_ram_dcache_data.md) | 需重新生成（D$ 32 KiB） |
 | `ip_mul_s33x33` | APM 乘法器 | 33 × 33 有符号，2 级 | `edrv32_mul_s33x33` | CPU | [ip_mul_s33x33.md](ip_mul_s33x33.md) | 已生成（20261025-01） |
 | `ip_rom_gpu_recip_q30` | DRM ROM | 1024 × 18，高位种子 | `edrv32_rom_gpu_recip_q30` | GPU project、setup 各 1 份 | [ip_rom_gpu_recip_q30.md](ip_rom_gpu_recip_q30.md) | 待生成 |
+| `ip_rom_gpu_recip_p18` | DRM ROM | 1024 × 18，P18 完整种子 | `edrv32_rom_gpu_recip_p18` | GPU perspective ×4 | [ip_rom_gpu_recip_p18.md](ip_rom_gpu_recip_p18.md) | 待生成 |
 | `ip_rom_boot` | DRM ROM，带初始化 | 2048 × 64 | `edrv32_rom_boot` | Boot ROM | [ip_rom_boot.md](ip_rom_boot.md) | 已生成（20261025-01） |
 | `ip_ram_sram` | DRM 单口 RAM，字节写使能，可初始化 | 8192 × 64 | `edrv32_ram_sram` | SRAM | [ip_ram_sram.md](ip_ram_sram.md) | 已生成（8192 深，20261027-02） |
 | `ip_ram_npu_line` | DRM 简单双口 RAM，输出寄存 | 1024 × 256 | `edrv32_ram_npu_line` | NPU 行缓存 ×2 | [ip_ram_npu_line.md](ip_ram_npu_line.md) | 已生成（20261027-02） |

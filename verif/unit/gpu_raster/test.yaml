@@ -1,0 +1,10 @@
+top: tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 1200
+pass: PASS
+tier: full
+simulator: iverilog
+runner: python3 verif/unit/gpu_raster/run.py

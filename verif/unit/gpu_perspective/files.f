@@ -1,0 +1,11 @@
++incdir+../../../rtl/include
+../../../rtl/gpu/edrv32_gpu_perspective.v
+../../../rtl/tech/edrv32_rom_gpu_recip_p18.v
+../../../rtl/gpu/edrv32_gpu_perspective_absolute.v
+../../../rtl/gpu/edrv32_gpu_perspective_maximum.v
+../../../rtl/gpu/edrv32_gpu_perspective_multiply.v
+../../../rtl/gpu/edrv32_gpu_perspective_normal.v
+../../../rtl/gpu/edrv32_gpu_perspective_scale.v
+../../../rtl/gpu/edrv32_gpu_perspective_sign.v
+../../../rtl/gpu/edrv32_gpu_perspective_subtract.v
+tb.sv
