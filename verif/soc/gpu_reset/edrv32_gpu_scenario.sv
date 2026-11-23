@@ -18,7 +18,9 @@ module edrv32_gpu_scenario (
         if ($root.edrv32_gpu_soc_tb.u_dut.rst_sys_n_w)
             $fatal(1, "FAIL sys released before GPU/audio time=%0t", $time);
         @(posedge $root.edrv32_gpu_soc_tb.u_dut.rst_sys_n_w);
-        wait ($root.edrv32_gpu_soc_tb.u_ddr.peek(32'h003ff000) == 14);
+        while ($root.edrv32_gpu_soc_tb.u_ddr.peek(32'h003ff000) != 14) begin
+            @(negedge $root.edrv32_gpu_soc_tb.clk_mem_i);
+        end
         $root.edrv32_gpu_soc_tb.u_ddr.poke(32'h003ff004, 8'd1);
         wait (!$root.edrv32_gpu_soc_tb.u_dut.rst_gpu_n_w &&
                 !$root.edrv32_gpu_soc_tb.u_dut.rst_aud_n_w);

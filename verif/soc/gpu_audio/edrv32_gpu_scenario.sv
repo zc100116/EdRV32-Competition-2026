@@ -61,7 +61,9 @@ module edrv32_gpu_scenario (
         wait (samples_checked == 256);
         if (writes_checked != 27 || codec_count != 27)
             $fatal(1, "FAIL codec writes expected=27 actual=%0d time=%0t", codec_count, $time);
-        wait ($root.edrv32_gpu_soc_tb.u_ddr.peek(32'h003ff000) == 12);
+        while ($root.edrv32_gpu_soc_tb.u_ddr.peek(32'h003ff000) != 12) begin
+            @(negedge $root.edrv32_gpu_soc_tb.clk_mem_i);
+        end
         $root.edrv32_gpu_soc_tb.u_ddr.poke(32'h003ff004, 8'd1);
         checks_complete_o = 1;
         $display("CHECK ST-12 I2C writes=27 I2S stereo frames=256");

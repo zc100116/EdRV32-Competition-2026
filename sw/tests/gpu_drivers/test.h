@@ -30,11 +30,25 @@ static inline void test_finish(uint32_t code)
         __asm__ volatile ("wfi");
     }
 }
+static inline void test_hex(uint32_t value)
+{
+    for (int digit = 7; digit >= 0; --digit) {
+        uart_putc((uint8_t)"0123456789abcdef"[(value >> (digit * 4)) & 15u]);
+    }
+}
 static inline void test_equal(const char *label, uint32_t expected, uint32_t actual)
 {
     if (actual != expected) {
         uart_puts("FAIL ");
         uart_puts(label);
+        uart_puts(" expected=");
+        test_hex(expected);
+        uart_puts(" actual=");
+        test_hex(actual);
+        uint32_t cycle;
+        __asm__ volatile ("csrr %0, mcycle" : "=r"(cycle));
+        uart_puts(" cycle=");
+        test_hex(cycle);
         uart_puts("\r\n");
         test_finish(1u);
     }

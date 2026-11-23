@@ -57,7 +57,9 @@ int main(void)
         gpu_set_matrix(&commands[count++], &(struct gpu_set_matrix_args){
             .addr = gpu_physical(matrix)
         });
-        gpu_set_light(&commands[count++], &(struct gpu_set_light_args){.amb_rgb = 0xffffffu});
+        gpu_set_light(&commands[count++], &(struct gpu_set_light_args){
+            .lz = 16384u, .amb_rgb = 0xffffffu
+        });
         gpu_tex_load(&commands[count++], &(struct gpu_tex_load_args){
             .src = gpu_physical(texture), .bytes = 128u
         });

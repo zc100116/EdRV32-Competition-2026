@@ -99,7 +99,9 @@ module edrv32_gpu_scenario (
         wait (load_ready);
         send_file("bios_rx.bin", 1);
         wait (load_pass && run_seen);
-        wait ($root.edrv32_gpu_soc_tb.u_ddr.peek(32'h003ff000) == 13);
+        while ($root.edrv32_gpu_soc_tb.u_ddr.peek(32'h003ff000) != 13) begin
+            @(negedge $root.edrv32_gpu_soc_tb.clk_mem_i);
+        end
         receive_phase = 1;
         send_file("rx.bin", 0);
         if (!rx_arp_seen) $fatal(1, "FAIL RX ARP not checked time=%0t", $time);

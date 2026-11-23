@@ -16,12 +16,15 @@ module edrv32_gpu_scenario (
         checks_complete_o = 0;
         #1;
         $readmemh({$root.edrv32_gpu_soc_tb.data_dir, "/surface.hex"}, expected);
-        wait ($root.edrv32_gpu_soc_tb.u_ddr.peek(32'h003ff000) == 10);
+        while ($root.edrv32_gpu_soc_tb.u_ddr.peek(32'h003ff000) != 10) begin
+            @(negedge $root.edrv32_gpu_soc_tb.clk_mem_i);
+        end
         frame_start = $root.edrv32_gpu_soc_tb.u_hdmi.frame_count_o;
         wait ($root.edrv32_gpu_soc_tb.u_hdmi.frame_count_o >= frame_start + 2);
         @(negedge $root.edrv32_gpu_soc_tb.clk_pix_i);
         if ($root.edrv32_gpu_soc_tb.u_hdmi.frame_pixel_count_o != 921600)
-            $fatal(1, "FAIL HDMI frame pixel count time=%0t", $time);
+            $fatal(1, "FAIL HDMI pixels expected=921600 actual=%0d time=%0t",
+                $root.edrv32_gpu_soc_tb.u_hdmi.frame_pixel_count_o, $time);
         for (int y = 0; y < 720; y++) begin
             for (int x = 0; x < 1280; x++) begin
                 pixel = expected[(y/2)*640 + x/2];

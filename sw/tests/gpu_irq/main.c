@@ -5,7 +5,7 @@
  */
 #include "../gpu_drivers/test.h"
 static volatile uint32_t completed;
-static struct gpu_event last;
+static volatile struct gpu_event last;
 
 static void complete(const struct gpu_event *event, void *context)
 {

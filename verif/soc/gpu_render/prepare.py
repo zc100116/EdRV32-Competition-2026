@@ -35,7 +35,7 @@ def prepare(out):
             ('SET_TARGET', dict(TGT_Y0=y, SC_Y0=y, SC_X1=640, SC_Y1=y+180, VP_W=640, VP_H=360)),
             ('CLEAR', dict(COLOR=0x0841, DEPTH=65535, EN_COLOR=1, EN_DEPTH=1, EN_STENCIL=1)),
             ('SET_MATRIX', dict(ADDR=0x10000)),
-            ('SET_LIGHT', dict(AMB_RGB=0xffffff)),
+            ('SET_LIGHT', dict(LZ=16384, AMB_RGB=0xffffff)),
             ('TEX_LOAD', dict(SRC=0x10100, BYTES=128)),
             ('SET_TEX', dict(LOG2_W=3, LOG2_H=3, FORMAT=2, LEVELS=1)),
             ('SET_PIXEL', dict(DEPTH_FUNC=1, COLOR_WRITE=1, ST_FUNC=7,
