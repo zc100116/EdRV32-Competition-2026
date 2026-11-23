@@ -7,7 +7,15 @@ module edrv32_gpu_scenario (
     output bit checks_complete_o,
     output wire [1:0] model_sda_oe_o
 );
+    realtime last_gpu_edge;
+    realtime last_aud_edge;
     assign model_sda_oe_o = 2'b00;
+    always @(posedge $root.edrv32_gpu_soc_tb.clk_gpu_i) begin
+        last_gpu_edge <= $realtime;
+    end
+    always @(posedge $root.edrv32_gpu_soc_tb.clk_aud_i) begin
+        last_aud_edge <= $realtime;
+    end
     initial begin
         checks_complete_o = 0;
         @(posedge $root.edrv32_gpu_soc_tb.u_dut.u_mem.rst_mem_core_ctrl_n_w[0]);
@@ -36,11 +44,11 @@ module edrv32_gpu_scenario (
         $display("CHECK ST-14 initial order and media soft reset");
     end
     always @(posedge $root.edrv32_gpu_soc_tb.u_dut.u_gpu.rst_gpu_n_w) begin
-        if (!$root.edrv32_gpu_soc_tb.clk_gpu_i)
-            $fatal(1, "FAIL GPU reset not synchronous time=%0t", $time);
+        if ($realtime != last_gpu_edge)
+            $fatal(1, "FAIL GPU release expected edge=%0t actual=%0t", last_gpu_edge, $realtime);
     end
     always @(posedge $root.edrv32_gpu_soc_tb.u_dut.u_aud.rst_aud_n_w) begin
-        if (!$root.edrv32_gpu_soc_tb.clk_aud_i)
-            $fatal(1, "FAIL AUD reset not synchronous time=%0t", $time);
+        if ($realtime != last_aud_edge)
+            $fatal(1, "FAIL AUD release expected edge=%0t actual=%0t", last_aud_edge, $realtime);
     end
 endmodule

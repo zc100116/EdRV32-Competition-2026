@@ -30,7 +30,8 @@ module i2c_model_tb;
         .write_count_o(write_count_o)
     );
     task automatic settle;
-        repeat (10) @(negedge clk_i);
+        // 125 MHz observation clock: 625 cycles gives a 5 us I2C half-period.
+        repeat (625) @(negedge clk_i);
     endtask
     task automatic send_byte(input bit [7:0] value);
         for (int i = 7; i >= 0; i--) begin

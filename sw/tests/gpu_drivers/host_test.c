@@ -117,9 +117,14 @@ int main(void)
     aud_init(&ring, (void *)(uintptr_t)(EDRV32_DDR_BASE + 4096u), 512u, 128u);
     assert(aud_space(&ring) == 480u);
     ring.write_offset = 480u;
+    /* Emulate DMA progress so the wrapped producer write preserves the 32 B gap. */
+    mmio_write32(EDRV32_AUD_BASE + EDRV32_AUD_WR_PTR_OFFSET, 480u);
+    mmio_write32(EDRV32_AUD_BASE + EDRV32_AUD_RD_PTR_OFFSET, 256u);
+    assert(aud_space(&ring) == 256u);
     cache_clean_count = 0u;
     aud_write(&ring, samples, 16u);
     assert(ring.write_offset == 32u && cache_clean_count == 2u);
+    assert(aud_space(&ring) == 192u);
     for (uint32_t i = 0; i < 8u; ++i) {
         assert(ring.samples[120u+i] == samples[i]);
         assert(ring.samples[i] == samples[8u+i]);
