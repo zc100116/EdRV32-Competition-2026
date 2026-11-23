@@ -6,7 +6,9 @@ from array import array
 import struct
 
 from ..scene import SCHEMA, LAYOUTS, OPCODES, BusError, pack, unpack
-from .arithmetic import Numeric, d, divide, edge, expand, p565, saturate, shift, signed, top_left
+from .arithmetic import (CLIP_BITS, CLIP_FRAC, GUARD, RECIPROCAL_FRAC, W_NEAR,
+                         d, divide, edge, expand, logarithm, p565, reciprocal, saturate,
+                         shift, signed, top_left)
 from .texture import Texture
 
 
@@ -23,11 +25,8 @@ class GPUError(Exception):
 
 
 class GPU:
-    def __init__(self, memory, numeric=Numeric(), viewport=(0, 0, 640, 360),
-                 reference_size=None):
-        self.viewport = viewport
+    def __init__(self, memory, reference_size=None):
         self.memory = memory
-        self.numeric = numeric
         self.regs = {}
         self.register_names = {}
         self.register_access = {}
@@ -70,8 +69,7 @@ class GPU:
         elif name == 'CTRL':
             self.regs[name] = value & 1
             if value & 8:
-                memory, numeric, viewport = self.memory, self.numeric, self.viewport
-                self.__init__(memory, numeric, viewport)
+                self.__init__(self.memory)
         else:
             self.regs[name] = value & 0xffffffff
             if name == 'TGT_CFG':
@@ -122,7 +120,7 @@ class GPU:
         elif name == 'SET_LIGHT':
             self.light = fields
         elif name == 'SET_TEX':
-            texture = Texture(self.ram, self.palettes, fields, self.numeric)
+            texture = Texture(self.ram, self.palettes, fields)
             if texture.end > len(self.ram):
                 raise GPUError(3)
             self.texture = texture
@@ -237,15 +235,14 @@ class GPU:
                                transparent=rgba[3] == 0)
 
     def transform(self, vertex):
-        numeric = self.numeric
         position = [vertex[name] for name in ('X', 'Y', 'Z')] + [1]
         coords = []
         for row in range(4):
-            products = [numeric.coefficient(self.matrix[row * 4 + column])
+            products = [self.matrix[row * 4 + column]
                         * position[column] for column in range(4)]
-            value = shift(sum(products), numeric.matrix_frac - numeric.clip_frac)
-            coords.append(saturate(value, -(1 << (numeric.clip_bits - 1)),
-                                   (1 << (numeric.clip_bits - 1)) - 1))
+            value = sum(products)
+            coords.append(saturate(value, -(1 << (CLIP_BITS - 1)),
+                                   (1 << (CLIP_BITS - 1)) - 1))
         light = self.light
         dot = max(0, sum(vertex[n] * light[l] for n, l in
                          zip(('NX', 'NY', 'NZ'), ('LX', 'LY', 'LZ'))))
@@ -259,7 +256,7 @@ class GPU:
         return coords + [vertex['U'], vertex['V']] + colors
 
     def clip(self, polygon):
-        near, guard = self.numeric.near, self.numeric.guard
+        near, guard = W_NEAR, GUARD
         planes = (lambda v: v[3] - near, lambda v: guard * v[3] + v[0],
                   lambda v: guard * v[3] - v[0], lambda v: guard * v[3] + v[1],
                   lambda v: guard * v[3] - v[1])
@@ -282,10 +279,10 @@ class GPU:
         return polygon
 
     def project(self, vertex):
-        numeric = self.numeric
-        q = numeric.reciprocal(vertex[3], numeric.clip_frac)
-        scale = 1 << (numeric.clip_frac + numeric.reciprocal_frac)
-        vx, vy, width, height = self.viewport
+        q = reciprocal(vertex[3], CLIP_FRAC)
+        scale = 1 << (CLIP_FRAC + RECIPROCAL_FRAC)
+        vx, vy, width, height = (self.target[name] for name in
+                                 ('VP_X0', 'VP_Y0', 'VP_W', 'VP_H'))
         x = vx * 16 + divide((vertex[0] * q + scale) * width * 8, scale)
         y = vy * 16 + divide((scale - vertex[1] * q) * height * 8, scale)
         x, y = saturate(x, -65536, 65535), saturate(y, -65536, 65535)
@@ -344,16 +341,16 @@ class GPU:
                              for channel in range(2, 9)]
                     depth, q, uq, vq = attrs[:4]
                     # The same normalized reciprocal unit is used for per-pixel correction.
-                    inverse_q = self.numeric.reciprocal(q, self.numeric.reciprocal_frac)
-                    u = shift(uq * inverse_q, 2 * self.numeric.reciprocal_frac)
-                    v = shift(vq * inverse_q, 2 * self.numeric.reciprocal_frac)
+                    inverse_q = reciprocal(q, RECIPROCAL_FRAC)
+                    u = shift(uq * inverse_q, 2 * RECIPROCAL_FRAC)
+                    v = shift(vq * inverse_q, 2 * RECIPROCAL_FRAC)
                     span = 0
                     for dq, duq, dvq in derivatives:
                         for numerator, attribute in ((duq, uq), (dvq, vq)):
                             derivative = divide(abs(numerator * q - attribute * dq) << 8,
                                                 area * q * q)
                             span = max(span, derivative)
-                    lod = self.numeric.logarithm(span, 16) if span else 0
+                    lod = logarithm(span) if span else 0
                     colors = [saturate(shift(value, 16), 0, 255) for value in attrs[4:]]
                     yield x, y, depth, u, v, lod, colors
 

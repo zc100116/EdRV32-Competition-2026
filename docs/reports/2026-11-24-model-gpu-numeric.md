@@ -1,6 +1,6 @@
 # GPU 逐位模型与数值研究（2026-11-24）
 
-模型 commit：21e51698c9ddfefc18d8ee860c373e946e53149d；依据 gpu-spec v0.1、gpu-testplan v0.1、gpu.json 的布局及用户资源闭合决定 da4c70345。
+研究模型 commit：5938c1038（rebase 后的研究代码；当前模型已固定为规格 v0.2）；依据 gpu-spec v0.1、gpu-testplan v0.1、gpu.json 的布局及用户资源闭合决定 da4c70345。
 环境：Linux，Python 3.12.3，标准库；全部重负载串行执行，无 numpy 依赖。
 原始数据：`build/gpu/numeric.json`（复现生成，不入库）；模型/API 说明见 `tools/gpu/{model,scene}/README.md`。
 
@@ -88,7 +88,9 @@ PERF4 为通过范围、纹理透明、模板和深度测试的片元数，与�
 目标/时钟变更：115200 像素，TGT_CFG=0/1 对应640x180/1280x90；640x360分2条、1280x720分8条。开发初值180 MHz，本报告只给功能误差与主机时间，不换算GPU周期。
 
 ## 复现与验收
+研究代码已从当前分支删除；在独立复现工作树中先恢复历史模型，再执行原研究命令（以下自检与数字均属于该历史版本）。
 ```sh
+git checkout 5938c1038 -- tools/gpu/model
 python3 tools/gpu/model/numeric.py --output build/gpu/numeric.json
 /usr/bin/time -f "wall=%e s max_rss=%M KiB" python3 tools/gpu/model/selftest.py
 python3 -m compileall -q tools/gpu

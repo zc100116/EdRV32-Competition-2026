@@ -1,7 +1,6 @@
-"""arithmetic.py — gpu-spec 2.4–2.7, G-N1–G-N3 arithmetic proposals.
+"""arithmetic.py — gpu-spec v0.2 2.4–2.12 fixed integer arithmetic.
 Host integer arithmetic, independent of any RTL; no clock domain.
 """
-from dataclasses import dataclass
 from functools import lru_cache
 
 
@@ -41,52 +40,34 @@ def p565(rgb):
     return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3)
 
 
-@dataclass(frozen=True)
-class Numeric:
-    """Research-only parameters; delete alternatives after specification convergence."""
-    matrix_frac: int = 16
-    clip_bits: int = 40
-    clip_frac: int = 16
-    near_numerator: int = 1
-    near_denominator: int = 16
-    guard: int = 4
-    reciprocal_table_bits: int = 10
-    reciprocal_iterations: int = 1
-    reciprocal_frac: int = 30
-    log_table_bits: int = 8
-    log_frac: int = 8
+# gpu-spec v0.2 2.4–2.6: fixed formats and clipping planes.
+CLIP_FRAC = 16
+CLIP_BITS = 40
+W_NEAR = 1 << 12
+GUARD = 4
+RECIPROCAL_FRAC = 30
+LOG_FRAC = 8
 
-    def coefficient(self, value):
-        bound = 1 << (15 + self.matrix_frac)
-        return saturate(shift(value, 16 - self.matrix_frac), -bound, bound - 1)
 
-    @property
-    def near(self):
-        return divide(self.near_numerator << self.clip_frac, self.near_denominator)
+def reciprocal(value, input_frac):
+    """Q30 midpoint ROM (10-bit index), one Newton iteration, Q30 output (2.12)."""
+    exponent = value.bit_length() - 1
+    mantissa = (value >> (exponent - 30) if exponent >= 30
+                else value << (30 - exponent))
+    index = (mantissa - (1 << 30)) >> 20
+    midpoint = (1 << 30) + (index << 20) + (1 << 19)
+    seed = reciprocal_seed(midpoint)
+    product = shift(mantissa * seed, 30)
+    result = shift(seed * ((2 << 30) - product), 30)
+    return shift(result, exponent - input_frac)
 
-    def reciprocal(self, value, input_frac):
-        """Normalize, midpoint ROM seed Q30, Newton r <- r(2-mr), denormalize."""
-        exponent = value.bit_length() - 1
-        mantissa = (value >> (exponent - 30) if exponent >= 30
-                    else value << (30 - exponent))
-        index = (mantissa - (1 << 30)) >> (30 - self.reciprocal_table_bits)
-        midpoint = ((1 << 30) + (index << (30 - self.reciprocal_table_bits))
-                    + (1 << (29 - self.reciprocal_table_bits)))
-        result = reciprocal_seed(midpoint)
-        for _ in range(self.reciprocal_iterations):
-            product = shift(mantissa * result, 30)
-            result = shift(result * ((2 << 30) - product), 30)
-        return shift(result, exponent - input_frac + 30 - self.reciprocal_frac)
 
-    def logarithm(self, value, input_frac):
-        """Leading-one exponent plus floor-indexed log2(1+i/2^L) ROM, Qlog_frac."""
-        exponent = value.bit_length() - 1
-        bits = self.log_table_bits
-        mantissa = (value >> (exponent - bits) if exponent >= bits
-                    else value << (bits - exponent))
-        index = mantissa - (1 << bits)
-        fraction = logarithm_entry(index, bits, self.log_frac)
-        return ((exponent - input_frac) << self.log_frac) + fraction
+def logarithm(value):
+    """Leading-one exponent plus 8-bit-index ROM; Q16 span to Q8 LOD (2.6)."""
+    exponent = value.bit_length() - 1
+    mantissa = value >> (exponent - 8) if exponent >= 8 else value << (8 - exponent)
+    fraction = logarithm_entry(mantissa - 256)
+    return ((exponent - 16) << 8) + fraction
 
 
 @lru_cache(maxsize=None)
@@ -95,13 +76,12 @@ def reciprocal_seed(midpoint):
 
 
 @lru_cache(maxsize=None)
-def logarithm_entry(index, table_bits, output_bits):
+def logarithm_entry(index):
     # Construct the ROM without host floating point. 64 fractional bits retain
-    # ample guard precision for all research configurations (output <= 8 bits).
-    value = (1 << 64) + (index << (64 - table_bits))
+    # ample guard precision for the specified Q8 output.
+    value = (1 << 64) + (index << 56)
     fraction = 0
-    precision = output_bits + 16
-    for _ in range(precision):
+    for _ in range(24):
         value = (value * value) >> 64
         bit = value >= (2 << 64)
         if bit:

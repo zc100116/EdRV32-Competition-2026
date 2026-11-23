@@ -1,16 +1,15 @@
 """texture.py — gpu-spec 2.6: packed mipmaps, palettes and deterministic filtering.
 Host integer reference, no clock domain. UV uses eight fractional bits.
 """
-from .arithmetic import divide, expand, saturate, shift
+from .arithmetic import LOG_FRAC, divide, expand, saturate, shift
 from .layout import mip_layout, texel_address
 
 
 class Texture:
-    def __init__(self, ram, palettes, descriptor, numeric):
+    def __init__(self, ram, palettes, descriptor):
         self.ram = ram
         self.palettes = palettes
         self.desc = descriptor
-        self.numeric = numeric
         self.levels = mip_layout(1 << descriptor['LOG2_W'], 1 << descriptor['LOG2_H'],
                                  descriptor['LEVELS'], descriptor['FORMAT'],
                                  descriptor['OFFSET'])
@@ -28,7 +27,7 @@ class Texture:
         return (*expand(color & 65535), ((color >> 16) & 15) * 17)
 
     def bilinear(self, u, v, level, group):
-        u, v = u >> level, v >> level
+        u, v = (u >> level) - 128, (v >> level) - 128
         x, y, fx, fy = u >> 8, v >> 8, u & 255, v & 255
         samples = (self.texel(x, y, level, group), self.texel(x + 1, y, level, group),
                    self.texel(x, y + 1, level, group),
@@ -43,7 +42,7 @@ class Texture:
             group = self.desc['PAL_GROUP']
         if nearest:
             return self.texel(u >> 8, v >> 8, 0, group)
-        bits = self.numeric.log_frac
+        bits = LOG_FRAC
         bias = shift(self.desc['LOD_BIAS'], 4 - bits)
         lod = saturate(lod + bias, 0, (len(self.levels) - 1) << bits)
         level = lod >> bits

@@ -16,7 +16,7 @@ OPCODES = dict(zip(('SET_MATRIX', 'SET_LIGHT', 'SET_TEX', 'SET_PIXEL', 'SET_TARG
 BYTE_FIELDS = {'ADDR', 'SRC', 'DST', 'BASE', 'STRIDE', 'OFFSET', 'BYTES'}
 SIGNED = {'X', 'Y', 'Z', 'NX', 'NY', 'NZ', 'LX', 'LY', 'LZ', 'LOD_BIAS',
           'PX', 'PY', 'VX', 'VY', 'AX', 'AY', 'TGT_X0', 'TGT_Y0',
-          'SC_X0', 'SC_Y0', 'SC_X1', 'SC_Y1'}
+          'SC_X0', 'SC_Y0', 'SC_X1', 'SC_Y1', 'VP_X0', 'VP_Y0'}
 
 
 def pack(layout, **values):

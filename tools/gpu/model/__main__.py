@@ -16,9 +16,8 @@ def main():
     parser.add_argument('registers', type=Path)
     parser.add_argument('output', type=Path)
     parser.add_argument('--base', type=lambda value: int(value, 0), required=True)
-    parser.add_argument('--viewport', type=int, nargs=4, default=(0, 0, 640, 360))
     args = parser.parse_args()
-    gpu = GPU(Memory.read_hex(args.image, args.base), viewport=tuple(args.viewport))
+    gpu = GPU(Memory.read_hex(args.image, args.base))
     gpu.execute(json.loads(args.registers.read_text()))
     args.output.mkdir(parents=True, exist_ok=True)
     for name, data in (('color', gpu.color), ('depth', gpu.depth), ('stencil', gpu.stencil)):

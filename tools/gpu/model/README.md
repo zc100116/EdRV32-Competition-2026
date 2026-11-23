@@ -1,66 +1,73 @@
-# GPU reference model
+# GPU reference model (gpu-spec v0.2)
 
-Implements `gpu-spec.md` v0.1 sections 2–6 plus the resource-closure decision da4c70345 without reading GPU RTL. Layouts come directly
-from `rtl/include/regs/gpu.json`; arithmetic proposals and coordinator-confirmed specification
-omissions are recorded in `docs/reports/2026-11-24-model-gpu-numeric.md`.
-Python 3 standard library only; no extra installation is needed.
+Python 3 standard library only. The model implements sections 2–6 with fixed arithmetic
+from 2.12; command/record layouts come from `rtl/include/regs/gpu.json`. There are no
+numeric study parameters. Historical numeric experiments are reproduced using the commit
+and commands in `docs/reports/2026-11-24-model-gpu-numeric.md`.
+
+The verification worker can create input DDR, commands and register writes with `Scene`
+(see `../scene/README.md`), then run the same image through the oracle:
 
 ```python
+import json
+from pathlib import Path
 from tools.gpu.scene import Memory
-from tools.gpu.model import GPU, Numeric
+from tools.gpu.model import GPU
 
-memory = Memory.read_hex('build/gpu/scene.hex', base=0x80000000)
-gpu = GPU(memory, viewport=(0, 0, 640, 360))
-gpu.execute([['DESC_BASE', command_address], ['DESC_COUNT', command_count], ['DOORBELL', 1]])
+# scene.export has already written these two input files.
+image = Path('build/gpu/scene.hex')
+writes = json.loads(Path('build/gpu/writes.json').read_text())
+memory = Memory.read_hex(image, base=0x80000000)
+gpu = GPU(memory).execute(writes)
+gpu.memory.write_hex('build/gpu/expected-ddr.hex')
 # gpu.color / gpu.depth: flat row-major array('H'); gpu.stencil: bytearray
-# gpu.memory: updated DDR; gpu.regs: register names (including PERF[1] etc.) -> integers
+# gpu.regs: register names -> integers, e.g. PERF[1], OBJ_HIT_COUNT, ERR_CODE
 ```
 
-`execute` accepts ordered register writes by name or numeric APB offset. `DOORBELL` executes
-synchronously. `run()` uses the current `DESC_BASE/COUNT`; `run([encoded_command, ...])`
-executes an explicit command list. State commands must precede their consumers; clear target
-contents before relying on them. Construction allocates zero-filled host storage, which does
-not define the hardware's power-on RAM contents. `TGT_CFG` changes the physical 115200-pixel
-storage organization without clearing it.
+`execute(writes)` accepts ordered `(register name or numeric APB offset, value)` pairs.
+`DOORBELL` executes synchronously using `DESC_BASE` and `DESC_COUNT`. Alternatively,
+`gpu.run(scene.commands)` executes a list of encoded 32-byte commands directly; `run()`
+without an argument reads the command list from DDR. Both return `gpu`.
+`Memory.read(address, size)` returns bytes for comparing a Surface, object table or list;
+`memory.base` and `memory.data` identify the complete contiguous DDR image. Clone input
+memory with `Memory(scene.memory.base, scene.memory.data)` before running if both input
+and expected images must remain available in memory. `read_errors` and `write_errors`
+are sets of DDR byte addresses used to inject the specified AXI error (ERR_CODE 2).
 
-The viewport is a model API parameter pending specification completion. For stripe rendering,
-use the same full-screen viewport for every stripe and change `SET_TARGET` and `TGT_CFG`.
-`reference_size=(1280,720)` allocates the full-screen ideal target used exclusively for the
-stripe-equivalence test; this is not a hardware configuration. The physical target is
-640x180 or 1280x90, selected by TGT_CFG; 640x360 uses two stripes and 1280x720 uses eight.
+The viewport comes exclusively from `SET_TARGET.VP_X0/VP_Y0/VP_W/VP_H`. Set these fields
+before drawing; the GPU constructor and CLI have no viewport argument. Signed viewport
+origins and unsigned dimensions follow the JSON layout. For stripes, keep VP_* constant
+and change TGT_X0/TGT_Y0 and SC_*; TGT_X0 must be a multiple of four. Physical storage is
+115200 pixels: TGT_CFG=0 selects 640x180, TGT_CFG=1 selects 1280x90. Stripe equivalence
+compares color, depth and stencil for 640x360 in two stripes and 1280x720 in eight stripes.
+`reference_size=(width,height)` allocates a full-frame oracle for that comparison only;
+it does not represent a hardware configuration. RESOLVE addresses are
+`BASE + screen_y*STRIDE + 2*screen_x`. AA clamps neighbors at each RESOLVE region boundary.
 
 ```sh
 python3 tools/gpu/model/selftest.py
-python3 tools/gpu/model/numeric.py --output build/gpu/numeric.json
 python3 -m tools.gpu.model build/gpu/scene.hex build/gpu/writes.json build/gpu/expected \
-    --base 0x80000000 --viewport 0 0 640 360
+    --base 0x80000000
 ```
 
-The CLI exports `color.bin`, `depth.bin` (little-endian u16), `stencil.bin` (u8), updated
-`ddr.hex`, and `registers.json`. The target arrays contain physical target coordinates;
-`SET_TARGET.TGT_X0/Y0` maps screen coordinates into those arrays. RESOLVE Surface addresses
-are `BASE + screen_y*STRIDE + 2*screen_x`; the region is in screen coordinates.
+The CLI exports `color.bin` and `depth.bin` as little-endian u16, `stencil.bin` as u8,
+updated `ddr.hex`, and `registers.json`. Binary target buffers use physical row-major target
+coordinates; subtract SET_TARGET.TGT_X0/Y0 from screen coordinates to index them.
+Rendering is entirely integer: MVP s15.16, clip coordinates 40-bit Q16, q Q30 with a
+10-bit midpoint ROM and one Newton step, and Q8 LOD with an 8-bit-index log2 ROM.
+Bilinear filtering subtracts half a texel after selecting/scaling each mip level;
+trilinear filtering uses that same convention independently at both levels.
 
-PERF1–4 count functional events; timing counters PERF0/5–8 are not predicted and remain zero.
-The model does not simulate APB/AXI cycles, transactions in flight, or mid-command ABORT.
-`Memory.read_errors` and `Memory.write_errors` are sets of byte addresses at which accesses
-raise the specified AXI error (ERR_CODE 2). Other specified errors set registers and stop the
-command list. Host/API errors raise exceptions; there are no recovery paths.
+`interleave_texture(levels, width, height, format)` converts row-major integer mip texels
+to the physical four-bank texture stream; `Scene.texture` calls it automatically. RAM is
+192 KiB, two 96 KiB halves; each mip reserves complete 2x2 halfword groups, including
+8 bytes for a 1x1 mip. Descriptor bounds use that padded physical size. TEX_LOAD copies
+bytes linearly. STEP=0 counts and optionally draws alive objects without simulation,
+collision, list writes or table writes; HIT/FREE counts and overflow are zero.
 
-`Numeric` holds the temporary G-N1–G-N3 research configurations. MVP input is encoded s15.16;
-`matrix_frac` can reduce its evaluated precision. Reciprocal ROMs and log ROMs are generated
-from integer arithmetic, then cached; all rendering arithmetic is integer. The independent
-float study uses the exact values of the encoded input matrix/vertices as its ideal input.
-
-Textures use the four-bank parity layout from microarch 7ed45f8e9 section 4.8 in 192 KiB
-RAM (two 96 KiB halves). `interleave_texture(levels, width, height, format)` exported from
-`tools.gpu.model` converts row-major integer mip texels into the physical byte stream;
-`Scene.texture` calls it automatically. Each mip reserves complete 2x2 halfword groups,
-including 8 bytes for a 1x1 mip, and descriptor bounds use this padded physical size.
-`TEX_LOAD` performs a linear byte copy; it does not convert a row-major image online.
-
-`OBJ_STEP STEP=0` counts and optionally draws the input alive objects, without motion,
-live-region tests, collisions, list writes, or table writes. HIT/FREE counts and overflow
-are zero for that command; ALIVE_COUNT counts the alive input records. STEP=1 performs
-all simulation, collisions and writeback before any drawing. Development clock is 180 MHz;
-this functional model produces no cycle estimates.
+State commands must precede their consumers; clear target contents before relying on them.
+Zero-filled host allocation does not define hardware power-on RAM contents. TGT_CFG changes
+organization without clearing storage. PERF1–4 count functional events. The model does not
+simulate APB/AXI cycles, transactions in flight, mid-command ABORT or timing counters
+PERF0/5–8, which remain zero. Only specified GPU errors are converted to ERR_CODE and stop
+the list; host/API errors raise exceptions.

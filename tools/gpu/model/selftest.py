@@ -11,9 +11,9 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from tools.gpu.model import GPU, Numeric, interleave_texture
+from tools.gpu.model import GPU, interleave_texture
 from tools.gpu.model.layout import mip_layout, texel_address
-from tools.gpu.model.arithmetic import d, divide, expand, p565
+from tools.gpu.model.arithmetic import CLIP_FRAC, W_NEAR, d, divide, expand, p565
 from tools.gpu.scene import LAYOUTS, Memory, Scene, pack, unpack
 
 
@@ -25,9 +25,10 @@ def pixel_state(**overrides):
     return unpack('CMD_SET_PIXEL', pack('CMD_SET_PIXEL', **values))
 
 
-def target(gpu, width=640, height=360, y=0):
-    gpu.target = dict(TGT_X0=0, TGT_Y0=y, SC_X0=0, SC_Y0=y,
-                      SC_X1=width, SC_Y1=y + height)
+def target(gpu, width=640, height=360, y=0, vp_width=640, vp_height=360):
+    gpu.command(pack('CMD_SET_TARGET', TGT_X0=0, TGT_Y0=y, SC_X0=0, SC_Y0=y,
+                     SC_X1=width, SC_Y1=y + height, VP_X0=0, VP_Y0=0,
+                     VP_W=vp_width, VP_H=vp_height))
 
 
 def ready(color=0xffff, **kwargs):
@@ -115,8 +116,8 @@ def test_hand_computed():
 
 def test_strips():
     for width, height, stripe_height, wide in ((640, 360, 180, 0), (1280, 720, 90, 1)):
-        full = ready(viewport=(0, 0, width, height), reference_size=(width, height))
-        target(full, width, height)
+        full = ready(reference_size=(width, height))
+        target(full, width, height, vp_width=width, vp_height=height)
         pattern = interleave_texture([[0xffff if (x + y) % 2 else 0x8410
                                        for y in range(8) for x in range(8)]], 8, 8, 2)
         full.ram[:128] = pattern
@@ -134,10 +135,10 @@ def test_strips():
         full.draw_triangle(vertices)
         stitched_color, stitched_depth, stitched_stencil = array('H'), array('H'), bytearray()
         for y in range(0, height, stripe_height):
-            strip = ready(viewport=(0, 0, width, height))
+            strip = ready()
             strip.write_register('TGT_CFG', wide)
             strip.ram[:128] = pattern
-            target(strip, width, stripe_height, y)
+            target(strip, width, stripe_height, y, vp_width=width, vp_height=height)
             strip.pixel_state = full.pixel_state
             strip.matrix, strip.light = matrix, full.light
             for item in rectangles:
@@ -215,10 +216,11 @@ def test_texture():
     assert texture.sample(256, 0, 0) == (255, 0, 0, 255)
     assert texture.sample(-256, 0, 0) == (255, 0, 0, 255)
     texture.desc['SAMPLE'] = 1
-    assert texture.sample(128, 0, 0) == (128, 0, 128, 255)
+    assert texture.sample(256, 128, 0) == (128, 0, 128, 255)
+    assert texture.sample(128, 128, 0) == (0, 0, 255, 255)
     gpu.command(pack('CMD_SET_TEX', LOG2_W=3, LOG2_H=3, FORMAT=2, LEVELS=2, SAMPLE=2))
     gpu.ram[128:160] = struct.pack('<16H', *([0x07e0] * 16))
-    assert gpu.texture.sample(0, 0, 128) == (0, 128, 128, 255)
+    assert gpu.texture.sample(128, 128, 128) == (0, 128, 128, 255)
     gpu.ram[:32] = interleave_texture([[1 if x % 2 == 0 else 2
                                           for y in range(8) for x in range(8)]], 8, 8, 0)
     gpu.palettes[3][1] = (15 << 16) | 0xf800
@@ -229,6 +231,49 @@ def test_texture():
     gpu.ram[0] = 1
     gpu.command(pack('CMD_SET_TEX', LOG2_W=3, LOG2_H=3, FORMAT=1, LEVELS=1, PAL_GROUP=3))
     assert gpu.texture.sample(0, 0, 0) == (255, 0, 0, 255)
+
+
+def test_bilinear_triangle():
+    pattern = [((x * 4) << 11) | ((y * 8) << 5) | ((x + y) * 2)
+               for y in range(8) for x in range(8)]
+    images = []
+    for mode in (0, 1):
+        gpu = ready()
+        gpu.ram[:128] = interleave_texture([pattern], 8, 8, 2)
+        gpu.command(pack('CMD_SET_TEX', LOG2_W=3, LOG2_H=3, FORMAT=2, LEVELS=1, SAMPLE=mode))
+        def vertex(x, y):
+            result = screen_vertex(x * 16, y * 16)
+            result[4], result[5] = x * 256 * (1 << 30), y * 256 * (1 << 30)
+            return result
+        for points in (((0, 0), (8, 0), (8, 8)), ((0, 0), (8, 8), (0, 8))):
+            gpu.triangle([vertex(x, y) for x, y in points])
+        image = [gpu.color[y * 640 + x] for y in range(8) for x in range(8)]
+        assert image == pattern
+        assert gpu.regs['PERF[4]'] == 64
+        images.append(gpu.color)
+    assert images[0] == images[1]
+
+
+def test_viewport():
+    gpu = ready()
+    # Exercise signed origin decoding and target-relative storage separately from the viewport.
+    gpu.command(pack('CMD_SET_TARGET', TGT_X0=4, TGT_Y0=3, SC_X0=4, SC_Y0=3,
+                     SC_X1=644, SC_Y1=183, VP_X0=-8, VP_Y0=11, VP_W=32, VP_H=16))
+    assert gpu.target['VP_X0'] == -8 and gpu.target['VP_Y0'] == 11
+    unit = 1 << CLIP_FRAC
+    clip_vertex = lambda x, y: [x * unit, y * unit, 0, unit, 0, 0] + [255 << 16] * 3
+    assert gpu.project(clip_vertex(0, 0))[:2] == [8 * 16, 19 * 16]
+    gpu.triangle([gpu.project(clip_vertex(x, y)) for x, y in ((-1, 1), (1, 1), (1, -1))])
+    gpu.triangle([gpu.project(clip_vertex(x, y)) for x, y in ((-1, 1), (1, -1), (-1, -1))])
+    assert gpu.regs['PERF[4]'] == 20 * 16
+    for y in range(180):
+        for x in range(640):
+            expected = 65535 if x < 20 and 8 <= y < 24 else 0
+            assert gpu.color[y * 640 + x] == expected, (x, y)
+    # Changing only SET_TARGET changes projection immediately, including positive VP origins.
+    gpu.command(pack('CMD_SET_TARGET', SC_X1=640, SC_Y1=180, VP_X0=13, VP_Y0=7,
+                     VP_W=80, VP_H=24))
+    assert gpu.project(clip_vertex(0, 0))[:2] == [53 * 16, 19 * 16]
 
 
 def test_texture_layout():
@@ -278,7 +323,8 @@ def test_command_stream():
     scene.command('PAL_LOAD', SRC=palette, GROUP=0, ENTRIES=1)
     scene.command('SET_TEX', LOG2_W=3, LOG2_H=3, FORMAT=2, LEVELS=1)
     scene.command('SET_PIXEL', **{k: v for k, v in pixel_state().items() if k != 'OPCODE'})
-    scene.command('SET_TARGET', SC_X1=640, SC_Y1=360)
+    scene.command('SET_TARGET', SC_X1=640, SC_Y1=360, VP_X0=0, VP_Y0=0,
+                  VP_W=640, VP_H=360)
     scene.command('CLEAR', DEPTH=65535, EN_COLOR=1, EN_DEPTH=1, EN_STENCIL=1)
     scene.command('DRAW_QUAD', ADDR=quads, COUNT=1)
     scene.command('DRAW_TRI', ADDR=vertices, COUNT=1)
@@ -357,8 +403,6 @@ def test_stencil_blend_and_aa():
 
 def test_clipping_and_arithmetic():
     assert d(65025) == 255 and divide(-3, 2) == -2
-    assert Numeric(matrix_frac=12).coefficient(0x7fffffff) == (1 << 27) - 1
-    assert Numeric(matrix_frac=12).coefficient(-0x80000000) == -(1 << 27)
     gpu = ready()
     gpu.write_register('DESC_COUNT', 0x12345678)
     assert gpu.regs['DESC_COUNT'] == 0x5678
@@ -368,13 +412,13 @@ def test_clipping_and_arithmetic():
     gpu.light = dict(LX=0, LY=0, LZ=16384, AMB_RGB=0, DIR_RGB=0xffffff)
     v = dict(X=1, Y=2, Z=3, NX=0, NY=0, NZ=127, U=123, V=456, COLOR=65535)
     transformed = gpu.transform(v)
-    unit = 1 << gpu.numeric.clip_frac
+    unit = 1 << CLIP_FRAC
     assert transformed[:4] == [unit, 2 * unit, 3 * unit, unit]
     assert transformed[4:6] == [123, 456]
     assert transformed[6:] == [253 << 16] * 3
     gpu.light['AMB_RGB'] = 0xffffff
     assert gpu.transform(v)[6:] == [255 << 16] * 3
-    f = gpu.numeric.clip_frac
+    f = CLIP_FRAC
     def vertex(x, y, w):
         return [round(x * (1 << f)), round(y * (1 << f)), 0, round(w * (1 << f)),
                 0, 0, 255 << 16, 255 << 16, 255 << 16]
@@ -383,7 +427,7 @@ def test_clipping_and_arithmetic():
         result = gpu.clip(polygon)
         assert len(result) >= 3
         for v in result:
-            assert v[3] >= gpu.numeric.near
+            assert v[3] >= W_NEAR
             assert abs(v[0]) <= 4 * v[3] + 1 and abs(v[1]) <= 4 * v[3] + 1
     assert not gpu.clip([vertex(0, 0, -1)] * 3)
     before = gpu.regs['PERF[2]']
@@ -399,7 +443,8 @@ def test_clipping_and_arithmetic():
 def main():
     start = time.perf_counter()
     for test in (test_shared_edges, test_hand_computed, test_strips, test_objects,
-                 test_texture, test_texture_layout, test_command_stream, test_stencil_blend_and_aa,
+                 test_texture, test_bilinear_triangle, test_viewport, test_texture_layout,
+                 test_command_stream, test_stencil_blend_and_aa,
                  test_clipping_and_arithmetic):
         test()
         print(f'{test.__name__}: PASS')

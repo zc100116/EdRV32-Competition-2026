@@ -21,14 +21,20 @@ scene.command('TEX_LOAD', SRC=texture, DST=0, BYTES=texture_bytes)
 scene.command('SET_TEX', OFFSET=0, LOG2_W=3, LOG2_H=3, FORMAT=2, LEVELS=1)
 scene.command('SET_PIXEL', DEPTH_FUNC=1, COLOR_WRITE=1, ST_FUNC=7,
               ST_RMASK=255, ST_WMASK=255, BL_FS=1)
-scene.command('SET_TARGET', SC_X1=640, SC_Y1=360)
+scene.command('SET_TARGET', SC_X1=640, SC_Y1=180, VP_X0=0, VP_Y0=0,
+              VP_W=640, VP_H=360)
 scene.command('CLEAR', COLOR=0, DEPTH=65535, EN_COLOR=1, EN_DEPTH=1, EN_STENCIL=1)
 scene.command('DRAW_QUAD', ADDR=quads, COUNT=1)
 scene.command('RESOLVE', BASE=surface, STRIDE=1280, X1=640, Y1=180)
 # Create build/gpu first; export writes no directories or metadata implicitly.
 writes = scene.export('build/gpu/scene.hex', 'build/gpu/writes.json')
-gpu = GPU(scene.memory).execute(writes)
+# Encoded command list for a testbench; also stored in DDR at DESC_BASE.
+commands = b''.join(scene.commands)
+from tools.gpu.scene import Memory
+gpu = GPU(Memory(scene.memory.base, scene.memory.data)).execute(writes)
+gpu.memory.write_hex('build/gpu/expected-ddr.hex')
 assert gpu.color[9 * 640 + 7] == 0xf800
+assert gpu.memory.read(surface + 9 * 1280 + 7 * 2, 2) == b'\x00\xf8'
 ```
 
 - `blob(bytes, alignment=32)` and `reserve(size, alignment=32)` return DDR byte addresses.
@@ -46,3 +52,18 @@ assert gpu.color[9 * 640 + 7] == 0xf800
   little-endian memory word; e.g. bytes `01 02 03 04` produce line `04030201`. The starting
   DDR byte address is explicitly passed as `base`, not embedded as an extra hex directive.
 - `pack(layout, **fields)` and `unpack(layout, bytes)` expose the same record codec directly.
+
+For V-1, export before running the oracle: `scene.hex` is the immutable input DDR,
+`writes.json` is the ordered APB setup/doorbell sequence, and `scene.commands` is a list
+of 32-byte command records. The final three writes from `finish`/`export` identify
+DESC_BASE, DESC_COUNT and DOORBELL. To export raw command bytes explicitly, use
+`Path('build/gpu/commands.bin').write_bytes(b''.join(scene.commands))`.
+The updated oracle DDR contains RESOLVE output, object writeback and hit/free lists;
+read individual regions with `gpu.memory.read(address, length)` or export the complete
+image with `gpu.memory.write_hex(path)`. For binary target and register exports use
+`python3 -m tools.gpu.model` as described in the model README.
+
+Every SET_TARGET must explicitly encode VP_X0/VP_Y0 (signed) and VP_W/VP_H (unsigned).
+For example, the viewport can remain 640x360 while the physical target holds only the
+first 640x180 stripe; the next stripe changes TGT_Y0/SC_Y0/SC_Y1 while retaining VP_*.
+The API does not supply implicit viewport values.
