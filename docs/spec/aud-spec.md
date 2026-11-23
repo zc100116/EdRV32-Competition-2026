@@ -2,11 +2,11 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.1 |
+| 版本 | v0.2 |
 | 日期 | 2026-11-23 |
 | 状态 | 已确认（用户 2026-11-23） |
 | 范围 | `edrv32_aud`：从 DDR 环形缓冲读取 16 位立体声样本，作为 I2S 主机以 48 kHz 输出；AUD 寄存器块 |
-| 关联文档 | `gpu-soc-spec.md` v0.1 3、5.2（X11）、6.1、6.2；视觉规格 4.2、4.3、7.1；设计记录 `2026-11-23-gpu-architecture.md` R8、`2026-11-23-audio-pmod-pins.md` |
+| 关联文档 | `gpu-soc-spec.md` v0.2 3、5.2（X11）、6.1、6.2；视觉规格 4.2、4.3、7.1；设计记录 `2026-11-23-gpu-architecture.md` R8、`2026-11-23-audio-pmod-pins.md` |
 
 ---
 
@@ -46,7 +46,8 @@ CPU 把混好的样本写进 DDR 环形缓冲并推进写指针；AUD 按需读�
 
 ### 2.4 样本 FIFO
 
-- `async_fifo`，宽 32 位（一个样本帧），深度 512 **[待定]**（A-1），约 10.7 ms。
+- `async_fifo_ram`（存储为 `edrv32_ram_aud_fifo`），宽 32 位（一个样本帧），深度 512 **[待定]**（A-1），约 10.7 ms。
+- 水位：clk_mem 域对写入 FIFO 的样本计数；clk_aud 域的读出计数经 `cdc_gray_cnt` 传回（X11）；占用 = 写入计数 − 同步后的读出计数。同步有延迟，占用只会偏大，2.3 的空位判断和 `urgent_o` 因此偏保守。
 - `urgent_o`：`CTRL.ENABLE` = 1 且 FIFO 水位低于 64 **[待定]**（A-2）时为 1。
 
 ### 2.5 I2S 发送（clk_aud）
@@ -81,8 +82,9 @@ CPU 把混好的样本写进 DDR 环形缓冲并推进写指针；AUD 按需读�
 | 0x110 | LOW_LEVEL | RW | 0 | 字节数；avail 从 ≥ LOW_LEVEL 变为 < LOW_LEVEL 时置 IRQ_STAT.LOW（bit8） |
 | 0x114 | UNDERRUN_CNT | RO | 0 | 欠载次数，32 位饱和 |
 
-- `CTRL.ENABLE` 由 0 变 1 时，`RD_PTR` 清零。`RING_BASE`、`RING_SIZE` 只在 `CTRL.ENABLE` = 0 时写入有效。
-- `CTRL.ENABLE` 变为 0：停止发起新读取；在途读取完成后丢弃 FIFO 中的样本；I2S 输出 0。
+- `RING_BASE`、`RING_SIZE` 只在 `CTRL.ENABLE` = 0 时写入有效。
+- `CTRL.ENABLE` 由 1 变 0：停止发起新读取；I2S 输出 0；clk_aud 域把 FIFO 中的样本取出丢弃。在途读取完成且 FIFO 排空后，`RD_PTR` 清零，清空完成。
+- 清空完成之前，即使 `CTRL.ENABLE` 已重新置 1，也不发起读取、不放音；清空完成且 `CTRL.ENABLE` = 1 时，从 `RD_PTR` = 0 开始放音。
 
 ## 5. 行为与时序
 
@@ -93,7 +95,7 @@ CPU 把混好的样本写进 DDR 环形缓冲并推进写指针；AUD 按需读�
 
 | ERR_CODE | 错误 | 处理 |
 |---|---|---|
-| 1 | AXI 读错误响应 | 置 ERROR，停止 DMA（已发出的事务照常完成）；I2S 继续输出 FIFO 中剩余样本，之后输出 0 |
+| 1 | AXI 读错误响应 | 置 ERROR，停止 DMA（已发出的事务照常完成）；I2S 继续输出 FIFO 中剩余样本，之后输出 0。出错事务中已返回的数据是否进入 FIFO 不作规定 |
 
 欠载不是错误，只计数（4、2.5）。
 
@@ -125,4 +127,5 @@ CPU 把混好的样本写进 DDR 环形缓冲并推进写指针；AUD 按需读�
 
 | 日期 | 版本 | 内容 |
 |---|---|---|
+| 2026-11-23 | v0.2 | 澄清（用户 2026-11-23 同意）：FIFO 水位由读出计数经 cdc_gray_cnt 回传求得；关闭放音的清空过程和 RD_PTR 清零时刻；出错事务数据不作规定；FIFO 存储包装 |
 | 2026-11-23 | v0.1 | 初稿。依据设计记录 R8：只做放音、FPGA 为 I2S 主机、CPU 软件混音 |

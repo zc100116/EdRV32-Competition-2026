@@ -6,7 +6,7 @@
 | 日期 | 2026-11-23 |
 | 状态 | 已确认（用户 2026-11-23） |
 | 范围 | GPU 项目的 SoC 层：`edrv32_gpu_soc_top` 及其内部。FPGA 板级层（PLL、DDR 控制器/PHY、TMDS 串化、RGMII IO、引脚）不在本文范围内 |
-| 关联文档 | 视觉 SoC 规格 `edrv32-soc-spec.md` v0.23（下称“视觉规格”，本文沿用其中的大部分条款，本项目不修改它）；`gpu-spec.md` v0.2；`aud-spec.md`；设计记录 `2026-11-23-gpu-architecture.md`（R4、R8）、`2026-11-23-audio-pmod-pins.md`、`2026-11-23-gpu-resource-closure.md` |
+| 关联文档 | 视觉 SoC 规格 `edrv32-soc-spec.md` v0.23（下称“视觉规格”，本文沿用其中的大部分条款，本项目不修改它）；`gpu-spec.md` v0.2；`aud-spec.md` v0.2；设计记录 `2026-11-23-gpu-architecture.md`（R4、R8）、`2026-11-23-audio-pmod-pins.md`、`2026-11-23-gpu-resource-closure.md` |
 
 本文与视觉规格的关系：本文**没有写到的内容一律按视觉规格执行**；本文写到的内容以本文为准。视觉项目的文件（视觉规格、各模块规格、`edrv32_soc_top` 及其文件列表）在本项目中不得修改。沿用模块需要的改动，写在第 8 节，在本项目自己的 RTL 和文件列表中实现。
 
@@ -119,6 +119,7 @@
 | X10 | clk_mem → clk_gpu | GPU 寄存器（媒体 APB 槽 6） | `apb_async_bridge`，放在 GPU 边界 |
 | X11 | clk_mem → clk_aud | 音频样本；放音使能 | `async_fifo`；`cdc_sync_bit` |
 | X11 | clk_aud → clk_mem | 欠载事件 | `cdc_pulse` |
+| X11 | clk_aud → clk_mem | 样本 FIFO 读出计数（求水位） | `cdc_gray_cnt` |
 
 ### 5.3 复位
 
@@ -272,5 +273,6 @@ DRM（估算）：GPU 约 195 块，保留模块约 63 块，合计约 258 / 415
 
 | 日期 | 版本 | 变更 |
 |---|---|---|
+| 2026-11-23 | v0.2 | X11 增加 FIFO 读出计数回传（`cdc_gray_cnt`，用户 2026-11-23 同意） |
 | 2026-11-23 | v0.2 | 资源闭合（用户 2026-11-23）：渲染目标减半，GS-3 关闭；clk_gpu 初值 180 MHz；9.1 带宽按条带重算；9.3 DRM 预算和 65% 上限 |
 | 2026-11-23 | v0.1 | 初稿。GPU 项目单独成文，不修改视觉规格（用户 2026-11-23）；沿用 CPU、cache、系统子系统、存储子系统、DISP、ETH；新增 GPU、AUD；mem_xbar 减为 5 个端口（用户 2026-11-23：减少逻辑）；DISP 增加 L0 2 倍放大；用户确认全文 |
