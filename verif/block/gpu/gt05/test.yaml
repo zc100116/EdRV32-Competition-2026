@@ -1,0 +1,12 @@
+top: edrv32_gpu_tb
+files: files.f
+simulator: verilator
+defines: SIM_MODE
+parameters:
+software:
+runner: python3 verif/block/gpu/run.py rtl gt05
+timeout: 900
+pass: PASS
+tier: smoke
+seed: 202605
+group: verif/block/gpu

@@ -1,0 +1,10 @@
+`verilator_config
+// Procedural verification models and scoreboards intentionally use blocking assignments.
+lint_off -rule BLKSEQ -file "*verif/block/gpu/*.sv"
+lint_off -rule BLKSEQ -file "*verif/common/edrv32_axi256_checker.sv"
+// Shared interface has sixteen slots; the GPU test only uses slot zero.
+lint_off -rule UNUSEDSIGNAL -file "*verif/common/edrv32_apb_if.sv"
+// Shared checker indexes a sixteen-ID table with a host integer.
+lint_off -rule UNUSEDSIGNAL -file "*verif/common/edrv32_axi256_checker.sv"
+// Shared APB checker uses async reset; the DDR model samples reset synchronously.
+lint_off -rule SYNCASYNCNET -file "*verif/block/gpu/edrv32_gpu_tb.sv"

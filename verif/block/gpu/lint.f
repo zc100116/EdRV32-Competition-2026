@@ -1,0 +1,9 @@
+verif/block/gpu/lint.vlt
+verif/common/edrv32_axi256_if.sv
+verif/common/edrv32_apb_if.sv
+verif/common/edrv32_axi256_checker.sv
+verif/common/edrv32_apb_checker.sv
+verif/block/gpu/edrv32_gpu_memory.sv
+verif/block/gpu/edrv32_gpu_apb_host.sv
+verif/block/gpu/edrv32_gpu_tb.sv
+verif/block/gpu/lint/edrv32_gpu.sv
