@@ -12,6 +12,7 @@ def build(c, rng):
         run = c if index == 0 else Case()
         if index:
             c.runs.append(run)
+        run.clock_mhz = 180
         run.ready(SC_X1=640, SC_Y1=180, VP_W=640, VP_H=180)
         run.command_timing = True
         if name == 'quad':

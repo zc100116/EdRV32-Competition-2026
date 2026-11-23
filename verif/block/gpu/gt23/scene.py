@@ -10,8 +10,10 @@ def build(c, rng):
         dims = item['dimensions']
         names.extend(item['name'] + (f'[{i}]' if dims else '')
                      for i in range(dims[0]['count'] if dims else 1))
+    timing = [f'PERF[{i}]' for i in [0, 5, 6, 7, 8]]
+    functional = [name for name in names if name not in timing]
     c.reset_registers = names
-    c.sample_registers = names
+    c.sample_registers = functional
     c.ready()
     s = c.scene
     c.pixel(COLOR_WRITE=0, DEPTH_WRITE=0)
@@ -47,7 +49,7 @@ def build(c, rng):
     for pattern in [0x55555555, 0xaaaaaaaa]:
         run = Case()
         run.ready()
-        run.sample_registers = names
+        run.sample_registers = functional
         for item in SCHEMA['registers']:
             if item['access'] != 'RW' or item['name'] in ['CTRL', 'IRQ_EN']:
                 continue
