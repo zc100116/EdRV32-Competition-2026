@@ -1,0 +1,9 @@
+`verilator_config
+// Behavioral queues and scoreboards require ordered, blocking updates.
+lint_off -rule BLKSEQ -file "*verif/block/aud/*.sv"
+lint_off -rule BLKSEQ -file "*verif/models/i2s_rx_model.sv"
+lint_off -rule BLKSEQ -file "*verif/common/edrv32_axi256_checker.sv"
+// The shared checker indexes sixteen-entry ID tables with a 32-bit temporary.
+lint_off -rule UNUSEDSIGNAL -file "*verif/common/edrv32_axi256_checker.sv"
+// The transaction and external clock models sample the DUT asynchronous reset.
+lint_off -rule SYNCASYNCNET -file "*verif/block/aud/edrv32_aud_tb.sv"

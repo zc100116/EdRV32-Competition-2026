@@ -1,0 +1,12 @@
+top: edrv32_aud_tb
+files: files.f
+simulator: verilator
+defines: SIM_MODE
+parameters:
+software:
+timeout: 60
+pass: PASS
+tier: smoke
+verilator_flags: -Wall --timescale 1ns/1ps
+plusargs: +AT=3
+group: verif/block/aud
