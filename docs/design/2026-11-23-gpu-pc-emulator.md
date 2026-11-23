@@ -43,6 +43,7 @@
    - 中断：模拟器在主循环中检查各块的中断，调用已注册的处理函数。
 4. **游戏平台层** `sw/lib/plat/`：
    - 驱动以外的平台差异只放在这里：帧计时、输入（板上为按键和 ETH 虚拟手柄，PC 上为键盘）、日志（板上走 UART，PC 上走 stdout）、DMA 可见内存的分配。
+   - 按键位为 UP、DOWN、LEFT、RIGHT、A、B、START、SELECT，与 `sw/lib/virtual_input.h` 的同名位一一对应。PC 上 Z/X 对应 A/B，Enter 对应 START，Esc 对应 SELECT；板上 4 个按键固定对应 RIGHT/LEFT/A/START。
    - 有 `board.c`、`pc.c` 两个实现。游戏只调用平台层、驱动和 C 标准库。
 5. **前端**：
    - Windows 交互前端：GDI 窗口，按整数倍放大，键盘输入，winmm 出声。在 Linux 上用 zig 交叉编译成单个 `.exe`，不依赖其他文件。
