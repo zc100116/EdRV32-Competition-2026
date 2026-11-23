@@ -17,18 +17,22 @@ A-3：06=00、10=00 与手册描述不同，协调者确认保留厂家开发初
 | host 驱动检查 | PASS：cache 调用、环回写、错误保留、81 个 I2C 字节命令 |
 | I2C 接收模型独立仿真 | PASS：2 次寄存器写及 ACK，620 us 仿真时间 |
 | 本任务 7 个 SV 文件风格检查 | PASS，0 告警 |
-| 5 个 SoC 场景接口 lint | PASS，0 告警，仅 lint 使用明确授权的 idle GPU |
+| 真实 SoC 的 ST-10–14 接口 lint | PASS，0 告警 |
 | ST-10 参考图生成 | PASS：2 条、230400 个源像素 |
-| ST-09 GPU 槽位/PLIC 源 13 | 等待真实 GPU 集成；后续删除占位并重跑全项 |
-| ST-10 / ST-11 完整 SoC | 等待真实 GPU 集成 |
-| ST-12 / ST-13 / ST-14 完整 SoC | 等待真实 GPU 集成；首次 RTL lint 退出，未进入仿真 |
+| ST-08 真实 GPU 启动 | FAIL：1800 s 超时；最后输出停在 BIOS 编译器信息，无 PASS |
+| ST-09 GPU 槽位/PLIC 源 13 | PASS：5 个 ID、22 个 SLVERR、5 个 PLIC 源，390 s |
+| ST-10 完整 SoC | PASS：921600 个 HDMI 像素逐个一致，974 s |
+| ST-11 完整 SoC | PASS：DONE/PLIC 源 13、对象写回、1 次命中及 1 次释放，296 s |
+| ST-12 完整 SoC | PASS：27 次 I2C 写、256 帧立体声、LOW 补充至少 3 次，仿真 15 ms |
+| ST-13 完整 SoC | PASS：真实 ETH 加载、DDR 跳转、64 KiB RX、校验和/端口丢弃、ARP；仿真 20 ms |
+| ST-14 完整 SoC | FAIL：366 ns 时 SYS 已释放，而 GPU/AUD 实际副本尚未均释放；已报协调者 |
 
 ST-10 比对模型生成图像放大后的全部 921600 个 HDMI 像素。
 ST-11 软件检查 DONE、PLIC、对象写回、命中和释放列表的 cache 交接。
 ST-12 场景检查 27 次 ES8156 配置和 256 个正弦左声道/方波右声道样本。
 ST-13 经真实 BIOS Ethernet 前门加载程序及 DDR 段，再执行视觉 SC-06 的 64 KiB RX 检查。
 ST-14 检查 GPU/AUD 初始复位顺序与媒体软复位，并由软件检查寄存器复位值。
-上述场景定义不表示完整 SoC 仿真已经通过。
+真实 GPU 基线：`fc448d81b`；ST-08 超时待启动测试所有者排查，ST-14 待复位 RTL 修复后复测。
 
 复现命令（仓库根目录）：
 
@@ -47,10 +51,7 @@ python3 sw/tests/gpu_drivers/lint.py
 python3 verif/soc/gpu_audio/run_model.py
 mkdir -p build/gpu_soc/gpu_render
 python3 verif/soc/gpu_render/prepare.py build/gpu_soc/gpu_render
-python3 tools/regress.py full --path verif/soc/gpu_regs -j 1
-python3 tools/regress.py full --path verif/soc/gpu_audio -j 1
-python3 tools/regress.py full --path verif/soc/gpu_eth -j 1
-python3 tools/regress.py full --path verif/soc/gpu_reset -j 1
-python3 tools/regress.py full --path verif/soc/gpu_render -j 1
-python3 tools/regress.py full --path verif/soc/gpu_irq -j 1
+for p in boot regs render irq audio eth reset; do
+    python3 tools/regress.py full --path verif/soc/gpu_$p -j 1
+done
 ```

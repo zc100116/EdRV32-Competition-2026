@@ -5,7 +5,7 @@ parameters:
 software: gpu_audio
 timeout: 1800
 pass: PASS ST-12
-tier: smoke
+tier: full
 simulator: verilator
 group: gpu_soc
 runner: python3 verif/soc/gpu_audio/run.py

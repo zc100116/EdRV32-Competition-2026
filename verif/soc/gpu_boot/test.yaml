@@ -8,4 +8,4 @@ pass: PASS
 tier: full
 simulator: verilator
 group: gpu_soc
-runner: python3 verif/soc/gpu_boot/run.py --gpu-placeholder
+runner: python3 verif/soc/gpu_boot/run.py

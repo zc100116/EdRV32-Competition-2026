@@ -51,7 +51,7 @@ module edrv32_gpu_scenario (
                 if (line_text == "BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud")
                     menu_seen = 1;
                 if (line_text == "ETH load ready 192.168.1.10:5000") load_ready = 1;
-                if (line_text.len() >= 21 && line_text.substr(0, 20) == "ETH load result: PASS")
+                if (line_text == "Load result: PASS")
                     load_pass = 1;
                 if (line_text.len() >= 7 && line_text.substr(0, 6) == "Run: 0x") run_seen = 1;
                 line_text = "";
@@ -80,6 +80,26 @@ module edrv32_gpu_scenario (
             end else loader_arp_seen = 1;
         end
     end
+    // Retain visual SC-18 functional-test acceleration; B1 covers physical timing.
+    // GPU SYS is 125 MHz: divider 256 gives 7.8125 Mbaud (16 * SYS / divider).
+    reg [63:0] bios_next_time;
+    initial begin
+        #1;
+        force $root.edrv32_gpu_soc_tb.u_dut.u_sys.u_uart.baud_div_r = 24'd256;
+        $root.edrv32_gpu_soc_tb.u_uart.baud = 7812500.0;
+        forever begin
+            @(negedge $root.edrv32_gpu_soc_tb.clk_sys_i);
+            if ($root.edrv32_gpu_soc_tb.u_dut.u_sys.u_clint.axi_arvalid_i &&
+                $root.edrv32_gpu_soc_tb.u_dut.u_sys.u_clint.axi_arready_o &&
+                $root.edrv32_gpu_soc_tb.u_dut.u_sys.u_clint.axi_araddr_i[15:3] == 13'h17ff) begin
+                bios_next_time = $root.edrv32_gpu_soc_tb.u_dut.u_sys.u_clint.mtime_r + 10000;
+                force $root.edrv32_gpu_soc_tb.u_dut.u_sys.u_clint.mtime_next_w = bios_next_time;
+                @(negedge $root.edrv32_gpu_soc_tb.clk_sys_i);
+                release $root.edrv32_gpu_soc_tb.u_dut.u_sys.u_clint.mtime_next_w;
+            end
+        end
+    end
+
     initial begin
         checks_complete_o = 0;
         loader_arp_seen = 0;
