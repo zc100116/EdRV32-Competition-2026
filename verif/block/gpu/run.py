@@ -163,6 +163,7 @@ def generate_case(case, out):
             kind, (first, last) = 2, abort['write_address']
     (out/'events.txt').write_text(('%d %d %d %d %08x %08x\n') %
                                   (*values, kind, first, last))
+    # Each independently reset subscene carries its own clock selection into the RTL run.
     arguments = [f'+CLOCK_MHZ={case.clock_mhz}']
     for channel, fault in case.axi_errors.items():
         tag = 'R' if channel == 'read' else 'W'

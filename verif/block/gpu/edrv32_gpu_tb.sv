@@ -46,6 +46,7 @@ module edrv32_gpu_tb;
     real clock_mhz = 150.0;
     initial begin
         void'($value$plusargs("CLOCK_MHZ=%f", clock_mhz));
+        $display("GPU_CLOCK_MHZ=%0g", clock_mhz);
         forever #(500.0/clock_mhz) clk_r = ~clk_r;
     end
 

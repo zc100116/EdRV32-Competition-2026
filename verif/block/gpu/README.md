@@ -105,7 +105,11 @@ ABORT 后的像素内容/部分计数不作保证；错误后的已执行写入�
 用于顶点/DMA/对象的首读，或 RESOLVE 的首个写地址；同一场景选择一种触发方式。
 
 `case.clock_mhz=180` 为 GT-25 选择规格第 7 节的 180 MHz 条件；默认仍为环境的 150 MHz。
-runner 将其作为 `+CLOCK_MHZ=<MHz>` 传给 testbench，模型仅记录配置，不生成周期期望。
+runner 将其作为 `+CLOCK_MHZ=<MHz>` 写入各子场景的 `sim_args.json`，RTL 模式启动每个
+子场景时均将该参数传给 testbench；`config.json` 同时记录数值。TB 读取此值，以
+`500.0/clock_mhz` ns 作为半周期，并在仿真日志输出 `GPU_CLOCK_MHZ=<MHz>`。
+模型仅记录配置，不生成周期期望。GT-25 的十个子场景均设置 180，performance.py
+仍委托公共 runner 启动，因此每个子场景都会使用 180 MHz；其他场景默认 150 MHz。
 
 GT-09–GT-17 已加入：GT-09/10/15 为 full，其余为 smoke；固定 seed 写在各 test.yaml。
 GT-09 用 RGB565 低 8 位编码模板探针结果；GT-11/16 另用后续深度/模板条件绘制，
