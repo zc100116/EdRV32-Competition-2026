@@ -1,0 +1,70 @@
+# GPU 项目实施方案
+
+| 项 | 内容 |
+|---|---|
+| 版本 | v0.1 |
+| 日期 | 2026-11-23 |
+| 分支 | `zc100116/gpu`（协调者工作树 `EdRV32-Competition-2026/gpu`）；worker 分支由 Orca 从它拉出 |
+| 规格 | `gpu-spec.md` v0.1、`gpu-soc-spec.md` v0.1、`aud-spec.md` v0.1 |
+| 验证方案 | `gpu-testplan.md`、`aud-testplan.md`、`gpu-soc-testplan.md`（均为 v0.1） |
+
+## 1. 目标和完成标准
+
+- **仿真**：GPU、AUD 的模块级 smoke 和 full 全部通过；GPU SoC 的 smoke 和 full 全部通过；GPU perf 档记录到测量报告。
+- **上板**：Windows 端完成综合和布局布线，时序收敛；三部分演示在板上运行，放音正常。
+- **规格定稿**：`gpu-spec.md` 第 9 节、`gpu-soc-spec.md` 第 10 节、`aud-spec.md` 第 9 节的待定项全部按数据定稿。
+
+## 2. 前置条件
+
+- 视觉项目的 RTL、验证环境和工具链（`zc100116/b3` 3f111eb83 的内容）都已在本分支中。
+- 本项目的文件列表、地址表、顶层都新建，不修改视觉项目的对应文件（`gpu-soc-spec.md` 开头说明）。
+
+## 3. 待办清单
+
+执行者：Codex 一律用 `gpt-6.1-sol`、effort medium，不派 Claude worker。
+
+| 编号 | 内容 | 执行者 | 依赖 | 验收 | 状态 |
+|---|---|---|---|---|---|
+| C-1 | 命令格式文件 `rtl/include/gpu_cmd.json` 及其生成器（RTL localparam、C 头文件）；地址表 `gpu_soc_address_map.json` | 协调者（生成器可派 Codex） | — | 生成器运行通过；字段与 gpu-spec 2.3–2.9 逐项一致 | [ ] |
+| M-1 | Python 逐位参考模型 `tools/gpu/model/` 和场景生成器 `tools/gpu/scene/`；数值研究：对 G-N1–G-N3 给出定点格式和近似方法的误差数据与建议 | Codex（验证侧，不读 RTL） | C-1 | 模型覆盖规格全部功能；数值报告 `docs/reports/<日期>-model-gpu-numeric.md` | [ ] |
+| D-1 | GPU 微结构设计记录：单元划分、单元间接口（信号、握手、时序）、流水线、片上 RAM 组织（纹理存储体、渲染目标 4 像素字）、读改写旁路、资源和时序估算 | Codex 起草，协调者逐条评审 | C-1 | 设计记录 `docs/design/<日期>-gpu-microarch.md` 经协调者批准；内部接口冻结 | [ ] |
+| S-1 | 协调者根据 M-1 修订 `gpu-spec.md` 为 v0.2（G-N1–G-N3 定稿），经用户确认 | 协调者 | M-1 | 规格 v0.2 | [ ] |
+| R-1 | GPU 前端：寄存器块、命令处理、DMA（命令、顶点、四边形、对象表、纹理装入）、RESOLVE 与后处理抗锯齿 | Codex | D-1、S-1 | 单元测试；lint 0 | [ ] |
+| R-2 | 几何：顶点变换、光照、裁剪、透视除法、背面剔除、三角形建立 | Codex | D-1、S-1 | 单元测试对照参考模型逐位一致 | [ ] |
+| R-3 | 光栅化（三角形、四边形快速通道）与对象单元 | Codex | D-1、S-1 | 单元测试 | [ ] |
+| R-4 | 纹理单元（取样、mipmap、调色板）、像素运算（模板、深度、混合）、片上渲染目标 | Codex | D-1、S-1 | 单元测试 | [ ] |
+| V-1 | GPU 模块级测试环境和 GT-01–GT-25（不读 RTL） | Codex（验证侧） | M-1、C-1 | 环境可运行；测试按验证方案实现 | [ ] |
+| I-1 | GPU 集成：`edrv32_gpu` 顶层，跑 GPU 模块级全部档位，按 11.3 分清 RTL、测试、规格问题 | Codex（集成） | R-1–R-4、V-1 | smoke、full 通过；perf 报告 | [ ] |
+| A-1 | AUD RTL、单元测试，以及 AT-01–AT-09（RTL 和测试由两个 worker 分开写） | Codex × 2 | C-1 | smoke、full 通过 | [ ] |
+| X-1 | mem_xbar 改为 5 个端口，相应测试改写（ST-01–03） | Codex；**协调者逐行评审** | — | ST-01–03 通过 | [ ] |
+| X-2 | DISP 增加 `L0_X2`；测试 ST-04–07 | Codex | — | ST-04–07 通过 | [ ] |
+| X-3 | 系统子系统：reset_ctrl 改名和新增 `rst_aud_n`；CHIP_ID | Codex | — | 视觉项目系统子系统测试通过 | [ ] |
+| T-1 | `edrv32_gpu_soc_top`、本项目文件列表、板级顶层和约束（PLL 增加 clk_gpu、clk_aud 输出；I2S、I2C 引脚按 J25 PMOD-D）、PDS 导入脚本 | Codex（RTL）；协调者（约束、脚本、IP 说明） | I-1、A-1、X-1–X-3 | SoC lint 0；ST-08、ST-09 通过 | [ ] |
+| W-1 | BSP 驱动（GPU、AUD、ES8156 配置）和 SoC 测试程序 ST-10–ST-14 | Codex | T-1 | SoC smoke、full 通过 | [ ] |
+| B-1 | Windows 任务卡：PLL IP 修改说明、综合、布局布线、时序和资源报告，上板跑 ST-10、ST-12 的程序 | 协调者写卡，用户和 Windows Codex 执行 | W-1 | 报告回传；定稿 G-T1、G-R1、G-R2、GS-1、GS-3 | [ ] |
+| G-1 | 三部分演示软件（2D 弹幕挑战、3D 小场景、功能演示页），玩法逐条与用户确认后再开发 | Codex | W-1、玩法确认 | 仿真和上板运行 | [ ] |
+
+## 4. 规格定稿项
+
+| 待定项 | 时机 | 依据 |
+|---|---|---|
+| gpu-spec G-N1–G-N3 | M-1 完成后（S-1） | 参考模型误差数据 |
+| gpu-spec G-T1、G-R1、G-R2、G-P1 | B-1 后 | PDS 报告、perf 测量 |
+| gpu-soc-spec GS-1、GS-3 | B-1 后 | PDS 报告 |
+| gpu-soc-spec GS-2 | 现在 | 用户确认 CHIP_ID |
+| gpu-soc-spec GS-4 | W-1 后 | 联调带宽测量 |
+| aud-spec A-1–A-3 | 上板后 | 听感、DDR 延迟 |
+
+## 5. 风险和阻塞
+
+| 风险 | 应对 |
+|---|---|
+| DRM 预算偏紧（估算 382 / 415） | D-1 先给出精确的 RAM 映射；不够时按 GS-3 用条带减半渲染目标 |
+| clk_gpu 时序：透视校正的倒数、三线性、混合乘法链较长 | D-1 按 PDS 级数预算切流水；按全 SoC 拥塞留余量（150 MHz 初值） |
+| 主机只有 7 GiB 内存、3 核 | 本机 worker 仿真 `-j 1`；大规模回归放到仿真虚拟机（只能由 Codex 访问） |
+
+## 6. 变更记录
+
+| 日期 | 版本 | 内容 |
+|---|---|---|
+| 2026-11-23 | v0.1 | 初稿 |
