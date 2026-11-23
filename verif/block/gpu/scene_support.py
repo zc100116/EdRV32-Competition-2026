@@ -10,6 +10,14 @@ class Case:
         self.surfaces = []
         self.regions = []
         self.checks = []
+        self.runs = []
+        self.axi_errors = {}
+        self.abort = None
+        self.sample_registers = []
+        self.checked_registers = None
+        self.expected_registers = {}
+        self.compare_ddr = True
+        self.command_timing = False
 
     def target(self, **changes):
         fields = dict(TGT_X0=0, TGT_Y0=0, SC_X0=0, SC_Y0=0, SC_X1=64, SC_Y1=64,

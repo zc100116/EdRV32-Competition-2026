@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[3]
 HERE = Path(__file__).resolve().parent
 sys.path[:0] = [str(ROOT), str(HERE)]
 from tools.gpu.model import GPU
-from tools.gpu.scene import Memory, SCHEMA
+from tools.gpu.scene import BusError, Memory, SCHEMA
 from scene_support import Case
 
 REGISTERS = {}
@@ -35,6 +35,43 @@ def metadata(test):
                 if ':' in line and not line.lstrip().startswith('#'))
 
 
+class TestMemory(Memory):
+    """Apply specified address-range errors; nth AXI errors use a model access address."""
+    def __init__(self, original, errors):
+        super().__init__(original.base, original.data)
+        self.errors = errors
+
+    def fault(self, channel, address, size):
+        if channel in self.errors:
+            fault = self.errors[channel]
+            if 'nth' in fault:
+                first = last = fault['model_address']
+            else:
+                first, last = fault['first'], fault['last']
+            if address <= last and first < address+size:
+                raise BusError(f'{channel} response error at {address:#x}')
+
+    def read(self, address, size):
+        self.fault('read', address, size)
+        return super().read(address, size)
+
+    def write(self, address, data):
+        self.fault('write', address, len(data))
+        super().write(address, data)
+
+
+def execute_model(out, writes, base, config):
+    gpu = GPU(TestMemory(Memory.read_hex(out/'initial.hex', base), config['axi_errors']))
+    if config['abort'] is not None:
+        # Mid-command target contents and timing are outside the functional model.
+        gpu.execute([write for write in writes if write[0] != REGISTERS['DOORBELL']])
+        gpu.write_register('CTRL', 5)
+    else:
+        gpu.execute(writes)
+    gpu.memory.errors = {}
+    return gpu
+
+
 def model_export(out):
     # Consume the bench control file, including its integer/hex conventions.
     records = (out/'control.txt').read_text().splitlines()
@@ -44,7 +81,8 @@ def model_export(out):
               (line.split() for line in records[1:1+int(write_count)])]
     offsets = [int(line, 16) for line in records[1+int(write_count):]]
     assert len(offsets) == int(sample_count)
-    gpu = GPU(Memory.read_hex(out/'initial.hex', base)).execute(writes)
+    config = json.loads((out/'config.json').read_text())
+    gpu = execute_model(out, writes, base, config)
     # Export numeric little-endian words exactly as the DDR BFM's dump task does.
     (out/'actual.ddr.hex').write_text(''.join(
         f'{int.from_bytes(gpu.memory.read(base+index*4, 4), "little"):08x}\n'
@@ -61,15 +99,37 @@ def generate(test, out):
     spec.loader.exec_module(module)
     case = Case()
     module.build(case, random.Random(seed))
+    outputs = [out] + [out/f'run{index:02d}' for index in range(1, len(case.runs)+1)]
+    for item, directory in zip([case] + case.runs, outputs):
+        generate_case(item, directory)
+    (out/'runs.json').write_text(json.dumps([str(p.relative_to(out)) for p in outputs]) + '\n')
+    return outputs
+
+
+def generate_case(case, out):
     out.mkdir(parents=True, exist_ok=True)
     writes = case.scene.export(out/'initial.hex', out/'writes.json')
-    # Re-import the exact serialized image and numeric APB writes consumed by the bench.
+    if case.command_timing:
+        base_name, base = writes[-3]
+        count = writes[-2][1]
+        writes = list(writes[:-3])
+        for index in range(count):
+            writes.extend([['IRQ_STAT', 3], [base_name, base+index*32],
+                           ['DESC_COUNT', 1], ['DOORBELL', 1]])
     writes = [[REGISTERS[name], value] for name, value in writes]
-    gpu = GPU(Memory.read_hex(out/'initial.hex', case.scene.memory.base)).execute(writes)
+    checked = CHECKED if case.checked_registers is None else case.checked_registers
+    checked = list(dict.fromkeys(checked + case.sample_registers +
+                                 list(case.expected_registers)))
+    sampled = list(dict.fromkeys(checked + SAMPLED + case.sample_registers))
+    config = dict(axi_errors=case.axi_errors, abort=case.abort,
+                  compare_ddr=case.compare_ddr, checked=checked)
+    (out/'config.json').write_text(json.dumps(config, indent=2) + '\n')
+    gpu = execute_model(out, writes, case.scene.memory.base, config)
     for check in case.checks:
         check(gpu)
     gpu.memory.write_hex(out/'expected.ddr.hex')
-    expected = {name: gpu.regs[name] for name in CHECKED}
+    expected = {name: gpu.regs[name] for name in checked}
+    expected.update(case.expected_registers)
     (out/'expected.regs.json').write_text(json.dumps(expected, indent=2) + '\n')
     (out/'regions.json').write_text(json.dumps(dict(surfaces=case.surfaces,
                                                   regions=case.regions), indent=2) + '\n')
@@ -78,11 +138,24 @@ def generate(test, out):
             gpu.memory.read(region['address'], region['size']))
     (out/'commands.bin').write_bytes(b''.join(case.scene.commands))
     words = len((out/'initial.hex').read_text().splitlines())
-    header = f'{case.scene.memory.base:08x} {words:d} {len(writes):d} {len(SAMPLED):d}\n'
+    header = f'{case.scene.memory.base:08x} {words:d} {len(writes):d} {len(sampled):d}\n'
     (out/'control.txt').write_text(header + ''.join(f'{a:03x} {v:08x}\n' for a, v in writes)
-                                  + ''.join(f'{REGISTERS[n]:03x}\n' for n in SAMPLED))
+                                  + ''.join(f'{REGISTERS[n]:03x}\n' for n in sampled))
     # Expected IRQ_STAT selects normal completion or the specified command error path.
-    (out/'completion.txt').write_text(f'{gpu.regs["IRQ_STAT"]:08x}\n')
+    (out/'completion.txt').write_text(f'{expected.get("IRQ_STAT", gpu.regs["IRQ_STAT"]):08x}\n')
+    abort = case.abort
+    values = (-1, 0, 0) if abort is None else (
+        abort.get('cycle', -1), abort.get('command', 0), abort.get('after', 0))
+    (out/'events.txt').write_text('%d %d %d\n' % values)
+    arguments = []
+    for channel, fault in case.axi_errors.items():
+        tag = 'R' if channel == 'read' else 'W'
+        if 'nth' in fault:
+            arguments.append(f'+MEM_{tag}ERR_NTH={fault["nth"]}')
+        else:
+            arguments.extend([f'+MEM_{tag}ERR={fault["first"]:x}',
+                              f'+MEM_{tag}ERR_LAST={fault["last"]:x}'])
+    (out/'sim_args.json').write_text(json.dumps(arguments) + '\n')
 
 
 def compare(out):
@@ -91,7 +164,9 @@ def compare(out):
     actual = (out/'actual.ddr.hex').read_text().splitlines()
     if len(expected) != len(actual):
         raise AssertionError(f'DDR words expected={len(expected)} actual={len(actual)}')
-    for index, (left, right) in enumerate(zip(expected, actual)):
+    config = json.loads((out/'config.json').read_text())
+    pairs = zip(expected, actual) if config['compare_ddr'] else []
+    for index, (left, right) in enumerate(pairs):
         if int(left, 16) != int(right, 16):
             want = int(left, 16).to_bytes(4, 'little')
             got = int(right, 16).to_bytes(4, 'little')
@@ -109,7 +184,7 @@ def compare(out):
     for index, region in enumerate(regions['surfaces'] + regions['regions']):
         (out/f'actual.region{index}.bin').write_bytes(
             memory.read(region['address'], region['size']))
-    print(f'PASS {out.name}: DDR={len(expected)*4} bytes, registers={len(CHECKED)}')
+    print(f'PASS {out.name}: DDR={len(expected)*4} bytes, registers={len(json.loads((out/"expected.regs.json").read_text()))}')
 
 
 def main():
@@ -119,25 +194,28 @@ def main():
     args = parser.parse_args()
     tests = args.tests or [f'gt{i:02d}' for i in range(1, 9)]
     for test in tests:
-        out = ROOT/'build/gpu/block'/test
+        root = ROOT/'build/gpu/block'/test
         if args.mode == 'compare':
-            compare(out)
-            continue
-        generate(test, out)
+            outputs = [root/item for item in json.loads((root/'runs.json').read_text())]
+        else:
+            outputs = generate(test, root)
         if args.mode == 'generate':
             continue
-        if args.mode == 'model':
-            model_export(out)
-        else:
-            from tools.regress import expand_files
-            obj = ROOT/'build/gpu/block/obj'
-            subprocess.run(['verilator', '--binary', '--timing', '-Wall', '-j', '1',
-                            '--top-module', 'edrv32_gpu_tb', '--Mdir', str(obj), '-o', 'sim',
-                            '+define+SIM_MODE', *expand_files(HERE/test/'files.f')],
-                           cwd=ROOT, check=True)
-            subprocess.run([str(obj/'sim'), f'+CASE_DIR={out}',
-                            f'+SEED={int(metadata(test)["seed"])}'], cwd=ROOT, check=True)
-        compare(out)
+        for out in outputs:
+            if args.mode == 'model':
+                model_export(out)
+            elif args.mode == 'rtl':
+                from tools.regress import expand_files
+                obj = ROOT/'build/gpu/block/obj'
+                subprocess.run(['verilator', '--binary', '--timing', '-Wall', '-j', '1',
+                                '--top-module', 'edrv32_gpu_tb', '--Mdir', str(obj), '-o', 'sim',
+                                '+define+SIM_MODE', *expand_files(HERE/test/'files.f')],
+                               cwd=ROOT, check=True)
+                arguments = json.loads((out/'sim_args.json').read_text())
+                subprocess.run([str(obj/'sim'), f'+CASE_DIR={out}',
+                                f'+SEED={int(metadata(test)["seed"])}', *arguments],
+                               cwd=ROOT, check=True)
+            compare(out)
 
 
 if __name__ == '__main__':

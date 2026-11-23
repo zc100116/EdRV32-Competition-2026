@@ -29,6 +29,13 @@ module edrv32_gpu_memory (
     bit [31:0] read_error_address;
     bit [31:0] write_error_address;
     bit [1:0] write_response;
+    bit [1:0] read_response;
+    bit [31:0] read_error_last;
+    bit [31:0] write_error_last;
+    int read_error_nth = 0;
+    int write_error_nth = 0;
+    int read_transactions;
+    int write_transactions;
 
     initial begin
         void'($value$plusargs("SEED=%d", random_r));
@@ -36,6 +43,12 @@ module edrv32_gpu_memory (
         void'($value$plusargs("MEM_JITTER=%d", jitter));
         read_error_enable = $value$plusargs("MEM_RERR=%h", read_error_address);
         write_error_enable = $value$plusargs("MEM_WERR=%h", write_error_address);
+        read_error_last = read_error_address;
+        write_error_last = write_error_address;
+        void'($value$plusargs("MEM_RERR_LAST=%h", read_error_last));
+        void'($value$plusargs("MEM_WERR_LAST=%h", write_error_last));
+        void'($value$plusargs("MEM_RERR_NTH=%d", read_error_nth));
+        void'($value$plusargs("MEM_WERR_NTH=%d", write_error_nth));
     end
 
     function automatic byte unsigned peek(input bit [31:0] address);
@@ -86,6 +99,9 @@ module edrv32_gpu_memory (
             read_id = 0;
             write_id = 0;
             write_response = 0;
+            read_response = 0;
+            read_transactions = 0;
+            write_transactions = 0;
             bus.rvalid <= 0;
             bus.rdata <= 0;
             bus.rid <= 0;
@@ -110,6 +126,10 @@ module edrv32_gpu_memory (
                 write_complete = 0;
             end
             if (bus.arvalid && bus.arready) begin
+                read_transactions++;
+                read_response = ((read_error_enable && bus.araddr <= read_error_last &&
+                    read_error_address < bus.araddr+32'(32*(int'(bus.arlen)+1))) ||
+                    (read_error_nth != 0 && read_transactions == read_error_nth)) ? 2 : 0;
                 reading = 1;
                 read_addr = bus.araddr;
                 read_left = int'(bus.arlen)+1;
@@ -121,13 +141,14 @@ module edrv32_gpu_memory (
                 write_addr = bus.awaddr;
                 write_left = int'(bus.awlen)+1;
                 write_id = bus.awid;
-                write_response = 0;
+                write_transactions++;
+                write_response = ((write_error_enable && bus.awaddr <= write_error_last &&
+                    write_error_address < bus.awaddr+32'(32*(int'(bus.awlen)+1))) ||
+                    (write_error_nth != 0 && write_transactions == write_error_nth)) ? 2 : 0;
             end
             if (bus.wvalid && bus.wready) begin
                 for (int b = 0; b < 32; b++)
                     if (bus.wstrb[b]) memory[write_addr+32'(b)] = bus.wdata[b*8 +: 8];
-                if (write_error_enable && write_error_address >= write_addr &&
-                    write_error_address < write_addr+32) write_response = 2;
                 write_addr = write_addr+32;
                 write_left--;
                 if (write_left == 0) begin
@@ -142,8 +163,7 @@ module edrv32_gpu_memory (
                     bus.rdata <= data;
                     bus.rid <= read_id;
                     bus.rlast <= read_left == 1;
-                    bus.rresp <= (read_error_enable && read_error_address >= read_addr &&
-                                    read_error_address < read_addr+32) ? 2'b10 : 2'b00;
+                    bus.rresp <= read_response;
                     bus.rvalid <= 1;
                 end
             end

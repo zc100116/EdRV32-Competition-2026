@@ -9,6 +9,26 @@ module edrv32_gpu_tb;
     wire irq_w;
     int checker_errors;
     bit [31:0] expected_irq;
+    int cycle_r = 0;
+    int doorbell_cycle = -1;
+    int fetch_cycle = -1;
+    int abort_cycle;
+    int abort_command;
+    int abort_after;
+    bit [31:0] descriptor_base;
+    bit [31:0] descriptor_count;
+    bit [31:0] abort_address;
+    always @(posedge clk_r) begin
+        cycle_r <= cycle_r+1;
+        if (apb.psel[0] && apb.penable && apb.pready[0] && apb.pwrite &&
+            apb.paddr == 12'h028) begin
+            doorbell_cycle = cycle_r;
+            fetch_cycle = -1;
+        end
+        if (abort_command != 0 && fetch_cycle < 0 && axi.arvalid && axi.arready &&
+            axi.araddr <= abort_address &&
+            abort_address < axi.araddr+32'(32*(int'(axi.arlen)+1))) fetch_cycle = cycle_r;
+    end
     edrv32_axi256_if axi();
     edrv32_apb_if apb();
     assign apb.pready[15:1] = 0;
@@ -96,6 +116,8 @@ module edrv32_gpu_tb;
         int control;
         int completion;
         int output_fd;
+        int events;
+        int timing;
         bit [31:0] base;
         int words;
         int writes;
@@ -114,6 +136,13 @@ module edrv32_gpu_tb;
         if ($fscanf(completion, "%h", expected_irq) != 1)
             $fatal(1, "FAIL completion record");
         $fclose(completion);
+        events = $fopen({directory, "/events.txt"}, "r");
+        if (events == 0) $fatal(1, "FAIL cannot open events.txt");
+        if ($fscanf(events, "%d %d %d", abort_cycle, abort_command, abort_after) != 3)
+            $fatal(1, "FAIL events record");
+        $fclose(events);
+        timing = $fopen({directory, "/timing.txt"}, "w");
+        if (timing == 0) $fatal(1, "FAIL cannot create timing.txt");
         u_apb_host.idle();
         u_memory.load({directory, "/initial.hex"}, base, words);
         repeat (5) @(negedge clk_r);
@@ -121,14 +150,39 @@ module edrv32_gpu_tb;
         for (int n = 0; n < writes; n++) begin
             if ($fscanf(control, "%h %h", address, value) != 2)
                 $fatal(1, "FAIL APB write record=%0d", n);
+            if (address == 12'h020) begin
+                descriptor_base = value;
+                abort_address = value+32'(32*(abort_command-1));
+            end
+            if (address == 12'h024) descriptor_count = value;
             u_apb_host.write_reg(address, value);
+            if (address == 12'h028) begin
+                if (abort_cycle >= 0 || abort_command != 0) begin
+                    if (abort_command != 0) begin
+                        wait (fetch_cycle >= 0);
+                        wait (cycle_r >= fetch_cycle+abort_after);
+                    end else wait (cycle_r >= doorbell_cycle+abort_cycle);
+                    u_apb_host.write_reg(12'h004, 5);
+                    u_apb_host.read_reg(12'h008, value);
+                    while (value[0]) u_apb_host.read_reg(12'h008, value);
+                    u_apb_host.read_reg(12'h010, observed_irq);
+                end else begin
+                    observed_irq = 0;
+                    while (!(|observed_irq[1:0]))
+                        u_apb_host.read_reg(12'h010, observed_irq);
+                end
+                wait (!u_memory.reading && !u_memory.writing);
+                $fdisplay(timing, "%08x %0d %0d %0d %08x", descriptor_base,
+                            descriptor_count, doorbell_cycle, cycle_r, observed_irq);
+            end
         end
-        observed_irq = 0;
-        while (!(|observed_irq[1:0])) u_apb_host.read_reg(12'h010, observed_irq);
+        $fclose(timing);
         if (observed_irq != expected_irq)
             $fatal(1, "FAIL IRQ_STAT expected=%h actual=%h time=%0t",
                     expected_irq, observed_irq, $time);
-        if (!irq_w) $fatal(1, "FAIL irq_o expected=1 actual=0 time=%0t", $time);
+        if (irq_w != (|expected_irq[1:0]))
+            $fatal(1, "FAIL irq_o expected=%b actual=%b time=%0t",
+                    |expected_irq[1:0], irq_w, $time);
         wait (!u_memory.reading && !u_memory.writing);
         // Statistics lag events by one clock (SoC 7.1).
         repeat (2) @(negedge clk_r);

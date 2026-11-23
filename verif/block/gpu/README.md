@@ -61,3 +61,36 @@ LFSR 随机扰动，R/B 延迟独立扰动。直接运行生成的 sim 时使用
 2. 复制一个 `test.yaml` 和 `files.f`，修改 runner 的 gtNN、固定 seed、档位；不新增顶层。
 3. 执行 `run.py model gtNN`；RTL 就绪后执行 `run.py rtl gtNN`，检查自检 PASS。
    单个测试可追加多次 RESOLVE 保留中间结果；同一构建组串行，构建目录可复用。
+
+## 子场景和观测 hooks（V-1b）
+
+`build(case,rng)` 的主场景仍写入 `<gtNN>/`；向 `case.runs` 追加 `Case()` 实例，
+依次执行独立复位的子场景 `run01/`、`run02/`。每个实例自行调用 `ready()` 和设置状态。
+生成的 `runs.json` 是执行顺序，generate/model/rtl/compare 都按该顺序处理。
+
+- `case.axi_errors['read'|'write'] = {'first': a, 'last': b}`：闭区间字节地址。
+  AXI 事务覆盖该区间时返回 SLVERR；读、写可以分别设置。
+- `case.axi_errors['read'|'write'] = {'nth': n, 'model_address': a}`：第 n 个 AR/AW
+  事务（从 1 开始）返回 SLVERR。模型没有 AXI 事务划分，`model_address` 显式指定
+  对应模型访问的字节地址；不把模型调用次数当作 AXI 次数。仅在执行命令时注错。
+  直接运行 sim 使用 `+MEM_RERR=a +MEM_RERR_LAST=b` 或 `+MEM_RERR_NTH=n`，写侧用 WERR。
+- `case.abort = {'cycle': n}`：从 DOORBELL 被 APB 接收的周期起，经过 n 个时钟后
+  发起 CTRL=5（ENABLE|ABORT）写入。APB 传输本身还需要 SETUP/ACCESS 周期。
+- `case.abort = {'command': n, 'after': d}`：第 n 条命令（从 1 开始）的地址第一次
+  被 AR 请求覆盖后经过 d 个周期发起 ABORT。这是**取命令**事件，不能解释为内部执行边界。
+  已发事务排空、STATUS.BUSY 清零后采样。模型不执行中途 ABORT；此类场景必须设置
+  `case.compare_ddr=False`、`case.checked_registers=['STATUS','IRQ_STAT','ERR_CODE',
+  'DONE_COUNT']`，只检查规格保证的状态；模型以未执行命令的初始状态作为期望。
+- `case.sample_registers = ['TGT_CFG', ...]`：结束后追加 APB 读回并与模型寄存器比较。
+  `case.checked_registers` 可指定完整的功能检查集合；默认仍为原来的 12 个。
+  所有 PERF 和计数寄存器均可按名称指定，PERF0/5–8 已默认采样而不比较。
+  `case.expected_registers` 是显式期望覆盖，供模型不描述的状态检查使用。
+- `case.command_timing=True`：把原命令流拆为多次 DESC_COUNT=1/DOORBELL，保留状态，
+  每次启动前清 IRQ_STAT，并等待完成后才发下一条；DONE_COUNT 因此按命令数递增。
+  `timing.txt` 每行：`DESC_BASE(hex) DESC_COUNT START_CYCLE END_CYCLE IRQ_STAT(hex)`。
+  START 是 DOORBELL 的 APB 接收周期，END 是 APB 观测到 DONE/ERROR 并排空事务的周期。
+  未拆分时记录整份列表的外部耗时；文件不声称提供内部命令开始/结束周期。
+  稳态吞吐用大列表总耗时减去另测固定开销后除以数量（协调者确认）。
+
+ABORT 后的像素内容/部分计数不作保证；错误后的已执行写入仍由对应场景定义观察范围。
+所有 hooks 都只观察公共 APB/AXI 和验证存储模型，不访问 RTL 内部信号。
