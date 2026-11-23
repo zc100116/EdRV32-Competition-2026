@@ -8,7 +8,10 @@
 
 /* PMOD ES8156_reg_config.v sequence; 02=04 selects software slave (MS_MODE=0).
  * 08=2b/2f keeps external SCLK/LRCK on and master clock outputs off.
- * 11=30 selects 16-bit standard I2S; 01=21 uses the supplied 256 Fs MCLK. */
+ * 11=30 selects 16-bit standard I2S; 01=21 uses the supplied 256 Fs MCLK.
+ * A-3: vendor writes 06=00 and 10=00 conflict with the datasheet's NFS/DAC_NS
+ * descriptions. Keep these vendor power-up values as confirmed development
+ * defaults; actual codec operation remains to be confirmed on the board. */
 static const uint8_t configuration[][2] = {
     {0x10, 0x00}, {0x00, 0x3c}, {0x00, 0x05}, {0x00, 0x1c},
     {0x02, 0x04}, {0x03, 0x01}, {0x04, 0x00}, {0x05, 0x08},

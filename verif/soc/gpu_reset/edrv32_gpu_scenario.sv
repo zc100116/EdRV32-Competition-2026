@@ -10,36 +10,36 @@ module edrv32_gpu_scenario (
     assign model_sda_oe_o = 2'b00;
     initial begin
         checks_complete_o = 0;
-        @(posedge $root.edrv32_gpu_soc_tb.u_dut.rst_mem_core_n_w);
+        @(posedge $root.edrv32_gpu_soc_tb.u_dut.u_mem.rst_mem_core_ctrl_n_w[0]);
         if (!$root.edrv32_gpu_soc_tb.mem_ready_i)
             $fatal(1, "FAIL mem reset before ready time=%0t", $time);
-        wait ($root.edrv32_gpu_soc_tb.u_dut.rst_gpu_n_w &&
-                $root.edrv32_gpu_soc_tb.u_dut.rst_aud_n_w);
-        if ($root.edrv32_gpu_soc_tb.u_dut.rst_sys_n_w)
+        wait ($root.edrv32_gpu_soc_tb.u_dut.u_gpu.rst_gpu_n_w &&
+                $root.edrv32_gpu_soc_tb.u_dut.u_aud.rst_aud_n_w);
+        if ($root.edrv32_gpu_soc_tb.u_dut.u_sys.rst_sys_xbar_n_w)
             $fatal(1, "FAIL sys released before GPU/audio time=%0t", $time);
-        @(posedge $root.edrv32_gpu_soc_tb.u_dut.rst_sys_n_w);
+        @(posedge $root.edrv32_gpu_soc_tb.u_dut.u_sys.rst_sys_xbar_n_w);
         while ($root.edrv32_gpu_soc_tb.u_ddr.peek(32'h003ff000) != 14) begin
             @(negedge $root.edrv32_gpu_soc_tb.clk_mem_i);
         end
         $root.edrv32_gpu_soc_tb.u_ddr.poke(32'h003ff004, 8'd1);
-        wait (!$root.edrv32_gpu_soc_tb.u_dut.rst_gpu_n_w &&
-                !$root.edrv32_gpu_soc_tb.u_dut.rst_aud_n_w);
-        if (!$root.edrv32_gpu_soc_tb.u_dut.rst_sys_n_w ||
-            !$root.edrv32_gpu_soc_tb.u_dut.rst_mem_core_n_w)
+        wait (!$root.edrv32_gpu_soc_tb.u_dut.u_gpu.rst_gpu_n_w &&
+                !$root.edrv32_gpu_soc_tb.u_dut.u_aud.rst_aud_n_w);
+        if (!$root.edrv32_gpu_soc_tb.u_dut.u_sys.rst_sys_xbar_n_w ||
+            !$root.edrv32_gpu_soc_tb.u_dut.u_mem.rst_mem_core_ctrl_n_w[0])
             $fatal(1, "FAIL media reset affected sys/memory core time=%0t", $time);
-        wait ($root.edrv32_gpu_soc_tb.u_dut.rst_gpu_n_w &&
-                $root.edrv32_gpu_soc_tb.u_dut.rst_aud_n_w &&
-                $root.edrv32_gpu_soc_tb.u_dut.rst_mem_n_w &&
-                $root.edrv32_gpu_soc_tb.u_dut.rst_pix_n_w);
+        wait ($root.edrv32_gpu_soc_tb.u_dut.u_gpu.rst_gpu_n_w &&
+                $root.edrv32_gpu_soc_tb.u_dut.u_aud.rst_aud_n_w &&
+                $root.edrv32_gpu_soc_tb.u_dut.u_aud.rst_mem_n_w &&
+                $root.edrv32_gpu_soc_tb.u_dut.u_gpu.rst_mem_n_w);
         $root.edrv32_gpu_soc_tb.u_ddr.poke(32'h003ff004, 8'd2);
         checks_complete_o = 1;
         $display("CHECK ST-14 initial order and media soft reset");
     end
-    always @(posedge $root.edrv32_gpu_soc_tb.u_dut.rst_gpu_n_w) begin
+    always @(posedge $root.edrv32_gpu_soc_tb.u_dut.u_gpu.rst_gpu_n_w) begin
         if (!$root.edrv32_gpu_soc_tb.clk_gpu_i)
             $fatal(1, "FAIL GPU reset not synchronous time=%0t", $time);
     end
-    always @(posedge $root.edrv32_gpu_soc_tb.u_dut.rst_aud_n_w) begin
+    always @(posedge $root.edrv32_gpu_soc_tb.u_dut.u_aud.rst_aud_n_w) begin
         if (!$root.edrv32_gpu_soc_tb.clk_aud_i)
             $fatal(1, "FAIL AUD reset not synchronous time=%0t", $time);
     end

@@ -398,11 +398,14 @@ void gpu_submit(const struct gpu_batch *batch)
 
 static struct gpu_event finish(void)
 {
-    /* Error stops new work; wait for outstanding AXI writes before ownership returns. */
-    while ((read_reg(EDRV32_GPU_STATUS_OFFSET) & EDRV32_GPU_STATUS_IDLE_MASK) == 0u) {
+    uint32_t irq = read_reg(EDRV32_GPU_IRQ_STAT_OFFSET);
+    /* DONE already guarantees completed writes. ERROR may precede AXI drain (GPU 6). */
+    if ((irq & EDRV32_GPU_IRQ_STAT_ERROR_MASK) != 0u) {
+        while ((read_reg(EDRV32_GPU_STATUS_OFFSET) & EDRV32_GPU_STATUS_IDLE_MASK) == 0u) {
+        }
     }
     struct gpu_event event = {
-        read_reg(EDRV32_GPU_IRQ_STAT_OFFSET), read_reg(EDRV32_GPU_ERR_CODE_OFFSET),
+        irq, read_reg(EDRV32_GPU_ERR_CODE_OFFSET),
         read_reg(EDRV32_GPU_DONE_COUNT_OFFSET), read_reg(EDRV32_GPU_OBJ_HIT_COUNT_OFFSET),
         read_reg(EDRV32_GPU_OBJ_FREE_COUNT_OFFSET),
         read_reg(EDRV32_GPU_OBJ_ALIVE_COUNT_OFFSET), read_reg(EDRV32_GPU_OBJ_STAT_OFFSET)
