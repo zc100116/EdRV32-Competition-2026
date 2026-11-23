@@ -1,0 +1,12 @@
+top: edrv32_gpu_tb
+files: files.f
+simulator: verilator
+defines: SIM_MODE
+parameters:
+software:
+runner: python3 verif/block/gpu/gt25/performance.py
+timeout: 900
+pass: PASS
+tier: perf
+seed: 202625
+group: verif/block/gpu
