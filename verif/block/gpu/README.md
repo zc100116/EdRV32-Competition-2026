@@ -103,3 +103,6 @@ ABORT 后的像素内容/部分计数不作保证；错误后的已执行写入�
 `case.abort={'write_address':(first,last),'after':n}`：AR/AW **握手**覆盖闭区间后，
 经过 n 个周期再发起 ABORT；只取第一次命中。等待触发期间不会结束测试，始终受总超时约束。
 用于顶点/DMA/对象的首读，或 RESOLVE 的首个写地址；同一场景选择一种触发方式。
+
+`case.clock_mhz=180` 为 GT-25 选择规格第 7 节的 180 MHz 条件；默认仍为环境的 150 MHz。
+runner 将其作为 `+CLOCK_MHZ=<MHz>` 传给 testbench，模型仅记录配置，不生成周期期望。

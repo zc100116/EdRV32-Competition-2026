@@ -1,7 +1,7 @@
 // File: edrv32_gpu_tb.sv
 // Spec: gpu-spec 3–6; gpu-testplan 2, 4; SoC 7.1–7.2.
 // Description: Command-list startup via APB, external DDR export, no internal DUT probes.
-// Clock domain: clk_gpu at 150 MHz.
+// Clock domain: clk_gpu, default 150 MHz; GT-25 selects 180 MHz.
 `timescale 1ns/1ps
 module edrv32_gpu_tb;
     logic clk_r = 0;
@@ -43,7 +43,11 @@ module edrv32_gpu_tb;
     assign apb.pready[15:1] = 0;
     assign apb.pslverr[15:1] = 0;
     assign apb.prdata[511:32] = 0;
-    always #3.333 clk_r = ~clk_r;
+    real clock_mhz = 150.0;
+    initial begin
+        void'($value$plusargs("CLOCK_MHZ=%f", clock_mhz));
+        forever #(500.0/clock_mhz) clk_r = ~clk_r;
+    end
 
     edrv32_gpu_memory u_memory (
         .clk_i(clk_r),
@@ -194,6 +198,8 @@ module edrv32_gpu_tb;
                     u_apb_host.write_reg(12'h004, 5);
                     u_apb_host.read_reg(12'h008, value);
                     while (value[0]) u_apb_host.read_reg(12'h008, value);
+                    if (u_memory.reading || u_memory.writing)
+                        $fatal(1, "FAIL ABORT idle with pending DDR time=%0t", $time);
                     u_apb_host.read_reg(12'h010, observed_irq);
                 end else begin
                     observed_irq = 0;

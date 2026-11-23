@@ -128,7 +128,8 @@ def generate_case(case, out):
                                  list(case.expected_registers)))
     sampled = list(dict.fromkeys(checked + SAMPLED + case.sample_registers))
     config = dict(axi_errors=case.axi_errors, abort=case.abort,
-                  compare_ddr=case.compare_ddr, checked=checked, reset_registers=case.reset_registers)
+                  compare_ddr=case.compare_ddr, checked=checked,
+                  reset_registers=case.reset_registers, clock_mhz=case.clock_mhz)
     (out/'config.json').write_text(json.dumps(config, indent=2) + '\n')
     (out/'reset.txt').write_text(str(len(case.reset_registers)) + '\n' + ''.join(
         f'{REGISTERS[name]:03x} {RESETS[name]:08x}\n' for name in case.reset_registers))
@@ -162,7 +163,7 @@ def generate_case(case, out):
             kind, (first, last) = 2, abort['write_address']
     (out/'events.txt').write_text(('%d %d %d %d %08x %08x\n') %
                                   (*values, kind, first, last))
-    arguments = []
+    arguments = [f'+CLOCK_MHZ={case.clock_mhz}']
     for channel, fault in case.axi_errors.items():
         tag = 'R' if channel == 'read' else 'W'
         if 'nth' in fault:
@@ -203,7 +204,8 @@ def compare(out):
     for index, region in enumerate(regions['surfaces'] + regions['regions']):
         (out/f'actual.region{index}.bin').write_bytes(
             memory.read(region['address'], region['size']))
-    print(f'PASS {out.name}: DDR={len(expected)*4} bytes, registers={len(json.loads((out/"expected.regs.json").read_text()))}')
+    register_count = len(json.loads((out/"expected.regs.json").read_text()))
+    print(f'PASS {out.name}: DDR={len(expected)*4} bytes, registers={register_count}')
 
 
 def main():

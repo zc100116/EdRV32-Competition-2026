@@ -19,6 +19,7 @@ class Case:
         self.expected_registers = {}
         self.compare_ddr = True
         self.command_timing = False
+        self.clock_mhz = 150
 
     def target(self, **changes):
         fields = dict(TGT_X0=0, TGT_Y0=0, SC_X0=0, SC_Y0=0, SC_X1=64, SC_Y1=64,
