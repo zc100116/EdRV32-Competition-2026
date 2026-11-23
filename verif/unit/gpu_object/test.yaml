@@ -1,0 +1,11 @@
+name: gpu_object
+top: tb_gpu_object
+files: files.f
+simulator: verilator
+defines:
+parameters:
+software:
+timeout: 120
+pass: PASS
+tier: smoke
+runner: python3 verif/unit/gpu_object/run.py
