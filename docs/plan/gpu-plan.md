@@ -46,7 +46,10 @@
 | W-1 | BSP 驱动（GPU、AUD、ES8156 配置）和 SoC 测试程序 ST-10–ST-14 | Codex | T-1 | SoC smoke、full 通过 | [~] W-1a ctx_66db0a0f8cac（驱动、ST-10–14） |
 | B-1 | Windows 任务卡：PLL IP 修改说明、综合、布局布线、时序和资源报告，上板跑 ST-10、ST-12 的程序 | 协调者写卡，用户和 Windows Codex 执行 | W-1 | 报告回传；定稿 G-T1、G-R1、G-R2、GS-1、GS-3 | [ ] |
 | V2-1 | 第二版：可编程顶点着色器（4 路 SIMD），取代几何单元（设计记录 gpu-architecture 第 7 节）；第一版完成后再讨论规格 | — | 第一版上板 | — | [ ] |
-| G-1 | 三部分演示软件（2D 弹幕挑战、3D 小场景、功能演示页），玩法逐条与用户确认后再开发 | Codex | W-1、玩法确认 | 仿真和上板运行 | [ ] |
+| S-0a | GPU 模拟器核心：Python 参考模型的 C 移植（设计记录 2026-11-23-gpu-pc-emulator） | Codex | M-1 | 全部 GT/自测场景与 Python 模型逐位一致；压力场景一帧 ≤ 16 ms | [~] |
+| S-0b | PC 平台：替换 mmio.h 的虚拟 SoC（GPU、DISP、AUD、PLIC）、游戏平台层、Windows exe 与 Linux 无界面前端、示例程序 gpu_hello | Codex | S-0a、S-0c | 三种构建 0 告警；gpu_hello 出帧且与 Python 模型一致 | [~] |
+| S-0c | 驱动 mmio 改造：gpu.c、aud.c 改用 mmio.h，新增 ddr_physical() | Codex（W-1a） | W-1 | 全部 sw 构建 0 告警，行为不变 | [~] |
+| G-1 | 三部分演示软件（2D 弹幕挑战、3D 小场景、功能演示页），玩法逐条与用户确认后再开发 | Codex | W-1、S-0、玩法确认 | PC 上运行，上板运行 | [ ] |
 
 ## 4. 规格定稿项
 
