@@ -4,15 +4,15 @@
 |---|---|
 | 日期 | 2026-11-24 |
 | 状态 | 已决定，待协调者批准冻结 |
-| 依据 | `2026-11-23-gpu-resource-closure.md`（已决定，da4c70345）、`gpu-spec.md` v0.2（2.4–2.6、2.12、第7节）、`gpu-soc-spec.md` v0.2、`rtl/include/regs/gpu.json`、`2026-11-23-gpu-architecture.md`、`2026-11-23-gpu-2d-estimates.md`、`gpu-plan.md` |
-| 源码基线 | `b2ac0bb8b`（本次修订基线），分支 `zc100116/gpu-dev` |
+| 依据 | `2026-11-23-gpu-resource-closure.md`（已决定，da4c70345）、`gpu-spec.md` v0.3草案（8f55e23f0，2.4–2.6、2.12–2.13）、`2026-11-24-model-gpu-numeric-v03.md`（B32/P18）、`tools/gpu/model/planes.py`（b3315ccb0）、`gpu-soc-spec.md` v0.2、`rtl/include/regs/gpu.json`、`2026-11-23-gpu-architecture.md`、`2026-11-23-gpu-2d-estimates.md`、`gpu-plan.md` |
+| 源码基线 | `8f9272261`（本次文档修订基线），分支 `zc100116/gpu-dev` |
 | 数字性质 | 以下 GPU 周期、资源、级数均为结构估算，未经综合、PDS 或上板测量；历史实测另注明出处 |
 
 ## 1. 背景和问题
 
 GPU 需要把固定功能几何、三角形/四边形扫描、对象推进、片上纹理和片上读改写连接成一条流水线。R-1–R-4 并行开发前，需要统一状态归属、流的排列、停顿和排空语义，否则局部单元都正确也可能在重叠绘制或命令切换时产生错误。第二版只替换三角形建立之前的几何单元，因此该边界单独定义。
 
-本文按 v0.2 定稿数值定义 Verilog-2001 内部接口；目标115200像素、纹理192KiB及完整/当前组两级调色板沿用资源闭合决定。本文件只记录微结构及估算，不修改规格或寄存器JSON。
+本文按 v0.3 草案 B32/P18 数值定义 Verilog-2001 内部接口；目标115200像素、纹理192KiB及完整/当前组两级调色板沿用资源闭合决定。本文件只记录微结构及估算，不修改规格或寄存器JSON。
 
 ## 2. 约束
 
@@ -48,17 +48,18 @@ GPU 需要把固定功能几何、三角形/四边形扫描、对象推进、片
 | R-1 | `regs` | APB本地setup寄存、公共/私有寄存器、IRQ、规格PERF；快照对象配置 |
 | R-1 | `command` | 命令预取/解码、状态所有者、错误1/3/4、命令启动及排空、DONE/ABORT |
 | R-1 | `read_dma`、`write_dma` | 内部读写客户仲裁、32B对齐/4KiB切分、AXI返回分派、错误2、在途排空 |
+| R-1 | `unpack`、`list_pack` | 独立装入/拆包适配模块、独立命中/释放列表打包模块；不并入DMA或对象核 |
 | R-1 | `resolve` | 读目标颜色、三行缓冲、四路AA、RGB565打包、Surface逐行写出 |
 | R-2 | `geometry` | 自成一体的几何外壳：顶点三元组、变换/光照、五平面裁剪、扇形拆分、投影、背面剔除 |
 | R-2 | `transform`、`clip`、`project` | 上述三个内部算术阶段；不对R-1/R-3暴露内部状态 |
 | R-2 | `setup` | 屏幕空间三角形→包围框、左上偏置边方程、属性平面；在几何替换边界之外 |
 | R-3 | `raster`、`quad` | 三角形4像素组扫描、四边形快速扫描及两路有序选择；相同fragment契约 |
-| R-3 | `perspective` | 四路q倒数、透视u/v与偏导，四边形直通；送纹理单元 |
+| R-3 | `perspective` | 四路18位尾数q倒数、透视u/v与偏导，四边形直通；送纹理单元 |
 | R-3 | `object` | 一对象/拍运动/寿命/区域/八框并行碰撞、事件及更新对象、有序四边形输出 |
 | R-4 | `texture`、`texture_ram`、`palette` | LOD、请求排程/去重/冲突、192KiB四体RAM、4读口完整调色板和8读口当前组副本、三种过滤、着色 |
 | R-4 | `pixel`、`target` | 透明丢弃、模板/深度/混合、目标RAM、同字依赖旁路、CLEAR及RESOLVE访问 |
 
-`geometry` 内部模块及 `texture` 内部模块的端口由其 worker 自行划分，不跨任务。倒数算法同源但不用一个跨worker共享RTL文件：R-2 `project` 和 R-3 `perspective` 各有本地实现，数值规则均取规格2.12。tech RAM/APM 包装、公共头、寄存器生成物和文件列表不归这四个 worker 修改。
+`geometry` 内部模块及 `texture` 内部模块的端口由其 worker 自行划分，不跨任务。倒数不使用跨worker共享RTL文件：R-2 `project`、`setup` 和 R-3 `perspective` 各有本地实现，project及setup面积倒数取2.12，perspective像素倒数取2.13；不共用跨单元算术池。tech RAM/APM 包装、公共头、寄存器生成物和文件列表不归这四个 worker 修改。
 
 ### 4.2 通用内部协议与排列
 
@@ -77,13 +78,13 @@ GPU 需要把固定功能几何、三角形/四边形扫描、对象推进、片
 | `palette_prepared` | palette→command | 无负载，仅valid/ready | 256项全部预装完成后响应一次；握手后才开始DRAW_TRI。每次符合条件的DRAW都重新预装，不加命中标签 |
 | `object_cfg` | regs→object（command调度） | `object_cfg_live:64`、`object_cfg_targets:512`、`object_cfg_hit_base:32`、`object_cfg_hit_max:24`、`object_cfg_free_base:32`、`object_cfg_free_max:24` | OBJ_STEP前快照；矩形依次x0/y0/x1/y1，每项s16；targets低64为目标0；寄存器后续写不影响在执行命令 |
 | `clear` | command→target | `clear_command:256`、`clear_target:256`、`clear_wide:1` | CLEAR独占目标；清除区域与目标和SCISSOR求交，未清字段保留 |
-| `resolve` | command→resolve | `resolve_command:256`、`resolve_wide:1` | 先排空所有像素；写出区域按命令，颜色读接口见后表 |
-| `unit_done` | geometry/setup/raster/quad/perspective/object/texture/pixel/target/resolve→command | 每单元 `unit_done:1`（电平，无valid/ready） | 接受本命令前置0，finish已到达且所有本命令输出已握手、内部无有效项后置1并保持到下次启动；无输出的空DRAW也完成；pixel/target完成须包括RAM提交；resolve/object须再由command合并DMA B排空；object_result是完成后的发布口，不计入object的unit_done排空条件 |
-| `finish` | command→各处理单元 | `finish:1`（每单元独立电平） | 表示该单元本命令不会再有输入；仅在其全部上游done后拉高，保持到下次启动。不清除或丢弃已接收工作 |
+| `resolve` | command→resolve | `resolve_command:256`、`resolve_target:256`、`resolve_wide:1` | 先排空所有像素；target为最近SET_TARGET原命令快照，执行期间不变；写出区域按命令，颜色读接口见后表 |
+| `unit_done` | geometry/setup/raster/quad/perspective/object/texture/pixel/target/resolve→command | 每单元 `unit_done:1`（电平，无valid/ready） | finish由1变0时清0，finish已到达且所有本命令输出已握手、内部无有效项后置1并保持到下次启动；无输出的空DRAW也完成；pixel/target完成须包括RAM提交；resolve/object须再由command合并DMA B排空；object_result是完成后的发布口，不计入object的unit_done排空条件 |
+| `finish` | command→各处理单元 | `finish:1`（每单元独立电平） | 表示该单元本命令不会再有输入；仅在其全部上游done后拉高，保持到下次启动；1→0表示新命令开始，各单元清unit_done，command在发配置前至少保持一拍finish=0。不清除或丢弃已接收工作 |
 | `stop` | command→所有业务单元 | `stop:1`（电平） | ABORT或ERROR后保持至本次排空完成；停止生成新工作，丢弃尚未发出的业务负载；DMA已经接收的请求继续服务。stop期间各返回消费者继续ready并丢弃返回内容，已握手写区间的数据仍从已缓存突发供完。无额外取消标签 |
 | `dma_idle`、`dma_error` | DMA→command | 各方向 `dma_idle:1`、`dma_error:1`（电平） | idle表示队列、在途及返回负载全空；error是本次运行非OKAY的粘滞位，映射ERR_CODE2 |
 
-finish按依赖逐级推进：输入DMA完成→geometry或quad/object；geometry完成→setup；setup完成→raster；raster/quad完成→perspective；perspective完成→texture；texture完成→pixel；pixel完成→target。对象的quad输出先入quad再走同一像素链，object自身完成不等绘制链；CLEAR/RESOLVE在区间数据源终止后finish。每单元接受新draw或状态快照开始本命令，finish/stop由command复原，不能靠瞬时FIFO空提前宣告完成。
+finish按依赖逐级推进：输入DMA完成→geometry或quad/object；geometry完成→setup；setup完成→raster；raster/quad完成→perspective；perspective完成→texture；texture完成→pixel；pixel完成→target。对象的quad输出先入quad再走同一像素链，object自身完成不等绘制链；CLEAR/RESOLVE在区间数据源终止后finish。每单元以finish的1→0开始新命令，随后接收配置/draw；finish/stop由command复原，不能靠瞬时FIFO空提前宣告完成。
 
 `regs` 与 `command` 的控制线：`start:1`、`abort:1`、`soft_rst:1` 为regs→command一拍脉冲；`enable:1`、`desc_base:32`、`desc_count:16`、`wide:1`为regs→command电平，start沿快照。command→regs为 `busy:1`、`done:1`一拍、`error:1`一拍、`err_code:32`（error同拍），DONE_COUNT由regs在done递增。CTRL/START/DOORBELL/SOFT_RST按SoC7.1执行，不另定义软件行为。
 
@@ -97,14 +98,14 @@ PERF只在regs累加：各单元给本地周期事件，`perf_vertex:1`、`perf_
 
 | 流 | A→B | 信号名:位宽 | 格式和含义 |
 |---|---|---|---|
-| `vertex` | read_dma→geometry | `vertex_data:128` | gpu.json VERTEX的16B原样；先v0/v1/v2，再下一三角形；三角形数量来自draw；每2拍可收1顶点，无额外last端口 |
+| `vertex` | unpack→geometry | `vertex_data:128` | gpu.json VERTEX的16B原样；先v0/v1/v2，再下一三角形；三角形数量来自draw；每2拍可收1顶点，无额外last端口 |
 | `screen_triangle` | geometry→setup | `screen_triangle_x:51`、`screen_triangle_y:51` | 各3×s12.4（17bit），屏幕像素坐标 |
-| 同一流 | 同上 | `screen_triangle_depth:48` | 3×u16，投影/映射后的深度 |
-| 同一流 | 同上 | `screen_triangle_q:105` | 3×u35 Q30，1/W，W≥1/16故q≤16 |
-| 同一流 | 同上 | `screen_triangle_uq:153`、`screen_triangle_vq:153` | 各3×u51 Q38，16位Q8 UV乘35位Q30 q的完整积 |
-| 同一流 | 同上 | `screen_triangle_color:216` | 3顶点×3通道×u24 Q16；光照后u8左移16位，低通道R、其次G、再B |
+| 同一流 | 同上 | `screen_triangle_depth:48` | 3×u16，投影/映射后的原始深度，f=0 |
+| 同一流 | 同上 | `screen_triangle_q:105` | 3×u35 Q30，原始1/W，f=30，W≥1/16故q≤16 |
+| 同一流 | 同上 | `screen_triangle_uq:153`、`screen_triangle_vq:153` | 各3×u51 Q38，原始16位Q8 UV乘35位Q30 q的完整积，f=38 |
+| 同一流 | 同上 | `screen_triangle_color:216` | 3顶点×3通道×u24 Q16；裁剪/光照后的原始颜色，f=16；低通道R、其次G、再B |
 
-输出是完成五平面裁剪、投影和剔除的三角形，裁剪多边形按扇形顺序输出。完全裁掉、退化或剔除的输入不输出；setup仍独立拒绝零面积，不产生像素。几何输出done在最后一个screen_triangle握手后成立；setup自己的done另行排空。状态在接受draw前握手，直到本DRAW完成保持。无隐含顶点缓存地址、内部裁剪缓冲地址或矩阵RAM读口跨过此边界。
+输出是完成五平面裁剪、投影和剔除的三角形，裁剪多边形按扇形顺序输出；剔除后顶点连同属性排为正面积，再交setup。完全裁掉、退化或剔除的输入不输出；setup仍独立拒绝零面积，不产生像素。几何输出done在最后一个screen_triangle握手后成立；setup自己的done另行排空。状态在接受draw前握手，直到本DRAW完成保持。无隐含顶点缓存地址、内部裁剪缓冲地址或矩阵RAM读口跨过此边界。
 
 矩阵为32位s15.16、输入位置s16，32×16积48位，四项累加50位，一次舍入/饱和为40位s23.16。W_NEAR=1/16，G=4；五平面顺序及对称交点公式取2.4，距离用s43（40位坐标、乘4及加减），距离差s44，坐标交点分子s84（40+43+1），除后按规格舍入。裁剪UV为u16 Q8、颜色u24 Q16，各分量同样完整扩展。双8顶点寄存工作集保留全部属性。
 
@@ -112,7 +113,7 @@ PERF只在regs累加：各单元给本地周期事件，`perf_vertex:1`、`perf_
 
 SET_TARGET原始256位的字节0x10低/高16位为VP_X0/VP_Y0（命令bits[143:128]/[159:144]，s16）；0x14低/高16位为VP_W/VP_H（bits[175:160]/[191:176]，u16），与gpu.json一致。所有target配置流原样保留这些位。
 
-倒数严格采用归一化Q30尾数（u31）、10位中点种子索引、一次牛顿迭代及指数还原舍入；乘法保留31×31完整62位，种子r₀为u30，t及2−t的减法用32位。输出按调用方量级保存：q用u35 Q30，像素w用u54 Q30（q最小可为128个Q30单位，w最大2²³）。种子ROM保存Q30种子的高18位，读取后左移12位并拼接由常数组合逻辑给出的低12位；低位必须补全，不能截成18位尾数。
+倒数严格采用归一化Q30尾数（u31）、10位中点种子索引、一次牛顿迭代及指数还原舍入；乘法保留31×31完整62位，种子r₀为u30，t及2−t的减法用32位。几何输出q用u35 Q30；setup对面积使用同一Q30算法并保留面积指数k，不先将1/A舍入为Q30。像素倒数另按2.13的P18规则。种子ROM保存Q30种子的高18位，读取后左移12位并拼接由常数组合逻辑给出的低12位；低位必须补全，不能截成18位尾数。
 
 ### 4.4 建立、扫描、纹理与像素接口
 
@@ -120,15 +121,16 @@ SET_TARGET原始256位的字节0x10低/高16位为VP_X0/VP_Y0（命令bits[143:1
 |---|---|---|---|
 | `triangle_setup` | setup→raster | `triangle_setup_bounds:64` | x0/y0/x1/y1各s16，含左上不含右下；x0按4向下取整，覆盖还受边/目标裁剪；y为整数行 |
 | 同一流 | 同上 | `triangle_setup_edge:480` | 3边×4值×s40：E在首组lane0中心的值、一步x增量、一步y增量、左上偏置；同一边4值依次从低位排列；建立时统一内部方向为E>=0，左上边偏置0，其他边偏置-1，覆盖测试E+bias>=0 |
-| 同一流 | 同上 | `triangle_setup_plane:2016`、`triangle_setup_area:40` | 7属性×3个s96整数分子：首中心N、每像素ΔxN、每行ΔyN；属性顺序q/uq/vq/z/R/G/B，小数位30/38/38/0/16/16/16；公共正面积u40作分母。保留有理平面，不能先舍入斜率再累加 |
-| `quad_record` | read_dma→quad | `quad_record_data:128` | gpu.json QUAD；表顺序，无逐项命令排空 |
-| `object_record` | read_dma→object | `object_record_data:256`、`object_record_idx:24` | gpu.json OBJ及对象编号，从0递增；空槽也传入以保持索引 |
+| 同一流 | 同上 | `triangle_setup_origin:32`、`triangle_setup_start:490`、`triangle_setup_gradient:784`、`triangle_setup_h:70` | origin低16位xr、高16位yr，均s16；7×s70规范起点s；7×2×s56增量gx/gy，属性内先gx；7×s10指数h；属性顺序固定depth/q/uq/vq/R/G/B |
+| 同一流 | 同上 | `triangle_setup_normal_gradient:174` | 6×29位归一化数，顺序Gq,x/Guq,x/Gvq,x/Gq,y/Guq,y/Gvq,y；各为N(g,h−f)，详下文 |
+| `quad_record` | unpack→quad | `quad_record_data:128` | gpu.json QUAD；表顺序，无逐项命令排空 |
+| `object_record` | unpack→object | `object_record_data:256`、`object_record_idx:24` | gpu.json OBJ及对象编号，从0递增；空槽也传入以保持索引 |
 | `object_quad` | object→quad | `object_quad_data:128`、`object_quad_x:17`、`object_quad_y:17` | 存活且draw=1；data承载QUAD非位置字段，其x/y位不使用；位置独立s17，p取整−半宽高，不截成外部QUAD的s12造成屏外回绕；顺序与对象表相同，不会与DRAW_QUAD源同时活动 |
 | `fragment` | raster/quad有序选择→perspective | `fragment_x:16`、`fragment_y:16`、`fragment_mask:4`、`fragment_quad:1` | x/y为s16屏幕整数坐标，x是4倍数；lane位置x+k；mask为覆盖且在scissor/target内，0组不发 |
-| 同一流 | 同上 | `fragment_q:140`、`fragment_uq:204`、`fragment_vq:204`、`fragment_depth:64`、`fragment_color:96` | 各4lane，q/uq/vq格式同几何输出；depth4×16、color4×24；quad的q=1，uq/vq直接表示纹素坐标，color为白色 |
-| 同一流 | 同上 | `fragment_gradient:576`、`fragment_area:40`、`fragment_palette:4`、`fragment_alpha:8` | 梯度顺序duq/dx、duq/dy、dvq/dx、dvq/dy、dq/dx、dq/dy各s96分子，共用u40面积；uq/vq梯度Q38、q梯度Q30；quad梯度不用。palette为quad项覆盖值，tri使用SET_TEX；alpha为quad全局alpha，tri=255 |
+| 同一流 | 同上 | `fragment_plane:1960`、`fragment_h:70` | 4lane×7属性×s70的T，lane内属性顺序depth/q/uq/vq/R/G/B；每属性物理单位2^(h−f)，h同setup，四lane共用一份；不先舍入回几何格式 |
+| 同一流 | 同上 | `fragment_gradient:174`、`fragment_palette:4`、`fragment_alpha:8` | 六个归一化梯度原样传递；palette为quad覆盖值，tri使用SET_TEX；alpha为quad全局alpha，tri=255 |
 | `sample` | perspective→texture | `sample_x:16`、`sample_y:16`、`sample_mask:4`、`sample_quad:1`、`sample_u:128`、`sample_v:128` | 4×s32 Q8纹素坐标；quad绕过倒数，保留翻转方向产生的坐标；texture按尺寸取模 |
-| 同一流 | 同上 | `sample_span:384`、`sample_depth:64`、`sample_color:96`、`sample_palette:4`、`sample_alpha:8` | span每lane u96 Q16，为max(abs(du/dx),abs(du/dy),abs(dv/dx),abs(dv/dy))；梯度由商导数(uq'−u*q')/q得到；LOD由texture计算 |
+| 同一流 | 同上 | `sample_span:384`、`sample_depth:64`、`sample_color:96`、`sample_palette:4`、`sample_alpha:8` | span每lane u96 Q16，为max(abs(du/dx),abs(du/dy),abs(dv/dx),abs(dv/dy))；四偏导按2.13第13–14条的归一化乘减生成，各自舍入Q16再取最大；LOD由texture计算 |
 | `shaded` | texture→pixel | `shaded_x:16`、`shaded_y:16`、`shaded_mask:4`、`shaded_depth:64`、`shaded_color:96`、`shaded_alpha:32` | 过滤/着色后4lane RGB888及A8；透明lane清mask，目标坐标/深度保持原lane；每输入组严格对应一个输出组，允许mask全0 |
 | `target_read` | pixel→target | `target_read_addr:16` | 地址为目标四像素字，范围0–28799；无mask，读全160bit |
 | `target_old` | target→pixel | `target_old_data:160` | 顺序响应；每lane40bit={stencil8,depth16,color16}；读请求到输出5拍：地址预译码1、DRM阵列/输出寄存2、两级选择树2；已包含同拍写回旁路 |
@@ -136,15 +138,18 @@ SET_TARGET原始256位的字节0x10低/高16位为VP_X0/VP_Y0（命令bits[143:1
 | `resolve_read` | resolve→target | `resolve_read_addr:16` | 仅RESOLVE期间允许，独占target读端；同字映射 |
 | `resolve_color` | target→resolve | `resolve_color_data:64` | 5拍有序响应，每lane16bit RGB565；不读改写，不更新目标 |
 
-位宽推导：17位顶点坐标差用s18，面积叉积18+18+1=37位；像素组按4对齐时p−a保留s19，边函数18+19+1=38位，统一s40包含偏置和步进，正面积用u40。只扫描三角形包围框及其组对齐扩展，不把整段s16屏幕空间外推到边寄存。最大属性uq/vq为u51，三项E·attr累加需40+51+2=93位，统一s96分子；乘前扩展，符号和舍入均取2.12。对N/A一次舍入到q35/uq51/vq51/z16/颜色24 Q16，颜色再按规格舍入/饱和到u8，避免把已舍入dx/dy当精确平面。
+位宽推导：顶点差s18、面积叉积s37；组对齐扩展的边函数统一s40，左上偏置只用于覆盖，不进入属性平面。setup以规范xr=floor(min sx/16)、yr=floor(min sy/16)建立，不以条带或scissor起点建立。属性f=[0,30,38,38,16,16,16]；q/uq/vq各h=bit_length(max原始幅值)−32（全零bit_length=0），深度h=−16、颜色h=−8；s10能容纳全部h。
 
-透视完整uq51×w54=105位Q68，右移60位舍入得到Q8，sample容器s32。偏导保留有理梯度：以u的Q8整数U计算(Duq−U·Dq)·w/A，32+96+1=129位差，乘54位w为183位Q68，转Q16需除A并右移52位；跨度用u96：实际Dq分子位界35+18+1+4=58，乘U32后差最多91位，再乘w54并移52位最多93位，96位足够。quad的uq/vq先将Q8坐标左移30位、q=2³⁰；送sample时恢复Q8，跨度不用。上述是唯一精确接口；下文B/C只比较尚未获准的规格改动，不构成另一个端口定义。
+R为最近舍入、半值远离零；未列舍入点的中间乘加完整保留。按2.13先求ai=R(rawi/2^h)（最多33位幅值）；Dx/Dy为对边坐标差乘16，分子ΣD·ai保留s56，与Q30面积倒数r完整相乘为s87，再R(/2^(30+k))得s56的gx/gy。s=aa+R(((16xr+8−ax)gx+(16yr+8−ay)gy)/16)，中间完整扩展，s保存s70。像素T=s+(x−xr)gx+(y−yr)gy保存s70；行、lane、组分别加gy/gx/4gx，不舍入、不截断。条带首组由同一s/g直接求值，起点不重新舍入；因此与planes.py逐位一致。
 
+归一化负载固定29位：低18位为幅值M，bit18为符号，bits[28:19]为s10指数E，物理值为(−1)^sign·M·2^E；零固定(+,0,0)。N、乘积36位、带3保护位的s23对齐减法和舍入进位全部按2.13第8–9条。每lane先N(Tq,hq−30)，以F=17、中点种子、两次18×18完整积及规定舍入得w=N(r1,−34−E)；U=N(N(Tuq,huq−38)×w)，V同理。sample输出R(U×256)、R(V×256)为s32 Q8，不饱和；LOD偏导使用归一化U/V，不能改用已舍入的sample_u/v。深度由Q16舍入夹u16、RGB由Q24舍入夹u8后送sample。
+
+quad使用同一fragment契约：h固定为[−16,0,0,0,−8,−8,−8]，Tdepth=z<<16、Tq=2^30、Tuq=u_Q8<<30、Tvq=v_Q8<<30、RGB=255<<24；故q=1，uq/vq的物理值直接为纹素坐标。fragment_quad=1时透视旁路恢复Q8坐标，不作P18归一化；梯度及span置0（quad强制nearest），深度/颜色仍按同一输出舍入。
 四边形和三角形同一命令不混排；raster/quad只允许当前draw源输出。quad_record的s12位置先符号扩展到s17，object_quad使用独立s17位置，两路归一为同一内部扫描格式；减半宽高采用整数floor，取整规则依2.9。quad不能为了隐藏开销调换精灵顺序。过滤吞吐较低时，texture持有一个4lane组并分拍发lane0/1、lane2/3（bilinear）或逐lane（trilinear），组装回原4lane，pixel看到的lane/address不变。
 
 ### 4.5 装入、DMA及对象写回接口
 
-内部DMA采用字节区间请求，客户不自行切AXI突发。读客户编号固定：0命令、1矩阵、2顶点、3四边形、4对象、5纹理、6调色板；写客户编号固定：0对象表、1命中列表、2释放列表、3RESOLVE。每客户至多一条逻辑区间未完成，客户有独立流，不把编号做成业务单元端口。矩阵DMA读回2个256位beat后command组成512位matrix；命令beat直达command；顶点/quad每beat拆成两项。
+内部DMA采用字节区间请求，客户不自行切AXI突发。读客户编号固定：0命令、1矩阵、2顶点、3四边形、4对象、5纹理、6调色板；写客户编号固定：0对象表、1命中列表、2释放列表、3RESOLVE。每客户至多一条逻辑区间未完成，客户有独立流，不把编号做成业务单元端口。矩阵DMA读回2个256位beat后command组成512位matrix；命令beat直达command；顶点/quad由独立unpack每beat拆成两项，纹理/调色板装入适配也归unpack；列表压缩及尾包由独立list_pack负责。
 
 | 流 | A→B | 负载信号:位宽 | 协议及语义 |
 |---|---|---|---|
@@ -154,28 +159,28 @@ SET_TARGET原始256位的字节0x10低/高16位为VP_X0/VP_Y0（命令bits[143:1
 | `write_req`（每写客户） | 客户→write_dma | `write_req_addr:32`、`write_req_bytes:32` | 精确连续有效字节区间；此流握手后才消费该客户write_data |
 | `write_data`（每写客户） | 客户→write_dma | `write_data_data:256`、`write_data_keep:32`、`write_data_last:1` | 已按DDR对齐beat排列；keep是该请求中实际写字节位置，last标记逻辑末拍；列表项32bit、resolve像素16bit按地址排列 |
 | `write_done`（每写客户） | write_dma→客户 | `write_done:1`，无握手一拍 | 该请求所有突发B返回后脉冲；对象/列表计数发布依赖这些完成 |
-| `texture_load` | read_dma装入适配→texture_ram | `texture_load_addr:18`、`texture_load_data:256`、`texture_load_keep:32` | 18bit纹理字节地址（32B对齐），32B一组；按离线字流线性地址写4体，拆成四次8B内部写；RAM返回ready反压 |
-| `palette_load` | read_dma装入适配→palette | `palette_load_idx:12`、`palette_load_data:20` | group*256+entry；每beat拆8个PAL_ENTRY逐项广播写两份完整表；高12位DDR填充忽略 |
+| `texture_load` | unpack→texture_ram | `texture_load_addr:18`、`texture_load_data:256`、`texture_load_keep:32` | 18bit纹理字节地址（32B对齐），32B一组；按离线字流线性地址写4体，拆成四次8B内部写；RAM返回ready反压 |
+| `palette_load` | unpack→palette | `palette_load_idx:12`、`palette_load_data:20` | group*256+entry；每beat拆8个PAL_ENTRY逐项广播写两份完整表；高12位DDR填充忽略 |
 | `object_update` | object→写回适配 | `object_update_idx:24`、`object_update_data:256` | 仅step=1，保持原记录未定义位及非运动字段；更新alive/p/v/life；地址基址+32*idx |
-| `object_event` | object→列表打包适配（R-1） | `object_event_idx:24`、`object_event_hit:8`、`object_event_free:1` | 仅step=1时每个已处理对象一次，step=0不发事件、不写列表；hit位k对应目标k；先按对象顺序，再按目标编号递增压缩列表；free是本次由活变死；空槽不计free。命中/释放是否同时产生严格依2.9及模型的顺序 |
+| `object_event` | object→list_pack（R-1） | `object_event_idx:24`、`object_event_hit:8`、`object_event_free:1` | 仅step=1时每个已处理对象一次，step=0不发事件、不写列表；hit位k对应目标k；先按对象顺序，再按目标编号递增压缩列表；free是本次由活变死；空槽也发一次hit=0、free=0事件，但不发update、不绘制、不计ALIVE。命中/释放是否同时产生严格依2.9及模型的顺序 |
 
-STEP=0只检查原记录alive并按draw开关输出四边形；不推进、不做存活区判定/碰撞、不写回/列表，hit/free/overflow结果为0，alive_count统计原存活对象。STEP=1才走运动/判定/碰撞/写回路径；对象result计数由object统计未截断事件总数，hit每拍popcount8、free/alive各0/1。R-1打包器只对容量内条目写DDR，full后停止追加；对象单元得到同一配置快照，以实际计数和MAX比较形成规定的overflow。两边不重复统计可见寄存器，也不添加第二套溢出行为。尾部用WSTRB保留容量外及相邻数据。
+STEP=0时所有对象都不发event和update；只检查原记录alive并按draw开关输出四边形；不推进、不做存活区判定/碰撞、不写回/列表，hit/free/overflow结果为0，alive_count统计原存活对象。STEP=1仅非空槽走运动/判定/碰撞/写回路径；对象result计数由object统计未截断事件总数，hit每拍popcount8、free/alive各0/1。R-1打包器只对容量内条目写DDR，full后停止追加；对象单元得到同一配置快照，以实际计数和MAX比较形成规定的overflow。两边不重复统计可见寄存器，也不添加第二套溢出行为。尾部用WSTRB保留容量外及相邻数据。
 
 ### 4.6 200MHz流水线、数值与吞吐
 
-以下均为结构估算，不是综合结果。每级≤3级LUT，宽加减按每20位两拍切分；全精度分块乘用APM三拍、部分积压缩/进位每层两拍。整数位移只在规格舍入点取位。II按无背压计。
+以下均为结构估算，不是综合结果。目标每级≤3级LUT，宽加减按每20位一拍切分（含选择的复杂级再拆拍）；全精度分块乘用APM三拍、部分积压缩/进位每层两拍。整数位移只在规格舍入点取位。II按无背压计。
 
 | 阶段 | 分级/延迟估算 | II/吞吐与限制 |
 |---|---|---|
 | 变换/光照 | 16矩阵积两拍发射、APM3、50位加法树两层各3、饱和2，约14拍；光照分级对齐 | 顶点II=2，全内三角形 |
 | 裁剪 | s43距离加减3、分类1；对称交点分子84位，6块乘积压缩/加减约9、精确除法另计 | 全内约4拍；跨平面按边序列反压，不把倒数近似代替规定交点除法 |
 | 顶点投影 | 归一化3、种子3、两次牛顿宽乘各5、减2、还原3=21；40×35的6块积3+压缩/加减6；视口乘/舍入8、剔除4，共约42拍 | 顶点II=2；三坐标各6块，不能再按32×18的2块计 |
-| 建立 | s18差2、面积积/差5、属性分子乘/压缩9、首中心求值与符号对齐8，约24拍；面积不预舍入成斜率 | 目标II=8；至少ceil(24/8)=3上下文，保留5项配额；需实现调度验证 |
-| 扫描/插值 | s40边加2、s96分子加5、覆盖2；N/A逐属性精确除法采用下述保守展开基线：96步×2拍=192拍，再舍入2，合计约201拍 | 四lane并行、各步寄存，II=1；长延迟和资源不能隐去 |
+| 建立 | 面积/归一化/Q30倒数32拍；7属性各40拍预算（缩放3、分子积6/求和6、倒数积7/舍入5、起点积7/相加4，余2拍控制；P18梯度并行），共32+7×40=312拍 | 保守II=312，一上下文串行；调度须RTL验证 |
+| 扫描/插值 | 裁剪首值按同一规范s/g求值，17位偏移移位加法17×4加合并4，共72拍预算；稳态边/属性分块加4、lane展开4、覆盖/对齐2，约10拍 | s70反馈按每20位一拍分4相交错，稳态II=1组，行切换含起点装入；各相位跨4组加16gx，行首相位均由同一平面求值；无像素除法 |
 | 四边形扫描 | 建立2、位置/UV/翻转2、mask1，共5拍；当前/下一预建 | 对齐16×16为64组，不齐最多80组，稳态≤80拍 |
-| 像素倒数/UV | 倒数21；51×54的9块乘3+压缩/进位6、舍入2，共32拍 | 4lane II=1；精确全乘基线104 APM，详4.11 |
-| 每像素精确偏导A | u×Dq、差、乘w共约22拍；183/40精确除法183步×2=366拍，取Q16/最大4，共约392拍 | 与UV并行，结果按原4lane组对齐；资源尚未闭合 |
-| 纹理 | 96位跨度前导位/移位5、256项log2表2、偏置/夹取2、地址3、RAM5、palette4；RGBA过滤乘加独立分级 | nearest4（无冲突）、bilinear2、trilinear1像素/拍；双线性横向保留Q8积，纵向保留Q16积再一次舍入 |
+| 像素透视/UV | 70位归一化前导位/分层移位/舍入8、种子3、牛顿两乘各3与舍入各2、减2、w归一化4、UV乘及归一化7、Q8输出3，共37拍 | 4lane II=1；每lane2牛顿+2UV乘，共16 APM；各舍入点严格按2.13 |
+| 每像素LOD偏导 | 与UV之后串联：U/V×Gq乘及N共7、保护位对齐/s23减及N共8、乘w及N共7、Q16/绝对值/max共5，计27拍 | 4lane II=1，每lane8乘，共32 APM；以未转Q8的U/V求每像素四偏导，无除法 |
+| 纹理LOD/取样 | u96跨度前导位/移位5、256项log2表2、偏置/夹取2，LOD共9拍、II=1组；地址3、RAM5、palette4，过滤乘加独立分级 | nearest4（无冲突）、bilinear2、trilinear1像素/拍；双线性二维积一次舍入 |
 | 像素运算 | mask1、目标读5、比较2、模板2、因子2、APM3、d2、op2、合并2、提交1，共22拍 | 4像素/拍；同字依赖另停顿 |
 | 对象 | STEP=1共12拍，STEP=0共4拍 | 单元II=1，不含绘制/DDR；STEP=0不走推进/碰撞/列表/写回 |
 | AA | 亮度/minmax/差/方向/和/打包各2拍，共12 | 四像素/拍 |
@@ -299,13 +304,14 @@ TEX_LOAD和DRAW按命令顺序执行，因此本版没有同时读一半/写另�
 | R-4 当前组palette | 8副本*256×20 LUTRAM，约1600 LUT | 0 |
 | R-1 AA | 3行各320×64有效字，各1片512×72 | 3 |
 | R-2 顶点倒数种子 | 1份1024×18，低12位由LUTROM补全 | 1 |
-| R-3 像素倒数种子 | 4lane各1024×18，低12位由LUTROM补全 | 4 |
+| R-2 建立面积倒数种子 | 独立1份1024×18，Q30低12位由LUTROM补全 | 1 |
+| R-3 像素倒数种子 | 4lane各1024×18，P18完整种子，无低位补全 | 4 |
 | R-1 DMA池 | 读64×256，写32×256 LUTRAM | 0 |
-| **GPU DRM总计** | **129+48+8+3+1+4** | **193** |
+| **GPU DRM总计** | **129+48+8+3+1+1+4** | **194** |
 
-DMA读池4个16beat区=64×256，写池2个16beat区=32×256，共24576bit；按32bit/LUT为768 LUT容量代理，含读树/指针/寄存预留约1500 LUT、600 FF，仍支持4读/2写在途和16beat突发。命令FIFO32×256、顶点16×128、quad4×128、对象输入/更新各16×256、对象事件16×33、列表各两个256bit尾包、setup至少5项上下文（建立延迟按下表重估，II=8）、fragment/sample/shaded各两项槽均用LUTRAM/FF，计入4.11；不整表缓存。
+DMA读池4个16beat区=64×256，写池2个16beat区=32×256，共24576bit；按32bit/LUT为768 LUT容量代理，含读树/指针/寄存预留约1500 LUT、600 FF，仍支持4读/2写在途和16beat突发。命令FIFO32×256、顶点16×128、quad4×128、对象输入/更新各16×256、对象事件16×33、列表各两个256bit尾包、setup单项计算上下文及两项输出槽（II=312）、fragment/sample/shaded各两项槽均用LUTRAM/FF，计入4.11；不整表缓存。
 
-矩阵16×32及状态、裁剪双8顶点、32项未决RMW存寄存器；LOD256项×9位小数表（索引8位，含舍入到256的端点）用组合常数分级，不占DRM。相对闭合记录约195块，本选择193少2块：当前组采用LUTRAM而非理想独立18Kb双口的2块；全芯片加保留63为**256/415=61.69%**，低于65%共3.31个百分点，按floor(415*0.65)=269块尚余13块。保留模块63已按任务提供的全芯片代理口径，IP实际占用仍由PDS确认。
+矩阵16×32及状态、裁剪双8顶点、32项未决RMW存寄存器；LOD256项×9位小数表（索引8位，含舍入到256的端点）用组合常数分级，不占DRM。DRM为194块：几何投影、建立面积各有独立Q30种子ROM，像素四份为完整P18种子；不跨单元共享端口。全芯片加保留63为**257/415=61.93%**，低于65%；floor(415×0.65)−257=12块余量。相对原193账本新增建立ROM一块，不能把几何种子与建立种子漏算为一份；IP实际占用待PDS。
 
 ### 4.9 单AXI256内部DMA仲裁
 
@@ -325,63 +331,49 @@ STEP=1的OBJ_STEP中可同时对象读、对象写、列表写；推进核1对�
 |---|---|
 | Q30牛顿 | 31×30及30×32各ceil(31/18)×ceil(32/18)=4块，APM3+部分积/加减2，两个乘法不串级 |
 | 40×35坐标 | ceil(40/18)×ceil(35/18)=6块，APM3+两层压缩/进位各2–3，完整75位输出 |
-| 51×54透视UV | 3×3=9块，APM3+两层压缩/进位共6，舍入2；上下半部不提前截断 |
-| s96分子反馈 | 每20位进位一拍，5拍；采用5相交错，反馈推进20像素，逐组输出；行首保存5个相位起点 |
-| 精确除法 | 展开恢复除法，每步40位减/选择分2拍；相邻步寄存，不能用一个组合除号估计200MHz |
+| P18透视/偏导 | 18×18完整36位APM3；每次N及对齐/舍入独立寄存，不串接两乘；符号与s10指数随行 |
+| s70平面反馈 | 每20位进位一拍，4拍；4相交错，反馈推进16像素，逐组输出；行首保存4相位起点 |
+| 建立宽积 | 56×31用8块APM，s87压缩/加法切段寄存；两池仅在setup内部复用，逐像素不除法 |
 | 目标/纹理 | 地址/段CE1、DRM读/输出2、局部及最终选择各1，共5拍 |
 | palette/过滤 | 完整及当前组读4拍；横积/纵积均保留精度，只有二维和末端舍入；三线性另一次舍入 |
 
 command按单元寄存控制副本，texture按4bank、pixel按4lane、target按15段分层复制CE/写控制，局部目标每份≤32–64负载。控制不广播到整条宽数据通路，数据寄存不复位。上述预算必须由PDS的最差路径/扇出确认，不能由LUT级数宣称180/200MHz已可达。
 
-### 4.11 每单元与全芯片资源估算及待决比较
+### 4.11 每单元与全芯片资源估算
 
-**本次复算发现原稿资源闭合不适用于v0.2完整精度。** 协调者要求先列A/B/C的成本和图像影响，偏导方案等待用户决定；不修改规格。以下是可复算的结构估算，尤其展开除法是直接展开实现的面积代理，不是最优实现的下界；不能据此宣称规格本身不可实现，也不能把它伪报成已闭合方案。
+采用B32/P18，删除旧精确插值除法、倒数UV混合软乘和LOD-A展开实现。以下均为结构估算，非综合/时序实测；不宣称整GPU已闭合。沿用原账本其余基础配额（包括raster/quad 6500 LUT），不把数值研究的局部预算误作全GPU预算。
 
-计数口径：乘法块数M(a,b)=ceil(a/18)·ceil(b/18)，18×18软乘面积代理360 LUT、流水108 FF/块；这是结构配额，需综合校准。完整乘积的压缩/对齐在单元基础配额中计。精确n位分子/u40分母的展开除法D(n)取n步，每步减法/选择2×40=80 LUT，两级余数/控制寄存4×40=160 FF；D(n)=(80n LUT,160n FF)。这些代理不含复位或非法输入检查。
+令M(a,b)=ceil(a/18)·ceil(b/18)、B=32、P=18、W=B+38=70。两个setup乘法池各max(M(56,31),M(31,32))=8 APM，共16；像素四lane×(2牛顿+2UV+8偏导)×M(18,18)=48 APM。无软乘或像素展开除法。
+建立LUT=8(B+55)+1200+384=2280；像素LUT=28W×2+12W×4+16(6P+48)+4×256+72+1000+128max(P−18,0)=11872。合计14152 LUT/64 APM，1000覆盖及72 log表已含，不重复追加。该公式与数值报告一致。
 
-| 共用部分 | LUT估算 | FF估算 | DRM | APM估算/公式 |
-|---|---:|---:|---:|---|
+| 单元 | LUT估算 | FF估算 | DRM估算 | APM估算 |
+|---|---:|---:|---:|---:|
 | regs/command | 3000 | 2300 | 0 | 0 |
-| DMA/打包 | 5500 | 4400 | 0 | 2 |
+| DMA/unpack/list_pack | 5500 | 4400 | 0 | 2 |
 | resolve/AA | 3500 | 3400 | 3 | 0 |
 | transform/light | 5000 | 5400 | 0 | 22=8×2+6 |
-| clip/project | 7884 | 8000 | 1 | 26=3×6+2×4；裁剪串行复用该算术池 |
-| setup | 6500 | 8000 | 0 | 24=4×6，面积/属性乘共享调度 |
-| raster/quad（分子加法/队列） | 6500 | 10000 | 0 | 0 |
+| clip/project | 7884 | 8000 | 1 | 26=3×6+2×4 |
+| setup（B32） | 2280 | 8000 | 1 | 16=2×8 |
+| raster/quad基础队列及扫描 | 6500 | 10000 | 0 | 0 |
+| 像素平面累加/归一化/透视/LOD（P18） | 11872 | 24936 | 4 | 48=4×12 |
 | object | 2800 | 3000 | 0 | 0 |
-| texture/filter/palette | 9000 | 10000 | 56 | 44=28过滤+16着色 |
-| pixel/target | 6300 | 8000 | 129 | 24混合 |
-| 精确插值除法（四lane×七属性） | 215040=28×D(96).LUT | 430080=28×D(96).FF | 0 | 0 |
+| texture/filter/palette | 9000 | 10000 | 56 | 44=28+16 |
+| pixel/target | 6300 | 8000 | 129 | 24 |
 | 桥/区域reset | 500 | 500 | 0 | 0 |
-| **共用小计（不含像素倒数/UV/偏导）** | **271524** | **493080** | **189** | **142** |
+| **GPU合计** | **64136** | **87936** | **194** | **182** |
+| 保留模块代理 | 40000 | F_reserved（未提供） | 63 | 10 |
+| **全芯片合计** | **104136** | **87936+F_reserved** | **257** | **192** |
 
-基础LUT合计55600，另加顶点ROM低位384、插值215040、桥500=271524；FF62500+430080+500=493080。相对旧稿，s96分子加法/相位、完整乘积压缩、光照与log2表均增加基础配额；该插值除法开销是原稿只列48位平面时漏计的部分，三种LOD方案都不能消除，须独立优化实现。
+LUT合计=未替换基础49984+2280+11872=64136；APM=未替换基础118+16+48=182。全芯片APM=192/740=25.95%，距floor(740×30%)余30；DRM=257/415=61.93%，距floor(415×65%)余12。GPU仍比60K LUT目标多4136，须后续实现/综合收敛，不能以局部14152<15000宣称全GPU闭合。
 
-**单独核算每像素倒数和UV**：每lane牛顿2×M(31,32)=8块，UV两次M(51,54)=18块，共26；四lane为104 APM，尚未包括偏导。四份1024×30种子中高18位仍用4 DRM，低12位用LUTROM，容量4×1024×12/32=1536 LUT；顶点另1份384 LUT已计上表。全APM实现的该部分为LUT 5500+1536=7036、FF 7200、DRM4、APM104；加共用142和保留10为256/740=34.59%，**UV及倒数本身也需混合映射**。
-
-为只比较LOD的增量，以下三方案均固定像素倒数/UV为68 APM，余104−68=36等效块用LUT：LUT=7036+36×360=19996，FF=7200+36×108=11088，DRM4。全芯片APM统一为142+68+10=220/740=29.73%，floor(740×30%)−220=2块余量；这只是APM满足约束，不能当作面积/时序闭合。
-
-A的偏导每lane四个：32×96需M=12，129×54需M=24，四lane共16×(12+24)=576软乘等效块；再加16×D(183)。故增量LUT=576×360+16×183×80=441600，FF=576×108+16×183×160=530688。除后按Q16取跨度，不截断中间乘积。
-
-B每组只做一次上述四偏导，选组内lane0，不额外取组中心样本；其偏导面积为A的1/4：110400 LUT、132672 FF。C用于比较的具体假设为每个偏导两次18位尾数乘、指数对齐及归一化，四lane×四偏导×两乘=32软乘块，外加16×128 LUT/FF的归一化配额：13568 LUT、5504 FF；先舍入尾数，输出跨度仍Q16，误差必须M-1重测后才能形成规格。
-
-| 方案（偏导待决，接口当前仅A） | GPU APM / 全芯片APM | GPU LUT / 全芯片LUT | GPU FF估算 | 图像影响与规格 |
-|---|---|---|---:|---|
-| A 每像素完整精度 | 210 / 220 | 733120 / 773120 | 1034856 | 完全遵循现v0.2；精确除法基线面积明显超预算 |
-| B 四像素共用lane0 LOD | 210 / 220 | 401920 / 441920 | 636840 | UV逐像素精确；大透视变化时组内mip选择会变，可能出现4像素阶梯；需改2.6 |
-| C 每像素18位尾数偏导 | 210 / 220 | 305088 / 345088 | 509672 | UV逐像素精确；LOD边界可能选相邻mip，过滤结果变化；需改2.6/2.12并复核误差 |
-
-FF使用表列每级配额，不是网表计数；完整负载对齐和时序复制还可能增加，当前数值只用于比较结构成本。表中GPU总量=共用小计+19996 LUT/11088 FF+各方案偏导；全芯片LUT再加任务代理40000，FF只列GPU（保留模块未提供）。三种均DRM193，全芯片193+63=256/415=61.69%，保持不变；APM均220低于30%。三种展开基线均超过GPU60K目标，FF也不满足可实现性承诺，不能冻结资源账本。LUTRAM位不重复算FF；5份种子低位共1920 LUT，log2表另72 LUT容量代理，均保留完整Q30/Q8语义。
-
-**推荐C作为数值研究方向**：保留逐像素LOD，资源显著低于A，避免B的组内阶梯；这不是已批准的数值变更。即使选择C，也必须优化共同的精确属性插值和倒数/UV软乘映射，并用综合替换当前展开基线估算；本次不擅自缩短Q30尾数、不提前舍入平面、不降低四lane吞吐。资源与偏导精度等待用户/协调者决定，4.2–4.4仍只定义现行规格的精确接口。
+FF为独立寄存配额：未替换基础55000；setup沿用8000（上下文、两乘法池完整积和控制）；像素估算28×70×5（平面相位/结果）+12×70×4（输入归一化）+48×36×3（乘积流水）+48×29×4（归一化/对齐）+4×256（控制）=24936。总FF=55000+8000+24936=87936；基础raster队列保守保留，宽负载停顿槽及扇出复制可能继续改变结果。保留模块未提供FF，故全芯片仅给显式公式，不虚构合计。LUTRAM位不重复算FF；几何和setup两份Q30低位ROM各384 LUT，像素P18种子无低位ROM。
 
 ## 5. 影响
 
-- 本次只修改本设计记录；不改RTL、规格、gpu.json、文件列表或测试。纯文档不运行RTL lint/仿真；执行 `git diff --check` 及4.8的纹理枚举，预期 `PASS 783363 192KiB bounds; palette 8-read preload`。
-- R-1–R-4的配置/数据接口采用4.2–4.4唯一定义；数值依据v0.2，错误/停顿/排空语义保持。完整Q30种子ROM高18位/低12位分存，DRM不变，但IP说明需同步完整读出语义。
-- 待决A/B/C按协调者本次答复列比较，用户决定前不得按B/C实现；选B/C需先修订规格及参考模型。精确插值/透视资源尚未闭合，需另行实现研究和PDS评估，本记录不把展开基线估算写成实测结果。
-- 复现以源码基线b2ac0bb8b加本次文档提交为准；纹理公式命令见4.8，算术/资源公式见4.3/4.4/4.11，无新增报告或测量产物。
+- 本次只修改本设计记录；不改RTL、规格、gpu.json、文件列表或测试。纯文档不运行RTL lint/仿真；`git diff --check` 通过，4.8的纹理枚举实跑结果为 `PASS 783363 192KiB bounds; palette 8-read preload`。
+- R-1–R-4接口以4.2–4.4为唯一定义，算术依据v0.3草案2.13和planes.py（b3315ccb0）；几何/建立Q30及像素P18种子包装需分别落实；R-1有独立unpack/list_pack。
+- 复现以文档基线8f9272261加本次文档提交为准；纹理公式命令见4.8，资源公式见4.11。数值研究结果引用既有报告，本次没有重跑数值研究或新增测量报告。
 
 ## 6. 状态
 
-**已决定，待协调者批准冻结。** v0.2数值及当前精确接口已统一；偏导实现方案A/B/C按协调者要求标为待决，不把B/C写进接口表。DRM估算GPU193、全芯片256；按混合映射APM估算GPU210、全芯片220（29.73%）；A展开基线估算为GPU733120 LUT、全芯片773120 LUT，不能宣称满足60K目标或可实现。推荐研究C，并优化共同的精确插值/UV面积；200/180MHz、实际LUT/FF/APM及物理端口模式均待实现与PDS验证。
+**已决定，待协调者批准冻结。** 采用B32/P18唯一路径：规范平面起点、s56系数、s70无损步进、P18透视及逐像素LOD。GPU估算194 DRM、182 APM、64136 LUT、87936 FF；全芯片估算257 DRM、192 APM、104136 LUT、87936+F_reserved FF（保留模块FF未提供）。GPU LUT尚超60K目标4136；建立II=312及200MHz分级均为结构估算，实际时序、吞吐和资源待RTL与PDS验证。
