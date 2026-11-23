@@ -5,13 +5,14 @@
 | 模块 | 端口摘要 |
 |---|---|
 | `regs` | APB4；start/abort/soft_rst 脉冲；enable/desc_base/desc_count/wide；busy/done/error/err_code；object_cfg 与 object_result；PERF 事件、IRQ |
-| `command` | 7 路独立 read_req；command_read_data；matrix 回传；unpack/pack 启动；geometry_cfg；raster/texture/pixel 三路 render_state；geometry/raster/quad/object 四路 draw；clear/resolve；palette_prepare/prepared；每单元 finish/done；stop、DMA start/idle/error |
+| `command` | 7 路独立 read_req；command_read_data；matrix 回传；unpack/pack 启动；geometry_cfg；raster/quad/texture/pixel 四路 render_state；geometry/raster/quad/object 四路 draw；clear/resolve；palette_prepare/prepared；每单元 finish/done；stop、DMA start/idle/error |
 | `read_dma` | command/matrix/vertex/quad/object/texture/palette 七路 read_req/data/done；AXI256 AR/R；start/stop、idle/error、read_wait |
 | `write_dma` | object/hit/free/resolve 四路 write_req/data/done；AXI256 AW/W/B；start/stop、idle/error |
 | `resolve` | resolve_command/target/wide；target resolve_read/color；Surface write_req/data/done；finish/stop/done、busy 事件 |
 | `unpack` | 当前命令；matrix/vertex/quad/texture/palette 五路 read_data；matrix512、vertex128、quad_record128、texture_load、palette_load；stop/done |
 | `list_pack` | 当前 OBJ_STEP、列表配置；object_update/event；object/hit/free 三路 write_req/data/done；finish/stop/done |
 
+- DRAW_TRI 只向 raster 发扫描状态；DRAW_QUAD/OBJ_STEP 只向 quad 发扫描状态，测试分别计数并对 quad 独立反压。
 - 命令 FIFO 为 32 项；每次预取至多 16 条，并先保留整个区间所需 FIFO 空间，避免命令返回阻塞当前绘制所需的读 DMA。
 - `command.dma_start_o` 接两个 DMA 的 `start_i`，清本次运行的 AXI 错误粘滞位。
 - `command.object_cfg_request_o` 接 regs 快照请求；`object_cfg_done_i` 是配置流实际握手脉冲。快照同时供 object 与 list_pack，顶层须保证两者均已取到快照。
@@ -55,3 +56,8 @@ SET_TEX 的 108 种宽高/格式组合均核对完整 9 级物理占用，并测
 七项自检 7/7 PASS；10 个 RTL 文件风格检查和七模块 Verilator `--lint-only -Wall` 均为 0 告警。
 读/写在途峰值 4/2；640×180 全条 AA 为 34375 周期；主机仿真进程和构建目录已清理。
 周期属于单元目标/写完成模型，DDR 端到端性能和 PDS 时序留给独立集成验证。
+
+4.12 状态路由补充：`gpu: command sends render_state to quad for quad draws`；
+`python3 tools/regress.py smoke --path verif/unit/gpu_command -j 1` 实测 1 PASS、0 FAIL。
+新增检查：DRAW_TRI 的 raster 快照 1 次，DRAW_QUAD/OBJ_STEP 的 quad 快照合计 2 次；
+quad 独立反压时快照保持；command 风格检查和 `--lint-only -Wall` 为 0 告警。

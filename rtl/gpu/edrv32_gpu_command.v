@@ -85,6 +85,12 @@ module edrv32_gpu_command (
     output wire [255:0] raster_render_state_pixel_o,
     output wire [255:0] raster_render_state_target_o,
     output wire raster_render_state_wide_o,
+    output wire quad_render_state_valid_o,
+    input wire quad_render_state_ready_i,
+    output wire [255:0] quad_render_state_tex_o,
+    output wire [255:0] quad_render_state_pixel_o,
+    output wire [255:0] quad_render_state_target_o,
+    output wire quad_render_state_wide_o,
     output wire texture_render_state_valid_o,
     input wire texture_render_state_ready_i,
     output wire [255:0] texture_render_state_tex_o,
@@ -194,7 +200,7 @@ module edrv32_gpu_command (
     reg stop_r;
     reg error_pending_r;
     reg [31:0] error_code_r;
-    reg [5:0] config_r;
+    reg [6:0] config_r;
     reg [5:0] draw_r;
     reg palette_needed_r;
     reg object_configured_r;
@@ -285,6 +291,12 @@ module edrv32_gpu_command (
     assign raster_render_state_pixel_o = pixel_r;
     assign raster_render_state_target_o = target_r;
     assign raster_render_state_wide_o = wide_r;
+    // microarch 4.12: only the active scan source receives the render snapshot.
+    assign quad_render_state_valid_o = state_r == S_CONFIG && config_r[6];
+    assign quad_render_state_tex_o = tex_r;
+    assign quad_render_state_pixel_o = pixel_r;
+    assign quad_render_state_target_o = target_r;
+    assign quad_render_state_wide_o = wide_r;
     assign texture_render_state_valid_o = state_r == S_CONFIG && config_r[3];
     assign texture_render_state_tex_o = tex_r;
     assign texture_render_state_pixel_o = pixel_r;
@@ -384,7 +396,7 @@ module edrv32_gpu_command (
             error_pending_r <= 1'b0;
             error_code_r <= 32'b0;
             dma_start_o <= 1'b0;
-            config_r <= 6'b0;
+            config_r <= 7'b0;
             draw_r <= 6'b0;
             palette_needed_r <= 1'b0;
             palette_sent_r <= 1'b0;
@@ -463,7 +475,7 @@ module edrv32_gpu_command (
                     pixel_finish_o <= 1'b0;
                     target_finish_o <= 1'b0;
                     resolve_finish_o <= 1'b0;
-                    config_r <= 6'b0;
+                    config_r <= 7'b0;
                     draw_r <= 6'b0;
                     palette_needed_r <= 1'b0;
                     palette_sent_r <= 1'b0;
@@ -497,14 +509,16 @@ module edrv32_gpu_command (
                             palette_needed_r <= tex_r[73:72] != 2'd2 && tex_r[83:82] != 0;
                         end
                         8'h21: begin
-                            config_r[4:2] <= 3'b111;
+                            config_r[4:3] <= 2'b11;
+                            config_r[6] <= 1'b1;
                             config_r[0] <= command_r[119:96] != 0;
                             draw_r[2] <= 1'b1;
                             read_client_r <= 3'd3;
                             read_bytes_r <= {4'b0, command_r[119:96], 4'b0};
                         end
                         8'h22: begin
-                            config_r[4:2] <= 3'b111;
+                            config_r[4:3] <= 2'b11;
+                            config_r[6] <= 1'b1;
                             config_r[5] <= 1'b1;
                             draw_r[3:2] <= 2'b11;
                             object_cfg_request_o <= 1'b1;
@@ -565,6 +579,8 @@ module edrv32_gpu_command (
                     if (pixel_render_state_valid_o && pixel_render_state_ready_i)
                         config_r[4] <= 1'b0;
                     if (pack_valid_o && pack_ready_i) config_r[5] <= 1'b0;
+                    if (quad_render_state_valid_o && quad_render_state_ready_i)
+                        config_r[6] <= 1'b0;
                     if (config_r == 0) state_r <= S_PREP;
                 end
                 S_PREP: begin

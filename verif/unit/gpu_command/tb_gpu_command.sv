@@ -72,6 +72,12 @@ module tb_gpu_command;
     logic [255:0] raster_render_state_pixel_o;
     logic [255:0] raster_render_state_target_o;
     logic raster_render_state_wide_o;
+    logic quad_render_state_valid_o;
+    logic quad_render_state_ready_i = 0;
+    logic [255:0] quad_render_state_tex_o;
+    logic [255:0] quad_render_state_pixel_o;
+    logic [255:0] quad_render_state_target_o;
+    logic quad_render_state_wide_o;
     logic texture_render_state_valid_o;
     logic texture_render_state_ready_i = 0;
     logic [255:0] texture_render_state_tex_o;
@@ -214,6 +220,12 @@ module tb_gpu_command;
         .raster_render_state_pixel_o(raster_render_state_pixel_o),
         .raster_render_state_target_o(raster_render_state_target_o),
         .raster_render_state_wide_o(raster_render_state_wide_o),
+        .quad_render_state_valid_o(quad_render_state_valid_o),
+        .quad_render_state_ready_i(quad_render_state_ready_i),
+        .quad_render_state_tex_o(quad_render_state_tex_o),
+        .quad_render_state_pixel_o(quad_render_state_pixel_o),
+        .quad_render_state_target_o(quad_render_state_target_o),
+        .quad_render_state_wide_o(quad_render_state_wide_o),
         .texture_render_state_valid_o(texture_render_state_valid_o),
         .texture_render_state_ready_i(texture_render_state_ready_i),
         .texture_render_state_tex_o(texture_render_state_tex_o),
@@ -302,6 +314,8 @@ module tb_gpu_command;
     int request_count[7];
     int done_count=0,error_count=0;
     int resolve_count=0,draw_count=0;
+    int raster_state_count=0,quad_state_count=0;
+    int quad_draw_count=0;
     int unit_delay[10];
     int cycles=0;
     bit model_run=0;
@@ -377,6 +391,7 @@ module tb_gpu_command;
             unpack_ready_i=cycles%7!=0;
             geometry_cfg_ready_i=cycles%7!=0;
             raster_render_state_ready_i=cycles%7!=0;
+            quad_render_state_ready_i=cycles%11>=4;
             texture_render_state_ready_i=cycles%7!=0;
             pixel_render_state_ready_i=cycles%7!=0;
             geometry_draw_ready_i=cycles%7!=0;
@@ -463,9 +478,26 @@ module tb_gpu_command;
                     || geometry_cfg_wide_o) $fatal(1,"FAIL geometry snapshot");
             end
             if(raster_render_state_valid_o && raster_render_state_ready_i) begin
+                raster_state_count++;
                 if(raster_render_state_tex_o!==expected_tex || raster_render_state_pixel_o!==expected_pixel
                     || raster_render_state_target_o!==expected_target || raster_render_state_wide_o)
                     $fatal(1,"FAIL raster snapshot");
+            end
+            if(quad_render_state_valid_o) begin
+                if(quad_render_state_tex_o!==expected_tex
+                    || quad_render_state_pixel_o!==expected_pixel
+                    || quad_render_state_target_o!==expected_target || quad_render_state_wide_o)
+                    $fatal(1,"FAIL quad snapshot under backpressure");
+                if(quad_render_state_ready_i) quad_state_count++;
+            end
+            if(raster_draw_valid_o && raster_draw_ready_i) begin
+                if(raster_state_count!=1 || quad_state_count!=0)
+                    $fatal(1,"FAIL DRAW_TRI render-state route");
+            end
+            if(quad_draw_valid_o && quad_draw_ready_i) begin
+                quad_draw_count++;
+                if(raster_state_count!=1 || quad_state_count!=quad_draw_count)
+                    $fatal(1,"FAIL DRAW_QUAD/OBJ_STEP render-state route");
             end
             if(texture_render_state_valid_o && texture_render_state_ready_i) begin
                 if(texture_render_state_tex_o!==expected_tex || texture_render_state_pixel_o!==expected_pixel
@@ -508,6 +540,9 @@ module tb_gpu_command;
         launch(12);wait_idle();
         if(done_count!=1 || error_count!=0 || resolve_count!=1 || draw_count!=1)
             $fatal(1,"FAIL all opcode sequence done=%0d error=%0d",done_count,error_count);
+        if(raster_state_count!=1 || quad_state_count!=2 || quad_draw_count!=2)
+            $fatal(1,"FAIL render-state counts raster=%0d quad=%0d draws=%0d",
+                raster_state_count,quad_state_count,quad_draw_count);
         for(int i=1;i<7;i++) if(request_count[i]!=1) $fatal(1,"FAIL decoded client %0d",i);
         program_data[0]=0;program_data[0][7:0]='hff;expect_error(1);
         program_data[0]=expected_tex;program_data[0][49:37]=13'(196608>>5);expect_error(3);
