@@ -36,12 +36,12 @@
 | R-2 | 几何：顶点变换、光照、裁剪、透视除法、背面剔除、三角形建立 | Codex | D-1、S-1 | 单元测试对照参考模型逐位一致 | [ ] |
 | R-3 | 光栅化（三角形、四边形快速通道）与对象单元 | Codex | D-1、S-1 | 单元测试 | [~] 对象单元 R-3o ctx_6240e77b31ac；光栅化、四边形、透视待 S-2 |
 | R-4 | 纹理单元（取样、mipmap、调色板）、像素运算（模板、深度、混合）、片上渲染目标 | Codex | D-1、S-1 | 单元测试 | [~] 像素运算和目标 R-4b ctx_50ce2c34b38c；纹理待 S-2 |
-| V-1 | GPU 模块级测试环境和 GT-01–GT-25（不读 RTL） | Codex（验证侧） | M-1、C-1 | 环境可运行；测试按验证方案实现 | [~] V-1a 环境和 GT-01–08 ctx_16346155d024（gpu-dev）；GT-09–25 在环境提交后分给多个 worker |
+| V-1 | GPU 模块级测试环境和 GT-01–GT-25（不读 RTL） | Codex（验证侧） | M-1、C-1 | 环境可运行；测试按验证方案实现 | [~] V-1a 完成（b851cc734，模型对模型 8/8 PASS）；V-1b GT-09–17 ctx_eccfb5a5452e、V-1c GT-18–25 ctx_af9fd2593279 进行中 |
 | I-1 | GPU 集成：`edrv32_gpu` 顶层，跑 GPU 模块级全部档位，按 11.3 分清 RTL、测试、规格问题 | Codex（集成） | R-1–R-4、V-1 | smoke、full 通过；perf 报告 | [ ] |
-| A-1 | AUD RTL、单元测试，以及 AT-01–AT-09（RTL 和测试由两个 worker 分开写） | Codex × 2 | C-1 | smoke、full 通过 | [~] A-1r ctx_cdae0d727eb3、A-1v ctx_200db360b211（gpu-dev） |
+| A-1 | AUD RTL、单元测试，以及 AT-01–AT-09（RTL 和测试由两个 worker 分开写） | Codex × 2 | C-1 | smoke、full 通过 | [~] A-1r 完成（gpu-dev 0ea3c68b7，单元测试 5 项 PASS）；A-1v ctx_200db360b211 进行中 |
 | X-1 | mem_xbar 改为 5 个端口，相应测试改写（ST-01–03） | Codex；**协调者逐行评审** | — | ST-01–03 通过 | [~] ctx_20678072fa24（gpu-dev） |
 | X-2 | DISP 增加 `L0_X2`；测试 ST-04–07 | Codex | — | ST-04–07 通过 | [~] ctx_1f085da9d661（gpu-dev） |
-| X-3 | 系统子系统：reset_ctrl 改名和新增 `rst_aud_n`；CHIP_ID | Codex | — | 视觉项目系统子系统测试通过 | [~] ctx_9aa6f41251c4（gpu-dev） |
+| X-3 | 系统子系统：reset_ctrl 改名和新增 `rst_aud_n`；CHIP_ID | Codex | — | 视觉项目系统子系统测试通过 | [x] gpu-dev 48091fd90，协调者评审通过；测试 8 项 PASS |
 | T-1 | `edrv32_gpu_soc_top`、本项目文件列表、板级顶层和约束（PLL 增加 clk_gpu、clk_aud 输出；I2S、I2C 引脚按 J25 PMOD-D）、PDS 导入脚本 | Codex（RTL）；协调者（约束、脚本、IP 说明） | I-1、A-1、X-1–X-3 | SoC lint 0；ST-08、ST-09 通过 | [ ] |
 | W-1 | BSP 驱动（GPU、AUD、ES8156 配置）和 SoC 测试程序 ST-10–ST-14 | Codex | T-1 | SoC smoke、full 通过 | [ ] |
 | B-1 | Windows 任务卡：PLL IP 修改说明、综合、布局布线、时序和资源报告，上板跑 ST-10、ST-12 的程序 | 协调者写卡，用户和 Windows Codex 执行 | W-1 | 报告回传；定稿 G-T1、G-R1、G-R2、GS-1、GS-3 | [ ] |
