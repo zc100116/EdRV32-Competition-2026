@@ -1,0 +1,12 @@
++incdir+../include
+../common/edrv32_reset_copy.v
+../common/edrv32_cdc_sync_bit.v
+../common/edrv32_cdc_pulse.v
+../common/edrv32_cdc_gray_cnt.v
+../common/edrv32_async_fifo_ram.v
+../tech/edrv32_ram_aud_fifo.v
+../media/aud/edrv32_aud_regs.v
+../media/aud/edrv32_aud_dma.v
+../media/aud/edrv32_aud_fifo.v
+../media/aud/edrv32_aud_i2s.v
+../media/aud/edrv32_aud.v
