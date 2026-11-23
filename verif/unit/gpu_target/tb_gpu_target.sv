@@ -231,6 +231,8 @@ module tb_gpu_target;
             clears = clears + 1;
         end
     endtask
+    integer clear_begin_cycle;
+    integer small_clear_cycles;
     initial begin
         defaults();
         sent = 0;
@@ -323,6 +325,51 @@ module tb_gpu_target;
             read_word(28799, 1);
             drain();
         end
+        // Clipped traversal costs one cycle per covered word plus fixed RAM/drain latency.
+        clear_wide_i = 0;
+        clear_target_i[47:32] = -16'sd16;
+        clear_target_i[63:48] = 16'd123;
+        clear_target_i[79:64] = -16'sd12;
+        clear_target_i[95:80] = 16'd124;
+        clear_target_i[111:96] = 16'd4;
+        clear_target_i[127:112] = 16'd140;
+        clear_command_i[47:32] = 16'h8bad;
+        clear_command_i[63:48] = 16'h89ab;
+        clear_command_i[71:64] = 8'ha5;
+        clear_command_i[74:72] = 3'b111;
+        clear_begin_cycle = cycle;
+        clear_words();
+        small_clear_cycles = cycle - clear_begin_cycle;
+        if (small_clear_cycles > 64+16)
+            $fatal(1, "FAIL 16x16 CLEAR cycles=%0d words=64", small_clear_cycles);
+        $display("PERF CLEAR 16x16 words=64 cycles=%0d", small_clear_cycles);
+        read_word(160, 0);
+        read_word(161, 0);
+        read_word(2564, 1);
+        drain();
+        // The first and last words retain unselected lanes, including across row strides.
+        clear_target_i[79:64] = -16'sd13;
+        clear_target_i[111:96] = -16'sd9;
+        clear_target_i[127:112] = 16'd128;
+        clear_command_i[47:32] = 16'h24e7;
+        clear_begin_cycle = cycle;
+        clear_words();
+        small_clear_cycles = cycle - clear_begin_cycle;
+        if (small_clear_cycles > 8+16)
+            $fatal(1, "FAIL partial CLEAR cycles=%0d words=8", small_clear_cycles);
+        $display("PERF CLEAR partial 4x4 words=8 cycles=%0d", small_clear_cycles);
+        read_word(160, 0);
+        read_word(161, 0);
+        read_word(640, 1);
+        read_word(641, 1);
+        drain();
+        clear_target_i[111:96] = -16'sd100;
+        clear_begin_cycle = cycle;
+        clear_words();
+        small_clear_cycles = cycle - clear_begin_cycle;
+        if (small_clear_cycles > 16)
+            $fatal(1, "FAIL empty CLEAR cycles=%0d", small_clear_cycles);
+        $display("PERF CLEAR empty words=0 cycles=%0d", small_clear_cycles);
         finish_i = 1;
         while (!unit_done_o) @(negedge clk_i);
         $display("PASS gpu_target reads=%0d clears=%0d words=28800 shapes=2 latency=5", reads, clears);

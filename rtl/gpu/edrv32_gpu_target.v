@@ -42,6 +42,20 @@ module edrv32_gpu_target (
 );
     reg clear_active_r;
     reg clear_issued_r;
+    reg [1:0] clear_prepare_r;
+    reg [10:0] clear_first_x_r;
+    reg [10:0] clear_last_x_r;
+    reg [7:0] clear_last_y_r;
+    reg [15:0] clear_row_step_r;
+    reg signed [17:0] clear_x0_w;
+    reg signed [17:0] clear_y0_w;
+    reg signed [17:0] clear_x1_w;
+    reg signed [17:0] clear_y1_w;
+    reg signed [17:0] unused_clear_last_x_w;
+    reg signed [17:0] unused_clear_last_y_w;
+    reg clear_empty_w;
+    wire [15:0] clear_first_addr_w;
+    wire [15:0] clear_row_step_w;
     reg [15:0] clear_addr_r;
     reg [10:0] clear_x_r;
     reg [7:0] clear_y_r;
@@ -71,7 +85,13 @@ module edrv32_gpu_target (
     assign resolve_read_ready_o = !clear_active_r && read_ready_w && !stop_i &&
         !target_read_valid_i;
     assign target_write_ready_o = !clear_active_r && !stop_i;
-    assign read_valid_w = !stop_i && (clear_active_r ? !clear_issued_r :
+    assign clear_first_addr_w = clear_wide_r
+        ? {8'd0, clear_y_r} * 16'd320 + {7'd0, clear_x_r[10:2]}
+        : {8'd0, clear_y_r} * 16'd160 + {7'd0, clear_x_r[10:2]};
+    assign clear_row_step_w = (clear_wide_r ? 16'd320 : 16'd160)
+        - ({7'd0, clear_last_x_r[10:2]} - {7'd0, clear_first_x_r[10:2]});
+    assign read_valid_w = !stop_i && (clear_active_r
+        ? (clear_prepare_r == 0 && !clear_issued_r) :
         (target_read_valid_i || resolve_read_valid_i));
     assign read_addr_w = clear_active_r ? clear_addr_r :
         (target_read_valid_i ? target_read_addr_i : resolve_read_addr_i);
@@ -86,6 +106,31 @@ module edrv32_gpu_target (
         target_write_valid_i);
     assign write_addr_w = clear_active_r ? old_addr_w : target_write_addr_i;
     assign write_data_w = clear_active_r ? cleared_w : target_write_data_i;
+
+    // Work in target-local coordinates, then retain whole words at partial lane edges.
+    // The two preparation clocks separate clipping from row-address arithmetic.
+    always @(*) begin
+        clear_x0_w = $signed({{2{clear_target_r[79]}}, clear_target_r[79:64]})
+            - $signed({{2{clear_target_r[47]}}, clear_target_r[47:32]});
+        clear_y0_w = $signed({{2{clear_target_r[95]}}, clear_target_r[95:80]})
+            - $signed({{2{clear_target_r[63]}}, clear_target_r[63:48]});
+        clear_x1_w = $signed({{2{clear_target_r[111]}}, clear_target_r[111:96]})
+            - $signed({{2{clear_target_r[47]}}, clear_target_r[47:32]});
+        clear_y1_w = $signed({{2{clear_target_r[127]}}, clear_target_r[127:112]})
+            - $signed({{2{clear_target_r[63]}}, clear_target_r[63:48]});
+        unused_clear_last_x_w = 18'sd0;
+        unused_clear_last_y_w = 18'sd0;
+        clear_empty_w = 1'b0;
+        if (clear_x0_w < 0) clear_x0_w = 18'sd0;
+        if (clear_y0_w < 0) clear_y0_w = 18'sd0;
+        if (clear_x1_w > (clear_wide_r ? 18'sd1280 : 18'sd640))
+            clear_x1_w = clear_wide_r ? 18'sd1280 : 18'sd640;
+        if (clear_y1_w > (clear_wide_r ? 18'sd90 : 18'sd180))
+            clear_y1_w = clear_wide_r ? 18'sd90 : 18'sd180;
+        unused_clear_last_x_w = clear_x1_w - 18'sd1;
+        unused_clear_last_y_w = clear_y1_w - 18'sd1;
+        clear_empty_w = clear_x0_w >= clear_x1_w || clear_y0_w >= clear_y1_w;
+    end
 
     genvar color_lane;
     generate
@@ -142,6 +187,7 @@ module edrv32_gpu_target (
         if (!rst_n_i) begin
             clear_active_r <= 0;
             clear_issued_r <= 0;
+            clear_prepare_r <= 0;
             clear_addr_r <= 0;
             clear_x_r <= 0;
             clear_y_r <= 0;
@@ -150,25 +196,39 @@ module edrv32_gpu_target (
             if (clear_valid_i && clear_ready_o) begin
                 clear_active_r <= 1;
                 clear_issued_r <= 0;
+                clear_prepare_r <= 2;
                 clear_addr_r <= 0;
                 clear_x_r <= 0;
                 clear_y_r <= 0;
                 unit_done_o <= 0;
             end
-            if (clear_active_r && read_valid_w && read_ready_w) begin
-                if (clear_addr_r == 16'd28799) begin
-                    clear_issued_r <= 1;
+            if (clear_prepare_r != 0) begin
+                clear_prepare_r <= clear_prepare_r - 1'b1;
+                if (clear_prepare_r == 2) begin
+                    clear_x_r <= {clear_x0_w[10:2], 2'b00};
+                    clear_y_r <= clear_y0_w[7:0];
+                    clear_issued_r <= clear_empty_w;
                 end else begin
-                    clear_addr_r <= clear_addr_r + 1'b1;
-                    if (clear_x_r == (clear_wide_r ? 11'd1276 : 11'd636)) begin
-                        clear_x_r <= 0;
-                        clear_y_r <= clear_y_r + 1'b1;
-                    end else begin
-                        clear_x_r <= clear_x_r + 11'd4;
-                    end
+                    clear_addr_r <= clear_first_addr_w;
                 end
             end
-            if (clear_active_r && (clear_issued_r || stop_i) && idle_w) begin
+            if (clear_active_r && read_valid_w && read_ready_w) begin
+                if (clear_x_r == clear_last_x_r) begin
+                    if (clear_y_r == clear_last_y_r) begin
+                        clear_issued_r <= 1;
+                    end else begin
+                        clear_addr_r <= clear_addr_r + clear_row_step_r;
+                        clear_x_r <= clear_first_x_r;
+                        clear_y_r <= clear_y_r + 1'b1;
+                    end
+                end else begin
+                    clear_addr_r <= clear_addr_r + 1'b1;
+                    clear_x_r <= clear_x_r + 11'd4;
+                end
+            end
+            if (stop_i) clear_prepare_r <= 0;
+            if (clear_active_r && (clear_issued_r || stop_i) && idle_w
+                && (clear_prepare_r == 0 || stop_i)) begin
                 clear_active_r <= 0;
             end
             if (target_read_valid_i || resolve_read_valid_i || target_write_valid_i) begin
@@ -184,6 +244,12 @@ module edrv32_gpu_target (
         end
     end
     always @(posedge clk_i) begin
+        if (clear_prepare_r == 2) begin
+            clear_first_x_r <= {clear_x0_w[10:2], 2'b00};
+            clear_last_x_r <= {unused_clear_last_x_w[10:2], 2'b00};
+            clear_last_y_r <= unused_clear_last_y_w[7:0];
+        end
+        if (clear_prepare_r == 1) clear_row_step_r <= clear_row_step_w;
         if (clear_valid_i && clear_ready_o) begin
             clear_command_r <= clear_command_i[74:32];
             clear_target_r <= clear_target_i[127:32];
