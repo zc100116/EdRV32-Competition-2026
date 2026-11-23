@@ -4,7 +4,7 @@
 |---|---|
 | 版本 | v0.3 |
 | 日期 | 2026-11-23 |
-| 状态 | 草案（v0.3 待用户确认；v0.2 已确认） |
+| 状态 | 已确认（用户 2026-11-23） |
 | 范围 | `edrv32_gpu`：命令式 3D/2D 渲染器，包括命令处理、硬件几何单元、对象运动与碰撞单元、三角形与四边形光栅化、纹理单元、像素运算、片上颜色/深度/模板缓冲、写出（含后处理抗锯齿）；GPU 寄存器块 |
 | 关联文档 | `gpu-soc-spec.md` v0.1（3、5.1、5.2 X3/X9/X10、6.1、6.2 P3、8.2 DISP 2 倍放大）；视觉规格 `edrv32-soc-spec.md` v0.23 4.2、4.3、7.1–7.4；设计记录 `2026-11-23-gpu-architecture.md`（R1′–R13）、`2026-11-23-gpu-2d-estimates.md`、`2026-11-23-qianying-analysis.md`、`2026-11-23-gpu-resource-closure.md`、`2026-11-24-gpu-microarch.md`；数值报告 `docs/reports/2026-11-24-model-gpu-numeric.md`、`2026-11-24-model-gpu-numeric-v03.md` |
 
