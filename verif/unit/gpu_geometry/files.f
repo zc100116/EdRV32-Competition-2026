@@ -1,0 +1,8 @@
++incdir+../../../rtl/include
+../../../rtl/tech/edrv32_rom_gpu_recip_q30.v
+../../../rtl/gpu/edrv32_gpu_project_recip.v
+../../../rtl/gpu/edrv32_gpu_transform.v
+../../../rtl/gpu/edrv32_gpu_clip.v
+../../../rtl/gpu/edrv32_gpu_project.v
+../../../rtl/gpu/edrv32_gpu_geometry.v
+tb_gpu_geometry.sv
