@@ -49,3 +49,9 @@ python3 tools/regress.py smoke --path verif/unit/gpu_list_pack -j 1
 SET_TEX 的 108 种宽高/格式组合均核对完整 9 级物理占用，并测试容量内/越界相邻 32 B 偏移。
 
 单元测试自检 payload、状态和完成顺序；DMA 覆盖背压、4 KiB、16 beat、4读/2写在途上限、keep/WSTRB、错误与 ABORT；RESOLVE 覆盖逐像素公式、边界、两种目标形状、偏移、跨度及全条 AA 周期预算。
+
+## 验证结果
+实现 commit：`48136be87acb141fcfa99a97eb3cd8d5b62d6833`。
+七项自检 7/7 PASS；10 个 RTL 文件风格检查和七模块 Verilator `--lint-only -Wall` 均为 0 告警。
+读/写在途峰值 4/2；640×180 全条 AA 为 34375 周期；主机仿真进程和构建目录已清理。
+周期属于单元目标/写完成模型，DDR 端到端性能和 PDS 时序留给独立集成验证。
