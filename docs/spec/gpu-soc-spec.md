@@ -4,7 +4,7 @@
 |---|---|
 | 版本 | v0.2 |
 | 日期 | 2026-11-23 |
-| 状态 | 草案（v0.2 待用户确认；v0.1 已确认） |
+| 状态 | 已确认（用户 2026-11-23） |
 | 范围 | GPU 项目的 SoC 层：`edrv32_gpu_soc_top` 及其内部。FPGA 板级层（PLL、DDR 控制器/PHY、TMDS 串化、RGMII IO、引脚）不在本文范围内 |
 | 关联文档 | 视觉 SoC 规格 `edrv32-soc-spec.md` v0.23（下称“视觉规格”，本文沿用其中的大部分条款，本项目不修改它）；`gpu-spec.md` v0.2；`aud-spec.md`；设计记录 `2026-11-23-gpu-architecture.md`（R4、R8）、`2026-11-23-audio-pmod-pins.md`、`2026-11-23-gpu-resource-closure.md` |
 
