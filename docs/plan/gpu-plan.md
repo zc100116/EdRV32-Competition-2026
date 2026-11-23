@@ -21,11 +21,11 @@
 
 ## 3. 待办清单
 
-执行者：Codex 一律用 `gpt-6.1-sol`、effort medium，不派 Claude worker。
+执行者：Codex 一律用 `gpt-6.2-sol`（用户 2026-11-23）、effort medium，不派 Claude worker。
 
 | 编号 | 内容 | 执行者 | 依赖 | 验收 | 状态 |
 |---|---|---|---|---|---|
-| C-1 | 命令格式文件 `rtl/include/gpu_cmd.json` 及其生成器（RTL localparam、C 头文件）；地址表 `gpu_soc_address_map.json` | 协调者（生成器可派 Codex） | — | 生成器运行通过；字段与 gpu-spec 2.3–2.9 逐项一致 | [ ] |
+| C-1 | 寄存器和命令格式 `rtl/include/regs/gpu.json`、`aud.json`（沿用 `tools/gen/regs.py` 生成头文件）；gpu-spec 2.11 编码表。地址表 `gpu_soc_address_map.json` 放到 T-1 | 协调者 | — | 生成器运行通过；字段与 gpu-spec 2.3–2.11、aud-spec 4 逐项一致 | [x] |
 | M-1 | Python 逐位参考模型 `tools/gpu/model/` 和场景生成器 `tools/gpu/scene/`；数值研究：对 G-N1–G-N3 给出定点格式和近似方法的误差数据与建议 | Codex（验证侧，不读 RTL） | C-1 | 模型覆盖规格全部功能；数值报告 `docs/reports/<日期>-model-gpu-numeric.md` | [ ] |
 | D-1 | GPU 微结构设计记录：单元划分、单元间接口（信号、握手、时序）、流水线、片上 RAM 组织（纹理存储体、渲染目标 4 像素字）、读改写旁路、资源和时序估算 | Codex 起草，协调者逐条评审 | C-1 | 设计记录 `docs/design/<日期>-gpu-microarch.md` 经协调者批准；内部接口冻结 | [ ] |
 | S-1 | 协调者根据 M-1 修订 `gpu-spec.md` 为 v0.2（G-N1–G-N3 定稿），经用户确认 | 协调者 | M-1 | 规格 v0.2 | [ ] |

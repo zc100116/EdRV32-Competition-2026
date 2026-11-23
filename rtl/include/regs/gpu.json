@@ -1,0 +1,1526 @@
+{
+  "module": "gpu",
+  "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 2.3-2.11, 4",
+  "note": "VALUE names unnamed ranges; common bit names include unused bits (SoC 7.1). Encodings of enumerated fields are in gpu-spec.md 2.11. Unlisted bits of commands and records are ignored.",
+  "registers": [
+    {
+      "name": "ID",
+      "offset": "0x000",
+      "access": "RO",
+      "reset": 393217,
+      "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "TYPE",
+          "lsb": 16,
+          "width": 16,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "VERSION",
+          "lsb": 0,
+          "width": 16,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "CTRL",
+      "offset": "0x004",
+      "access": "RW",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "ENABLE",
+          "lsb": 0,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "START",
+          "lsb": 1,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "ABORT",
+          "lsb": 2,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "SOFT_RST",
+          "lsb": 3,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "STATUS",
+      "offset": "0x008",
+      "access": "RO",
+      "reset": 2,
+      "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "BUSY",
+          "lsb": 0,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "IDLE",
+          "lsb": 1,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "ERROR",
+          "lsb": 2,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "IRQ_EN",
+      "offset": "0x00C",
+      "access": "RW",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "DONE",
+          "lsb": 0,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "ERROR",
+          "lsb": 1,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "FRAME",
+          "lsb": 2,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY0",
+          "lsb": 8,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY1",
+          "lsb": 9,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY2",
+          "lsb": 10,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY3",
+          "lsb": 11,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "IRQ_STAT",
+      "offset": "0x010",
+      "access": "RW1C",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "DONE",
+          "lsb": 0,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "ERROR",
+          "lsb": 1,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "FRAME",
+          "lsb": 2,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY0",
+          "lsb": 8,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY1",
+          "lsb": 9,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY2",
+          "lsb": 10,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY3",
+          "lsb": 11,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "ERR_CODE",
+      "offset": "0x014",
+      "access": "RO",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4",
+      "dimensions": [],
+      "fields": []
+    },
+    {
+      "name": "DESC_BASE",
+      "offset": "0x020",
+      "access": "RW",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 5,
+          "width": 27,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "DESC_COUNT",
+      "offset": "0x024",
+      "access": "RW",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 0,
+          "width": 16,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "DOORBELL",
+      "offset": "0x028",
+      "access": "WO",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [],
+      "note": "WO; reads 0 (SoC 7.1)."
+    },
+    {
+      "name": "DONE_COUNT",
+      "offset": "0x02C",
+      "access": "RO",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4",
+      "dimensions": [],
+      "fields": []
+    },
+    {
+      "name": "PERF",
+      "offset": "0x040",
+      "access": "RO",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4",
+      "dimensions": [
+        {
+          "index": "n",
+          "count": 16,
+          "stride": 4
+        }
+      ],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 0,
+          "width": 32,
+          "spec": "edrv32-soc-spec.md 7.1; gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "TGT_CFG",
+      "offset": "0x100",
+      "access": "RW",
+      "reset": 0,
+      "spec": "gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "WIDE",
+          "lsb": 0,
+          "width": 1,
+          "spec": "gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "OBJ_LIVE_RECT0",
+      "offset": "0x110",
+      "access": "RW",
+      "reset": 0,
+      "spec": "gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "X0",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 4"
+        },
+        {
+          "name": "Y0",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "OBJ_LIVE_RECT1",
+      "offset": "0x114",
+      "access": "RW",
+      "reset": 0,
+      "spec": "gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "X1",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 4"
+        },
+        {
+          "name": "Y1",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "OBJ_HIT_BASE",
+      "offset": "0x118",
+      "access": "RW",
+      "reset": 0,
+      "spec": "gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "ADDR",
+          "lsb": 5,
+          "width": 27,
+          "spec": "gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "OBJ_HIT_MAX",
+      "offset": "0x11C",
+      "access": "RW",
+      "reset": 0,
+      "spec": "gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 0,
+          "width": 24,
+          "spec": "gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "OBJ_HIT_COUNT",
+      "offset": "0x120",
+      "access": "RO",
+      "reset": 0,
+      "spec": "gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 0,
+          "width": 24,
+          "spec": "gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "OBJ_FREE_BASE",
+      "offset": "0x124",
+      "access": "RW",
+      "reset": 0,
+      "spec": "gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "ADDR",
+          "lsb": 5,
+          "width": 27,
+          "spec": "gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "OBJ_FREE_MAX",
+      "offset": "0x128",
+      "access": "RW",
+      "reset": 0,
+      "spec": "gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 0,
+          "width": 24,
+          "spec": "gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "OBJ_FREE_COUNT",
+      "offset": "0x12C",
+      "access": "RO",
+      "reset": 0,
+      "spec": "gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 0,
+          "width": 24,
+          "spec": "gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "OBJ_ALIVE_COUNT",
+      "offset": "0x130",
+      "access": "RO",
+      "reset": 0,
+      "spec": "gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 0,
+          "width": 24,
+          "spec": "gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "OBJ_STAT",
+      "offset": "0x134",
+      "access": "RO",
+      "reset": 0,
+      "spec": "gpu-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "HIT_OVF",
+          "lsb": 0,
+          "width": 1,
+          "spec": "gpu-spec.md 4"
+        },
+        {
+          "name": "FREE_OVF",
+          "lsb": 1,
+          "width": 1,
+          "spec": "gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "OBJ_TGT0",
+      "offset": "0x140",
+      "access": "RW",
+      "reset": 0,
+      "spec": "gpu-spec.md 4",
+      "dimensions": [
+        {
+          "index": "t",
+          "count": 8,
+          "stride": 8
+        }
+      ],
+      "fields": [
+        {
+          "name": "X0",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 4"
+        },
+        {
+          "name": "Y0",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "OBJ_TGT1",
+      "offset": "0x144",
+      "access": "RW",
+      "reset": 0,
+      "spec": "gpu-spec.md 4",
+      "dimensions": [
+        {
+          "index": "t",
+          "count": 8,
+          "stride": 8
+        }
+      ],
+      "fields": [
+        {
+          "name": "X1",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 4"
+        },
+        {
+          "name": "Y1",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 4"
+        }
+      ]
+    }
+  ],
+  "layouts": [
+    {
+      "name": "CMD_SET_MATRIX",
+      "size": 32,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.3, 2.11",
+      "fields": [
+        {
+          "name": "OPCODE",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "ADDR",
+          "offset": "0x08",
+          "lsb": 5,
+          "width": 27,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        }
+      ],
+      "note": "Matrix: 16 x s15.16 words, row-major, 32 B aligned."
+    },
+    {
+      "name": "CMD_SET_LIGHT",
+      "size": 32,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.3, 2.11",
+      "fields": [
+        {
+          "name": "OPCODE",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "LX",
+          "offset": "0x04",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "LY",
+          "offset": "0x04",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "LZ",
+          "offset": "0x08",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "DIR_RGB",
+          "offset": "0x0C",
+          "lsb": 0,
+          "width": 24,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "AMB_RGB",
+          "offset": "0x10",
+          "lsb": 0,
+          "width": 24,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        }
+      ],
+      "note": "LX/LY/LZ s1.14; colours RGB888 with R in [23:16]."
+    },
+    {
+      "name": "CMD_SET_TEX",
+      "size": 32,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.3, 2.11",
+      "fields": [
+        {
+          "name": "OPCODE",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "OFFSET",
+          "offset": "0x04",
+          "lsb": 5,
+          "width": 13,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "LOG2_W",
+          "offset": "0x08",
+          "lsb": 0,
+          "width": 4,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "LOG2_H",
+          "offset": "0x08",
+          "lsb": 4,
+          "width": 4,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "FORMAT",
+          "offset": "0x08",
+          "lsb": 8,
+          "width": 2,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "LEVELS",
+          "offset": "0x08",
+          "lsb": 10,
+          "width": 4,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "PAL_GROUP",
+          "offset": "0x08",
+          "lsb": 14,
+          "width": 4,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "SAMPLE",
+          "offset": "0x08",
+          "lsb": 18,
+          "width": 2,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "LOD_BIAS",
+          "offset": "0x08",
+          "lsb": 20,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        }
+      ],
+      "note": "OFFSET in bytes (32 B aligned) within texture RAM; LOD_BIAS s3.4."
+    },
+    {
+      "name": "CMD_SET_PIXEL",
+      "size": 32,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.3, 2.11",
+      "fields": [
+        {
+          "name": "OPCODE",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "DEPTH_FUNC",
+          "offset": "0x04",
+          "lsb": 0,
+          "width": 1,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "DEPTH_WRITE",
+          "offset": "0x04",
+          "lsb": 1,
+          "width": 1,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "COLOR_WRITE",
+          "offset": "0x04",
+          "lsb": 2,
+          "width": 1,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "CULL",
+          "offset": "0x04",
+          "lsb": 3,
+          "width": 2,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "ST_FUNC",
+          "offset": "0x08",
+          "lsb": 0,
+          "width": 3,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "ST_SFAIL",
+          "offset": "0x08",
+          "lsb": 3,
+          "width": 3,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "ST_ZFAIL",
+          "offset": "0x08",
+          "lsb": 6,
+          "width": 3,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "ST_ZPASS",
+          "offset": "0x08",
+          "lsb": 9,
+          "width": 3,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "ST_REF",
+          "offset": "0x08",
+          "lsb": 12,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "ST_RMASK",
+          "offset": "0x08",
+          "lsb": 20,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "ST_WMASK",
+          "offset": "0x0C",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "BL_FS",
+          "offset": "0x10",
+          "lsb": 0,
+          "width": 4,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "BL_FD",
+          "offset": "0x10",
+          "lsb": 4,
+          "width": 4,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "BL_OP",
+          "offset": "0x10",
+          "lsb": 8,
+          "width": 3,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "BL_CONST_A",
+          "offset": "0x10",
+          "lsb": 16,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        }
+      ]
+    },
+    {
+      "name": "CMD_SET_TARGET",
+      "size": 32,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.3, 2.11",
+      "fields": [
+        {
+          "name": "OPCODE",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "TGT_X0",
+          "offset": "0x04",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "TGT_Y0",
+          "offset": "0x04",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "SC_X0",
+          "offset": "0x08",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "SC_Y0",
+          "offset": "0x08",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "SC_X1",
+          "offset": "0x0C",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "SC_Y1",
+          "offset": "0x0C",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        }
+      ],
+      "note": "All values s16 screen coordinates; scissor X1/Y1 exclusive."
+    },
+    {
+      "name": "CMD_CLEAR",
+      "size": 32,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.3, 2.11",
+      "fields": [
+        {
+          "name": "OPCODE",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "COLOR",
+          "offset": "0x04",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "DEPTH",
+          "offset": "0x04",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "STENCIL",
+          "offset": "0x08",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "EN_COLOR",
+          "offset": "0x08",
+          "lsb": 8,
+          "width": 1,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "EN_DEPTH",
+          "offset": "0x08",
+          "lsb": 9,
+          "width": 1,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "EN_STENCIL",
+          "offset": "0x08",
+          "lsb": 10,
+          "width": 1,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        }
+      ]
+    },
+    {
+      "name": "CMD_DRAW_TRI",
+      "size": 32,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.3, 2.11",
+      "fields": [
+        {
+          "name": "OPCODE",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "ADDR",
+          "offset": "0x08",
+          "lsb": 5,
+          "width": 27,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "COUNT",
+          "offset": "0x0C",
+          "lsb": 0,
+          "width": 24,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        }
+      ],
+      "note": "Vertex buffer 32 B aligned; COUNT triangles = 3 x COUNT vertices."
+    },
+    {
+      "name": "CMD_DRAW_QUAD",
+      "size": 32,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.3, 2.11",
+      "fields": [
+        {
+          "name": "OPCODE",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "ADDR",
+          "offset": "0x08",
+          "lsb": 5,
+          "width": 27,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "COUNT",
+          "offset": "0x0C",
+          "lsb": 0,
+          "width": 24,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        }
+      ],
+      "note": "Quad table 32 B aligned."
+    },
+    {
+      "name": "CMD_OBJ_STEP",
+      "size": 32,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.3, 2.11",
+      "fields": [
+        {
+          "name": "OPCODE",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "STEP",
+          "offset": "0x04",
+          "lsb": 0,
+          "width": 1,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "DRAW",
+          "offset": "0x04",
+          "lsb": 1,
+          "width": 1,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "ADDR",
+          "offset": "0x08",
+          "lsb": 5,
+          "width": 27,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "COUNT",
+          "offset": "0x0C",
+          "lsb": 0,
+          "width": 24,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        }
+      ],
+      "note": "Object table 32 B aligned."
+    },
+    {
+      "name": "CMD_TEX_LOAD",
+      "size": 32,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.3, 2.11",
+      "fields": [
+        {
+          "name": "OPCODE",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "SRC",
+          "offset": "0x08",
+          "lsb": 5,
+          "width": 27,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "DST",
+          "offset": "0x0C",
+          "lsb": 5,
+          "width": 13,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "BYTES",
+          "offset": "0x10",
+          "lsb": 5,
+          "width": 14,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        }
+      ],
+      "note": "SRC, DST and BYTES are multiples of 32 B."
+    },
+    {
+      "name": "CMD_PAL_LOAD",
+      "size": 32,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.3, 2.11",
+      "fields": [
+        {
+          "name": "OPCODE",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "GROUP",
+          "offset": "0x04",
+          "lsb": 0,
+          "width": 4,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "SRC",
+          "offset": "0x08",
+          "lsb": 5,
+          "width": 27,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "ENTRIES",
+          "offset": "0x0C",
+          "lsb": 0,
+          "width": 9,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        }
+      ],
+      "note": "ENTRIES 1-256; palette entries are 4 B each (PAL_ENTRY)."
+    },
+    {
+      "name": "CMD_RESOLVE",
+      "size": 32,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.3, 2.11",
+      "fields": [
+        {
+          "name": "OPCODE",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "FXAA",
+          "offset": "0x04",
+          "lsb": 0,
+          "width": 1,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "FXAA_TH",
+          "offset": "0x04",
+          "lsb": 8,
+          "width": 8,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "BASE",
+          "offset": "0x08",
+          "lsb": 12,
+          "width": 20,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "STRIDE",
+          "offset": "0x0C",
+          "lsb": 5,
+          "width": 11,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "X0",
+          "offset": "0x10",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "Y0",
+          "offset": "0x10",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "X1",
+          "offset": "0x14",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        },
+        {
+          "name": "Y1",
+          "offset": "0x14",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.3, 2.11"
+        }
+      ],
+      "note": "Surface base 4 KiB aligned, stride 32 B multiple; region in screen coordinates, X0/X1 multiples of 16, X1/Y1 exclusive."
+    },
+    {
+      "name": "VERTEX",
+      "size": 16,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.4",
+      "fields": [
+        {
+          "name": "X",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.4"
+        },
+        {
+          "name": "Y",
+          "offset": "0x00",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.4"
+        },
+        {
+          "name": "Z",
+          "offset": "0x04",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.4"
+        },
+        {
+          "name": "NX",
+          "offset": "0x04",
+          "lsb": 16,
+          "width": 8,
+          "spec": "gpu-spec.md 2.4"
+        },
+        {
+          "name": "NY",
+          "offset": "0x04",
+          "lsb": 24,
+          "width": 8,
+          "spec": "gpu-spec.md 2.4"
+        },
+        {
+          "name": "NZ",
+          "offset": "0x08",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.4"
+        },
+        {
+          "name": "COLOR",
+          "offset": "0x08",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.4"
+        },
+        {
+          "name": "U",
+          "offset": "0x0C",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.4"
+        },
+        {
+          "name": "V",
+          "offset": "0x0C",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.4"
+        }
+      ],
+      "note": "X/Y/Z s16; N* s1.7; COLOR RGB565; U/V u8.8 texels; bits [15:8] of word 2 ignored."
+    },
+    {
+      "name": "QUAD",
+      "size": 16,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.8",
+      "fields": [
+        {
+          "name": "X",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 12,
+          "spec": "gpu-spec.md 2.8"
+        },
+        {
+          "name": "Y",
+          "offset": "0x00",
+          "lsb": 12,
+          "width": 12,
+          "spec": "gpu-spec.md 2.8"
+        },
+        {
+          "name": "PAL_GROUP",
+          "offset": "0x00",
+          "lsb": 24,
+          "width": 4,
+          "spec": "gpu-spec.md 2.8"
+        },
+        {
+          "name": "FLIP_H",
+          "offset": "0x00",
+          "lsb": 28,
+          "width": 1,
+          "spec": "gpu-spec.md 2.8"
+        },
+        {
+          "name": "FLIP_V",
+          "offset": "0x00",
+          "lsb": 29,
+          "width": 1,
+          "spec": "gpu-spec.md 2.8"
+        },
+        {
+          "name": "W",
+          "offset": "0x04",
+          "lsb": 0,
+          "width": 9,
+          "spec": "gpu-spec.md 2.8"
+        },
+        {
+          "name": "H",
+          "offset": "0x04",
+          "lsb": 9,
+          "width": 9,
+          "spec": "gpu-spec.md 2.8"
+        },
+        {
+          "name": "ALPHA",
+          "offset": "0x04",
+          "lsb": 18,
+          "width": 8,
+          "spec": "gpu-spec.md 2.8"
+        },
+        {
+          "name": "U0",
+          "offset": "0x08",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.8"
+        },
+        {
+          "name": "V0",
+          "offset": "0x08",
+          "lsb": 8,
+          "width": 8,
+          "spec": "gpu-spec.md 2.8"
+        },
+        {
+          "name": "DEPTH",
+          "offset": "0x08",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.8"
+        }
+      ],
+      "note": "X/Y s12; word 3 ignored."
+    },
+    {
+      "name": "OBJ",
+      "size": 32,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.9",
+      "fields": [
+        {
+          "name": "ALIVE",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 1,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "TGT_MASK",
+          "offset": "0x00",
+          "lsb": 8,
+          "width": 8,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "LIFE",
+          "offset": "0x00",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "PX",
+          "offset": "0x04",
+          "lsb": 0,
+          "width": 24,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "PY",
+          "offset": "0x08",
+          "lsb": 0,
+          "width": 24,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "VX",
+          "offset": "0x0C",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "VY",
+          "offset": "0x0C",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "AX",
+          "offset": "0x10",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "AY",
+          "offset": "0x10",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "COL_HW",
+          "offset": "0x14",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "COL_HH",
+          "offset": "0x14",
+          "lsb": 8,
+          "width": 8,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "W",
+          "offset": "0x18",
+          "lsb": 0,
+          "width": 9,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "H",
+          "offset": "0x18",
+          "lsb": 9,
+          "width": 9,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "PAL_GROUP",
+          "offset": "0x18",
+          "lsb": 18,
+          "width": 4,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "FLIP_H",
+          "offset": "0x18",
+          "lsb": 22,
+          "width": 1,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "FLIP_V",
+          "offset": "0x18",
+          "lsb": 23,
+          "width": 1,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "ALPHA",
+          "offset": "0x18",
+          "lsb": 24,
+          "width": 8,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "U0",
+          "offset": "0x1C",
+          "lsb": 0,
+          "width": 8,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "V0",
+          "offset": "0x1C",
+          "lsb": 8,
+          "width": 8,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "DEPTH",
+          "offset": "0x1C",
+          "lsb": 16,
+          "width": 16,
+          "spec": "gpu-spec.md 2.9"
+        }
+      ],
+      "note": "PX/PY s16.8; VX/VY s8.8; AX/AY s4.12; LIFE 0 = unlimited."
+    },
+    {
+      "name": "HIT_ENTRY",
+      "size": 4,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.9",
+      "fields": [
+        {
+          "name": "OBJ",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 24,
+          "spec": "gpu-spec.md 2.9"
+        },
+        {
+          "name": "TGT",
+          "offset": "0x00",
+          "lsb": 24,
+          "width": 3,
+          "spec": "gpu-spec.md 2.9"
+        }
+      ]
+    },
+    {
+      "name": "FREE_ENTRY",
+      "size": 4,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.9",
+      "fields": [
+        {
+          "name": "OBJ",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 24,
+          "spec": "gpu-spec.md 2.9"
+        }
+      ]
+    },
+    {
+      "name": "PAL_ENTRY",
+      "size": 4,
+      "byte_order": "little endian 32-bit words",
+      "spec": "gpu-spec.md 2.6",
+      "fields": [
+        {
+          "name": "RGB565",
+          "offset": "0x00",
+          "lsb": 0,
+          "width": 16,
+          "spec": "gpu-spec.md 2.6"
+        },
+        {
+          "name": "A4",
+          "offset": "0x00",
+          "lsb": 16,
+          "width": 4,
+          "spec": "gpu-spec.md 2.6"
+        }
+      ]
+    }
+  ]
+}

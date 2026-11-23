@@ -1,0 +1,374 @@
+{
+  "module": "aud",
+  "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4",
+  "note": "IRQ_STAT bit8 is LOW (aud-spec.md 4). DESC_BASE, DESC_COUNT, DOORBELL and DONE_COUNT are unused and read as 0.",
+  "registers": [
+    {
+      "name": "ID",
+      "offset": "0x000",
+      "access": "RO",
+      "reset": 65537,
+      "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "TYPE",
+          "lsb": 16,
+          "width": 16,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "VERSION",
+          "lsb": 0,
+          "width": 16,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "CTRL",
+      "offset": "0x004",
+      "access": "RW",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "ENABLE",
+          "lsb": 0,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "START",
+          "lsb": 1,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "ABORT",
+          "lsb": 2,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "SOFT_RST",
+          "lsb": 3,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "STATUS",
+      "offset": "0x008",
+      "access": "RO",
+      "reset": 2,
+      "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "BUSY",
+          "lsb": 0,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "IDLE",
+          "lsb": 1,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "ERROR",
+          "lsb": 2,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "IRQ_EN",
+      "offset": "0x00C",
+      "access": "RW",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "DONE",
+          "lsb": 0,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "ERROR",
+          "lsb": 1,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "FRAME",
+          "lsb": 2,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY0",
+          "lsb": 8,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY1",
+          "lsb": 9,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY2",
+          "lsb": 10,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY3",
+          "lsb": 11,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "IRQ_STAT",
+      "offset": "0x010",
+      "access": "RW1C",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "DONE",
+          "lsb": 0,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "ERROR",
+          "lsb": 1,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "FRAME",
+          "lsb": 2,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY0",
+          "lsb": 8,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY1",
+          "lsb": 9,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY2",
+          "lsb": 10,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        },
+        {
+          "name": "RX_NOTIFY3",
+          "lsb": 11,
+          "width": 1,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "ERR_CODE",
+      "offset": "0x014",
+      "access": "RO",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4",
+      "dimensions": [],
+      "fields": []
+    },
+    {
+      "name": "DESC_BASE",
+      "offset": "0x020",
+      "access": "RW",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 5,
+          "width": 27,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "DESC_COUNT",
+      "offset": "0x024",
+      "access": "RW",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 0,
+          "width": 16,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "DOORBELL",
+      "offset": "0x028",
+      "access": "WO",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4",
+      "dimensions": [],
+      "fields": [],
+      "note": "WO; reads 0 (SoC 7.1)."
+    },
+    {
+      "name": "DONE_COUNT",
+      "offset": "0x02C",
+      "access": "RO",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4",
+      "dimensions": [],
+      "fields": []
+    },
+    {
+      "name": "PERF",
+      "offset": "0x040",
+      "access": "RO",
+      "reset": 0,
+      "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4",
+      "dimensions": [
+        {
+          "index": "n",
+          "count": 16,
+          "stride": 4
+        }
+      ],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 0,
+          "width": 32,
+          "spec": "edrv32-soc-spec.md 7.1; aud-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "RING_BASE",
+      "offset": "0x100",
+      "access": "RW",
+      "reset": 0,
+      "spec": "aud-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "ADDR",
+          "lsb": 9,
+          "width": 23,
+          "spec": "aud-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "RING_SIZE",
+      "offset": "0x104",
+      "access": "RW",
+      "reset": 0,
+      "spec": "aud-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 9,
+          "width": 15,
+          "spec": "aud-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "WR_PTR",
+      "offset": "0x108",
+      "access": "RW",
+      "reset": 0,
+      "spec": "aud-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 5,
+          "width": 19,
+          "spec": "aud-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "RD_PTR",
+      "offset": "0x10C",
+      "access": "RO",
+      "reset": 0,
+      "spec": "aud-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 5,
+          "width": 19,
+          "spec": "aud-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "LOW_LEVEL",
+      "offset": "0x110",
+      "access": "RW",
+      "reset": 0,
+      "spec": "aud-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 0,
+          "width": 24,
+          "spec": "aud-spec.md 4"
+        }
+      ]
+    },
+    {
+      "name": "UNDERRUN_CNT",
+      "offset": "0x114",
+      "access": "RO",
+      "reset": 0,
+      "spec": "aud-spec.md 4",
+      "dimensions": [],
+      "fields": [
+        {
+          "name": "VALUE",
+          "lsb": 0,
+          "width": 32,
+          "spec": "aud-spec.md 4"
+        }
+      ]
+    }
+  ],
+  "layouts": []
+}

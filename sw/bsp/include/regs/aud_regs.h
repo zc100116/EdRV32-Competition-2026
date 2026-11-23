@@ -1,0 +1,211 @@
+/* File: aud_regs.h
+ * Spec: edrv32-soc-spec.md 7.1; aud-spec.md 4
+ * Description: Engine register offsets, fields and descriptor layouts.
+ * Clock domain: none (constants).
+ */
+// 由 tools/gen/regs.py 从 rtl/include/regs/*.json 生成，不要手改。
+#ifndef EDRV32_AUD_REGS_H
+#define EDRV32_AUD_REGS_H
+
+/* IRQ_STAT bit8 is LOW (aud-spec.md 4). DESC_BASE, DESC_COUNT, DOORBELL and DONE_COUNT are unused and read as 0. */
+
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4; RO; reset: 65537. */
+#define EDRV32_AUD_ID_OFFSET 0x00000000u
+#define EDRV32_AUD_ID_RESET 0x00010001u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_ID_TYPE_POS 0x00000010u
+#define EDRV32_AUD_ID_TYPE_WIDTH 0x00000010u
+#define EDRV32_AUD_ID_TYPE_MASK 0xFFFF0000u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_ID_VERSION_POS 0x00000000u
+#define EDRV32_AUD_ID_VERSION_WIDTH 0x00000010u
+#define EDRV32_AUD_ID_VERSION_MASK 0x0000FFFFu
+
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4; RW; reset: 0. */
+#define EDRV32_AUD_CTRL_OFFSET 0x00000004u
+#define EDRV32_AUD_CTRL_RESET 0x00000000u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_CTRL_ENABLE_POS 0x00000000u
+#define EDRV32_AUD_CTRL_ENABLE_WIDTH 0x00000001u
+#define EDRV32_AUD_CTRL_ENABLE_MASK 0x00000001u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_CTRL_START_POS 0x00000001u
+#define EDRV32_AUD_CTRL_START_WIDTH 0x00000001u
+#define EDRV32_AUD_CTRL_START_MASK 0x00000002u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_CTRL_ABORT_POS 0x00000002u
+#define EDRV32_AUD_CTRL_ABORT_WIDTH 0x00000001u
+#define EDRV32_AUD_CTRL_ABORT_MASK 0x00000004u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_CTRL_SOFT_RST_POS 0x00000003u
+#define EDRV32_AUD_CTRL_SOFT_RST_WIDTH 0x00000001u
+#define EDRV32_AUD_CTRL_SOFT_RST_MASK 0x00000008u
+
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4; RO; reset: 2. */
+#define EDRV32_AUD_STATUS_OFFSET 0x00000008u
+#define EDRV32_AUD_STATUS_RESET 0x00000002u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_STATUS_BUSY_POS 0x00000000u
+#define EDRV32_AUD_STATUS_BUSY_WIDTH 0x00000001u
+#define EDRV32_AUD_STATUS_BUSY_MASK 0x00000001u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_STATUS_IDLE_POS 0x00000001u
+#define EDRV32_AUD_STATUS_IDLE_WIDTH 0x00000001u
+#define EDRV32_AUD_STATUS_IDLE_MASK 0x00000002u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_STATUS_ERROR_POS 0x00000002u
+#define EDRV32_AUD_STATUS_ERROR_WIDTH 0x00000001u
+#define EDRV32_AUD_STATUS_ERROR_MASK 0x00000004u
+
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4; RW; reset: 0. */
+#define EDRV32_AUD_IRQ_EN_OFFSET 0x0000000Cu
+#define EDRV32_AUD_IRQ_EN_RESET 0x00000000u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_IRQ_EN_DONE_POS 0x00000000u
+#define EDRV32_AUD_IRQ_EN_DONE_WIDTH 0x00000001u
+#define EDRV32_AUD_IRQ_EN_DONE_MASK 0x00000001u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_IRQ_EN_ERROR_POS 0x00000001u
+#define EDRV32_AUD_IRQ_EN_ERROR_WIDTH 0x00000001u
+#define EDRV32_AUD_IRQ_EN_ERROR_MASK 0x00000002u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_IRQ_EN_FRAME_POS 0x00000002u
+#define EDRV32_AUD_IRQ_EN_FRAME_WIDTH 0x00000001u
+#define EDRV32_AUD_IRQ_EN_FRAME_MASK 0x00000004u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_IRQ_EN_RX_NOTIFY0_POS 0x00000008u
+#define EDRV32_AUD_IRQ_EN_RX_NOTIFY0_WIDTH 0x00000001u
+#define EDRV32_AUD_IRQ_EN_RX_NOTIFY0_MASK 0x00000100u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_IRQ_EN_RX_NOTIFY1_POS 0x00000009u
+#define EDRV32_AUD_IRQ_EN_RX_NOTIFY1_WIDTH 0x00000001u
+#define EDRV32_AUD_IRQ_EN_RX_NOTIFY1_MASK 0x00000200u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_IRQ_EN_RX_NOTIFY2_POS 0x0000000Au
+#define EDRV32_AUD_IRQ_EN_RX_NOTIFY2_WIDTH 0x00000001u
+#define EDRV32_AUD_IRQ_EN_RX_NOTIFY2_MASK 0x00000400u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_IRQ_EN_RX_NOTIFY3_POS 0x0000000Bu
+#define EDRV32_AUD_IRQ_EN_RX_NOTIFY3_WIDTH 0x00000001u
+#define EDRV32_AUD_IRQ_EN_RX_NOTIFY3_MASK 0x00000800u
+
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4; RW1C; reset: 0. */
+#define EDRV32_AUD_IRQ_STAT_OFFSET 0x00000010u
+#define EDRV32_AUD_IRQ_STAT_RESET 0x00000000u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_IRQ_STAT_DONE_POS 0x00000000u
+#define EDRV32_AUD_IRQ_STAT_DONE_WIDTH 0x00000001u
+#define EDRV32_AUD_IRQ_STAT_DONE_MASK 0x00000001u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_IRQ_STAT_ERROR_POS 0x00000001u
+#define EDRV32_AUD_IRQ_STAT_ERROR_WIDTH 0x00000001u
+#define EDRV32_AUD_IRQ_STAT_ERROR_MASK 0x00000002u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_IRQ_STAT_FRAME_POS 0x00000002u
+#define EDRV32_AUD_IRQ_STAT_FRAME_WIDTH 0x00000001u
+#define EDRV32_AUD_IRQ_STAT_FRAME_MASK 0x00000004u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_IRQ_STAT_RX_NOTIFY0_POS 0x00000008u
+#define EDRV32_AUD_IRQ_STAT_RX_NOTIFY0_WIDTH 0x00000001u
+#define EDRV32_AUD_IRQ_STAT_RX_NOTIFY0_MASK 0x00000100u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_IRQ_STAT_RX_NOTIFY1_POS 0x00000009u
+#define EDRV32_AUD_IRQ_STAT_RX_NOTIFY1_WIDTH 0x00000001u
+#define EDRV32_AUD_IRQ_STAT_RX_NOTIFY1_MASK 0x00000200u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_IRQ_STAT_RX_NOTIFY2_POS 0x0000000Au
+#define EDRV32_AUD_IRQ_STAT_RX_NOTIFY2_WIDTH 0x00000001u
+#define EDRV32_AUD_IRQ_STAT_RX_NOTIFY2_MASK 0x00000400u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_IRQ_STAT_RX_NOTIFY3_POS 0x0000000Bu
+#define EDRV32_AUD_IRQ_STAT_RX_NOTIFY3_WIDTH 0x00000001u
+#define EDRV32_AUD_IRQ_STAT_RX_NOTIFY3_MASK 0x00000800u
+
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4; RO; reset: 0. */
+#define EDRV32_AUD_ERR_CODE_OFFSET 0x00000014u
+#define EDRV32_AUD_ERR_CODE_RESET 0x00000000u
+
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4; RW; reset: 0. */
+#define EDRV32_AUD_DESC_BASE_OFFSET 0x00000020u
+#define EDRV32_AUD_DESC_BASE_RESET 0x00000000u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_DESC_BASE_VALUE_POS 0x00000005u
+#define EDRV32_AUD_DESC_BASE_VALUE_WIDTH 0x0000001Bu
+#define EDRV32_AUD_DESC_BASE_VALUE_MASK 0xFFFFFFE0u
+
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4; RW; reset: 0. */
+#define EDRV32_AUD_DESC_COUNT_OFFSET 0x00000024u
+#define EDRV32_AUD_DESC_COUNT_RESET 0x00000000u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_DESC_COUNT_VALUE_POS 0x00000000u
+#define EDRV32_AUD_DESC_COUNT_VALUE_WIDTH 0x00000010u
+#define EDRV32_AUD_DESC_COUNT_VALUE_MASK 0x0000FFFFu
+
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4; WO; reset: 0. */
+/* WO; reads 0 (SoC 7.1). */
+#define EDRV32_AUD_DOORBELL_OFFSET 0x00000028u
+#define EDRV32_AUD_DOORBELL_RESET 0x00000000u
+
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4; RO; reset: 0. */
+#define EDRV32_AUD_DONE_COUNT_OFFSET 0x0000002Cu
+#define EDRV32_AUD_DONE_COUNT_RESET 0x00000000u
+
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4; RO; reset: 0. */
+#define EDRV32_AUD_PERF_N_COUNT 0x00000010u
+#define EDRV32_AUD_PERF_OFFSET(n) \
+    (0x00000040u + 0x00000004u * (n))
+#define EDRV32_AUD_PERF_RESET 0x00000000u
+/* edrv32-soc-spec.md 7.1; aud-spec.md 4 */
+#define EDRV32_AUD_PERF_VALUE_POS 0x00000000u
+#define EDRV32_AUD_PERF_VALUE_WIDTH 0x00000020u
+#define EDRV32_AUD_PERF_VALUE_MASK 0xFFFFFFFFu
+
+/* aud-spec.md 4; RW; reset: 0. */
+#define EDRV32_AUD_RING_BASE_OFFSET 0x00000100u
+#define EDRV32_AUD_RING_BASE_RESET 0x00000000u
+/* aud-spec.md 4 */
+#define EDRV32_AUD_RING_BASE_ADDR_POS 0x00000009u
+#define EDRV32_AUD_RING_BASE_ADDR_WIDTH 0x00000017u
+#define EDRV32_AUD_RING_BASE_ADDR_MASK 0xFFFFFE00u
+
+/* aud-spec.md 4; RW; reset: 0. */
+#define EDRV32_AUD_RING_SIZE_OFFSET 0x00000104u
+#define EDRV32_AUD_RING_SIZE_RESET 0x00000000u
+/* aud-spec.md 4 */
+#define EDRV32_AUD_RING_SIZE_VALUE_POS 0x00000009u
+#define EDRV32_AUD_RING_SIZE_VALUE_WIDTH 0x0000000Fu
+#define EDRV32_AUD_RING_SIZE_VALUE_MASK 0x00FFFE00u
+
+/* aud-spec.md 4; RW; reset: 0. */
+#define EDRV32_AUD_WR_PTR_OFFSET 0x00000108u
+#define EDRV32_AUD_WR_PTR_RESET 0x00000000u
+/* aud-spec.md 4 */
+#define EDRV32_AUD_WR_PTR_VALUE_POS 0x00000005u
+#define EDRV32_AUD_WR_PTR_VALUE_WIDTH 0x00000013u
+#define EDRV32_AUD_WR_PTR_VALUE_MASK 0x00FFFFE0u
+
+/* aud-spec.md 4; RO; reset: 0. */
+#define EDRV32_AUD_RD_PTR_OFFSET 0x0000010Cu
+#define EDRV32_AUD_RD_PTR_RESET 0x00000000u
+/* aud-spec.md 4 */
+#define EDRV32_AUD_RD_PTR_VALUE_POS 0x00000005u
+#define EDRV32_AUD_RD_PTR_VALUE_WIDTH 0x00000013u
+#define EDRV32_AUD_RD_PTR_VALUE_MASK 0x00FFFFE0u
+
+/* aud-spec.md 4; RW; reset: 0. */
+#define EDRV32_AUD_LOW_LEVEL_OFFSET 0x00000110u
+#define EDRV32_AUD_LOW_LEVEL_RESET 0x00000000u
+/* aud-spec.md 4 */
+#define EDRV32_AUD_LOW_LEVEL_VALUE_POS 0x00000000u
+#define EDRV32_AUD_LOW_LEVEL_VALUE_WIDTH 0x00000018u
+#define EDRV32_AUD_LOW_LEVEL_VALUE_MASK 0x00FFFFFFu
+
+/* aud-spec.md 4; RO; reset: 0. */
+#define EDRV32_AUD_UNDERRUN_CNT_OFFSET 0x00000114u
+#define EDRV32_AUD_UNDERRUN_CNT_RESET 0x00000000u
+/* aud-spec.md 4 */
+#define EDRV32_AUD_UNDERRUN_CNT_VALUE_POS 0x00000000u
+#define EDRV32_AUD_UNDERRUN_CNT_VALUE_WIDTH 0x00000020u
+#define EDRV32_AUD_UNDERRUN_CNT_VALUE_MASK 0xFFFFFFFFu
+
+#endif

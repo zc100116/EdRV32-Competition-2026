@@ -44,7 +44,7 @@ DDR ◄─ mem_xbar P3 ◄─ AXI 异步桥 ─┤
 ### 2.2 命令列表
 
 - 软件在 DDR 中准备命令列表（64 B 对齐），写 DESC_BASE、DESC_COUNT，再写 DOORBELL（SoC 7.1、7.2，命令式）。
-- 每条命令 32 B。第一个字节是操作码，其余字段见 2.3。字段的位位置由 `rtl/include/gpu_cmd.json` 定义（协调者维护）；RTL 的 localparam 和软件头文件都由它生成。
+- 每条命令 32 B。第一个字节是操作码，其余字段见 2.3。字段的位位置由 `rtl/include/regs/gpu.json` 定义（协调者维护）；`tools/gen/regs.py` 由它生成 RTL 的 `edrv32_gpu_regs.vh` 和软件的 `regs/gpu_regs.h`。四边形表、顶点、对象、命中列表、释放列表、调色板项的布局也在该文件中。
 - 命令按顺序执行，结果等同于逐条串行执行（GPU 内部可以流水，但不得改变可见结果）。
 - 执行完全部命令，并且最后一个写响应返回后，置 IRQ_STAT.DONE、DONE_COUNT 加 1（SoC 7.2）。
 
@@ -183,6 +183,25 @@ DDR ◄─ mem_xbar P3 ◄─ AXI 异步桥 ─┤
   - 区域边界外的邻居取边界像素本身。
 - 只有执行到 RESOLVE 时才写 DDR；绘制命令不访问 DDR 中的颜色缓冲。
 
+### 2.11 编码
+
+| 字段 | 编码 |
+|---|---|
+| 纹理格式 FORMAT | 0 I4，1 I8，2 RGB565 |
+| 取样 SAMPLE | 0 最近邻，1 双线性，2 三线性 |
+| LOD 偏置 LOD_BIAS | s3.4 |
+| 深度比较 DEPTH_FUNC | 0 LEQUAL，1 ALWAYS |
+| 剔除 CULL | 0 不剔除，1 剔除屏幕上顺时针的三角形，2 剔除逆时针的（屏幕坐标 y 向下） |
+| 模板比较 ST_FUNC | 0 NEVER，1 LESS，2 EQUAL，3 LEQUAL，4 GREATER，5 NOTEQUAL，6 GEQUAL，7 ALWAYS；比较式为 (ref & mask) 〈函数〉 (stencil & mask)，例如 LESS 在 (ref & mask) < (stencil & mask) 时通过 |
+| 模板操作 ST_SFAIL、ST_ZFAIL、ST_ZPASS | 0 KEEP，1 ZERO，2 REPLACE，3 INCR（饱和），4 DECR（饱和），5 INVERT |
+| 混合因子 BL_FS、BL_FD | 0 ZERO，1 ONE，2 Sa，3 1 − Sa，4 S，5 1 − S，6 D，7 1 − D，8 常数 α，9 1 − 常数 α |
+| 混合运算 BL_OP | 0 ADD，1 SUB，2 REVSUB，3 MIN，4 MAX |
+| 调色板项 | [15:0] RGB565，[19:16] A4 |
+| 命中列表项 | [23:0] 对象编号，[26:24] 目标编号 |
+| 释放列表项 | [23:0] 对象编号 |
+
+未列出的编码保留，软件不得使用。
+
 ## 3. 接口
 
 GPU 顶层只有标准接口。
@@ -283,5 +302,6 @@ GPU 顶层只有标准接口。
 
 | 日期 | 版本 | 内容 |
 |---|---|---|
+| 2026-11-23 | v0.1 | 澄清（不改变行为）：增加 2.11 编码表；字段位置文件定为 `rtl/include/regs/gpu.json`，沿用现有生成器 |
 | 2026-11-23 | v0.1 | 澄清（不改变行为）：SoC 层引用改为 `gpu-soc-spec.md`，G-S1 关闭（用户 2026-11-23：GPU 项目单独成文） |
 | 2026-11-23 | v0.1 | 初稿。依据设计记录 `2026-11-23-gpu-architecture.md` 中用户确认的 R1′、R3–R13；用户确认全文（含字段格式、四边形不缩放、三角形无索引、深度两种比较等初值） |
