@@ -106,3 +106,12 @@ ABORT 后的像素内容/部分计数不作保证；错误后的已执行写入�
 
 `case.clock_mhz=180` 为 GT-25 选择规格第 7 节的 180 MHz 条件；默认仍为环境的 150 MHz。
 runner 将其作为 `+CLOCK_MHZ=<MHz>` 传给 testbench，模型仅记录配置，不生成周期期望。
+
+GT-09–GT-17 已加入：GT-09/10/15 为 full，其余为 smoke；固定 seed 写在各 test.yaml。
+GT-09 用 RGB565 低 8 位编码模板探针结果；GT-11/16 另用后续深度/模板条件绘制，
+观察透明丢弃和 CLEAR 的隐藏缓冲副作用。GT-15 在模型侧额外验证条带 Surface、
+对象写回与整帧一次渲染逐位一致，RTL 侧仍只比较 DDR 和寄存器。
+
+```sh
+python3 verif/block/gpu/run.py model gt09 gt10 gt11 gt12 gt13 gt14 gt15 gt16 gt17
+```
