@@ -348,6 +348,16 @@ module tb_gpu_pixel;
         cfg = 0;
         repeat (3) @(negedge clk_i);
         rst_n_i = 1;
+        // Complete an empty command, then leave the new command without input.
+        // The old done level must clear before any draw/configuration reaches this unit.
+        finish_i = 1;
+        do @(negedge clk_i); while (!unit_done_o);
+        finish_i = 0;
+        repeat (8) begin
+            @(negedge clk_i);
+            if (unit_done_o) $fatal(1, "FAIL stale done while new command waits upstream");
+        end
+
         render_state_target_i[47:32] = -16'sd12;
         render_state_target_i[63:48] = 16'd91;
         // Every function, operation path, mask and comparison boundary.

@@ -229,9 +229,10 @@ module edrv32_gpu_pixel (
             if (process_w) begin
                 process_r <= process_r + 1'b1;
             end
-            if (render_state_valid_i && render_state_ready_o) begin
+            // Completion belongs to the command lifetime, including empty commands.
+            if (!finish_i || (render_state_valid_i && render_state_ready_o)) begin
                 unit_done_o <= 0;
-            end else if (finish_i && count_r == 0 && !request_valid_r) begin
+            end else if (count_r == 0 && !request_valid_r) begin
                 unit_done_o <= 1;
             end
         end

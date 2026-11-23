@@ -174,7 +174,11 @@ module edrv32_gpu_target (
             if (target_read_valid_i || resolve_read_valid_i || target_write_valid_i) begin
                 unit_done_o <= 0;
             end
-            if (finish_i && idle_w && !clear_active_r && !read_valid_w && !write_valid_w) begin
+            // A new command can spend many clocks upstream before its first target access.
+            // microarch 4.2: finish low must clear the previous command's completion.
+            if (!finish_i) begin
+                unit_done_o <= 0;
+            end else if (idle_w && !clear_active_r && !read_valid_w && !write_valid_w) begin
                 unit_done_o <= 1;
             end
         end

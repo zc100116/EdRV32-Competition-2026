@@ -40,3 +40,9 @@ verilator --lint-only -Wall -DSIM_MODE -Irtl/include --top-module edrv32_gpu_tar
 - target RESOLVE：resolve_read(addr16)，resolve_color(data64)，顺序响应。
 - target 控制：clk/rst_n、finish/stop、unit_done，完成包含物理 RAM 写入。
 - 两种 tech 包装：clk、wr_en/wr_addr/wr_data、rd_en/rd_addr/rd_data；读延迟均 2 拍。
+
+I-1 完成协议修复：pixel/target 在 finish=0 时清除旧 unit_done（微结构 4.2）。
+原 target 在上游尚未送来首个读写时仍保留上一命令的 done，GT-01 因而提前退休 DRAW_TRI。
+两个单测均增加“空命令完成→finish 拉低→无输入/配置等待 8 拍”的检查，防止旧 done 泄漏。
+上述两条 full 回归重新实跑，均为 1 PASS、0 FAIL；RTL 风格和 GPU 顶层 lint 仍为 0 告警。
+修复提交定位：`git log -1 --format=%H -- rtl/gpu/edrv32_gpu_target.v`。
