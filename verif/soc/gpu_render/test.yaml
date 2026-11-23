@@ -1,0 +1,11 @@
+top: edrv32_gpu_soc_tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software: gpu_render
+timeout: 1800
+pass: PASS ST-10
+tier: smoke
+simulator: verilator
+group: gpu_soc
+runner: python3 verif/soc/gpu_render/run.py
