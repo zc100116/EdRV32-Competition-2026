@@ -37,6 +37,8 @@
 | `ip_ram_rnd_line` | DRM 简单双口 RAM，字节写使能 | 512 × 256 | `edrv32_ram_rnd_line` | RND 行缓冲 ×5 | [ip_ram_rnd_line.md](ip_ram_rnd_line.md) | 待生成（B3） |
 | `ip_ram_rnd_palette` | DRM 简单双口 RAM | 512 × 32（用 256 项） | `edrv32_ram_rnd_palette` | RND 调色板 ×2 | [ip_ram_rnd_palette.md](ip_ram_rnd_palette.md) | 待生成（B3） |
 | `ip_ram_rnd_window` | DRM 简单双口 RAM | 512 × 64（用256项） | `edrv32_ram_rnd_window` | AFFINE源窗口 ×4 | [ip_ram_rnd_window.md](ip_ram_rnd_window.md) | RND v2单独上板生成，不进卡21 |
+| `ip_ram_gpu_target_segment` | DRM 简单双口，输出寄存 | 2048 × 18 | `edrv32_ram_gpu_target_segment` | GPU target | [ip_ram_gpu_target_segment.md](ip_ram_gpu_target_segment.md) | 待生成 |
+| `ip_ram_gpu_target_tail` | DRM 简单双口，输出寄存 | 512 × 72 | `edrv32_ram_gpu_target_tail` | GPU target | [ip_ram_gpu_target_tail.md](ip_ram_gpu_target_tail.md) | 待生成 |
 | `ip_pll_sys` | PLL（板级） | 27 MHz → clk_sys 100 MHz | 无（板级顶层直接例化，仿真用 `verif/models/ip_pll_sys.sv`） | B1/B2 板级顶层 | [ip_pll_sys.md](ip_pll_sys.md) | B1 已生成 |
 | `ip_ddr3` | DDR3 Controller + PHY | x32、1000 Mbps，core_clk 125 MHz、用户口 256 位 | 无（板级直接例化） | B2 DDR 及 clk_mem | [ip_ddr3.md](ip_ddr3.md) | B2 待生成 |
 | `ip_pll_npu` | PLL | 27 → 180 MHz | 无（板级直接例化） | B2 NPU | [ip_pll_npu.md](ip_pll_npu.md) | B2 待生成 |

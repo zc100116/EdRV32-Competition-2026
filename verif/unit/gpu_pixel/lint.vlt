@@ -1,0 +1,4 @@
+`verilator_config
+lint_off -rule BLKSEQ -file "*tb_gpu_pixel.sv"
+lint_off -rule UNUSEDSIGNAL -file "*tb_gpu_pixel.sv"
+lint_off -rule SYNCASYNCNET -file "*tb_gpu_pixel.sv"
