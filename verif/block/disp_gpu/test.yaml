@@ -1,0 +1,12 @@
+# GPU ST-05: X2 full-frame receive/pixel and AXI checks, plus Python reference self-test.
+top: tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 7200
+pass: PASS
+tier: smoke
+simulator: verilator
+runner: python3 verif/block/disp_gpu/run.py smoke
+group: verif/block/disp_gpu

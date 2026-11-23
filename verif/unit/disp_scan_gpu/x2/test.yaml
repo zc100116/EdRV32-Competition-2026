@@ -1,0 +1,11 @@
+top: tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 240
+pass: PASS
+tier: full
+simulator: verilator
+plusargs: +X2
+verilator_flags: -Wall --timescale 1ns/1ps -Wno-BLKSEQ -Wno-UNUSEDSIGNAL -Wno-SYNCASYNCNET -Wno-PROCASSINIT -Wno-ZERODLY
