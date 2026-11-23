@@ -229,7 +229,8 @@ def main():
             elif args.mode == 'rtl':
                 from tools.regress import expand_files
                 obj = ROOT/'build/gpu/block/obj'
-                subprocess.run(['verilator', '--binary', '--timing', '-Wall', '-j', '1',
+                subprocess.run(['verilator', '--binary', '--timing', '-Wall',
+                                '--timescale', '1ns/1ps', '-j', '1',
                                 '--top-module', 'edrv32_gpu_tb', '--Mdir', str(obj), '-o', 'sim',
                                 '+define+SIM_MODE', *expand_files(HERE/test/'files.f')],
                                cwd=ROOT, check=True)
