@@ -1,0 +1,8 @@
++incdir+../../../rtl/include
+../../../rtl/tech/edrv32_ram_gpu_texture_segment.v
+../../../rtl/tech/edrv32_ram_gpu_palette_segment.v
+../../../rtl/tech/edrv32_ram_gpu_palette_current.v
+../../../rtl/gpu/edrv32_gpu_texture_ram.v
+../../../rtl/gpu/edrv32_gpu_palette.v
+../../../rtl/gpu/edrv32_gpu_texture.v
+../../../verif/unit/gpu_texture/tb_gpu_texture.sv

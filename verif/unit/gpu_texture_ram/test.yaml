@@ -1,0 +1,10 @@
+top: tb_gpu_texture_ram
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 600
+pass: PASS
+tier: full
+runner: /usr/bin/python3 verif/unit/gpu_texture_ram/run.py
+simulator: iverilog
