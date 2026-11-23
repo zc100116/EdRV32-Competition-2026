@@ -21,13 +21,13 @@
 
 ## 3. 待办清单
 
-执行者：Codex 一律用 `gpt-6.2-sol`（用户 2026-11-23）、effort medium，不派 Claude worker。
+执行者：Codex 暂用 `gpt-6.1-sol`、effort medium（用户 2026-11-23：本机 Codex CLI 不支持 gpt-6.2-sol，用户更新后通知再换），不派 Claude worker。
 
 | 编号 | 内容 | 执行者 | 依赖 | 验收 | 状态 |
 |---|---|---|---|---|---|
 | C-1 | 寄存器和命令格式 `rtl/include/regs/gpu.json`、`aud.json`（沿用 `tools/gen/regs.py` 生成头文件）；gpu-spec 2.11 编码表。地址表 `gpu_soc_address_map.json` 放到 T-1 | 协调者 | — | 生成器运行通过；字段与 gpu-spec 2.3–2.11、aud-spec 4 逐项一致 | [x] |
-| M-1 | Python 逐位参考模型 `tools/gpu/model/` 和场景生成器 `tools/gpu/scene/`；数值研究：对 G-N1–G-N3 给出定点格式和近似方法的误差数据与建议 | Codex（验证侧，不读 RTL） | C-1 | 模型覆盖规格全部功能；数值报告 `docs/reports/<日期>-model-gpu-numeric.md` | [ ] |
-| D-1 | GPU 微结构设计记录：单元划分、单元间接口（信号、握手、时序）、流水线、片上 RAM 组织（纹理存储体、渲染目标 4 像素字）、读改写旁路、资源和时序估算 | Codex 起草，协调者逐条评审 | C-1 | 设计记录 `docs/design/<日期>-gpu-microarch.md` 经协调者批准；内部接口冻结 | [ ] |
+| M-1 | Python 逐位参考模型 `tools/gpu/model/` 和场景生成器 `tools/gpu/scene/`；数值研究：对 G-N1–G-N3 给出定点格式和近似方法的误差数据与建议 | Codex（验证侧，不读 RTL） | C-1 | 模型覆盖规格全部功能；数值报告 `docs/reports/<日期>-model-gpu-numeric.md` | [~] 2026-11-23 派发（ctx_9b8f8fb3d99c，worktree task-gpu-model） |
+| D-1 | GPU 微结构设计记录：单元划分、单元间接口（信号、握手、时序）、流水线、片上 RAM 组织（纹理存储体、渲染目标 4 像素字）、读改写旁路、资源和时序估算 | Codex 起草，协调者逐条评审 | C-1 | 设计记录 `docs/design/<日期>-gpu-microarch.md` 经协调者批准；内部接口冻结 | [~] 草稿 7ed45f8e9 已评审；资源闭合待用户决定（DRM 357 块，全 SoC 约 419/415） |
 | S-1 | 协调者根据 M-1 修订 `gpu-spec.md` 为 v0.2（G-N1–G-N3 定稿），经用户确认 | 协调者 | M-1 | 规格 v0.2 | [ ] |
 | R-1 | GPU 前端：寄存器块、命令处理、DMA（命令、顶点、四边形、对象表、纹理装入）、RESOLVE 与后处理抗锯齿 | Codex | D-1、S-1 | 单元测试；lint 0 | [ ] |
 | R-2 | 几何：顶点变换、光照、裁剪、透视除法、背面剔除、三角形建立 | Codex | D-1、S-1 | 单元测试对照参考模型逐位一致 | [ ] |
@@ -69,3 +69,4 @@
 | 日期 | 版本 | 内容 |
 |---|---|---|
 | 2026-11-23 | v0.1 | 初稿 |
+| 2026-11-23 | v0.1 | M-1、D-1 用 gpt-6.1-sol 派发；D-1 草稿完成，问答中的规格缺口（视口、对象失效与碰撞、PERF4 口径、纹理分体布局、吞吐测量条件）归入 S-1 |
