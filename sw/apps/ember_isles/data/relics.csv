@@ -1,39 +1,39 @@
-id,name,tags,rarity,attribute,effect,flat,increased,more,conversion_numerator,conversion_denominator,level_max,price,value,value2,value3,description,grade
-iron_charm,铁护符,armor,common,armor,iron_charm,10,0,0,0,1,1,30,10,0,0,护甲 +10,0
-tide_heart,潮石心,,common,max_hp,tide_heart,30,0,0,0,1,1,30,30,0,0,最大生命 +30,0
-shore_boots,浅滩靴,,common,speed,shore_boots,0,8,0,0,1,1,30,8,0,0,移速 +8%,0
-ember_bag,余烬袋,,common,pickup,ember_bag,0,30,0,0,1,1,30,30,0,0,拾取范围 +30%,0
-whetstone,磨刀石,,common,attack,whetstone,5,0,0,0,1,1,30,5,0,0,攻击力 +5,0
-lucky_shell,幸运贝,,common,luck,lucky_shell,5,0,0,0,1,1,30,5,0,0,幸运 +5,0
-eagle_feather,鹰羽,crit,common,crit,eagle_feather,2,0,0,0,1,1,30,2,0,0,暴击率 +2%,0
-oil_flask,灯油壶,,common,fuel_efficiency,oil_flask,0,0,0,0,1,1,30,15,0,0,灯光衰减速度 −15%,0
-ash_quiver,灰羽箭囊,projectile,fine,damage,ash_quiver,0,0,0,0,1,1,80,20,0,0,投射物伤害提高 20%,1
-furnace_mirror,炉镜,area,fine,area,furnace_mirror,0,15,0,0,1,1,80,15,10,0,范围 +15%，范围伤害提高 10%,1
-slow_coal,慢燃炭,dot,fine,duration,slow_coal,0,20,0,0,1,1,80,20,20,0,持续伤害提高 20%，持续时间 +20%,1
-warrior_belt,战士腰带,melee|on_hit,fine,damage,warrior_belt,0,0,0,0,1,1,80,20,1,5,近战伤害提高 20%，近战命中回复 1 生命（每秒最多 5 次）,1
-twin_buckle,双环扣,on_dash,fine,dash_count,twin_buckle,1,0,0,0,1,1,80,1,0,0,冲刺次数 +1,1
-lamp_badge,守灯徽,light,fine,attack_speed,lamp_badge,0,0,0,0,1,1,80,15,0,0,光区内攻速 +15%,1
-night_cloak,夜行斗篷,dark,fine,speed,night_cloak,0,0,0,0,1,1,80,15,5,0,黑暗中移速 +15%，闪避 +5%,1
-frost_gloves,霜纹手套,tide|control,fine,chill,frost_gloves,0,0,0,0,1,1,80,1,0,0,冰缓叠满所需层数 −1,1
-star_needle,导星针,star|chain,fine,chain,star_needle,0,0,0,0,1,1,80,1,0,0,感电连锁 +1 跳,1
-armor_file,碎甲锉,iron|armor,fine,break,armor_file,0,0,0,0,1,1,80,2,0,0,每层破甲多降 2 点护甲,1
-leech_fang,吸蚀牙,,fine,leech,leech_fang,0,0,0,0,1,1,80,2,0,0,腐蚀的吸取比例 +2%,1
-furnace_core,炉心,ember,rare,damage,furnace_core,0,0,0,0,1,1,200,25,0,0,烬伤害额外 +25%,2
-ice_heart,冰心,tide|control,rare,damage,ice_heart,0,0,0,0,1,1,200,30,0,0,对冻结敌人的伤害额外 +30%,2
-astrolabe,星盘,star|chain,rare,damage,astrolabe,0,0,0,0,1,1,200,10,0,0,连锁每跳一次，伤害额外 +10%（可叠加）,2
-anvil,铁砧,armor,rare,damage,anvil,0,0,0,0,1,1,200,1,0,0,每 10 点护甲，伤害提高 1%（转化）,2
-dark_eye,暗瞳,crit|dark,rare,crit_damage,dark_eye,0,0,0,0,1,1,200,30,0,30,黑暗中暴击伤害额外 +30%,2
-forge_gauntlet,熔炉手甲,iron|ember,rare,conversion,forge_gauntlet,0,0,0,0,1,1,200,50,0,0,50% 物理伤害转为烬（转化）,2
-tide_pendant,潮汐坠,tide,rare,added,tide_pendant,0,0,0,0,1,1,200,15,0,0,命中时附加 15% 潮伤害（附加）,2
-single_lens,单点透镜,single,rare,damage,single_lens,0,0,0,0,1,1,200,25,20,0,对单体目标的伤害额外 +25%，范围 −20%,2
-star_hourglass,群星沙漏,on_hit,rare,cooldown,star_hourglass,0,0,0,0,1,1,200,60,5,0,每命中 5 个不同敌人，下一次技能冷却 −1 秒,2
-star_rift,裂星,crit,legendary,crit,star_rift,0,0,0,0,1,1,500,30,0,0,暴击率上限 +30%（唯一的常规突破来源）,3
-twins,双生,combo,legendary,dual,twins,0,0,0,0,1,1,500,30,0,0,副武器也会攻击，但两把武器伤害额外 −30%,3
-ember_lamp,余火即灯,ember|light,legendary,light,ember_lamp,0,0,0,0,1,1,500,1,0,0,点燃的敌人发光，等同小光区,3
-eternal_night,永夜,dark,legendary,dark,eternal_night,0,0,0,0,1,1,500,100,0,0,自身灯光熄灭；黑暗加成翻倍，光区加成失效,3
-echo_bell,回响之铃,on_hit,legendary,trigger,echo_bell,0,0,0,0,1,1,500,1,0,0,触发链上限 +1（4.5）,3
-hot_bone,炽热之骨,dot|crit,legendary,dot_crit,hot_bone,0,0,0,0,1,1,500,1,0,0,持续伤害可以暴击,3
-dark_heart,黑潮之心,shadow,legendary,curse,dark_heart,0,0,0,0,1,1,500,15,0,0,身上每个诅咒（4.4b）使伤害额外 +15%,3
-gale,疾风,combo,legendary,attack_speed,gale,0,0,0,0,1,1,500,50,0,0,攻速上限 +50%,3
-thorn_mail,棘甲,iron|armor|on_hurt,fine,shield,thorn_mail,0,0,0,0,1,1,80,50,30,0,受击时反伤等于护甲的50%，每0.5秒最多一次,1
-quench_lining,淬火内衬,armor|on_hurt,rare,shield,quench_lining,0,0,0,0,1,1,200,30,240,0,受击伤害的30%转为4秒临时护盾,2
+id,name,tags,rarity,attribute,effect,flat,increased,more,conversion_numerator,conversion_denominator,level_max,price,value,value2,value3,description,grade,value4,armor_step
+iron_charm,铁护符,armor,common,armor,iron_charm,10,0,0,0,1,1,30,10,0,0,护甲 +10,0,0,0
+tide_heart,潮石心,,common,max_hp,tide_heart,30,0,0,0,1,1,30,30,0,0,最大生命 +30,0,0,0
+shore_boots,浅滩靴,,common,speed,shore_boots,0,8,0,0,1,1,30,8,0,0,移速 +8%,0,0,0
+ember_bag,余烬袋,,common,pickup,ember_bag,0,30,0,0,1,1,30,30,0,0,拾取范围 +30%,0,0,0
+whetstone,磨刀石,,common,attack,whetstone,5,0,0,0,1,1,30,5,0,0,攻击力 +5,0,0,0
+lucky_shell,幸运贝,,common,luck,lucky_shell,5,0,0,0,1,1,30,5,0,0,幸运 +5,0,0,0
+eagle_feather,鹰羽,crit,common,crit,eagle_feather,2,0,0,0,1,1,30,2,0,0,暴击率 +2%,0,0,0
+oil_flask,灯油壶,,common,fuel_efficiency,oil_flask,0,0,0,0,1,1,30,15,0,0,灯光衰减速度 −15%,0,0,0
+ash_quiver,灰羽箭囊,projectile,fine,damage,ash_quiver,0,0,0,0,1,1,80,20,0,0,投射物伤害提高 20%,1,0,0
+furnace_mirror,炉镜,area,fine,area,furnace_mirror,0,15,0,0,1,1,80,15,10,0,范围 +15%，范围伤害提高 10%,1,0,0
+slow_coal,慢燃炭,dot,fine,duration,slow_coal,0,20,0,0,1,1,80,20,20,0,持续伤害提高 20%，持续时间 +20%,1,0,0
+warrior_belt,战士腰带,melee|on_hit,fine,damage,warrior_belt,0,0,0,0,1,1,80,20,1,5,近战伤害提高 20%，近战命中回复 1 生命（每秒最多 5 次）,1,60,0
+twin_buckle,双环扣,on_dash,fine,dash_count,twin_buckle,1,0,0,0,1,1,80,1,0,0,冲刺次数 +1,1,0,0
+lamp_badge,守灯徽,light,fine,attack_speed,lamp_badge,0,0,0,0,1,1,80,15,0,0,光区内攻速 +15%,1,0,0
+night_cloak,夜行斗篷,dark,fine,speed,night_cloak,0,0,0,0,1,1,80,15,5,0,黑暗中移速 +15%，闪避 +5%,1,0,0
+frost_gloves,霜纹手套,tide|control,fine,chill,frost_gloves,0,0,0,0,1,1,80,1,0,0,冰缓叠满所需层数 −1,1,0,0
+star_needle,导星针,star|chain,fine,chain,star_needle,0,0,0,0,1,1,80,1,0,0,感电连锁 +1 跳,1,0,0
+armor_file,碎甲锉,iron|armor,fine,break,armor_file,0,0,0,0,1,1,80,2,0,0,每层破甲多降 2 点护甲,1,0,0
+leech_fang,吸蚀牙,,fine,leech,leech_fang,0,0,0,0,1,1,80,2,0,0,腐蚀的吸取比例 +2%,1,0,0
+furnace_core,炉心,ember,rare,damage,furnace_core,0,0,0,0,1,1,200,25,0,0,烬伤害额外 +25%,2,0,0
+ice_heart,冰心,tide|control,rare,damage,ice_heart,0,0,0,0,1,1,200,30,0,0,对冻结敌人的伤害额外 +30%,2,0,0
+astrolabe,星盘,star|chain,rare,damage,astrolabe,0,0,0,0,1,1,200,10,0,0,连锁每跳一次，伤害额外 +10%（可叠加）,2,0,0
+anvil,铁砧,armor,rare,damage,anvil,0,0,0,0,1,1,200,1,0,0,每 10 点护甲，伤害提高 1%（转化）,2,0,10
+dark_eye,暗瞳,crit|dark,rare,crit_damage,dark_eye,0,0,0,0,1,1,200,30,0,30,黑暗中暴击伤害额外 +30%,2,0,0
+forge_gauntlet,熔炉手甲,iron|ember,rare,conversion,forge_gauntlet,0,0,0,0,1,1,200,50,0,0,50% 物理伤害转为烬（转化）,2,0,0
+tide_pendant,潮汐坠,tide,rare,added,tide_pendant,0,0,0,0,1,1,200,15,0,0,命中时附加 15% 潮伤害（附加）,2,0,0
+single_lens,单点透镜,single,rare,damage,single_lens,0,0,0,0,1,1,200,25,20,0,对单体目标的伤害额外 +25%，范围 −20%,2,0,0
+star_hourglass,群星沙漏,on_hit,rare,cooldown,star_hourglass,0,0,0,0,1,1,200,60,5,0,每命中 5 个不同敌人，下一次技能冷却 −1 秒,2,0,0
+star_rift,裂星,crit,legendary,crit,star_rift,0,0,0,0,1,1,500,30,0,0,暴击率上限 +30%（唯一的常规突破来源）,3,0,0
+twins,双生,combo,legendary,dual,twins,0,0,0,0,1,1,500,30,0,0,副武器也会攻击，但两把武器伤害额外 −30%,3,0,0
+ember_lamp,余火即灯,ember|light,legendary,light,ember_lamp,0,0,0,0,1,1,500,1,48,0,点燃的敌人发光，等同小光区,3,0,0
+eternal_night,永夜,dark,legendary,dark,eternal_night,0,0,0,0,1,1,500,100,0,0,自身灯光熄灭；黑暗加成翻倍，光区加成失效,3,0,0
+echo_bell,回响之铃,on_hit,legendary,trigger,echo_bell,0,0,0,0,1,1,500,1,0,0,触发链上限 +1（4.5）,3,0,0
+hot_bone,炽热之骨,dot|crit,legendary,dot_crit,hot_bone,0,0,0,0,1,1,500,1,0,0,持续伤害可以暴击,3,0,0
+dark_heart,黑潮之心,shadow,legendary,curse,dark_heart,0,0,0,0,1,1,500,15,0,0,身上每个诅咒（4.4b）使伤害额外 +15%,3,0,0
+gale,疾风,combo,legendary,attack_speed,gale,0,0,0,0,1,1,500,50,0,0,攻速上限 +50%,3,0,0
+thorn_mail,棘甲,iron|armor|on_hurt,fine,shield,thorn_mail,0,0,0,0,1,1,80,50,30,0,受击时反伤等于护甲的50%，每0.5秒最多一次,1,0,0
+quench_lining,淬火内衬,armor|on_hurt,rare,shield,quench_lining,0,0,0,0,1,1,200,30,240,0,受击伤害的30%转为4秒临时护盾,2,0,0

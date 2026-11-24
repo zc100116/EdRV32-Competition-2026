@@ -1,14 +1,14 @@
-id,name,tags,rarity,target,effect,value,duration,cooldown,value2,description
-steam_oath,蒸汽之约,ember|tide,rare,,steam_oath,100,0,0,0,所有烬伤害也视为潮伤害（吃两边的提高）
-moving_fire,疾行之火,on_dash,rare,,moving_fire,40,120,0,0,冲刺后 2 秒内伤害提高 40%
-lamp_guard,灯守,light,rare,,lamp_guard,20,0,0,0,光区内敌人受到的伤害提高 20%
-dark_hunter,黑暗猎手,dark|on_kill,rare,,dark_hunter,200,0,0,0,黑暗中击杀回复 2 点灯油
-harvest,收获,on_kill,rare,,harvest,1,0,0,0,精英死亡额外掉落 1 件普通遗物
-shield_pulse,护盾脉冲,on_hit|area,rare,,shield_pulse,40,0,0,100,常驻护盾回满时，释放一次冲击波
-energy,能量涌流,on_hit,rare,,energy,40,0,0,0,大招能量获取 +40%
-chain_reaction,连锁反应,area|control,rare,,chain_reaction,100,0,0,0,状态联动（4.2）的伤害翻倍
-judgment,群体审判,group,rare,,judgment,10,0,0,50,每有 10 个敌人在身边，伤害提高 10%（最多 50%）
-first_hit,一击之誓,single,rare,,first_hit,100,0,0,0,对满血敌人的第一击伤害额外 +100%
-pet_heart,宠物之心,summon,rare,,pet_heart,50,0,0,30,宠物攻速 +50%，技能冷却 −30%
-stand,坚守,armor,rare,,stand,25,60,0,0,站立不动 1 秒后，减伤 25%
-recoil,反震,on_hurt|area,rare,,recoil,40,0,120,100,受击时震退身边敌人并释放冲击波，每2秒最多一次
+id,name,tags,rarity,target,effect,value,duration,cooldown,value2,description,value3,radius,knockback_speed,knockback_frames
+steam_oath,蒸汽之约,ember|tide,rare,,steam_oath,100,0,0,0,所有烬伤害也视为潮伤害（吃两边的提高）,0,0,0,0
+moving_fire,疾行之火,on_dash,rare,,moving_fire,40,120,0,0,冲刺后 2 秒内伤害提高 40%,0,0,0,0
+lamp_guard,灯守,light,rare,,lamp_guard,20,0,0,0,光区内敌人受到的伤害提高 20%,0,0,0,0
+dark_hunter,黑暗猎手,dark|on_kill,rare,,dark_hunter,200,0,0,0,黑暗中击杀回复 2 点灯油,0,0,0,0
+harvest,收获,on_kill,rare,,harvest,1,0,0,0,精英死亡额外掉落 1 件普通遗物,0,0,0,0
+shield_pulse,护盾脉冲,on_hit|area,rare,,shield_pulse,40,0,0,100,常驻护盾回满时，释放一次冲击波,0,0,0,0
+energy,能量涌流,on_hit,rare,,energy,40,0,0,0,大招能量获取 +40%,0,0,0,0
+chain_reaction,连锁反应,area|control,rare,,chain_reaction,100,0,0,0,状态联动（4.2）的伤害翻倍,0,0,0,0
+judgment,群体审判,group,rare,,judgment,10,0,0,50,每有 10 个敌人在身边，伤害提高 10%（最多 50%）,10,160,0,0
+first_hit,一击之誓,single,rare,,first_hit,100,0,0,0,对满血敌人的第一击伤害额外 +100%,0,0,0,0
+pet_heart,宠物之心,summon,rare,,pet_heart,50,0,0,30,宠物攻速 +50%，技能冷却 −30%,0,0,0,0
+stand,坚守,armor,rare,,stand,25,60,0,0,站立不动 1 秒后，减伤 25%,0,0,0,0
+recoil,反震,on_hurt|area,rare,,recoil,40,0,120,100,受击时震退身边敌人并释放冲击波，每2秒最多一次,0,0,180,12

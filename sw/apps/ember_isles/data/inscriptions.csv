@@ -1,19 +1,19 @@
-id,name,tags,rarity,target,effect,value,duration,cooldown,slots,price,value2,description,grade
-sharp,锐化,projectile,fine,,sharp,2,180,0,1,80,0,穿透 +2,1
-scatter,散射,projectile,fine,,scatter,2,180,0,1,80,30,投射物 +2，各自伤害 −30%,1
-ignite,引燃,ember|on_hit,fine,,ignite,20,180,0,1,80,0,命中 20% 概率点燃,1
-wet,浸润,tide|on_hit,fine,,wet,1,180,0,1,80,0,命中使敌人潮湿,1
-heavy,重击,crit|combo,fine,,heavy,3,180,0,1,80,0,每第 3 击必定暴击,1
-leech,吸取,on_hit,fine,,leech,3,180,0,1,80,0,伤害的 3% 回复生命,1
-split,三星火,projectile,rare,,split,3,180,0,1,200,0,投射物命中后分裂为 3 个,2
-homing,追踪,projectile,rare,,homing,1,180,0,1,200,0,投射物追踪最近敌人,2
-return,回旋,projectile,rare,,return,1,180,0,1,200,0,投射物到达射程后飞回,2
-follow,随身,area,rare,,follow,1,180,0,1,200,0,范围攻击改为跟随自身,2
-charge,蓄能,charge,rare,,charge,40,180,0,1,200,20,蓄力时间 −40%，蓄力攻击伤害额外 +20%,2
-thunder,雷鸣,crit|star|chain,rare,,thunder,3,180,0,1,200,0,暴击时释放连锁闪电（星）,2
-burst,爆裂,area|on_kill,rare,,burst,50,180,0,1,200,0,击杀时爆炸，伤害为该次命中的 50%,2
-ember_ground,余烬地,ember|area|dot,rare,,ember_ground,1,180,0,1,200,0,攻击落点留下燃烧地块,2
-posture,破势,control,rare,,posture,50,180,0,1,200,0,架势削减 +50%,2
-ignore_block,无视格挡,on_hit,legendary,,ignore_block,1,180,0,1,200,0,攻击无视格挡,3
-double,双发,combo,legendary,,double,35,180,0,1,200,0,每次攻击执行两次，伤害额外 −35%,3
-rotate,元素轮转,ember|tide|iron|star|shadow,legendary,,rotate,1,180,0,1,200,0,每次攻击依次改为烬、潮、铁、星、影,3
+id,name,tags,rarity,target,effect,value,duration,cooldown,slots,price,value2,description,grade,value3,spread_angle
+sharp,锐化,projectile,fine,,sharp,2,180,0,1,80,0,穿透 +2,1,0,0
+scatter,散射,projectile,fine,,scatter,2,180,0,1,80,30,投射物 +2，各自伤害 −30%,1,0,0
+ignite,引燃,ember|on_hit,fine,,ignite,20,180,0,1,80,0,命中 20% 概率点燃,1,0,0
+wet,浸润,tide|on_hit,fine,,wet,1,180,0,1,80,0,命中使敌人潮湿,1,0,0
+heavy,重击,crit|combo,fine,,heavy,3,180,0,1,80,0,每第 3 击必定暴击,1,0,0
+leech,吸取,on_hit,fine,,leech,3,180,0,1,80,0,伤害的 3% 回复生命,1,0,0
+split,三星火,projectile,rare,,split,3,60,0,1,200,0,投射物命中后分裂为 3 个,2,0,4096
+homing,追踪,projectile,rare,,homing,1,180,0,1,200,0,投射物追踪最近敌人,2,0,0
+return,回旋,projectile,rare,,return,1,180,0,1,200,0,投射物到达射程后飞回,2,0,0
+follow,随身,area,rare,,follow,1,180,0,1,200,0,范围攻击改为跟随自身,2,0,0
+charge,蓄能,charge,rare,,charge,40,180,0,1,200,20,蓄力时间 −40%，蓄力攻击伤害额外 +20%,2,0,0
+thunder,雷鸣,crit|star|chain,rare,,thunder,3,180,0,1,200,0,暴击时释放连锁闪电（星）,2,0,0
+burst,爆裂,area|on_kill,rare,,burst,50,180,0,1,200,50,击杀时爆炸，伤害为该次命中的 50%,2,0,0
+ember_ground,余烬地,ember|area|dot,rare,,ember_ground,1,180,0,1,200,25,攻击落点留下燃烧地块,2,30,0
+posture,破势,control,rare,,posture,50,180,0,1,200,0,架势削减 +50%,2,0,0
+ignore_block,无视格挡,on_hit,legendary,,ignore_block,1,180,0,1,200,0,攻击无视格挡,3,0,0
+double,双发,combo,legendary,,double,35,180,0,1,200,2,每次攻击执行两次，伤害额外 −35%,3,0,0
+rotate,元素轮转,ember|tide|iron|star|shadow,legendary,,rotate,1,180,0,1,200,0,每次攻击依次改为烬、潮、铁、星、影,3,0,0
