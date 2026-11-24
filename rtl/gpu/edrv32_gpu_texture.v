@@ -90,12 +90,13 @@ module edrv32_gpu_texture (
     reg [7:0] alpha_r [0:31];
     reg quad_r [0:31];
     reg [3:0] palette_r [0:31];
+    reg [4:0] cfg_wait_r;
     reg [1:0] batch_r;
     reg [3:0] nearest_pending_r;
     assign occupancy_w = allocate_r - retire_r;
-    assign sample_ready_o = occupancy_w < 6'd32 && !stop_i;
+    assign sample_ready_o = occupancy_w < 6'd32 && cfg_wait_r == 0 && !stop_i;
     assign accept_w = sample_valid_i && sample_ready_o;
-    assign render_state_ready_o = occupancy_w == 0;
+    assign render_state_ready_o = occupancy_w == 0 && cfg_wait_r == 0;
     assign shaded_valid_o = occupancy_w != 0 && completed_w[retire_r[4:0]] == 4'hf
                             && !stop_i;
     assign retire_w = shaded_valid_o && shaded_ready_i;
@@ -526,56 +527,89 @@ module edrv32_gpu_texture (
         end
     endgenerate
 
-    // Schedule stage: one shared nine-level mip prefix chain and eight tap address units.
-    // Each mip level has one 9x9 size product and one 17-bit offset adder.
-    wire [8:0] mip_width_w [0:9];
-    wire [8:0] mip_height_w [0:9];
-    wire [8:0] mip_groups_x_w [0:9];
-    // Split constant slices so lint follows each combinational chain element independently.
-    wire [80:0] mip_width_chain_w /* verilator split_var */;
-    wire [80:0] mip_height_chain_w /* verilator split_var */;
-    wire [80:0] mip_groups_x_chain_w /* verilator split_var */;
-    wire [80:0] mip_groups_y_chain_w /* verilator split_var */;
-    wire [152:0] mip_offset_chain_w /* verilator split_var */;
+    // SET_TEX constants settle before sampling: dimensions take one stage per level,
+    // sizes and prefix offsets take two. No mip prefix arithmetic lies on a tap path.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) cfg_wait_r <= 0;
+        else if (render_state_valid_i && render_state_ready_o) cfg_wait_r <= 20;
+        else if (cfg_wait_r != 0) cfg_wait_r <= cfg_wait_r - 1'b1;
+    end
+    wire [16:0] offset_base_w;
+    assign offset_base_w = offset_r[17:1];
+    wire [8:0] mip_mask_x_w [0:9];
+    wire [8:0] mip_mask_y_w [0:9];
+    wire [3:0] mip_row_shift_w [0:9];
     wire [16:0] mip_offset_w [0:9];
+    wire [80:0] mip_width_chain_w;
+    wire [80:0] mip_height_chain_w;
+    wire [80:0] mip_groups_x_chain_w;
+    wire [80:0] mip_groups_y_chain_w;
+    wire [152:0] mip_offset_chain_w;
     genvar mip;
     generate
         for (mip = 0; mip < 10; mip = mip + 1) begin : g_mip
+            localparam [3:0] RGB_ROW_LEVEL = mip + 1;
+            localparam [3:0] INDEX_ROW_LEVEL = mip + 2;
+            reg [8:0] mask_x_r;
+            reg [8:0] mask_y_r;
+            reg [3:0] row_shift_r;
+            reg [8:0] unused_width_r;
+            reg [8:0] unused_height_r;
+            reg [8:0] unused_groups_x_r;
+            reg [8:0] unused_groups_y_r;
+            reg [16:0] level_offset_r;
             wire [8:0] width_w;
             wire [8:0] height_w;
-            wire [8:0] blocks_x_w;
-            wire [8:0] blocks_y_w;
             wire [8:0] groups_x_w;
-            wire [8:0] unused_groups_y_w;
-            wire [16:0] offset_w;
-            assign mip_width_w[mip] = width_w;
-            assign mip_height_w[mip] = height_w;
-            assign mip_groups_x_w[mip] = groups_x_w;
-            assign mip_offset_w[mip] = offset_w;
+            wire [8:0] groups_y_w;
+            assign mip_mask_x_w[mip] = mask_x_r;
+            assign mip_mask_y_w[mip] = mask_y_r;
+            assign mip_row_shift_w[mip] = row_shift_r;
+            assign mip_offset_w[mip] = level_offset_r;
             if (mip < 9) begin : g_chain
-                assign mip_width_chain_w[mip*9 +: 9] = width_w;
-                assign mip_height_chain_w[mip*9 +: 9] = height_w;
-                assign mip_groups_x_chain_w[mip*9 +: 9] = groups_x_w;
-                assign mip_groups_y_chain_w[mip*9 +: 9] = unused_groups_y_w;
-                assign mip_offset_chain_w[mip*17 +: 17] = offset_w;
+                assign mip_width_chain_w[mip*9 +: 9] = unused_width_r;
+                assign mip_height_chain_w[mip*9 +: 9] = unused_height_r;
+                assign mip_groups_x_chain_w[mip*9 +: 9] = unused_groups_x_r;
+                assign mip_groups_y_chain_w[mip*9 +: 9] = unused_groups_y_r;
+                assign mip_offset_chain_w[mip*17 +: 17] = level_offset_r;
             end
-            assign blocks_x_w = format_r == 2 ? width_w : (width_w + 9'd1) >> 1;
-            assign blocks_y_w = format_r == 0 ? (height_w + 9'd1) >> 1 : height_w;
-            assign groups_x_w = (blocks_x_w + 9'd1) >> 1;
-            assign unused_groups_y_w = (blocks_y_w + 9'd1) >> 1;
+            // All dimensions are powers of two, including padded one-block levels.
+            assign groups_x_w = format_r == 2 ?
+                (width_w > 1 ? width_w >> 1 : 9'd1) :
+                (width_w > 2 ? width_w >> 2 : 9'd1);
+            assign groups_y_w = format_r == 0 ?
+                (height_w > 2 ? height_w >> 2 : 9'd1) :
+                (height_w > 1 ? height_w >> 1 : 9'd1);
+            always @(posedge clk_i) begin
+                mask_x_r <= width_w - 9'd1;
+                mask_y_r <= height_w - 9'd1;
+                row_shift_r <= format_r == 2 ?
+                    (log2_w_r > RGB_ROW_LEVEL ? log2_w_r - RGB_ROW_LEVEL : 4'd0) :
+                    (log2_w_r > INDEX_ROW_LEVEL ? log2_w_r - INDEX_ROW_LEVEL : 4'd0);
+                unused_width_r <= width_w;
+                unused_height_r <= height_w;
+                unused_groups_x_r <= groups_x_w;
+                unused_groups_y_r <= groups_y_w;
+            end
             if (mip == 0) begin : g_first
                 assign width_w = 9'd1 << log2_w_r;
                 assign height_w = 9'd1 << log2_h_r;
-                assign offset_w = offset_r[17:1];
+                always @(posedge clk_i) begin
+                    level_offset_r <= offset_base_w;
+                end
             end else begin : g_next
-                wire [16:0] size_w;
-                assign size_w = (mip_groups_x_chain_w[(mip-1)*9 +: 9] *
-                    mip_groups_y_chain_w[(mip-1)*9 +: 9]) << 2;
-                assign offset_w = mip_offset_chain_w[(mip-1)*17 +: 17] + size_w;
+                reg [16:0] size_r;
+                reg [16:0] base_r;
                 assign width_w = mip_width_chain_w[(mip-1)*9 +: 9] > 1 ?
-                    mip_width_chain_w[(mip-1)*9 +: 9] >> 1 : mip_width_chain_w[(mip-1)*9 +: 9];
+                    mip_width_chain_w[(mip-1)*9 +: 9] >> 1 : 9'd1;
                 assign height_w = mip_height_chain_w[(mip-1)*9 +: 9] > 1 ?
-                    mip_height_chain_w[(mip-1)*9 +: 9] >> 1 : mip_height_chain_w[(mip-1)*9 +: 9];
+                    mip_height_chain_w[(mip-1)*9 +: 9] >> 1 : 9'd1;
+                always @(posedge clk_i) begin
+                    size_r <= (mip_groups_x_chain_w[(mip-1)*9 +: 9] *
+                        mip_groups_y_chain_w[(mip-1)*9 +: 9]) << 2;
+                    base_r <= mip_offset_chain_w[(mip-1)*17 +: 17];
+                    level_offset_r <= base_r + size_r;
+                end
             end
         end
     endgenerate
@@ -626,7 +660,7 @@ module edrv32_gpu_texture (
             wire [8:0] wrapped_y_w;
             wire [8:0] block_x_w;
             wire [8:0] block_y_w;
-            wire [16:0] row_product_w;
+            wire [16:0] unused_row_product_w;
             wire [16:0] halfword_w;
             wire [8:0] weight_x_w;
             wire [8:0] weight_y_w;
@@ -646,15 +680,16 @@ module edrv32_gpu_texture (
                 ((launch_mode_w != 0 && (tap % 2) != 0) ? 9'd1 : 9'd0);
             assign y_w = centered_v_w[16:8] +
                 ((launch_mode_w != 0 && ((tap/2) % 2) != 0) ? 9'd1 : 9'd0);
-            assign wrapped_x_w = x_w & (mip_width_w[level_w] - 9'd1);
-            assign wrapped_y_w = y_w & (mip_height_w[level_w] - 9'd1);
+            assign wrapped_x_w = x_w & mip_mask_x_w[level_w];
+            assign wrapped_y_w = y_w & mip_mask_y_w[level_w];
             assign block_x_w = format_r == 2 ? wrapped_x_w : wrapped_x_w >> 1;
             assign block_y_w = format_r == 0 ? wrapped_y_w >> 1 : wrapped_y_w;
-            // Eight 8x9 row products, coordinate shifts/adders and 9x9 filter products.
-            assign row_product_w = block_y_w[8:1] * mip_groups_x_w[level_w];
-            assign halfword_w = mip_offset_w[level_w] +
-                ((row_product_w + {9'd0, block_x_w[8:1]}) << 2) +
-                {16'd0, block_x_w[0]} + {15'd0, block_y_w[0], 1'b0};
+            // Power-of-two rows make multiplication a shift. The column occupies
+            // only the zero low bits of the row; the bank bits never carry into it.
+            assign unused_row_product_w = {9'b0, block_y_w[8:1]} << mip_row_shift_w[level_w];
+            assign halfword_w = {mip_offset_w[level_w][16:2] +
+                (unused_row_product_w[14:0] | {7'b0, block_x_w[8:1]}),
+                block_y_w[0], block_x_w[0]};
             assign tap_address_w[tap] = {format_r == 0 ?
                 {wrapped_y_w[0], wrapped_x_w[0], 2'b0} : format_r == 1 ?
                 {wrapped_x_w[0], 3'b0} : 4'd0, halfword_w};
