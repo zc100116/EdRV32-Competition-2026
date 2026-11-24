@@ -1,4 +1,4 @@
-# Ember Isles audio credits
+# Ember Isles asset credits
 
 Music: Eric Skiff — **A Night Of Dizzy Spells**, **Arpanauts**, **Chibi Ninja** —
 *Resistor Anthems* — [Available at EricSkiff.com/music](https://ericskiff.com/music/).
@@ -36,3 +36,16 @@ and block slows the coin bell to half pitch. Shot, iron hit, elemental hit, kill
 dash, seed, explosion, choose/weapon-change, hurt and pickup use the named source
 cues in `tools/music_convert.py`. All effects remain pending user listening approval.
 No commercial game recordings, third-party mirrors or website download bypasses were used.
+
+Font: **Fusion Pixel Font**, 12px monospaced zh_Hans, release **2026.11.10**,
+copyright (c) 2022 TakWolf and the contributors listed in the upstream licenses.
+Source: [TakWolf/fusion-pixel-font](https://github.com/TakWolf/fusion-pixel-font),
+[original release](https://github.com/TakWolf/fusion-pixel-font/releases/tag/2026.11.10).
+License: **SIL Open Font License 1.1**; the unmodified BDF, OFL text and original
+component notices are preserved in `fonts/` (`OFL.txt`, `LICENSES/`, `SOURCE.txt`).
+The converter extracts native glyph bitmaps used by game text into build outputs;
+it does not rescale the glyphs. Distribute the OFL and component notices with the
+game containing this font.
+
+The additional 12px U+2212 mathematical minus is an original Ember Isles glyph,
+dedicated by this project to **CC0**; it is separate from the upstream font.
