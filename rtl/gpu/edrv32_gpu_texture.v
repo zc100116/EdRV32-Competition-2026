@@ -80,8 +80,8 @@ module edrv32_gpu_texture (
     wire retire_w;
     wire schedule_valid_w;
     wire [4:0] schedule_slot_w;
-    reg [3:0] lod_ready_r [0:31];
-    reg [3:0] completed_r [0:31];
+    wire [3:0] lod_ready_w [0:31];
+    wire [3:0] completed_w [0:31];
     reg [15:0] x_r [0:31];
     reg [15:0] y_r [0:31];
     reg [3:0] mask_r [0:31];
@@ -90,30 +90,21 @@ module edrv32_gpu_texture (
     reg [7:0] alpha_r [0:31];
     reg quad_r [0:31];
     reg [3:0] palette_r [0:31];
-    reg [127:0] u_r [0:31];
-    reg [127:0] v_r [0:31];
-    reg [47:0] lod_r [0:31];
-    reg [95:0] result_color_r [0:31];
-    reg [31:0] result_alpha_r [0:31];
-    reg [3:0] result_mask_r [0:31];
     reg [1:0] batch_r;
     reg [3:0] nearest_pending_r;
     assign occupancy_w = allocate_r - retire_r;
     assign sample_ready_o = occupancy_w < 6'd32 && !stop_i;
     assign accept_w = sample_valid_i && sample_ready_o;
     assign render_state_ready_o = occupancy_w == 0;
-    assign shaded_valid_o = occupancy_w != 0 && completed_r[retire_r[4:0]] == 4'hf
+    assign shaded_valid_o = occupancy_w != 0 && completed_w[retire_r[4:0]] == 4'hf
                             && !stop_i;
     assign retire_w = shaded_valid_o && shaded_ready_i;
     assign shaded_x_o = x_r[retire_r[4:0]];
     assign shaded_y_o = y_r[retire_r[4:0]];
-    assign shaded_mask_o = result_mask_r[retire_r[4:0]];
     assign shaded_depth_o = depth_r[retire_r[4:0]];
-    assign shaded_color_o = result_color_r[retire_r[4:0]];
-    assign shaded_alpha_o = result_alpha_r[retire_r[4:0]];
     assign schedule_slot_w = schedule_r[4:0];
     assign schedule_valid_w = schedule_r != allocate_r
-                                && lod_ready_r[schedule_slot_w] == 4'hf && !stop_i;
+                                && lod_ready_w[schedule_slot_w] == 4'hf && !stop_i;
 
     function [8:0] log_fraction;
         input [7:0] index_i;
@@ -379,93 +370,90 @@ module edrv32_gpu_texture (
             endcase
         end
     endfunction
-    function [7:0] divide_255;
-        input [15:0] product_i;
-        reg [16:0] temp;
-        reg [17:0] total;
-        reg unused_total;
-        begin
-            temp = {1'b0, product_i} + 17'd128;
-            total = {1'b0, temp} + {9'b0, temp[16:8]};
-            divide_255 = total[15:8];
-            unused_total = ^{total[17:16], total[7:0]};
-        end
-    endfunction
-    function [31:0] expand_rgba;
-        input [15:0] rgb_i;
-        input [7:0] alpha_i;
-        begin
-            expand_rgba = {alpha_i, rgb_i[4:0], rgb_i[4:2], rgb_i[10:5], rgb_i[10:9],
-                            rgb_i[15:11], rgb_i[15:13]};
-        end
-    endfunction
-    // h[1:0] selects the bank; h>>2 selects the row. Small levels keep padding.
-    function [20:0] texel_address;
-        input signed [31:0] x_i;
-        input signed [31:0] y_i;
-        input [3:0] level_i;
-        reg [31:0] width_value;
-        reg [31:0] height_value;
-        reg [31:0] blocks_x;
-        reg [31:0] blocks_y;
-        reg [31:0] block_x;
-        reg [31:0] block_y;
-        reg [31:0] wrapped_x;
-        reg [31:0] wrapped_y;
-        reg [31:0] halfword;
-        reg [3:0] subword;
-        integer k;
-        begin
-            halfword = {15'b0, offset_r[17:1]};
-            width_value = 32'd1 << log2_w_r;
-            height_value = 32'd1 << log2_h_r;
-            blocks_x = 0;
-            blocks_y = 0;
-            block_x = 0;
-            block_y = 0;
-            wrapped_x = 0;
-            wrapped_y = 0;
-            subword = 0;
-            for (k = 0; k < 9; k = k + 1) begin
-                blocks_x = format_r == 2 ? width_value : (width_value + 1) >> 1;
-                blocks_y = format_r == 0 ? (height_value + 1) >> 1 : height_value;
-                if (k < {28'b0, level_i}) begin
-                    halfword = halfword + 4 * ((blocks_x + 1) >> 1)
-                                                * ((blocks_y + 1) >> 1);
-                    if (width_value > 1) begin
-                        width_value = width_value >> 1;
-                    end
-                    if (height_value > 1) begin
-                        height_value = height_value >> 1;
-                    end
-                end
-            end
-            blocks_x = format_r == 2 ? width_value : (width_value + 1) >> 1;
-            wrapped_x = $unsigned(x_i) & (width_value - 1);
-            wrapped_y = $unsigned(y_i) & (height_value - 1);
-            block_x = format_r == 2 ? wrapped_x : wrapped_x >> 1;
-            block_y = format_r == 0 ? wrapped_y >> 1 : wrapped_y;
-            halfword = halfword + 4 * ((block_y >> 1) * ((blocks_x + 1) >> 1)
-                                        + (block_x >> 1))
-                        + (block_x & 1) + 2 * (block_y & 1);
-            if (format_r == 0) begin
-                subword = {wrapped_y[0], wrapped_x[0], 2'b0};
-            end else if (format_r == 1) begin
-                subword = {wrapped_x[0], 3'b0};
-            end
-            texel_address = {subword, halfword[16:0]};
-        end
-    endfunction
-
+    // Four lanes, each with seven 96-bit normalization registers and one 256-entry lookup ROM.
     // Nine-stage LOD path: seven leading-one normalization decisions, ROM, clamp.
     reg [8:0] lod_valid_r;
-    reg [4:0] lod_slot_r [0:8];
+    wire [4:0] lod_slot_r [0:8];
+    reg [6:0] filter_valid_r;
+    wire [4:0] filter_slot_r [0:6];
+    wire [3:0] filter_done_r [0:6];
+    wire [95:0] modulated_color_w;
+    wire [31:0] modulated_alpha_w;
+    reg [3:0] shade_mask_r;
+    wire [31:0] lane_u_w [0:3];
+    wire [31:0] lane_v_w [0:3];
+    wire [11:0] lane_lod_w [0:3];
     genvar lane;
     generate
         for (lane = 0; lane < 4; lane = lane + 1) begin : g_lod
-            reg [95:0] normalized_r [0:6];
-            reg [6:0] shift_r [0:6];
-            reg zero_r [0:6];
+            wire [95:0] normalized_w [0:6];
+            wire [6:0] shift_w [0:6];
+            wire zero_w [0:6];
+            reg [31:0] u_r [0:31];
+            reg [31:0] v_r [0:31];
+            reg [11:0] lod_r [0:31];
+            reg [23:0] result_color_r [0:31];
+            reg [7:0] result_alpha_r [0:31];
+            reg result_mask_r [0:31];
+            assign lane_u_w[lane] = u_r[schedule_slot_w];
+            assign lane_v_w[lane] = v_r[schedule_slot_w];
+            assign lane_lod_w[lane] = lod_r[schedule_slot_w];
+            assign shaded_color_o[lane*24 +: 24] = result_color_r[retire_r[4:0]];
+            assign shaded_alpha_o[lane*8 +: 8] = result_alpha_r[retire_r[4:0]];
+            assign shaded_mask_o[lane] = result_mask_r[retire_r[4:0]];
+            always @(posedge clk_i) begin
+                if (accept_w) begin
+                    u_r[allocate_r[4:0]] <= sample_u_i[lane*32 +: 32];
+                    v_r[allocate_r[4:0]] <= sample_v_i[lane*32 +: 32];
+                end
+                if (filter_valid_r[6] && filter_done_r[6][lane]) begin
+                    result_color_r[filter_slot_r[6]] <= modulated_color_w[lane*24 +: 24];
+                    result_alpha_r[filter_slot_r[6]] <= modulated_alpha_w[lane*8 +: 8];
+                    result_mask_r[filter_slot_r[6]] <= shade_mask_r[lane];
+                end
+            end
+            reg [95:0] normalized_0_r;
+            assign normalized_w[0] = normalized_0_r;
+            reg [6:0] shift_0_r;
+            assign shift_w[0] = shift_0_r;
+            reg [0:0] zero_0_r;
+            assign zero_w[0] = zero_0_r;
+            reg [95:0] normalized_1_r;
+            assign normalized_w[1] = normalized_1_r;
+            reg [6:0] shift_1_r;
+            assign shift_w[1] = shift_1_r;
+            reg [0:0] zero_1_r;
+            assign zero_w[1] = zero_1_r;
+            reg [95:0] normalized_2_r;
+            assign normalized_w[2] = normalized_2_r;
+            reg [6:0] shift_2_r;
+            assign shift_w[2] = shift_2_r;
+            reg [0:0] zero_2_r;
+            assign zero_w[2] = zero_2_r;
+            reg [95:0] normalized_3_r;
+            assign normalized_w[3] = normalized_3_r;
+            reg [6:0] shift_3_r;
+            assign shift_w[3] = shift_3_r;
+            reg [0:0] zero_3_r;
+            assign zero_w[3] = zero_3_r;
+            reg [95:0] normalized_4_r;
+            assign normalized_w[4] = normalized_4_r;
+            reg [6:0] shift_4_r;
+            assign shift_w[4] = shift_4_r;
+            reg [0:0] zero_4_r;
+            assign zero_w[4] = zero_4_r;
+            reg [95:0] normalized_5_r;
+            assign normalized_w[5] = normalized_5_r;
+            reg [6:0] shift_5_r;
+            assign shift_w[5] = shift_5_r;
+            reg [0:0] zero_5_r;
+            assign zero_w[5] = zero_5_r;
+            reg [95:0] normalized_6_r;
+            assign normalized_w[6] = normalized_6_r;
+            reg [6:0] shift_6_r;
+            assign shift_w[6] = shift_6_r;
+            reg [0:0] zero_6_r;
+            assign zero_w[6] = zero_6_r;
             reg signed [15:0] logarithm_r;
             wire signed [15:0] biased_w;
             wire signed [15:0] maximum_w;
@@ -475,397 +463,461 @@ module edrv32_gpu_texture (
             assign clamped_w = biased_w < 0 ? 12'd0 :
                                 biased_w > maximum_w ? maximum_w[11:0] : biased_w[11:0];
             always @(posedge clk_i) begin
-                normalized_r[0] <= sample_span_i[lane*96+48 +: 48] == 0
+                normalized_0_r <= sample_span_i[lane*96+48 +: 48] == 0
                                     ? sample_span_i[lane*96 +: 96] << 48
                                     : sample_span_i[lane*96 +: 96];
-                shift_r[0] <= sample_span_i[lane*96+48 +: 48] == 0 ? 7'd48 : 7'd0;
-                zero_r[0] <= sample_span_i[lane*96 +: 96] == 0;
-                logarithm_r <= zero_r[6] ? 16'sd0 :
-                    (16'sd79 - $signed({9'b0, shift_r[6]})) * 16'sd256
-                    + $signed({7'b0, log_fraction(normalized_r[6][94:87])});
+                shift_0_r <= sample_span_i[lane*96+48 +: 48] == 0 ? 7'd48 : 7'd0;
+                zero_0_r <= sample_span_i[lane*96 +: 96] == 0;
+                logarithm_r <= zero_w[6] ? 16'sd0 :
+                    (16'sd79 - $signed({9'b0, shift_w[6]})) * 16'sd256
+                    + $signed({7'b0, log_fraction(normalized_w[6][94:87])});
                 if (lod_valid_r[7]) begin
-                    lod_r[lod_slot_r[7]][lane*12 +: 12] <= clamped_w;
+                    lod_r[lod_slot_r[7]] <= clamped_w;
                 end
             end
             always @(posedge clk_i) begin
-                normalized_r[1] <= normalized_r[0][95:72] == 0
-                                        ? normalized_r[0] << 24 : normalized_r[0];
-                shift_r[1] <= shift_r[0]
-                                + (normalized_r[0][95:72] == 0 ? 7'd24 : 7'd0);
-                zero_r[1] <= zero_r[0];
+                normalized_1_r <= normalized_w[0][95:72] == 0
+                                        ? normalized_w[0] << 24 : normalized_w[0];
+                shift_1_r <= shift_w[0]
+                                + (normalized_w[0][95:72] == 0 ? 7'd24 : 7'd0);
+                zero_1_r <= zero_w[0];
             end
             always @(posedge clk_i) begin
-                normalized_r[2] <= normalized_r[1][95:84] == 0
-                                        ? normalized_r[1] << 12 : normalized_r[1];
-                shift_r[2] <= shift_r[1]
-                                + (normalized_r[1][95:84] == 0 ? 7'd12 : 7'd0);
-                zero_r[2] <= zero_r[1];
+                normalized_2_r <= normalized_w[1][95:84] == 0
+                                        ? normalized_w[1] << 12 : normalized_w[1];
+                shift_2_r <= shift_w[1]
+                                + (normalized_w[1][95:84] == 0 ? 7'd12 : 7'd0);
+                zero_2_r <= zero_w[1];
             end
             always @(posedge clk_i) begin
-                normalized_r[3] <= normalized_r[2][95:90] == 0
-                                        ? normalized_r[2] << 6 : normalized_r[2];
-                shift_r[3] <= shift_r[2]
-                                + (normalized_r[2][95:90] == 0 ? 7'd6 : 7'd0);
-                zero_r[3] <= zero_r[2];
+                normalized_3_r <= normalized_w[2][95:90] == 0
+                                        ? normalized_w[2] << 6 : normalized_w[2];
+                shift_3_r <= shift_w[2]
+                                + (normalized_w[2][95:90] == 0 ? 7'd6 : 7'd0);
+                zero_3_r <= zero_w[2];
             end
             always @(posedge clk_i) begin
-                normalized_r[4] <= normalized_r[3][95:93] == 0
-                                        ? normalized_r[3] << 3 : normalized_r[3];
-                shift_r[4] <= shift_r[3]
-                                + (normalized_r[3][95:93] == 0 ? 7'd3 : 7'd0);
-                zero_r[4] <= zero_r[3];
+                normalized_4_r <= normalized_w[3][95:93] == 0
+                                        ? normalized_w[3] << 3 : normalized_w[3];
+                shift_4_r <= shift_w[3]
+                                + (normalized_w[3][95:93] == 0 ? 7'd3 : 7'd0);
+                zero_4_r <= zero_w[3];
             end
             always @(posedge clk_i) begin
-                normalized_r[5] <= normalized_r[4][95:94] == 0
-                                        ? normalized_r[4] << 2 : normalized_r[4];
-                shift_r[5] <= shift_r[4]
-                                + (normalized_r[4][95:94] == 0 ? 7'd2 : 7'd0);
-                zero_r[5] <= zero_r[4];
+                normalized_5_r <= normalized_w[4][95:94] == 0
+                                        ? normalized_w[4] << 2 : normalized_w[4];
+                shift_5_r <= shift_w[4]
+                                + (normalized_w[4][95:94] == 0 ? 7'd2 : 7'd0);
+                zero_5_r <= zero_w[4];
             end
             always @(posedge clk_i) begin
-                normalized_r[6] <= normalized_r[5][95:95] == 0
-                                        ? normalized_r[5] << 1 : normalized_r[5];
-                shift_r[6] <= shift_r[5]
-                                + (normalized_r[5][95:95] == 0 ? 7'd1 : 7'd0);
-                zero_r[6] <= zero_r[5];
+                normalized_6_r <= normalized_w[5][95:95] == 0
+                                        ? normalized_w[5] << 1 : normalized_w[5];
+                shift_6_r <= shift_w[5]
+                                + (normalized_w[5][95:95] == 0 ? 7'd1 : 7'd0);
+                zero_6_r <= zero_w[5];
             end
         end
     endgenerate
 
-    // One launch holds up to eight taps. Equal words in each bank share a read.
-    reg [7:0] port_en_w;
-    reg [119:0] port_row_w;
-    reg [23:0] tap_port_w;
-    reg [31:0] tap_subword_w;
-    reg [135:0] tap_weight_w;
-    reg [3:0] lane_done_w;
-    reg [3:0] pending_w;
-    reg [1:0] launch_mode_w;
-    reg [1:0] launch_lane_w;
-    reg [7:0] launch_fraction_w;
-    reg group_issued_w;
-    reg [20:0] tap_address_w [0:7];
-    integer tap;
-    integer bank_idx;
-    integer port_idx;
-    integer match_idx;
-    integer pixel_idx;
-    integer tap_level;
-    integer tap_x;
-    integer tap_y;
-    integer fraction_x;
-    integer fraction_y;
-    integer weight;
-    integer lod_value;
-    reg signed [31:0] scaled_u_w;
-    reg signed [31:0] scaled_v_w;
-    reg [11:0] lane_lod_w;
+    // Schedule stage: one shared nine-level mip prefix chain and eight tap address units.
+    // Each mip level has one 9x9 size product and one 17-bit offset adder.
+    wire [8:0] mip_width_w [0:9];
+    wire [8:0] mip_height_w [0:9];
+    wire [8:0] mip_groups_x_w [0:9];
+    wire [16:0] mip_offset_w [0:9];
+    genvar mip;
+    generate
+        for (mip = 0; mip < 10; mip = mip + 1) begin : g_mip
+            wire [8:0] width_w;
+            wire [8:0] height_w;
+            wire [8:0] blocks_x_w;
+            wire [8:0] blocks_y_w;
+            wire [8:0] groups_x_w;
+            wire [8:0] unused_groups_y_w;
+            wire [16:0] offset_w;
+            assign mip_width_w[mip] = width_w;
+            assign mip_height_w[mip] = height_w;
+            assign mip_groups_x_w[mip] = groups_x_w;
+            assign mip_offset_w[mip] = offset_w;
+            assign blocks_x_w = format_r == 2 ? width_w : (width_w + 9'd1) >> 1;
+            assign blocks_y_w = format_r == 0 ? (height_w + 9'd1) >> 1 : height_w;
+            assign groups_x_w = (blocks_x_w + 9'd1) >> 1;
+            assign unused_groups_y_w = (blocks_y_w + 9'd1) >> 1;
+            if (mip == 0) begin : g_first
+                assign width_w = 9'd1 << log2_w_r;
+                assign height_w = 9'd1 << log2_h_r;
+                assign offset_w = offset_r[17:1];
+            end else begin : g_next
+                wire [16:0] size_w;
+                assign size_w = (g_mip[mip-1].groups_x_w * g_mip[mip-1].unused_groups_y_w) << 2;
+                assign offset_w = g_mip[mip-1].offset_w + size_w;
+                assign width_w = g_mip[mip-1].width_w > 1 ?
+                    g_mip[mip-1].width_w >> 1 : g_mip[mip-1].width_w;
+                assign height_w = g_mip[mip-1].height_w > 1 ?
+                    g_mip[mip-1].height_w >> 1 : g_mip[mip-1].height_w;
+            end
+        end
+    endgenerate
+    wire [7:0] port_en_w;
+    wire [119:0] port_row_w;
+    wire [23:0] tap_port_w;
+    wire [31:0] tap_subword_w;
+    wire [135:0] tap_weight_w;
+    wire [20:0] tap_address_w [0:7];
+    wire [2:0] bank_port_w [0:31];
+    wire [7:0] unused_tap_accepted_w;
+    wire [3:0] lane_done_w;
+    wire [3:0] pending_w;
+    wire [1:0] launch_mode_w;
+    wire [1:0] launch_lane_w;
+    wire [7:0] launch_fraction_w;
+    wire group_issued_w;
+    assign launch_mode_w = quad_r[schedule_slot_w] ? 2'b0 : mode_r;
+    assign launch_lane_w = launch_mode_w == 1 ? {batch_r[0], 1'b0} : batch_r;
+    assign launch_fraction_w = lane_lod_w[launch_lane_w][7:0];
+    assign lane_done_w = launch_mode_w == 0 ? unused_tap_accepted_w[3:0] :
+        launch_mode_w == 1 ? 4'b0011 << launch_lane_w : 4'b0001 << launch_lane_w;
+    assign pending_w = nearest_pending_r & ~lane_done_w;
+    assign group_issued_w = launch_mode_w == 0 ? pending_w == 0 :
+        launch_mode_w == 1 ? batch_r[0] : batch_r == 3;
     always @(*) begin
-        port_en_w = 0;
-        port_row_w = 0;
-        tap_port_w = 0;
-        tap_subword_w = 0;
-        tap_weight_w = 0;
-        lane_done_w = 0;
-        pending_w = nearest_pending_r;
-        launch_mode_w = quad_r[schedule_slot_w] ? 2'b0 : mode_r;
-        launch_lane_w = launch_mode_w == 1 ? {batch_r[0], 1'b0} : batch_r;
-        launch_fraction_w = 0;
-        group_issued_w = 0;
-        bank_idx = 0;
-        port_idx = 0;
-        match_idx = 0;
-        pixel_idx = 0;
-        tap_level = 0;
-        tap_x = 0;
-        tap_y = 0;
-        fraction_x = 0;
-        fraction_y = 0;
-        weight = 0;
-        lod_value = 0;
-        scaled_u_w = 0;
-        scaled_v_w = 0;
-        lane_lod_w = 0;
-        for (tap = 0; tap < 8; tap = tap + 1) begin
-            tap_address_w[tap] = 0;
-            if (launch_mode_w == 0) begin
-                pixel_idx = tap % 4;
-            end else if (launch_mode_w == 1) begin
-                pixel_idx = {30'b0, launch_lane_w} + tap / 4;
-            end else begin
-                pixel_idx = {30'b0, launch_lane_w};
-            end
-            lane_lod_w = quad_r[schedule_slot_w] ? 12'b0
-                            : lod_r[schedule_slot_w][pixel_idx*12 +: 12];
-            lod_value = {20'b0, lane_lod_w};
-            tap_level = lod_value >> 8;
-            if (launch_mode_w == 2 && tap >= 4 && tap_level < {28'b0, levels_r}-1) begin
-                tap_level = tap_level + 1;
-            end
-            scaled_u_w = $signed(u_r[schedule_slot_w][pixel_idx*32 +: 32]) >>> tap_level;
-            scaled_v_w = $signed(v_r[schedule_slot_w][pixel_idx*32 +: 32]) >>> tap_level;
-            if (launch_mode_w != 0) begin
-                scaled_u_w = scaled_u_w - 32'sd128;
-                scaled_v_w = scaled_v_w - 32'sd128;
-            end
-            fraction_x = {24'b0, scaled_u_w[7:0]};
-            fraction_y = {24'b0, scaled_v_w[7:0]};
-            tap_x = scaled_u_w >>> 8;
-            tap_y = scaled_v_w >>> 8;
-            weight = 65536;
-            if (launch_mode_w != 0) begin
-                tap_x = tap_x + tap % 2;
-                tap_y = tap_y + (tap / 2) % 2;
-                weight = ((tap % 2) == 0 ? 256-fraction_x : fraction_x)
-                            * (((tap/2) % 2) == 0 ? 256-fraction_y : fraction_y);
-            end
-            tap_address_w[tap] = texel_address(tap_x, tap_y, tap_level[3:0]);
-            tap_subword_w[tap*4 +: 4] = tap_address_w[tap][20:17];
-            tap_weight_w[tap*17 +: 17] = weight[16:0];
-            if (schedule_valid_w && (launch_mode_w != 0
-                                    || (tap < 4 && nearest_pending_r[tap%4]))) begin
-                bank_idx = {30'b0, tap_address_w[tap][1:0]};
-                match_idx = -1;
-                for (port_idx = 0; port_idx < 2; port_idx = port_idx + 1) begin
-                    if (port_en_w[bank_idx*2+port_idx]
-                        && port_row_w[(bank_idx*2+port_idx)*15 +: 15]
-                            == tap_address_w[tap][16:2]) begin
-                        match_idx = bank_idx*2+port_idx;
-                    end
-                end
-                if (match_idx == -1) begin
-                    if (!port_en_w[bank_idx*2]) begin
-                        match_idx = bank_idx*2;
-                    end else if (!port_en_w[bank_idx*2+1]) begin
-                        match_idx = bank_idx*2+1;
-                    end
-                end
-                if (match_idx != -1) begin
-                    port_en_w[match_idx] = 1'b1;
-                    port_row_w[match_idx*15 +: 15] = tap_address_w[tap][16:2];
-                    tap_port_w[tap*3 +: 3] = match_idx[2:0];
-                    if (launch_mode_w == 0) begin
-                        pending_w[tap%4] = 1'b0;
-                        lane_done_w[tap%4] = 1'b1;
-                    end
-                end
-            end
-        end
-        if (launch_mode_w == 0) begin
-            group_issued_w = pending_w == 0;
-        end else if (launch_mode_w == 1) begin
-            lane_done_w = 4'b0011 << launch_lane_w;
-            group_issued_w = batch_r[0];
-        end else begin
-            lane_done_w = 4'b0001 << launch_lane_w;
-            group_issued_w = batch_r == 3;
-        end
-        launch_fraction_w = lod_r[schedule_slot_w][launch_lane_w*12 +: 8];
         texture_read_addr_o = port_row_w;
     end
     assign texture_read_en_o = port_en_w;
     assign perf_texture_stall_o = schedule_valid_w && launch_mode_w == 0 && pending_w != 0;
+    genvar tap;
+    genvar bank;
+    generate
+        for (tap = 0; tap < 8; tap = tap + 1) begin : g_tap
+            localparam [1:0] NEAREST_PIXEL = tap[1:0];
+            localparam [1:0] PAIR_PIXEL = {1'b0, tap[2]};
+            wire [1:0] pixel_w;
+            wire [11:0] unused_lod_w;
+            wire [3:0] level_w;
+            wire signed [31:0] scaled_u_w;
+            wire signed [31:0] scaled_v_w;
+            wire signed [31:0] centered_u_w;
+            wire signed [31:0] centered_v_w;
+            wire [8:0] x_w;
+            wire [8:0] y_w;
+            wire [8:0] wrapped_x_w;
+            wire [8:0] wrapped_y_w;
+            wire [8:0] block_x_w;
+            wire [8:0] block_y_w;
+            wire [16:0] row_product_w;
+            wire [16:0] halfword_w;
+            wire [8:0] weight_x_w;
+            wire [8:0] weight_y_w;
+            wire [17:0] weight_w;
+            wire unused_weight_w;
+            assign pixel_w = launch_mode_w == 0 ? NEAREST_PIXEL :
+                launch_mode_w == 1 ? launch_lane_w + PAIR_PIXEL : launch_lane_w;
+            assign unused_lod_w = quad_r[schedule_slot_w] ? 12'd0 : lane_lod_w[pixel_w];
+            assign level_w = unused_lod_w[11:8] +
+                ((launch_mode_w == 2 && tap >= 4 && unused_lod_w[11:8] < levels_r - 4'd1)
+                    ? 4'd1 : 4'd0);
+            assign scaled_u_w = $signed(lane_u_w[pixel_w]) >>> level_w;
+            assign scaled_v_w = $signed(lane_v_w[pixel_w]) >>> level_w;
+            assign centered_u_w = scaled_u_w - (launch_mode_w != 0 ? 32'sd128 : 32'sd0);
+            assign centered_v_w = scaled_v_w - (launch_mode_w != 0 ? 32'sd128 : 32'sd0);
+            assign x_w = centered_u_w[16:8] +
+                ((launch_mode_w != 0 && (tap % 2) != 0) ? 9'd1 : 9'd0);
+            assign y_w = centered_v_w[16:8] +
+                ((launch_mode_w != 0 && ((tap/2) % 2) != 0) ? 9'd1 : 9'd0);
+            assign wrapped_x_w = x_w & (mip_width_w[level_w] - 9'd1);
+            assign wrapped_y_w = y_w & (mip_height_w[level_w] - 9'd1);
+            assign block_x_w = format_r == 2 ? wrapped_x_w : wrapped_x_w >> 1;
+            assign block_y_w = format_r == 0 ? wrapped_y_w >> 1 : wrapped_y_w;
+            // Eight 8x9 row products, coordinate shifts/adders and 9x9 filter products.
+            assign row_product_w = block_y_w[8:1] * mip_groups_x_w[level_w];
+            assign halfword_w = mip_offset_w[level_w] +
+                ((row_product_w + {9'd0, block_x_w[8:1]}) << 2) +
+                {16'd0, block_x_w[0]} + {15'd0, block_y_w[0], 1'b0};
+            assign tap_address_w[tap] = {format_r == 0 ?
+                {wrapped_y_w[0], wrapped_x_w[0], 2'b0} : format_r == 1 ?
+                {wrapped_x_w[0], 3'b0} : 4'd0, halfword_w};
+            assign tap_subword_w[tap*4 +: 4] = tap_address_w[tap][20:17];
+            assign weight_x_w = (tap % 2) == 0 ?
+                9'd256 - {1'b0, centered_u_w[7:0]} : {1'b0, centered_u_w[7:0]};
+            assign weight_y_w = ((tap/2) % 2) == 0 ?
+                9'd256 - {1'b0, centered_v_w[7:0]} : {1'b0, centered_v_w[7:0]};
+            assign weight_w = weight_x_w * weight_y_w;
+            assign unused_weight_w = ^{weight_w[17], centered_u_w[31:17], centered_v_w[31:17]};
+            assign tap_weight_w[tap*17 +: 17] = launch_mode_w == 0 ?
+                17'd65536 : weight_w[16:0];
+            assign tap_port_w[tap*3 +: 3] = bank_port_w[tap*4] |
+                bank_port_w[tap*4+1] | bank_port_w[tap*4+2] | bank_port_w[tap*4+3];
+        end
+        // Four banks, each an eight-step ordered two-port allocator; no dynamic bus writes.
+        for (bank = 0; bank < 4; bank = bank + 1) begin : g_bank
+            wire [7:0] accepted_w;
+            assign port_en_w[bank*2 +: 2] = g_allocate[7].en_w;
+            assign port_row_w[bank*30 +: 30] = {g_allocate[7].row_b_w, g_allocate[7].row_a_w};
+            for (tap = 0; tap < 8; tap = tap + 1) begin : g_allocate
+                wire [1:0] previous_en_w;
+                wire [14:0] previous_a_w;
+                wire [14:0] previous_b_w;
+                wire [1:0] en_w;
+                wire [14:0] row_a_w;
+                wire [14:0] row_b_w;
+                if (tap == 0) begin : g_first
+                    assign previous_en_w = 0;
+                    assign previous_a_w = 0;
+                    assign previous_b_w = 0;
+                end else begin : g_previous
+                    assign previous_en_w = g_allocate[tap-1].en_w;
+                    assign previous_a_w = g_allocate[tap-1].row_a_w;
+                    assign previous_b_w = g_allocate[tap-1].row_b_w;
+                end
+                wire request_w;
+                wire match_a_w;
+                wire match_b_w;
+                wire select_b_w;
+                wire accepted_tap_w;
+                assign request_w = schedule_valid_w && tap_address_w[tap][1:0] == bank &&
+                    (launch_mode_w != 0 || (tap < 4 && nearest_pending_r[tap%4]));
+                assign match_a_w = previous_en_w[0] && previous_a_w == tap_address_w[tap][16:2];
+                assign match_b_w = previous_en_w[1] && previous_b_w == tap_address_w[tap][16:2];
+                assign select_b_w = match_b_w || (!match_a_w && previous_en_w[0]);
+                assign accepted_tap_w = request_w &&
+                    (match_a_w || match_b_w || previous_en_w != 2'b11);
+                assign accepted_w[tap] = accepted_tap_w;
+                assign en_w = previous_en_w |
+                    (accepted_tap_w ? (select_b_w ? 2'b10 : 2'b01) : 2'b00);
+                assign row_a_w = accepted_tap_w && !select_b_w ?
+                    tap_address_w[tap][16:2] : previous_a_w;
+                assign row_b_w = accepted_tap_w && select_b_w ?
+                    tap_address_w[tap][16:2] : previous_b_w;
+                assign bank_port_w[tap*4+bank] = accepted_tap_w ?
+                    {bank[1:0], select_b_w} : 3'd0;
+            end
+        end
+        for (tap = 0; tap < 8; tap = tap + 1) begin : g_accepted
+            assign unused_tap_accepted_w[tap] = g_bank[0].accepted_w[tap] |
+                g_bank[1].accepted_w[tap] | g_bank[2].accepted_w[tap] |
+                g_bank[3].accepted_w[tap];
+        end
+    endgenerate
 
     // Tap metadata accompanies the five-cycle RAM and four-cycle palette paths.
     reg [8:0] return_valid_r;
-    reg [4:0] return_slot_r [0:8];
-    reg [1:0] return_mode_r [0:8];
-    reg [1:0] return_lane_r [0:8];
-    reg [3:0] return_done_r [0:8];
-    reg [23:0] return_port_r [0:4];
-    reg [31:0] return_subword_r [0:4];
-    reg [135:0] return_weight_r [0:8];
-    reg [7:0] return_fraction_r [0:8];
-    reg [127:0] direct_r [0:3];
-    reg [127:0] direct_w;
-    reg [15:0] word_w;
-    reg [15:0] shifted_w;
-    reg [7:0] index_w;
-    integer lookup;
-    always @(*) begin
-        full_read_idx_o = 0;
-        current_read_idx_o = 0;
-        direct_w = 0;
-        word_w = 0;
-        shifted_w = 0;
-        index_w = 0;
-        for (lookup = 0; lookup < 8; lookup = lookup + 1) begin
-            word_w = texture_read_data_i[return_port_r[4][lookup*3 +: 3]*16 +: 16];
-            shifted_w = word_w >> return_subword_r[4][lookup*4 +: 4];
-            index_w = format_r == 0 ? {4'b0, shifted_w[3:0]} : shifted_w[7:0];
-            current_read_idx_o[lookup*8 +: 8] = index_w;
-            if (lookup < 4) begin
-                full_read_idx_o[lookup*12 +: 12] =
-                    {palette_r[return_slot_r[4]], index_w};
+    wire [4:0] return_slot_r [0:8];
+    wire [1:0] return_mode_r [0:8];
+    wire [1:0] return_lane_r [0:8];
+    wire [3:0] return_done_r [0:8];
+    wire [23:0] return_port_r [0:4];
+    wire [31:0] return_subword_r [0:4];
+    wire [135:0] return_weight_r [0:8];
+    wire [7:0] return_fraction_r [0:8];
+    wire [127:0] direct_r [0:3];
+    wire [127:0] direct_w;
+    generate
+        for (tap = 0; tap < 8; tap = tap + 1) begin : g_lookup
+            reg [15:0] word_w;
+            wire [15:0] shifted_w;
+            wire [7:0] index_w;
+            wire unused_shifted_w;
+            always @(*) begin
+                word_w = 0;
+                case (return_port_r[4][tap*3 +: 3])
+                    3'd0: word_w = texture_read_data_i[0 +: 16];
+                    3'd1: word_w = texture_read_data_i[16 +: 16];
+                    3'd2: word_w = texture_read_data_i[32 +: 16];
+                    3'd3: word_w = texture_read_data_i[48 +: 16];
+                    3'd4: word_w = texture_read_data_i[64 +: 16];
+                    3'd5: word_w = texture_read_data_i[80 +: 16];
+                    3'd6: word_w = texture_read_data_i[96 +: 16];
+                    3'd7: word_w = texture_read_data_i[112 +: 16];
+                    default: word_w = 0;
+                endcase
             end
-            direct_w[lookup*16 +: 16] = word_w;
+            assign shifted_w = word_w >> return_subword_r[4][tap*4 +: 4];
+            assign unused_shifted_w = ^shifted_w[15:8];
+            assign index_w = format_r == 0 ? {4'b0, shifted_w[3:0]} : shifted_w[7:0];
+            always @(*) begin
+                current_read_idx_o[tap*8 +: 8] = index_w;
+            end
+            if (tap < 4) begin : g_full
+                always @(*) begin
+                    full_read_idx_o[tap*12 +: 12] = {palette_r[return_slot_r[4]], index_w};
+                end
+            end
+            assign direct_w[tap*16 +: 16] = word_w;
         end
-    end
+    endgenerate
     assign full_read_en_o = return_valid_r[4] && return_mode_r[4] == 0 && !stop_i;
     assign current_read_en_o = return_valid_r[4] && return_mode_r[4] != 0 && !stop_i;
 
     // Palette expansion, tap products, pair sums, 2-D rounding, LOD products,
     // LOD rounding and shading are distinct stages. Horizontal sums never round.
-    reg [31:0] expanded_w [0:7];
-    reg [19:0] entry_w;
-    reg [6:0] filter_valid_r;
-    reg [4:0] filter_slot_r [0:6];
-    reg [1:0] filter_mode_r [0:6];
-    reg [1:0] filter_lane_r [0:6];
-    reg [3:0] filter_done_r [0:6];
-    reg [7:0] filter_fraction_r [0:3];
+    wire [31:0] expanded_w [0:7];
+    wire [1:0] filter_mode_r [0:6];
+    wire [1:0] filter_lane_r [0:6];
+    wire [7:0] filter_fraction_r [0:3];
     reg [135:0] filter_weight_r;
     reg [255:0] expanded_r;
-    reg [799:0] products_r;
-    reg [415:0] pairs_r;
-    reg [127:0] nearest_r [0:2];
+    wire [24:0] product_w [0:31];
+    wire [25:0] pair_w [0:15];
+    wire [127:0] nearest_r [0:2];
     reg [127:0] bilinear_r;
     reg [127:0] bypass_r;
     reg [135:0] lod_products_r;
     reg [127:0] filtered_r;
     reg [191:0] shade_products_r;
     reg [63:0] alpha_products_r;
-    reg [3:0] shade_mask_r;
     reg [31:0] unmodulated_alpha_r;
     reg shade_quad_r;
-    integer expand_tap;
-    always @(*) begin
-        entry_w = 0;
-        for (expand_tap = 0; expand_tap < 8; expand_tap = expand_tap + 1) begin
-            entry_w = return_mode_r[8] == 0
-                        ? full_read_data_i[(expand_tap%4)*20 +: 20]
-                        : current_read_data_i[expand_tap*20 +: 20];
-            expanded_w[expand_tap] = format_r == 2
-                ? expand_rgba(direct_r[3][expand_tap*16 +: 16], 8'd255)
-                : expand_rgba(entry_w[15:0], {entry_w[19:16], entry_w[19:16]});
-        end
-    end
-    reg [26:0] rounded_sum_w;
-    reg [17:0] rounded_lod_w;
-    reg [127:0] bilinear_w;
-    reg [127:0] filtered_w;
-    reg [191:0] shade_products_w;
-    reg [63:0] alpha_products_w;
-    reg [3:0] shade_mask_w;
-    reg [31:0] unmodulated_alpha_w;
-    integer filter_pixel;
-    integer channel;
-    integer result_lane;
-    wire unused_arithmetic_w;
-    assign unused_arithmetic_w = ^{offset_r[0], weight[31:17], shifted_w[15:8],
-                                    rounded_sum_w[26:24], rounded_sum_w[15:0],
-                                    rounded_lod_w[17:16], rounded_lod_w[7:0]};
-    always @(*) begin
-        rounded_sum_w = 0;
-        rounded_lod_w = 0;
-        bilinear_w = nearest_r[2];
-        filtered_w = bypass_r;
-        shade_products_w = 0;
-        alpha_products_w = 0;
-        shade_mask_w = 0;
-        unmodulated_alpha_w = 0;
-        result_lane = 0;
-        for (filter_pixel = 0; filter_pixel < 4; filter_pixel = filter_pixel + 1) begin
-            for (channel = 0; channel < 4; channel = channel + 1) begin
-                rounded_sum_w = {1'b0, pairs_r[((filter_pixel%2)*8+channel*2)*26 +: 26]}
-                    + {1'b0, pairs_r[((filter_pixel%2)*8+channel*2+1)*26 +: 26]}
-                    + 27'd32768;
-                if (filter_mode_r[2] != 0) begin
-                    bilinear_w[filter_pixel*32+channel*8 +: 8] = rounded_sum_w[23:16];
-                end
-            end
-        end
-        for (channel = 0; channel < 4; channel = channel + 1) begin
-            rounded_lod_w = {1'b0, lod_products_r[channel*34 +: 17]}
-                + {1'b0, lod_products_r[channel*34+17 +: 17]} + 18'd128;
-            if (filter_mode_r[4] == 2) begin
-                filtered_w[channel*8 +: 8] = rounded_lod_w[15:8];
-            end
-        end
-        for (filter_pixel = 0; filter_pixel < 4; filter_pixel = filter_pixel + 1) begin
-            result_lane = filter_mode_r[5] == 0 ? filter_pixel
-                : {30'b0, filter_lane_r[5]} + filter_pixel;
-            if (result_lane < 4) begin
-                for (channel = 0; channel < 3; channel = channel + 1) begin
-                    shade_products_w[result_lane*48+channel*16 +: 16] =
-                        filtered_r[filter_pixel*32+channel*8 +: 8]
-                        * color_r[filter_slot_r[5]][result_lane*24+channel*8 +: 8];
-                end
-                alpha_products_w[result_lane*16 +: 16] =
-                    filtered_r[filter_pixel*32+24 +: 8] * alpha_r[filter_slot_r[5]];
-                unmodulated_alpha_w[result_lane*8 +: 8] = filtered_r[filter_pixel*32+24 +: 8];
-                shade_mask_w[result_lane] = mask_r[filter_slot_r[5]][result_lane]
-                    && filtered_r[filter_pixel*32+24 +: 8] != 0;
-            end
-        end
-    end
-    wire [95:0] modulated_color_w;
-    wire [31:0] modulated_alpha_w;
-    genvar shade_lane;
-    genvar shade_channel;
+    wire [127:0] bilinear_w;
+    wire [127:0] filtered_w;
+    wire [191:0] shade_products_w;
+    wire [63:0] alpha_products_w;
+    wire [3:0] shade_mask_w;
+    wire [31:0] unmodulated_alpha_w;
+    wire unused_offset_w;
+    assign unused_offset_w = offset_r[0];
+    genvar filter_pixel;
+    genvar channel;
+    genvar pair;
     generate
-        for (shade_lane = 0; shade_lane < 4; shade_lane = shade_lane + 1) begin : g_shade
-            assign modulated_alpha_w[shade_lane*8 +: 8] = shade_quad_r
-                ? divide_255(alpha_products_r[shade_lane*16 +: 16])
-                : unmodulated_alpha_r[shade_lane*8 +: 8];
-            for (shade_channel = 0; shade_channel < 3;
-                    shade_channel = shade_channel + 1) begin : g_channel
-                assign modulated_color_w[shade_lane*24+shade_channel*8 +: 8] =
-                    divide_255(shade_products_r[shade_lane*48+shade_channel*16 +: 16]);
+        // Expansion stage: eight RGB565 wiring networks and alpha selectors, no arithmetic.
+        for (tap = 0; tap < 8; tap = tap + 1) begin : g_expand
+            wire [19:0] entry_w;
+            wire [15:0] rgb_w;
+            wire [7:0] alpha_w;
+            wire unused_entry_w;
+            assign entry_w = return_mode_r[8] == 0 ?
+                full_read_data_i[(tap%4)*20 +: 20] : current_read_data_i[tap*20 +: 20];
+            assign rgb_w = format_r == 2 ? direct_r[3][tap*16 +: 16] : entry_w[15:0];
+            assign alpha_w = format_r == 2 ? 8'd255 : {entry_w[19:16], entry_w[19:16]};
+            assign unused_entry_w = ^entry_w;
+            assign expanded_w[tap] = {alpha_w, rgb_w[4:0], rgb_w[4:2],
+                rgb_w[10:5], rgb_w[10:9], rgb_w[15:11], rgb_w[15:13]};
+            // Product stage: 8 taps x 4 channels = 32 independent 8x17 multipliers.
+            for (channel = 0; channel < 4; channel = channel + 1) begin : g_product
+                reg [24:0] product_r;
+                assign product_w[tap*4+channel] = product_r;
+                always @(posedge clk_i) begin
+                    product_r <= expanded_r[tap*32+channel*8 +: 8] *
+                        filter_weight_r[tap*17 +: 17];
+                end
+            end
+        end
+        // Pair stage: 2 footprints x 4 channels x 2 rows = sixteen 26-bit sums.
+        for (filter_pixel = 0; filter_pixel < 2; filter_pixel = filter_pixel + 1) begin : g_pair
+            localparam PIXEL_BASE = filter_pixel*8;
+            for (channel = 0; channel < 4; channel = channel + 1) begin : g_channel
+                localparam CHANNEL_BASE = channel*2;
+                for (pair = 0; pair < 2; pair = pair + 1) begin : g_row
+                    reg [25:0] pair_r;
+                    assign pair_w[PIXEL_BASE+CHANNEL_BASE+pair] = pair_r;
+                    always @(posedge clk_i) begin
+                        pair_r <= {1'b0, product_w[(filter_pixel*4+pair*2)*4+channel]} +
+                            {1'b0, product_w[(filter_pixel*4+pair*2+1)*4+channel]};
+                    end
+                end
+            end
+        end
+        // Bilinear rounding stage: eight 27-bit vertical sums shared by duplicate outputs.
+        for (filter_pixel = 0; filter_pixel < 2;
+                filter_pixel = filter_pixel + 1) begin : g_bilinear
+            localparam PIXEL_BASE = filter_pixel*8;
+            for (channel = 0; channel < 4; channel = channel + 1) begin : g_channel
+                wire [26:0] rounded_w;
+                wire unused_rounded_w;
+                assign rounded_w = {1'b0, pair_w[PIXEL_BASE+channel*2]} +
+                    {1'b0, pair_w[PIXEL_BASE+channel*2+1]} + 27'd32768;
+                assign unused_rounded_w = ^{rounded_w[26:24], rounded_w[15:0]};
+                assign bilinear_w[filter_pixel*32+channel*8 +: 8] = filter_mode_r[2] != 0 ?
+                    rounded_w[23:16] : nearest_r[2][filter_pixel*32+channel*8 +: 8];
+                assign bilinear_w[(filter_pixel+2)*32+channel*8 +: 8] = filter_mode_r[2] != 0 ?
+                    rounded_w[23:16] : nearest_r[2][(filter_pixel+2)*32+channel*8 +: 8];
+            end
+        end
+        // LOD stages: eight 8x9 products, then four 18-bit rounding sums.
+        for (channel = 0; channel < 4; channel = channel + 1) begin : g_lod_filter
+            wire [8:0] inverse_fraction_w;
+            wire [17:0] rounded_w;
+            wire unused_rounded_w;
+            assign inverse_fraction_w = 9'd256 - {1'b0, filter_fraction_r[3]};
+            assign rounded_w = {1'b0, lod_products_r[channel*34 +: 17]} +
+                {1'b0, lod_products_r[channel*34+17 +: 17]} + 18'd128;
+            assign unused_rounded_w = ^{rounded_w[17:16], rounded_w[7:0]};
+            assign filtered_w[channel*8 +: 8] = filter_mode_r[4] == 2 ?
+                rounded_w[15:8] : bypass_r[channel*8 +: 8];
+            always @(posedge clk_i) begin
+                lod_products_r[channel*34 +: 17] <= bilinear_r[channel*8 +: 8] *
+                    inverse_fraction_w;
+                lod_products_r[channel*34+17 +: 17] <=
+                    bilinear_r[32+channel*8 +: 8] * filter_fraction_r[3];
             end
         end
     endgenerate
-    integer filter_idx;
-    integer filter_channel;
-    integer filter_tap;
+    assign filtered_w[127:32] = bypass_r[127:32];
+    generate
+        // Shade product stage: four fixed output lanes, each with 3 RGB and 1 alpha product.
+        // Registered filter lane selects a source word before the sixteen 8x8 multipliers.
+        for (filter_pixel = 0; filter_pixel < 4; filter_pixel = filter_pixel + 1) begin : g_shade
+            reg [31:0] source_w;
+            wire enabled_w;
+            wire [31:0] selected_w;
+            wire [7:0] alpha_w;
+            wire [16:0] alpha_temp_w;
+            wire [17:0] alpha_total_w;
+            wire unused_alpha_w;
+            if (filter_pixel == 3) begin : g_all_sources
+                assign enabled_w = 1'b1;
+            end else begin : g_source_range
+                assign enabled_w = filter_mode_r[5] == 0 || filter_lane_r[5] <= filter_pixel;
+            end
+            always @(*) begin
+                source_w = 0;
+                case (filter_lane_r[5])
+                    2'd0: source_w = filtered_r[(filter_pixel-0)*32 +: 32];
+                    2'd1: source_w = filter_pixel >= 1 ?
+                        filtered_r[((filter_pixel+4-1)%4)*32 +: 32] : 32'd0;
+                    2'd2: source_w = filter_pixel >= 2 ?
+                        filtered_r[((filter_pixel+4-2)%4)*32 +: 32] : 32'd0;
+                    2'd3: source_w = filter_pixel >= 3 ?
+                        filtered_r[((filter_pixel+4-3)%4)*32 +: 32] : 32'd0;
+                    default: source_w = 0;
+                endcase
+            end
+            assign selected_w = filter_mode_r[5] == 0 ?
+                filtered_r[filter_pixel*32 +: 32] : source_w;
+            assign alpha_w = selected_w[31:24];
+            assign alpha_products_w[filter_pixel*16 +: 16] = enabled_w ?
+                alpha_w * alpha_r[filter_slot_r[5]] : 16'd0;
+            assign unmodulated_alpha_w[filter_pixel*8 +: 8] = enabled_w ? alpha_w : 8'd0;
+            assign shade_mask_w[filter_pixel] = enabled_w &&
+                mask_r[filter_slot_r[5]][filter_pixel] && alpha_w != 0;
+            // Shade rounding stage: sixteen explicit 17/18-bit divide-by-255 networks.
+            assign alpha_temp_w = {1'b0, alpha_products_r[filter_pixel*16 +: 16]} + 17'd128;
+            assign alpha_total_w = {1'b0, alpha_temp_w} + {9'b0, alpha_temp_w[16:8]};
+            assign unused_alpha_w = ^{alpha_total_w[17:16], alpha_total_w[7:0]};
+            assign modulated_alpha_w[filter_pixel*8 +: 8] = shade_quad_r ?
+                alpha_total_w[15:8] : unmodulated_alpha_r[filter_pixel*8 +: 8];
+            for (channel = 0; channel < 3; channel = channel + 1) begin : g_channel
+                wire [16:0] temp_w;
+                wire [17:0] total_w;
+                wire unused_total_w;
+                assign shade_products_w[filter_pixel*48+channel*16 +: 16] = enabled_w ?
+                    selected_w[channel*8 +: 8] *
+                    color_r[filter_slot_r[5]][filter_pixel*24+channel*8 +: 8] : 16'd0;
+                assign temp_w =
+                    {1'b0, shade_products_r[filter_pixel*48+channel*16 +: 16]} + 17'd128;
+                assign total_w = {1'b0, temp_w} + {9'b0, temp_w[16:8]};
+                assign unused_total_w = ^{total_w[17:16], total_w[7:0]};
+                assign modulated_color_w[filter_pixel*24+channel*8 +: 8] = total_w[15:8];
+            end
+        end
+    endgenerate
     always @(posedge clk_i) begin
-        filter_slot_r[0] <= return_slot_r[8];
-        filter_mode_r[0] <= return_mode_r[8];
-        filter_lane_r[0] <= return_lane_r[8];
-        filter_done_r[0] <= return_done_r[8];
-        filter_fraction_r[0] <= return_fraction_r[8];
         filter_weight_r <= return_weight_r[8];
-        for (filter_idx = 1; filter_idx < 7; filter_idx = filter_idx + 1) begin
-            filter_slot_r[filter_idx] <= filter_slot_r[filter_idx-1];
-            filter_mode_r[filter_idx] <= filter_mode_r[filter_idx-1];
-            filter_lane_r[filter_idx] <= filter_lane_r[filter_idx-1];
-            filter_done_r[filter_idx] <= filter_done_r[filter_idx-1];
-        end
-        for (filter_idx = 1; filter_idx < 4; filter_idx = filter_idx + 1) begin
-            filter_fraction_r[filter_idx] <= filter_fraction_r[filter_idx-1];
-        end
-        for (filter_idx = 0; filter_idx < 8; filter_idx = filter_idx + 1) begin
-            expanded_r[filter_idx*32 +: 32] <= expanded_w[filter_idx];
-            for (filter_channel = 0; filter_channel < 4; filter_channel = filter_channel + 1) begin
-                products_r[(filter_idx*4+filter_channel)*25 +: 25] <=
-                    expanded_r[filter_idx*32+filter_channel*8 +: 8]
-                    * filter_weight_r[filter_idx*17 +: 17];
-            end
-        end
-        for (filter_idx = 0; filter_idx < 4; filter_idx = filter_idx + 1) begin
-            nearest_r[0][filter_idx*32 +: 32] <= expanded_w[filter_idx];
-        end
-        nearest_r[1] <= nearest_r[0];
-        nearest_r[2] <= nearest_r[1];
-        for (filter_idx = 0; filter_idx < 2; filter_idx = filter_idx + 1) begin
-            for (filter_channel = 0; filter_channel < 4; filter_channel = filter_channel + 1) begin
-                for (filter_tap = 0; filter_tap < 2; filter_tap = filter_tap + 1) begin
-                    pairs_r[(filter_idx*8+filter_channel*2+filter_tap)*26 +: 26] <=
-                        {1'b0, products_r[((filter_idx*4+filter_tap*2)*4
-                                            +filter_channel)*25 +: 25]}
-                        + {1'b0, products_r[((filter_idx*4+filter_tap*2+1)*4
-                                            +filter_channel)*25 +: 25]};
-                end
-            end
-        end
+        expanded_r <= {expanded_w[7], expanded_w[6], expanded_w[5], expanded_w[4],
+            expanded_w[3], expanded_w[2], expanded_w[1], expanded_w[0]};
         bilinear_r <= bilinear_w;
         bypass_r <= bilinear_r;
-        for (filter_channel = 0; filter_channel < 4; filter_channel = filter_channel + 1) begin
-            lod_products_r[filter_channel*34 +: 17] <=
-                bilinear_r[filter_channel*8 +: 8] * (17'd256 - {9'b0, filter_fraction_r[3]});
-            lod_products_r[filter_channel*34+17 +: 17] <=
-                bilinear_r[32+filter_channel*8 +: 8] * filter_fraction_r[3];
-        end
         filtered_r <= filtered_w;
         shade_products_r <= shade_products_w;
         alpha_products_r <= alpha_products_w;
@@ -905,17 +957,6 @@ module edrv32_gpu_texture (
                     batch_r <= batch_r + 1'b1;
                 end
             end
-            if (accept_w) begin
-                completed_r[allocate_r[4:0]] <= 0;
-                lod_ready_r[allocate_r[4:0]] <= 0;
-            end
-            if (lod_valid_r[8]) begin
-                lod_ready_r[lod_slot_r[8]] <= 4'hf;
-            end
-            if (filter_valid_r[6]) begin
-                completed_r[filter_slot_r[6]] <= completed_r[filter_slot_r[6]]
-                                                | filter_done_r[6];
-            end
             if (stop_i) begin
                 allocate_r <= 0;
                 schedule_r <= 0;
@@ -934,8 +975,6 @@ module edrv32_gpu_texture (
             end
         end
     end
-    integer data_idx;
-    integer write_lane;
     always @(posedge clk_i) begin
         if (render_state_valid_i && render_state_ready_o) begin
             log2_w_r <= render_state_tex_i[67:64];
@@ -956,47 +995,245 @@ module edrv32_gpu_texture (
             alpha_r[allocate_r[4:0]] <= sample_alpha_i;
             quad_r[allocate_r[4:0]] <= sample_quad_i;
             palette_r[allocate_r[4:0]] <= sample_quad_i ? sample_palette_i : group_r;
-            u_r[allocate_r[4:0]] <= sample_u_i;
-            v_r[allocate_r[4:0]] <= sample_v_i;
-        end
-        lod_slot_r[0] <= allocate_r[4:0];
-        for (data_idx = 1; data_idx < 9; data_idx = data_idx + 1) begin
-            lod_slot_r[data_idx] <= lod_slot_r[data_idx-1];
-        end
-        return_slot_r[0] <= schedule_slot_w;
-        return_mode_r[0] <= launch_mode_w;
-        return_lane_r[0] <= launch_lane_w;
-        return_done_r[0] <= lane_done_w;
-        return_port_r[0] <= tap_port_w;
-        return_subword_r[0] <= tap_subword_w;
-        return_weight_r[0] <= tap_weight_w;
-        return_fraction_r[0] <= launch_fraction_w;
-        for (data_idx = 1; data_idx < 9; data_idx = data_idx + 1) begin
-            return_slot_r[data_idx] <= return_slot_r[data_idx-1];
-            return_mode_r[data_idx] <= return_mode_r[data_idx-1];
-            return_lane_r[data_idx] <= return_lane_r[data_idx-1];
-            return_done_r[data_idx] <= return_done_r[data_idx-1];
-            return_weight_r[data_idx] <= return_weight_r[data_idx-1];
-            return_fraction_r[data_idx] <= return_fraction_r[data_idx-1];
-        end
-        for (data_idx = 1; data_idx < 5; data_idx = data_idx + 1) begin
-            return_port_r[data_idx] <= return_port_r[data_idx-1];
-            return_subword_r[data_idx] <= return_subword_r[data_idx-1];
-        end
-        direct_r[0] <= direct_w;
-        for (data_idx = 1; data_idx < 4; data_idx = data_idx + 1) begin
-            direct_r[data_idx] <= direct_r[data_idx-1];
-        end
-        if (filter_valid_r[6]) begin
-            for (write_lane = 0; write_lane < 4; write_lane = write_lane + 1) begin
-                if (filter_done_r[6][write_lane]) begin
-                    result_color_r[filter_slot_r[6]][write_lane*24 +: 24] <=
-                        modulated_color_w[write_lane*24 +: 24];
-                    result_alpha_r[filter_slot_r[6]][write_lane*8 +: 8] <=
-                        modulated_alpha_w[write_lane*8 +: 8];
-                    result_mask_r[filter_slot_r[6]][write_lane] <= shade_mask_r[write_lane];
-                end
-            end
         end
     end
+    // Thirty-two context completion registers: one whole-element update per clock.
+    genvar context_idx;
+    generate
+        for (context_idx = 0; context_idx < 32; context_idx = context_idx + 1) begin : g_context
+            reg [3:0] completed_r;
+            reg [3:0] lod_ready_r;
+            wire [3:0] completed_next_w;
+            assign completed_next_w =
+                filter_valid_r[6] && filter_slot_r[6] == context_idx ?
+                    completed_r | filter_done_r[6] : 4'd0;
+            // Reset holds the uninitialized context data, matching the command-control process.
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                end else begin
+                    if ((accept_w && allocate_r[4:0] == context_idx) ||
+                            (filter_valid_r[6] && filter_slot_r[6] == context_idx))
+                        completed_r <= completed_next_w;
+                    if ((accept_w && allocate_r[4:0] == context_idx) ||
+                            (lod_valid_r[8] && lod_slot_r[8] == context_idx))
+                        lod_ready_r <= lod_valid_r[8] && lod_slot_r[8] == context_idx ?
+                            4'hf : 4'd0;
+                end
+            end
+            assign completed_w[context_idx] = completed_r;
+            assign lod_ready_w[context_idx] = lod_ready_r;
+        end
+    endgenerate
+    // Metadata stages: independent local registers, one assignment per register.
+    genvar pipe_stage;
+    generate
+        for (pipe_stage = 0; pipe_stage < 9; pipe_stage = pipe_stage + 1) begin : g_lod_slot
+            reg [4:0] data_r;
+            wire [4:0] data_w;
+            assign lod_slot_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = allocate_r[4:0];
+            end else begin : g_previous
+                assign data_w = g_lod_slot[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 9; pipe_stage = pipe_stage + 1) begin : g_return_slot
+            reg [4:0] data_r;
+            wire [4:0] data_w;
+            assign return_slot_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = schedule_slot_w;
+            end else begin : g_previous
+                assign data_w = g_return_slot[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 9; pipe_stage = pipe_stage + 1) begin : g_return_mode
+            reg [1:0] data_r;
+            wire [1:0] data_w;
+            assign return_mode_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = launch_mode_w;
+            end else begin : g_previous
+                assign data_w = g_return_mode[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 9; pipe_stage = pipe_stage + 1) begin : g_return_lane
+            reg [1:0] data_r;
+            wire [1:0] data_w;
+            assign return_lane_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = launch_lane_w;
+            end else begin : g_previous
+                assign data_w = g_return_lane[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 9; pipe_stage = pipe_stage + 1) begin : g_return_done
+            reg [3:0] data_r;
+            wire [3:0] data_w;
+            assign return_done_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = lane_done_w;
+            end else begin : g_previous
+                assign data_w = g_return_done[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 5; pipe_stage = pipe_stage + 1) begin : g_return_port
+            reg [23:0] data_r;
+            wire [23:0] data_w;
+            assign return_port_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = tap_port_w;
+            end else begin : g_previous
+                assign data_w = g_return_port[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 5; pipe_stage = pipe_stage + 1) begin : g_return_subword
+            reg [31:0] data_r;
+            wire [31:0] data_w;
+            assign return_subword_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = tap_subword_w;
+            end else begin : g_previous
+                assign data_w = g_return_subword[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 9; pipe_stage = pipe_stage + 1) begin : g_return_weight
+            reg [135:0] data_r;
+            wire [135:0] data_w;
+            assign return_weight_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = tap_weight_w;
+            end else begin : g_previous
+                assign data_w = g_return_weight[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 9; pipe_stage = pipe_stage + 1) begin : g_return_fraction
+            reg [7:0] data_r;
+            wire [7:0] data_w;
+            assign return_fraction_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = launch_fraction_w;
+            end else begin : g_previous
+                assign data_w = g_return_fraction[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 4; pipe_stage = pipe_stage + 1) begin : g_direct
+            reg [127:0] data_r;
+            wire [127:0] data_w;
+            assign direct_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = direct_w;
+            end else begin : g_previous
+                assign data_w = g_direct[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 7; pipe_stage = pipe_stage + 1) begin : g_filter_slot
+            reg [4:0] data_r;
+            wire [4:0] data_w;
+            assign filter_slot_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = return_slot_r[8];
+            end else begin : g_previous
+                assign data_w = g_filter_slot[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 7; pipe_stage = pipe_stage + 1) begin : g_filter_mode
+            reg [1:0] data_r;
+            wire [1:0] data_w;
+            assign filter_mode_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = return_mode_r[8];
+            end else begin : g_previous
+                assign data_w = g_filter_mode[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 7; pipe_stage = pipe_stage + 1) begin : g_filter_lane
+            reg [1:0] data_r;
+            wire [1:0] data_w;
+            assign filter_lane_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = return_lane_r[8];
+            end else begin : g_previous
+                assign data_w = g_filter_lane[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 7; pipe_stage = pipe_stage + 1) begin : g_filter_done
+            reg [3:0] data_r;
+            wire [3:0] data_w;
+            assign filter_done_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = return_done_r[8];
+            end else begin : g_previous
+                assign data_w = g_filter_done[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 4; pipe_stage = pipe_stage + 1) begin : g_filter_fraction
+            reg [7:0] data_r;
+            wire [7:0] data_w;
+            assign filter_fraction_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = return_fraction_r[8];
+            end else begin : g_previous
+                assign data_w = g_filter_fraction[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+        for (pipe_stage = 0; pipe_stage < 3; pipe_stage = pipe_stage + 1) begin : g_nearest
+            reg [127:0] data_r;
+            wire [127:0] data_w;
+            assign nearest_r[pipe_stage] = data_r;
+            if (pipe_stage == 0) begin : g_first
+                assign data_w = {expanded_w[3], expanded_w[2], expanded_w[1], expanded_w[0]};
+            end else begin : g_previous
+                assign data_w = g_nearest[pipe_stage-1].data_r;
+            end
+            always @(posedge clk_i) begin
+                data_r <= data_w;
+            end
+        end
+    endgenerate
 endmodule
