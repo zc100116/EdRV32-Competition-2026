@@ -286,6 +286,19 @@ module tb_gpu_object;
         $readmemh("build/gpu_object/configs.hex", configs);
         repeat (3) @(negedge clk_i);
         rst_n_i = 1;
+        finish_i = 1;
+        repeat (2) @(negedge clk_i);
+        finish_i = 0;
+        repeat (8) begin
+            @(negedge clk_i);
+            if (unit_done_o) $fatal(1, "FAIL no-cfg waiting done must be low");
+        end
+        finish_i = 1;
+        @(negedge clk_i);
+        if (!unit_done_o) $fatal(1, "FAIL no-cfg empty completion");
+        finish_i = 0;
+        @(negedge clk_i);
+        if (unit_done_o) $fatal(1, "FAIL falling finish did not clear done");
         for (case_number = 0; case_number < CASES; case_number++) begin
             cfg = configs[case_number];
             base_index = int'(cfg[673:650]);

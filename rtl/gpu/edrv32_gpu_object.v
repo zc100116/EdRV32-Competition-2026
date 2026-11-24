@@ -57,6 +57,7 @@ module edrv32_gpu_object (
     localparam STAGES = 12;
 
     reg active_r;
+    reg finish_r;
     reg started_r;
     reg step_r;
     reg draw_r;
@@ -198,6 +199,7 @@ module edrv32_gpu_object (
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
+            finish_r <= 1'b1;
             active_r <= 1'b0;
             started_r <= 1'b0;
             published_r <= 1'b0;
@@ -207,6 +209,7 @@ module edrv32_gpu_object (
             free_count_r <= 24'd0;
             alive_count_r <= 24'd0;
         end else begin
+            finish_r <= finish_i;
             if (object_cfg_valid_i && object_cfg_ready_o) begin
                 active_r <= 1'b1;
                 started_r <= 1'b0;
@@ -224,8 +227,10 @@ module edrv32_gpu_object (
                                 {23'd0, (step_r && object_event_free_o)};
                 alive_count_r <= alive_count_r + {23'd0, record_r[11][0]};
             end
-            if (active_r && started_r && finish_i && ingress_count_r == 0 && valid_r == 0)
+            if (finish_i && (!active_r || (started_r && ingress_count_r == 0 && valid_r == 0)))
                 unit_done_o <= 1'b1;
+            // microarch 4.2: falling finish starts every command, including no-cfg commands.
+            if (finish_r && !finish_i) unit_done_o <= 1'b0;
             // Publication follows command's DMA-B and rendering drain barrier.
             if (active_r && unit_done_o && object_publish_i && !published_r && !stop_i) begin
                 object_result_valid_o <= 1'b1;
