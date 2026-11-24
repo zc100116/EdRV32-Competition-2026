@@ -31,7 +31,7 @@ for reg in SCHEMA['registers']:
 
 def build(threads=3):
     BUILD.mkdir(parents=True, exist_ok=True)
-    flags = ['-std=c11', '-Wall', '-Wextra', '-Werror', '-O2',
+    flags = ['-std=c11', '-Wall', '-Wextra', '-Werror', '-O3',
              f'-DGPU_EMU_THREADS={threads}', '-pthread']
     subprocess.run(['gcc', *flags, '-shared', '-fPIC', str(HERE/'test_bridge.c'),
                     '-o', str(BUILD/'libtest.so')], check=True)

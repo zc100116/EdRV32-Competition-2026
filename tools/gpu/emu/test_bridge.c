@@ -41,7 +41,7 @@ int test_op(struct gpu_emu *e, int op, uint8_t *data, int64_t *v)
     case 6: {
         struct rgba rgba;
         for (int i = 0; i < 4; ++i) rgba.c[i] = v[i+3];
-        pixel(e,v[0],v[1],v[2],rgba,v[7]); break;
+        pixel_at(e,address(e,v[0],v[1]),v[2],rgba,v[7]); break;
     }
     case 7: stencil_op(e,v[0],v[1]); break;
     case 8: { struct vec a = transform(e,decode_vertex(data)); memcpy(v,&a,sizeof a); break; }
