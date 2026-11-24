@@ -1,5 +1,5 @@
 id,name,tags,rarity,target,effect,value,duration,cooldown,slots,price,value2,description,grade,value3,spread_angle
-sharp,锐化,projectile,fine,,sharp,2,180,0,1,80,0,穿透 +2,1,0,0
+sharp,锐化,projectile,fine,,sharp,2,180,0,1,80,0,贯穿 +2,1,0,0
 scatter,散射,projectile,fine,,scatter,2,180,0,1,80,30,投射物 +2，各自伤害 −30%,1,0,0
 ignite,引燃,ember|on_hit,fine,,ignite,20,180,0,1,80,0,命中 20% 概率点燃,1,0,0
 wet,浸润,tide|on_hit,fine,,wet,1,180,0,1,80,0,命中使敌人潮湿,1,0,0
