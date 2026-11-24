@@ -192,6 +192,7 @@ static void tests(void)
     d.vulnerability=20; d.reduction[0]=50; d.temporary[0]=1000;
     d.temporary[6]=1000; d.permanent_shield=1000; d.temporary[5]=10;
     HIT(50,"true damage skips defense and block; vulnerability reduction true shield remain");
+    require(!r.blocked,"pure true damage does not report block");
     RESET(); d.shield_max=100; d.shield_recovery=10; d.temporary[0]=50;
     d.shield_frames[0]=2; ember_defense_step(&d); ember_defense_step(&d);
     require(!d.temporary[0],"temporary shield expires");
@@ -259,8 +260,16 @@ static void tests(void)
     sim.enemies[0].defense.frozen=90;
     h=(struct ember_attack){.base=10,.attack=100,.share={100,0,0,0,0,0}};
     ember_sim_hit(&sim,0,&h);
-    require(!sim.enemies[0].defense.frozen && sim.enemies[1].hp<10000,
-            "iron shatters frozen target into nearby shards");
+    require(sim.enemies[0].alive && !sim.enemies[0].defense.frozen &&
+            sim.enemies[1].hp==9990 && !sim.player.kills,
+            "nonfatal iron hit shatters frozen target into nearby shards");
+    setup(); target(0,20,1); target(1,60,10000);
+    sim.enemies[0].defense.frozen=90;
+    ember_sim_hit(&sim,0,&h);
+    require(!sim.enemies[0].alive && !sim.enemies[0].defense.frozen &&
+            sim.enemies[1].hp==9990 && sim.player.kills==1 && sim.alive_count==1 &&
+            sim.pickup_count==1 && sim.trigger_peak==1,
+            "fatal iron hit shatters and processes death once");
     setup(); target(0,20,10000);
     ember_sim_status(&sim,0,EMBER_BREAK_ARMOR,0);
     h=(struct ember_attack){.base=100,.attack=100,.crit=100,.crit_damage=150,
@@ -277,6 +286,29 @@ static void tests(void)
     setup(); target(0,0,10000); sim.player.dash=2;
     before=sim.player.hp; ember_sim_step(&sim,0);
     require(sim.player.hp==before,"dash gives contact invulnerability");
+    setup(); target(0,0,10000); sim.player.defense.dodge=100;
+    before=sim.player.hp; ember_sim_step(&sim,0);
+    require(sim.player.hp==before && sim.events.count==1 &&
+            sim.events.item[0].kind==8 && sim.events.item[0].outcome==1 &&
+            !sim.events.item[0].value,"player dodge publishes outcome without damage");
+    setup(); target(0,0,10000); sim.player.defense.active_block=1;
+    sim.player.defense.block_strength=100;
+    before=sim.player.hp; ember_sim_step(&sim,0);
+    require(sim.player.hp==before && sim.events.count==1 &&
+            sim.events.item[0].kind==8 && sim.events.item[0].outcome==2 &&
+            !sim.events.item[0].value,"player full block publishes outcome without damage");
+    setup(); target(0,20,10000); sim.enemies[0].defense.active_block=1;
+    sim.enemies[0].defense.block_strength=100;
+    h=(struct ember_attack){.base=100,.attack=100,.share={100,0,0,0,0,0}};
+    r=ember_sim_hit(&sim,0,&h);
+    require(r.blocked && !r.damage && sim.enemies[0].hp==10000 &&
+            sim.events.count==1 && sim.events.item[0].kind==1 &&
+            sim.events.item[0].outcome==2 && !sim.events.item[0].value,
+            "enemy full block publishes outcome without damage");
+    h.share[0]=0; h.share[EMBER_DAMAGE_TRUE]=100;
+    r=ember_sim_hit(&sim,0,&h);
+    require(!r.blocked && r.damage==100 && sim.events.count==2 &&
+            !sim.events.item[1].outcome,"pure true damage publishes ordinary hit outcome");
     setup(); sim.player.charge=1000; ember_sim_step(&sim,EMBER_U);
     require(!sim.player.charge && sim.player.action==EMBER_CAST,"U casts ultimate");
     setup(); ember_sim_step(&sim,EMBER_K); require(sim.player.cooldown_k,"K skill");

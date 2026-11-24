@@ -180,6 +180,19 @@ static void pickup_drop(struct ember_sim *s, const struct ember_enemy *e)
 }
 static void area_hit(struct ember_sim *s, ember_fixed x, ember_fixed y,
                      int radius, int damage, unsigned weapon, unsigned depth, int periodic);
+/* gdd 4.2/4.5: shards also follow a fatal hit, within the same trigger limit. */
+static void shatter(struct ember_sim *s, unsigned index, unsigned depth)
+{
+    struct ember_enemy *e = &s->enemies[index];
+    e->defense.frozen = 0;
+    struct ember_attack linked = {.base = ember_system[0].shatter_damage,
+        .attack = 100, .crit_damage = 150, .share = {100,0,0,0,0,0},
+        .depth = (uint8_t)(depth + 1)};
+    for (unsigned n = 0; n < EMBER_ENEMIES; ++n)
+        if (s->enemies[n].alive && n != index && within(e->x, e->y,
+            s->enemies[n].x, s->enemies[n].y, ember_system[0].chain_range))
+            ember_sim_hit(s, n, &linked);
+}
 struct ember_damage_result ember_sim_hit(struct ember_sim *s, unsigned index,
                                          const struct ember_attack *hit)
 {
@@ -195,7 +208,13 @@ struct ember_damage_result ember_sim_hit(struct ember_sim *s, unsigned index,
         s->events.item[s->events.count - 1].outcome = 1;
         return r;
     }
-    if (!r.damage && !r.absorbed) return r;
+    if (!r.damage && !r.absorbed) {
+        if (r.blocked) {
+            event(s, 1, 0, e->x, e->y);
+            s->events.item[s->events.count - 1].outcome = 2;
+        }
+        return r;
+    }
     if (hit->leech) s->player.hp = minimum(s->player.max_hp,
         s->player.hp + r.damage * hit->leech / 100);
     e->flash = 6;
@@ -210,15 +229,7 @@ struct ember_damage_result ember_sim_hit(struct ember_sim *s, unsigned index,
         if (hit->depth == 3 + s->trigger_bonus) return r;
         struct ember_attack linked = {.attack = 100, .crit_damage = 150,
                                        .depth = (uint8_t)(hit->depth + 1)};
-        if (frozen && r.part[EMBER_DAMAGE_IRON]) {
-            e->defense.frozen = 0;
-            linked.base = ember_system[0].shatter_damage;
-            linked.share[EMBER_DAMAGE_IRON] = 100;
-            for (unsigned n = 0; n < EMBER_ENEMIES; ++n)
-                if (s->enemies[n].alive && n != index && within(e->x, e->y,
-                    s->enemies[n].x, s->enemies[n].y, ember_system[0].chain_range))
-                    ember_sim_hit(s, n, &linked);
-        }
+        if (frozen && r.part[EMBER_DAMAGE_IRON]) shatter(s, index, hit->depth);
         if (r.crit && e->defense.status[EMBER_BREAK_ARMOR].frames) {
             linked.base = ember_system[0].heavy_damage;
             linked.share[EMBER_DAMAGE_IRON] = 100;
@@ -242,6 +253,8 @@ struct ember_damage_result ember_sim_hit(struct ember_sim *s, unsigned index,
         s->player.charge + ember_characters[0].charge_kill);
     pickup_drop(s, e);
     event(s, 2, (unsigned)r.damage, e->x, e->y);
+    if (frozen && r.part[EMBER_DAMAGE_IRON] && hit->depth < 3 + s->trigger_bonus)
+        shatter(s, index, hit->depth);
     if (e->burn && hit->depth < 3 + s->trigger_bonus) {
         int radius = ember_characters[0].passive_radius * s->attributes[EMBER_AREA] / 100;
         if (e->burn_weapon < EMBER_WEAPONS_COUNT && inscription(s, e->burn_weapon, 3))
@@ -387,13 +400,20 @@ static void player_hurt(struct ember_sim *s, int damage, unsigned wave,
     int lit = illuminated(s, source_x, source_y);
     if (!lit) hit.increased = ember_lighting[0].dark_damage;
     struct ember_damage_result r = ember_damage(&s->combat_rng, &hit, &p->defense, &p->hp);
-    if (r.dodged || (!r.damage && !r.absorbed)) return;
+    if (r.dodged || (!r.damage && !r.absorbed)) {
+        if (r.dodged || r.blocked) {
+            event(s, 8, 0, p->x, p->y);
+            s->events.item[s->events.count - 1].outcome = r.dodged ? 1 : 2;
+        }
+        return;
+    }
     p->invulnerable = p->defense.invulnerable;
     p->flash = 8;
     p->action = EMBER_HURT;
     p->action_time = 8;
     p->charge = (uint16_t)minimum(ember_characters[0].charge_max, p->charge + r.damage);
     event(s, 8, (unsigned)r.damage, p->x, p->y);
+    s->events.item[s->events.count - 1].outcome = r.blocked ? 2 : 0;
     if (p->hp <= 0) { p->action = EMBER_DEAD; s->phase = EMBER_LOST; }
 }
 static void enemy_spawn(struct ember_sim *s)

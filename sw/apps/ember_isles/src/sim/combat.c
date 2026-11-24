@@ -105,7 +105,10 @@ struct ember_damage_result ember_damage(struct ember_rng *rng, const struct embe
     if (d->broken) vulnerability += ember_system[0].broken_vulnerability;
     total = total * (100 + vulnerability) / 100;
     r.before_defense = (int32_t)(total / EMBER_Q);
-    if (!(h->flags & EMBER_IGNORE_BLOCK) &&
+    int blockable = 0;
+    for (unsigned i = 0; i < EMBER_DAMAGE_TRUE; ++i)
+        blockable |= h->share[i] + h->added[i];
+    if (blockable && !(h->flags & EMBER_IGNORE_BLOCK) &&
         (d->active_block || (d->front_block && (h->flags & EMBER_FRONT)) ||
          (int32_t)(ember_random(rng) % 100) < d->block_chance)) r.blocked = 1;
     int64_t taken = 100000000;
