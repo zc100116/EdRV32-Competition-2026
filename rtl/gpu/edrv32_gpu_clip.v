@@ -72,6 +72,7 @@ module edrv32_gpu_clip (
     reg write_r;
     reg [2111:0] output_r [0:1];
     reg [3:0] output_count_r [0:1];
+    wire [2111:0] push_data_w;
     integer copy_r;
 
     function signed [42:0] distance;
@@ -114,6 +115,12 @@ module edrv32_gpu_clip (
     assign push_w = !stop_i && ((accept_w && all_inside_w)
         || (state_r == S_OUTPUT && count_r != 2));
     assign polygon_valid_o = count_r != 0;
+    // One full-word write per push: PDS reports multiple drivers when the two
+    // branches write output_r whole and by slice (card 109).
+    assign push_data_w = (state_r == S_IDLE) ? {1320'd0, triangle_data_i}
+        : {workset_r[bank_r][7], workset_r[bank_r][6], workset_r[bank_r][5],
+            workset_r[bank_r][4], workset_r[bank_r][3], workset_r[bank_r][2],
+            workset_r[bank_r][1], workset_r[bank_r][0]};
     assign polygon_data_o = output_r[read_r];
     assign polygon_count_o = output_count_r[read_r];
     assign pop_w = polygon_valid_o && polygon_ready_i;
@@ -283,12 +290,7 @@ module edrv32_gpu_clip (
         end
         if (push_w) begin
             output_count_r[write_r] <= state_r == S_IDLE ? 4'd3 : input_count_r;
-            if (state_r == S_IDLE) output_r[write_r] <= {1320'd0, triangle_data_i};
-            else begin
-                for (copy_r = 0; copy_r < 8; copy_r = copy_r + 1) begin
-                    output_r[write_r][copy_r * 264 +: 264] <= workset_r[bank_r][copy_r];
-                end
-            end
+            output_r[write_r] <= push_data_w;
         end
     end
 endmodule
