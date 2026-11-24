@@ -75,6 +75,11 @@ def check(path):
             report(number, 'gate primitive is forbidden')
         if len(re.findall(r'\.\w+\s*\(', line)) > 1:
             report(number, 'connect one port per line')
+    # Generate block names use g_ (CLAUDE.md 6); PDS cannot resolve these references.
+    pattern = r'\bg_[A-Za-z0-9_]+\s*(?:\[[^]\n]+\]\s*)?\.\s*[A-Za-z_]'
+    for match in re.finditer(pattern, clean):
+        report(clean[:match.start()].count('\n') + 1,
+               'generate-scope hierarchical reference is forbidden (PDS unsupported)')
     if path.suffix == '.v':
         modules = re.findall(r'\bmodule\s+(\w+)', clean)
         if modules != [path.stem] or not re.fullmatch(r'edrv32_[a-z0-9_]+', path.stem):

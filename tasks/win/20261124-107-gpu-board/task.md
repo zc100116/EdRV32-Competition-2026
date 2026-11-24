@@ -68,6 +68,12 @@
   - 如果 Compile 仍明显偏慢（超过 10 分钟），记下日志里耗时最长的模块名。
 - 其余步骤和产物同第 5、6 节。
 
+## 6b. 第 4 轮（2026-11-24，修复第 3 轮 Compile 报错）
+
+- 第 3 轮 Compile 报 `Verilog-4205 edrv32_gpu_texture.v(656) Size of concatenate expression should not be 0`：整改引入了 39 处跨 generate 作用域的层次引用，PDS 不支持。已在 7ce424fe0 全部改写（texture 30 处、perspective 9 处），风格检查新增此规则（becd1795e）。
+- 取本卡最新提交（随本节一起提交），同第 6a 节：沿用工程和 IP，移除旧源文件，重新执行导入脚本，从 Compile 开始；额外记录同第 6a 节。
+- 这一轮的仿真回归在仿真主机恢复后补跑，结果不影响你先做 Compile 和综合。
+
 ## 7. 通过判据
 
 - 布局布线完成（时序不满足也要完整回传报告，不判失败）。

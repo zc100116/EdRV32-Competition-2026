@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: original coast enemy animation sprite sheet, strict LOW resolution pixel art on an exact 160x128 logical pixel canvas, enlarged with nearest neighbor only. 5 columns by 4 rows of equal 32x32 logical pixel cells, no labels, transparent background.
+Enemy A "Tidegnaw": original small teal aquatic quadruped with long eel-like body and tail, orange dorsal fins, enormous ivory biting jaws, cyan eyes, low crouched silhouette, 22 pixels wide by 18 tall.
+Enemy B "Reefshell crab": original squat broad coral-red crab with huge faceted blue-violet reef armor shell, cream shell highlights, asymmetrical large claws, 28 pixels wide by 23 tall. Absolutely different silhouette from Tidegnaw.
+Row1: Tidegnaw four distinct moving frames in cols1-4, col5 pure white hit-flash silhouette.
+Row2: Tidegnaw four death frames collapsing and dissolving into teal droplets, col5 empty.
+Row3: crab four distinct side-scuttling movement frames, col5 white hit-flash silhouette.
+Row4: crab four death frames shell cracking, collapse, fragments, tiny fragments; col5 empty.
+Uniform scale and feet baseline in each cell, complete padding, no cropping. Each material >=3 shade steps plus bright highlight. Continuous one pixel dark navy outer contour, readable eyes, claws, scales. Clean deliberate pixel clusters; crisp 1 pixel square grid, limited unified 48 color palette. Bright saturated optimistic coastal fantasy. No painterly detail, no blur, no anti-aliasing, no gradients, no external game designs. Ground shadows omitted, separate layer later.

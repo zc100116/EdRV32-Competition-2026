@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """profile_ember.py — P-1: 1200-frame coast replay profiling; generated files stay in build.
-Host monotonic clock; no emulated clock domain.
+Host wall/CPU clocks and scheduler switch counts; no emulated clock domain.
 Use --gprof for a separate call-graph run (its overhead changes phase timings).
 """
 import argparse
@@ -82,11 +82,15 @@ static void reset(struct gpu_emu *e)''')
     pc_soc_destroy();''')
         (BUILD / Path(filename).name).write_text(PREFIX + source)
     (BUILD / 'timing.c').write_text('''#include <time.h>
+#include <sys/resource.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 uint64_t profile_ns[256];
-static uint64_t frames[PROFILE_FRAMES];
+static uint64_t frames[PROFILE_FRAMES], cpu[PROFILE_FRAMES];
+static uint64_t previous_cpu;
+static long voluntary[PROFILE_FRAMES], involuntary[PROFILE_FRAMES];
+static struct rusage previous_usage;
 static uint64_t phase_frames[PROFILE_FRAMES][5], phase_previous[5];
 static uint32_t enemies_per_frame[PROFILE_FRAMES], shots_per_frame[PROFILE_FRAMES];
 static unsigned count;
@@ -110,6 +114,15 @@ uint64_t profile_clock(void)
 void profile_frame(uint64_t start)
 {
     frames[count]=profile_clock()-start;
+    struct rusage usage;
+    getrusage(RUSAGE_SELF,&usage);
+    uint64_t total_cpu=(uint64_t)(usage.ru_utime.tv_sec+usage.ru_stime.tv_sec)*1000000000
+        +(uint64_t)(usage.ru_utime.tv_usec+usage.ru_stime.tv_usec)*1000;
+    cpu[count]=total_cpu-previous_cpu;
+    previous_cpu=total_cpu;
+    voluntary[count]=usage.ru_nvcsw-previous_usage.ru_nvcsw;
+    involuntary[count]=usage.ru_nivcsw-previous_usage.ru_nivcsw;
+    previous_usage=usage;
     uint64_t gpu=0;
     for (unsigned i=16;i<256;++i) gpu+=profile_ns[i];
     uint64_t phase[5]={profile_ns[0],profile_ns[1],gpu,profile_ns[2],profile_ns[3]};
@@ -130,14 +143,15 @@ static void report(void)
     unsigned late=0;
     FILE *csv=fopen(PROFILE_CSV,"w");
     if (!csv) { perror(PROFILE_CSV); exit(1); }
-    fputs("frame,ms,enemies,shots,sim_ms,gfx_ms,gpu_ms,audio_ms,disp_ms\\n",csv);
+    fputs("frame,ms,enemies,shots,sim_ms,gfx_ms,gpu_ms,audio_ms,disp_ms,"
+          "cpu_ms,voluntary,involuntary\\n",csv);
     for (unsigned i=0;i<count;++i) {
         sum+=frames[i];
         late+=frames[i]>1000000000u/60u;
         fprintf(csv,"%u,%.6f,%u,%u",i+1,frames[i]/1e6,
                 enemies_per_frame[i],shots_per_frame[i]);
         for (unsigned j=0;j<5;++j) fprintf(csv,",%.6f",phase_frames[i][j]/1e6);
-        fputc('\\n',csv);
+        fprintf(csv,",%.6f,%ld,%ld\\n",cpu[i]/1e6,voluntary[i],involuntary[i]);
     }
     fclose(csv);
     qsort(frames,count,sizeof(*frames),order);
@@ -149,7 +163,14 @@ static void report(void)
     for (int i=0;i<256;++i) if (profile_ns[i])
         fprintf(stderr,"PHASE,%d,%.6f ms/frame\\n",i,profile_ns[i]/(count*1e6));
 }
-__attribute__((constructor)) static void init(void) { atexit(report); }
+__attribute__((constructor)) static void init(void)
+{
+    getrusage(RUSAGE_SELF,&previous_usage);
+    previous_cpu=(uint64_t)(previous_usage.ru_utime.tv_sec+previous_usage.ru_stime.tv_sec)
+        *1000000000
+        +(uint64_t)(previous_usage.ru_utime.tv_usec+previous_usage.ru_stime.tv_usec)*1000;
+    atexit(report);
+}
 ''')
     makefile = ROOT / 'sw/apps/ember_isles/Makefile'
     if args.revision:

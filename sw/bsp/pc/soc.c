@@ -380,19 +380,29 @@ static void display_frame(void)
         for (unsigned y = 0; y < 720; y += scale) {
             uint64_t row = (uint64_t)DR(CUR_BASE) + (sy + y / scale) * DR(STRIDE) + 2 * sx;
             uint32_t *out = pixels + y * 1280;
-            for (unsigned x = 0; x < 1280 / scale; ++x) {
-                uint64_t address = row + 2 * x;
-                uint32_t color = 0;
-                if (address + 2 > DDR_BYTES) {
-                    DR(ERR_CODE) = 2;
-                    DR(IRQ_STAT) |= D(IRQ_STAT_ERROR_MASK);
-                } else {
+            unsigned width = 1280 / scale;
+            unsigned valid = row >= DDR_BYTES ? 0 :
+                (DDR_BYTES - row) / 2 < width ? (unsigned)((DDR_BYTES - row) / 2) : width;
+            const uint8_t *source = ddr + (valid ? row : 0);
+            if (scale == 2) {
+                for (unsigned x = 0; x < valid; ++x) {
                     uint16_t value;
-                    memcpy(&value, ddr + address, 2);
-                    color = expand565(value);
+                    memcpy(&value, source + 2 * x, 2);
+                    uint32_t color = expand565(value);
+                    out[2 * x] = color;
+                    out[2 * x + 1] = color;
                 }
-                out[x * scale] = color;
-                if (scale == 2) out[x * scale + 1] = color;
+            } else {
+                for (unsigned x = 0; x < valid; ++x) {
+                    uint16_t value;
+                    memcpy(&value, source + 2 * x, 2);
+                    out[x] = expand565(value);
+                }
+            }
+            if (valid < width) {
+                DR(ERR_CODE) = 2;
+                DR(IRQ_STAT) |= D(IRQ_STAT_ERROR_MASK);
+                memset(out + valid * scale, 0, (width - valid) * scale * sizeof(*out));
             }
             if (scale == 2) memcpy(out + 1280, out, 1280 * sizeof(*out));
         }

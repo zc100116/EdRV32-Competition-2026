@@ -1,0 +1,7 @@
+Use case: precise-object-edit. Edit this original coastal ground tile atlas to be usable in a game. Preserve7columns×3rows and the material order EXACTLY. Change ONLY these problems:
+1 REMOVE ALL dark cell borders and grid lines. Tiles meet edge-to-edge, no drawn divisions.
+2 Sand column1: remove the repeated diagonal dune stripes entirely. Quiet golden sand base with just2-3 small irregular shaded depressions or shell clusters per64x64logical tile. All sand tile edges must use the SAME flat golden sand color, so all3variants tile seamlessly. Distinct3shades plus tiny cream highlights, but keep most area quiet.
+3 Wet sand column2: same flat muted peach edge colors across variants, sparse cracks/pools only near centers, no diagonal bands.
+4 Reef rock column3: larger quieter chunky rock plates3shades, no noise.
+5 Shore col4 preserve teal water to sand transition. Pier col5 preserve planks. Wall tops col6 and fronts col7 preserve.
+Keep everything strict low resolution native64pixel square tiles (whole logical canvas448x192), uniformly large crisp pixels with NO micro-details. Display as exact nearest neighbor enlargement. <=64colors, bright optimistic coastal fantasy. No antialiasing, no gradients, no black grid, no repeated sand striping, no labels.

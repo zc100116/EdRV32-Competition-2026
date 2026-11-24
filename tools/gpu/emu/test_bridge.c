@@ -5,6 +5,7 @@
 void *test_buffer(struct gpu_emu *e, int kind)
 {
     if (kind == 3 || kind == 4) e->texel_dirty = 1;
+    if (kind == 4) e->palette_dirty = 1;
     switch (kind) {
     case 0: return e->color;
     case 1: return e->depth;

@@ -1,0 +1,7 @@
+Use case: stylized-concept. Asset type: original pixel VFX and damage-number atlas.
+Create a strict low resolution pixel art sprite atlas, 8 columns x4 rows of 32x32 logical pixel cells, total logical canvas256x128 pixels nearest-neighbor enlarged. Solid BLACK background (RGB0,0,0), pure black will be keyed transparent for ADD blending. No labels.
+Row1: four frames orange FIREBALL projectile with bright white-yellow core and long tapered red-orange trail traveling right, then four frames golden impact sparks starburst.
+Row2: four frames SMALL EXPLOSION expansion then dissipation, then four frames animated burning flame tongues with hot yellow centers.
+Row3: four simple concentric warm amber light halo masks each nearly fills its cell; then four oval cast shadows on solid black background, dark slate lavender shapes with crisp stepped ellipse outline.
+Row4: four bold clearly readable outlined pixel damage numbers in separate cells: "28" in ivory, "126" in yellow, "384" in orange red larger weight, "72" in bright cyan. Each digit blocky and designed on a 5x7 or7x9 logical pixel grid, crisp one pixel navy outer outline, no gradients.
+All sprites centered in their own cells with full padding and no overlap. Uniform large square pixel grid, <=48 colors, vivid saturated colors. No antialiasing, no blur, no painterly detail. Each fire material has3 shades plus bright highlight. Original game effects only.
