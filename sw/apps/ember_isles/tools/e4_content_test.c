@@ -917,8 +917,19 @@ static void determinism(void)
     }
     puts("DETERMINISM,8 characters,180 ticks each,raw state equal");
 }
+static void tag_membership(void)
+{
+    CHECK(!tag_present("on_crit", "crit"));
+    CHECK(tag_present("on_crit", "on_crit"));
+    CHECK(tag_present("iron|crit|on_hit", "crit"));
+    CHECK(!tag_present("iron|on_crit|on_hit", "crit"));
+    CHECK(tag_present("crit|on_crit", "crit"));
+    CHECK(tag_present("on_hit|on_crit|on_hurt", "on_crit"));
+    CHECK(!tag_present("crit", "on_crit"));
+}
 int main(void)
 {
+    tag_membership();
     weapons(); evolutions(); relics(); relic_rules(); inscriptions(); characters(); pets(); pet_runes();
     enemies(); class_shapes(); entity_rules(); blessings(); resonances(); contracts(); builds(); interface_rules(); dark_projectile_snapshot(); vulnerability_and_dots(); skill_and_evolution_modifiers(); inherited_area_tags(); target_lifetimes(); healing_windows(); split_depth(); determinism();
     printf("PASS E4 assertions=%u\n", assertions);

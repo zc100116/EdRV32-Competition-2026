@@ -782,7 +782,7 @@ unsigned ember_sim_tag_count(const struct ember_sim *s, const char *tag)
 {
     unsigned pieces = 0;
     for (unsigned i = 0; i < EMBER_RELICS_COUNT; ++i)
-        pieces += s->player.relic_level[i] && strstr(ember_relics[i].tags, tag);
+        pieces += s->player.relic_level[i] && tag_present(ember_relics[i].tags, tag);
     for (unsigned w = 0; w < EMBER_WEAPONS_COUNT; ++w) {
         if (!s->player.weapon_level[w]) continue;
         for (unsigned i = 0; i < EMBER_TAGS_COUNT; ++i)
@@ -790,15 +790,15 @@ unsigned ember_sim_tag_count(const struct ember_sim *s, const char *tag)
                 pieces += !!(ember_sim_weapon_tags(s, w) & (1u << i));
         for (unsigned slot = 0; slot < 2; ++slot) {
             unsigned rune = s->player.inscription[w][slot];
-            if (rune) pieces += strstr(ember_inscriptions[rune - 1].tags, tag) != NULL;
+            if (rune) pieces += tag_present(ember_inscriptions[rune - 1].tags, tag);
         }
     }
     for (unsigned i = 0; i < EMBER_BLESSINGS_COUNT; ++i)
-        pieces += s->blessings[i] && strstr(ember_blessings[i].tags, tag);
+        pieces += s->blessings[i] && tag_present(ember_blessings[i].tags, tag);
     if (s->pet_kind != 255 && s->player.pet_weapon != 255)
-        pieces += strstr(ember_pet_weapons[s->player.pet_weapon].tags, tag) != NULL;
+        pieces += tag_present(ember_pet_weapons[s->player.pet_weapon].tags, tag);
     if (s->pet_kind != 255 && pet_rune(s))
-        pieces += strstr(ember_inscriptions[pet_rune(s) - 1].tags, tag) != NULL;
+        pieces += tag_present(ember_inscriptions[pet_rune(s) - 1].tags, tag);
     return pieces;
 }
 int ember_sim_evolution_ready(const struct ember_sim *s, unsigned w, unsigned branch)

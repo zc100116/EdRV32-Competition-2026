@@ -132,9 +132,22 @@ static int enemy_in_dark(const struct ember_sim *s, ember_fixed x, ember_fixed y
     return !light_zone_at(s, x, y) && (s->lamp_disabled ||
         !within(x, y, s->player.x, s->player.y, s->lamp_radius));
 }
+static int tag_present(const char *tags, const char *tag)
+{
+    /* GDD 4.1: crit and on_crit are separate tags. */
+    size_t length = strlen(tag);
+    while (*tags) {
+        const char *end = strchr(tags, '|');
+        size_t token_length = end ? (size_t)(end - tags) : strlen(tags);
+        if (token_length == length && !strncmp(tags, tag, length)) return 1;
+        if (!end) break;
+        tags = end + 1;
+    }
+    return 0;
+}
 static int tagged(unsigned weapon, const char *tag)
 {
-    return strstr(ember_weapons[weapon].tags, tag) != NULL;
+    return tag_present(ember_weapons[weapon].tags, tag);
 }
 static int inscription(const struct ember_sim *s, unsigned w, unsigned id)
 {
@@ -1556,7 +1569,7 @@ void ember_sim_init(struct ember_sim *s, uint32_t seed)
         s->weapon_system[i].offhand_attribute = (uint8_t)ember_weapons[i].offhand_attribute;
         s->weapon_system[i].offhand_flat = ember_weapons[i].offhand_flat;
         for (unsigned t = 0; t < EMBER_TAGS_COUNT; ++t)
-            if (strstr(ember_weapons[i].tags, ember_tags[t].id))
+            if (tag_present(ember_weapons[i].tags, ember_tags[t].id))
                 s->weapon_system[i].tags |= 1u << t;
     }
     for (unsigned i = 0; i < 8; ++i) {
