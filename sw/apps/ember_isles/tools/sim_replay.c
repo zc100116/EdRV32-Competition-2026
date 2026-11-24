@@ -43,7 +43,7 @@ static uint16_t demo_input(void)
     }
     input |= sim.combat_frame % 120 == 119 ? 0 : EMBER_J;
     if (sim.combat_frame == 1500 || sim.combat_frame == 1620) input |= EMBER_SWAP;
-    if (sim.player.charge == 1000) input |= EMBER_U;
+    if (sim.player.charge == 100) input |= EMBER_U;
     if (sim.combat_frame % 240 == 0) input |= EMBER_L;
     if (sim.combat_frame % 180 == 0) input |= EMBER_K;
     if (sim.combat_frame % 600 == 0) input |= EMBER_DASH;
@@ -226,7 +226,7 @@ static void tests(void)
     sim.oil=0; ember_sim_step(&sim,0); require(sim.in_light,"pillar is independent light source");
     setup(); for(unsigned i=0;i<60;++i) ember_sim_step(&sim,0);
     require(sim.oil==9900,"CSV oil drain per second");
-    setup(); target(0,100,10000); sim.player.pet_weapon=0;
+    setup(); target(0,100,10000); ember_sim_pet(&sim, 0, 3);
     ember_sim_step(&sim,0); require(shots()==1,"pet weapon autonomous attack");
     setup(); target(0,100,10000); ember_sim_status(&sim,0,EMBER_WET,0);
     ember_sim_status(&sim,0,EMBER_IGNITE,0);
@@ -309,7 +309,7 @@ static void tests(void)
     r=ember_sim_hit(&sim,0,&h);
     require(!r.blocked && r.damage==100 && sim.events.count==2 &&
             !sim.events.item[1].outcome,"pure true damage publishes ordinary hit outcome");
-    setup(); sim.player.charge=1000; ember_sim_step(&sim,EMBER_U);
+    setup(); sim.player.charge=100; ember_sim_step(&sim,EMBER_U);
     require(!sim.player.charge && sim.player.action==EMBER_CAST,"U casts ultimate");
     setup(); ember_sim_step(&sim,EMBER_K); require(sim.player.cooldown_k,"K skill");
     setup(); ember_sim_step(&sim,EMBER_L); require(sim.player.cooldown_b,"L skill");
@@ -323,7 +323,8 @@ static void tests(void)
     setup(); target(0,20,10000); sim.tag_damage[0]=20;
     sim.attributes[EMBER_EMBER_DAMAGE]=120;
     ember_sim_step(&sim,EMBER_J); ember_sim_step(&sim,EMBER_J);
-    require(sim.enemies[0].hp==9957,"element and tag bonuses share increased damage zone");
+    require(sim.enemies[0].hp==9942,
+            "element and tag bonuses share increased zone on staff impact and splash");
     RESET(); h=(struct ember_attack){.base=100,.attack=100,.share={100,0,0,0,0,0}};
     d.active_block=1; d.block_strength=50; HIT(50,"active block");
     setup(); target(0,100,10000); ember_sim_status(&sim,0,EMBER_IGNITE,0);
