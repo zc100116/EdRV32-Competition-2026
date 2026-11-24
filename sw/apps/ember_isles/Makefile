@@ -17,7 +17,7 @@ PC := sw/lib/plat/pc.c sw/bsp/pc/soc.c sw/bsp/pc/cache.c tools/gpu/emu/gpu_emu.c
 BOARD := sw/lib/plat/board.c sw/bsp/start.S sw/bsp/host.c sw/bsp/cache.c \
     sw/drivers/uart.c sw/drivers/gpio.c sw/drivers/clint.c sw/drivers/es8156.c \
     sw/drivers/i2c.c sw/drivers/eth.c sw/lib/virtual_input.c sw/apps/gpu_hello/runtime.c
-HEADERS = $(wildcard $(APP)/src/*.h $(APP)/src/*/*.h $(APP)/src/*/*.inc \
+HEADERS = $(APP)/Makefile $(wildcard $(APP)/src/*.h $(APP)/src/*/*.h $(APP)/src/*/*.inc \
     $(ROOT)/sw/drivers/include/*.h $(ROOT)/sw/drivers/include/regs/*.h \
     $(ROOT)/sw/bsp/include/*.h $(ROOT)/sw/bsp/pc/include/*.h \
     $(ROOT)/sw/lib/plat/*.h $(ROOT)/tools/gpu/emu/*.h $(ROOT)/tools/gpu/emu/pc/*.h)

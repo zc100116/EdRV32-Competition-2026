@@ -1,5 +1,5 @@
-id,name,tags,rarity,element,shape,effect,damage,cooldown,radius,speed,duration,count,pierce,crit,level_max,unlock_cost
-firebolt,Cinder Bolt,ember|projectile,common,ember,projectile,aim_nearest,28,36,5,300,120,1,0,0,5,0
-fire_ring,Hearth Ring,ember|area,common,ember,area,radial_pulse,32,150,85,0,1,1,0,0,5,0
-embers,Ember Bed,ember|dot|area,common,ember,dot,ground_burn,7,120,48,0,150,1,0,0,5,0
-firepot,Fire Pot,ember|area|projectile,common,ember,lob,landing_explosion,48,180,60,180,60,1,0,0,5,0
+id,name,tags,rarity,element,shape,effect,damage,cooldown,radius,speed,duration,count,pierce,crit,level_max,unlock_cost,damage_per_level,spread_angle,area_frames,tick_interval,lob_speed_q16,lob_gravity_q16
+firebolt,Cinder Bolt,ember|projectile,common,ember,projectile,aim_nearest,28,36,5,300,120,1,0,0,5,0,25,1536,12,30,131072,4369
+fire_ring,Hearth Ring,ember|area,common,ember,area,radial_pulse,32,150,85,0,1,1,0,0,5,0,25,1536,12,30,131072,4369
+embers,Ember Bed,ember|dot|area,common,ember,dot,ground_burn,7,120,48,0,150,1,0,0,5,0,25,1536,12,30,131072,4369
+firepot,Fire Pot,ember|area|projectile,common,ember,lob,landing_explosion,48,180,60,180,60,1,0,0,5,0,25,1536,12,30,131072,4369

@@ -114,6 +114,12 @@ void ember_ui_build(struct ember_ui_canvas *out, const struct ember_sim *sim,
                     unsigned particles)
 {
     char text[128];
+    unsigned remaining = 0;
+    if (sim->wave) {
+        unsigned limit = (unsigned)ember_waves[sim->wave - 1].time_limit;
+        remaining = sim->wave_frame < limit ? (limit - sim->wave_frame + 59) / 60 : 0;
+        if (sim->rest) remaining = (sim->rest + 59) / 60;
+    }
     out->rect_count = 0;
     out->glyph_count = 0;
     if (sim->phase == EMBER_PLAY || sim->phase == EMBER_UPGRADE) {
@@ -126,7 +132,7 @@ void ember_ui_build(struct ember_ui_canvas *out, const struct ember_sim *sim,
             (unsigned)sim->player.max_hp, EMBER_HEALTH);
         panel(out, 230, 9, 180, 40, 0);
         (void)snprintf(text, sizeof(text), "WAVE %u / 5    %02u:%02u", (unsigned)sim->wave,
-                       (unsigned)sim->combat_frame / 3600, (unsigned)sim->combat_frame / 60 % 60);
+                       remaining / 60, remaining % 60);
         ember_ui_text(out, 242, 17, text, 0);
         ember_ui_text(out, 242, 33, sim->rest ? "GATHER THE EMBERS" : "THE TIDE APPROACHES", 0);
         panel(out, 426, 9, 204, 40, 0);
@@ -137,7 +143,7 @@ void ember_ui_build(struct ember_ui_canvas *out, const struct ember_sim *sim,
         panel(out, 10, 319, 408, 31, 0);
         (void)snprintf(text, sizeof(text), "Z DASH %u    X SEED %u    Z+X BURST %u%%",
                        sim->player.cooldown_a / 60, sim->player.cooldown_b / 60,
-                       sim->player.charge);
+                       sim->player.charge / 10);
         ember_ui_text(out, 20, 330, text, 0);
         (void)snprintf(text, sizeof(text), "BOLT %u RING %u BED %u POT %u",
                        sim->player.weapon_level[0], sim->player.weapon_level[1],
