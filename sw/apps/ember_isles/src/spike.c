@@ -113,8 +113,8 @@ int main(void)
         ember_gfx_prepare(&simulation, 60, &ui);
         uint32_t after_gfx = instret();
         for (unsigned j = 0; j < simulation.events.count; ++j) {
-            unsigned kind = simulation.events.item[j].kind;
-            ember_audio_event(kind);
+            const struct ember_event *event = &simulation.events.item[j];
+            ember_audio_result(event->kind, event->damage_type, event->outcome);
         }
         ember_audio_mix(samples, 800);
         uint32_t after_audio = instret();
