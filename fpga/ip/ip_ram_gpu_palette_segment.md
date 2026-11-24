@@ -28,11 +28,11 @@
 
 | 端口 | 方向 | 位宽 |
 |---|---|---|
-| `clk_a`、`clk_b`、`rst_a`、`rst_b` | in | 1 |
-| `clk_en_a`、`clk_en_b`、`wr_en_a`、`wr_en_b` | in | 1 |
-| `addr_a`、`addr_b` | in | 10 |
-| `wr_data_a`、`wr_data_b` | in | 20 |
-| `rd_data_a`、`rd_data_b` | out | 20 |
+| `a_clk`、`b_clk`、`a_rst`、`b_rst` | in | 1 |
+| `a_clk_en`、`b_clk_en`、`a_wr_en`、`b_wr_en` | in | 1 |
+| `a_addr`、`b_addr` | in | 10 |
+| `a_wr_data`、`b_wr_data` | in | 20 |
+| `a_rd_data`、`b_rd_data` | out | 20 |
 
 行为模型内容和数据寄存器不初始化、不复位。读使能控制阵列寄存器，输出寄存器
 每拍更新；同址读写模型返回旧值，业务不依赖该值。
