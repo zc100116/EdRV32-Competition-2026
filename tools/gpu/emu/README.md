@@ -6,7 +6,7 @@ Python model's integer algorithms. Arithmetic uses standard C and compiler
 on Windows and pthreads on Linux. `-DGPU_EMU_THREADS=1` removes the platform
 thread code and keeps the serial library. Public entry points are unchanged.
 
-`gpu_emu.h` fixes the five entry points: create/destroy, APB offset read/write,
+`gpu_emu.h` defines create/destroy, APB offset read/write,
 and IRQ level. The caller owns the entire DDR allocation starting at physical
 address zero and keeps it alive until destroy. Create returns NULL on allocation
 failure. DOORBELL executes the descriptor list synchronously. IRQ is the OR of
@@ -127,3 +127,26 @@ Indexed texture caches retain indices across per-quad palette-group changes;
 alpha blending still rounds source and destination products separately.
 Use `--revision <commit>` for the same instrumentation on historical C sources;
 its output directory is `build/ember-perf/profile-<commit>/`.
+
+Ember Isles E3 capacity and runtime measurements (tech 5a):
+
+```sh
+python3 tools/gpu/emu/capacity_test.py
+python3 tools/gpu/emu/pc/profile_ember.py --frames 10800 --texture-bytes 262144
+```
+
+`GPU_EMU_TEXTURE_BYTES` defaults to 196608 (hardware); PC builds can define
+262144 without changing command encoding or the rendering path. SET_TEX and
+TEX_LOAD use the same configured bound and retain error codes 3/4. The encoded
+texture start offset remains 18 bits, with 32-byte alignment. No other capacity
+is currently constrained by an emulator-local array: object tables live in DDR.
+`gpu_emu_usage()` reports lifetime texture end offset and submitted/alive object
+peaks, including across soft resets; it does not change GPU registers or PERF.
+The texture end offset measures required layout capacity, including any gaps.
+The PC BSP exposes the same values as `pc_soc_gpu_usage()`.
+
+The profiler records actual monotonic frame durations to
+`build/ember-perf/profile/frames.csv`, plus mean/p50/p95/p99/max and the number
+above 16.667 ms. It executes simulation, the real GPU command stream, audio
+refill and DISP composition; it does not sleep or call GDI/waveOut. GPU cycle
+counters remain zero: wall time is host software execution, not hardware cycles.

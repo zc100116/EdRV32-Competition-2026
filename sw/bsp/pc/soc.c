@@ -24,6 +24,16 @@ static uint8_t *ddr;
 static void *ddr_allocation;
 static size_t allocated;
 static struct gpu_emu *gpu;
+struct gpu_emu_usage pc_soc_gpu_usage(void) { return gpu_emu_usage(gpu); }
+static uint16_t game_keys;
+static struct plat_pointer_state game_pointer;
+void pc_soc_game_input(uint16_t keys, struct plat_pointer_state pointer)
+{
+    game_keys = keys;
+    game_pointer = pointer;
+}
+uint32_t pc_soc_game_keys(void) { return game_keys; }
+struct plat_pointer_state pc_soc_pointer(void) { return game_pointer; }
 static uint32_t disp[REG_WORDS];
 static uint32_t aud[REG_WORDS];
 static uint32_t pixels[1280 * 720];

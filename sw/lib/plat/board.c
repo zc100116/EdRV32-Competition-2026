@@ -122,6 +122,27 @@ uint32_t plat_keys(void)
     if (buttons & 8) keys |= PLAT_START;
     return keys;
 }
+uint32_t plat_game_keys(void)
+{
+    uint32_t saved;
+    __asm__ volatile ("csrrci %0, mstatus, 8" : "=r"(saved) :: "memory");
+    uint16_t keys = virtual_input_get().keys;
+    if (saved & 8) __asm__ volatile ("csrsi mstatus, 8" ::: "memory");
+    unsigned buttons = (~gpio_read()) & 15;
+    if (buttons & 1) keys |= VI_RIGHT;
+    if (buttons & 2) keys |= VI_LEFT;
+    if (buttons & 4) keys |= VI_A;
+    if (buttons & 8) keys |= VI_ENTER;
+    return virtual_input_game_keys(keys);
+}
+struct plat_pointer_state plat_pointer(void)
+{
+    uint32_t saved;
+    __asm__ volatile ("csrrci %0, mstatus, 8" : "=r"(saved) :: "memory");
+    struct virtual_input_state input = virtual_input_get();
+    if (saved & 8) __asm__ volatile ("csrsi mstatus, 8" ::: "memory");
+    return (struct plat_pointer_state){input.x / 2, input.y / 2, input.mouse};
+}
 uint32_t plat_millis(void)
 {
     return (uint32_t)((clint_time() - started) / (EDRV32_CLK_SYS_HZ / 1000));

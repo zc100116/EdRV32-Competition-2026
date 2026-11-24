@@ -31,6 +31,8 @@ void plat_init(void)
 }
 void plat_wait_vsync(void) { pc_soc_vsync(pc_frontend_wait()); }
 uint32_t plat_keys(void) { return pc_frontend_keys(); }
+uint32_t plat_game_keys(void) { return pc_soc_game_keys(); }
+struct plat_pointer_state plat_pointer(void) { return pc_soc_pointer(); }
 uint32_t plat_millis(void) { return pc_frontend_millis(); }
 void *plat_dma_alloc(size_t bytes, size_t alignment) { return pc_soc_alloc(bytes, alignment); }
 int plat_printf(const char *format, ...)

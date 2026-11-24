@@ -39,8 +39,14 @@ $(OUT)/gpu_hello.elf: $(addprefix $(ROOT)/,$(BOARD)) $(HEADERS)
 	    -ffunction-sections -fdata-sections -nostdlib \
 	    -Wl,--gc-sections -Tsw/bsp/ld/ddr.ld $(filter %.c %.S,$^) -lm -lc -lgcc -o $@
 .PHONY: test
-test: $(OUT)/soc_test
+test: $(OUT)/soc_test $(OUT)/platform_input_test
 	$(OUT)/soc_test
+	$(OUT)/platform_input_test
+$(OUT)/platform_input_test: $(addprefix $(ROOT)/,sw/bsp/pc/soc.c sw/lib/plat/pc.c \
+    sw/lib/virtual_input.c tools/gpu/emu/gpu_emu.c tools/gpu/emu/pc/platform_input_test.c \
+    sw/drivers/plic.c) $(HEADERS)
+	mkdir -p $(OUT)
+	$(CC) -pthread $(PCFLAGS) $(filter %.c,$^) -o $@
 $(OUT)/soc_test: $(addprefix $(ROOT)/,sw/bsp/pc/soc.c tools/gpu/emu/gpu_emu.c \
     tools/gpu/emu/pc/soc_test.c sw/drivers/plic.c) $(HEADERS)
 	mkdir -p $(OUT)

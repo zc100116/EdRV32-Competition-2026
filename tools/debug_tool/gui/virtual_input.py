@@ -10,7 +10,8 @@ from core.virtual_input import KEYS, channel
 KEY_MAP = {
     Qt.Key_Up: 'up', Qt.Key_W: 'up', Qt.Key_Down: 'down', Qt.Key_S: 'down',
     Qt.Key_Left: 'left', Qt.Key_A: 'left', Qt.Key_Right: 'right', Qt.Key_D: 'right',
-    Qt.Key_J: 'a', Qt.Key_K: 'b', Qt.Key_U: 'select', Qt.Key_I: 'start',
+    Qt.Key_J: 'a', Qt.Key_K: 'b', Qt.Key_Space: 'select', Qt.Key_I: 'start',
+    Qt.Key_L: 'l', Qt.Key_U: 'u', Qt.Key_Q: 'q', Qt.Key_F: 'f',
     Qt.Key_Return: 'enter', Qt.Key_Enter: 'enter', Qt.Key_Escape: 'esc', Qt.Key_Tab: 'next',
 }
 
@@ -102,9 +103,11 @@ class VirtualInputPanel(QWidget):
         positions = [('up', '↑  W/↑', 0, 1), ('left', '←  A/←', 1, 0),
                      ('down', '↓  S/↓', 1, 1), ('right', '→  D/→', 1, 2),
                      ('a', 'A  J', 0, 3), ('b', 'B  K', 1, 3),
-                     ('select', 'Select  U', 0, 4), ('start', 'Start  I', 1, 4),
+                     ('select', 'Select  空格', 0, 4), ('start', 'Start  I', 1, 4),
                      ('enter', '确认  Enter', 0, 5), ('esc', '返回  Esc', 1, 5),
-                     ('next', 'Next  Tab', 0, 6), ('prev', 'Prev  Shift+Tab', 1, 6)]
+                     ('next', 'Next  Tab', 0, 6), ('prev', 'Prev  Shift+Tab', 1, 6),
+                     ('l', '技能2  L', 2, 3), ('u', '大招  U', 2, 4),
+                     ('q', '换武器  Q', 2, 5), ('f', '互动  F', 2, 6)]
         for key, text, row, column in positions:
             button = QPushButton(text)
             self.buttons[key] = button
@@ -120,7 +123,7 @@ class VirtualInputPanel(QWidget):
         controls.addLayout(grid)
         controls.addStretch()
         layout.addLayout(controls)
-        help_text = QLabel('方向键 / WASD 移动 · J / K 为 A / B · U / I 为 Select / Start\n'
+        help_text = QLabel('方向键 / WASD 移动 · J / K 为 A / B · 空格 / I 为 Select / Start · L / U / Q / F 为游戏扩展键\n'
                            'Enter 确认 · Esc 返回 · Tab 下一项 · Shift+Tab 上一项\n'
                            '滚轮切换焦点 · 中键确认')
         help_text.setWordWrap(True)

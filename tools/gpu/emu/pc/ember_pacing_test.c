@@ -32,8 +32,10 @@ int main(void)
 {
     ember_game_init();
     ember_game_replay(20261124u);
-    for (millis = 0; millis <= 1023; millis += 33)
+    for (millis = 0; millis <= 1023; millis += 33) {
+        pc_soc_game_input(millis == 0 ? PLAT_KEY_ENTER : 0, (struct plat_pointer_state){0});
         ember_game_realtime(renders + 1);
+    }
     assert(renders == 32);
     assert(ember_game_state()->frame == 62);
     assert(fps == 31 && tick_rate == 60);

@@ -18,9 +18,38 @@ static WAVEHDR headers[16];
 static int16_t audio_buffers[16][512];
 static unsigned next_buffer;
 static uint32_t keys;
+static uint16_t game_keys;
+static struct plat_pointer_state pointer;
 static int running = 1;
 static LARGE_INTEGER frequency, origin, deadline, previous;
 static uint64_t sample_remainder;
+static double frame_times[600], work_times[600];
+static unsigned timing_count;
+static int timing_order(const void *a, const void *b)
+{
+    double x = *(const double *)a, y = *(const double *)b;
+    return (x > y) - (x < y);
+}
+static void report_timing(void)
+{
+    if (!timing_count) return;
+    double total = 0, work = 0;
+    for (unsigned i = 0; i < timing_count; ++i) {
+        total += frame_times[i];
+        work += work_times[i];
+    }
+    qsort(frame_times, timing_count, sizeof(*frame_times), timing_order);
+    qsort(work_times, timing_count, sizeof(*work_times), timing_order);
+    struct gpu_emu_usage usage = pc_soc_gpu_usage();
+    printf("PC frames=%u fps=%.2f frame_ms(mean/p95/max)=%.3f/%.3f/%.3f "
+           "game_gdi_ms(mean/p95/max)=%.3f/%.3f/%.3f tex_end=%u obj_slots=%u particles=%u\n",
+           timing_count, timing_count * 1000.0 / total, total / timing_count,
+           frame_times[timing_count * 95 / 100], frame_times[timing_count - 1],
+           work / timing_count, work_times[timing_count * 95 / 100],
+           work_times[timing_count - 1], usage.texture_bytes, usage.object_slots,
+           usage.objects_alive);
+    timing_count = 0;
+}
 static _Noreturn void win_error(const char *operation, unsigned long code)
 {
     fprintf(stderr, "%s failed: %lu\n", operation, code);
@@ -38,7 +67,29 @@ static void messages(void)
 static LRESULT CALLBACK procedure(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
     if (message == WM_DESTROY) { running = 0; PostQuitMessage(0); return 0; }
-    if (message == WM_KILLFOCUS) keys = 0;
+    if (message == WM_KILLFOCUS) {
+        keys = game_keys = pointer.buttons = 0;
+        pc_soc_game_input(game_keys, pointer);
+    }
+    if (message == WM_MOUSEMOVE || message == WM_LBUTTONDOWN ||
+        message == WM_LBUTTONUP || message == WM_RBUTTONDOWN || message == WM_RBUTTONUP ||
+        message == WM_MBUTTONDOWN || message == WM_MBUTTONUP) {
+        RECT client;
+        GetClientRect(hwnd, &client);
+        pointer.x = (int16_t)((int16_t)LOWORD(lparam) * 640 / client.right);
+        pointer.y = (int16_t)((int16_t)HIWORD(lparam) * 360 / client.bottom);
+        pointer.buttons = ((wparam & MK_LBUTTON) ? 1 : 0) |
+            ((wparam & MK_RBUTTON) ? 2 : 0) | ((wparam & MK_MBUTTON) ? 4 : 0);
+        if (message == WM_LBUTTONDOWN || message == WM_RBUTTONDOWN ||
+            message == WM_MBUTTONDOWN) SetCapture(hwnd);
+        if (!pointer.buttons) ReleaseCapture();
+        pc_soc_game_input(game_keys, pointer);
+        return 0;
+    }
+    if (message == WM_CAPTURECHANGED) {
+        pointer.buttons = 0;
+        pc_soc_game_input(game_keys, pointer);
+    }
     if (message == WM_KEYDOWN || message == WM_KEYUP) {
         uint32_t bit = 0;
         switch (wparam) {
@@ -52,6 +103,26 @@ static LRESULT CALLBACK procedure(HWND hwnd, UINT message, WPARAM wparam, LPARAM
         case VK_ESCAPE: bit = PLAT_SELECT; break;
         default: break;
         }
+        uint16_t game_bit = 0;
+        switch (wparam) {
+        case 'W': case VK_UP: game_bit = PLAT_KEY_W; break;
+        case 'A': case VK_LEFT: game_bit = PLAT_KEY_A; break;
+        case 'S': case VK_DOWN: game_bit = PLAT_KEY_S; break;
+        case 'D': case VK_RIGHT: game_bit = PLAT_KEY_D; break;
+        case 'J': game_bit = PLAT_KEY_J; break;
+        case 'K': game_bit = PLAT_KEY_K; break;
+        case 'L': game_bit = PLAT_KEY_L; break;
+        case 'U': game_bit = PLAT_KEY_U; break;
+        case 'Q': game_bit = PLAT_KEY_Q; break;
+        case 'F': game_bit = PLAT_KEY_F; break;
+        case VK_SPACE: game_bit = PLAT_KEY_SPACE; break;
+        case VK_ESCAPE: game_bit = PLAT_KEY_ESC; break;
+        case VK_RETURN: game_bit = PLAT_KEY_ENTER; break;
+        default: break;
+        }
+        if (message == WM_KEYDOWN) game_keys |= game_bit;
+        else game_keys &= (uint16_t)~game_bit;
+        pc_soc_game_input(game_keys, pointer);
         if (message == WM_KEYDOWN) keys |= bit;
         else keys &= ~bit;
         return 0;
@@ -92,7 +163,7 @@ uint32_t pc_frontend_wait(void)
     uint32_t frames = (uint32_t)(elapsed / (uint64_t)frequency.QuadPart);
     sample_remainder = elapsed % (uint64_t)frequency.QuadPart;
     previous = now;
-    if (now.QuadPart > deadline.QuadPart) deadline = now;
+    /* Keep an absolute cadence: Sleep's rounding must not accumulate each frame. */
     return frames;
 }
 uint32_t pc_frontend_keys(void) { messages(); return keys; }
@@ -152,12 +223,23 @@ int main(int argc, char **argv)
     previous = deadline;
     ShowWindow(window, SW_SHOW);
     for (unsigned frame = 1; running; ++frame) {
+        LARGE_INTEGER begin, submitted, composed, finished;
+        QueryPerformanceCounter(&begin);
         messages();
         ember_game_realtime(frame);
+        QueryPerformanceCounter(&submitted);
         plat_wait_vsync();
+        QueryPerformanceCounter(&composed);
         InvalidateRect(window, NULL, FALSE);
         UpdateWindow(window);
+        QueryPerformanceCounter(&finished);
+        frame_times[timing_count] = (finished.QuadPart - begin.QuadPart) * 1000.0 /
+            frequency.QuadPart;
+        work_times[timing_count] = ((submitted.QuadPart - begin.QuadPart) +
+            (finished.QuadPart - composed.QuadPart)) * 1000.0 / frequency.QuadPart;
+        if (++timing_count == 600) report_timing();
     }
+    report_timing();
     waveOutReset(audio);
     for (unsigned i = 0; i < 16; ++i) if (headers[i].dwFlags & WHDR_PREPARED)
         waveOutUnprepareHeader(audio, &headers[i], sizeof(headers[i]));
