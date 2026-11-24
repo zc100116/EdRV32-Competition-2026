@@ -15,7 +15,7 @@ TEXT = {'id', 'name', 'tags', 'effect', 'attribute', 'calculation', 'passive', '
 def convert():
     out = ROOT / 'build/ember_isles/generated'
     out.mkdir(parents=True, exist_ok=True)
-    lines = ['/* Generated from data/*.csv; gdd 10. */', '#ifndef EMBER_DATA_H',
+    lines = ['/* Generated from the data CSV tables; gdd 10. */', '#ifndef EMBER_DATA_H',
              '#define EMBER_DATA_H', '#include <stdint.h>']
     for path in sorted((APP / 'data').glob('*.csv')):
         with path.open(encoding='utf-8', newline='') as stream:
