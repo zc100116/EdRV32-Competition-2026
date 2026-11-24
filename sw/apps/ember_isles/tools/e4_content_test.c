@@ -968,6 +968,7 @@ static void upgrade_fillers(void)
         CHECK(fixture.gold == (reward == EMBER_DATA_UPGRADE_FILLERS_GOLD ? 50u : 10u));
         CHECK(fixture.oil == (reward == EMBER_DATA_UPGRADE_FILLERS_OIL ? 3000 : 0));
         CHECK(!memcmp(attributes, fixture.attributes, sizeof(attributes)));
+        row("upgrade_fillers", ember_upgrade_fillers[reward].id);
     }
 }
 int main(void)

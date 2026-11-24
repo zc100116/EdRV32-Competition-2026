@@ -1,94 +1,83 @@
 # C 第一版集成报告（进行中）
 
-状态：E3系统与平台已集成，Windows帧率待实测；E4待玩法决议，ART3容量失败，E5/新音频未完成。
-集成908da6ff7，GPU/PC性能dc323266c；规格gdd/tech v2.0，蓄力4a5df57c0、内容8b7645861。
-本报告为工作中记录，不能作为完整 C 第一版验收通过的依据。
-旧ART2（2d4e370a7）用户否决；b4efbe59f新样张画风已认可，按AI生图+网格规范化+人工修整生产。
-E3模拟551ca8366/ef9fb9725；平台f33181ace/a20fe0023/10f5e5b12/7591a2056。
-E3返工13879d601：致命冻结铁命中碎裂，死亡计数一次；补闪避/格挡结果事件。
-纯真伤不误报格挡；正式测试覆盖致命/非致命碎裂及玩家和敌人的结果事件。
-集成908da6ff7：PC纹理256KiB；菜单鼠标转换为录像里的方向/确认键。
-旧plat_keys保持兼容；plat_game_keys返回16位键位图；菜单指针640×360。
-E4已实现弓/火铳/大剑及爆核松键蓄力攻击；其他类别按住持续攻击，里程碑尚未验收。
+结论：完整C版未完成；E4已提交但未验收，E5、完整ART3和新音频仍缺。
+游戏代码b871ee706；规格gdd/tech v2.0；字体准备0d8c859ec。
+E3模拟13879d601，平台10f5e5b12，GPU等价性能优化dc323266c。
+E4员工提交见report-e4.md；PM修复c99be1151、8e7d2e950、b871ee706。
+E4四项玩法待答：沙漏消费时机、中性减速、影步朝向窗口、灯匠重整叠加。
+另待冻结混伤元素提高的份额算法及伤害数字颜色口径；未自行改动。
 
-四目标构建与五组测试通过，构建0 warning/0 error：
+四目标及五组系统测试通过，GCC13.3/Zig0.17/xPack15.2，C11/Wall/Wextra/Werror。
 ```sh
 . ~/.local/opt/edrv32/env.sh
 make -C sw/apps/ember_isles all test -j1
+python3 sw/apps/ember_isles/tools/e4_verify.py
 ```
-日志：build/g2/e3-integrated-build.log；GCC13.3/Zig0.17/xPack15.2，C11/Wall/Wextra/Werror。
-Windows仅交叉编译，未实机运行；板上仅构建，FPGA移植不在本包。
-可执行文件：outputs/ember_isles/ember_isles.exe（E3占位画面，非完整发行版）。
+日志build/g2/e4-fillers-build.log：warning/error均0；E4共8087条断言通过。
+原194项覆盖加3种资源补位，表由工具生成到build/ember_isles/e4-coverage.csv，不入库。
+Windows与board仅构建，未实机运行；FPGA移植不在本包。
 
-E3基线录像：assets/replays/coast.txt，seed20261124，10800帧；第9947帧清第5波。
-PC/Spike每60帧180组摘要一致；双实例逐帧全状态一致；230击杀/260生命/14级。
-原始数据：build/g2/g22b-{pc-summary,baseline-summary,spike}.log。
-按最终模拟13879d601的Spike日志汇总（每帧10800行）：
-| 分项 | 平均instret | 最大instret | 最大周期估计(CPI1.3) |
+长录像发现第6984帧、12升13级时第三次抽取空升级池，导致除零/SIGILL。
+已按GDD6补位：回复30%生命、金币40、灯油30，初值在upgrade_fillers.csv。
+选择kind5、中文说明、0/1/2普通候选及资源/属性回归已实现；不是完整满槽替换流程。
+调试记录docs/debug/2026-11-24-upgrade-pool-exhaustion.md；基线8e7d2e950。
+修复版ASan/UBSan运行满10800输入帧无异常；旧工具因胜利断言返回1。
+旧E3输入在新内容中停于升级界面，不能作为E4通关证据，E5必须重录。
+
+跨平台样本：b871ee706、seed20261124、10800输入帧、9264战斗tick。
+PC/Spike每60帧180组字段摘要完全相同；两端END,10800,2,5（升级界面/第5波）。
+原始日志build/g2/e4-fixed-{pc,spike}.log；汇总e4-cross-summary.txt；PC音频欠载0。
+复现（在本报告提交构建，游戏逻辑与样本相同）：
+```sh
+build/ember_isles/ember_isles --replay sw/apps/ember_isles/assets/replays/coast.txt > build/g2/e4-fixed-pc.log
+spike --isa=rv32im_zicsr_zicntr --priv=m --pmpregions=0 --no-dm --disable-dtb \
+  -m0x80000000:0x40000000 --pc=0x80000000 build/ember_isles/ember_isles-spike.elf > build/g2/e4-fixed-spike.log
+python3 sw/apps/ember_isles/tools/compare_replay.py build/g2/e4-fixed-pc.log build/g2/e4-fixed-spike.log
+```
+Spike实测每帧10800行；表现仅CPU准备，不含GPU/MMIO提交；CPI1.3为估计。
+| 分项 | 平均instret | 最大instret | 最大周期估计 |
 |---|---:|---:|---:|
-| 模拟 | 66808.30 | 108007 | 140409.10 |
-| 表现准备 | 167506.17 | 255791 | 332528.30 |
-| 音频 | 61437.28 | 129298 | 168087.40 |
-| 同帧合计 | 295751.74 | 477568 | 620838.40 |
-音频峰值超15万周期分项预算12.06%；表现不含GPU/MMIO提交，CPI仍待上板测量。
+| 模拟 | 97395.74 | 274860 | 357318.0 |
+| 表现准备 | 157598.15 | 235403 | 306023.9 |
+| 旧音频 | 58888.03 | 129535 | 168395.5 |
+| 同帧合计 | 313881.91 | 623059 | 809976.7 |
+音频峰值超过15万周期分项预算12.26%；总计不是各分项峰值相加。
+功能模型GPU周期PERF仍为0，硬件GPU时钟预算未测，不能据PC墙钟推算。
 
-03平台实测：10800帧墙钟mean/p95/p99/max=9.956/16.557/23.173/62.689ms。
-510/10800帧超16.667ms（4.722%），共享主机调度包含在内，不能宣称稳定60Hz。
-繁忙600帧：GPU84.29%、DISP12.58%、模拟0.70%、表现准备0.59%、音频0.34%。
-详见report-e3-platform.md；build/ember-perf/e3-before/{profile.log,frames.csv,replay.log}。
-08性能优化dc323266c：最近邻缓存复用、调色板延迟展开、并行只读共享、DISP行循环优化。
-同10800帧CPU均值8.717→6.937ms（−20.42%），CPU p99 16.919→14.890ms。
-墙钟均值10.463→9.460ms，但p99 28.377ms、894帧超16.667ms，不能宣称稳定60Hz。
-08按failed结算；接受等价优化，E3帧率由用户Windows实测判定，详见report-e3-performance.md。
-优化前后180组STATE及10800行PERF一致；不改模拟，不重复Spike。
-GPU逐位：121个GT与43863次自测通过，沿用C API不支持的AXI错误注入跳过项。
-GPU功能模型周期PERF仍为0，GPU时钟预算未测定；不能据墙钟推算硬件周期。
+PC稳定60帧未验收，本报告未取得用户Windows实测frame-times.txt。
+E3优化同10800帧CPU均值8.717→6.937ms，CPU p99 16.919→14.890ms。
+共享Linux墙钟均值9.460ms、p99 28.377ms，894帧超16.667ms；详report-e3-performance.md。
+GPU逐位等价优化曾通过121个GT和43863次自测，沿用C API不支持的AXI注入跳过项。
+新E4尚未做稳定帧率验收；旧占位图集65600B，不冒充三关量产纹理统计。
 
-当前纹理布局65600B/硬件196608B，低于预算131008B；PC容量262144B。
-提交对象槽峰值8000，存活粒子140，敌人19，模拟弹33；未验证1500/3000/8000存活目标。
-以上是五波海岸测量，不冒充未来两模式三关的各关容量统计。
-| 产物 | text B | data B | bss B |
+| b871ee706产物 | text B | data B | bss B |
 |---|---:|---:|---:|
-| Linux | 239175 | 11388 | 4507016 |
-| Windows | 431210 | 528 | 0 |
-| board | 206832 | 1752 | 67865564 |
-| Spike | 237496 | 1744 | 9025592 |
-BSS包括固定实体/录像池，board还包括64MiB平台DMA池；Windows列仅照录GNU size输出。
-以上为GNU size口径，不是进程运行时内存；PC列为dc323266c，最终内容/图集变化后须重测。
+| Linux | 369789 | 73204 | 5275944 |
+| Windows | 578526 | 528 | 0 |
+| board | 325692 | 1752 | 68635548 |
+| Spike | 356540 | 1744 | 9794252 |
+GNU size口径，text含只读数据，不是进程运行时内存；Windows BSS照录工具输出。
+board BSS含64MiB平台DMA池；新中文字体未链接入这些产物，最终素材后须重测。
 
-E3截图：outputs/ember_isles/e3/{combat,upgrade,weapon-swap}.png，1280×720。
-E3视频：outputs/ember_isles/e3/systems-30s.mp4，30秒/30fps，录像前1800模拟帧每2帧采样。
-视频无音轨，仅展示系统；占位素材、旧英文HUD与旧键位标签仍待E5/美术替换。
-捕获：908da6ff7，build/g2/e3-capture.log；帧PNG在build/g2/e3-frames/，音频欠载0。
-编码：ffmpeg7.0.2-static，libx264，-threads 1 -crf20 -pix_fmt yuv420p。
+旧ART2被用户否决；b4efbe59f新样张画风确认，采用AI生图+网格规范化+人工修整。
+06a以failed结算，b20b77328；仅守火人检查点与容量试样，不是完整海岸包。
+I8精确部件基础163840B、爆核196608B，分别超98304B常驻半区65536B、98304B。
+I4比较为69632B、81920B；加其他项预留估算仍超，完整常驻/场景包未实测。
+每帧41–91个4x4小quad的测量不是最终语义共骨架方案；还有36姿势尺寸告警待核对。
+检视outputs/ember_isles/art3-coast-assets/index.html；I4比较keeper-i4-comparison.html。
+待协调者决定I8共骨架重构或I4例外；提案build/g2/subtasks/06a2-art3-semantic-parts.md。
 
-tech7自评：帧率未达标；美术/完整动作/大招全屏/中文图标界面未达标；规模未测。
-已有火花/闪白/击退/爆散/飘字仅E2占位表现，不算ART-3通过；灯火状态未完整可视化。
-旧音乐与十音效仍在，音频质量未通过；新音乐待制作、授权写CREDITS。
-尚缺：E4四项玩法答复、两模式三关/局外/经济、完整回放与各关统计。
-尚缺：ART-3全套、完整音频、每个后续里程碑截图视频和最终Windows试玩；新方向已确认。
-当前exe含dc323266c优化；另存ember_isles-e3-optimized.exe，区别于用户此前下载的908da6ff7版。
-04与06a均以failed结算；已保留提交，等待协调者处理决议和后续派发。
-后续：06b真实GPU海岸验证交用户，再扩三关；完整ART3/音频及两模式三关未完成。
-录像配置快照/相对动作计时契约已确认待后续接入；E3 Windows帧率仍待frame-times.txt。
+中文字体：0d8c859ec保存Fusion Pixel 12px原始BDF/OFL及上游许可，显式补U+2212减号。
+初次CPU子集690字形/22080B；当前工具按CSV与UI重生成，GPU界面缓存尚未接入。
+CPU字体预览outputs/ember_isles/font-cpu-preview.png，不算中文HUD完成。
+音乐候选4首Eric Skiff（原页CC BY4.0），音效候选11个Kenney官方仓库OGG（CC0）。
+原始来源/许可/文件已保存build/g2/audio-research/，未试听验收或链接进游戏。
+30秒试听outputs/ember_isles/audio-candidates/candidate-{1,2,3,4}.wav及CREDITS.txt。
+07音频任务已备好，等待协调者代派；最终授权与字体统一汇入assets/CREDITS.md。
 
-中文字体准备：Fusion Pixel 12px zh_Hans 2026.11.10，OFL及上游许可原文随assets/fonts保留。
-font_convert.py按当前CSV/UI提取690字形，位图16560B，C结构22080B；额外提供原生U+2212减号。
-命令：python3 sw/apps/ember_isles/tools/font_convert.py；C11/Wall/Wextra/Werror头文件编译及字形检查通过。
-CPU预览：outputs/ember_isles/font-cpu-preview.png；尚未接入GPU界面，不算中文HUD完成。
-
-E4提交ba87460fd/a30712bff/c0a9f3541/cf0a84583/619e91951/db40d6b7a/6391ae272。
-191项内容+3召唤模板，194行覆盖；员工8053断言通过，另有四项玩法ask未答，详见report-e4.md。
-PM修复crit/on_crit子串误匹配；e4_verify.py通过8060断言，8角色各180tick双实例一致，0告警。
-PM复核日志build/g2/e4-tag-fix.log；E4实际GPU截图及30秒视频outputs/ember_isles/e4/content-30s.mp4。
-06a提交b20b77328；I8角色部件基础163840B/爆核196608B，分别超96KiB半区65536B/98304B。
-I4部件69632B/81920B仍未计完整VFX/UI/字形，另有36姿势尺寸失败；完整海岸包未交付。
-待决定：语义共骨架重构或I4例外；不以4x4块每帧约58quad方案作为合格表现，性能未测。
-
-PM集成补验：修复RV32摘要charge_frames格式类型及E4测试遗漏sim.c依赖；四目标构建/五组系统测试通过。
-命令仍为make all test -j1；日志build/g2/e4-integrated-build.log，warning/error均0；E4复核8060断言通过。
-
-E4长录像在6984帧因第三次升级抽取空池崩溃；已按GDD6接入3种资源补位（选择kind5/CSV初值）。
-0/1/2普通候选与资源效果回归通过，总8087断言；四目标/五组系统测试再次通过，日志e4-fillers-build.log。
-修复版10800帧ASan/UBSan无异常，旧工具因未通关退出1；旧输入停升级，不能充当E4胜利证据。
-调试记录：docs/debug/2026-11-24-upgrade-pool-exhaustion.md；PC/Spike与分项instret待本次长录像复核。
+E3截图及视频outputs/ember_isles/e3/；E4四图outputs/ember_isles/e4/frame*.png。
+E4 content-30s.mp4：实际GPU路径，640×360、15fps、450帧、30秒，3864621B，无音轨。
+E3/E4视频均沿用旧占位美术/HUD，不是ART3质量通过；各关实体/粒子峰值尚未测全。
+tech7自评：稳定帧率、量产美术/完整动作/VFX、中文图标界面、规模及声音均未达最终验收。
+outputs/ember_isles/ember_isles.exe仍为此前E3优化版；最终两模式三关Windows发行版尚未生成。
+下一步：答复E4玩法、派07、决定容量工艺，再完成06b实际海岸、05模式及06c其余素材。
