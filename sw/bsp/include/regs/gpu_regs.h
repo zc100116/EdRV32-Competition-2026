@@ -682,7 +682,7 @@
 
 /* gpu-spec.md 2.3, 2.11; little endian 32-bit words. */
 #define EDRV32_GPU_CMD_RESOLVE_SIZE 0x00000020u
-/* Surface base 4 KiB aligned, stride 32 B multiple; region in screen coordinates, X0/X1 multiples of 16, X1/Y1 exclusive. */
+/* Surface base 4 KiB aligned, stride 32 B multiple; region in screen coordinates, X0/X1 multiples of 4, X1/Y1 exclusive. */
 #define EDRV32_GPU_CMD_RESOLVE_OPCODE_OFFSET 0x00000000u
 /* gpu-spec.md 2.3, 2.11 */
 #define EDRV32_GPU_CMD_RESOLVE_OPCODE_POS 0x00000000u

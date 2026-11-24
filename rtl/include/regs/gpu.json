@@ -1182,7 +1182,7 @@
           "spec": "gpu-spec.md 2.3, 2.11"
         }
       ],
-      "note": "Surface base 4 KiB aligned, stride 32 B multiple; region in screen coordinates, X0/X1 multiples of 16, X1/Y1 exclusive."
+      "note": "Surface base 4 KiB aligned, stride 32 B multiple; region in screen coordinates, X0/X1 multiples of 4, X1/Y1 exclusive."
     },
     {
       "name": "VERTEX",
