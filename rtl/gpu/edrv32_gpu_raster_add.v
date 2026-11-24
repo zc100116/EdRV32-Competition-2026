@@ -12,23 +12,24 @@ module edrv32_gpu_raster_add (
     input wire [69:0] b_i,
     output wire [69:0] sum_o
 );
+    // Four carry stages: one 20/20/20/10-bit slice adder per enabled clock.
     reg [69:0] unused_a_0_r;
     reg [69:0] unused_b_0_r;
-    reg [69:0] sum_0_r;
+    reg [19:0] sum_0_r;
     reg carry_0_r;
     wire [20:0] unused_slice_0_w;
     assign unused_slice_0_w = {1'b0, a_i[0 +: 20]} +
         {1'b0, b_i[0 +: 20]};
     reg [69:0] unused_a_1_r;
     reg [69:0] unused_b_1_r;
-    reg [69:0] sum_1_r;
+    reg [39:0] sum_1_r;
     reg carry_1_r;
     wire [20:0] unused_slice_1_w;
     assign unused_slice_1_w = {1'b0, unused_a_0_r[20 +: 20]} +
         {1'b0, unused_b_0_r[20 +: 20]} + {20'b0, carry_0_r};
     reg [69:0] unused_a_2_r;
     reg [69:0] unused_b_2_r;
-    reg [69:0] sum_2_r;
+    reg [59:0] sum_2_r;
     reg carry_2_r;
     wire [20:0] unused_slice_2_w;
     assign unused_slice_2_w = {1'b0, unused_a_1_r[40 +: 20]} +
@@ -44,23 +45,19 @@ module edrv32_gpu_raster_add (
         if (en_i) begin
             unused_a_0_r <= a_i;
             unused_b_0_r <= b_i;
-            sum_0_r <= 70'b0;
-            sum_0_r[0 +: 20] <= unused_slice_0_w[19:0];
+            sum_0_r <= unused_slice_0_w[19:0];
             carry_0_r <= unused_slice_0_w[20];
             unused_a_1_r <= unused_a_0_r;
             unused_b_1_r <= unused_b_0_r;
-            sum_1_r <= sum_0_r;
-            sum_1_r[20 +: 20] <= unused_slice_1_w[19:0];
+            sum_1_r <= {unused_slice_1_w[19:0], sum_0_r};
             carry_1_r <= unused_slice_1_w[20];
             unused_a_2_r <= unused_a_1_r;
             unused_b_2_r <= unused_b_1_r;
-            sum_2_r <= sum_1_r;
-            sum_2_r[40 +: 20] <= unused_slice_2_w[19:0];
+            sum_2_r <= {unused_slice_2_w[19:0], sum_1_r};
             carry_2_r <= unused_slice_2_w[20];
             unused_a_3_r <= unused_a_2_r;
             unused_b_3_r <= unused_b_2_r;
-            sum_3_r <= sum_2_r;
-            sum_3_r[60 +: 10] <= unused_slice_3_w[9:0];
+            sum_3_r <= {unused_slice_3_w[9:0], sum_2_r};
         end
     end
 endmodule
