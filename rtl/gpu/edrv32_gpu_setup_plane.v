@@ -28,209 +28,280 @@ module edrv32_gpu_setup_plane (
     output wire [57:0] plane_normal_o
 );
     reg [14:0] valid_r;
-    reg [6:0] tag_r [0:14];
-    reg signed [9:0] h_r [0:14];
-    reg [32:0] first_r [0:12];
-    reg [30:0] reciprocal_r [0:5];
-    reg [5:0] exponent_r [0:8];
-    reg [35:0] offset_r [0:9];
-    reg signed [33:0] difference_r [0:1];
+    wire [6:0] tag_w [0:14];
+    wire signed [9:0] h_pipe_w [0:14];
+    wire [32:0] first_w [0:12];
+    wire [30:0] reciprocal_w [0:5];
+    wire [5:0] exponent_w [0:8];
+    wire [35:0] offset_w [0:9];
+    wire signed [33:0] difference_w [0:1];
     reg [71:0] delta_r;
-    reg signed [51:0] product_r [0:3][1:3];
-    reg signed [55:0] numerator_r [0:1][4:5];
-    reg signed [86:0] inverse_product_r [0:1][6:8];
-    reg signed [55:0] gradient_r [0:1][9:14];
-    reg signed [73:0] origin_product_r [0:1][10:12];
-    reg signed [69:0] start_r [13:14];
-    reg [57:0] normal_r;
-    reg [50:0] maximum_w;
-    reg signed [9:0] h_w;
-    reg [32:0] scaled_w [0:2];
-    reg signed [74:0] origin_sum_w;
-    reg signed [74:0] origin_magnitude_w;
-    reg signed [74:0] origin_rounded_w;
-    wire signed [55:0] rounded_gradient_w [0:1];
-    wire [57:0] normal_w;
-    integer index_w;
-    integer stage_r;
-    integer axis_r;
-
-    function [32:0] scale_value;
-        input [50:0] value_i;
-        input signed [9:0] amount_i;
-        reg [51:0] unused_shifted;
-        begin
-            if (amount_i > 0) begin
-                unused_shifted = ({1'b0, value_i} + (52'd1 << (amount_i - 1))) >> amount_i;
-            end else begin
-                unused_shifted = {1'b0, value_i} << -amount_i;
-            end
-            scale_value = unused_shifted[32:0];
-        end
-    endfunction
-
-    function signed [55:0] round_gradient;
-        input signed [86:0] value_i;
-        input [5:0] exponent_i;
-        reg [86:0] magnitude;
-        reg [87:0] unused_rounded;
-        begin
-            magnitude = value_i[86] ? -value_i : value_i;
-            unused_rounded = ({1'b0, magnitude} + (88'd1 << (29 + exponent_i)))
-                >> (30 + exponent_i);
-            round_gradient = value_i[86] ? -unused_rounded[55:0] : unused_rounded[55:0];
-        end
-    endfunction
-
-    function [28:0] normal_gradient;
-        input signed [55:0] value_i;
-        input signed [9:0] exponent_i;
-        reg [55:0] magnitude;
-        reg [56:0] rounded;
-        reg signed [9:0] result_exponent;
-        reg [17:0] mantissa;
-        integer leading;
-        integer amount;
-        integer bit_index;
-        begin
-            magnitude = value_i[55] ? -value_i : value_i;
-            leading = 0;
-            for (bit_index = 0; bit_index < 56; bit_index = bit_index + 1) begin
-                if (magnitude[bit_index]) begin
-                    leading = bit_index;
-                end
-            end
-            amount = leading - 17;
-            if (amount > 0) begin
-                rounded = ({1'b0, magnitude} + (57'd1 << (amount - 1))) >> amount;
-            end else begin
-                rounded = {1'b0, magnitude} << -amount;
-            end
-            if (rounded[18]) begin
-                rounded = rounded >> 1;
-                amount = amount + 1;
-            end
-            mantissa = rounded[17:0];
-            result_exponent = exponent_i + amount[9:0];
-            normal_gradient = magnitude == 0 ? 29'd0
-                : {result_exponent, value_i[55], mantissa};
-        end
-    endfunction
-
+    wire signed [51:0] product_w [0:3];
+    wire signed [73:0] origin_product_w [0:1];
+    wire [28:0] normal_w [0:1];
+    wire [32:0] scaled_w [0:2];
+    wire [50:0] maximum_01_w;
+    wire [50:0] maximum_w;
+    wire signed [9:0] h_w;
+    assign maximum_01_w = plane_value_i[101:51] > plane_value_i[50:0]
+        ? plane_value_i[101:51] : plane_value_i[50:0];
+    assign maximum_w = plane_value_i[152:102] > maximum_01_w
+        ? plane_value_i[152:102] : maximum_01_w;
+    // Input stage: two maximum comparators, one six-level leading-one tree.
+    wire [63:0] leading_data64_w;
+    wire [5:0] leading_w;
+    wire leading_bit0_w;
+    wire leading_bit1_w;
+    wire leading_bit2_w;
+    wire leading_bit3_w;
+    wire leading_bit4_w;
+    wire leading_bit5_w;
+    assign leading_w = {leading_bit5_w, leading_bit4_w, leading_bit3_w,
+        leading_bit2_w, leading_bit1_w, leading_bit0_w};
+    assign leading_data64_w = {13'd0, maximum_w};
+    wire [31:0] leading_data32_w;
+    assign leading_bit5_w = |leading_data64_w[63:32];
+    assign leading_data32_w = leading_bit5_w
+        ? leading_data64_w[63:32] : leading_data64_w[31:0];
+    wire [15:0] leading_data16_w;
+    assign leading_bit4_w = |leading_data32_w[31:16];
+    assign leading_data16_w = leading_bit4_w
+        ? leading_data32_w[31:16] : leading_data32_w[15:0];
+    wire [7:0] leading_data8_w;
+    assign leading_bit3_w = |leading_data16_w[15:8];
+    assign leading_data8_w = leading_bit3_w
+        ? leading_data16_w[15:8] : leading_data16_w[7:0];
+    wire [3:0] leading_data4_w;
+    assign leading_bit2_w = |leading_data8_w[7:4];
+    assign leading_data4_w = leading_bit2_w
+        ? leading_data8_w[7:4] : leading_data8_w[3:0];
+    wire [1:0] unused_leading_data2_w;
+    assign leading_bit1_w = |leading_data4_w[3:2];
+    assign unused_leading_data2_w = leading_bit1_w
+        ? leading_data4_w[3:2] : leading_data4_w[1:0];
+    assign leading_bit0_w = unused_leading_data2_w[1];
+    assign h_w = plane_tag_i[2:0] == 0 ? -10'sd16 :
+        plane_tag_i[2:0] < 4 ? (maximum_w == 0 ? -10'sd32 :
+        $signed({4'd0, leading_w}) - 10'sd31) : -10'sd8;
     assign plane_valid_o = valid_r[14];
-    assign plane_tag_o = tag_r[14];
-    assign plane_start_o = start_r[14];
-    assign plane_gradient_o = {gradient_r[1][14], gradient_r[0][14]};
-    assign plane_h_o = h_r[14];
-    assign plane_normal_o = normal_r;
-
-    assign rounded_gradient_w[0] = round_gradient(inverse_product_r[0][8], exponent_r[8]);
-    assign rounded_gradient_w[1] = round_gradient(inverse_product_r[1][8], exponent_r[8]);
-    assign normal_w = {
-        normal_gradient(gradient_r[1][13], h_r[13]
-            - (tag_r[13][2:0] == 1 ? 10'sd30 : 10'sd38)),
-        normal_gradient(gradient_r[0][13], h_r[13]
-            - (tag_r[13][2:0] == 1 ? 10'sd30 : 10'sd38))};
-
-    always @(*) begin
-        maximum_w = plane_value_i[50:0];
-        h_w = -10'sd8;
-        for (index_w = 1; index_w < 3; index_w = index_w + 1) begin
-            if (plane_value_i[index_w * 51 +: 51] > maximum_w) begin
-                maximum_w = plane_value_i[index_w * 51 +: 51];
-            end
+    assign plane_tag_o = tag_w[14];
+    assign plane_h_o = h_pipe_w[14];
+    assign plane_normal_o = {normal_w[1], normal_w[0]};
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) valid_r <= 15'd0;
+        else if (stop_i) valid_r <= 15'd0;
+        else if (enable_i) valid_r <= {valid_r[13:0], plane_valid_i};
+    end
+    always @(posedge clk_i) begin
+        if (enable_i) delta_r <= plane_delta_i;
+    end
+    genvar vertex;
+    generate
+        // Three independent 52-bit rounding adders and shifters before stage 0.
+        for (vertex = 0; vertex < 3; vertex = vertex + 1) begin : g_scale
+            wire [50:0] value_w;
+            wire [51:0] unused_shifted_w;
+            assign value_w = plane_value_i[vertex*51 +: 51];
+            assign unused_shifted_w = h_w > 0
+                ? ({1'b0, value_w} + (52'd1 << (h_w - 10'sd1))) >> h_w
+                : {1'b0, value_w} << -h_w;
+            assign scaled_w[vertex] = unused_shifted_w[32:0];
         end
-        if (plane_tag_i[2:0] == 0) begin
-            h_w = -10'sd16;
-        end else if (plane_tag_i[2:0] < 4) begin
-            h_w = -10'sd32;
-            for (index_w = 0; index_w < 51; index_w = index_w + 1) begin
-                if (maximum_w[index_w]) begin
-                    h_w = index_w[9:0] - 10'sd31;
+    endgenerate
+    genvar stage;
+    generate
+        // Metadata delay: each stage owns its scalar registers and one write per register.
+        for (stage = 0; stage < 15; stage = stage + 1) begin : g_metadata
+            reg [6:0] tag_r;
+            reg signed [9:0] h_r;
+            assign tag_w[stage] = tag_r;
+            assign h_pipe_w[stage] = h_r;
+            always @(posedge clk_i) begin
+                if (enable_i) begin
+                    tag_r <= stage == 0 ? plane_tag_i : tag_w[stage == 0 ? 0 : stage-1];
+                    h_r <= stage == 0 ? h_w : h_pipe_w[stage == 0 ? 0 : stage-1];
+                end
+            end
+            if (stage < 13) begin : g_first
+                reg [32:0] value_r;
+                assign first_w[stage] = value_r;
+                always @(posedge clk_i) begin
+                    if (enable_i) value_r <= stage == 0 ? scaled_w[0]
+                        : first_w[stage == 0 ? 0 : stage-1];
+                end
+            end
+            if (stage < 6) begin : g_reciprocal
+                reg [30:0] value_r;
+                assign reciprocal_w[stage] = value_r;
+                always @(posedge clk_i) begin
+                    if (enable_i) value_r <= stage == 0 ? plane_reciprocal_i
+                        : reciprocal_w[stage == 0 ? 0 : stage-1];
+                end
+            end
+            if (stage < 9) begin : g_exponent
+                reg [5:0] value_r;
+                assign exponent_w[stage] = value_r;
+                always @(posedge clk_i) begin
+                    if (enable_i) value_r <= stage == 0 ? plane_exponent_i
+                        : exponent_w[stage == 0 ? 0 : stage-1];
+                end
+            end
+            if (stage < 10) begin : g_offset
+                reg [35:0] value_r;
+                assign offset_w[stage] = value_r;
+                always @(posedge clk_i) begin
+                    if (enable_i) value_r <= stage == 0 ? plane_offset_i
+                        : offset_w[stage == 0 ? 0 : stage-1];
                 end
             end
         end
-        for (index_w = 0; index_w < 3; index_w = index_w + 1) begin
-            scaled_w[index_w] = scale_value(plane_value_i[index_w * 51 +: 51], h_w);
+    endgenerate
+    genvar product;
+    generate
+        // Four 34x18 multipliers, registered at stages 1, 2 and 3.
+        for (product = 0; product < 4; product = product + 1) begin : g_product
+            reg signed [51:0] product_1_r;
+            reg signed [51:0] product_2_r;
+            reg signed [51:0] product_3_r;
+            assign product_w[product] = product_3_r;
+            always @(posedge clk_i) begin
+                if (enable_i) begin
+                    product_1_r <= difference_w[product % 2]
+                        * $signed(delta_r[product*18 +: 18]);
+                    product_2_r <= product_1_r;
+                    product_3_r <= product_2_r;
+                end
+            end
         end
-        origin_sum_w = {origin_product_r[0][12][73], origin_product_r[0][12]}
-            + {origin_product_r[1][12][73], origin_product_r[1][12]};
-        origin_magnitude_w = origin_sum_w[74] ? -origin_sum_w : origin_sum_w;
-        origin_rounded_w = (origin_magnitude_w + 75'sd8) >>> 4;
-        if (origin_sum_w[74]) begin
-            origin_rounded_w = -origin_rounded_w;
+    endgenerate
+    genvar axis;
+    generate
+        // Two channels: stage 0 difference, stage 4 numerator, stages 6-8 56x31 product,
+        // stage 9 rounded gradient, stages 10-12 56x18 origin product, stage 14 normal.
+        for (axis = 0; axis < 2; axis = axis + 1) begin : g_axis
+            reg signed [33:0] difference_r;
+            reg signed [55:0] numerator_4_r;
+            reg signed [55:0] numerator_5_r;
+            reg signed [86:0] inverse_6_r;
+            reg signed [86:0] inverse_7_r;
+            reg signed [86:0] inverse_8_r;
+            wire [86:0] magnitude_w;
+            wire [87:0] unused_rounded_w;
+            wire signed [55:0] rounded_w;
+            wire [6:0] rounding_bit_w;
+            wire [6:0] rounding_shift_w;
+            wire signed [55:0] gradient_pipe_w [9:14];
+            reg signed [73:0] origin_10_r;
+            reg signed [73:0] origin_11_r;
+            reg signed [73:0] origin_12_r;
+            assign difference_w[axis] = difference_r;
+            assign magnitude_w = inverse_8_r[86] ? -inverse_8_r : inverse_8_r;
+            assign rounding_bit_w = 7'd29 + {1'b0, exponent_w[8]};
+            assign rounding_shift_w = 7'd30 + {1'b0, exponent_w[8]};
+            assign unused_rounded_w = ({1'b0, magnitude_w} + (88'd1 << rounding_bit_w))
+                >> rounding_shift_w;
+            assign rounded_w = inverse_8_r[86]
+                ? -unused_rounded_w[55:0] : unused_rounded_w[55:0];
+            assign origin_product_w[axis] = origin_12_r;
+            assign plane_gradient_o[axis*56 +: 56] = gradient_pipe_w[14];
+            always @(posedge clk_i) begin
+                if (enable_i) begin
+                    difference_r <= $signed({1'b0, scaled_w[axis+1]})
+                        - $signed({1'b0, scaled_w[0]});
+                    numerator_4_r <=
+                        ($signed({{4{product_w[axis*2][51]}}, product_w[axis*2]})
+                        + $signed({{4{product_w[axis*2+1][51]}}, product_w[axis*2+1]})) <<< 4;
+                    numerator_5_r <= numerator_4_r;
+                    inverse_6_r <= numerator_5_r * $signed({1'b0, reciprocal_w[5]});
+                    inverse_7_r <= inverse_6_r;
+                    inverse_8_r <= inverse_7_r;
+                    origin_10_r <= gradient_pipe_w[9] * $signed(offset_w[9][axis*18 +: 18]);
+                    origin_11_r <= origin_10_r;
+                    origin_12_r <= origin_11_r;
+                end
+            end
+            for (stage = 9; stage < 15; stage = stage + 1) begin : g_gradient
+                reg signed [55:0] value_r;
+                assign gradient_pipe_w[stage] = value_r;
+                always @(posedge clk_i) begin
+                    if (enable_i) value_r <= stage == 9 ? rounded_w
+                        : gradient_pipe_w[stage == 9 ? 9 : stage-1];
+                end
+            end
+            wire [55:0] normal_magnitude_w;
+            assign normal_magnitude_w = gradient_pipe_w[13][55]
+                ? -gradient_pipe_w[13] : gradient_pipe_w[13];
+            wire [63:0] normal_leading_data64_w;
+            wire [5:0] normal_leading_w;
+            wire normal_leading_bit0_w;
+            wire normal_leading_bit1_w;
+            wire normal_leading_bit2_w;
+            wire normal_leading_bit3_w;
+            wire normal_leading_bit4_w;
+            wire normal_leading_bit5_w;
+            assign normal_leading_w = {normal_leading_bit5_w, normal_leading_bit4_w,
+                normal_leading_bit3_w, normal_leading_bit2_w,
+                normal_leading_bit1_w, normal_leading_bit0_w};
+            assign normal_leading_data64_w = {8'd0, normal_magnitude_w};
+            wire [31:0] normal_leading_data32_w;
+            assign normal_leading_bit5_w = |normal_leading_data64_w[63:32];
+            assign normal_leading_data32_w = normal_leading_bit5_w
+                ? normal_leading_data64_w[63:32] : normal_leading_data64_w[31:0];
+            wire [15:0] normal_leading_data16_w;
+            assign normal_leading_bit4_w = |normal_leading_data32_w[31:16];
+            assign normal_leading_data16_w = normal_leading_bit4_w
+                ? normal_leading_data32_w[31:16] : normal_leading_data32_w[15:0];
+            wire [7:0] normal_leading_data8_w;
+            assign normal_leading_bit3_w = |normal_leading_data16_w[15:8];
+            assign normal_leading_data8_w = normal_leading_bit3_w
+                ? normal_leading_data16_w[15:8] : normal_leading_data16_w[7:0];
+            wire [3:0] normal_leading_data4_w;
+            assign normal_leading_bit2_w = |normal_leading_data8_w[7:4];
+            assign normal_leading_data4_w = normal_leading_bit2_w
+                ? normal_leading_data8_w[7:4] : normal_leading_data8_w[3:0];
+            wire [1:0] unused_normal_leading_data2_w;
+            assign normal_leading_bit1_w = |normal_leading_data4_w[3:2];
+            assign unused_normal_leading_data2_w = normal_leading_bit1_w
+                ? normal_leading_data4_w[3:2] : normal_leading_data4_w[1:0];
+            assign normal_leading_bit0_w = unused_normal_leading_data2_w[1];
+            wire signed [9:0] amount_w;
+            wire [56:0] rounded_normal_w;
+            wire [56:0] unused_adjusted_normal_w;
+            wire signed [9:0] normal_exponent_w;
+            reg [28:0] normal_r;
+            assign amount_w = $signed({4'd0, normal_leading_w}) - 10'sd17;
+            assign rounded_normal_w = amount_w > 0
+                ? ({1'b0, normal_magnitude_w} + (57'd1 << (amount_w - 10'sd1))) >> amount_w
+                : {1'b0, normal_magnitude_w} << -amount_w;
+            assign unused_adjusted_normal_w = rounded_normal_w[18]
+                ? rounded_normal_w >> 1 : rounded_normal_w;
+            assign normal_exponent_w = h_pipe_w[13]
+                - (tag_w[13][2:0] == 1 ? 10'sd30 : 10'sd38)
+                + amount_w + (rounded_normal_w[18] ? 10'sd1 : 10'sd0);
+            assign normal_w[axis] = normal_r;
+            always @(posedge clk_i) begin
+                if (enable_i) normal_r <= normal_magnitude_w == 0 ? 29'd0
+                    : {normal_exponent_w, gradient_pipe_w[13][55], unused_adjusted_normal_w[17:0]};
+            end
         end
-    end
-
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
-            valid_r <= 15'd0;
-        end else if (stop_i) begin
-            valid_r <= 15'd0;
-        end else if (enable_i) begin
-            valid_r <= {valid_r[13:0], plane_valid_i};
-        end
-    end
-
+    endgenerate
+    // Stage 13: one 75-bit origin sum and rounding adder; stage 14 delays the start.
+    wire signed [74:0] origin_sum_w;
+    wire signed [74:0] origin_magnitude_w;
+    wire signed [74:0] origin_rounded_w;
+    wire signed [74:0] unused_origin_signed_w;
+    reg [69:0] start_13_r;
+    reg [69:0] start_14_r;
+    assign origin_sum_w = {origin_product_w[0][73], origin_product_w[0]}
+        + {origin_product_w[1][73], origin_product_w[1]};
+    assign origin_magnitude_w = origin_sum_w[74] ? -origin_sum_w : origin_sum_w;
+    assign origin_rounded_w = (origin_magnitude_w + 75'sd8) >>> 4;
+    assign unused_origin_signed_w = origin_sum_w[74] ? -origin_rounded_w : origin_rounded_w;
+    assign plane_start_o = start_14_r;
     always @(posedge clk_i) begin
         if (enable_i) begin
-            tag_r[0] <= plane_tag_i;
-            h_r[0] <= h_w;
-            first_r[0] <= scaled_w[0];
-            reciprocal_r[0] <= plane_reciprocal_i;
-            exponent_r[0] <= plane_exponent_i;
-            offset_r[0] <= plane_offset_i;
-            delta_r <= plane_delta_i;
-            difference_r[0] <= $signed({1'b0, scaled_w[1]})
-                - $signed({1'b0, scaled_w[0]});
-            difference_r[1] <= $signed({1'b0, scaled_w[2]})
-                - $signed({1'b0, scaled_w[0]});
-            for (stage_r = 1; stage_r < 15; stage_r = stage_r + 1) begin
-                tag_r[stage_r] <= tag_r[stage_r - 1];
-                h_r[stage_r] <= h_r[stage_r - 1];
-            end
-            for (stage_r = 1; stage_r < 13; stage_r = stage_r + 1) begin
-                first_r[stage_r] <= first_r[stage_r - 1];
-            end
-            for (stage_r = 1; stage_r < 6; stage_r = stage_r + 1) begin
-                reciprocal_r[stage_r] <= reciprocal_r[stage_r - 1];
-            end
-            for (stage_r = 1; stage_r < 9; stage_r = stage_r + 1) begin
-                exponent_r[stage_r] <= exponent_r[stage_r - 1];
-            end
-            for (stage_r = 1; stage_r < 10; stage_r = stage_r + 1) begin
-                offset_r[stage_r] <= offset_r[stage_r - 1];
-            end
-            for (axis_r = 0; axis_r < 4; axis_r = axis_r + 1) begin
-                product_r[axis_r][1] <= difference_r[axis_r % 2]
-                    * $signed(delta_r[axis_r * 18 +: 18]);
-                product_r[axis_r][2] <= product_r[axis_r][1];
-                product_r[axis_r][3] <= product_r[axis_r][2];
-            end
-            for (axis_r = 0; axis_r < 2; axis_r = axis_r + 1) begin
-                numerator_r[axis_r][4] <=
-                    ($signed({{4{product_r[axis_r * 2][3][51]}},
-                        product_r[axis_r * 2][3]})
-                    + $signed({{4{product_r[axis_r * 2 + 1][3][51]}},
-                        product_r[axis_r * 2 + 1][3]})) <<< 4;
-                numerator_r[axis_r][5] <= numerator_r[axis_r][4];
-                inverse_product_r[axis_r][6] <= numerator_r[axis_r][5]
-                    * $signed({1'b0, reciprocal_r[5]});
-                inverse_product_r[axis_r][7] <= inverse_product_r[axis_r][6];
-                inverse_product_r[axis_r][8] <= inverse_product_r[axis_r][7];
-                gradient_r[axis_r][9] <=
-                    rounded_gradient_w[axis_r];
-                for (stage_r = 10; stage_r < 15; stage_r = stage_r + 1) begin
-                    gradient_r[axis_r][stage_r] <= gradient_r[axis_r][stage_r - 1];
-                end
-                origin_product_r[axis_r][10] <= gradient_r[axis_r][9]
-                    * $signed(offset_r[9][axis_r * 18 +: 18]);
-                origin_product_r[axis_r][11] <= origin_product_r[axis_r][10];
-                origin_product_r[axis_r][12] <= origin_product_r[axis_r][11];
-            end
-            start_r[13] <= {37'd0, first_r[12]} + origin_rounded_w[69:0];
-            start_r[14] <= start_r[13];
-            normal_r <= normal_w;
+            start_13_r <= {37'd0, first_w[12]} + unused_origin_signed_w[69:0];
+            start_14_r <= start_13_r;
         end
     end
 endmodule

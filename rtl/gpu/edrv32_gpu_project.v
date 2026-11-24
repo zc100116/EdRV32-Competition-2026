@@ -28,82 +28,56 @@ module edrv32_gpu_project (
     wire reciprocal_valid_w;
     wire [30:0] reciprocal_w;
     wire [5:0] exponent_w;
-    reg [263:0] data_r [0:10];
+    wire [39:0] position_input_w [0:2];
+    wire [15:0] uv_input_w [0:1];
+    wire [71:0] color_input_w;
     reg [3:0] valid_r;
     reg [9:0] input_valid_r;
-    reg [34:0] q_r [10:13];
-    reg signed [74:0] position_r [0:2];
-    reg signed [93:0] viewport_r [0:2];
-    reg [101:0] uv_r [11:13];
-    reg [71:0] color_r [11:13];
+    wire [34:0] q_w [10:13];
+    wire signed [74:0] position_w [0:2];
+    wire signed [93:0] viewport_w [0:2];
+    wire [101:0] uv_w [11:13];
+    wire [71:0] color_w [11:13];
     reg [49:0] screen_r;
     reg [1:0] count_r;
     reg read_r;
     reg write_r;
-    reg [258:0] output_r [0:1];
+    wire [16:0] screen_coordinate_w [0:1];
+    wire [15:0] depth_w;
+    reg [39:0] unused_restored_w;
+    wire [93:0] depth_rounded_w;
     wire push_w;
     wire pop_w;
     wire [34:0] restored_w;
     wire [49:0] screen_w;
     wire [50:0] uv_product_w [0:1];
-    integer stage_r;
-    integer axis_r;
 
-    function [34:0] restore;
-        input [30:0] reciprocal_i;
-        input [5:0] exponent_i;
-        reg [39:0] unused_result;
-        begin
-            if (exponent_i > 16) begin
-                unused_result = ({9'd0, reciprocal_i}
-                    + (40'd1 << (exponent_i - 17))) >> (exponent_i - 16);
-            end else begin
-                unused_result = {9'd0, reciprocal_i} << (16 - exponent_i);
-            end
-            restore = unused_result[34:0];
-        end
-    endfunction
-
-    function [16:0] screen_coordinate;
-        input signed [93:0] value_i;
-        input signed [15:0] offset_i;
-        reg [93:0] magnitude;
-        reg signed [94:0] rounded;
-        begin
-            magnitude = value_i[93] ? -value_i : value_i;
-            rounded = $signed(({1'b0, magnitude} + (95'd1 << 45)) >> 46);
-            if (value_i[93]) rounded = -rounded;
-            rounded = rounded + ($signed({{79{offset_i[15]}}, offset_i}) <<< 4);
-            if (rounded > 65535) screen_coordinate = 17'h0ffff;
-            else if (rounded < -65536) screen_coordinate = 17'h10000;
-            else screen_coordinate = rounded[16:0];
-        end
-    endfunction
-
-    function [15:0] depth;
-        input signed [93:0] value_i;
-        reg [93:0] rounded;
-        begin
-            rounded = (value_i + (94'sd1 << 45)) >>> 46;
-            if (value_i < 0) depth = 16'd0;
-            else if (rounded > 65535) depth = 16'hffff;
-            else depth = rounded[15:0];
-        end
-    endfunction
 
     assign enable_w = count_r != 2 && !stop_i;
     assign clipped_ready_o = enable_w;
     assign accept_w = clipped_valid_i && clipped_ready_o;
     assign projected_valid_o = count_r != 0;
-    assign projected_data_o = output_r[read_r];
     assign push_w = enable_w && valid_r[3];
     assign pop_w = projected_valid_o && projected_ready_i;
-    assign restored_w = restore(reciprocal_w, exponent_w);
-    assign uv_product_w[0] = data_r[10][175:160] * q_r[10];
-    assign uv_product_w[1] = data_r[10][191:176] * q_r[10];
-    assign screen_w = {depth(viewport_r[2]),
-        screen_coordinate(viewport_r[1], viewport_i[31:16]),
-        screen_coordinate(viewport_r[0], viewport_i[15:0])};
+    // Restore stage: one rounded barrel shifter, preserving the original u40 intermediate.
+    always @(*) begin
+        unused_restored_w = 40'd0;
+        if (exponent_w > 6'd16) begin
+            unused_restored_w = ({9'd0, reciprocal_w}
+                + (40'd1 << (exponent_w - 6'd17))) >> (exponent_w - 6'd16);
+        end else begin
+            unused_restored_w = {9'd0, reciprocal_w} << (6'd16 - exponent_w);
+        end
+    end
+    assign restored_w = unused_restored_w[34:0];
+    // Position stage also contains two 16x35 UV multipliers.
+    assign uv_product_w[0] = uv_input_w[0] * q_w[10];
+    assign uv_product_w[1] = uv_input_w[1] * q_w[10];
+    // Final conversion stage: depth add/shift/clamp, plus two screen converters below.
+    assign depth_rounded_w = (viewport_w[2] + (94'sd1 << 45)) >>> 46;
+    assign depth_w = viewport_w[2] < 0 ? 16'd0
+        : (depth_rounded_w > 65535 ? 16'hffff : depth_rounded_w[15:0]);
+    assign screen_w = {depth_w, screen_coordinate_w[1], screen_coordinate_w[0]};
     assign idle_o = count_r == 0 && valid_r == 0 && !reciprocal_valid_w
         && input_valid_r == 0;
 
@@ -118,6 +92,149 @@ module edrv32_gpu_project (
         .reciprocal_o(reciprocal_w),
         .exponent_o(exponent_w)
     );
+
+    genvar field_g;
+    genvar stage_g;
+    genvar axis_g;
+    generate
+        // Eleven original delay slots, stored independently for nine vertex fields.
+        for (field_g = 0; field_g < 9; field_g = field_g + 1) begin : g_input_field
+            localparam WIDTH = field_g < 4 ? 40 : (field_g < 6 ? 16 : 24);
+            localparam OFFSET = field_g < 4 ? field_g * 40
+                : (field_g < 6 ? 160 + (field_g - 4) * 16 : 192 + (field_g - 6) * 24);
+            wire [WIDTH-1:0] delay_w [0:10];
+            for (stage_g = 0; stage_g < 11; stage_g = stage_g + 1) begin : g_stage
+                reg [WIDTH-1:0] data_r;
+                wire [WIDTH-1:0] next_w;
+                if (stage_g == 0) begin : g_first
+                    assign next_w = clipped_data_i[OFFSET +: WIDTH];
+                end else begin : g_delay
+                    assign next_w = delay_w[stage_g - 1];
+                end
+                assign delay_w[stage_g] = data_r;
+                always @(posedge clk_i) begin
+                    if (enable_w) data_r <= next_w;
+                end
+            end
+            if (field_g < 3) begin : g_position
+                assign position_input_w[field_g] = delay_w[10];
+            end else if (field_g == 3) begin : g_unused_w
+                wire [WIDTH-1:0] unused_w;
+                assign unused_w = delay_w[10];
+            end else if (field_g < 6) begin : g_uv
+                assign uv_input_w[field_g - 4] = delay_w[10];
+            end else begin : g_color
+                assign color_input_w[(field_g - 6) * 24 +: 24] = delay_w[10];
+            end
+        end
+        // Position stage: three signed 40x36 products; viewport stage remains unchanged.
+        for (axis_g = 0; axis_g < 3; axis_g = axis_g + 1) begin : g_position
+            reg signed [74:0] data_r;
+            assign position_w[axis_g] = data_r;
+            always @(posedge clk_i) begin
+                if (enable_w) data_r <= $signed(position_input_w[axis_g])
+                    * $signed({1'b0, q_w[10]});
+            end
+        end
+        // Final screen stage: two copies of absolute value, round, offset add and saturation.
+        for (axis_g = 0; axis_g < 2; axis_g = axis_g + 1) begin : g_screen
+            wire [93:0] magnitude_w;
+            wire signed [94:0] rounded_w;
+            wire signed [94:0] signed_w;
+            wire signed [94:0] offset_w;
+            assign magnitude_w = viewport_w[axis_g][93]
+                ? -viewport_w[axis_g] : viewport_w[axis_g];
+            assign rounded_w = $signed(({1'b0, magnitude_w} + (95'd1 << 45)) >> 46);
+            assign signed_w = viewport_w[axis_g][93] ? -rounded_w : rounded_w;
+            assign offset_w = signed_w
+                + ($signed({{79{viewport_i[axis_g * 16 + 15]}},
+                    viewport_i[axis_g * 16 +: 16]}) <<< 4);
+            assign screen_coordinate_w[axis_g] = offset_w > 65535 ? 17'h0ffff
+                : (offset_w < -65536 ? 17'h10000 : offset_w[16:0]);
+        end
+        // Output FIFO: seven fields, two slots each, packed only at the output port.
+        for (field_g = 0; field_g < 7; field_g = field_g + 1) begin : g_output
+            localparam WIDTH = field_g < 2 ? 17 : (field_g == 2 ? 16
+                : (field_g == 3 ? 35 : (field_g < 6 ? 51 : 72)));
+            localparam OFFSET = field_g == 0 ? 0 : (field_g == 1 ? 17
+                : (field_g == 2 ? 34 : (field_g == 3 ? 50
+                : (field_g == 4 ? 85 : (field_g == 5 ? 136 : 187)))));
+            reg [WIDTH-1:0] data_r [0:1];
+            wire [WIDTH-1:0] next_w;
+            if (field_g < 3) begin : g_screen
+                assign next_w = screen_r[OFFSET +: WIDTH];
+            end else if (field_g == 3) begin : g_q
+                assign next_w = q_w[13];
+            end else if (field_g < 6) begin : g_uv
+                assign next_w = uv_w[13][(field_g - 4) * 51 +: 51];
+            end else begin : g_color
+                assign next_w = color_w[13];
+            end
+            assign projected_data_o[OFFSET +: WIDTH] = data_r[read_r];
+            always @(posedge clk_i) begin
+                if (push_w) data_r[write_r] <= next_w;
+            end
+        end
+        for (stage_g = 10; stage_g <= 13; stage_g = stage_g + 1) begin : g_q
+            reg [34:0] data_r;
+            wire [34:0] next_w;
+            if (stage_g == 10) begin : g_first
+                assign next_w = restored_w;
+            end else begin : g_delay
+                assign next_w = q_w[stage_g - 1];
+            end
+            assign q_w[stage_g] = data_r;
+            always @(posedge clk_i) begin
+                if (enable_w) data_r <= next_w;
+            end
+        end
+        for (stage_g = 11; stage_g <= 13; stage_g = stage_g + 1) begin : g_uv
+            reg [101:0] data_r;
+            wire [101:0] next_w;
+            if (stage_g == 11) begin : g_first
+                assign next_w = {uv_product_w[1], uv_product_w[0]};
+            end else begin : g_delay
+                assign next_w = uv_w[stage_g - 1];
+            end
+            assign uv_w[stage_g] = data_r;
+            always @(posedge clk_i) begin
+                if (enable_w) data_r <= next_w;
+            end
+        end
+        for (stage_g = 11; stage_g <= 13; stage_g = stage_g + 1) begin : g_color
+            reg [71:0] data_r;
+            wire [71:0] next_w;
+            if (stage_g == 11) begin : g_first
+                assign next_w = color_input_w;
+            end else begin : g_delay
+                assign next_w = color_w[stage_g - 1];
+            end
+            assign color_w[stage_g] = data_r;
+            always @(posedge clk_i) begin
+                if (enable_w) data_r <= next_w;
+            end
+        end
+        // Viewport stage: two signed products and one depth shift/subtract unit.
+        for (axis_g = 0; axis_g < 3; axis_g = axis_g + 1) begin : g_viewport
+            reg signed [93:0] data_r;
+            wire signed [93:0] next_w;
+            if (axis_g == 0) begin : g_x
+                assign next_w = (($signed({{19{position_w[0][74]}}, position_w[0]})
+                    + (94'sd1 << 46)) * $signed({1'b0, viewport_i[47:32]})) <<< 3;
+            end else if (axis_g == 1) begin : g_y
+                assign next_w = (((94'sd1 << 46)
+                    - $signed({{19{position_w[1][74]}}, position_w[1]}))
+                    * $signed({1'b0, viewport_i[63:48]})) <<< 3;
+            end else begin : g_depth
+                assign next_w = ($signed({{19{position_w[2][74]}}, position_w[2]}) <<< 16)
+                    - $signed({{19{position_w[2][74]}}, position_w[2]});
+            end
+            assign viewport_w[axis_g] = data_r;
+            always @(posedge clk_i) begin
+                if (enable_w) data_r <= next_w;
+            end
+        end
+    endgenerate
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
@@ -151,35 +268,7 @@ module edrv32_gpu_project (
 
     always @(posedge clk_i) begin
         if (enable_w) begin
-            data_r[0] <= clipped_data_i;
-            for (stage_r = 1; stage_r < 11; stage_r = stage_r + 1) begin
-                data_r[stage_r] <= data_r[stage_r - 1];
-            end
-            q_r[10] <= restored_w;
-            for (stage_r = 11; stage_r < 14; stage_r = stage_r + 1) begin
-                q_r[stage_r] <= q_r[stage_r - 1];
-            end
-            for (axis_r = 0; axis_r < 3; axis_r = axis_r + 1) begin
-                position_r[axis_r] <= $signed(data_r[10][axis_r * 40 +: 40])
-                    * $signed({1'b0, q_r[10]});
-            end
-            uv_r[11] <= {uv_product_w[1], uv_product_w[0]};
-            color_r[11] <= data_r[10][263:192];
-            uv_r[12] <= uv_r[11];
-            uv_r[13] <= uv_r[12];
-            color_r[12] <= color_r[11];
-            color_r[13] <= color_r[12];
-            viewport_r[0] <= (($signed({{19{position_r[0][74]}}, position_r[0]})
-                + (94'sd1 << 46)) * $signed({1'b0, viewport_i[47:32]})) <<< 3;
-            viewport_r[1] <= (((94'sd1 << 46)
-                - $signed({{19{position_r[1][74]}}, position_r[1]}))
-                * $signed({1'b0, viewport_i[63:48]})) <<< 3;
-            viewport_r[2] <= ($signed({{19{position_r[2][74]}}, position_r[2]}) <<< 16)
-                - $signed({{19{position_r[2][74]}}, position_r[2]});
             screen_r <= screen_w;
-        end
-        if (push_w) begin
-            output_r[write_r] <= {color_r[13], uv_r[13], q_r[13], screen_r};
         end
     end
 endmodule

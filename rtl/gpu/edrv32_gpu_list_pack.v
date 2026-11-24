@@ -75,8 +75,10 @@ module edrv32_gpu_list_pack (
     reg [23:0] free_max_r;
     reg [23:0] hit_count_r;
     reg [23:0] free_count_r;
-    reg [255:0] hit_pack_r;
-    reg [255:0] free_pack_r;
+    reg [31:0] hit_pack_r [0:7];
+    wire [255:0] hit_pack_w;
+    reg [31:0] free_pack_r [0:7];
+    wire [255:0] free_pack_w;
     reg [3:0] hit_items_r;
     reg [3:0] free_items_r;
     reg [23:0] event_idx_r [0:1];
@@ -97,19 +99,20 @@ module edrv32_gpu_list_pack (
     wire [2:0] req_ready_w;
     wire [2:0] data_ready_w;
     wire [2:0] write_done_w;
-    reg [255:0] data_r [0:5];
-    reg [31:0] addr_r [0:5];
-    reg [5:0] bytes_r [0:5];
-    reg [2:0] head_r;
-    reg [2:0] tail_r;
-    reg [1:0] count_r [0:2];
-    reg [1:0] write_state_r [0:2];
+    wire [255:0] queue_data_w [0:2];
+    wire [31:0] queue_addr_w [0:2];
+    wire [5:0] queue_bytes_w [0:2];
+    wire [255:0] push_data_w [0:2];
+    wire [31:0] push_addr_w [0:2];
+    wire [5:0] push_bytes_w [0:2];
+    wire [1:0] count_w [0:2];
+    wire [1:0] write_state_w [0:2];
     wire unused_command_w;
     assign unused_command_w = ^{pack_command_i[255:96], pack_command_i[68:33],
         pack_command_i[31:0]};
     assign pack_ready_o = !busy_r;
     assign unit_done_o = done_r;
-    assign object_update_ready_o = stop_i || (busy_r && count_r[0] < 2);
+    assign object_update_ready_o = stop_i || (busy_r && count_w[0] < 2);
     assign object_event_ready_o = stop_i || (busy_r && event_count_r < 2);
     assign event_push_w = object_event_valid_i && object_event_ready_o && !stop_i;
     assign event_pop_w = event_count_r != 0 && event_target_r == 4'd9;
@@ -117,9 +120,9 @@ module edrv32_gpu_list_pack (
         && hit_items_r < 4'd8 && !stop_i;
     assign process_free_w = event_count_r != 0 && event_target_r == 4'd8
         && free_items_r < 4'd8 && !stop_i;
-    assign hit_flush_w = hit_items_r != 0 && count_r[1] < 2 && !stop_i
+    assign hit_flush_w = hit_items_r != 0 && count_w[1] < 2 && !stop_i
         && (hit_items_r == 4'd8 || (finish_i && event_count_r == 0));
-    assign free_flush_w = free_items_r != 0 && count_r[2] < 2 && !stop_i
+    assign free_flush_w = free_items_r != 0 && count_w[2] < 2 && !stop_i
         && (free_items_r == 4'd8 || (finish_i && event_count_r == 0));
     assign queue_push_w[0] = object_update_valid_i && object_update_ready_o && !stop_i;
     assign queue_push_w[1] = hit_flush_w;
@@ -127,39 +130,39 @@ module edrv32_gpu_list_pack (
     assign req_ready_w[0] = object_write_req_ready_i;
     assign data_ready_w[0] = object_write_data_ready_i;
     assign write_done_w[0] = object_write_done_i;
-    assign object_write_req_valid_o = count_r[0] != 0 && write_state_r[0] == 0 && !stop_i;
-    assign object_write_req_addr_o = addr_r[0+{31'b0, head_r[0]}];
-    assign object_write_req_bytes_o = {26'b0, bytes_r[0+{31'b0, head_r[0]}]};
-    assign object_write_data_valid_o = write_state_r[0] == 1;
-    assign object_write_data_data_o = data_r[0+{31'b0, head_r[0]}];
+    assign object_write_req_valid_o = count_w[0] != 0 && write_state_w[0] == 0 && !stop_i;
+    assign object_write_req_addr_o = queue_addr_w[0];
+    assign object_write_req_bytes_o = {26'b0, queue_bytes_w[0]};
+    assign object_write_data_valid_o = write_state_w[0] == 1;
+    assign object_write_data_data_o = queue_data_w[0];
     assign object_write_data_keep_o = 32'hffffffff
-        >> (6'd32 - bytes_r[0+{31'b0, head_r[0]}]);
+        >> (6'd32 - queue_bytes_w[0]);
     assign object_write_data_last_o = 1'b1;
-    assign queue_pop_w[0] = write_state_r[0] == 1 && data_ready_w[0];
+    assign queue_pop_w[0] = write_state_w[0] == 1 && data_ready_w[0];
     assign req_ready_w[1] = hit_write_req_ready_i;
     assign data_ready_w[1] = hit_write_data_ready_i;
     assign write_done_w[1] = hit_write_done_i;
-    assign hit_write_req_valid_o = count_r[1] != 0 && write_state_r[1] == 0 && !stop_i;
-    assign hit_write_req_addr_o = addr_r[2+{31'b0, head_r[1]}];
-    assign hit_write_req_bytes_o = {26'b0, bytes_r[2+{31'b0, head_r[1]}]};
-    assign hit_write_data_valid_o = write_state_r[1] == 1;
-    assign hit_write_data_data_o = data_r[2+{31'b0, head_r[1]}];
+    assign hit_write_req_valid_o = count_w[1] != 0 && write_state_w[1] == 0 && !stop_i;
+    assign hit_write_req_addr_o = queue_addr_w[1];
+    assign hit_write_req_bytes_o = {26'b0, queue_bytes_w[1]};
+    assign hit_write_data_valid_o = write_state_w[1] == 1;
+    assign hit_write_data_data_o = queue_data_w[1];
     assign hit_write_data_keep_o = 32'hffffffff
-        >> (6'd32 - bytes_r[2+{31'b0, head_r[1]}]);
+        >> (6'd32 - queue_bytes_w[1]);
     assign hit_write_data_last_o = 1'b1;
-    assign queue_pop_w[1] = write_state_r[1] == 1 && data_ready_w[1];
+    assign queue_pop_w[1] = write_state_w[1] == 1 && data_ready_w[1];
     assign req_ready_w[2] = free_write_req_ready_i;
     assign data_ready_w[2] = free_write_data_ready_i;
     assign write_done_w[2] = free_write_done_i;
-    assign free_write_req_valid_o = count_r[2] != 0 && write_state_r[2] == 0 && !stop_i;
-    assign free_write_req_addr_o = addr_r[4+{31'b0, head_r[2]}];
-    assign free_write_req_bytes_o = {26'b0, bytes_r[4+{31'b0, head_r[2]}]};
-    assign free_write_data_valid_o = write_state_r[2] == 1;
-    assign free_write_data_data_o = data_r[4+{31'b0, head_r[2]}];
+    assign free_write_req_valid_o = count_w[2] != 0 && write_state_w[2] == 0 && !stop_i;
+    assign free_write_req_addr_o = queue_addr_w[2];
+    assign free_write_req_bytes_o = {26'b0, queue_bytes_w[2]};
+    assign free_write_data_valid_o = write_state_w[2] == 1;
+    assign free_write_data_data_o = queue_data_w[2];
     assign free_write_data_keep_o = 32'hffffffff
-        >> (6'd32 - bytes_r[4+{31'b0, head_r[2]}]);
+        >> (6'd32 - queue_bytes_w[2]);
     assign free_write_data_last_o = 1'b1;
-    assign queue_pop_w[2] = write_state_r[2] == 1 && data_ready_w[2];
+    assign queue_pop_w[2] = write_state_w[2] == 1 && data_ready_w[2];
 
     always @(posedge clk_i) begin
         if (pack_valid_i && pack_ready_o) begin
@@ -175,63 +178,83 @@ module edrv32_gpu_list_pack (
             event_hit_r[event_tail_r] <= object_event_hit_i;
             event_free_r[event_tail_r] <= object_event_free_i;
         end
-        if (queue_push_w[0]) begin
-            data_r[{31'b0, tail_r[0]}] <= object_update_data_i;
-            addr_r[{31'b0, tail_r[0]}] <= object_base_r
-                + {3'b0, object_update_idx_i, 5'b0};
-            bytes_r[{31'b0, tail_r[0]}] <= 6'd32;
-        end
         if (process_hit_w && event_hit_r[event_head_r][event_target_r[2:0]]
             && hit_count_r < hit_max_r)
-            hit_pack_r[hit_items_r[2:0]*32 +: 32] <=
+            hit_pack_r[hit_items_r[2:0]] <=
                 {5'b0, event_target_r[2:0], event_idx_r[event_head_r]};
         if (process_free_w && event_free_r[event_head_r] && free_count_r < free_max_r)
-            free_pack_r[free_items_r[2:0]*32 +: 32] <= {8'b0, event_idx_r[event_head_r]};
-        if (hit_flush_w) begin
-            data_r[2+{31'b0, tail_r[1]}] <= hit_pack_r;
-            addr_r[2+{31'b0, tail_r[1]}] <= hit_base_r
-                + {6'b0, (hit_count_r - {20'b0, hit_items_r}), 2'b0};
-            bytes_r[2+{31'b0, tail_r[1]}] <= {hit_items_r, 2'b0};
-        end
-        if (free_flush_w) begin
-            data_r[4+{31'b0, tail_r[2]}] <= free_pack_r;
-            addr_r[4+{31'b0, tail_r[2]}] <= free_base_r
-                + {6'b0, (free_count_r - {20'b0, free_items_r}), 2'b0};
-            bytes_r[4+{31'b0, tail_r[2]}] <= {free_items_r, 2'b0};
-        end
+            free_pack_r[free_items_r[2:0]] <= {8'b0, event_idx_r[event_head_r]};
     end
 
+    // Three independent DMA writers, each with two 256-bit data slots and address/byte fields.
+    // Hit/free packs each contain eight 32-bit registers with one element write point.
+    assign push_data_w[0] = object_update_data_i;
+    assign push_data_w[1] = hit_pack_w;
+    assign push_data_w[2] = free_pack_w;
+    assign push_addr_w[0] = object_base_r + {3'b0, object_update_idx_i, 5'b0};
+    assign push_addr_w[1] = hit_base_r
+        + {6'b0, (hit_count_r - {20'b0, hit_items_r}), 2'b0};
+    assign push_addr_w[2] = free_base_r
+        + {6'b0, (free_count_r - {20'b0, free_items_r}), 2'b0};
+    assign push_bytes_w[0] = 6'd32;
+    assign push_bytes_w[1] = {hit_items_r, 2'b0};
+    assign push_bytes_w[2] = {free_items_r, 2'b0};
+
     genvar c;
+    genvar item_g;
     generate
+        for (item_g = 0; item_g < 8; item_g = item_g + 1) begin : g_pack
+            assign hit_pack_w[item_g * 32 +: 32] = hit_pack_r[item_g];
+            assign free_pack_w[item_g * 32 +: 32] = free_pack_r[item_g];
+        end
         for (c = 0; c < 3; c = c + 1) begin : g_writer
+            reg [255:0] data_r [0:1];
+            reg [31:0] addr_r [0:1];
+            reg [5:0] bytes_r [0:1];
+            reg head_r;
+            reg tail_r;
+            reg [1:0] count_r;
+            reg [1:0] write_state_r;
+            assign queue_data_w[c] = data_r[head_r];
+            assign queue_addr_w[c] = addr_r[head_r];
+            assign queue_bytes_w[c] = bytes_r[head_r];
+            assign count_w[c] = count_r;
+            assign write_state_w[c] = write_state_r;
+            always @(posedge clk_i) begin
+                if (queue_push_w[c]) begin
+                    data_r[tail_r] <= push_data_w[c];
+                    addr_r[tail_r] <= push_addr_w[c];
+                    bytes_r[tail_r] <= push_bytes_w[c];
+                end
+            end
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i) begin
-                    head_r[c] <= 1'b0;
-                    tail_r[c] <= 1'b0;
-                    count_r[c] <= 2'b0;
-                    write_state_r[c] <= 2'b0;
+                    head_r <= 1'b0;
+                    tail_r <= 1'b0;
+                    count_r <= 2'b0;
+                    write_state_r <= 2'b0;
                 end else if (pack_valid_i && pack_ready_o) begin
-                    head_r[c] <= 1'b0;
-                    tail_r[c] <= 1'b0;
-                    count_r[c] <= 2'b0;
-                    write_state_r[c] <= 2'b0;
+                    head_r <= 1'b0;
+                    tail_r <= 1'b0;
+                    count_r <= 2'b0;
+                    write_state_r <= 2'b0;
                 end else begin
-                    if (queue_push_w[c]) tail_r[c] <= !tail_r[c];
-                    if (queue_pop_w[c]) head_r[c] <= !head_r[c];
+                    if (queue_push_w[c]) tail_r <= !tail_r;
+                    if (queue_pop_w[c]) head_r <= !head_r;
                     case ({queue_push_w[c], queue_pop_w[c]})
-                        2'b10: count_r[c] <= count_r[c] + 2'd1;
-                        2'b01: count_r[c] <= count_r[c] - 2'd1;
+                        2'b10: count_r <= count_r + 2'd1;
+                        2'b01: count_r <= count_r - 2'd1;
                         default: begin end
                     endcase
                     begin
-                        case (write_state_r[c])
+                        case (write_state_r)
                             2'd0: begin
-                                if (stop_i) count_r[c] <= 2'b0;
-                                else if (count_r[c] != 0 && req_ready_w[c])
-                                    write_state_r[c] <= 2'd1;
+                                if (stop_i) count_r <= 2'b0;
+                                else if (count_r != 0 && req_ready_w[c])
+                                    write_state_r <= 2'd1;
                             end
-                            2'd1: if (data_ready_w[c]) write_state_r[c] <= 2'd2;
-                            2'd2: if (write_done_w[c]) write_state_r[c] <= 2'd0;
+                            2'd1: if (data_ready_w[c]) write_state_r <= 2'd2;
+                            2'd2: if (write_done_w[c]) write_state_r <= 2'd0;
                             default: begin end
                         endcase
                     end
@@ -301,8 +324,8 @@ module edrv32_gpu_list_pack (
             end
             if (busy_r && (finish_i || stop_i) && event_count_r == 0
                 && hit_items_r == 0 && free_items_r == 0
-                && count_r[0] == 0 && count_r[1] == 0 && count_r[2] == 0
-                && write_state_r[0] == 0 && write_state_r[1] == 0 && write_state_r[2] == 0) begin
+                && count_w[0] == 0 && count_w[1] == 0 && count_w[2] == 0
+                && write_state_w[0] == 0 && write_state_w[1] == 0 && write_state_w[2] == 0) begin
                 busy_r <= 1'b0;
                 done_r <= 1'b1;
             end

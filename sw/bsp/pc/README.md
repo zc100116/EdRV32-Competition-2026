@@ -55,3 +55,31 @@ the board uses a 64 MiB static DDR pool. Cache operations on PC are no-ops.
 Headless time advances 800 stereo samples per display frame; Windows follows
 wall time at 48 kHz and uses waveOut. IRQ delivery uses PLIC claim/complete and
 the same `plat_irq_register` callback convention on both targets.
+
+Ember Isles E3 has a separate game input interface; the legacy `plat_keys()`
+controller bitmap and existing frontend callbacks retain their values.
+`plat_game_keys()` returns W/A/S/D/J/K/L/U/Q/F/Space/Esc/Enter at bits 0..12.
+`plat_pointer()` returns 640x360 logical menu coordinates with left/right/middle
+button bits 0/1/2. PC frontends publish both through
+`pc_soc_game_input(uint16_t keys, struct plat_pointer_state pointer)`.
+The Ember Isles Windows frontend supports WASD and arrow aliases, J/K/L/U/Q/F,
+Space, Esc and Enter, and scales pointer coordinates for either window size.
+On focus loss it releases keyboard/mouse state; the game layer consumes the
+pointer only in menus, outside the deterministic replay input stream.
+
+Board virtual input retains its eight-byte wire frame: keys16 little endian,
+x/y signed16 little endian (1280x720), mouse L/R/M at byte 6, cumulative wheel
+at byte 7. `active` is receiver state, not a ninth wire byte. Existing VI bits
+0..11 are unchanged; L/U/Q/F occupy bits 12..15. Board game keys map VI_UP,
+LEFT, DOWN, RIGHT, A, B to W/A/S/D/J/K; VI_SELECT to Space, VI_ESC to Esc,
+VI_ENTER to Enter, and the four new bits directly to L/U/Q/F. VI_START/NEXT/PREV
+are not game keys. `plat_pointer()` divides wire coordinates by two. GPIO
+RIGHT/LEFT/A/START maps to game D/A/J/Enter. The debug-tool sender exposes the
+new keys; Space replaces its former U physical shortcut for VI_SELECT.
+
+`make -C sw/bsp/pc test -j1` also checks this input contract. The Windows Ember
+frontend prints frame mean/p95/max, actual FPS, texture end offset and object
+peaks every 600 frames and on shutdown. `game_gdi_ms` excludes platform wait,
+DISP composition and audio service; `frame_ms` includes the entire iteration.
+Windows QPC pacing keeps absolute 60 Hz deadlines so Sleep rounding does not
+accumulate. Actual GDI/waveOut timing requires a Windows runtime measurement.

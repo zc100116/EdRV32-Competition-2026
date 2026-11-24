@@ -16,17 +16,24 @@
 #include <windows.h>
 #else
 #include <pthread.h>
+#include <semaphore.h>
 #endif
 #endif
 
 typedef __int128 wide;
 #define R(e, n) ((e)->regs[EDRV32_GPU_##n##_OFFSET / 4])
 #define PERF(e, n) ((e)->regs[EDRV32_GPU_PERF_OFFSET(n) / 4])
-#define RAM_BYTES (192 * 1024)
+#define RAM_BYTES GPU_EMU_TEXTURE_BYTES
 #define PIXELS 115200
+struct draw_job;
+struct rgba { int c[4]; };
 struct gpu_emu {
+#if GPU_EMU_THREADS > 1
+    struct draw_job *jobs;
+#endif
     uint8_t *ddr;
     uint32_t ddr_bytes;
+    struct gpu_emu_usage usage;
     uint32_t regs[128];
     uint16_t *color, *depth;
     uint8_t *stencil;
@@ -35,6 +42,8 @@ struct gpu_emu {
     uint8_t ram[RAM_BYTES];
     uint32_t command_index;
     uint32_t palettes[16][256];
+    struct rgba palette_texels[16][256];
+    uint32_t palette_quads[16][256]; /* RGB565 plus expanded alpha in bits 16..23 */
     int width, height;
     int32_t matrix[16];
     struct cmd_set_light light;
@@ -44,7 +53,6 @@ struct gpu_emu {
     int mip_offset[16], mip_width[16], mip_height[16];
     jmp_buf fault;
 };
-struct rgba { int c[4]; };
 struct vec { int64_t c[9]; };
 struct number { int64_t m; int e; };
 struct planes {
@@ -215,6 +223,15 @@ static int factor(int mode, int src, int dst, int alpha, int constant)
     default: return 255-constant;
     }
 }
+/* gpu-spec 2.7: round source and destination factors separately. */
+static uint16_t alpha_over(struct rgba src, uint16_t dest)
+{
+    if (src.c[3] == 255) return p565(src);
+    struct rgba out = expand(dest);
+    for (int c = 0; c < 3; ++c)
+        out.c[c] = d(src.c[c]*src.c[3]) + d(out.c[c]*(255-src.c[3]));
+    return p565(out);
+}
 static void pixel_at(struct gpu_emu *e, int i, int depth, struct rgba rgba,
                      int transparent)
 {
@@ -235,6 +252,10 @@ static void pixel_at(struct gpu_emu *e, int i, int depth, struct rgba rgba,
         e->color[i] = p565(rgba);
         return;
     }
+    if (s->bl_fs == 2 && s->bl_fd == 3 && !s->bl_op) {
+        e->color[i] = alpha_over(rgba,e->color[i]);
+        return;
+    }
     struct rgba out = expand(e->color[i]);
     for (int c = 0; c < 3; ++c) {
         int src = rgba.c[c], dst = out.c[c], alpha = rgba.c[3];
@@ -252,11 +273,6 @@ static void pixel_at(struct gpu_emu *e, int i, int depth, struct rgba rgba,
     }
     e->color[i] = p565(out);
 }
-static void pixel(struct gpu_emu *e, int x, int y, int depth, struct rgba rgba,
-                  int transparent)
-{
-    pixel_at(e,address(e,x,y),depth,rgba,transparent);
-}
 static struct rgba raw_texel(struct gpu_emu *e, int64_t u, int64_t v, int level, int group)
 {
     int w = e->mip_width[level], h = e->mip_height[level];
@@ -270,16 +286,25 @@ static struct rgba raw_texel(struct gpu_emu *e, int64_t u, int64_t v, int level,
     if (fmt == 2) return expand(word);
     int bit = fmt == 0 ? 4*((x&1)+2*(y&1)) : 8*(x&1);
     int entry = (word>>bit) & (fmt == 0 ? 15 : 255);
+    if (group < 0) return (struct rgba){{entry,0,0,0}};
     uint32_t color = e->palettes[group][entry];
     struct rgba result = expand(color & 65535);
     result.c[3] = ((color>>16)&15)*17;
     return result;
 }
-/* Decode tiled addressing and palette expansion once per texture/group change.
+/* Quads cache indices across palette groups; triangles cache expanded RGBA
+ * for their fixed group so bilinear sampling does not perform palette lookups.
  * gpu-spec 2.6: at most 256^2 + 128^2 + ... + 1 = 87381 texels. */
 static void prepare_texture(struct gpu_emu *e, int group)
 {
     if (!e->texel_dirty && e->texel_group == group) return;
+    for (int g = 0; g < 16; ++g) for (int i = 0; i < 256; ++i) {
+        uint32_t color = e->palettes[g][i];
+        e->palette_texels[g][i] = expand(color & 65535);
+        int alpha = ((color >> 16) & 15) * 17;
+        e->palette_texels[g][i].c[3] = alpha;
+        e->palette_quads[g][i] = (color & 65535) | (uint32_t)alpha << 16;
+    }
     int base = 0;
     for (int l = 0; l < e->texture.levels; ++l) {
         e->texel_base[l] = base;
@@ -289,6 +314,13 @@ static void prepare_texture(struct gpu_emu *e, int group)
     }
     e->texel_group = group;
     e->texel_dirty = 0;
+}
+/* Indexed texture cache stores indices, so palette-group changes do not
+ * decode the entire atlas again (gpu-spec 2.6, 2.8 per-quad PAL_GROUP). */
+static struct rgba cached_texel(struct gpu_emu *e, struct rgba value, int group)
+{
+    if (e->texture.format == 2 || e->texel_group >= 0) return value;
+    return e->palette_texels[group][value.c[0]];
 }
 static struct rgba texel(struct gpu_emu *e, int64_t u, int64_t v, int level, int group)
 {
@@ -303,20 +335,22 @@ static struct rgba bilinear(struct gpu_emu *e, int64_t u, int64_t v, int l, int 
     int fx = u&255, fy = v&255;
     struct rgba samples[] = {texel(e,x,y,l,g), texel(e,x+1,y,l,g),
                              texel(e,x,y+1,l,g), texel(e,x+1,y+1,l,g)};
-    int weights[] = {(256-fx)*(256-fy), fx*(256-fy), (256-fx)*fy, fx*fy};
     struct rgba out;
     for (int c = 0; c < 4; ++c) {
-        int sum = 0;
-        for (int k = 0; k < 4; ++k) sum += samples[k].c[c]*weights[k];
-        out.c[c] = (sum+32768)>>16;
+        /* Distribute the four weights exactly; retain the single final round. */
+        int top = samples[0].c[c]*256 + (samples[1].c[c]-samples[0].c[c])*fx;
+        int bottom = samples[2].c[c]*256 + (samples[3].c[c]-samples[2].c[c])*fx;
+        out.c[c] = (top*256 + (bottom-top)*fy + 32768)>>16;
     }
     return out;
 }
 static struct rgba sample(struct gpu_emu *e, int64_t u, int64_t v, int lod,
                           int group, int nearest)
 {
-    if (nearest) return texel(e,u>>8,v>>8,0,group);
+    if (nearest) return cached_texel(e,texel(e,u>>8,v>>8,0,group),group);
     struct cmd_set_tex *t = &e->texture;
+    if (t->levels == 1)
+        return t->sample ? bilinear(e,u,v,0,group) : texel(e,u>>8,v>>8,0,group);
     lod = clamp(lod+t->lod_bias*16, 0, (t->levels-1)*256);
     int l = lod>>8;
     if (!t->sample) return texel(e,u>>(8+l),v>>(8+l),l,group);
@@ -334,24 +368,55 @@ static void quad(struct gpu_emu *e, struct quad q)
     x0 = imax(x0,q.x); x1 = imin(x1,q.x+q.w);
     y0 = imax(y0,q.y); y1 = imin(y1,q.y+q.h);
     if (x0 >= x1 || y0 >= y1) return;
-    prepare_texture(e,q.pal_group);
+    prepare_texture(e,-1);
     const struct cmd_set_pixel *state = &e->pixel;
     /* gpu-spec 2.7's opaque, stencil-KEEP, depth-ALWAYS combination needs
-     * only the transparency discard, color store and passed-pixel counter. */
+     * only transparency, color blending/store and the passed-pixel counter. */
     if (state->st_func == 7 && state->depth_func && !state->depth_write
-        && !state->st_zpass && state->color_write && state->bl_fs == 1
-        && !state->bl_fd && !state->bl_op) {
+        && !state->st_zpass && state->color_write && !state->bl_op
+        && ((state->bl_fs == 1 && !state->bl_fd)
+            || (state->bl_fs == 2 && state->bl_fd == 3))) {
         int w = e->mip_width[0], h = e->mip_height[0];
         int du = q.flip_h ? -1 : 1;
         int u0 = q.u0+(q.flip_h ? q.w-1-(x0-q.x) : x0-q.x);
         uint32_t passed = 0;
+        /* Indexed quads already contain RGB565 palette values. Preserve these
+         * directly for opaque pixels rather than unpacking/repacking channels. */
+        if (e->texture.format < 2) {
+            const uint32_t *palette = e->palette_quads[q.pal_group];
+            for (int y = y0; y < y1; ++y) {
+                int v = q.v0+(q.flip_v ? q.h-1-(y-q.y) : y-q.y);
+                const struct rgba *row = e->texels+e->texel_base[0]+(v & (h-1))*w;
+                uint16_t *out = e->color+address(e,x0,y);
+                for (int x = x0, u = u0; x < x1; ++x, u += du, ++out) {
+                    uint32_t color = palette[row[u & (w-1)].c[0]];
+                    if (!(color >> 16)) continue;
+                    int alpha = d((int)(color >> 16)*q.alpha);
+                    if (state->bl_fs == 1 || alpha == 255) *out = (uint16_t)color;
+                    else {
+                        struct rgba src = expand((uint16_t)color);
+                        src.c[3] = alpha;
+                        *out = alpha_over(src,*out);
+                    }
+                    ++passed;
+                }
+            }
+            PERF(e,4) += passed;
+            return;
+        }
         for (int y = y0; y < y1; ++y) {
             int v = q.v0+(q.flip_v ? q.h-1-(y-q.y) : y-q.y);
             const struct rgba *row = e->texels+e->texel_base[0]+(v & (h-1))*w;
             uint16_t *out = e->color+address(e,x0,y);
             for (int x = x0, u = u0; x < x1; ++x, u += du, ++out) {
-                struct rgba rgba = row[u & (w-1)];
-                if (rgba.c[3]) { *out = p565(rgba); ++passed; }
+                struct rgba rgba = cached_texel(e,row[u & (w-1)],q.pal_group);
+                if (!rgba.c[3]) continue;
+                if (state->bl_fs == 1) *out = p565(rgba);
+                else {
+                    rgba.c[3] = d(rgba.c[3]*q.alpha);
+                    *out = alpha_over(rgba,*out);
+                }
+                ++passed;
             }
         }
         PERF(e,4) += passed;
@@ -443,6 +508,12 @@ static void triangle(struct gpu_emu *e, struct vec a, struct vec b, struct vec c
         if (fixed[k] && (k == 0 || k >= 4))
             fixed_value[k] = clamp(shift(p.coeff[k][0],-p.exp[k]),0,k ? 255 : 65535);
     }
+    int white = fixed[4] && fixed[5] && fixed[6] && fixed_value[4] == 255 &&
+                fixed_value[5] == 255 && fixed_value[6] == 255;
+    const struct cmd_set_pixel *state = &e->pixel;
+    int opaque = state->st_func == 7 && state->depth_func && !state->depth_write
+                 && !state->st_zpass && state->color_write && state->bl_fs == 1
+                 && !state->bl_fd && !state->bl_op;
     int only_uv = fixed[0] && fixed[1] && fixed[4] && fixed[5] && fixed[6];
     struct number fixed_w = {0,0};
     if (fixed[1]) fixed_w = inverse(normal(p.coeff[1][0],p.exp[1]));
@@ -452,7 +523,8 @@ static void triangle(struct gpu_emu *e, struct vec a, struct vec b, struct vec c
     for (int y = y0; y < y1; ++y) {
         wide attrs[7]; memcpy(attrs,row,sizeof attrs);
         int64_t weights[3]; memcpy(weights,edge_row,sizeof weights);
-        for (int x = x0; x < x1; ++x) {
+        int index = address(e,x0,y);
+        for (int x = x0; x < x1; ++x, ++index) {
             int covered = (weights[0] | weights[1] | weights[2]) >= 0;
             for (int i = 0; i < 3; ++i) weights[i] += edge_dx[i];
             if (covered) {
@@ -478,10 +550,12 @@ static void triangle(struct gpu_emu *e, struct vec a, struct vec b, struct vec c
                 struct rgba rgba = sample(e,coords[0],coords[1],span ? logarithm(span) : 0,
                                           e->texture.pal_group,0);
                 int transparent = !rgba.c[3];
-                for (int k = 0; k < 3; ++k)
+                if (!white) for (int k = 0; k < 3; ++k)
                     rgba.c[k] = d(rgba.c[k]*(fixed[k+4] ? fixed_value[k+4]
                                           : clamp(shift(attrs[k+4],-p.exp[k+4]),0,255)));
-                pixel(e,x,y,depth,rgba,transparent);
+                if (opaque) {
+                    if (!transparent) { e->color[index] = p565(rgba); ++PERF(e,4); }
+                } else pixel_at(e,index,depth,rgba,transparent);
             }
             if (only_uv) {
                 attrs[2] += p.coeff[2][1]; attrs[3] += p.coeff[3][1];
@@ -593,6 +667,7 @@ static void rect(uint32_t a, uint32_t b, int *r)
 }
 static void objects(struct gpu_emu *e, struct cmd_obj_step f)
 {
+    if ((uint32_t)f.count > e->usage.object_slots) e->usage.object_slots = f.count;
     uint32_t hit = 0, free_count = 0, alive = 0;
     int live[4], targets[8][4];
     R(e,OBJ_STAT) = 0;
@@ -636,6 +711,7 @@ static void objects(struct gpu_emu *e, struct cmd_obj_step f)
     R(e,OBJ_HIT_COUNT) = hit & 0xffffff;
     R(e,OBJ_FREE_COUNT) = free_count & 0xffffff;
     R(e,OBJ_ALIVE_COUNT) = alive & 0xffffff;
+    if (alive > e->usage.objects_alive) e->usage.objects_alive = alive;
 }
 static void resolve(struct gpu_emu *e, struct cmd_resolve f)
 {
@@ -677,10 +753,51 @@ static void draw_batch(struct gpu_emu *e, uint32_t addr, int count, int triangle
     }
 }
 #if GPU_EMU_THREADS > 1
+#ifdef _WIN32
+typedef HANDLE draw_signal;
+static void signal_init(draw_signal *s)
+{
+    *s = CreateEvent(NULL,FALSE,FALSE,NULL);
+    if (!*s) { fputs("GPU CreateEvent failed\n",stderr); abort(); }
+}
+static void signal_wait(draw_signal *s)
+{
+    if (WaitForSingleObject(*s,INFINITE) != WAIT_OBJECT_0) {
+        fputs("GPU event wait failed\n",stderr); abort();
+    }
+}
+static void signal_post(draw_signal *s)
+{
+    if (!SetEvent(*s)) { fputs("GPU SetEvent failed\n",stderr); abort(); }
+}
+static void signal_destroy(draw_signal *s)
+{
+    if (!CloseHandle(*s)) { fputs("GPU CloseHandle failed\n",stderr); abort(); }
+}
+#else
+typedef sem_t draw_signal;
+static void signal_init(draw_signal *s)
+{
+    if (sem_init(s,0,0)) { perror("GPU sem_init"); abort(); }
+}
+static void signal_wait(draw_signal *s)
+{
+    if (sem_wait(s)) { perror("GPU sem_wait"); abort(); }
+}
+static void signal_post(draw_signal *s)
+{
+    if (sem_post(s)) { perror("GPU sem_post"); abort(); }
+}
+static void signal_destroy(draw_signal *s)
+{
+    if (sem_destroy(s)) { perror("GPU sem_destroy"); abort(); }
+}
+#endif
 struct draw_job {
     struct gpu_emu local;
     uint32_t addr;
-    int count, triangles;
+    int count, triangles, stop;
+    draw_signal start, done;
 #ifdef _WIN32
     HANDLE thread;
 #else
@@ -694,31 +811,25 @@ static void *draw_worker(void *arg)
 #endif
 {
     struct draw_job *job = arg;
-    draw_batch(&job->local,job->addr,job->count,job->triangles);
+    for (;;) {
+        signal_wait(&job->start);
+        if (job->stop) break;
+        draw_batch(&job->local,job->addr,job->count,job->triangles);
+        signal_post(&job->done);
+    }
     return 0;
 }
-static void parallel_draw(struct gpu_emu *e, uint32_t addr, int count, int triangles)
+static void create_jobs(struct gpu_emu *e)
 {
-    /* Small batches cost less than creating host threads and copying state. */
-    if (count < 128) { draw_batch(e,addr,count,triangles); return; }
-    struct draw_job *jobs = malloc(GPU_EMU_THREADS*sizeof *jobs);
-    if (!jobs) { fputs("GPU draw jobs allocation failed\n",stderr); abort(); }
-    int x0,y0,x1,y1;
-    bounds(e,&x0,&y0,&x1,&y1);
-    int rows = imax(0,y1-y0);
+    e->jobs = calloc(GPU_EMU_THREADS,sizeof *e->jobs);
+    if (!e->jobs) { fputs("GPU draw jobs allocation failed\n",stderr); abort(); }
     for (int i = 0; i < GPU_EMU_THREADS; ++i) {
-        struct draw_job *j = &jobs[i];
-        memcpy(&j->local,e,sizeof *e);
+        struct draw_job *j = &e->jobs[i];
         j->local.texels = malloc(87392*sizeof *e->texels);
         if (!j->local.texels) { fputs("GPU texture allocation failed\n",stderr); abort(); }
-        j->local.texel_dirty = 1;
-        j->local.target.sc_y0 = y0+rows*i/GPU_EMU_THREADS;
-        j->local.target.sc_y1 = y0+rows*(i+1)/GPU_EMU_THREADS;
-        j->addr = addr; j->count = count; j->triangles = triangles;
-        if (i == GPU_EMU_THREADS-1) {
-            draw_worker(j);
-            continue;
-        }
+        if (i == GPU_EMU_THREADS-1) continue;
+        signal_init(&j->start);
+        signal_init(&j->done);
 #ifdef _WIN32
         j->thread = CreateThread(NULL,0,draw_worker,j,0,NULL);
         if (!j->thread) { fputs("GPU CreateThread failed\n",stderr); abort(); }
@@ -727,10 +838,15 @@ static void parallel_draw(struct gpu_emu *e, uint32_t addr, int count, int trian
         if (error) { fprintf(stderr,"GPU pthread_create: %s\n",strerror(error)); abort(); }
 #endif
     }
-    uint32_t pixels = 0;
+}
+static void destroy_jobs(struct gpu_emu *e)
+{
+    if (!e->jobs) return;
     for (int i = 0; i < GPU_EMU_THREADS; ++i) {
-        struct draw_job *j = &jobs[i];
+        struct draw_job *j = &e->jobs[i];
         if (i != GPU_EMU_THREADS-1) {
+            j->stop = 1;
+            signal_post(&j->start);
 #ifdef _WIN32
             if (WaitForSingleObject(j->thread,INFINITE) != WAIT_OBJECT_0) {
                 fputs("GPU thread wait failed\n",stderr); abort();
@@ -740,13 +856,45 @@ static void parallel_draw(struct gpu_emu *e, uint32_t addr, int count, int trian
             int error = pthread_join(j->thread,NULL);
             if (error) { fprintf(stderr,"GPU pthread_join: %s\n",strerror(error)); abort(); }
 #endif
+            signal_destroy(&j->start);
+            signal_destroy(&j->done);
         }
-        pixels += PERF(&j->local,4)-PERF(e,4);
         free(j->local.texels);
     }
-    for (int i = 1; i <= 3; ++i) PERF(e,i) = PERF(&jobs[0].local,i);
+    free(e->jobs);
+}
+static void parallel_draw(struct gpu_emu *e, uint32_t addr, int count, int triangles)
+{
+    /* Measured quad batches need more work to amortize wakeup/state copies. */
+    if (count < (triangles ? 128 : 2048)) {
+        draw_batch(e,addr,count,triangles);
+        return;
+    }
+    if (!e->jobs) create_jobs(e);
+    int x0,y0,x1,y1;
+    bounds(e,&x0,&y0,&x1,&y1);
+    int rows = imax(0,y1-y0);
+    for (int i = 0; i < GPU_EMU_THREADS; ++i) {
+        struct draw_job *j = &e->jobs[i];
+        struct rgba *texels = j->local.texels;
+        memcpy(&j->local,e,sizeof *e);
+        j->local.texels = texels;
+        j->local.texel_dirty = 1;
+        j->local.target.sc_y0 = y0+rows*i/GPU_EMU_THREADS;
+        j->local.target.sc_y1 = y0+rows*(i+1)/GPU_EMU_THREADS;
+        j->addr = addr; j->count = count; j->triangles = triangles;
+        if (i == GPU_EMU_THREADS-1)
+            draw_batch(&j->local,addr,count,triangles);
+        else signal_post(&j->start);
+    }
+    uint32_t pixels = 0;
+    for (int i = 0; i < GPU_EMU_THREADS; ++i) {
+        struct draw_job *j = &e->jobs[i];
+        if (i != GPU_EMU_THREADS-1) signal_wait(&j->done);
+        pixels += PERF(&j->local,4)-PERF(e,4);
+    }
+    for (int i = 1; i <= 3; ++i) PERF(e,i) = PERF(&e->jobs[0].local,i);
     PERF(e,4) += pixels;
-    free(jobs);
 }
 #else
 #define parallel_draw draw_batch
@@ -771,7 +919,7 @@ static void command(struct gpu_emu *e, const uint8_t *data)
             int bx = (w+bw-1)/bw, by = (h+bh-1)/bh;
             offset += 8*((bx+1)/2)*((by+1)/2);
         }
-        if (offset > RAM_BYTES) fail(e,3);
+        if ((uint32_t)offset > RAM_BYTES) fail(e,3);
         e->texture = t;
         e->texel_dirty = 1;
         for (int i = 0; i < t.levels; ++i) {
@@ -809,6 +957,8 @@ static void command(struct gpu_emu *e, const uint8_t *data)
         if (f.dst+f.bytes > RAM_BYTES) fail(e,4);
         e->texel_dirty = 1;
         memcpy(e->ram+f.dst,memory(e,f.src,f.bytes),(size_t)f.bytes);
+        if ((uint32_t)(f.dst + f.bytes) > e->usage.texture_bytes)
+            e->usage.texture_bytes = f.dst + f.bytes;
         break;
     }
     case 49: {
@@ -824,10 +974,18 @@ static void command(struct gpu_emu *e, const uint8_t *data)
 }
 static void reset(struct gpu_emu *e)
 {
+    struct gpu_emu_usage usage = e->usage;
     uint8_t *ddr = e->ddr; uint32_t bytes = e->ddr_bytes;
     uint16_t *color = e->color, *depth = e->depth; uint8_t *stencil = e->stencil;
     struct rgba *texels = e->texels;
+#if GPU_EMU_THREADS > 1
+    struct draw_job *jobs = e->jobs;
+#endif
     memset(e,0,sizeof *e); e->ddr = ddr; e->ddr_bytes = bytes;
+    e->usage = usage;
+#if GPU_EMU_THREADS > 1
+    e->jobs = jobs;
+#endif
     e->texels = texels; e->texel_dirty = 1;
     e->color = color; e->depth = depth; e->stencil = stencil;
     memset(color,0,PIXELS*sizeof *color); memset(depth,0,PIXELS*sizeof *depth);
@@ -838,7 +996,7 @@ static void reset(struct gpu_emu *e)
 }
 struct gpu_emu *gpu_emu_create(uint8_t *ddr, uint32_t ddr_bytes)
 {
-    struct gpu_emu *e = malloc(sizeof *e);
+    struct gpu_emu *e = calloc(1,sizeof *e);
     if (!e) return NULL;
     e->color = malloc(PIXELS*sizeof *e->color);
     e->depth = malloc(PIXELS*sizeof *e->depth);
@@ -850,6 +1008,9 @@ struct gpu_emu *gpu_emu_create(uint8_t *ddr, uint32_t ddr_bytes)
 }
 void gpu_emu_destroy(struct gpu_emu *e)
 {
+#if GPU_EMU_THREADS > 1
+    if (e) destroy_jobs(e);
+#endif
     if (e) { free(e->color); free(e->depth); free(e->stencil); free(e->texels); free(e); }
 }
 uint32_t gpu_emu_read(struct gpu_emu *e, uint32_t offset)
@@ -859,6 +1020,7 @@ uint32_t gpu_emu_read(struct gpu_emu *e, uint32_t offset)
     return 0;
 }
 int gpu_emu_irq(const struct gpu_emu *e) { return !!(R(e,IRQ_STAT) & R(e,IRQ_EN)); }
+struct gpu_emu_usage gpu_emu_usage(const struct gpu_emu *e) { return e->usage; }
 static void run(struct gpu_emu *e)
 {
     R(e,STATUS) = 1;

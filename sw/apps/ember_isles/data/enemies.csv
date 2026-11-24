@@ -1,0 +1,4 @@
+id,name,tags,behavior,hp,armor,speed,damage,radius,xp,gold,attack_cooldown,attack_range,projectile_speed,charge_frames,charge_speed,charge_duration,range_hysteresis,projectile_radius,projectile_life,initial_delay,delay_jitter
+swarm,Tide Gnawer,shadow,swarm,30,0,56,4,7,4,0,60,12,0,0,0,36,25,4,300,30,60
+charger,Brine Charger,shadow,charge,80,5,35,10,11,10,0,180,140,0,45,220,36,25,4,300,30,60
+shooter,Drowned Watcher,shadow|projectile,ranged,55,0,40,7,9,8,0,150,160,90,0,0,36,25,4,300,30,60

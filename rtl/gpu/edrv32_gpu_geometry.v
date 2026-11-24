@@ -42,7 +42,9 @@ module edrv32_gpu_geometry (
     output reg unit_done_o,
     output wire perf_vertex_o
 );
-    reg [511:0] matrix_r;
+    wire [511:0] matrix_w;
+    wire [791:0] triangle_data_w;
+    wire [263:0] project_input_data_w;
     reg [95:0] light_r;
     reg [255:0] unused_target_r;
     reg [255:0] unused_pixel_r;
@@ -57,9 +59,7 @@ module edrv32_gpu_geometry (
     wire transform_ready_w;
     wire [263:0] transform_data_w;
     wire transform_idle_w;
-    reg [527:0] assembly_r;
     reg [1:0] assembly_count_r;
-    reg [791:0] triangle_r [0:1];
     reg [1:0] triangle_count_r;
     reg triangle_read_r;
     reg triangle_write_r;
@@ -73,7 +73,6 @@ module edrv32_gpu_geometry (
     wire clip_idle_w;
     reg sending_r;
     reg send_phase_r;
-    reg [2111:0] polygon_r;
     reg [3:0] send_count_r;
     reg [2:0] send_index_r;
     wire project_input_valid_w;
@@ -88,30 +87,24 @@ module edrv32_gpu_geometry (
     reg [3:0] counts_write_r;
     wire polygon_accept_w;
     wire polygon_complete_w;
-    reg [258:0] screen_r [0:7];
     reg [2:0] screen_index_r;
     reg fan_r;
     reg [2:0] fan_index_r;
     reg [3:0] fan_count_r;
-    reg [258:0] fan_vertex_w [0:2];
-    reg signed [17:0] fan_x_w [0:2];
-    reg signed [17:0] fan_y_w [0:2];
+    wire signed [17:0] fan_x_w [0:2];
+    wire signed [17:0] fan_y_w [0:2];
     reg signed [17:0] fan_dx_w [0:1];
     reg signed [17:0] fan_dy_w [0:1];
     reg signed [35:0] fan_product_w [0:1];
     reg signed [36:0] fan_area_w;
     wire fan_keep_w;
     wire fan_advance_w;
-    reg [776:0] fan_data_w;
     reg [1:0] output_count_r;
     reg output_read_r;
     reg output_write_r;
-    reg [776:0] output_r [0:1];
     wire output_push_w;
     wire output_pop_w;
     wire drained_w;
-    integer vertex_w;
-    integer unused_select_w;
 
     assign unused_draw_w = draw_command_i;
     assign geometry_cfg_ready_o = !active_r && !stop_i;
@@ -138,21 +131,13 @@ module edrv32_gpu_geometry (
     assign drained_w = remaining_r == 0 && transform_idle_w && assembly_count_r == 0
         && triangle_count_r == 0 && clip_idle_w && !sending_r && counts_count_r == 0
         && project_idle_w && !fan_r && output_count_r == 0 && screen_index_r == 0;
-    assign screen_triangle_x_o = output_r[output_read_r][0 +: 51];
-    assign screen_triangle_y_o = output_r[output_read_r][51 +: 51];
-    assign screen_triangle_depth_o = output_r[output_read_r][102 +: 48];
-    assign screen_triangle_q_o = output_r[output_read_r][150 +: 105];
-    assign screen_triangle_uq_o = output_r[output_read_r][255 +: 153];
-    assign screen_triangle_vq_o = output_r[output_read_r][408 +: 153];
-    assign screen_triangle_color_o = output_r[output_read_r][561 +: 216];
-
     edrv32_gpu_transform u_transform (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .vertex_valid_i(transform_input_valid_w),
         .vertex_ready_o(transform_input_ready_w),
         .vertex_data_i(vertex_data_i),
-        .matrix_i(matrix_r),
+        .matrix_i(matrix_w),
         .light_i(light_r),
         .transformed_valid_o(transform_valid_w),
         .transformed_ready_i(transform_ready_w),
@@ -166,7 +151,7 @@ module edrv32_gpu_geometry (
         .rst_n_i(rst_n_i),
         .triangle_valid_i(triangle_count_r != 0),
         .triangle_ready_o(clip_ready_w),
-        .triangle_data_i(triangle_r[triangle_read_r]),
+        .triangle_data_i(triangle_data_w),
         .polygon_valid_o(polygon_valid_w),
         .polygon_ready_i(polygon_ready_w),
         .polygon_data_o(polygon_data_w),
@@ -180,7 +165,7 @@ module edrv32_gpu_geometry (
         .rst_n_i(rst_n_i),
         .clipped_valid_i(project_input_valid_w),
         .clipped_ready_o(project_input_ready_w),
-        .clipped_data_i(polygon_r[send_index_r * 264 +: 264]),
+        .clipped_data_i(project_input_data_w),
         .viewport_i(unused_target_r[191:128]),
         .projected_valid_o(project_valid_w),
         .projected_ready_i(project_ready_w),
@@ -189,16 +174,104 @@ module edrv32_gpu_geometry (
         .idle_o(project_idle_w)
     );
 
-    always @(*) begin
-        fan_vertex_w[0] = screen_r[0];
-        fan_vertex_w[1] = screen_r[fan_index_r];
-        fan_vertex_w[2] = screen_r[fan_index_r + 3'd1];
-        fan_data_w = 777'd0;
-        unused_select_w = 0;
-        for (vertex_w = 0; vertex_w < 3; vertex_w = vertex_w + 1) begin
-            fan_x_w[vertex_w] = {fan_vertex_w[vertex_w][16], fan_vertex_w[vertex_w][16:0]};
-            fan_y_w[vertex_w] = {fan_vertex_w[vertex_w][33], fan_vertex_w[vertex_w][33:17]};
+    // Configuration: sixteen independent 32-bit registers, packed only at the port.
+    // Assembly/clip/project queues: nine fields per vertex; no internal record mux.
+    genvar field_g;
+    genvar vertex_g;
+    genvar matrix_g;
+    generate
+        for (matrix_g = 0; matrix_g < 16; matrix_g = matrix_g + 1) begin : g_matrix
+            reg [31:0] data_r;
+            assign matrix_w[matrix_g * 32 +: 32] = data_r;
+            always @(posedge clk_i) begin
+                if (geometry_cfg_valid_i && geometry_cfg_ready_o)
+                    data_r <= geometry_cfg_matrix_i[matrix_g * 32 +: 32];
+            end
         end
+        for (field_g = 0; field_g < 9; field_g = field_g + 1) begin : g_clipped_field
+            localparam WIDTH = field_g < 4 ? 40 : (field_g < 6 ? 16 : 24);
+            localparam OFFSET = field_g < 4 ? field_g * 40
+                : (field_g < 6 ? 160 + (field_g - 4) * 16 : 192 + (field_g - 6) * 24);
+            wire [WIDTH-1:0] polygon_w [0:7];
+            assign project_input_data_w[OFFSET +: WIDTH] = polygon_w[send_index_r];
+            for (vertex_g = 0; vertex_g < 8; vertex_g = vertex_g + 1) begin : g_polygon
+                reg [WIDTH-1:0] data_r;
+                assign polygon_w[vertex_g] = data_r;
+                always @(posedge clk_i) begin
+                    if (polygon_accept_w)
+                        data_r <= polygon_data_w[vertex_g * 264 + OFFSET +: WIDTH];
+                end
+            end
+            for (vertex_g = 0; vertex_g < 3; vertex_g = vertex_g + 1) begin : g_triangle
+                wire [WIDTH-1:0] push_data_w;
+                reg [WIDTH-1:0] data_r [0:1];
+                if (vertex_g < 2) begin : g_assembly
+                    reg [WIDTH-1:0] assembly_r;
+                    always @(posedge clk_i) begin
+                        if (transform_valid_w && transform_ready_w && assembly_count_r == vertex_g)
+                            assembly_r <= transform_data_w[OFFSET +: WIDTH];
+                    end
+                    assign push_data_w = assembly_r;
+                end else begin : g_last
+                    assign push_data_w = transform_data_w[OFFSET +: WIDTH];
+                end
+                assign triangle_data_w[vertex_g * 264 + OFFSET +: WIDTH] = data_r[triangle_read_r];
+                always @(posedge clk_i) begin
+                    if (triangle_push_w) data_r[triangle_write_r] <= push_data_w;
+                end
+            end
+        end
+        // Seven projected fields; each has one 8-entry screen array and a 2-slot output FIFO.
+        for (field_g = 0; field_g < 7; field_g = field_g + 1) begin : g_screen_field
+            localparam WIDTH = field_g < 2 ? 17 : (field_g == 2 ? 16
+                : (field_g == 3 ? 35 : (field_g < 6 ? 51 : 72)));
+            localparam OFFSET = field_g == 0 ? 0 : (field_g == 1 ? 17
+                : (field_g == 2 ? 34 : (field_g == 3 ? 50
+                : (field_g == 4 ? 85 : (field_g == 5 ? 136 : 187)))));
+            reg [WIDTH-1:0] screen_r [0:7];
+            wire [WIDTH-1:0] fan_w [0:2];
+            wire [2:0] next_index_w;
+            wire [WIDTH*3-1:0] ordered_w;
+            wire [WIDTH*3-1:0] output_w;
+            reg [WIDTH*3-1:0] output_r [0:1];
+            assign next_index_w = fan_index_r + 3'd1;
+            assign fan_w[0] = screen_r[0];
+            assign fan_w[1] = screen_r[fan_index_r];
+            assign fan_w[2] = screen_r[next_index_w];
+            assign ordered_w = fan_area_w >= 0 ? {fan_w[2], fan_w[1], fan_w[0]}
+                : {fan_w[1], fan_w[2], fan_w[0]};
+            assign output_w = output_r[output_read_r];
+            if (field_g == 0) begin : g_x
+                assign screen_triangle_x_o = output_w;
+                for (vertex_g = 0; vertex_g < 3; vertex_g = vertex_g + 1) begin : g_vertex
+                    assign fan_x_w[vertex_g] = {fan_w[vertex_g][16], fan_w[vertex_g]};
+                end
+            end else if (field_g == 1) begin : g_y
+                assign screen_triangle_y_o = output_w;
+                for (vertex_g = 0; vertex_g < 3; vertex_g = vertex_g + 1) begin : g_vertex
+                    assign fan_y_w[vertex_g] = {fan_w[vertex_g][16], fan_w[vertex_g]};
+                end
+            end else if (field_g == 2) begin : g_depth
+                assign screen_triangle_depth_o = output_w;
+            end else if (field_g == 3) begin : g_q
+                assign screen_triangle_q_o = output_w;
+            end else if (field_g == 4) begin : g_uq
+                assign screen_triangle_uq_o = output_w;
+            end else if (field_g == 5) begin : g_vq
+                assign screen_triangle_vq_o = output_w;
+            end else begin : g_color
+                assign screen_triangle_color_o = output_w;
+            end
+            always @(posedge clk_i) begin
+                if (project_valid_w && project_ready_w)
+                    screen_r[screen_index_r] <= project_data_w[OFFSET +: WIDTH];
+                if (output_push_w) output_r[output_write_r] <= ordered_w;
+            end
+        end
+    endgenerate
+
+    // Existing fan stage: four s18 subtractors, two 18x18 multipliers, one s37 subtractor.
+    always @(*) begin
         fan_dx_w[0] = fan_x_w[1] - fan_x_w[0];
         fan_dx_w[1] = fan_x_w[2] - fan_x_w[0];
         fan_dy_w[0] = fan_y_w[1] - fan_y_w[0];
@@ -207,23 +280,6 @@ module edrv32_gpu_geometry (
         fan_product_w[1] = fan_dy_w[0] * fan_dx_w[1];
         fan_area_w = $signed({fan_product_w[0][35], fan_product_w[0]})
             - $signed({fan_product_w[1][35], fan_product_w[1]});
-        for (vertex_w = 0; vertex_w < 3; vertex_w = vertex_w + 1) begin
-            unused_select_w = vertex_w == 0 || fan_area_w >= 0 ? vertex_w : 3 - vertex_w;
-            fan_data_w[0 + vertex_w * 17 +: 17]
-                = fan_vertex_w[unused_select_w][0 +: 17];
-            fan_data_w[51 + vertex_w * 17 +: 17]
-                = fan_vertex_w[unused_select_w][17 +: 17];
-            fan_data_w[102 + vertex_w * 16 +: 16]
-                = fan_vertex_w[unused_select_w][34 +: 16];
-            fan_data_w[150 + vertex_w * 35 +: 35]
-                = fan_vertex_w[unused_select_w][50 +: 35];
-            fan_data_w[255 + vertex_w * 51 +: 51]
-                = fan_vertex_w[unused_select_w][85 +: 51];
-            fan_data_w[408 + vertex_w * 51 +: 51]
-                = fan_vertex_w[unused_select_w][136 +: 51];
-            fan_data_w[561 + vertex_w * 72 +: 72]
-                = fan_vertex_w[unused_select_w][187 +: 72];
-        end
     end
 
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -341,22 +397,11 @@ module edrv32_gpu_geometry (
 
     always @(posedge clk_i) begin
         if (geometry_cfg_valid_i && geometry_cfg_ready_o) begin
-            matrix_r <= geometry_cfg_matrix_i;
             light_r <= geometry_cfg_light_i;
             unused_target_r <= geometry_cfg_target_i;
             unused_pixel_r <= geometry_cfg_pixel_i;
             unused_wide_r <= geometry_cfg_wide_i;
         end
-        if (transform_valid_w && transform_ready_w) begin
-            if (assembly_count_r < 2)
-                assembly_r[assembly_count_r * 264 +: 264] <= transform_data_w;
-            else triangle_r[triangle_write_r] <= {transform_data_w, assembly_r};
-        end
-        if (polygon_accept_w) begin
-            polygon_r <= polygon_data_w;
-            counts_r[counts_write_r] <= polygon_count_w;
-        end
-        if (project_valid_w && project_ready_w) screen_r[screen_index_r] <= project_data_w;
-        if (output_push_w) output_r[output_write_r] <= fan_data_w;
+        if (polygon_accept_w) counts_r[counts_write_r] <= polygon_count_w;
     end
 endmodule

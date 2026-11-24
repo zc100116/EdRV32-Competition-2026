@@ -7,7 +7,7 @@ CFLAGS := -std=c11 -O2 -Wall -Wextra -Werror -I$(ROOT)/sw/bsp/include \
     -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/lib -I$(ROOT)/sw/lib/plat \
     -I$(ROOT)/sw/apps/gpu_hello -I$(ROOT)/tools/gpu/emu
 MAP := -DEDRV32_SOC_MAP_H -include $(ROOT)/sw/bsp/include/gpu_soc_map.h
-PCFLAGS := -I$(ROOT)/sw/bsp/pc/include $(CFLAGS) $(MAP) \
+PCFLAGS := -I$(ROOT)/sw/bsp/pc/include $(CFLAGS) $(MAP) -O3 \
     -include $(ROOT)/sw/bsp/pc/include/mmio.h
 COMMON := sw/apps/gpu_hello/hello.c sw/drivers/gpu.c sw/drivers/aud.c \
     sw/drivers/disp.c sw/drivers/plic.c
@@ -27,7 +27,7 @@ HEADERS := $(wildcard $(ROOT)/sw/bsp/pc/include/*.h $(ROOT)/sw/lib/plat/*.h \
 $(OUT)/gpu_hello: $(addprefix $(ROOT)/,$(PC) tools/gpu/emu/pc/headless.c \
     tools/gpu/emu/pc/png.c) $(HEADERS)
 	mkdir -p $(OUT)
-	$(CC) $(PCFLAGS) $(filter %.c,$^) -lm -o $@
+	$(CC) -pthread $(PCFLAGS) $(filter %.c,$^) -lm -o $@
 $(OUT)/gpu_hello.exe: $(addprefix $(ROOT)/,$(PC) tools/gpu/emu/pc/windows.c) $(HEADERS)
 	mkdir -p $(OUT)
 	$(ZIG) cc -target x86_64-windows-gnu -static $(PCFLAGS) $(filter %.c,$^) \
@@ -39,9 +39,15 @@ $(OUT)/gpu_hello.elf: $(addprefix $(ROOT)/,$(BOARD)) $(HEADERS)
 	    -ffunction-sections -fdata-sections -nostdlib \
 	    -Wl,--gc-sections -Tsw/bsp/ld/ddr.ld $(filter %.c %.S,$^) -lm -lc -lgcc -o $@
 .PHONY: test
-test: $(OUT)/soc_test
+test: $(OUT)/soc_test $(OUT)/platform_input_test
 	$(OUT)/soc_test
+	$(OUT)/platform_input_test
+$(OUT)/platform_input_test: $(addprefix $(ROOT)/,sw/bsp/pc/soc.c sw/lib/plat/pc.c \
+    sw/lib/virtual_input.c tools/gpu/emu/gpu_emu.c tools/gpu/emu/pc/platform_input_test.c \
+    sw/drivers/plic.c) $(ROOT)/sw/lib/virtual_input.h $(HEADERS)
+	mkdir -p $(OUT)
+	$(CC) -pthread $(PCFLAGS) $(filter %.c,$^) -o $@
 $(OUT)/soc_test: $(addprefix $(ROOT)/,sw/bsp/pc/soc.c tools/gpu/emu/gpu_emu.c \
     tools/gpu/emu/pc/soc_test.c sw/drivers/plic.c) $(HEADERS)
 	mkdir -p $(OUT)
-	$(CC) $(PCFLAGS) $(filter %.c,$^) -o $@
+	$(CC) -pthread $(PCFLAGS) $(filter %.c,$^) -o $@

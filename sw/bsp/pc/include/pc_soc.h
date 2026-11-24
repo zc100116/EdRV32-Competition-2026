@@ -7,6 +7,13 @@
 #define EDRV32_PC_SOC_H
 #include <stdint.h>
 #include <stddef.h>
+#include "plat.h"
+#include "gpu_emu.h"
+struct gpu_emu_usage pc_soc_gpu_usage(void);
+/* Frontends publish the game bitmap and logical menu pointer together. */
+void pc_soc_game_input(uint16_t keys, struct plat_pointer_state pointer);
+uint32_t pc_soc_game_keys(void);
+struct plat_pointer_state pc_soc_pointer(void);
 void pc_soc_init(void);
 void pc_soc_destroy(void);
 void *pc_soc_alloc(size_t bytes, size_t alignment);

@@ -67,7 +67,6 @@ module edrv32_gpu_perspective (
     reg [15:0] input_y_r [0:1];
     reg [3:0] input_mask_r [0:1];
     reg [0:0] input_quad_r [0:1];
-    reg [1959:0] input_plane_r [0:1];
     reg [69:0] input_h_r [0:1];
     reg [173:0] input_gradient_r [0:1];
     reg [3:0] input_palette_r [0:1];
@@ -80,26 +79,23 @@ module edrv32_gpu_perspective (
     assign sample_mask_o = output_mask_r[output_read_r];
     reg [0:0] output_quad_r [0:1];
     assign sample_quad_o = output_quad_r[output_read_r];
-    reg [127:0] output_u_r [0:1];
-    assign sample_u_o = output_u_r[output_read_r];
-    reg [127:0] output_v_r [0:1];
-    assign sample_v_o = output_v_r[output_read_r];
-    reg [383:0] output_span_r [0:1];
-    assign sample_span_o = output_span_r[output_read_r];
-    reg [63:0] output_depth_r [0:1];
-    assign sample_depth_o = output_depth_r[output_read_r];
-    reg [95:0] output_color_r [0:1];
-    assign sample_color_o = output_color_r[output_read_r];
     reg [3:0] output_palette_r [0:1];
     assign sample_palette_o = output_palette_r[output_read_r];
     reg [7:0] output_alpha_r [0:1];
     assign sample_alpha_o = output_alpha_r[output_read_r];
-    reg [15:0] pipe_x_r [0:104];
-    reg [15:0] pipe_y_r [0:104];
-    reg [3:0] pipe_mask_r [0:104];
-    reg [0:0] pipe_quad_r [0:104];
-    reg [3:0] pipe_palette_r [0:104];
-    reg [7:0] pipe_alpha_r [0:104];
+    reg [48:0] pipe_metadata_r [0:104];
+    wire [15:0] pipe_x_w;
+    assign pipe_x_w = pipe_metadata_r[104][0 +: 16];
+    wire [15:0] pipe_y_w;
+    assign pipe_y_w = pipe_metadata_r[104][16 +: 16];
+    wire [3:0] pipe_mask_w;
+    assign pipe_mask_w = pipe_metadata_r[104][32 +: 4];
+    wire [0:0] pipe_quad_w;
+    assign pipe_quad_w = pipe_metadata_r[104][36 +: 1];
+    wire [3:0] pipe_palette_w;
+    assign pipe_palette_w = pipe_metadata_r[104][37 +: 4];
+    wire [7:0] pipe_alpha_w;
+    assign pipe_alpha_w = pipe_metadata_r[104][41 +: 8];
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
@@ -157,48 +153,174 @@ module edrv32_gpu_perspective (
             input_y_r[input_write_r] <= fragment_y_i;
             input_mask_r[input_write_r] <= fragment_mask_i;
             input_quad_r[input_write_r] <= fragment_quad_i;
-            input_plane_r[input_write_r] <= fragment_plane_i;
             input_h_r[input_write_r] <= fragment_h_i;
             input_gradient_r[input_write_r] <= fragment_gradient_i;
             input_palette_r[input_write_r] <= fragment_palette_i;
             input_alpha_r[input_write_r] <= fragment_alpha_i;
         end
-        if (advance_w) begin
-            pipe_x_r[0] <= input_x_r[input_read_r];
-            pipe_y_r[0] <= input_y_r[input_read_r];
-            pipe_mask_r[0] <= input_mask_r[input_read_r];
-            pipe_quad_r[0] <= input_quad_r[input_read_r];
-            pipe_palette_r[0] <= input_palette_r[input_read_r];
-            pipe_alpha_r[0] <= input_alpha_r[input_read_r];
-        end
         if (output_push_w) begin
-            output_x_r[output_write_r] <= pipe_x_r[104];
-            output_y_r[output_write_r] <= pipe_y_r[104];
-            output_mask_r[output_write_r] <= pipe_mask_r[104];
-            output_quad_r[output_write_r] <= pipe_quad_r[104];
-            output_palette_r[output_write_r] <= pipe_palette_r[104];
-            output_alpha_r[output_write_r] <= pipe_alpha_r[104];
+            output_x_r[output_write_r] <= pipe_x_w;
+            output_y_r[output_write_r] <= pipe_y_w;
+            output_mask_r[output_write_r] <= pipe_mask_w;
+            output_quad_r[output_write_r] <= pipe_quad_w;
+            output_palette_r[output_write_r] <= pipe_palette_w;
+            output_alpha_r[output_write_r] <= pipe_alpha_w;
         end
     end
 
-    genvar stage;
-    generate
-        for (stage = 1; stage < 105; stage = stage + 1) begin : g_metadata
-            always @(posedge clk_i) begin
-                if (advance_w) begin
-                    pipe_x_r[stage] <= pipe_x_r[stage-1];
-                    pipe_y_r[stage] <= pipe_y_r[stage-1];
-                    pipe_mask_r[stage] <= pipe_mask_r[stage-1];
-                    pipe_quad_r[stage] <= pipe_quad_r[stage-1];
-                    pipe_palette_r[stage] <= pipe_palette_r[stage-1];
-                    pipe_alpha_r[stage] <= pipe_alpha_r[stage-1];
-                end
-            end
+    // One 105-stage, 49-bit metadata chain; fields are below the 256-bit record limit.
+    // A single writer shifts whole elements without reset; advance stalls every stage.
+    // Explicit constant stages also avoid simulator loop-unroll limits.
+    always @(posedge clk_i) begin
+        if (advance_w) begin
+            pipe_metadata_r[0] <= {input_alpha_r[input_read_r], input_palette_r[input_read_r],
+                input_quad_r[input_read_r], input_mask_r[input_read_r],
+                input_y_r[input_read_r], input_x_r[input_read_r]};
+            pipe_metadata_r[1] <= pipe_metadata_r[0];
+            pipe_metadata_r[2] <= pipe_metadata_r[1];
+            pipe_metadata_r[3] <= pipe_metadata_r[2];
+            pipe_metadata_r[4] <= pipe_metadata_r[3];
+            pipe_metadata_r[5] <= pipe_metadata_r[4];
+            pipe_metadata_r[6] <= pipe_metadata_r[5];
+            pipe_metadata_r[7] <= pipe_metadata_r[6];
+            pipe_metadata_r[8] <= pipe_metadata_r[7];
+            pipe_metadata_r[9] <= pipe_metadata_r[8];
+            pipe_metadata_r[10] <= pipe_metadata_r[9];
+            pipe_metadata_r[11] <= pipe_metadata_r[10];
+            pipe_metadata_r[12] <= pipe_metadata_r[11];
+            pipe_metadata_r[13] <= pipe_metadata_r[12];
+            pipe_metadata_r[14] <= pipe_metadata_r[13];
+            pipe_metadata_r[15] <= pipe_metadata_r[14];
+            pipe_metadata_r[16] <= pipe_metadata_r[15];
+            pipe_metadata_r[17] <= pipe_metadata_r[16];
+            pipe_metadata_r[18] <= pipe_metadata_r[17];
+            pipe_metadata_r[19] <= pipe_metadata_r[18];
+            pipe_metadata_r[20] <= pipe_metadata_r[19];
+            pipe_metadata_r[21] <= pipe_metadata_r[20];
+            pipe_metadata_r[22] <= pipe_metadata_r[21];
+            pipe_metadata_r[23] <= pipe_metadata_r[22];
+            pipe_metadata_r[24] <= pipe_metadata_r[23];
+            pipe_metadata_r[25] <= pipe_metadata_r[24];
+            pipe_metadata_r[26] <= pipe_metadata_r[25];
+            pipe_metadata_r[27] <= pipe_metadata_r[26];
+            pipe_metadata_r[28] <= pipe_metadata_r[27];
+            pipe_metadata_r[29] <= pipe_metadata_r[28];
+            pipe_metadata_r[30] <= pipe_metadata_r[29];
+            pipe_metadata_r[31] <= pipe_metadata_r[30];
+            pipe_metadata_r[32] <= pipe_metadata_r[31];
+            pipe_metadata_r[33] <= pipe_metadata_r[32];
+            pipe_metadata_r[34] <= pipe_metadata_r[33];
+            pipe_metadata_r[35] <= pipe_metadata_r[34];
+            pipe_metadata_r[36] <= pipe_metadata_r[35];
+            pipe_metadata_r[37] <= pipe_metadata_r[36];
+            pipe_metadata_r[38] <= pipe_metadata_r[37];
+            pipe_metadata_r[39] <= pipe_metadata_r[38];
+            pipe_metadata_r[40] <= pipe_metadata_r[39];
+            pipe_metadata_r[41] <= pipe_metadata_r[40];
+            pipe_metadata_r[42] <= pipe_metadata_r[41];
+            pipe_metadata_r[43] <= pipe_metadata_r[42];
+            pipe_metadata_r[44] <= pipe_metadata_r[43];
+            pipe_metadata_r[45] <= pipe_metadata_r[44];
+            pipe_metadata_r[46] <= pipe_metadata_r[45];
+            pipe_metadata_r[47] <= pipe_metadata_r[46];
+            pipe_metadata_r[48] <= pipe_metadata_r[47];
+            pipe_metadata_r[49] <= pipe_metadata_r[48];
+            pipe_metadata_r[50] <= pipe_metadata_r[49];
+            pipe_metadata_r[51] <= pipe_metadata_r[50];
+            pipe_metadata_r[52] <= pipe_metadata_r[51];
+            pipe_metadata_r[53] <= pipe_metadata_r[52];
+            pipe_metadata_r[54] <= pipe_metadata_r[53];
+            pipe_metadata_r[55] <= pipe_metadata_r[54];
+            pipe_metadata_r[56] <= pipe_metadata_r[55];
+            pipe_metadata_r[57] <= pipe_metadata_r[56];
+            pipe_metadata_r[58] <= pipe_metadata_r[57];
+            pipe_metadata_r[59] <= pipe_metadata_r[58];
+            pipe_metadata_r[60] <= pipe_metadata_r[59];
+            pipe_metadata_r[61] <= pipe_metadata_r[60];
+            pipe_metadata_r[62] <= pipe_metadata_r[61];
+            pipe_metadata_r[63] <= pipe_metadata_r[62];
+            pipe_metadata_r[64] <= pipe_metadata_r[63];
+            pipe_metadata_r[65] <= pipe_metadata_r[64];
+            pipe_metadata_r[66] <= pipe_metadata_r[65];
+            pipe_metadata_r[67] <= pipe_metadata_r[66];
+            pipe_metadata_r[68] <= pipe_metadata_r[67];
+            pipe_metadata_r[69] <= pipe_metadata_r[68];
+            pipe_metadata_r[70] <= pipe_metadata_r[69];
+            pipe_metadata_r[71] <= pipe_metadata_r[70];
+            pipe_metadata_r[72] <= pipe_metadata_r[71];
+            pipe_metadata_r[73] <= pipe_metadata_r[72];
+            pipe_metadata_r[74] <= pipe_metadata_r[73];
+            pipe_metadata_r[75] <= pipe_metadata_r[74];
+            pipe_metadata_r[76] <= pipe_metadata_r[75];
+            pipe_metadata_r[77] <= pipe_metadata_r[76];
+            pipe_metadata_r[78] <= pipe_metadata_r[77];
+            pipe_metadata_r[79] <= pipe_metadata_r[78];
+            pipe_metadata_r[80] <= pipe_metadata_r[79];
+            pipe_metadata_r[81] <= pipe_metadata_r[80];
+            pipe_metadata_r[82] <= pipe_metadata_r[81];
+            pipe_metadata_r[83] <= pipe_metadata_r[82];
+            pipe_metadata_r[84] <= pipe_metadata_r[83];
+            pipe_metadata_r[85] <= pipe_metadata_r[84];
+            pipe_metadata_r[86] <= pipe_metadata_r[85];
+            pipe_metadata_r[87] <= pipe_metadata_r[86];
+            pipe_metadata_r[88] <= pipe_metadata_r[87];
+            pipe_metadata_r[89] <= pipe_metadata_r[88];
+            pipe_metadata_r[90] <= pipe_metadata_r[89];
+            pipe_metadata_r[91] <= pipe_metadata_r[90];
+            pipe_metadata_r[92] <= pipe_metadata_r[91];
+            pipe_metadata_r[93] <= pipe_metadata_r[92];
+            pipe_metadata_r[94] <= pipe_metadata_r[93];
+            pipe_metadata_r[95] <= pipe_metadata_r[94];
+            pipe_metadata_r[96] <= pipe_metadata_r[95];
+            pipe_metadata_r[97] <= pipe_metadata_r[96];
+            pipe_metadata_r[98] <= pipe_metadata_r[97];
+            pipe_metadata_r[99] <= pipe_metadata_r[98];
+            pipe_metadata_r[100] <= pipe_metadata_r[99];
+            pipe_metadata_r[101] <= pipe_metadata_r[100];
+            pipe_metadata_r[102] <= pipe_metadata_r[101];
+            pipe_metadata_r[103] <= pipe_metadata_r[102];
+            pipe_metadata_r[104] <= pipe_metadata_r[103];
         end
-    endgenerate
+    end
+    // Four copies of the unchanged arithmetic pipeline below, one per pixel lane.
+    // Each lane has 12 three-stage multipliers: Newton x2, UV x2, derivatives x8.
+    // Their results retain the original 22/28/41/79/92/105-cycle alignment.
     genvar lane;
     generate
         for (lane = 0; lane < 4; lane = lane + 1) begin : g_lane
+            // Four lanes, each owning seven 70-bit two-slot input field queues.
+            // No queue array is shared between generated lanes or fields.
+            genvar attribute;
+            for (attribute = 0; attribute < 7; attribute = attribute + 1) begin : g_plane
+                reg [69:0] input_plane_r [0:1];
+                always @(posedge clk_i) begin
+                    if (input_push_w) begin
+                        input_plane_r[input_write_r] <=
+                            fragment_plane_i[lane*490+attribute*70 +: 70];
+                    end
+                end
+                wire [69:0] plane_w;
+                assign plane_w = input_plane_r[input_read_r];
+            end
+
+            // Five independent two-slot output fields per lane, written at stage 105.
+            reg [31:0] output_u_r [0:1];
+            assign sample_u_o[lane*32 +: 32] =
+                output_u_r[output_read_r];
+            reg [31:0] output_v_r [0:1];
+            assign sample_v_o[lane*32 +: 32] =
+                output_v_r[output_read_r];
+            reg [95:0] output_span_r [0:1];
+            assign sample_span_o[lane*96 +: 96] =
+                output_span_r[output_read_r];
+            reg [15:0] output_depth_r [0:1];
+            assign sample_depth_o[lane*16 +: 16] =
+                output_depth_r[output_read_r];
+            reg [23:0] output_color_r [0:1];
+            assign sample_color_o[lane*24 +: 24] =
+                output_color_r[output_read_r];
+
+            // Each lane owns 27 unreset, whole-element delay chains below.
             wire [69:0] q_absolute_w;
             wire [0:0] q_sign_w;
             wire [9:0] q_exponent_w;
@@ -333,7 +455,7 @@ module edrv32_gpu_perspective (
             wire [95:0] span_y_w;
             wire [95:0] span_w;
             wire [69:0] unused_depth_raw_w;
-            assign unused_depth_raw_w = input_plane_r[input_read_r][lane*490+0 +: 70];
+            assign unused_depth_raw_w = g_plane[0].plane_w;
             reg [16:0] unused_depth_rounded_r;
             reg [0:0] depth_overflow_r;
             reg [0:0] depth_negative_r;
@@ -342,7 +464,7 @@ module edrv32_gpu_perspective (
             wire [15:0] final_depth_w;
             assign final_depth_w = delay_22_r[102];
             wire [69:0] unused_red_raw_w;
-            assign unused_red_raw_w = input_plane_r[input_read_r][lane*490+280 +: 70];
+            assign unused_red_raw_w = g_plane[4].plane_w;
             reg [8:0] unused_red_rounded_r;
             reg [0:0] red_overflow_r;
             reg [0:0] red_negative_r;
@@ -351,7 +473,7 @@ module edrv32_gpu_perspective (
             wire [7:0] final_red_w;
             assign final_red_w = delay_23_r[102];
             wire [69:0] unused_green_raw_w;
-            assign unused_green_raw_w = input_plane_r[input_read_r][lane*490+350 +: 70];
+            assign unused_green_raw_w = g_plane[5].plane_w;
             reg [8:0] unused_green_rounded_r;
             reg [0:0] green_overflow_r;
             reg [0:0] green_negative_r;
@@ -360,7 +482,7 @@ module edrv32_gpu_perspective (
             wire [7:0] final_green_w;
             assign final_green_w = delay_24_r[102];
             wire [69:0] unused_blue_raw_w;
-            assign unused_blue_raw_w = input_plane_r[input_read_r][lane*490+420 +: 70];
+            assign unused_blue_raw_w = g_plane[6].plane_w;
             reg [8:0] unused_blue_rounded_r;
             reg [0:0] blue_overflow_r;
             reg [0:0] blue_negative_r;
@@ -377,7 +499,7 @@ module edrv32_gpu_perspective (
             edrv32_gpu_perspective_absolute u_q_absolute (
                 .clk_i(clk_i),
                 .en_i(advance_w),
-                .value_i(input_plane_r[input_read_r][lane*490+70 +: 70]),
+                .value_i(g_plane[1].plane_w),
                 .exponent_i(input_h_r[input_read_r][10 +: 10] - 10'd30),
                 .magnitude_o(q_absolute_w),
                 .sign_o(q_sign_w),
@@ -394,7 +516,7 @@ module edrv32_gpu_perspective (
             edrv32_gpu_perspective_absolute u_uq_absolute (
                 .clk_i(clk_i),
                 .en_i(advance_w),
-                .value_i(input_plane_r[input_read_r][lane*490+140 +: 70]),
+                .value_i(g_plane[2].plane_w),
                 .exponent_i(input_h_r[input_read_r][20 +: 10] - 10'd38),
                 .magnitude_o(uq_absolute_w),
                 .sign_o(uq_sign_w),
@@ -411,7 +533,7 @@ module edrv32_gpu_perspective (
             edrv32_gpu_perspective_absolute u_vq_absolute (
                 .clk_i(clk_i),
                 .en_i(advance_w),
-                .value_i(input_plane_r[input_read_r][lane*490+210 +: 70]),
+                .value_i(g_plane[3].plane_w),
                 .exponent_i(input_h_r[input_read_r][30 +: 10] - 10'd38),
                 .magnitude_o(vq_absolute_w),
                 .sign_o(vq_sign_w),
@@ -1951,7 +2073,7 @@ module edrv32_gpu_perspective (
                     delay_25_r[100] <= delay_25_r[99];
                     delay_25_r[101] <= delay_25_r[100];
                     delay_25_r[102] <= delay_25_r[101];
-                    delay_26_r[0] <= input_plane_r[input_read_r][lane*490+170 +: 32];
+                    delay_26_r[0] <= g_plane[2].plane_w[30 +: 32];
                     delay_26_r[1] <= delay_26_r[0];
                     delay_26_r[2] <= delay_26_r[1];
                     delay_26_r[3] <= delay_26_r[2];
@@ -2056,7 +2178,7 @@ module edrv32_gpu_perspective (
                     delay_26_r[102] <= delay_26_r[101];
                     delay_26_r[103] <= delay_26_r[102];
                     delay_26_r[104] <= delay_26_r[103];
-                    delay_27_r[0] <= input_plane_r[input_read_r][lane*490+240 +: 32];
+                    delay_27_r[0] <= g_plane[3].plane_w[30 +: 32];
                     delay_27_r[1] <= delay_27_r[0];
                     delay_27_r[2] <= delay_27_r[1];
                     delay_27_r[3] <= delay_27_r[2];
@@ -2163,14 +2285,14 @@ module edrv32_gpu_perspective (
                     delay_27_r[104] <= delay_27_r[103];
                 end
                 if (output_push_w) begin
-                    output_u_r[output_write_r][lane*32 +: 32] <= pipe_quad_r[104] ?
+                    output_u_r[output_write_r] <= pipe_quad_w ?
                         bypass_u_w : delay_7_r[52];
-                    output_v_r[output_write_r][lane*32 +: 32] <= pipe_quad_r[104] ?
+                    output_v_r[output_write_r] <= pipe_quad_w ?
                         bypass_v_w : delay_9_r[52];
-                    output_span_r[output_write_r][lane*96 +: 96] <= pipe_quad_r[104] ?
+                    output_span_r[output_write_r] <= pipe_quad_w ?
                         96'b0 : span_w;
-                    output_depth_r[output_write_r][lane*16 +: 16] <= final_depth_w;
-                    output_color_r[output_write_r][lane*24 +: 24] <=
+                    output_depth_r[output_write_r] <= final_depth_w;
+                    output_color_r[output_write_r] <=
                         {final_blue_w, final_green_w, final_red_w};
                 end
             end

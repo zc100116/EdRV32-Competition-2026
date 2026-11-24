@@ -1,0 +1,5 @@
+id,stage,x,y,radius
+reef_west,coast,1030,640,26
+reef_north,coast,1390,500,34
+reef_east,coast,1630,790,30
+reef_south,coast,1190,1030,38

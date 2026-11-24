@@ -9,7 +9,7 @@ from .ethernet import packets
 
 FRAME = struct.Struct('<HhhBB')
 KEYS = ('up', 'down', 'left', 'right', 'a', 'b', 'select', 'start',
-        'enter', 'esc', 'next', 'prev')
+        'enter', 'esc', 'next', 'prev', 'l', 'u', 'q', 'f')
 
 
 class VirtualInput:

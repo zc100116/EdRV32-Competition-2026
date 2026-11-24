@@ -62,7 +62,7 @@ void pc_png_write(const char *path, const uint32_t *pixels)
     be32(header, 1280); be32(header + 4, 720); header[8] = 8; header[9] = 2;
     chunk(file, "IHDR", header, 13);
     chunk(file, "IDAT", zlib, (uint32_t)output);
-    chunk(file, "IEND", NULL, 0);
+    chunk(file, "IEND", header, 0);
     if (fclose(file)) { perror(path); exit(1); }
     free(raw); free(zlib);
 }

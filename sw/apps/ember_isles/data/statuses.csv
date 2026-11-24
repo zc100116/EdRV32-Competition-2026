@@ -1,0 +1,9 @@
+id,name,tags,element,effect,damage,interval,duration,stacks,strength,freeze_frames,posture
+ignite,Ignite,ember|dot,ember,periodic_damage,3,30,180,5,100,0,0
+wet,Wet,tide,tide,resistance,0,0,180,1,20,0,0
+chill,Chill,tide,tide,slow_freeze,0,0,180,3,15,90,30
+shock,Shock,star|chain,star,vulnerability,8,0,180,1,10,0,0
+armor_break,Armor break,iron,iron,armor,0,0,180,5,10,0,0
+stun,Stun,iron,iron,control,0,0,30,1,100,0,40
+corrode,Corrode,shadow,shadow,max_health,0,0,180,5,5,0,0
+blind,Blind,star|shadow,shadow,miss,0,0,180,1,30,0,0

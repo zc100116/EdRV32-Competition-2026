@@ -4,12 +4,30 @@
  * Clock domain: clk_sys, or host test caller.
  */
 #include "virtual_input.h"
+#include "plat/plat.h"
 static volatile struct virtual_input_state state;
 static uint8_t serial_frame[VIRTUAL_INPUT_BYTES];
 static unsigned serial_position;
 static unsigned revision;
 unsigned virtual_input_revision(void) { return revision; }
 static int16_t wheel_pending;
+
+uint16_t virtual_input_game_keys(uint16_t keys)
+{
+    return ((keys & VI_UP) ? PLAT_KEY_W : 0) |
+        ((keys & VI_LEFT) ? PLAT_KEY_A : 0) |
+        ((keys & VI_DOWN) ? PLAT_KEY_S : 0) |
+        ((keys & VI_RIGHT) ? PLAT_KEY_D : 0) |
+        ((keys & VI_A) ? PLAT_KEY_J : 0) |
+        ((keys & VI_B) ? PLAT_KEY_K : 0) |
+        ((keys & VI_L) ? PLAT_KEY_L : 0) |
+        ((keys & VI_U) ? PLAT_KEY_U : 0) |
+        ((keys & VI_Q) ? PLAT_KEY_Q : 0) |
+        ((keys & VI_F) ? PLAT_KEY_F : 0) |
+        ((keys & VI_SELECT) ? PLAT_KEY_SPACE : 0) |
+        ((keys & VI_ESC) ? PLAT_KEY_ESC : 0) |
+        ((keys & VI_ENTER) ? PLAT_KEY_ENTER : 0);
+}
 
 void virtual_input_network(const volatile uint8_t *frame)
 {
