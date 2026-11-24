@@ -35,7 +35,8 @@ $(OUT)/generated/data.h: $(wildcard $(APP)/data/*.csv) $(APP)/tools/data_convert
 	python3 $(APP)/tools/data_convert.py
 $(OUT)/generated/atlas.h: $(wildcard $(APP)/assets/art/*) $(APP)/tools/atlas_convert.py
 	python3 $(APP)/tools/atlas_convert.py
-$(OUT)/generated/music.h: $(wildcard $(APP)/assets/music/*) $(APP)/tools/music_convert.py
+$(OUT)/generated/music.h: $(wildcard $(APP)/assets/music/* $(APP)/assets/audio/*) \
+    $(APP)/tools/music_convert.py
 	python3 $(APP)/tools/music_convert.py
 $(OUT)/generated/replay.h: $(wildcard $(APP)/assets/replays/*) $(APP)/tools/replay_convert.py
 	python3 $(APP)/tools/replay_convert.py
