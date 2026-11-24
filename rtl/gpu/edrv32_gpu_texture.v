@@ -386,9 +386,9 @@ module edrv32_gpu_texture (
     genvar lane;
     generate
         for (lane = 0; lane < 4; lane = lane + 1) begin : g_lod
-            wire [95:0] normalized_w [0:6];
-            wire [6:0] shift_w [0:6];
-            wire zero_w [0:6];
+            wire [96*7-1:0] unused_normalized_w;
+            wire [7*7-1:0] shift_w;
+            wire [6:0] zero_w;
             reg [31:0] u_r [0:31];
             reg [31:0] v_r [0:31];
             reg [11:0] lod_r [0:31];
@@ -413,45 +413,45 @@ module edrv32_gpu_texture (
                 end
             end
             reg [95:0] normalized_0_r;
-            assign normalized_w[0] = normalized_0_r;
+            assign unused_normalized_w[0 +: 96] = normalized_0_r;
             reg [6:0] shift_0_r;
-            assign shift_w[0] = shift_0_r;
+            assign shift_w[0 +: 7] = shift_0_r;
             reg [0:0] zero_0_r;
             assign zero_w[0] = zero_0_r;
             reg [95:0] normalized_1_r;
-            assign normalized_w[1] = normalized_1_r;
+            assign unused_normalized_w[96 +: 96] = normalized_1_r;
             reg [6:0] shift_1_r;
-            assign shift_w[1] = shift_1_r;
+            assign shift_w[7 +: 7] = shift_1_r;
             reg [0:0] zero_1_r;
             assign zero_w[1] = zero_1_r;
             reg [95:0] normalized_2_r;
-            assign normalized_w[2] = normalized_2_r;
+            assign unused_normalized_w[192 +: 96] = normalized_2_r;
             reg [6:0] shift_2_r;
-            assign shift_w[2] = shift_2_r;
+            assign shift_w[14 +: 7] = shift_2_r;
             reg [0:0] zero_2_r;
             assign zero_w[2] = zero_2_r;
             reg [95:0] normalized_3_r;
-            assign normalized_w[3] = normalized_3_r;
+            assign unused_normalized_w[288 +: 96] = normalized_3_r;
             reg [6:0] shift_3_r;
-            assign shift_w[3] = shift_3_r;
+            assign shift_w[21 +: 7] = shift_3_r;
             reg [0:0] zero_3_r;
             assign zero_w[3] = zero_3_r;
             reg [95:0] normalized_4_r;
-            assign normalized_w[4] = normalized_4_r;
+            assign unused_normalized_w[384 +: 96] = normalized_4_r;
             reg [6:0] shift_4_r;
-            assign shift_w[4] = shift_4_r;
+            assign shift_w[28 +: 7] = shift_4_r;
             reg [0:0] zero_4_r;
             assign zero_w[4] = zero_4_r;
             reg [95:0] normalized_5_r;
-            assign normalized_w[5] = normalized_5_r;
+            assign unused_normalized_w[480 +: 96] = normalized_5_r;
             reg [6:0] shift_5_r;
-            assign shift_w[5] = shift_5_r;
+            assign shift_w[35 +: 7] = shift_5_r;
             reg [0:0] zero_5_r;
             assign zero_w[5] = zero_5_r;
             reg [95:0] normalized_6_r;
-            assign normalized_w[6] = normalized_6_r;
+            assign unused_normalized_w[576 +: 96] = normalized_6_r;
             reg [6:0] shift_6_r;
-            assign shift_w[6] = shift_6_r;
+            assign shift_w[42 +: 7] = shift_6_r;
             reg [0:0] zero_6_r;
             assign zero_w[6] = zero_6_r;
             reg signed [15:0] logarithm_r;
@@ -469,52 +469,58 @@ module edrv32_gpu_texture (
                 shift_0_r <= sample_span_i[lane*96+48 +: 48] == 0 ? 7'd48 : 7'd0;
                 zero_0_r <= sample_span_i[lane*96 +: 96] == 0;
                 logarithm_r <= zero_w[6] ? 16'sd0 :
-                    (16'sd79 - $signed({9'b0, shift_w[6]})) * 16'sd256
-                    + $signed({7'b0, log_fraction(normalized_w[6][94:87])});
+                    (16'sd79 - $signed({9'b0, shift_w[42 +: 7]})) * 16'sd256
+                    + $signed({7'b0, log_fraction(unused_normalized_w[663 +: 8])});
                 if (lod_valid_r[7]) begin
                     lod_r[lod_slot_r[7]] <= clamped_w;
                 end
             end
             always @(posedge clk_i) begin
-                normalized_1_r <= normalized_w[0][95:72] == 0
-                                        ? normalized_w[0] << 24 : normalized_w[0];
-                shift_1_r <= shift_w[0]
-                                + (normalized_w[0][95:72] == 0 ? 7'd24 : 7'd0);
+                normalized_1_r <= unused_normalized_w[72 +: 24] == 0
+                                        ? unused_normalized_w[0 +: 96] << 24
+                                        : unused_normalized_w[0 +: 96];
+                shift_1_r <= shift_w[0 +: 7]
+                                + (unused_normalized_w[72 +: 24] == 0 ? 7'd24 : 7'd0);
                 zero_1_r <= zero_w[0];
             end
             always @(posedge clk_i) begin
-                normalized_2_r <= normalized_w[1][95:84] == 0
-                                        ? normalized_w[1] << 12 : normalized_w[1];
-                shift_2_r <= shift_w[1]
-                                + (normalized_w[1][95:84] == 0 ? 7'd12 : 7'd0);
+                normalized_2_r <= unused_normalized_w[180 +: 12] == 0
+                                        ? unused_normalized_w[96 +: 96] << 12
+                                        : unused_normalized_w[96 +: 96];
+                shift_2_r <= shift_w[7 +: 7]
+                                + (unused_normalized_w[180 +: 12] == 0 ? 7'd12 : 7'd0);
                 zero_2_r <= zero_w[1];
             end
             always @(posedge clk_i) begin
-                normalized_3_r <= normalized_w[2][95:90] == 0
-                                        ? normalized_w[2] << 6 : normalized_w[2];
-                shift_3_r <= shift_w[2]
-                                + (normalized_w[2][95:90] == 0 ? 7'd6 : 7'd0);
+                normalized_3_r <= unused_normalized_w[282 +: 6] == 0
+                                        ? unused_normalized_w[192 +: 96] << 6
+                                        : unused_normalized_w[192 +: 96];
+                shift_3_r <= shift_w[14 +: 7]
+                                + (unused_normalized_w[282 +: 6] == 0 ? 7'd6 : 7'd0);
                 zero_3_r <= zero_w[2];
             end
             always @(posedge clk_i) begin
-                normalized_4_r <= normalized_w[3][95:93] == 0
-                                        ? normalized_w[3] << 3 : normalized_w[3];
-                shift_4_r <= shift_w[3]
-                                + (normalized_w[3][95:93] == 0 ? 7'd3 : 7'd0);
+                normalized_4_r <= unused_normalized_w[381 +: 3] == 0
+                                        ? unused_normalized_w[288 +: 96] << 3
+                                        : unused_normalized_w[288 +: 96];
+                shift_4_r <= shift_w[21 +: 7]
+                                + (unused_normalized_w[381 +: 3] == 0 ? 7'd3 : 7'd0);
                 zero_4_r <= zero_w[3];
             end
             always @(posedge clk_i) begin
-                normalized_5_r <= normalized_w[4][95:94] == 0
-                                        ? normalized_w[4] << 2 : normalized_w[4];
-                shift_5_r <= shift_w[4]
-                                + (normalized_w[4][95:94] == 0 ? 7'd2 : 7'd0);
+                normalized_5_r <= unused_normalized_w[478 +: 2] == 0
+                                        ? unused_normalized_w[384 +: 96] << 2
+                                        : unused_normalized_w[384 +: 96];
+                shift_5_r <= shift_w[28 +: 7]
+                                + (unused_normalized_w[478 +: 2] == 0 ? 7'd2 : 7'd0);
                 zero_5_r <= zero_w[4];
             end
             always @(posedge clk_i) begin
-                normalized_6_r <= normalized_w[5][95:95] == 0
-                                        ? normalized_w[5] << 1 : normalized_w[5];
-                shift_6_r <= shift_w[5]
-                                + (normalized_w[5][95:95] == 0 ? 7'd1 : 7'd0);
+                normalized_6_r <= unused_normalized_w[575 +: 1] == 0
+                                        ? unused_normalized_w[480 +: 96] << 1
+                                        : unused_normalized_w[480 +: 96];
+                shift_6_r <= shift_w[35 +: 7]
+                                + (unused_normalized_w[575 +: 1] == 0 ? 7'd1 : 7'd0);
                 zero_6_r <= zero_w[5];
             end
         end

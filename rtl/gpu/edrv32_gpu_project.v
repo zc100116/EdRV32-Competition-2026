@@ -102,29 +102,29 @@ module edrv32_gpu_project (
             localparam WIDTH = field_g < 4 ? 40 : (field_g < 6 ? 16 : 24);
             localparam OFFSET = field_g < 4 ? field_g * 40
                 : (field_g < 6 ? 160 + (field_g - 4) * 16 : 192 + (field_g - 6) * 24);
-            wire [WIDTH-1:0] delay_w [0:10];
+            wire [WIDTH*11-1:0] delay_w;
             for (stage_g = 0; stage_g < 11; stage_g = stage_g + 1) begin : g_stage
                 reg [WIDTH-1:0] data_r;
                 wire [WIDTH-1:0] next_w;
                 if (stage_g == 0) begin : g_first
                     assign next_w = clipped_data_i[OFFSET +: WIDTH];
                 end else begin : g_delay
-                    assign next_w = delay_w[stage_g - 1];
+                    assign next_w = delay_w[WIDTH*(stage_g - 1) +: WIDTH];
                 end
-                assign delay_w[stage_g] = data_r;
+                assign delay_w[WIDTH*stage_g +: WIDTH] = data_r;
                 always @(posedge clk_i) begin
                     if (enable_w) data_r <= next_w;
                 end
             end
             if (field_g < 3) begin : g_position
-                assign position_input_w[field_g] = delay_w[10];
+                assign position_input_w[field_g] = delay_w[WIDTH*10 +: WIDTH];
             end else if (field_g == 3) begin : g_unused_w
                 wire [WIDTH-1:0] unused_w;
-                assign unused_w = delay_w[10];
+                assign unused_w = delay_w[WIDTH*10 +: WIDTH];
             end else if (field_g < 6) begin : g_uv
-                assign uv_input_w[field_g - 4] = delay_w[10];
+                assign uv_input_w[field_g - 4] = delay_w[WIDTH*10 +: WIDTH];
             end else begin : g_color
-                assign color_input_w[(field_g - 6) * 24 +: 24] = delay_w[10];
+                assign color_input_w[(field_g - 6) * 24 +: 24] = delay_w[WIDTH*10 +: WIDTH];
             end
         end
         // Position stage: three signed 40x36 products; viewport stage remains unchanged.

@@ -192,11 +192,26 @@ module edrv32_gpu_geometry (
             localparam WIDTH = field_g < 4 ? 40 : (field_g < 6 ? 16 : 24);
             localparam OFFSET = field_g < 4 ? field_g * 40
                 : (field_g < 6 ? 160 + (field_g - 4) * 16 : 192 + (field_g - 6) * 24);
-            wire [WIDTH-1:0] polygon_w [0:7];
-            assign project_input_data_w[OFFSET +: WIDTH] = polygon_w[send_index_r];
+            wire [WIDTH*8-1:0] polygon_w;
+            reg [WIDTH-1:0] selected_polygon_w;
+            assign project_input_data_w[OFFSET +: WIDTH] = selected_polygon_w;
+            always @(*) begin
+                selected_polygon_w = 0;
+                case (send_index_r)
+                    3'd0: selected_polygon_w = polygon_w[WIDTH*0 +: WIDTH];
+                    3'd1: selected_polygon_w = polygon_w[WIDTH*1 +: WIDTH];
+                    3'd2: selected_polygon_w = polygon_w[WIDTH*2 +: WIDTH];
+                    3'd3: selected_polygon_w = polygon_w[WIDTH*3 +: WIDTH];
+                    3'd4: selected_polygon_w = polygon_w[WIDTH*4 +: WIDTH];
+                    3'd5: selected_polygon_w = polygon_w[WIDTH*5 +: WIDTH];
+                    3'd6: selected_polygon_w = polygon_w[WIDTH*6 +: WIDTH];
+                    3'd7: selected_polygon_w = polygon_w[WIDTH*7 +: WIDTH];
+                    default: selected_polygon_w = 0;
+                endcase
+            end
             for (vertex_g = 0; vertex_g < 8; vertex_g = vertex_g + 1) begin : g_polygon
                 reg [WIDTH-1:0] data_r;
-                assign polygon_w[vertex_g] = data_r;
+                assign polygon_w[WIDTH*vertex_g +: WIDTH] = data_r;
                 always @(posedge clk_i) begin
                     if (polygon_accept_w)
                         data_r <= polygon_data_w[vertex_g * 264 + OFFSET +: WIDTH];
@@ -229,27 +244,30 @@ module edrv32_gpu_geometry (
                 : (field_g == 2 ? 34 : (field_g == 3 ? 50
                 : (field_g == 4 ? 85 : (field_g == 5 ? 136 : 187)))));
             reg [WIDTH-1:0] screen_r [0:7];
-            wire [WIDTH-1:0] fan_w [0:2];
+            wire [WIDTH*3-1:0] fan_w;
             wire [2:0] next_index_w;
             wire [WIDTH*3-1:0] ordered_w;
             wire [WIDTH*3-1:0] output_w;
             reg [WIDTH*3-1:0] output_r [0:1];
             assign next_index_w = fan_index_r + 3'd1;
-            assign fan_w[0] = screen_r[0];
-            assign fan_w[1] = screen_r[fan_index_r];
-            assign fan_w[2] = screen_r[next_index_w];
-            assign ordered_w = fan_area_w >= 0 ? {fan_w[2], fan_w[1], fan_w[0]}
-                : {fan_w[1], fan_w[2], fan_w[0]};
+            assign fan_w[WIDTH*0 +: WIDTH] = screen_r[0];
+            assign fan_w[WIDTH*1 +: WIDTH] = screen_r[fan_index_r];
+            assign fan_w[WIDTH*2 +: WIDTH] = screen_r[next_index_w];
+            assign ordered_w = fan_area_w >= 0
+                ? {fan_w[WIDTH*2 +: WIDTH], fan_w[WIDTH*1 +: WIDTH], fan_w[WIDTH*0 +: WIDTH]}
+                : {fan_w[WIDTH*1 +: WIDTH], fan_w[WIDTH*2 +: WIDTH], fan_w[WIDTH*0 +: WIDTH]};
             assign output_w = output_r[output_read_r];
             if (field_g == 0) begin : g_x
                 assign screen_triangle_x_o = output_w;
                 for (vertex_g = 0; vertex_g < 3; vertex_g = vertex_g + 1) begin : g_vertex
-                    assign fan_x_w[vertex_g] = {fan_w[vertex_g][16], fan_w[vertex_g]};
+                    assign fan_x_w[vertex_g] = {fan_w[WIDTH*vertex_g+16],
+                        fan_w[WIDTH*vertex_g +: WIDTH]};
                 end
             end else if (field_g == 1) begin : g_y
                 assign screen_triangle_y_o = output_w;
                 for (vertex_g = 0; vertex_g < 3; vertex_g = vertex_g + 1) begin : g_vertex
-                    assign fan_y_w[vertex_g] = {fan_w[vertex_g][16], fan_w[vertex_g]};
+                    assign fan_y_w[vertex_g] = {fan_w[WIDTH*vertex_g+16],
+                        fan_w[WIDTH*vertex_g +: WIDTH]};
                 end
             end else if (field_g == 2) begin : g_depth
                 assign screen_triangle_depth_o = output_w;

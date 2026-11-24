@@ -190,7 +190,7 @@ module edrv32_gpu_setup_plane (
             wire signed [55:0] rounded_w;
             wire [6:0] rounding_bit_w;
             wire [6:0] rounding_shift_w;
-            wire signed [55:0] gradient_pipe_w [9:14];
+            wire [56*6-1:0] gradient_pipe_w;
             reg signed [73:0] origin_10_r;
             reg signed [73:0] origin_11_r;
             reg signed [73:0] origin_12_r;
@@ -203,7 +203,7 @@ module edrv32_gpu_setup_plane (
             assign rounded_w = inverse_8_r[86]
                 ? -unused_rounded_w[55:0] : unused_rounded_w[55:0];
             assign origin_product_w[axis] = origin_12_r;
-            assign plane_gradient_o[axis*56 +: 56] = gradient_pipe_w[14];
+            assign plane_gradient_o[axis*56 +: 56] = $signed(gradient_pipe_w[280 +: 56]);
             always @(posedge clk_i) begin
                 if (enable_i) begin
                     difference_r <= $signed({1'b0, scaled_w[axis+1]})
@@ -215,22 +215,23 @@ module edrv32_gpu_setup_plane (
                     inverse_6_r <= numerator_5_r * $signed({1'b0, reciprocal_w[5]});
                     inverse_7_r <= inverse_6_r;
                     inverse_8_r <= inverse_7_r;
-                    origin_10_r <= gradient_pipe_w[9] * $signed(offset_w[9][axis*18 +: 18]);
+                    origin_10_r <= $signed(gradient_pipe_w[0 +: 56])
+                        * $signed(offset_w[9][axis*18 +: 18]);
                     origin_11_r <= origin_10_r;
                     origin_12_r <= origin_11_r;
                 end
             end
             for (stage = 9; stage < 15; stage = stage + 1) begin : g_gradient
                 reg signed [55:0] value_r;
-                assign gradient_pipe_w[stage] = value_r;
+                assign gradient_pipe_w[56*(stage-9) +: 56] = value_r;
                 always @(posedge clk_i) begin
                     if (enable_i) value_r <= stage == 9 ? rounded_w
-                        : gradient_pipe_w[stage == 9 ? 9 : stage-1];
+                        : $signed(gradient_pipe_w[56*((stage == 9 ? 9 : stage-1)-9) +: 56]);
                 end
             end
             wire [55:0] normal_magnitude_w;
-            assign normal_magnitude_w = gradient_pipe_w[13][55]
-                ? -gradient_pipe_w[13] : gradient_pipe_w[13];
+            assign normal_magnitude_w = gradient_pipe_w[279]
+                ? -$signed(gradient_pipe_w[224 +: 56]) : $signed(gradient_pipe_w[224 +: 56]);
             wire [63:0] normal_leading_data64_w;
             wire [5:0] normal_leading_w;
             wire normal_leading_bit0_w;
@@ -281,7 +282,7 @@ module edrv32_gpu_setup_plane (
             assign normal_w[axis] = normal_r;
             always @(posedge clk_i) begin
                 if (enable_i) normal_r <= normal_magnitude_w == 0 ? 29'd0
-                    : {normal_exponent_w, gradient_pipe_w[13][55], unused_adjusted_normal_w[17:0]};
+                    : {normal_exponent_w, gradient_pipe_w[279], unused_adjusted_normal_w[17:0]};
             end
         end
     endgenerate

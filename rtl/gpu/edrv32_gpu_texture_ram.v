@@ -69,10 +69,10 @@ module edrv32_gpu_texture_ram (
             reg [29:0] read_addr_r;
             reg [7:0] segment_a_r;
             reg [7:0] segment_b_r;
-            wire [15:0] segment_a_w [0:11];
-            wire [15:0] segment_b_w [0:11];
-            wire [15:0] group_a_w [0:2];
-            wire [15:0] group_b_w [0:2];
+            wire [16*12-1:0] segment_a_w;
+            wire [16*12-1:0] segment_b_w;
+            wire [16*3-1:0] group_a_w;
+            wire [16*3-1:0] group_b_w;
             reg [15:0] wr_data_w;
             reg [1:0] wr_keep_w;
             reg [15:0] final_a_w;
@@ -126,8 +126,8 @@ module edrv32_gpu_texture_ram (
                     .rd_b_en_i(read_en_r[1] && read_addr_r[29:26] == segment),
                     .rd_a_addr_i(read_addr_r[10:0]),
                     .rd_b_addr_i(read_addr_r[25:15]),
-                    .rd_a_data_o(segment_a_w[segment]),
-                    .rd_b_data_o(segment_b_w[segment])
+                    .rd_a_data_o(segment_a_w[16*segment +: 16]),
+                    .rd_b_data_o(segment_b_w[16*segment +: 16])
                 );
             end
             // Read stage 4: three pairs of 4:1 selectors per bank, then stage 5: 3:1.
@@ -136,25 +136,25 @@ module edrv32_gpu_texture_ram (
                 reg [15:0] b_r;
                 reg [15:0] a_w;
                 reg [15:0] b_w;
-                assign group_a_w[group_idx] = a_r;
-                assign group_b_w[group_idx] = b_r;
+                assign group_a_w[16*group_idx +: 16] = a_r;
+                assign group_b_w[16*group_idx +: 16] = b_r;
                 always @(*) begin
                     a_w = 0;
                     case (segment_a_r[5:4])
-                        2'd0: a_w = segment_a_w[group_idx*4+0];
-                        2'd1: a_w = segment_a_w[group_idx*4+1];
-                        2'd2: a_w = segment_a_w[group_idx*4+2];
-                        2'd3: a_w = segment_a_w[group_idx*4+3];
+                        2'd0: a_w = segment_a_w[16*(group_idx*4+0) +: 16];
+                        2'd1: a_w = segment_a_w[16*(group_idx*4+1) +: 16];
+                        2'd2: a_w = segment_a_w[16*(group_idx*4+2) +: 16];
+                        2'd3: a_w = segment_a_w[16*(group_idx*4+3) +: 16];
                         default: a_w = 0;
                     endcase
                 end
                 always @(*) begin
                     b_w = 0;
                     case (segment_b_r[5:4])
-                        2'd0: b_w = segment_b_w[group_idx*4+0];
-                        2'd1: b_w = segment_b_w[group_idx*4+1];
-                        2'd2: b_w = segment_b_w[group_idx*4+2];
-                        2'd3: b_w = segment_b_w[group_idx*4+3];
+                        2'd0: b_w = segment_b_w[16*(group_idx*4+0) +: 16];
+                        2'd1: b_w = segment_b_w[16*(group_idx*4+1) +: 16];
+                        2'd2: b_w = segment_b_w[16*(group_idx*4+2) +: 16];
+                        2'd3: b_w = segment_b_w[16*(group_idx*4+3) +: 16];
                         default: b_w = 0;
                     endcase
                 end
@@ -166,18 +166,18 @@ module edrv32_gpu_texture_ram (
             always @(*) begin
                 final_a_w = 16'bx;
                 case (final_select_r[1:0])
-                    2'd0: final_a_w = group_a_w[0];
-                    2'd1: final_a_w = group_a_w[1];
-                    2'd2: final_a_w = group_a_w[2];
+                    2'd0: final_a_w = group_a_w[0 +: 16];
+                    2'd1: final_a_w = group_a_w[16 +: 16];
+                    2'd2: final_a_w = group_a_w[32 +: 16];
                     default: final_a_w = 16'bx;
                 endcase
             end
             always @(*) begin
                 final_b_w = 16'bx;
                 case (final_select_r[3:2])
-                    2'd0: final_b_w = group_b_w[0];
-                    2'd1: final_b_w = group_b_w[1];
-                    2'd2: final_b_w = group_b_w[2];
+                    2'd0: final_b_w = group_b_w[0 +: 16];
+                    2'd1: final_b_w = group_b_w[16 +: 16];
+                    2'd2: final_b_w = group_b_w[32 +: 16];
                     default: final_b_w = 16'bx;
                 endcase
             end

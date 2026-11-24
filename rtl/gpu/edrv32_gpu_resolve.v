@@ -205,9 +205,9 @@ module edrv32_gpu_resolve (
             reg [23:0] color_c_r [0:4];
             reg [23:0] color_d_r [0:4];
             reg [7:0] light_b_r [0:4];
-            wire [7:0] light_w [0:4];
+            wire [8*5-1:0] light_w;
             for (channel = 0; channel < 5; channel = channel + 1) begin : g_luminance
-                assign light_w[channel] = luminance(color_a_r[channel]);
+                assign light_w[8*channel +: 8] = luminance(color_a_r[channel]);
             end
             reg [7:0] center_c_r;
             reg [7:0] max_ns_c_r;
@@ -245,7 +245,7 @@ module edrv32_gpu_resolve (
                         : previous_center_r[((bank+1)%4)*16 +: 16]);
                     for (color_r = 0; color_r < 5; color_r = color_r + 1) begin
                         color_b_r[color_r] <= color_a_r[color_r];
-                        light_b_r[color_r] <= light_w[color_r];
+                        light_b_r[color_r] <= light_w[8*color_r +: 8];
                         color_c_r[color_r] <= color_b_r[color_r];
                         color_d_r[color_r] <= color_c_r[color_r];
                     end

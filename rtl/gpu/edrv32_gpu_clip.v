@@ -112,20 +112,20 @@ module edrv32_gpu_clip (
             wire signed [42:0] x_w;
             wire signed [42:0] y_w;
             wire signed [42:0] w_w;
-            wire signed [42:0] distance_w [0:4];
+            wire [43*5-1:0] unused_distance_w;
             assign x_w = {{3{triangle_data_i[vertex_g * 264 + 39]}},
                 triangle_data_i[vertex_g * 264 +: 40]};
             assign y_w = {{3{triangle_data_i[vertex_g * 264 + 79]}},
                 triangle_data_i[vertex_g * 264 + 40 +: 40]};
             assign w_w = {{3{triangle_data_i[vertex_g * 264 + 159]}},
                 triangle_data_i[vertex_g * 264 + 120 +: 40]};
-            assign distance_w[0] = w_w - 43'sd4096;
-            assign distance_w[1] = (w_w <<< 2) + x_w;
-            assign distance_w[2] = (w_w <<< 2) - x_w;
-            assign distance_w[3] = (w_w <<< 2) + y_w;
-            assign distance_w[4] = (w_w <<< 2) - y_w;
+            assign unused_distance_w[0 +: 43] = w_w - 43'sd4096;
+            assign unused_distance_w[43 +: 43] = (w_w <<< 2) + x_w;
+            assign unused_distance_w[86 +: 43] = (w_w <<< 2) - x_w;
+            assign unused_distance_w[129 +: 43] = (w_w <<< 2) + y_w;
+            assign unused_distance_w[172 +: 43] = (w_w <<< 2) - y_w;
             for (distance_g = 0; distance_g < 5; distance_g = distance_g + 1) begin : g_sign
-                assign outside_w[vertex_g * 5 + distance_g] = distance_w[distance_g][42];
+                assign outside_w[vertex_g * 5 + distance_g] = unused_distance_w[43*distance_g+42];
             end
         end
         for (distance_g = 0; distance_g < 2; distance_g = distance_g + 1) begin : g_distance
@@ -169,13 +169,55 @@ module edrv32_gpu_clip (
             localparam WIDTH = field_g < 4 ? 40 : (field_g < 6 ? 16 : 24);
             localparam OFFSET = field_g < 4 ? field_g * 40
                 : (field_g < 6 ? 160 + (field_g - 4) * 16 : 192 + (field_g - 6) * 24);
-            wire [WIDTH-1:0] workset_w [0:15];
-            wire [WIDTH-1:0] current_w;
-            wire [WIDTH-1:0] last_w;
+            wire [WIDTH*16-1:0] workset_w;
+            reg [WIDTH-1:0] current_w;
+            reg [WIDTH-1:0] last_w;
             reg [WIDTH-1:0] previous_r;
             reg [WIDTH-1:0] intersection_r;
-            assign current_w = workset_w[{bank_r, vertex_index_r}];
-            assign last_w = workset_w[{bank_r, last_index_w}];
+            always @(*) begin
+                current_w = 0;
+                case ({bank_r, vertex_index_r})
+                    4'd0: current_w = workset_w[WIDTH*0 +: WIDTH];
+                    4'd1: current_w = workset_w[WIDTH*1 +: WIDTH];
+                    4'd2: current_w = workset_w[WIDTH*2 +: WIDTH];
+                    4'd3: current_w = workset_w[WIDTH*3 +: WIDTH];
+                    4'd4: current_w = workset_w[WIDTH*4 +: WIDTH];
+                    4'd5: current_w = workset_w[WIDTH*5 +: WIDTH];
+                    4'd6: current_w = workset_w[WIDTH*6 +: WIDTH];
+                    4'd7: current_w = workset_w[WIDTH*7 +: WIDTH];
+                    4'd8: current_w = workset_w[WIDTH*8 +: WIDTH];
+                    4'd9: current_w = workset_w[WIDTH*9 +: WIDTH];
+                    4'd10: current_w = workset_w[WIDTH*10 +: WIDTH];
+                    4'd11: current_w = workset_w[WIDTH*11 +: WIDTH];
+                    4'd12: current_w = workset_w[WIDTH*12 +: WIDTH];
+                    4'd13: current_w = workset_w[WIDTH*13 +: WIDTH];
+                    4'd14: current_w = workset_w[WIDTH*14 +: WIDTH];
+                    4'd15: current_w = workset_w[WIDTH*15 +: WIDTH];
+                    default: current_w = 0;
+                endcase
+            end
+            always @(*) begin
+                last_w = 0;
+                case ({bank_r, last_index_w})
+                    4'd0: last_w = workset_w[WIDTH*0 +: WIDTH];
+                    4'd1: last_w = workset_w[WIDTH*1 +: WIDTH];
+                    4'd2: last_w = workset_w[WIDTH*2 +: WIDTH];
+                    4'd3: last_w = workset_w[WIDTH*3 +: WIDTH];
+                    4'd4: last_w = workset_w[WIDTH*4 +: WIDTH];
+                    4'd5: last_w = workset_w[WIDTH*5 +: WIDTH];
+                    4'd6: last_w = workset_w[WIDTH*6 +: WIDTH];
+                    4'd7: last_w = workset_w[WIDTH*7 +: WIDTH];
+                    4'd8: last_w = workset_w[WIDTH*8 +: WIDTH];
+                    4'd9: last_w = workset_w[WIDTH*9 +: WIDTH];
+                    4'd10: last_w = workset_w[WIDTH*10 +: WIDTH];
+                    4'd11: last_w = workset_w[WIDTH*11 +: WIDTH];
+                    4'd12: last_w = workset_w[WIDTH*12 +: WIDTH];
+                    4'd13: last_w = workset_w[WIDTH*13 +: WIDTH];
+                    4'd14: last_w = workset_w[WIDTH*14 +: WIDTH];
+                    4'd15: last_w = workset_w[WIDTH*15 +: WIDTH];
+                    default: last_w = 0;
+                endcase
+            end
             if (field_g < 4) begin : g_signed
                 assign previous_component_w[field_g] = previous_r;
                 assign current_component_w[field_g] = current_w;
@@ -201,7 +243,7 @@ module edrv32_gpu_clip (
                 wire append_w;
                 wire [WIDTH-1:0] load_data_w;
                 wire [WIDTH-1:0] append_data_w;
-                assign workset_w[slot_g] = data_r;
+                assign workset_w[WIDTH*slot_g +: WIDTH] = data_r;
                 assign load_w = slot_g < 3 && accept_w && !all_inside_w;
                 if (slot_g < 3) begin : g_input
                     assign load_data_w = triangle_data_i[slot_g * 264 + OFFSET +: WIDTH];
@@ -226,7 +268,8 @@ module edrv32_gpu_clip (
                     assign bypass_w = {WIDTH{1'b0}};
                 end
                 assign push_wide_w = state_r == S_IDLE ? bypass_w
-                    : (bank_r ? workset_w[8 + slot_g] : workset_w[slot_g]);
+                    : (bank_r ? workset_w[WIDTH*(8 + slot_g) +: WIDTH]
+                        : workset_w[WIDTH*slot_g +: WIDTH]);
                 assign polygon_data_o[slot_g * 264 + OFFSET +: WIDTH] = data_r[read_r];
                 always @(posedge clk_i) begin
                     if (push_w) data_r[write_r] <= push_wide_w;
