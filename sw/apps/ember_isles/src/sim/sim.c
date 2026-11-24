@@ -381,7 +381,7 @@ void ember_sim_status(struct ember_sim *s, unsigned index, unsigned status, unsi
         ember_statuses[status].duration * s->attributes[EMBER_STATUS_DURATION] / 100,
         s->attributes[EMBER_STATUS_STRENGTH]);
     if (status == EMBER_CHILL && relic(s, R_FROST) &&
-        e->defense.status[EMBER_CHILL].stacks >= ember_statuses[EMBER_CHILL].stacks - 1 &&
+        e->defense.status[EMBER_CHILL].stacks >= ember_statuses[EMBER_CHILL].stacks - relic(s, R_FROST) &&
         e->defense.rank < 2)
         e->defense.frozen = (uint16_t)(ember_statuses[EMBER_CHILL].freeze_frames *
             (100 - e->defense.tenacity) / 100);
@@ -422,8 +422,8 @@ void ember_sim_status(struct ember_sim *s, unsigned index, unsigned status, unsi
             damage = damage * (100 + ember_system[0].chain_growth) / 100;
             damage = damage * (100 + relic(s, R_STAR)) / 100;
             if (s->resonances[2] && s->enemies[next].burn)
-                area_hit(s, s->enemies[next].x, s->enemies[next].y, ember_resonances[2].radius,
-                    ember_resonances[2].damage, 255, depth + 2, 0);
+                inherited_area(s, s->enemies[next].x, s->enemies[next].y,
+                    ember_resonances[2].radius, ember_resonances[2].damage, depth + 2);
             if (!(wet && s->resonances[5] &&
                 s->enemies[next].defense.status[EMBER_WET].frames) && (!wet || jump))
                 damage = damage * (100 - ember_system[0].chain_decay) / 100;
@@ -503,11 +503,11 @@ static void player_hit_effects(struct ember_sim *s, unsigned index,
     }
     if (relic(s, R_HOURGLASS) && !s->hourglass_seen[index]) {
         s->hourglass_seen[index] = 1;
-        if (++s->hourglass_count == 5) {
+        if (++s->hourglass_count == ember_relics[R_HOURGLASS].value2) {
             s->hourglass_count = 0;
             memset(s->hourglass_seen, 0, sizeof(s->hourglass_seen));
-            s->player.cooldown_k = (uint16_t)maximum(0, s->player.cooldown_k - 60);
-            s->player.cooldown_b = (uint16_t)maximum(0, s->player.cooldown_b - 60);
+            s->player.cooldown_k = (uint16_t)maximum(0, s->player.cooldown_k - relic(s, R_HOURGLASS));
+            s->player.cooldown_b = (uint16_t)maximum(0, s->player.cooldown_b - relic(s, R_HOURGLASS));
         }
     }
 }

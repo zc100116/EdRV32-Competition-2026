@@ -442,8 +442,8 @@ static void content_step(struct ember_sim *s)
         for (unsigned i = 0; i < 8; ++i) s->pillars[i].lit = (s->saved_pillars >> i) & 1;
     }
     if (s->resonances[9] && s->previous_light != s->in_light)
-        skill_area(s, p->x, p->y, ember_resonances[9].radius, ember_resonances[9].damage,
-            s->in_light ? 4 : 3, EMBER_SHOCK);
+        inherited_area(s, p->x, p->y, ember_resonances[9].radius,
+            ember_resonances[9].damage, 0);
     s->previous_light = s->in_light;
     if (p->dash) s->dash_buff = (uint16_t)ember_blessings[1].duration;
     else s->flame_dash = 0;
@@ -820,24 +820,29 @@ int ember_sim_resonance_ready(const struct ember_sim *s, unsigned id)
         ember_sim_tag_count(s, elements[pairs[id][1]]) >= (unsigned)ember_system[0].element_item_requirement;
 }
 
-static void inherited_hit(struct ember_sim *s, unsigned target, int damage, unsigned depth)
+static void inherited_hit_tags(struct ember_sim *s, unsigned target, int damage,
+                                 unsigned depth, uint32_t tags)
 {
     struct ember_attack h = {.base = damage, .attack = s->attributes[EMBER_ATTACK],
         .crit = s->attributes[EMBER_CRIT], .crit_damage = s->attributes[EMBER_CRIT_DAMAGE],
         .depth = (uint8_t)depth};
     memcpy(h.share, s->weapon_system[s->player.main_weapon].share, sizeof(h.share));
-    player_modifiers(s, target, &h, TAG_SINGLE);
+    player_modifiers(s, target, &h, tags);
     content_before_hit(s, target, 255, &h);
     struct ember_damage_result r = ember_sim_hit(s, target, &h);
-    player_hit_effects(s, target, r, TAG_SINGLE);
+    player_hit_effects(s, target, r, tags);
     content_after_hit(s, target, 255, r, depth);
+}
+static void inherited_hit(struct ember_sim *s, unsigned target, int damage, unsigned depth)
+{
+    inherited_hit_tags(s, target, damage, depth, TAG_SINGLE);
 }
 static void inherited_area(struct ember_sim *s, ember_fixed x, ember_fixed y,
                             int radius, int damage, unsigned depth)
 {
     for (unsigned i = 0; i < EMBER_ENEMIES; ++i)
         if (s->enemies[i].alive && within(x, y, s->enemies[i].x, s->enemies[i].y, radius))
-            inherited_hit(s, i, damage, depth);
+            inherited_hit_tags(s, i, damage, depth, TAG_AREA | TAG_GROUP);
 }
 
 int ember_sim_contract_reward_available(const struct ember_sim *s, unsigned reward)
