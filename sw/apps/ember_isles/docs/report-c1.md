@@ -84,3 +84,6 @@ PM复核日志build/g2/e4-tag-fix.log；E4实际GPU截图及30秒视频outputs/e
 06a提交b20b77328；I8角色部件基础163840B/爆核196608B，分别超96KiB半区65536B/98304B。
 I4部件69632B/81920B仍未计完整VFX/UI/字形，另有36姿势尺寸失败；完整海岸包未交付。
 待决定：语义共骨架重构或I4例外；不以4x4块每帧约58quad方案作为合格表现，性能未测。
+
+PM集成补验：修复RV32摘要charge_frames格式类型及E4测试遗漏sim.c依赖；四目标构建/五组系统测试通过。
+命令仍为make all test -j1；日志build/g2/e4-integrated-build.log，warning/error均0；E4复核8060断言通过。

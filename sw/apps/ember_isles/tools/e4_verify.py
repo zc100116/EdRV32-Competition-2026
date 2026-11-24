@@ -12,7 +12,8 @@ OUT.mkdir(parents=True, exist_ok=True)
 (ROOT / 'outputs/ember_isles/e4').mkdir(parents=True, exist_ok=True)
 fragment = OUT / 'e4.mk'
 fragment.write_text('''include sw/apps/ember_isles/Makefile
-$(OUT)/e4-content-test: $(APP)/tools/e4_content_test.c $(OUT)/generated/data.h $(HEADERS)
+E4_INPUTS := $(APP)/src/sim/sim.c $(APP)/src/sim/combat.c $(APP)/src/core/core.c
+$(OUT)/e4-content-test: $(APP)/tools/e4_content_test.c $(E4_INPUTS) $(OUT)/generated/data.h $(HEADERS)
 \t$(CC) $(CFLAGS) $(APP)/tools/e4_content_test.c $(APP)/src/sim/combat.c $(APP)/src/core/core.c -o $@
 $(OUT)/e4-capture: $(SOURCES) $(APP)/src/game.c $(APP)/tools/e4_capture.c $(GEN) $(HEADERS)
 \t$(CC) -pthread $(PCFLAGS) $(SOURCES) $(APP)/src/game.c $(APP)/tools/e4_capture.c $(addprefix $(ROOT)/,$(DRIVERS) $(PC) tools/gpu/emu/pc/png.c) -o $@

@@ -1,7 +1,8 @@
 # Ember Isles — C first version in progress
 
-E3 systems run on the existing five-wave coast content. E4 content, E5 modes,
-Chinese menus/HUD and the replacement art are pending; this is not the complete C release.
+E3 and the submitted E4 content run on the existing five-wave coast. Four E4
+gameplay decisions remain open (see `docs/report-e4.md`); E5 modes, Chinese
+menus/HUD and replacement art are pending. This is not the complete C release.
 PC stability is also pending: the shared Linux host exceeded 16.67 ms on 4.72% of
 frames in the platform measurement. See `docs/report-e3-platform.md`.
 
@@ -19,7 +20,8 @@ K/L/U for skills and the ultimate, and F to light a nearby pillar.
 Enter starts/pauses/returns; Esc toggles performance details in this E3 slice.
 Upgrade choices use A/D or W/S, then J to confirm. Menus also accept left clicks.
 The old placeholder art and HUD still show some E2 labels; E5/ART production will replace them.
-The agreed bow/gun/greatsword charge controls are scheduled for E4.
+Bow, gun and greatsword now hold J to charge and release J to fire; early release
+fires a normal attack. The focused-core staff evolution also gains charging.
 
 Capture selected frames into an existing directory:
 

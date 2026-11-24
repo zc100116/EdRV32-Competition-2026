@@ -1746,7 +1746,8 @@ void ember_sim_summary(const struct ember_sim *s, char *text, size_t bytes)
         status_frames[4], status_frames[5], status_frames[6], status_frames[7],
         (int)s->pet.x, (int)s->pet.y, p->pet_timer, p->facing, p->hand_x, p->hand_y,
         p->character, s->pet_kind, s->pet_level, p->evolution[p->main_weapon],
-        p->evolution[p->sub_weapon], s->charge_frames, p->facing8, p->facing_frame, p->flip_x);
+        p->evolution[p->sub_weapon], (unsigned)s->charge_frames,
+        p->facing8, p->facing_frame, p->flip_x);
 }
 
 #include "content.inc"
