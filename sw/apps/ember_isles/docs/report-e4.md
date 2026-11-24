@@ -62,3 +62,29 @@ AVI 无压缩，约 311 MB；截图、视频及 build 生成物不入库。
 未完成：沙漏冷却时机、中性减速、影步转向窗口、维修强化叠加的答复及相应回归。
 答复后完成 E4；等待协调者确认才进入 E5。
 待答复消息：msg_d675f4338d1e、msg_1a476fb6b19b、msg_d80a9c881d8c、msg_8e7959ee02bd。
+
+## E4b：协调者裁定收尾（2026-11-24）
+结论：六项裁定和追加事件完成；本节取代上文四项待答复状态，E5 未进入。
+实现提交 a741f9701；定向断言和 CSV 调参工具提交 068a1dbfe。
+元素提高按转化、附加后的实际类型分别结算；规格例旧 112 → 新 125（25 铁 + 100 烬）。
+颜色按防御、独立减伤后且吸收前的份额选取；元素盾吸收不会改变颜色。
+中性减速独立存储星门、深渊、藤缚、蛛网、漩涡来源，取最高比例，同源刷新，韧性缩时。
+群星沙漏为单个待用标记；K/L 消耗并减冷却，既有冷却和 U 不受影响。
+影步锁目标 facing8 十二 tick，仍允许移动、攻击；维修按造物创建时基础值强化一次。
+事件 0–11 常量在 core.h；PICKUP=10、WEAPON_CHANGE=11，新增末尾 subtype，保留伤害字段。
+PICKUP 的 subtype=经验/金币/余烬/物品，value=数量（物品为 ID）；换武器 subtype=主/副/宠物，value=新 ID。
+经验、遗物拾取及主副交换/新副武器/宠物武器变更已发事件；Q 每个变化槽各一次，不改随机流。
+完整命令 make -C sw/apps/ember_isles linux test -j1 一次通过；日志 build/ember_isles/e4b-linux-test.log。
+事件字段冻结后重编 Linux/Spike，并通过 E3/流程；日志 e4b-final-build.log、e4b-final-unit.log（同目录）。
+E4 全部 8132 条断言通过，含六项新规则、转化附加混伤及拾取/换武器事件；逐项表 197 行。
+定向程序 build/ember_isles/e4-content-test；日志 e4b-content.log，逐项表 e4b-coverage.csv（同目录）。
+CSV 命令 python3 sw/apps/ember_isles/tools/e4b_table_test.py；日志 build/ember_isles/e4b-table.log。
+仅改 CSV、生成并重编：锁向 12→7，星门 30%/90帧→45%/70帧，深渊 90→40帧。
+同次调参：沙漏 60→17帧，维修伤害 24→28、护甲 10→6；恢复原表后全部恢复，C 源码未改。
+跨平台：10800 输入帧、180 组全部字段摘要逐项一致，PC/Spike 均 END,10800,2,5。
+旧→新摘要基线：战斗 tick 9264→9264，HP 246→246，击杀 175→175，伤害 17335→17335。
+该录像旧/新 180 组摘要均未变化；终点为第5波升级界面，不作为 E5 通关证据。
+复现（先加载 edrv32/env.sh）：make -C sw/apps/ember_isles linux spike -j1；build/ember_isles/ember_isles --replay sw/apps/ember_isles/assets/replays/coast.txt > build/ember_isles/e4b-pc.log。
+Spike 参数和 PC 命令同 report-c1.md；新日志 build/ember_isles/e4b-{pc,spike}.log。
+比较：python3 sw/apps/ember_isles/tools/compare_replay.py build/ember_isles/e4b-pc.log build/ember_isles/e4b-spike.log。
+原始旧摘要 e4b-old-summary.log、比较结果 e4b-cross-summary.txt（同目录）；构建零告警，未完成项无。
