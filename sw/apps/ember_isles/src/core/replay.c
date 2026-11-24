@@ -5,12 +5,13 @@
  */
 #include "core.h"
 #include <stdio.h>
+#include <inttypes.h>
 #include <stdlib.h>
 void ember_replay_load(struct ember_replay *replay, const char *path)
 {
     FILE *file = fopen(path, "r");
     if (!file) { perror(path); exit(1); }
-    if (fscanf(file, "EMBER1 %u %u", &replay->seed, &replay->count) != 2 ||
+    if (fscanf(file, "EMBER1 %" SCNu32 " %" SCNu32, &replay->seed, &replay->count) != 2 ||
         replay->count > EMBER_REPLAY_FRAMES) {
         fprintf(stderr, "Invalid replay header: %s\n", path);
         exit(1);
@@ -29,7 +30,7 @@ void ember_replay_save(const struct ember_replay *replay, const char *path)
 {
     FILE *file = fopen(path, "w");
     if (!file) { perror(path); exit(1); }
-    fprintf(file, "EMBER1 %u %u\n", replay->seed, replay->count);
+    fprintf(file, "EMBER1 %" PRIu32 " %" PRIu32 "\n", replay->seed, replay->count);
     for (unsigned i = 0; i < replay->count; ++i) fprintf(file, "%u\n", replay->input[i]);
     if (fclose(file)) { perror(path); exit(1); }
 }
