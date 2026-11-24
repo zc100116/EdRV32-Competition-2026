@@ -1,0 +1,30 @@
+# Night Coast / 暗夜海岸 — original Ember Isles composition, 2026-11-24.
+# 96 BPM, eight bars of 4/4, D minor: Dm / Bb / F / C / Dm / Bb / Gm / A.
+# Sparse lighthouse calls above a rolling bass and quiet surf; no borrowed melodies.
+# Format: tempo BPM; voice WAVE PEAK PAN (0 left .. 256 right);
+# then NOTE:SIXTEENTHS. R is rest, N is noise. Each voice loops after eight bars.
+tempo 96
+
+voice triangle 1800 128
+D2:8 A2:4 D3:4
+Bb1:8 F2:4 Bb2:4
+F2:8 C3:4 A2:4
+C2:8 G2:4 E2:4
+D2:8 A2:4 F2:4
+Bb1:8 F2:4 D3:4
+G1:8 D2:4 Bb2:4
+A1:8 E2:4 A2:4
+
+voice square 1050 80
+R:2 A4:3 F4:1 E4:2 D4:4 R:4
+R:4 F4:2 A4:2 Bb4:4 A4:2 F4:2
+C5:4 A4:2 G4:2 F4:4 R:4
+E4:3 G4:1 A4:2 G4:2 E4:4 R:4
+R:2 D5:3 A4:1 F4:2 E4:2 D4:2 R:4
+F4:4 Bb4:3 A4:1 F4:4 D4:4
+G4:3 A4:1 Bb4:4 D5:4 Bb4:2 G4:2
+E4:4 C#5:4 A4:4 R:4
+
+voice noise 320 176
+N:12 R:4 N:10 R:6 N:12 R:4 N:8 R:8
+N:12 R:4 N:10 R:6 N:12 R:4 N:8 R:8
