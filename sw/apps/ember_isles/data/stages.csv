@@ -1,0 +1,2 @@
+id,width,height,time_limit,shrink_interval,shrink_pixels,outside_damage
+coast,2560,1440,43200,60,2,10

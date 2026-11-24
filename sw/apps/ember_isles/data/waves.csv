@@ -1,6 +1,6 @@
 id,name,stage,enemy,affix,wave,count,spawn_interval,time_limit,rest_frames,hp_percent,damage_percent,elite
-coast_1,First Tide,coast,swarm,,1,30,36,3600,300,100,100,0
-coast_2,Hunters,coast,swarm|charger,,2,40,32,3600,300,100,100,0
-coast_3,Cold Eyes,coast,swarm|shooter,,3,45,30,3600,300,100,100,0
-coast_4,Dark Surf,coast,swarm|charger|shooter,,4,55,28,3600,300,110,100,0
-coast_5,Elite Tide,coast,swarm|charger|shooter,haste|ward,5,60,26,3600,300,120,110,1
+coast_1,First Tide,coast,swarm,,1,30,34,3600,300,100,100,0
+coast_2,Hunters,coast,swarm|charger,,2,40,30,3600,300,100,100,0
+coast_3,Cold Eyes,coast,swarm|shooter,,3,45,28,3600,300,100,100,0
+coast_4,Dark Surf,coast,swarm|charger|shooter,,4,55,26,3600,300,110,100,0
+coast_5,Elite Tide,coast,swarm|charger|shooter,haste|ward,5,60,24,3600,300,120,110,1

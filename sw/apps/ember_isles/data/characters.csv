@@ -1,2 +1,2 @@
 id,name,tags,max_hp,regen,armor,dodge,shield,tenacity,speed,dash_count,dash_cooldown,attack,attack_speed,crit,crit_damage,area,projectiles,projectile_speed,duration,cooldown,pierce,knockback,pickup,xp,gold,luck,healing,aura,threat,passive,skill_a,skill_b,ultimate,talents,affinity,weapon
-keeper,Ember Keeper,ember|area|dot,180,0,15,0,0,0,120,1,180,100,100,5,150,100,1,100,100,0,0,20,48,100,100,0,100,100,100,burn_death_explosion,flame_dash,explosive_seed,core_burst,,ember,firebolt
+keeper,Ember Keeper,ember|area|dot,260,1,20,0,0,0,120,1,180,100,100,5,150,100,1,100,100,0,0,20,48,100,100,0,100,100,100,burn_death_explosion,flame_dash,explosive_seed,core_burst,,ember,firebolt
