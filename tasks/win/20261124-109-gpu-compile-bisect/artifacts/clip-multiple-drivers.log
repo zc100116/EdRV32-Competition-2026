@@ -1,0 +1,44 @@
+Standalone clip output probe
+G:/codex_project/edrv32-card109/build/card109/probes/clip-output-narrow/console.log
+39: Start rtl-infer.
+42: Executing : rtl-infer successfully. Time elapsed: 1.583s wall, 0.312s user + 0.297s system = 0.609s CPU (38.5%)
+249: E: Net output_r[0] [15] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+253: E: Net output_r[0] [14] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+257: E: Net output_r[0] [13] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+261: E: Net output_r[0] [12] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+265: E: Net output_r[0] [11] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+269: E: Net output_r[0] [10] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+273: E: Net output_r[0] [9] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+277: E: Net output_r[0] [8] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+281: E: Net output_r[0] [7] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+285: E: Net output_r[0] [6] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+289: E: Net output_r[0] [5] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+293: E: Net output_r[0] [4] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+297: E: Net output_r[0] [3] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+301: E: Net output_r[0] [2] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+305: E: Net output_r[0] [1] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+309: E: Net output_r[0] [0] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+313: E: Net output_r[1] [15] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+317: E: Net output_r[1] [14] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+321: E: Net output_r[1] [13] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+325: E: Net output_r[1] [12] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+329: E: Net output_r[1] [11] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+333: E: Net output_r[1] [10] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+337: E: Net output_r[1] [9] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+341: E: Net output_r[1] [8] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+345: E: Net output_r[1] [7] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+349: E: Net output_r[1] [6] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+353: E: Net output_r[1] [5] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+357: E: Net output_r[1] [4] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+361: E: Net output_r[1] [3] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+365: E: Net output_r[1] [2] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+369: E: Net output_r[1] [1] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+373: E: Net output_r[1] [0] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+378: Action compile: Real time elapsed is 0h:0m:8s
+
+Single whole-word assignment control
+G:/codex_project/edrv32-card109/build/card109/probes/clip-output-single/console.log
+39: Start rtl-infer.
+42: Executing : rtl-infer successfully. Time elapsed: 0.012s wall, 0.000s user + 0.000s system = 0.000s CPU (n/a%)
+57: Action compile: Real time elapsed is 0h:0m:3s
+65: Process "Compile" done.

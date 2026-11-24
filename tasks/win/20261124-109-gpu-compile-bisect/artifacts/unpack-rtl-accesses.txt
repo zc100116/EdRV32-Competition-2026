@@ -1,0 +1,39 @@
+rtl/gpu/edrv32_gpu_unpack.v @ 6ba07201. Original line numbers.
+
+73:     reg [255:0] data_r [0:9];
+74:     reg [31:0] keep_r [0:9];
+75:     reg last_r [0:9];
+
+125:     assign matrix_data_o = {data_r[{3'b0, !head_r[0]}], data_r[{3'b0, head_r[0]}]};
+
+127:     assign vertex_data_o = data_r[2+{31'b0, head_r[1]}][vertex_half_r*128 +: 128];
+
+130:     assign quad_record_data_o = data_r[4+{31'b0, head_r[2]}][quad_half_r*128 +: 128];
+
+134:     assign texture_load_data_o = data_r[6+{31'b0, head_r[3]}];
+135:     assign texture_load_keep_o = keep_r[6+{31'b0, head_r[3]}];
+
+139:     assign palette_load_data_o = data_r[8+{31'b0, head_r[4]}][palette_word_r*32 +: 20];
+
+141:     assign palette_end_w = palette_word_r == 3'd7
+142:         || (32'b0 == (keep_r[8+{31'b0, head_r[4]}] >> (({3'b0, palette_word_r}+6'd1)*6'd4)));
+143:     assign pop_w[0] = matrix_valid_o && matrix_ready_i;
+144:     assign pop_w[1] = vertex_fire_w && (vertex_half_r
+145:         || !keep_r[2+{31'b0, head_r[1]}][16]);
+146:     assign pop_w[2] = quad_fire_w && (quad_half_r
+147:         || !keep_r[4+{31'b0, head_r[2]}][16]);
+
+152:     generate
+153:         for (c = 0; c < 5; c = c + 1) begin : g_return
+154:             always @(posedge clk_i) begin
+155:                 if (push_w[c]) begin
+156:                     data_r[c*2+{31'b0, tail_r[c]}] <= data_w[c];
+157:                     keep_r[c*2+{31'b0, tail_r[c]}] <= keep_w[c];
+158:                     last_r[c*2+{31'b0, tail_r[c]}] <= last_w[c];
+159:                 end
+
+212:             if (stop_i || pop_w[0]
+213:                 || (pop_w[1] && last_r[2+{31'b0, head_r[1]}])
+214:                 || (pop_w[2] && last_r[4+{31'b0, head_r[2]}])
+215:                 || (pop_w[3] && last_r[6+{31'b0, head_r[3]}])
+216:                 || (pop_w[4] && last_r[8+{31'b0, head_r[4]}])) begin

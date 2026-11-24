@@ -1,0 +1,20 @@
+case	result	elapsed_s	first_error
+unpack-baseline	CRASH	4.83	InferWriteMode.cpp:2983 / Flow-0189
+unpack-without-data_r	CRASH	4.44	InferWriteMode.cpp:2983 / Flow-0189
+unpack-without-keep_r	CRASH	4.38	InferWriteMode.cpp:2983 / Flow-0189
+unpack-without-last_r	CRASH	4.32	InferWriteMode.cpp:2983 / Flow-0189
+unpack-only-data_r	CRASH	4.66	InferWriteMode.cpp:2983 / Flow-0189
+unpack-only-keep_r	CRASH	5.39	InferWriteMode.cpp:2983 / Flow-0189
+unpack-only-last_r	CRASH	5.11	InferWriteMode.cpp:2983 / Flow-0189
+unpack-without-all	PASS	5.39	-
+min-unpack-c1w1	PASS	4.49	-
+min-unpack-c2w1	OTHER	5.17	E: Sdm-4010: [G:/codex_project/edrv32-card109/build/card109/minimal-unpack/c2w1.v(line number: 11)] Unable to infer ram ram_buf_r in unpack_probe due to multiple ports
+min-unpack-c3w1-index-simple	CRASH	4.69	InferWriteMode.cpp:2983 / Flow-0189
+min-unpack-c4w1	CRASH	5.64	InferWriteMode.cpp:2983 / Flow-0189
+min-unpack-c5w1	CRASH	4.97	InferWriteMode.cpp:2983 / Flow-0189
+min-unpack-c3w1-fixed-read	OTHER	4.39	E: Net data_o[2] [G:/codex_project/edrv32-card109/build/card109/minimal-unpack/c3w1-fixed-read.v(line number:5)] has multiple drivers in module unpack_probe (see run.log for details).
+min-unpack-c3w1-local-banks	PASS	4.42	-
+unpack-local-banks	PASS	5.46	-
+published-unpack-repro	CRASH	5.09	InferWriteMode.cpp:2983 / Flow-0189
+clip-output-narrow	OTHER	9.39	E: Net output_r[0] [15] [G:/codex_project/edrv32-card109/build/card109/clip-output-probe.v(line number:11)] has multiple drivers in module clip_output_probe (see run.log for details).
+clip-output-single	PASS	4.55	-

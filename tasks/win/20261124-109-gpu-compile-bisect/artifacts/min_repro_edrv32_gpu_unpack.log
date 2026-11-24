@@ -1,0 +1,49 @@
+Full unpack module (35-module scan)
+G:/codex_project/edrv32-card109/build/card109/modules/edrv32_gpu_unpack/console.log
+866: Start rtl-infer.
+867: Start DFF-inference.
+868: Executing : DFF-inference successfully.
+869: Development error at line 2983 in G:\wf\2022.2\output_files\oem\FAB_Develop\branches\pds_2022.2\source\sw\ads\sdm\InferWriteMode.cpp
+871: pds_shell crashes.
+900: Action compile: Real time elapsed is 0h:0m:4s
+901: Action compile: CPU time elapsed is 0h:0m:0s
+902: Action compile: Process CPU time elapsed is 0h:0m:0s
+904: Action compile: Peak memory pool usage is 146 MB
+905: E: Flow-0189: Internal error occurred.
+
+Standalone published repro
+G:/codex_project/edrv32-card109/build/card109/probes/published-unpack-repro/console.log
+39: Start rtl-infer.
+40: Start DFF-inference.
+41: Executing : DFF-inference successfully.
+42: Development error at line 2983 in G:\wf\2022.2\output_files\oem\FAB_Develop\branches\pds_2022.2\source\sw\ads\sdm\InferWriteMode.cpp
+44: pds_shell crashes.
+73: Action compile: Real time elapsed is 0h:0m:4s
+74: Action compile: CPU time elapsed is 0h:0m:0s
+75: Action compile: Process CPU time elapsed is 0h:0m:0s
+77: Action compile: Peak memory pool usage is 131 MB
+78: E: Flow-0189: Internal error occurred.
+
+Standalone banked control
+G:/codex_project/edrv32-card109/build/card109/probes/min-unpack-c3w1-local-banks/console.log
+39: Start rtl-infer.
+40: Start DFF-inference.
+41: Executing : DFF-inference successfully.
+42: Executing : rtl-infer successfully. Time elapsed: 0.032s wall, 0.016s user + 0.016s system = 0.031s CPU (98.1%)
+57: Action compile: Real time elapsed is 0h:0m:3s
+58: Action compile: CPU time elapsed is 0h:0m:0s
+59: Action compile: Process CPU time elapsed is 0h:0m:0s
+61: Action compile: Peak memory pool usage is 132 MB
+65: Process "Compile" done.
+
+Full unpack with separate channel banks, diagnostic only
+G:/codex_project/edrv32-card109/build/card109/probes/unpack-local-banks/console.log
+39: Start rtl-infer.
+40: Start DFF-inference.
+41: Executing : DFF-inference successfully.
+42: Executing : rtl-infer successfully. Time elapsed: 0.313s wall, 0.125s user + 0.016s system = 0.141s CPU (44.9%)
+71: Action compile: Real time elapsed is 0h:0m:4s
+72: Action compile: CPU time elapsed is 0h:0m:0s
+73: Action compile: Process CPU time elapsed is 0h:0m:0s
+75: Action compile: Peak memory pool usage is 139 MB
+79: Process "Compile" done.

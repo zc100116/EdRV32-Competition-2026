@@ -1,0 +1,36 @@
+module	result	elapsed_s	last_Found_Ram_in_rtl-infer	first_error
+edrv32_gpu_clip	OTHER	261.25	none	E: Net output_r[1] [2111] [G:/codex_project/edrv32-card109/rtl/gpu/edrv32_gpu_clip.v(line number:73)] has multiple drivers in module edrv32_gpu_clip (see run.log for details).
+edrv32_gpu_command	PASS	5.54	I: Sdm-0001: [G:/codex_project/EdRV32-FPGA/board_gpu/ipcore/ip_lutram_gpu_write_pool/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu_write_pool.v(line number: 78)] Found Ram mem, depth=32, width=256.	-
+edrv32_gpu_geometry	OTHER	514.48	I: Sdm-0001: [G:/codex_project/edrv32-card109/rtl/gpu/edrv32_gpu_geometry.v(line number: 342)] Found Ram screen_r, depth=8, width=259.	E: Net output_r[1] [2111] [G:/codex_project/edrv32-card109/rtl/gpu/edrv32_gpu_clip.v(line number:73)] has multiple drivers in module edrv32_gpu_clip (see run.log for details).
+edrv32_gpu_list_pack	PASS	17.26	none	-
+edrv32_gpu_object	PASS	49.99	none	-
+edrv32_gpu_palette	PASS	25.98	I: Sdm-0001: [G:/codex_project/EdRV32-FPGA/board_gpu/ipcore/ip_lutram_gpu_palette_current/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu_palette_current.v(line number: 78)] Found Ram mem, depth=16, width=20.	-
+edrv32_gpu_perspective	PASS	151.56	none	-
+edrv32_gpu_perspective_absolute	PASS	7.48	none	-
+edrv32_gpu_perspective_maximum	PASS	9.56	none	-
+edrv32_gpu_perspective_multiply	PASS	9.53	none	-
+edrv32_gpu_perspective_normal	PASS	8.26	none	-
+edrv32_gpu_perspective_scale	PASS	10.20	none	-
+edrv32_gpu_perspective_sign	PASS	8.99	none	-
+edrv32_gpu_perspective_subtract	PASS	8.43	none	-
+edrv32_gpu_pixel	PASS	9.11	I: Sdm-0001: [G:/codex_project/edrv32-card109/rtl/gpu/edrv32_gpu_pixel.v(line number: 240)] Found Ram addr_r, depth=32, width=16.	-
+edrv32_gpu_pixel_lane	PASS	6.40	none	-
+edrv32_gpu_project	PASS	6.67	none	-
+edrv32_gpu_project_recip	PASS	8.74	none	-
+edrv32_gpu_quad	PASS	46.41	none	-
+edrv32_gpu_raster	PASS	100.89	none	-
+edrv32_gpu_raster_add	PASS	5.96	none	-
+edrv32_gpu_raster_plane	PASS	6.22	none	-
+edrv32_gpu_raster_prepare	PASS	6.15	none	-
+edrv32_gpu_read_dma	PASS	7.73	I: Sdm-0001: [G:/codex_project/EdRV32-FPGA/board_gpu/ipcore/ip_lutram_gpu_read_pool/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu_read_pool.v(line number: 78)] Found Ram mem, depth=64, width=256.	-
+edrv32_gpu_regs	PASS	6.46	none	-
+edrv32_gpu_resolve	PASS	7.51	none	-
+edrv32_gpu_setup	PASS	302.66	I: Sdm-0001: [G:/codex_project/edrv32-card109/rtl/gpu/edrv32_gpu_setup.v(line number: 312)] Found Ram bounds_r, depth=16, width=64.	-
+edrv32_gpu_setup_plane	PASS	7.07	none	-
+edrv32_gpu_target	PASS	8.03	I: Sdm-0001: [G:/codex_project/edrv32-card109/rtl/gpu/edrv32_gpu_target_store.v(line number: 202)] Found Ram fifo_meta_r, depth=16, width=6.	-
+edrv32_gpu_target_store	PASS	7.79	I: Sdm-0001: [G:/codex_project/edrv32-card109/rtl/gpu/edrv32_gpu_target_store.v(line number: 202)] Found Ram fifo_meta_r, depth=16, width=6.	-
+edrv32_gpu_texture	PASS	100.94	I: Sdm-0001: [G:/codex_project/edrv32-card109/rtl/gpu/edrv32_gpu_texture.v(line number: 939)] Found Ram quad_r, depth=32, width=1.	-
+edrv32_gpu_texture_ram	PASS	30.38	none	-
+edrv32_gpu_transform	PASS	15.34	none	-
+edrv32_gpu_unpack	CRASH	5.90	none	E: Flow-0189: Internal error occurred.
+edrv32_gpu_write_dma	PASS	6.85	I: Sdm-0001: [G:/codex_project/EdRV32-FPGA/board_gpu/ipcore/ip_lutram_gpu_write_pool/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu_write_pool.v(line number: 78)] Found Ram mem, depth=32, width=256.	-
