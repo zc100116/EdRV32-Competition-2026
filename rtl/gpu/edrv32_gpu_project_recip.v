@@ -17,10 +17,13 @@ module edrv32_gpu_project_recip (
     // Normalized reciprocal and original leading-one exponent.
     output wire value_valid_o,
     output wire [30:0] reciprocal_o,
-    output wire [5:0] exponent_o
+    output wire [5:0] exponent_o,
+
+    // Shared ten-enabled-cycle exponent delay RAM.
+    output wire [5:0] delay_exponent_wr_data_o,
+    input wire [5:0] delay_exponent_rd_data_i
 );
     reg [9:0] valid_r;
-    wire [5:0] exponent_pipe_w [0:9];
     reg [5:0] exponent_w;
     wire [4:0] leading_group_w;
     wire [2:0] leading_position_w [0:4];
@@ -39,7 +42,8 @@ module edrv32_gpu_project_recip (
 
     assign value_valid_o = valid_r[9];
     assign reciprocal_o = reciprocal_r;
-    assign exponent_o = exponent_pipe_w[9];
+    assign exponent_o = delay_exponent_rd_data_i;
+    assign delay_exponent_wr_data_o = exponent_w;
     assign unused_rounded_product_w = {1'b0, product_w[4]} + 62'd536870912;
     assign unused_rounded_result_w = {1'b0, result_w[8]} + 63'd536870912;
 
@@ -79,19 +83,6 @@ module edrv32_gpu_project_recip (
                     8'b00000001: position_w = 3'd0;
                     default: begin end
                 endcase
-            end
-        end
-        for (stage_g = 0; stage_g <= 9; stage_g = stage_g + 1) begin : g_exponent
-            reg [5:0] data_r;
-            wire [5:0] next_w;
-            if (stage_g == 0) begin : g_first
-                assign next_w = exponent_w;
-            end else begin : g_delay
-                assign next_w = exponent_pipe_w[stage_g - 1];
-            end
-            assign exponent_pipe_w[stage_g] = data_r;
-            always @(posedge clk_i) begin
-                if (enable_i) data_r <= next_w;
             end
         end
         for (stage_g = 0; stage_g <= 1; stage_g = stage_g + 1) begin : g_mantissa

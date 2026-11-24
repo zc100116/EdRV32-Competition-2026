@@ -10,6 +10,10 @@ module edrv32_gpu_setup_plane (
     input wire enable_i,
     input wire stop_i,
 
+    // Reciprocal metadata shares this unit's enabled nine-cycle RAM.
+    input wire [5:0] recip_delay_wr_data_i,
+    output wire [5:0] recip_delay_rd_data_o,
+
     // Attribute and triangle context.
     input wire plane_valid_i,
     input wire [6:0] plane_tag_i,
@@ -27,13 +31,21 @@ module edrv32_gpu_setup_plane (
     output wire [9:0] plane_h_o,
     output wire [57:0] plane_normal_o
 );
+    reg signed [9:0] h_first_r;
+    reg signed [9:0] h_last_r;
+    reg [35:0] offset_first_r;
+    reg [8:0] metadata_write_r;
+    wire [8:0] metadata_read_13_w;
+    wire [8:0] metadata_read_9_w;
+    wire [71:0] unused_metadata_13_w;
+    wire [71:0] unused_metadata_9_w;
+    wire signed [9:0] normal_h_w;
+    wire [32:0] first_w;
+    wire [5:0] exponent_w;
+    wire [35:0] offset_w;
     reg [14:0] valid_r;
     wire [6:0] tag_w [0:14];
-    wire signed [9:0] h_pipe_w [0:14];
-    wire [32:0] first_w [0:12];
     wire [30:0] reciprocal_w [0:5];
-    wire [5:0] exponent_w [0:8];
-    wire [35:0] offset_w [0:9];
     wire signed [33:0] difference_w [0:1];
     reg [71:0] delta_r;
     wire signed [51:0] product_w [0:3];
@@ -85,7 +97,7 @@ module edrv32_gpu_setup_plane (
         $signed({4'd0, leading_w}) - 10'sd31) : -10'sd8;
     assign plane_valid_o = valid_r[14];
     assign plane_tag_o = tag_w[14];
-    assign plane_h_o = h_pipe_w[14];
+    assign plane_h_o = h_last_r;
     assign plane_normal_o = {normal_w[1], normal_w[0]};
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) valid_r <= 15'd0;
@@ -95,6 +107,42 @@ module edrv32_gpu_setup_plane (
     always @(posedge clk_i) begin
         if (enable_i) delta_r <= plane_delta_i;
     end
+    assign metadata_read_13_w = metadata_write_r - 9'd12;
+    assign metadata_read_9_w = metadata_write_r - 9'd8;
+    assign first_w = unused_metadata_13_w[32:0];
+    assign normal_h_w = unused_metadata_13_w[42:33];
+    assign exponent_w = unused_metadata_9_w[5:0];
+    assign offset_w = unused_metadata_9_w[41:6];
+    assign recip_delay_rd_data_o = unused_metadata_9_w[47:42];
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) metadata_write_r <= 0;
+        else if (enable_i) metadata_write_r <= metadata_write_r + 1'b1;
+    end
+    always @(posedge clk_i) begin
+        if (enable_i) begin
+            h_first_r <= h_w;
+            h_last_r <= normal_h_w;
+            offset_first_r <= plane_offset_i;
+        end
+    end
+    edrv32_ram_gpu_delay u_metadata_13 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i),
+        .wr_addr_i(metadata_write_r),
+        .wr_data_i({29'b0, h_first_r, scaled_w[0]}),
+        .rd_en_i(enable_i),
+        .rd_addr_i(metadata_read_13_w),
+        .rd_data_o(unused_metadata_13_w)
+    );
+    edrv32_ram_gpu_delay u_metadata_9 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i),
+        .wr_addr_i(metadata_write_r),
+        .wr_data_i({24'b0, recip_delay_wr_data_i, offset_first_r, plane_exponent_i}),
+        .rd_en_i(enable_i),
+        .rd_addr_i(metadata_read_9_w),
+        .rd_data_o(unused_metadata_9_w)
+    );
     genvar vertex;
     generate
         // Three independent 52-bit rounding adders and shifters before stage 0.
@@ -113,21 +161,10 @@ module edrv32_gpu_setup_plane (
         // Metadata delay: each stage owns its scalar registers and one write per register.
         for (stage = 0; stage < 15; stage = stage + 1) begin : g_metadata
             reg [6:0] tag_r;
-            reg signed [9:0] h_r;
             assign tag_w[stage] = tag_r;
-            assign h_pipe_w[stage] = h_r;
             always @(posedge clk_i) begin
                 if (enable_i) begin
                     tag_r <= stage == 0 ? plane_tag_i : tag_w[stage == 0 ? 0 : stage-1];
-                    h_r <= stage == 0 ? h_w : h_pipe_w[stage == 0 ? 0 : stage-1];
-                end
-            end
-            if (stage < 13) begin : g_first
-                reg [32:0] value_r;
-                assign first_w[stage] = value_r;
-                always @(posedge clk_i) begin
-                    if (enable_i) value_r <= stage == 0 ? scaled_w[0]
-                        : first_w[stage == 0 ? 0 : stage-1];
                 end
             end
             if (stage < 6) begin : g_reciprocal
@@ -136,22 +173,6 @@ module edrv32_gpu_setup_plane (
                 always @(posedge clk_i) begin
                     if (enable_i) value_r <= stage == 0 ? plane_reciprocal_i
                         : reciprocal_w[stage == 0 ? 0 : stage-1];
-                end
-            end
-            if (stage < 9) begin : g_exponent
-                reg [5:0] value_r;
-                assign exponent_w[stage] = value_r;
-                always @(posedge clk_i) begin
-                    if (enable_i) value_r <= stage == 0 ? plane_exponent_i
-                        : exponent_w[stage == 0 ? 0 : stage-1];
-                end
-            end
-            if (stage < 10) begin : g_offset
-                reg [35:0] value_r;
-                assign offset_w[stage] = value_r;
-                always @(posedge clk_i) begin
-                    if (enable_i) value_r <= stage == 0 ? plane_offset_i
-                        : offset_w[stage == 0 ? 0 : stage-1];
                 end
             end
         end
@@ -196,8 +217,8 @@ module edrv32_gpu_setup_plane (
             reg signed [73:0] origin_12_r;
             assign difference_w[axis] = difference_r;
             assign magnitude_w = inverse_8_r[86] ? -inverse_8_r : inverse_8_r;
-            assign rounding_bit_w = 7'd29 + {1'b0, exponent_w[8]};
-            assign rounding_shift_w = 7'd30 + {1'b0, exponent_w[8]};
+            assign rounding_bit_w = 7'd29 + {1'b0, exponent_w};
+            assign rounding_shift_w = 7'd30 + {1'b0, exponent_w};
             assign unused_rounded_w = ({1'b0, magnitude_w} + (88'd1 << rounding_bit_w))
                 >> rounding_shift_w;
             assign rounded_w = inverse_8_r[86]
@@ -216,7 +237,7 @@ module edrv32_gpu_setup_plane (
                     inverse_7_r <= inverse_6_r;
                     inverse_8_r <= inverse_7_r;
                     origin_10_r <= $signed(gradient_pipe_w[0 +: 56])
-                        * $signed(offset_w[9][axis*18 +: 18]);
+                        * $signed(offset_w[axis*18 +: 18]);
                     origin_11_r <= origin_10_r;
                     origin_12_r <= origin_11_r;
                 end
@@ -276,7 +297,7 @@ module edrv32_gpu_setup_plane (
                 : {1'b0, normal_magnitude_w} << -amount_w;
             assign unused_adjusted_normal_w = rounded_normal_w[18]
                 ? rounded_normal_w >> 1 : rounded_normal_w;
-            assign normal_exponent_w = h_pipe_w[13]
+            assign normal_exponent_w = normal_h_w
                 - (tag_w[13][2:0] == 1 ? 10'sd30 : 10'sd38)
                 + amount_w + (rounded_normal_w[18] ? 10'sd1 : 10'sd0);
             assign normal_w[axis] = normal_r;
@@ -301,7 +322,7 @@ module edrv32_gpu_setup_plane (
     assign plane_start_o = start_14_r;
     always @(posedge clk_i) begin
         if (enable_i) begin
-            start_13_r <= {37'd0, first_w[12]} + unused_origin_signed_w[69:0];
+            start_13_r <= {37'd0, first_w} + unused_origin_signed_w[69:0];
             start_14_r <= start_13_r;
         end
     end

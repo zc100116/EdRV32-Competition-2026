@@ -767,8 +767,36 @@ module edrv32_gpu_texture (
     wire [3:0] return_done_r [0:8];
     wire [23:0] return_port_r [0:4];
     wire [31:0] return_subword_r [0:4];
-    wire [135:0] return_weight_r [0:8];
-    wire [7:0] return_fraction_r [0:8];
+    wire [135:0] return_weight_w;
+    wire [7:0] return_fraction_w;
+    // Nine-cycle filter metadata: one 144-bit circular RAM, split into two DRM banks.
+    reg [8:0] metadata_write_r;
+    wire [8:0] metadata_read_w;
+    wire [143:0] metadata_input_w;
+    wire [143:0] metadata_data_w;
+    assign metadata_read_w = metadata_write_r - 9'd8;
+    assign metadata_input_w = {launch_fraction_w, tap_weight_w};
+    assign return_weight_w = metadata_data_w[135:0];
+    assign return_fraction_w = metadata_data_w[143:136];
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) metadata_write_r <= 0;
+        else metadata_write_r <= metadata_write_r + 1'b1;
+    end
+    genvar metadata_bank;
+    generate
+        for (metadata_bank = 0; metadata_bank < 2;
+            metadata_bank = metadata_bank + 1) begin : g_delay
+            edrv32_ram_gpu_delay u_metadata (
+                .clk_i(clk_i),
+                .wr_en_i(1'b1),
+                .wr_addr_i(metadata_write_r),
+                .wr_data_i(metadata_input_w[metadata_bank*72 +: 72]),
+                .rd_en_i(1'b1),
+                .rd_addr_i(metadata_read_w),
+                .rd_data_o(metadata_data_w[metadata_bank*72 +: 72])
+            );
+        end
+    endgenerate
     wire [127:0] direct_r [0:3];
     wire [127:0] direct_w;
     generate
@@ -972,7 +1000,7 @@ module edrv32_gpu_texture (
         end
     endgenerate
     always @(posedge clk_i) begin
-        filter_weight_r <= return_weight_r[8];
+        filter_weight_r <= return_weight_w;
         expanded_r <= {expanded_w[7], expanded_w[6], expanded_w[5], expanded_w[4],
             expanded_w[3], expanded_w[2], expanded_w[1], expanded_w[0]};
         bilinear_r <= bilinear_w;
@@ -1177,32 +1205,6 @@ module edrv32_gpu_texture (
                 data_r <= data_w;
             end
         end
-        for (pipe_stage = 0; pipe_stage < 9; pipe_stage = pipe_stage + 1) begin : g_return_weight
-            reg [135:0] data_r;
-            wire [135:0] data_w;
-            assign return_weight_r[pipe_stage] = data_r;
-            if (pipe_stage == 0) begin : g_first
-                assign data_w = tap_weight_w;
-            end else begin : g_previous
-                assign data_w = return_weight_r[pipe_stage-1];
-            end
-            always @(posedge clk_i) begin
-                data_r <= data_w;
-            end
-        end
-        for (pipe_stage = 0; pipe_stage < 9; pipe_stage = pipe_stage + 1) begin : g_return_fraction
-            reg [7:0] data_r;
-            wire [7:0] data_w;
-            assign return_fraction_r[pipe_stage] = data_r;
-            if (pipe_stage == 0) begin : g_first
-                assign data_w = launch_fraction_w;
-            end else begin : g_previous
-                assign data_w = return_fraction_r[pipe_stage-1];
-            end
-            always @(posedge clk_i) begin
-                data_r <= data_w;
-            end
-        end
         for (pipe_stage = 0; pipe_stage < 4; pipe_stage = pipe_stage + 1) begin : g_direct
             reg [127:0] data_r;
             wire [127:0] data_w;
@@ -1273,7 +1275,7 @@ module edrv32_gpu_texture (
             wire [7:0] data_w;
             assign filter_fraction_r[pipe_stage] = data_r;
             if (pipe_stage == 0) begin : g_first
-                assign data_w = return_fraction_r[8];
+                assign data_w = return_fraction_w;
             end else begin : g_previous
                 assign data_w = filter_fraction_r[pipe_stage-1];
             end

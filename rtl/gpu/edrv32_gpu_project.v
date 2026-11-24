@@ -23,6 +23,12 @@ module edrv32_gpu_project (
     input wire stop_i,
     output wire idle_o
 );
+    reg [8:0] input_delay_write_r;
+    wire [8:0] input_delay_read_w;
+    wire [223:0] input_prefix_w;
+    wire [287:0] unused_input_delay_w;
+    wire [5:0] reciprocal_exponent_wr_w;
+    wire [5:0] reciprocal_exponent_rd_w;
     wire enable_w;
     wire accept_w;
     wire reciprocal_valid_w;
@@ -85,6 +91,8 @@ module edrv32_gpu_project (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .enable_i(enable_w),
+        .delay_exponent_wr_data_o(reciprocal_exponent_wr_w),
+        .delay_exponent_rd_data_i(reciprocal_exponent_rd_w),
         .stop_i(stop_i),
         .value_valid_i(accept_w),
         .value_i(clipped_data_i[159:120]),
@@ -93,38 +101,73 @@ module edrv32_gpu_project (
         .exponent_o(exponent_w)
     );
 
+    // Payload latency is 1+10; the reciprocal exponent uses the same ten RAM cycles.
+    assign input_delay_read_w = input_delay_write_r - 9'd9;
+    assign reciprocal_exponent_rd_w = unused_input_delay_w[229:224];
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) input_delay_write_r <= 0;
+        else if (enable_w) input_delay_write_r <= input_delay_write_r + 1'b1;
+    end
+    edrv32_ram_gpu_delay u_input_delay_0 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_w),
+        .wr_addr_i(input_delay_write_r),
+        .wr_data_i(input_prefix_w[0 +: 72]),
+        .rd_en_i(enable_w),
+        .rd_addr_i(input_delay_read_w),
+        .rd_data_o(unused_input_delay_w[0 +: 72])
+    );
+    edrv32_ram_gpu_delay u_input_delay_1 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_w),
+        .wr_addr_i(input_delay_write_r),
+        .wr_data_i(input_prefix_w[72 +: 72]),
+        .rd_en_i(enable_w),
+        .rd_addr_i(input_delay_read_w),
+        .rd_data_o(unused_input_delay_w[72 +: 72])
+    );
+    edrv32_ram_gpu_delay u_input_delay_2 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_w),
+        .wr_addr_i(input_delay_write_r),
+        .wr_data_i(input_prefix_w[144 +: 72]),
+        .rd_en_i(enable_w),
+        .rd_addr_i(input_delay_read_w),
+        .rd_data_o(unused_input_delay_w[144 +: 72])
+    );
+    edrv32_ram_gpu_delay u_input_delay_3 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_w),
+        .wr_addr_i(input_delay_write_r),
+        .wr_data_i({58'b0, reciprocal_exponent_wr_w, input_prefix_w[223:216]}),
+        .rd_en_i(enable_w),
+        .rd_addr_i(input_delay_read_w),
+        .rd_data_o(unused_input_delay_w[216 +: 72])
+    );
+
     genvar field_g;
     genvar stage_g;
     genvar axis_g;
     generate
-        // Eleven original delay slots, stored independently for nine vertex fields.
-        for (field_g = 0; field_g < 9; field_g = field_g + 1) begin : g_input_field
-            localparam WIDTH = field_g < 4 ? 40 : (field_g < 6 ? 16 : 24);
-            localparam OFFSET = field_g < 4 ? field_g * 40
-                : (field_g < 6 ? 160 + (field_g - 4) * 16 : 192 + (field_g - 6) * 24);
-            wire [WIDTH*11-1:0] delay_w;
-            for (stage_g = 0; stage_g < 11; stage_g = stage_g + 1) begin : g_stage
-                reg [WIDTH-1:0] data_r;
-                wire [WIDTH-1:0] next_w;
-                if (stage_g == 0) begin : g_first
-                    assign next_w = clipped_data_i[OFFSET +: WIDTH];
-                end else begin : g_delay
-                    assign next_w = delay_w[WIDTH*(stage_g - 1) +: WIDTH];
-                end
-                assign delay_w[WIDTH*stage_g +: WIDTH] = data_r;
-                always @(posedge clk_i) begin
-                    if (enable_w) data_r <= next_w;
-                end
+        // Eight payload fields, with one prefix register each; W is used by the reciprocal.
+        for (field_g = 0; field_g < 8; field_g = field_g + 1) begin : g_input_field
+            localparam WIDTH = field_g < 3 ? 40 : (field_g < 5 ? 16 : 24);
+            localparam INPUT_OFFSET = field_g < 3 ? field_g * 40
+                : (field_g < 5 ? 160 + (field_g - 3) * 16 : 192 + (field_g - 5) * 24);
+            localparam RAM_OFFSET = field_g < 3 ? field_g * 40
+                : (field_g < 5 ? 120 + (field_g - 3) * 16 : 152 + (field_g - 5) * 24);
+            reg [WIDTH-1:0] prefix_r;
+            always @(posedge clk_i) begin
+                if (enable_w) prefix_r <= clipped_data_i[INPUT_OFFSET +: WIDTH];
             end
+            assign input_prefix_w[RAM_OFFSET +: WIDTH] = prefix_r;
             if (field_g < 3) begin : g_position
-                assign position_input_w[field_g] = delay_w[WIDTH*10 +: WIDTH];
-            end else if (field_g == 3) begin : g_unused_w
-                wire [WIDTH-1:0] unused_w;
-                assign unused_w = delay_w[WIDTH*10 +: WIDTH];
-            end else if (field_g < 6) begin : g_uv
-                assign uv_input_w[field_g - 4] = delay_w[WIDTH*10 +: WIDTH];
+                assign position_input_w[field_g] = unused_input_delay_w[RAM_OFFSET +: WIDTH];
+            end else if (field_g < 5) begin : g_uv
+                assign uv_input_w[field_g - 3] = unused_input_delay_w[RAM_OFFSET +: WIDTH];
             end else begin : g_color
-                assign color_input_w[(field_g - 6) * 24 +: 24] = delay_w[WIDTH*10 +: WIDTH];
+                assign color_input_w[(field_g - 5) * 24 +: 24] =
+                    unused_input_delay_w[RAM_OFFSET +: WIDTH];
             end
         end
         // Position stage: three signed 40x36 products; viewport stage remains unchanged.

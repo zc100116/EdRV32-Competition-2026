@@ -88,6 +88,9 @@ module edrv32_gpu_setup (
     wire reciprocal_valid_w;
     wire [30:0] reciprocal_w;
     wire [5:0] reciprocal_exponent_w;
+    wire [5:0] reciprocal_exponent_wr_w;
+    wire [5:0] reciprocal_exponent_delay_w;
+    reg [5:0] reciprocal_exponent_first_r;
     reg attribute_valid_r;
     reg [2:0] attribute_index_r;
     reg [3:0] attribute_tag_r;
@@ -221,6 +224,8 @@ module edrv32_gpu_setup (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .enable_i(enable_w),
+        .delay_exponent_wr_data_o(reciprocal_exponent_wr_w),
+        .delay_exponent_rd_data_i(reciprocal_exponent_delay_w),
         .stop_i(stop_i),
         .value_valid_i(area_valid_r),
         .value_i({4'd0, area_w}),
@@ -229,11 +234,16 @@ module edrv32_gpu_setup (
         .exponent_o(reciprocal_exponent_w)
     );
 
+    always @(posedge clk_i) begin
+        if (enable_w) reciprocal_exponent_first_r <= reciprocal_exponent_wr_w;
+    end
     edrv32_gpu_setup_plane u_plane (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .enable_i(enable_w),
         .stop_i(stop_i),
+        .recip_delay_wr_data_i(reciprocal_exponent_first_r),
+        .recip_delay_rd_data_o(reciprocal_exponent_delay_w),
         .plane_valid_i(attribute_valid_r),
         .plane_tag_i({attribute_tag_r, attribute_index_r}),
         .plane_value_i(attribute_value_w),

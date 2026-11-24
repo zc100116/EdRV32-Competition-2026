@@ -85,18 +85,10 @@ module edrv32_gpu_object (
     reg quad_pending_r;
 
     wire [255:0] record_w [0:STAGES-1];
-    reg [23:0] idx_0_r;
-    reg [23:0] idx_1_r;
-    reg [23:0] idx_2_r;
-    reg [23:0] idx_3_r;
-    reg [23:0] idx_4_r;
-    reg [23:0] idx_5_r;
-    reg [23:0] idx_6_r;
-    reg [23:0] idx_7_r;
-    reg [23:0] idx_8_r;
-    reg [23:0] idx_9_r;
-    reg [23:0] idx_10_r;
-    reg [23:0] idx_11_r;
+    wire [23:0] idx_11_r;
+    reg [8:0] index_write_r;
+    wire [8:0] index_read_w;
+    wire [71:0] unused_index_data_w;
     reg [STAGES-1:0] original_alive_r;
     reg [15:0] acceleration_x_r;
     reg [15:0] acceleration_y_r;
@@ -166,6 +158,23 @@ module edrv32_gpu_object (
                         + {2'b0, mask_i[2]} + {2'b0, mask_i[3]};
         end
     endfunction
+
+    // Index metadata advances with all twelve object stages, including their common stall.
+    assign index_read_w = index_write_r - 9'd11;
+    assign idx_11_r = unused_index_data_w[23:0];
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) index_write_r <= 0;
+        else if (advance_w) index_write_r <= index_write_r + 1'b1;
+    end
+    edrv32_ram_gpu_delay u_index (
+        .clk_i(clk_i),
+        .wr_en_i(advance_w),
+        .wr_addr_i(index_write_r),
+        .wr_data_i({48'b0, ingress_idx_r[ingress_read_r]}),
+        .rd_en_i(advance_w),
+        .rd_addr_i(index_read_w),
+        .rd_data_o(unused_index_data_w)
+    );
 
     assign rounded_x_w = rounded_acceleration(ingress_data_w[143:128]);
     assign rounded_y_w = rounded_acceleration(ingress_data_w[159:144]);
@@ -349,29 +358,17 @@ module edrv32_gpu_object (
     // Data has no reset. Each stage transforms only its owned fields, preserving all others.
     always @(posedge clk_i) begin
         if (advance_w) begin
-            idx_0_r <= ingress_idx_r[ingress_read_r];
             original_alive_r[0] <= ingress_data_w[0];
-            idx_1_r <= idx_0_r;
             original_alive_r[1] <= original_alive_r[0];
-            idx_2_r <= idx_1_r;
             original_alive_r[2] <= original_alive_r[1];
-            idx_3_r <= idx_2_r;
             original_alive_r[3] <= original_alive_r[2];
-            idx_4_r <= idx_3_r;
             original_alive_r[4] <= original_alive_r[3];
-            idx_5_r <= idx_4_r;
             original_alive_r[5] <= original_alive_r[4];
-            idx_6_r <= idx_5_r;
             original_alive_r[6] <= original_alive_r[5];
-            idx_7_r <= idx_6_r;
             original_alive_r[7] <= original_alive_r[6];
-            idx_8_r <= idx_7_r;
             original_alive_r[8] <= original_alive_r[7];
-            idx_9_r <= idx_8_r;
             original_alive_r[9] <= original_alive_r[8];
-            idx_10_r <= idx_9_r;
             original_alive_r[10] <= original_alive_r[9];
-            idx_11_r <= idx_10_r;
             original_alive_r[11] <= original_alive_r[10];
             hit_6_r <= collision_hit_w;
             hit_7_r <= hit_6_r;
