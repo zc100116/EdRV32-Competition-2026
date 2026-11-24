@@ -44,7 +44,7 @@
 | X-3 | 系统子系统：reset_ctrl 改名和新增 `rst_aud_n`；CHIP_ID | Codex | — | 视觉项目系统子系统测试通过 | [x] gpu-dev 48091fd90，协调者评审通过；测试 8 项 PASS |
 | T-1 | `edrv32_gpu_soc_top`、本项目文件列表、板级顶层和约束（PLL 增加 clk_gpu、clk_aud 输出；I2S、I2C 引脚按 J25 PMOD-D）、PDS 导入脚本 | Codex（RTL）；协调者（约束、脚本、IP 说明） | I-1、A-1、X-1–X-3 | SoC lint 0；ST-08、ST-09 通过 | [x] 地址表 6d396ffb4；SoC 顶层 T-1a 455383e37；板级顶层、PLL 说明、约束、导入脚本 T-1b 5984930a7（协调者评审通过） |
 | W-1 | BSP 驱动（GPU、AUD、ES8156 配置）和 SoC 测试程序 ST-10–ST-14 | Codex | T-1 | SoC smoke、full 通过 | [x] W-1a 0f3cf7347；I-2 修复复位释放顺序 1aad898b8、ST-08 超时 06d94ada3 后 ST-08–14 全部 PASS（ST-08 仿真 2590 s，full 档） |
-| B-1 | Windows 任务卡：PLL IP 修改说明、综合、布局布线、时序和资源报告，上板跑 ST-10、ST-12 的程序 | 协调者写卡，用户和 Windows Codex 执行 | W-1 | 报告回传；定稿 G-T1、G-R1、G-R2、GS-1、GS-3 | [~] 卡 107：13 个新 IP 已生成（用户 2026-11-24）；纹理/调色板 RAM 包装端口改为 PDS 的 a_*/b_* 命名 d0d9c022d（已推送），Windows 从 Compile 重跑 |
+| B-1 | Windows 任务卡：PLL IP 修改说明、综合、布局布线、时序和资源报告，上板跑 ST-10、ST-12 的程序 | 协调者写卡，用户和 Windows Codex 执行 | W-1 | 报告回传；定稿 G-T1、G-R1、G-R2、GS-1、GS-3 | [~] 卡 107：13 个新 IP 已生成（用户 2026-11-24）；纹理/调色板 RAM 包装端口改为 PDS 的 a_*/b_* 命名 d0d9c022d；重跑后 PDS rtl-infer 内部崩溃（InferWriteMode.cpp:2983，Flow-0189），write_dma 单独编译通过；卡 109 逐模块二分定位（6ba07201e） |
 | V2-1 | 第二版：可编程顶点着色器（4 路 SIMD），取代几何单元（设计记录 gpu-architecture 第 7 节）；第一版完成后再讨论规格 | — | 第一版上板 | — | [ ] |
 | S-0a | GPU 模拟器核心：Python 参考模型的 C 移植（设计记录 2026-11-23-gpu-pc-emulator） | Codex | M-1 | 全部 GT/自测场景与 Python 模型逐位一致；压力场景一帧 ≤ 16 ms | [x] 2367f249f：121 个 GT 子场景 + 12 组自测逐位一致；S-0d 0f80d2861 提速：压力帧单线程 20.5 ms、三线程 11.0 ms |
 | S-0b | PC 平台：替换 mmio.h 的虚拟 SoC（GPU、DISP、AUD、PLIC）、游戏平台层、Windows exe 与 Linux 无界面前端、示例程序 gpu_hello | Codex | S-0a、S-0c | 三种构建 0 告警；gpu_hello 出帧且与 Python 模型一致 | [x] e8fa1e59d：三种构建 0 告警；gpu_hello 第 150 帧与 Python 模型逐位一致（协调者用 2367f249f 复跑通过） |
