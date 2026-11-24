@@ -5,6 +5,7 @@
  */
 #include "game.h"
 #include "ui/ui.h"
+#include "audio/audio.h"
 #include "aud.h"
 #include "plat.h"
 #include <assert.h>
@@ -40,6 +41,10 @@ void ember_gfx_prepare(const struct ember_sim *sim, unsigned fps,
 void ember_gfx_submit(unsigned frame) { (void)frame; }
 void ember_audio_reset(void) {}
 void ember_audio_event(unsigned event) { (void)event; }
+void ember_audio_result(unsigned kind, unsigned damage_type, unsigned outcome)
+{
+    (void)kind; (void)damage_type; (void)outcome;
+}
 void ember_audio_mix(uint32_t *samples, unsigned frames) { (void)samples; (void)frames; }
 void aud_init(struct aud_ring *ring, uint32_t *samples, uint32_t bytes, uint32_t level)
 {
