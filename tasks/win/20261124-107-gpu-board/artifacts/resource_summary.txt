@@ -1,0 +1,30 @@
+Card 107 round 5 | upstream 7bb2560e | local run fd019a94
+Windows PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | 2026-11-24
+
+Synthesize Mapping Summary (synthesize/run.log lines 93264-93279)
+Mapping Summary:
+Total LUTs: 141214 of 159800 (88.37%)
+	LUTs as dram: 4613 of 39500 (11.68%)
+	LUTs as logic: 136601
+Total Registers: 320874 of 319600 (100.40%)
+Total Latches: 0
+
+DRM36K/FIFO:
+Total DRM = 296.0 of 415 (71.33%)
+
+APMs:
+Total APMs = 271.00 of 740 (36.62%)
+
+Total I/O ports = 115 of 400 (28.75%)
+
+W: The design has 320874 Registers, but only 319600 available in the device
+
+PLL cells in the synthesis report (synthesize/edrv32_fpga_board_gpu_top.snr)
+GTP_GPLL                      7 uses
+GTP_PPLL                      2 uses
+
+Device Map final capacity check (device_map/run.log lines 4015-4016)
+C: DeviceMap-2003: The total resource of FF is 319600, but there are 320840.00 in the design.
+E: DRC-0018: The resource of FF is not enough.
+FF excess: 1240 (320840 - 319600), about 0.39% of device capacity.
+Device Map stopped at DRC. The device-side resource summary was not generated.

@@ -2,12 +2,63 @@
 
 | 项 | 内容 |
 |---|---|
-| 当前状态 | Compile 阻塞于 ADS RAM 写模式推断 |
-| 代码 HEAD | `2f6c3a61`，基于卡 107 `1a211b093`，已合入端口修复和配套说明 |
-| PDS 版本 | Windows PDS 2022.2-SP6.1 build 138931 |
+| 当前状态 | 第 5 轮 Compile 和 Synthesize 完成，Device Map 因 FF 超出容量报 `DRC-0018` |
+| 实测代码 | 本地 HEAD `fd019a94`，RTL 与任务卡提交 `7bb2560e` 一致，包含 `ba1ab19f` 的 8 个 RTL 文件修复 |
+| 测试时间 | 2026-11-24，Windows PDS 日志时间 22:09–22:35（北京时间） |
+| PDS 版本 | Windows PDS 2022.2-SP6.1 build 138931，ADS 综合 |
 | 器件 | Logos2 PG2L200H-6 FBB676 |
 | 工程 | `G:/codex_project/EdRV32-FPGA/board_gpu/board_gpu.pds` |
-| 输入 | 顶层 `edrv32_fpga_board_gpu_top`，宏 `FPGA_MODE`，GPU 专用 FDC |
+| 输入 | 顶层 `edrv32_fpga_board_gpu_top`、宏 `FPGA_MODE`、GPU 专用 FDC、原工程 IP |
+
+## 第 5 轮流程结果
+
+| 阶段 | 结果 | 墙钟用时 | 进程 CPU 用时 | 峰值内存池 |
+|---|---|---:|---:|---:|
+| Compile | 完成，`rtl-infer` 通过，本轮无 `E:` 行 | 2 分 55 秒 | 16 秒 | 924 MB |
+| Synthesize | 完成，报告寄存器超限警告 | 20 分 13 秒 | 6 分 30 秒 | 5,080 MB |
+| Device Map | `DeviceMap-2003`、`DRC-0018`，容量检查失败 | 2 分 33 秒 | 55 秒 | 4,357 MB |
+| Place、Route | 未开始 | 未取得 | 未取得 | 未取得 |
+
+第 4 轮在 19 秒时因 `Sdm-4000` 中止。第 5 轮未复现该错误，也未见之前的内部崩溃或多驱动错误。Device Map 使用 320,840 个 FF，器件提供 319,600 个，**超出 1,240 个，约 0.39%**。[阶段日志及全部错误行](artifacts/round5/flow-excerpts.log)
+
+## 资源
+
+| 资源 | 综合用量 | 器件容量 | 占用 |
+|---|---:|---:|---:|
+| LUT | 141,214 | 159,800 | 88.37% |
+| FF | 320,874 | 319,600 | 100.40% |
+| LUT 作分布式 RAM（计入 LUT 总数） | 4,613 | 39,500 | 11.68% |
+| DRM（36K 等效） | 296 | 415 | 71.33% |
+| APM | 271 | 740 | 36.62% |
+| I/O | 115 | 400 | 28.75% |
+| PLL 基元 | 7 个 GPLL、2 个 PPLL | 未取得 | 未取得 |
+
+综合超出 1,274 个 FF，Device Map 的容量检查使用另一个计数 320,840。最终 Device Map 资源汇总在 `multiseed_summary.csv` 里为 NA，表中其余数字均来自综合。[资源原文](artifacts/resource_summary.txt)
+
+| 综合层次（包含子模块） | LUT | FF | 分布式 RAM LUT | APM | DRM |
+|---|---:|---:|---:|---:|---:|
+| `u_soc/u_gpu` | 101,007 | 286,085 | 3,372 | 260 | 233.5 |
+| `u_soc/u_gpu/u_core/u_perspective` | 32,457 | 161,622 | 0 | 48 | 2 |
+| `u_soc/u_gpu/u_core/u_raster` | 12,580 | 51,448 | 0 | 0 | 0 |
+| `u_soc/u_gpu/u_core/u_geometry` | 13,724 | 21,346 | 262 | 68 | 1 |
+| `u_soc/u_cpu` | 19,189 | 12,109 | 680 | 4 | 27 |
+
+GPU 占全片综合 FF 的 89.16%，其中 `u_perspective` 单独占全片的 50.37%。综合报告有 1,544 组控制集，284,656 个 FF 带 CE 且没有同步或异步置位、复位。综合的 `u_palette` 层次共用 8 个 DRM，与 8 个 `palette_segment` 实例的配置相符。[完整层次资源表](artifacts/resource_hier.txt)
+
+## 综合预估时序
+
+以下为 ADS 综合后、布局前的 Slow Corner 估算。同域路径的 slack 单位为 ns。
+
+| 时钟域 | 请求 MHz | 估算 MHz | WNS | TNS | WHS | THS |
+|---|---:|---:|---:|---:|---:|---:|
+| `clk_gpu` | 180.0002 | 43.3514 | −17.510 | −163756.564 | 0.324 | 0.000 |
+| `clk_sys` | 125.0001 | 115.0076 | −0.695 | −43.644 | 0.324 | 0.000 |
+| `clk_mem` | 125.0000 | 119.2464 | −0.386 | −13.246 | −0.006 | −0.942 |
+| `clk_aud` | 12.2880 | 276.6247 | 77.765 | 0.000 | 0.619 | 0.000 |
+
+综合估算的 GPU 最差 setup 路径为 `u_soc/u_gpu/u_core/u_texture/log2_w_r[3]/CLK` 到 `u_soc/u_gpu/u_core/u_texture_ram/g_bank[3].read_addr_r[0]/D`，28 逻辑级，slack −17.510 ns。[时序汇总](artifacts/timing_summary.txt) · [已报告的路径索引](artifacts/round5/synthesis-path-index.txt) · [20 条最差 setup 明细](artifacts/round5/synthesis-setup-top20.txt) · [20 条最差 hold 明细](artifacts/round5/synthesis-hold-top20.txt)
+
+布局布线时序、每时钟域布线后最差 200 条路径、拥塞、比特流和上板结果均未取得。原始报告为 `G:/codex_project/EdRV32-FPGA/board_gpu/synthesize/edrv32_fpga_board_gpu_top.snr`，阶段日志在同一工程的 `compile/run.log`、`synthesize/run.log`、`device_map/run.log` 和 `pds.log`。
 
 ## IP 与 PLL
 
@@ -26,7 +77,7 @@
 
 频率由生成的 IDF 分频参数计算。上板实测频率未取得。[PLL 参数](artifacts/pll.txt)
 
-## Compile 诊断
+## 第 1 轮 Compile 诊断（历史记录）
 
 | 范围 | 结果 | 用时（墙钟 / CPU） | 证据 |
 |---|---|---|---|
@@ -40,11 +91,4 @@
 
 原始日志在 Windows 的 `G:/codex_project/EdRV32-FPGA/board_gpu/pds.log`、`compile/run.log` 和 `G:/codex_project/edrv32-card107/build/card107-pds-check/compile-crash/`。附件保留原始行号和崩溃调用栈。
 
-## 时序、资源与上板
-
-| 项 | 结果 |
-|---|---|
-| Synthesize、Device Map、Place & Route | 尚未开始 |
-| 各时钟域 WNS/TNS/WHS/THS、最差路径 | 未取得 |
-| 整片 LUT、FF、DRM、APM、分布式 RAM、IO、PLL | 未取得 |
-| 比特流、BIOS CHIP_ID、渲染和音频上板结果 | 未取得 |
+卡 109 随后将 RAM 推断崩溃定位到 `edrv32_gpu_unpack` 的跨通道共享数组，并单独定位了 `edrv32_gpu_clip` 的多驱动问题。两处修复均已进入第 5 轮的代码基线。[卡 109 复现与日志](https://github.com/zc100116/EdRV32-Competition-2026/tree/win/20261124-109-gpu-compile-bisect/tasks/win/20261124-109-gpu-compile-bisect)
