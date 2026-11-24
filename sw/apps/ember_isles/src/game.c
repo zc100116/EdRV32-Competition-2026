@@ -28,12 +28,14 @@ static struct ember_replay recording;
 /* The main loop publishes at most 256 events per frame. LOW refills every
  * 1024 samples; queue capacity covers the frames between LOW refills.
  * Only the refill service owns synthesizer state after startup. */
-static uint8_t audio_events[1024];
+struct audio_command { uint16_t kind; uint8_t damage_type, outcome; };
+static struct audio_command audio_events[1024];
 static _Atomic unsigned audio_head, audio_tail;
-static void queue_audio(unsigned event)
+static void queue_audio(unsigned event, unsigned damage_type, unsigned outcome)
 {
     unsigned head = atomic_load_explicit(&audio_head, memory_order_relaxed);
-    audio_events[head % 1024] = (uint8_t)event;
+    audio_events[head % 1024] =
+        (struct audio_command){(uint16_t)event, (uint8_t)damage_type, (uint8_t)outcome};
     atomic_store_explicit(&audio_head, head + 1, memory_order_release);
 }
 static void refill(struct aud_ring *ring, const struct aud_event *event, void *context)
@@ -43,9 +45,9 @@ static void refill(struct aud_ring *ring, const struct aud_event *event, void *c
     unsigned tail = atomic_load_explicit(&audio_tail, memory_order_relaxed);
     unsigned head = atomic_load_explicit(&audio_head, memory_order_acquire);
     while (tail != head) {
-        unsigned command = audio_events[tail % 1024];
-        if (command == 10) ember_audio_reset();
-        else ember_audio_event(command);
+        struct audio_command command = audio_events[tail % 1024];
+        if (command.kind == UINT16_MAX) ember_audio_reset();
+        else ember_audio_result(command.kind, command.damage_type, command.outcome);
         ++tail;
     }
     atomic_store_explicit(&audio_tail, tail, memory_order_release);
@@ -130,7 +132,7 @@ void ember_game_tick(void)
             recording.seed = 20261124u + ++run_number + plat_millis();
             recording.count = 0;
             ember_sim_init(&simulation, recording.seed);
-            queue_audio(10);
+            queue_audio(UINT16_MAX, 0, 0);
         }
     }
     if (!replay_mode && !returned_to_menu && simulation.phase != EMBER_WON &&
@@ -144,8 +146,8 @@ void ember_game_tick(void)
     }
     ember_sim_step(&simulation, keys);
     for (unsigned i = 0; i < simulation.events.count; ++i) {
-        unsigned kind = simulation.events.item[i].kind;
-        queue_audio(kind);
+        const struct ember_event *event = &simulation.events.item[i];
+        queue_audio(event->kind, event->damage_type, event->outcome);
     }
 }
 void ember_game_render(unsigned frame)

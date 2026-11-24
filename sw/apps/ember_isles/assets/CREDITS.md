@@ -1,0 +1,38 @@
+# Ember Isles audio credits
+
+Music: Eric Skiff — **A Night Of Dizzy Spells**, **Arpanauts**, **Chibi Ninja** —
+*Resistor Anthems* — [Available at EricSkiff.com/music](https://ericskiff.com/music/).
+License: [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/).
+The author's original page was verified on 2026-11-24 and explicitly grants CC BY 4.0.
+Original direct MP3 downloads are stored in `music/` with filename spaces removed.
+`music/stages.csv` maps coast / forest / crater to those three recordings respectively.
+This is a **provisional mapping**: user listening and scene-fit approval remain pending.
+
+Modifications: decoded/resampled to 48 kHz stereo; each music loop overlaps the final
+one second with the first one second using an equal-gain crossfade, omits the initial
+one second, normalizes peak to 10000 PCM units, and quantizes to G.711 mu-law.
+These are edited full recordings, not original compositions or claimed native seamless loops.
+The generated binary is linked into the same mixer on PC and board.
+Loop musical timing, full-track quality and the quantized sound remain subject to listening.
+
+Sound effects: **Kenney**, [Starter Kit FPS](https://github.com/KenneyNL/Starter-Kit-FPS/tree/185fd2326d74a5cf858cffc616f87cf9696f9cc0),
+commit `185fd2326d74a5cf858cffc616f87cf9696f9cc0`.
+The original README explicitly licenses included sound effects as
+[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/); the separate MIT
+software license does not describe these sound assets.
+Exact original `sounds/` files copied unchanged into `audio/`:
+`blaster.ogg`, `blaster_repeater.ogg`, `enemy_attack.ogg`, `enemy_destroy.ogg`,
+`enemy_hurt.ogg`, `weapon_change.ogg`.
+
+Sound effects: **Kenney**, [Starter Kit 3D Platformer](https://github.com/KenneyNL/Starter-Kit-3D-Platformer/tree/3fa8a04b1c01ab23db43123d4ce814a34c3fc7f0),
+commit `3fa8a04b1c01ab23db43123d4ce814a34c3fc7f0`.
+The original README explicitly licenses sound effects as **CC0 1.0**.
+Exact original `sounds/` files: `break.ogg`, `coin.ogg`, `jump.ogg`.
+Both pinned original READMEs were verified on 2026-11-24.
+
+Sound modifications: resample to 48 kHz stereo, normalize each cue to peak 4000,
+encode mu-law; level-up/victory layer three/four upward-transposed coin sounds,
+and block slows the coin bell to half pitch. Shot, iron hit, elemental hit, kill,
+dash, seed, explosion, choose/weapon-change, hurt and pickup use the named source
+cues in `tools/music_convert.py`. All effects remain pending user listening approval.
+No commercial game recordings, third-party mirrors or website download bypasses were used.

@@ -1,70 +1,122 @@
 #!/usr/bin/env python3
-# File: music_convert.py
-# Spec: ember_isles tech 5-6. Convert the original E2 coastal score to C tables.
-# Clock domain: offline; output uses 48 kHz frames and Q0.32 oscillator steps.
-"""Run from any directory; products go to repository build/ember_isles/generated."""
-
+# File: music_convert.py; ember_isles tech 5, G-2.7.
+# Convert licensed recordings to linked 48 kHz stereo G.711 mu-law assets.
+# Clock domain: offline. Requires ffmpeg on PATH; Python uses only stdlib.
+import array
+import bisect
+import csv
 from pathlib import Path
-
+import subprocess
+import sys
 
 APP = Path(__file__).resolve().parents[1]
-OUTPUT = APP.parents[2] / "build/ember_isles/generated/music.h"
-WAVES = {"square": 0, "triangle": 1, "noise": 2}
-PITCHES = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
+OUT = APP.parents[2] / 'build/ember_isles/generated'
 
 
-def phase_step(note):
-    if note == "R":
-        return 0
-    if note == "N":
-        return 1  # Noise is advanced once per output sample, independent of pitch.
-    pitch = PITCHES[note[0]]
-    accidental = note[1:-1]
-    pitch += {"": 0, "#": 1, "b": -1}[accidental]
-    midi = (int(note[-1]) + 1) * 12 + pitch
-    return round(440 * 2 ** ((midi - 69) / 12) * (1 << 32) / 48000)
+def decode(code):
+    value = (~code) & 255
+    magnitude = (((value & 15) << 3) + 132) << ((value >> 4) & 7)
+    return 132 - magnitude if value & 128 else magnitude - 132
+
+
+LEVELS = sorted((decode(code), code) for code in range(256))
+VALUES = [value for value, _ in LEVELS]
+ENCODE = bytearray(65536)
+for sample in range(-32768, 32768):
+    index = bisect.bisect_left(VALUES, sample)
+    index = min(index, 255)
+    if index and sample - VALUES[index - 1] < VALUES[index] - sample:
+        index -= 1
+    ENCODE[sample + 32768] = LEVELS[index][1]
+
+
+def read(path):
+    raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', str(path), '-ar', '48000',
+                          '-ac', '2', '-f', 's16le', '-'], check=True,
+                         stdout=subprocess.PIPE).stdout
+    pcm = array.array('h', raw)
+    if sys.byteorder != 'little':
+        pcm.byteswap()
+    return pcm
+
+
+def convert(pcm, peak, loop=False):
+    if loop:
+        # One second equal-gain overlap joins the ending to the opening.
+        # The returned loop begins immediately after that opening overlap.
+        overlap = 48000
+        for frame in range(overlap):
+            for channel in range(2):
+                end = len(pcm) - overlap * 2 + frame * 2 + channel
+                pcm[end] = (pcm[end] * (overlap - frame) +
+                            pcm[frame * 2 + channel] * frame) // overlap
+        del pcm[:overlap * 2]
+    scale = max(abs(value) for value in pcm)
+    encoded = bytearray(len(pcm))
+    error = signal = 0
+    for index, value in enumerate(pcm):
+        sample = value * peak // scale
+        code = ENCODE[sample + 32768]
+        encoded[index] = code
+        signal += sample * sample
+        error += (sample - decode(code)) ** 2
+    import math
+    print(f'{len(pcm) // 2} frames, {len(encoded)} bytes, '
+          f'quantization SNR {10 * math.log10(signal / error):.2f} dB')
+    return encoded
 
 
 def main():
-    voices = []
-    for line in (APP / "assets/music/night_coast.txt").read_text().splitlines():
-        words = line.split("# ", 1)[0].split()
-        if not words or words[0].startswith("#"):
-            continue
-        if words[0] == "tempo":
-            tick_frames = 48000 * 60 // (int(words[1]) * 4)
-        elif words[0] == "voice":
-            wave, peak, pan = words[1:]
-            voices.append((WAVES[wave], int(peak), int(pan), []))
-        else:
-            for token in words:
-                note, ticks = token.split(":")
-                voices[-1][3].append((phase_step(note), int(ticks) * tick_frames))
+    OUT.mkdir(parents=True, exist_ok=True)
+    clips = []
+    for row in csv.DictReader((APP / 'assets/music/stages.csv').open()):
+        print(row['stage'], row['source'])
+        clips.append(convert(read(APP / 'assets/music' / row['source']), 10000, True))
+    # Existing sim events 0..9, pickup (10), block (11), elemental impact (12).
+    names = ['blaster', 'enemy_hurt', 'break', 'jump', 'weapon_change',
+             'enemy_destroy', 'coin', 'weapon_change', 'enemy_attack', 'coin',
+             'coin', 'coin', 'blaster_repeater']
+    for cue, name in enumerate(names):
+        pcm = read(APP / 'assets/audio' / (name + '.ogg'))
+        if cue in (6, 9):
+            # Ascending sample-based chime; victory gets the longer four-note cadence.
+            source = pcm
+            pcm = array.array('h', [0]) * (len(source) + 2 * 7200 * (3 if cue == 9 else 2))
+            for note, rate in enumerate((1.0, 1.25, 1.5, 2.0)[:4 if cue == 9 else 3]):
+                for frame in range(int(len(source) // 2 / rate)):
+                    for channel in range(2):
+                        index = (frame + note * 7200) * 2 + channel
+                        pcm[index] = max(-32768, min(32767, pcm[index] +
+                            source[int(frame * rate) * 2 + channel]))
+        if cue == 11:
+            # Lower coin bell for the explicit GDD block ding.
+            pcm = array.array('h', (pcm[(i // 2) // 2 * 2 + i % 2]
+                                   for i in range(len(pcm) * 2)))
+        print('cue', cue, name)
+        clips.append(convert(pcm, 4000))
+    blob = bytearray()
+    descriptors = []
+    for clip in clips:
+        descriptors.append((len(blob), len(clip) // 2))
+        blob.extend(clip)
+    binary = OUT / 'audio.ulaw'
+    binary.write_bytes(blob)
+    lines = ['/* Generated by music_convert.py; licensed sources: assets/CREDITS.md. */',
+             '#ifndef EMBER_GENERATED_MUSIC_H', '#define EMBER_GENERATED_MUSIC_H',
+             '#include <stdint.h>', 'extern const unsigned char ember_audio_blob[];',
+             'struct ember_audio_clip { unsigned offset; unsigned frames; };',
+             'static const struct ember_audio_clip ember_audio_clips[] = {']
+    lines += [f'    {{{offset}u, {frames}u}},' for offset, frames in descriptors]
+    lines += ['};', 'static const int16_t ember_ulaw[256] = {']
+    lines += ['    ' + ', '.join(str(decode(c)) for c in range(i, i + 8)) + ','
+              for i in range(0, 256, 8)]
+    lines += ['};', '#define EMBER_AUDIO_ASSEMBLY "' +
+              '.section .rodata\\n.balign 4\\n.globl ember_audio_blob\\n' +
+              'ember_audio_blob:\\n.incbin \\"' + str(binary) + '\\"\\n.text\\n"',
+              '#endif', '']
+    (OUT / 'music.h').write_text('\n'.join(lines))
+    print('linked audio bytes', len(blob))
 
-    lines = [
-        "/* Generated by music_convert.py; original score: assets/music/night_coast.txt. */",
-        "#ifndef EMBER_GENERATED_MUSIC_H",
-        "#define EMBER_GENERATED_MUSIC_H",
-        "#include <stdint.h>",
-        "struct ember_music_note { uint32_t step; unsigned frames; };",
-        "struct ember_music_track {",
-        "    const struct ember_music_note *notes;",
-        "    unsigned count; unsigned wave; int peak; unsigned pan;",
-        "};",
-    ]
-    for index, (_, _, _, notes) in enumerate(voices):
-        lines.append(f"static const struct ember_music_note ember_music_{index}[] = {{")
-        lines.extend(f"    {{{step}u, {frames}u}}," for step, frames in notes)
-        lines.append("};")
-    lines.append("static const struct ember_music_track ember_music[] = {")
-    for index, (wave, peak, pan, notes) in enumerate(voices):
-        lines.append(f"    {{ember_music_{index}, {len(notes)}u, {wave}u, {peak}, {pan}u}},")
-    lines.extend(["};", f"enum {{ EMBER_MUSIC_VOICES = {len(voices)} }};", "#endif", ""])
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text("\n".join(lines))
-    durations = [sum(frames for _, frames in notes) for _, _, _, notes in voices]
-    print(f"music: {len(voices)} voices, loop frames {durations}, output {OUTPUT}")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
