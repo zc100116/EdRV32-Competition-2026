@@ -21,7 +21,7 @@
 - 正在进行（2026-11-24）：
   - GPU RTL 硬件风格整改 S-1（CLAUDE.md 5.5 第 1–5 条，逐周期不变；第 6 条级数预算等 PDS 时序数据后另做）：
     - S-1A 顶点前端 [x]：`zc100116/task-gpu-style-a` dd7c31414..39a993bde，35 处整改，GT-01–25 PASS，GT-25 周期逐项相同。
-    - S-1B 建立/光栅化 [~] ctx_434249ac0ea8（task-gpu-style-b-2）；S-1C 透视 [~] ctx_e54416ea1d28（task-gpu-style-c）；S-1D 纹理/对象/四边形 [~] ctx_fbdd80892681（task-gpu-style-d）。B、C 首次派发因磁盘写满失败后重派。
+    - S-1B 建立/光栅化 [~] ctx_434249ac0ea8（task-gpu-style-b-2）；S-1C 透视 [x] ad475e7c0（12 处，GT-01–25 PASS，GT-25 周期逐项相同）；S-1D 纹理/对象/四边形 [~] ctx_fbdd80892681（task-gpu-style-d）。B、C 首次派发因磁盘写满失败后重派。
     - 全部完成后合入 gpu-dev，重下卡 107，对比各模块单独编译时间。
   - 《余烬群岛》GDD 讨论：伤害结算 2.3、灯火 5a、共鸣 4.4a、契约 4.4b 已定；下一项宠物。ART-1b 方向被否（像早期 RTS），美术第二轮等议题讨论完再派。
 - 阻塞：无。
