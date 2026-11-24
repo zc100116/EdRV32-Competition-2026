@@ -49,7 +49,7 @@
 | S-0a | GPU 模拟器核心：Python 参考模型的 C 移植（设计记录 2026-11-23-gpu-pc-emulator） | Codex | M-1 | 全部 GT/自测场景与 Python 模型逐位一致；压力场景一帧 ≤ 16 ms | [x] 2367f249f：121 个 GT 子场景 + 12 组自测逐位一致；S-0d 0f80d2861 提速：压力帧单线程 20.5 ms、三线程 11.0 ms |
 | S-0b | PC 平台：替换 mmio.h 的虚拟 SoC（GPU、DISP、AUD、PLIC）、游戏平台层、Windows exe 与 Linux 无界面前端、示例程序 gpu_hello | Codex | S-0a、S-0c | 三种构建 0 告警；gpu_hello 出帧且与 Python 模型一致 | [x] e8fa1e59d：三种构建 0 告警；gpu_hello 第 150 帧与 Python 模型逐位一致（协调者用 2367f249f 复跑通过） |
 | S-0c | 驱动 mmio 改造：gpu.c、aud.c 改用 mmio.h，新增 ddr_physical() | Codex（W-1a） | W-1 | 全部 sw 构建 0 告警，行为不变 | [x] 166c00a27 |
-| G-1 | 游戏《余烬群岛》（2D 肉鸽 + 3D 对战，共用世界观；设计总纲 sw/apps/ember_isles/docs/gdd.md，逐章与用户确认）和测试展示页 | Codex | W-1、S-0、玩法确认 | PC 上运行，上板运行 | [~] 设计总纲 v0.1 讨论中 |
+| G-1 | 游戏《余烬群岛》（2D 肉鸽 + 3D 对战，共用世界观；设计总纲 sw/apps/ember_isles/docs/gdd.md，逐章与用户确认）和测试展示页 | Codex | W-1、S-0、玩法确认 | PC 上运行，上板运行 | [~] GDD v1.0 + tech.md v1.0（7226c177a）；E1+E2 由 Codex 项目经理 G-1a ctx_ce0b90c2a4cf 拆分开发；E3–E5 待派 |
 
 ## 4. 规格定稿项
 
