@@ -46,6 +46,8 @@
 | `ip_lutram_gpu_palette_current` | Simple Dual Port Distributed RAM | 16 × 20 | `edrv32_ram_gpu_palette_current` | GPU texture/palette ×128 | [ip_lutram_gpu_palette_current.md](ip_lutram_gpu_palette_current.md) | 待生成 |
 | `ip_pll_sys` | PLL（板级） | 27 MHz → clk_sys 100 MHz | 无（板级顶层直接例化，仿真用 `verif/models/ip_pll_sys.sv`） | B1/B2 板级顶层 | [ip_pll_sys.md](ip_pll_sys.md) | B1 已生成 |
 | `ip_ddr3` | DDR3 Controller + PHY | x32、1000 Mbps，core_clk 125 MHz、用户口 256 位 | 无（板级直接例化） | B2 DDR 及 clk_mem | [ip_ddr3.md](ip_ddr3.md) | B2 待生成 |
+| `ip_pll_gpu` | PLL（板级） | 27 → 180 MHz（目标，PDS 计算分频） | 无（板级直接例化） | GPU SoC | [ip_pll_gpu.md](ip_pll_gpu.md) | 待 Windows 生成及回传 |
+| `ip_pll_aud` | PLL（板级） | 27 → 12.288 MHz（目标，误差 ≤ 1000 ppm） | 无（板级直接例化） | AUD / PMOD-D MCLK | [ip_pll_aud.md](ip_pll_aud.md) | 待 Windows 生成及回传 |
 | `ip_pll_npu` | PLL | 27 → 180 MHz | 无（板级直接例化） | B2 NPU | [ip_pll_npu.md](ip_pll_npu.md) | B2 待生成 |
 | `ip_pll_video` | PLL | 27 → 74.25 / 371.25 MHz，同相 | 无（板级直接例化） | B2 DISP / TMDS | [ip_pll_video.md](ip_pll_video.md) | B2 待生成 |
 | `ip_pll_eth` | PLL | 125 → 125 MHz，0°，外部反馈 | 无（板级直接例化） | B2 RGMII RX/TX | [ip_pll_eth.md](ip_pll_eth.md) | B2 待生成 |
