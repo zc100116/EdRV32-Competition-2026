@@ -525,6 +525,12 @@ module edrv32_gpu_texture (
     wire [8:0] mip_width_w [0:9];
     wire [8:0] mip_height_w [0:9];
     wire [8:0] mip_groups_x_w [0:9];
+    // Split constant slices so lint follows each combinational chain element independently.
+    wire [80:0] mip_width_chain_w /* verilator split_var */;
+    wire [80:0] mip_height_chain_w /* verilator split_var */;
+    wire [80:0] mip_groups_x_chain_w /* verilator split_var */;
+    wire [80:0] mip_groups_y_chain_w /* verilator split_var */;
+    wire [152:0] mip_offset_chain_w /* verilator split_var */;
     wire [16:0] mip_offset_w [0:9];
     genvar mip;
     generate
@@ -540,6 +546,13 @@ module edrv32_gpu_texture (
             assign mip_height_w[mip] = height_w;
             assign mip_groups_x_w[mip] = groups_x_w;
             assign mip_offset_w[mip] = offset_w;
+            if (mip < 9) begin : g_chain
+                assign mip_width_chain_w[mip*9 +: 9] = width_w;
+                assign mip_height_chain_w[mip*9 +: 9] = height_w;
+                assign mip_groups_x_chain_w[mip*9 +: 9] = groups_x_w;
+                assign mip_groups_y_chain_w[mip*9 +: 9] = unused_groups_y_w;
+                assign mip_offset_chain_w[mip*17 +: 17] = offset_w;
+            end
             assign blocks_x_w = format_r == 2 ? width_w : (width_w + 9'd1) >> 1;
             assign blocks_y_w = format_r == 0 ? (height_w + 9'd1) >> 1 : height_w;
             assign groups_x_w = (blocks_x_w + 9'd1) >> 1;
@@ -550,12 +563,13 @@ module edrv32_gpu_texture (
                 assign offset_w = offset_r[17:1];
             end else begin : g_next
                 wire [16:0] size_w;
-                assign size_w = (g_mip[mip-1].groups_x_w * g_mip[mip-1].unused_groups_y_w) << 2;
-                assign offset_w = g_mip[mip-1].offset_w + size_w;
-                assign width_w = g_mip[mip-1].width_w > 1 ?
-                    g_mip[mip-1].width_w >> 1 : g_mip[mip-1].width_w;
-                assign height_w = g_mip[mip-1].height_w > 1 ?
-                    g_mip[mip-1].height_w >> 1 : g_mip[mip-1].height_w;
+                assign size_w = (mip_groups_x_chain_w[(mip-1)*9 +: 9] *
+                    mip_groups_y_chain_w[(mip-1)*9 +: 9]) << 2;
+                assign offset_w = mip_offset_chain_w[(mip-1)*17 +: 17] + size_w;
+                assign width_w = mip_width_chain_w[(mip-1)*9 +: 9] > 1 ?
+                    mip_width_chain_w[(mip-1)*9 +: 9] >> 1 : mip_width_chain_w[(mip-1)*9 +: 9];
+                assign height_w = mip_height_chain_w[(mip-1)*9 +: 9] > 1 ?
+                    mip_height_chain_w[(mip-1)*9 +: 9] >> 1 : mip_height_chain_w[(mip-1)*9 +: 9];
             end
         end
     endgenerate
@@ -567,6 +581,7 @@ module edrv32_gpu_texture (
     wire [20:0] tap_address_w [0:7];
     wire [2:0] bank_port_w [0:31];
     wire [7:0] unused_tap_accepted_w;
+    wire [7:0] bank_accepted_w [0:3];
     wire [3:0] lane_done_w;
     wire [3:0] pending_w;
     wire [1:0] launch_mode_w;
@@ -651,9 +666,15 @@ module edrv32_gpu_texture (
         end
         // Four banks, each an eight-step ordered two-port allocator; no dynamic bus writes.
         for (bank = 0; bank < 4; bank = bank + 1) begin : g_bank
-            wire [7:0] accepted_w;
-            assign port_en_w[bank*2 +: 2] = g_allocate[7].en_w;
-            assign port_row_w[bank*30 +: 30] = {g_allocate[7].row_b_w, g_allocate[7].row_a_w};
+            wire [17:0] en_chain_w /* verilator split_var */;
+            wire [134:0] row_a_chain_w /* verilator split_var */;
+            wire [134:0] row_b_chain_w /* verilator split_var */;
+            assign en_chain_w[0 +: 2] = 0;
+            assign row_a_chain_w[0 +: 15] = 0;
+            assign row_b_chain_w[0 +: 15] = 0;
+            assign port_en_w[bank*2 +: 2] = en_chain_w[16 +: 2];
+            assign port_row_w[bank*30 +: 30] = {row_b_chain_w[120 +: 15],
+                row_a_chain_w[120 +: 15]};
             for (tap = 0; tap < 8; tap = tap + 1) begin : g_allocate
                 wire [1:0] previous_en_w;
                 wire [14:0] previous_a_w;
@@ -661,15 +682,12 @@ module edrv32_gpu_texture (
                 wire [1:0] en_w;
                 wire [14:0] row_a_w;
                 wire [14:0] row_b_w;
-                if (tap == 0) begin : g_first
-                    assign previous_en_w = 0;
-                    assign previous_a_w = 0;
-                    assign previous_b_w = 0;
-                end else begin : g_previous
-                    assign previous_en_w = g_allocate[tap-1].en_w;
-                    assign previous_a_w = g_allocate[tap-1].row_a_w;
-                    assign previous_b_w = g_allocate[tap-1].row_b_w;
-                end
+                assign previous_en_w = en_chain_w[tap*2 +: 2];
+                assign previous_a_w = row_a_chain_w[tap*15 +: 15];
+                assign previous_b_w = row_b_chain_w[tap*15 +: 15];
+                assign en_chain_w[(tap+1)*2 +: 2] = en_w;
+                assign row_a_chain_w[(tap+1)*15 +: 15] = row_a_w;
+                assign row_b_chain_w[(tap+1)*15 +: 15] = row_b_w;
                 wire request_w;
                 wire match_a_w;
                 wire match_b_w;
@@ -682,7 +700,7 @@ module edrv32_gpu_texture (
                 assign select_b_w = match_b_w || (!match_a_w && previous_en_w[0]);
                 assign accepted_tap_w = request_w &&
                     (match_a_w || match_b_w || previous_en_w != 2'b11);
-                assign accepted_w[tap] = accepted_tap_w;
+                assign bank_accepted_w[bank][tap] = accepted_tap_w;
                 assign en_w = previous_en_w |
                     (accepted_tap_w ? (select_b_w ? 2'b10 : 2'b01) : 2'b00);
                 assign row_a_w = accepted_tap_w && !select_b_w ?
@@ -694,9 +712,9 @@ module edrv32_gpu_texture (
             end
         end
         for (tap = 0; tap < 8; tap = tap + 1) begin : g_accepted
-            assign unused_tap_accepted_w[tap] = g_bank[0].accepted_w[tap] |
-                g_bank[1].accepted_w[tap] | g_bank[2].accepted_w[tap] |
-                g_bank[3].accepted_w[tap];
+            assign unused_tap_accepted_w[tap] = bank_accepted_w[0][tap] |
+                bank_accepted_w[1][tap] | bank_accepted_w[2][tap] |
+                bank_accepted_w[3][tap];
         end
     endgenerate
 
@@ -1034,7 +1052,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = allocate_r[4:0];
             end else begin : g_previous
-                assign data_w = g_lod_slot[pipe_stage-1].data_r;
+                assign data_w = lod_slot_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1047,7 +1065,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = schedule_slot_w;
             end else begin : g_previous
-                assign data_w = g_return_slot[pipe_stage-1].data_r;
+                assign data_w = return_slot_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1060,7 +1078,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = launch_mode_w;
             end else begin : g_previous
-                assign data_w = g_return_mode[pipe_stage-1].data_r;
+                assign data_w = return_mode_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1073,7 +1091,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = launch_lane_w;
             end else begin : g_previous
-                assign data_w = g_return_lane[pipe_stage-1].data_r;
+                assign data_w = return_lane_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1086,7 +1104,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = lane_done_w;
             end else begin : g_previous
-                assign data_w = g_return_done[pipe_stage-1].data_r;
+                assign data_w = return_done_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1099,7 +1117,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = tap_port_w;
             end else begin : g_previous
-                assign data_w = g_return_port[pipe_stage-1].data_r;
+                assign data_w = return_port_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1112,7 +1130,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = tap_subword_w;
             end else begin : g_previous
-                assign data_w = g_return_subword[pipe_stage-1].data_r;
+                assign data_w = return_subword_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1125,7 +1143,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = tap_weight_w;
             end else begin : g_previous
-                assign data_w = g_return_weight[pipe_stage-1].data_r;
+                assign data_w = return_weight_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1138,7 +1156,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = launch_fraction_w;
             end else begin : g_previous
-                assign data_w = g_return_fraction[pipe_stage-1].data_r;
+                assign data_w = return_fraction_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1151,7 +1169,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = direct_w;
             end else begin : g_previous
-                assign data_w = g_direct[pipe_stage-1].data_r;
+                assign data_w = direct_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1164,7 +1182,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = return_slot_r[8];
             end else begin : g_previous
-                assign data_w = g_filter_slot[pipe_stage-1].data_r;
+                assign data_w = filter_slot_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1177,7 +1195,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = return_mode_r[8];
             end else begin : g_previous
-                assign data_w = g_filter_mode[pipe_stage-1].data_r;
+                assign data_w = filter_mode_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1190,7 +1208,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = return_lane_r[8];
             end else begin : g_previous
-                assign data_w = g_filter_lane[pipe_stage-1].data_r;
+                assign data_w = filter_lane_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1203,7 +1221,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = return_done_r[8];
             end else begin : g_previous
-                assign data_w = g_filter_done[pipe_stage-1].data_r;
+                assign data_w = filter_done_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1216,7 +1234,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = return_fraction_r[8];
             end else begin : g_previous
-                assign data_w = g_filter_fraction[pipe_stage-1].data_r;
+                assign data_w = filter_fraction_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;
@@ -1229,7 +1247,7 @@ module edrv32_gpu_texture (
             if (pipe_stage == 0) begin : g_first
                 assign data_w = {expanded_w[3], expanded_w[2], expanded_w[1], expanded_w[0]};
             end else begin : g_previous
-                assign data_w = g_nearest[pipe_stage-1].data_r;
+                assign data_w = nearest_r[pipe_stage-1];
             end
             always @(posedge clk_i) begin
                 data_r <= data_w;

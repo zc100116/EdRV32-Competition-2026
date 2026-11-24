@@ -290,6 +290,7 @@ module edrv32_gpu_perspective (
         for (lane = 0; lane < 4; lane = lane + 1) begin : g_lane
             // Four lanes, each owning seven 70-bit two-slot input field queues.
             // No queue array is shared between generated lanes or fields.
+            wire [69:0] plane_w [0:6];
             genvar attribute;
             for (attribute = 0; attribute < 7; attribute = attribute + 1) begin : g_plane
                 reg [69:0] input_plane_r [0:1];
@@ -299,8 +300,7 @@ module edrv32_gpu_perspective (
                             fragment_plane_i[lane*490+attribute*70 +: 70];
                     end
                 end
-                wire [69:0] plane_w;
-                assign plane_w = input_plane_r[input_read_r];
+                assign plane_w[attribute] = input_plane_r[input_read_r];
             end
 
             // Five independent two-slot output fields per lane, written at stage 105.
@@ -455,7 +455,7 @@ module edrv32_gpu_perspective (
             wire [95:0] span_y_w;
             wire [95:0] span_w;
             wire [69:0] unused_depth_raw_w;
-            assign unused_depth_raw_w = g_plane[0].plane_w;
+            assign unused_depth_raw_w = plane_w[0];
             reg [16:0] unused_depth_rounded_r;
             reg [0:0] depth_overflow_r;
             reg [0:0] depth_negative_r;
@@ -464,7 +464,7 @@ module edrv32_gpu_perspective (
             wire [15:0] final_depth_w;
             assign final_depth_w = delay_22_r[102];
             wire [69:0] unused_red_raw_w;
-            assign unused_red_raw_w = g_plane[4].plane_w;
+            assign unused_red_raw_w = plane_w[4];
             reg [8:0] unused_red_rounded_r;
             reg [0:0] red_overflow_r;
             reg [0:0] red_negative_r;
@@ -473,7 +473,7 @@ module edrv32_gpu_perspective (
             wire [7:0] final_red_w;
             assign final_red_w = delay_23_r[102];
             wire [69:0] unused_green_raw_w;
-            assign unused_green_raw_w = g_plane[5].plane_w;
+            assign unused_green_raw_w = plane_w[5];
             reg [8:0] unused_green_rounded_r;
             reg [0:0] green_overflow_r;
             reg [0:0] green_negative_r;
@@ -482,7 +482,7 @@ module edrv32_gpu_perspective (
             wire [7:0] final_green_w;
             assign final_green_w = delay_24_r[102];
             wire [69:0] unused_blue_raw_w;
-            assign unused_blue_raw_w = g_plane[6].plane_w;
+            assign unused_blue_raw_w = plane_w[6];
             reg [8:0] unused_blue_rounded_r;
             reg [0:0] blue_overflow_r;
             reg [0:0] blue_negative_r;
@@ -499,7 +499,7 @@ module edrv32_gpu_perspective (
             edrv32_gpu_perspective_absolute u_q_absolute (
                 .clk_i(clk_i),
                 .en_i(advance_w),
-                .value_i(g_plane[1].plane_w),
+                .value_i(plane_w[1]),
                 .exponent_i(input_h_r[input_read_r][10 +: 10] - 10'd30),
                 .magnitude_o(q_absolute_w),
                 .sign_o(q_sign_w),
@@ -516,7 +516,7 @@ module edrv32_gpu_perspective (
             edrv32_gpu_perspective_absolute u_uq_absolute (
                 .clk_i(clk_i),
                 .en_i(advance_w),
-                .value_i(g_plane[2].plane_w),
+                .value_i(plane_w[2]),
                 .exponent_i(input_h_r[input_read_r][20 +: 10] - 10'd38),
                 .magnitude_o(uq_absolute_w),
                 .sign_o(uq_sign_w),
@@ -533,7 +533,7 @@ module edrv32_gpu_perspective (
             edrv32_gpu_perspective_absolute u_vq_absolute (
                 .clk_i(clk_i),
                 .en_i(advance_w),
-                .value_i(g_plane[3].plane_w),
+                .value_i(plane_w[3]),
                 .exponent_i(input_h_r[input_read_r][30 +: 10] - 10'd38),
                 .magnitude_o(vq_absolute_w),
                 .sign_o(vq_sign_w),
@@ -2073,7 +2073,7 @@ module edrv32_gpu_perspective (
                     delay_25_r[100] <= delay_25_r[99];
                     delay_25_r[101] <= delay_25_r[100];
                     delay_25_r[102] <= delay_25_r[101];
-                    delay_26_r[0] <= g_plane[2].plane_w[30 +: 32];
+                    delay_26_r[0] <= plane_w[2][30 +: 32];
                     delay_26_r[1] <= delay_26_r[0];
                     delay_26_r[2] <= delay_26_r[1];
                     delay_26_r[3] <= delay_26_r[2];
@@ -2178,7 +2178,7 @@ module edrv32_gpu_perspective (
                     delay_26_r[102] <= delay_26_r[101];
                     delay_26_r[103] <= delay_26_r[102];
                     delay_26_r[104] <= delay_26_r[103];
-                    delay_27_r[0] <= g_plane[3].plane_w[30 +: 32];
+                    delay_27_r[0] <= plane_w[3][30 +: 32];
                     delay_27_r[1] <= delay_27_r[0];
                     delay_27_r[2] <= delay_27_r[1];
                     delay_27_r[3] <= delay_27_r[2];
