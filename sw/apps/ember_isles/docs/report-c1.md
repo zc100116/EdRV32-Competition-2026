@@ -48,7 +48,7 @@ GPU功能模型周期PERF仍为0，GPU时钟预算未测定；不能据墙钟推
 | Windows | 430054 | 528 | 0 |
 | board | 206832 | 1752 | 67865564 |
 | Spike | 237496 | 1744 | 9025592 |
-BSS包括固定实体/录像池；board还包括64MiB平台DMA池，Windows的BSS由PE工具口径合并。
+BSS包括固定实体/录像池，board还包括64MiB平台DMA池；Windows列仅照录GNU size输出。
 以上为GNU size口径，不是进程运行时内存；最终内容/图集变化后须重测。
 
 E3截图：outputs/ember_isles/e3/{combat,upgrade,weapon-swap}.png，1280×720。
