@@ -1,8 +1,10 @@
 # GPU C reference emulator
 
 C11 functional implementation of `gpu-spec.md` v0.3 sections 2–6, using the
-Python model's integer algorithms. The library uses only standard C and compiler
-`__int128`; it has no operating system or windowing dependency.
+Python model's integer algorithms. Arithmetic uses standard C and compiler
+`__int128`. Large draw batches use three horizontal sections, with Win32 threads
+on Windows and pthreads on Linux. `-DGPU_EMU_THREADS=1` removes the platform
+thread code and keeps the serial library. Public entry points are unchanged.
 
 `gpu_emu.h` fixes the five entry points: create/destroy, APB offset read/write,
 and IRQ level. The caller owns the entire DDR allocation starting at physical
@@ -22,9 +24,9 @@ Build from the repository root (one compiler process at a time):
 
 ```sh
 mkdir -p build/gpu-emu
-gcc -std=c11 -Wall -Wextra -Werror -O2 -c tools/gpu/emu/gpu_emu.c \
+gcc -std=c11 -Wall -Wextra -Werror -O2 -pthread -c tools/gpu/emu/gpu_emu.c \
     -o build/gpu-emu/gpu_emu.o
-gcc -std=c11 -Wall -Wextra -Werror -O2 tools/gpu/emu/gpu_emu.c \
+gcc -std=c11 -Wall -Wextra -Werror -O2 -pthread tools/gpu/emu/gpu_emu.c \
     tools/gpu/emu/cli.c -o build/gpu-emu/gpu-emu
 ~/.local/opt/zig-0.17.0/zig cc -target x86_64-windows-gnu \
     -std=c11 -Wall -Wextra -Werror -O2 tools/gpu/emu/gpu_emu.c \
@@ -66,3 +68,38 @@ path. Phase times are one additional C execution timed per command, including
 adapter overhead. All per-run timings and skip reasons are written to
 `build/gpu-emu/results.json`. `--gt-only` or `--selftest-only` selects one test
 suite; both also run stress. See `REPORT.md` for the measured result.
+
+Use `compare.py --threads 1` for the serial comparison/timing and `--threads 3`
+for the default threaded build. Every draw command joins before the next command;
+sections share only disjoint target rows, keep local counters/texture caches and
+preserve primitive order. Batches below 128 primitives stay serial because host
+thread creation costs more than these batches. OBJ_STEP remains serial to preserve
+DDR object/list aliasing and writeback order.
+
+Reproduce the gprof stress profile from the repository root:
+
+```sh
+python3 - <<'PY'
+import struct, sys
+sys.path[:0] = ['tools/gpu/emu', 'verif/block/gpu', '.']
+import compare
+from tools.gpu.scene import Scene
+original = Scene.__init__
+Scene.__init__ = lambda self, base=0: original(self, base)
+from stress import scene
+s = scene()
+writes = s.finish()
+compare.BUILD.mkdir(parents=True, exist_ok=True)
+(compare.BUILD/'stress.bin').write_bytes(s.memory.data)
+(compare.BUILD/'writes.bin').write_bytes(b''.join(
+    struct.pack('<II', compare.REGS[r], v) for r, v in writes))
+PY
+gcc -std=c11 -O2 -Wall -Wextra -Werror -pg -DGPU_EMU_THREADS=1 \
+    tools/gpu/emu/gpu_emu.c tools/gpu/emu/profile.c -o build/gpu-emu/profile
+GMON_OUT_PREFIX=build/gpu-emu/gmon build/gpu-emu/profile \
+    build/gpu-emu/stress.bin build/gpu-emu/writes.bin
+gprof build/gpu-emu/profile build/gpu-emu/gmon.* > build/gpu-emu/gprof.txt
+```
+
+The profile driver resets DDR and the emulator before each of 100 executions;
+wall-clock timings in `compare.py` exclude setup/allocation and profiling overhead.

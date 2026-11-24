@@ -1,4 +1,4 @@
-/* gpu_emu.c — gpu-spec 2–6: serial functional C reference implementation.
+/* gpu_emu.c — gpu-spec 2–6: functional C reference implementation.
  * Integer geometry, planes, textures, pixels, objects and DMA; no clock domain.
  */
 #include "gpu_emu.h"
@@ -7,6 +7,17 @@
 #include <setjmp.h>
 #include <stdio.h>
 #include "codec.h"
+
+#ifndef GPU_EMU_THREADS
+#define GPU_EMU_THREADS 3
+#endif
+#if GPU_EMU_THREADS > 1
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
+#endif
 
 typedef __int128 wide;
 #define R(e, n) ((e)->regs[EDRV32_GPU_##n##_OFFSET / 4])
@@ -19,6 +30,8 @@ struct gpu_emu {
     uint32_t regs[128];
     uint16_t *color, *depth;
     uint8_t *stencil;
+    struct rgba *texels;
+    int texel_base[16], texel_group, texel_dirty;
     uint8_t ram[RAM_BYTES];
     uint32_t command_index;
     uint32_t palettes[16][256];
@@ -92,30 +105,53 @@ static int logarithm(wide value)
     int mantissa = (int)(exp >= 8 ? value >> (exp-8) : value * ((wide)1<<(8-exp)));
     return (exp-16)*256 + log_rom[mantissa-256];
 }
+/* gpu-spec 2.13.8–11: normalized products have at most 36 magnitude bits;
+ * alignment uses 23 signed bits and Newton products at most 36. Only plane
+ * accumulators (70 signed bits, 2.13.7) still need the wide normal(). */
+static int64_t shift64(int64_t value, int bits)
+{
+    uint64_t mag = (value < 0 ? -(uint64_t)value : (uint64_t)value);
+    if (bits > 0) {
+        if (bits >= 64) return bits == 64 ? (int64_t)(mag >> 63)*(value < 0 ? -1 : 1) : 0;
+        mag = (mag + (UINT64_C(1) << (bits-1))) >> bits;
+    } else mag <<= -bits;
+    return value < 0 ? -(int64_t)mag : (int64_t)mag;
+}
+static inline struct number normal64(int64_t value, int exponent)
+{
+    if (!value) return (struct number){0,0};
+    uint64_t mag = (value < 0 ? -(uint64_t)value : (uint64_t)value);
+    int amount = 64-__builtin_clzll(mag)-18;
+    int64_t mantissa = shift64(value,amount);
+    if (llabs(mantissa) == (1<<18)) { mantissa = shift64(mantissa,1); ++amount; }
+    return (struct number){mantissa,exponent+amount};
+}
 static struct number normal(wide value, int exponent)
 {
-    if (!value) return (struct number){0, 0};
+    if (value >= INT64_MIN && value <= INT64_MAX)
+        return normal64((int64_t)value,exponent);
     int amount = bit_length(value)-18;
     wide mantissa = shift(value, amount);
     if (absw(mantissa) == (1<<18)) { mantissa = shift(mantissa, 1); ++amount; }
     return (struct number){(int64_t)mantissa, exponent+amount};
 }
 static struct number multiply(struct number a, struct number b)
-{ return normal((wide)a.m*b.m, a.e+b.e); }
+{ return normal64(a.m*b.m, a.e+b.e); }
 static struct number subtract(struct number a, struct number b)
 {
     if (!b.m) return a;
     if (!a.m) return (struct number){-b.m, b.e};
     int exp = imax(a.e, b.e)-3;
-    return normal(shift(a.m, exp-a.e)-shift(b.m, exp-b.e), exp);
+    return normal64(shift64(a.m, exp-a.e)-shift64(b.m, exp-b.e), exp);
 }
 static struct number inverse(struct number a)
 {
     int64_t index = (a.m-(1<<17)) >> 7;
-    wide seed = div_round((wide)1<<28, (1<<11)+2*index+1);
-    wide product = shift((wide)a.m*seed, 17);
-    wide result = shift(seed*((2<<17)-product), 17);
-    return normal(result, -34-a.e);
+    int64_t midpoint = (1<<11)+2*index+1;
+    int64_t seed = ((1<<28)+midpoint/2)/midpoint;
+    int64_t product = shift64(a.m*seed, 17);
+    int64_t result = shift64(seed*((2<<17)-product), 17);
+    return normal64(result, -34-a.e);
 }
 static void fail(struct gpu_emu *e, int code) { longjmp(e->fault, code); }
 static uint8_t *memory(struct gpu_emu *e, uint64_t addr, uint64_t bytes)
@@ -139,45 +175,95 @@ static int address(const struct gpu_emu *e, int x, int y)
 { return (y-e->target.tgt_y0)*e->width + x-e->target.tgt_x0; }
 static void stencil_op(struct gpu_emu *e, int i, int op)
 {
-    int old = e->stencil[i], ref = e->pixel.st_ref;
-    int values[] = {old, 0, ref, imin(255, old+1), imax(0, old-1), old^255};
+    if (!op || !e->pixel.st_wmask) return;
+    int old = e->stencil[i], value;
+    switch (op) {
+    case 1: value = 0; break;
+    case 2: value = e->pixel.st_ref; break;
+    case 3: value = imin(255,old+1); break;
+    case 4: value = imax(0,old-1); break;
+    default: value = old^255; break;
+    }
     int mask = e->pixel.st_wmask;
-    e->stencil[i] = (uint8_t)((old & (255^mask)) | (values[op] & mask));
+    e->stencil[i] = (uint8_t)((old & (255^mask)) | (value & mask));
 }
-static void pixel(struct gpu_emu *e, int x, int y, int depth, struct rgba rgba,
-                  int transparent)
+static int stencil_test(int func, int ref, int st)
+{
+    switch (func) {
+    case 0: return 0;
+    case 1: return ref < st;
+    case 2: return ref == st;
+    case 3: return ref <= st;
+    case 4: return ref > st;
+    case 5: return ref != st;
+    case 6: return ref >= st;
+    default: return 1;
+    }
+}
+static int factor(int mode, int src, int dst, int alpha, int constant)
+{
+    switch (mode) {
+    case 0: return 0;
+    case 1: return 255;
+    case 2: return alpha;
+    case 3: return 255-alpha;
+    case 4: return src;
+    case 5: return 255-src;
+    case 6: return dst;
+    case 7: return 255-dst;
+    case 8: return constant;
+    default: return 255-constant;
+    }
+}
+static void pixel_at(struct gpu_emu *e, int i, int depth, struct rgba rgba,
+                     int transparent)
 {
     if (transparent) return;
-    int i = address(e, x, y);
     struct cmd_set_pixel *s = &e->pixel;
-    int ref = s->st_ref & s->st_rmask, st = e->stencil[i] & s->st_rmask;
-    int tests[] = {0, ref<st, ref==st, ref<=st, ref>st, ref!=st, ref>=st, 1};
-    if (!tests[s->st_func]) { stencil_op(e, i, s->st_sfail); return; }
+    if (s->st_func != 7 && !stencil_test(s->st_func,s->st_ref & s->st_rmask,
+                                        e->stencil[i] & s->st_rmask)) {
+        stencil_op(e, i, s->st_sfail); return;
+    }
     if (!s->depth_func && depth > e->depth[i]) {
         stencil_op(e, i, s->st_zfail); return;
     }
     ++PERF(e, 4);
     stencil_op(e, i, s->st_zpass);
     if (s->depth_write) e->depth[i] = (uint16_t)depth;
-    if (s->color_write) {
-        struct rgba out = expand(e->color[i]);
-        for (int c = 0; c < 3; ++c) {
-            int src = rgba.c[c], dst = out.c[c], alpha = rgba.c[3];
-            int factors[] = {0, 255, alpha, 255-alpha, src, 255-src, dst, 255-dst,
-                             s->bl_const_a, 255-s->bl_const_a};
-            int a = d(src*factors[s->bl_fs]), b = d(dst*factors[s->bl_fd]);
-            int values[] = {a+b, a-b, b-a, imin(a,b), imax(a,b)};
-            out.c[c] = clamp(values[s->bl_op], 0, 255);
-        }
-        e->color[i] = p565(out);
+    if (!s->color_write) return;
+    if (s->bl_fs == 1 && !s->bl_fd && !s->bl_op) {
+        e->color[i] = p565(rgba);
+        return;
     }
+    struct rgba out = expand(e->color[i]);
+    for (int c = 0; c < 3; ++c) {
+        int src = rgba.c[c], dst = out.c[c], alpha = rgba.c[3];
+        int a = d(src*factor(s->bl_fs,src,dst,alpha,s->bl_const_a));
+        int b = d(dst*factor(s->bl_fd,src,dst,alpha,s->bl_const_a));
+        int value;
+        switch (s->bl_op) {
+        case 0: value = a+b; break;
+        case 1: value = a-b; break;
+        case 2: value = b-a; break;
+        case 3: value = imin(a,b); break;
+        default: value = imax(a,b); break;
+        }
+        out.c[c] = clamp(value,0,255);
+    }
+    e->color[i] = p565(out);
 }
-static struct rgba texel(struct gpu_emu *e, int64_t u, int64_t v, int level, int group)
+static void pixel(struct gpu_emu *e, int x, int y, int depth, struct rgba rgba,
+                  int transparent)
+{
+    pixel_at(e,address(e,x,y),depth,rgba,transparent);
+}
+static struct rgba raw_texel(struct gpu_emu *e, int64_t u, int64_t v, int level, int group)
 {
     int w = e->mip_width[level], h = e->mip_height[level];
     int x = (int)(u & (w-1)), y = (int)(v & (h-1));
-    int fmt = e->texture.format, bw = fmt < 2 ? 2 : 1, bh = fmt == 0 ? 2 : 1;
-    int bx = x/bw, by = y/bh, blocks_x = (w+bw-1)/bw;
+    int fmt = e->texture.format, bw = fmt < 2 ? 2 : 1;
+    int bx = x >> (fmt < 2), by = y >> (fmt == 0);
+    int blocks_x = (w+bw-1) >> (fmt < 2);
     int a = e->mip_offset[level] + 8*((by/2)*((blocks_x+1)/2)+bx/2)
           + 2*((bx&1)+2*(by&1));
     int word = e->ram[a] | (int)e->ram[a+1]<<8;
@@ -188,6 +274,27 @@ static struct rgba texel(struct gpu_emu *e, int64_t u, int64_t v, int level, int
     struct rgba result = expand(color & 65535);
     result.c[3] = ((color>>16)&15)*17;
     return result;
+}
+/* Decode tiled addressing and palette expansion once per texture/group change.
+ * gpu-spec 2.6: at most 256^2 + 128^2 + ... + 1 = 87381 texels. */
+static void prepare_texture(struct gpu_emu *e, int group)
+{
+    if (!e->texel_dirty && e->texel_group == group) return;
+    int base = 0;
+    for (int l = 0; l < e->texture.levels; ++l) {
+        e->texel_base[l] = base;
+        for (int y = 0; y < e->mip_height[l]; ++y)
+            for (int x = 0; x < e->mip_width[l]; ++x)
+                e->texels[base++] = raw_texel(e,x,y,l,group);
+    }
+    e->texel_group = group;
+    e->texel_dirty = 0;
+}
+static struct rgba texel(struct gpu_emu *e, int64_t u, int64_t v, int level, int group)
+{
+    (void)group;
+    int w = e->mip_width[level], h = e->mip_height[level];
+    return e->texels[e->texel_base[level]+(v & (h-1))*w+(u & (w-1))];
 }
 static struct rgba bilinear(struct gpu_emu *e, int64_t u, int64_t v, int l, int g)
 {
@@ -224,16 +331,43 @@ static void quad(struct gpu_emu *e, struct quad q)
     ++PERF(e,3);
     int x0, y0, x1, y1;
     bounds(e,&x0,&y0,&x1,&y1);
-    for (int y = imax(y0,q.y); y < imin(y1,q.y+q.h); ++y) {
+    x0 = imax(x0,q.x); x1 = imin(x1,q.x+q.w);
+    y0 = imax(y0,q.y); y1 = imin(y1,q.y+q.h);
+    if (x0 >= x1 || y0 >= y1) return;
+    prepare_texture(e,q.pal_group);
+    const struct cmd_set_pixel *state = &e->pixel;
+    /* gpu-spec 2.7's opaque, stencil-KEEP, depth-ALWAYS combination needs
+     * only the transparency discard, color store and passed-pixel counter. */
+    if (state->st_func == 7 && state->depth_func && !state->depth_write
+        && !state->st_zpass && state->color_write && state->bl_fs == 1
+        && !state->bl_fd && !state->bl_op) {
+        int w = e->mip_width[0], h = e->mip_height[0];
+        int du = q.flip_h ? -1 : 1;
+        int u0 = q.u0+(q.flip_h ? q.w-1-(x0-q.x) : x0-q.x);
+        uint32_t passed = 0;
+        for (int y = y0; y < y1; ++y) {
+            int v = q.v0+(q.flip_v ? q.h-1-(y-q.y) : y-q.y);
+            const struct rgba *row = e->texels+e->texel_base[0]+(v & (h-1))*w;
+            uint16_t *out = e->color+address(e,x0,y);
+            for (int x = x0, u = u0; x < x1; ++x, u += du, ++out) {
+                struct rgba rgba = row[u & (w-1)];
+                if (rgba.c[3]) { *out = p565(rgba); ++passed; }
+            }
+        }
+        PERF(e,4) += passed;
+        return;
+    }
+    for (int y = y0; y < y1; ++y) {
         int row = y-q.y;
         if (q.flip_v) row = q.h-1-row;
-        for (int x = imax(x0,q.x); x < imin(x1,q.x+q.w); ++x) {
+        int i = address(e,x0,y);
+        for (int x = x0; x < x1; ++x, ++i) {
             int col = x-q.x;
             if (q.flip_h) col = q.w-1-col;
             struct rgba rgba = sample(e,(q.u0+col)*256,(q.v0+row)*256,0,q.pal_group,1);
             int transparent = !rgba.c[3];
             rgba.c[3] = d(rgba.c[3]*q.alpha);
-            pixel(e,x,y,q.depth,rgba,transparent);
+            pixel_at(e,i,q.depth,rgba,transparent);
         }
     }
 }
@@ -284,6 +418,8 @@ static void triangle(struct gpu_emu *e, struct vec a, struct vec b, struct vec c
     y0 = imax(y0,(imin(a.c[1],imin(b.c[1],c.c[1]))+7)>>4);
     x1 = imin(x1,((imax(a.c[0],imax(b.c[0],c.c[0]))-8)>>4)+1);
     y1 = imin(y1,((imax(a.c[1],imax(b.c[1],c.c[1]))-8)>>4)+1);
+    if (x0 >= x1 || y0 >= y1) return;
+    prepare_texture(e,e->texture.pal_group);
     int inclusive[3];
     for (int i = 0; i < 3; ++i) {
         struct vec s = v[(i+1)%3], t = v[(i+2)%3];
@@ -291,27 +427,47 @@ static void triangle(struct gpu_emu *e, struct vec a, struct vec b, struct vec c
     }
     struct planes p;
     setup(&p,v,area);
+    /* s12.4 endpoints differ by < 2^17; edge products and increments fit
+     * signed 36 bits. Coverage stepping is exact in int64_t (spec 2.13.1). */
+    int64_t edge_row[3], edge_dx[3], edge_dy[3];
+    for (int i = 0; i < 3; ++i) {
+        struct vec s = v[(i+1)%3], t = v[(i+2)%3];
+        edge_row[i] = edge(s,t,16*x0+8,16*y0+8)-!inclusive[i];
+        edge_dx[i] = -16*(t.c[1]-s.c[1]);
+        edge_dy[i] = 16*(t.c[0]-s.c[0]);
+    }
+    int fixed[7], fixed_value[7];
+    for (int k = 0; k < 7; ++k) {
+        fixed[k] = !p.coeff[k][1] && !p.coeff[k][2];
+        fixed_value[k] = 0;
+        if (fixed[k] && (k == 0 || k >= 4))
+            fixed_value[k] = clamp(shift(p.coeff[k][0],-p.exp[k]),0,k ? 255 : 65535);
+    }
+    int only_uv = fixed[0] && fixed[1] && fixed[4] && fixed[5] && fixed[6];
+    struct number fixed_w = {0,0};
+    if (fixed[1]) fixed_w = inverse(normal(p.coeff[1][0],p.exp[1]));
     wide row[7];
     for (int k = 0; k < 7; ++k)
         row[k] = p.coeff[k][0]+(x0-p.x)*p.coeff[k][1]+(y0-p.y)*p.coeff[k][2];
     for (int y = y0; y < y1; ++y) {
         wide attrs[7]; memcpy(attrs,row,sizeof attrs);
+        int64_t weights[3]; memcpy(weights,edge_row,sizeof weights);
         for (int x = x0; x < x1; ++x) {
-            int covered = 1;
-            for (int i = 0; i < 3; ++i) {
-                int64_t weight = edge(v[(i+1)%3],v[(i+2)%3],16*x+8,16*y+8);
-                if (weight < 0 || (!weight && !inclusive[i])) covered = 0;
-            }
+            int covered = (weights[0] | weights[1] | weights[2]) >= 0;
+            for (int i = 0; i < 3; ++i) weights[i] += edge_dx[i];
             if (covered) {
-                int depth = clamp(shift(attrs[0],-p.exp[0]),0,65535);
-                struct number q = normal(attrs[1],p.exp[1]);
-                struct number w = inverse(q), uv[2];
+                int depth = fixed[0] ? fixed_value[0] : clamp(shift(attrs[0],-p.exp[0]),0,65535);
+                struct number w = fixed[1] ? fixed_w : inverse(normal(attrs[1],p.exp[1]));
+                struct number uv[2];
                 int64_t coords[2];
                 for (int k = 0; k < 2; ++k) {
                     uv[k] = multiply(normal(attrs[k+2],p.exp[k+2]),w);
-                    coords[k] = (int64_t)shift(uv[k].m,-uv[k].e-8);
+                    /* 2.13.12: coordinate outputs fit signed 32-bit Q8. */
+                    coords[k] = shift64(uv[k].m,-uv[k].e-8);
                 }
                 wide span = 0;
+                /* A single mip level makes LOD immaterial to all sampling modes. */
+                if (e->texture.levels > 1)
                 for (int axis = 0; axis < 2; ++axis) for (int k = 0; k < 2; ++k) {
                     struct number delta = subtract(p.grad[axis][k+1],
                                                    multiply(uv[k],p.grad[axis][0]));
@@ -323,12 +479,16 @@ static void triangle(struct gpu_emu *e, struct vec a, struct vec b, struct vec c
                                           e->texture.pal_group,0);
                 int transparent = !rgba.c[3];
                 for (int k = 0; k < 3; ++k)
-                    rgba.c[k] = d(rgba.c[k]*clamp(shift(attrs[k+4],-p.exp[k+4]),0,255));
+                    rgba.c[k] = d(rgba.c[k]*(fixed[k+4] ? fixed_value[k+4]
+                                          : clamp(shift(attrs[k+4],-p.exp[k+4]),0,255)));
                 pixel(e,x,y,depth,rgba,transparent);
             }
-            for (int k = 0; k < 7; ++k) attrs[k] += p.coeff[k][1];
+            if (only_uv) {
+                attrs[2] += p.coeff[2][1]; attrs[3] += p.coeff[3][1];
+            } else for (int k = 0; k < 7; ++k) attrs[k] += p.coeff[k][1];
         }
         for (int k = 0; k < 7; ++k) row[k] += p.coeff[k][2];
+        for (int i = 0; i < 3; ++i) edge_row[i] += edge_dy[i];
     }
 }
 
@@ -506,6 +666,91 @@ static void resolve(struct gpu_emu *e, struct cmd_resolve f)
         }
     }
 }
+/* A draw batch only reads DDR/texture state. Each horizontal section owns
+ * disjoint target rows and executes every primitive in the original order.
+ * Geometry/primitive PERF totals are identical in every section; pixels sum. */
+static void draw_batch(struct gpu_emu *e, uint32_t addr, int count, int triangles)
+{
+    for (int i = 0; i < count; ++i) {
+        if (triangles) draw_triangle(e,memory(e,addr+48*(uint64_t)i,48));
+        else quad(e,decode_quad(memory(e,addr+16*(uint64_t)i,16)));
+    }
+}
+#if GPU_EMU_THREADS > 1
+struct draw_job {
+    struct gpu_emu local;
+    uint32_t addr;
+    int count, triangles;
+#ifdef _WIN32
+    HANDLE thread;
+#else
+    pthread_t thread;
+#endif
+};
+#ifdef _WIN32
+static DWORD WINAPI draw_worker(void *arg)
+#else
+static void *draw_worker(void *arg)
+#endif
+{
+    struct draw_job *job = arg;
+    draw_batch(&job->local,job->addr,job->count,job->triangles);
+    return 0;
+}
+static void parallel_draw(struct gpu_emu *e, uint32_t addr, int count, int triangles)
+{
+    /* Small batches cost less than creating host threads and copying state. */
+    if (count < 128) { draw_batch(e,addr,count,triangles); return; }
+    struct draw_job *jobs = malloc(GPU_EMU_THREADS*sizeof *jobs);
+    if (!jobs) { fputs("GPU draw jobs allocation failed\n",stderr); abort(); }
+    int x0,y0,x1,y1;
+    bounds(e,&x0,&y0,&x1,&y1);
+    int rows = imax(0,y1-y0);
+    for (int i = 0; i < GPU_EMU_THREADS; ++i) {
+        struct draw_job *j = &jobs[i];
+        memcpy(&j->local,e,sizeof *e);
+        j->local.texels = malloc(87392*sizeof *e->texels);
+        if (!j->local.texels) { fputs("GPU texture allocation failed\n",stderr); abort(); }
+        j->local.texel_dirty = 1;
+        j->local.target.sc_y0 = y0+rows*i/GPU_EMU_THREADS;
+        j->local.target.sc_y1 = y0+rows*(i+1)/GPU_EMU_THREADS;
+        j->addr = addr; j->count = count; j->triangles = triangles;
+        if (i == GPU_EMU_THREADS-1) {
+            draw_worker(j);
+            continue;
+        }
+#ifdef _WIN32
+        j->thread = CreateThread(NULL,0,draw_worker,j,0,NULL);
+        if (!j->thread) { fputs("GPU CreateThread failed\n",stderr); abort(); }
+#else
+        int error = pthread_create(&j->thread,NULL,draw_worker,j);
+        if (error) { fprintf(stderr,"GPU pthread_create: %s\n",strerror(error)); abort(); }
+#endif
+    }
+    uint32_t pixels = 0;
+    for (int i = 0; i < GPU_EMU_THREADS; ++i) {
+        struct draw_job *j = &jobs[i];
+        if (i != GPU_EMU_THREADS-1) {
+#ifdef _WIN32
+            if (WaitForSingleObject(j->thread,INFINITE) != WAIT_OBJECT_0) {
+                fputs("GPU thread wait failed\n",stderr); abort();
+            }
+            if (!CloseHandle(j->thread)) { fputs("GPU CloseHandle failed\n",stderr); abort(); }
+#else
+            int error = pthread_join(j->thread,NULL);
+            if (error) { fprintf(stderr,"GPU pthread_join: %s\n",strerror(error)); abort(); }
+#endif
+        }
+        pixels += PERF(&j->local,4)-PERF(e,4);
+        free(j->local.texels);
+    }
+    for (int i = 1; i <= 3; ++i) PERF(e,i) = PERF(&jobs[0].local,i);
+    PERF(e,4) += pixels;
+    free(jobs);
+}
+#else
+#define parallel_draw draw_batch
+#endif
 static void command(struct gpu_emu *e, const uint8_t *data)
 {
     switch (data[0]) {
@@ -528,6 +773,7 @@ static void command(struct gpu_emu *e, const uint8_t *data)
         }
         if (offset > RAM_BYTES) fail(e,3);
         e->texture = t;
+        e->texel_dirty = 1;
         for (int i = 0; i < t.levels; ++i) {
             e->mip_offset[i] = offsets[i];
             e->mip_width[i] = widths[i]; e->mip_height[i] = heights[i];
@@ -549,23 +795,25 @@ static void command(struct gpu_emu *e, const uint8_t *data)
     }
     case 32: {
         struct cmd_draw_tri f = decode_cmd_draw_tri(data);
-        for (int i = 0; i < f.count; ++i) draw_triangle(e,memory(e,f.addr+48*(uint64_t)i,48));
+        parallel_draw(e,f.addr,f.count,1);
         break;
     }
     case 33: {
         struct cmd_draw_quad f = decode_cmd_draw_quad(data);
-        for (int i = 0; i < f.count; ++i) quad(e,decode_quad(memory(e,f.addr+16*(uint64_t)i,16)));
+        parallel_draw(e,f.addr,f.count,0);
         break;
     }
     case 34: objects(e,decode_cmd_obj_step(data)); break;
     case 48: {
         struct cmd_tex_load f = decode_cmd_tex_load(data);
         if (f.dst+f.bytes > RAM_BYTES) fail(e,4);
+        e->texel_dirty = 1;
         memcpy(e->ram+f.dst,memory(e,f.src,f.bytes),(size_t)f.bytes);
         break;
     }
     case 49: {
         struct cmd_pal_load f = decode_cmd_pal_load(data);
+        e->texel_dirty = 1;
         for (int i = 0; i < f.entries; ++i)
             e->palettes[f.group][i] = load32(memory(e,f.src+4*(uint64_t)i,4));
         break;
@@ -578,7 +826,9 @@ static void reset(struct gpu_emu *e)
 {
     uint8_t *ddr = e->ddr; uint32_t bytes = e->ddr_bytes;
     uint16_t *color = e->color, *depth = e->depth; uint8_t *stencil = e->stencil;
+    struct rgba *texels = e->texels;
     memset(e,0,sizeof *e); e->ddr = ddr; e->ddr_bytes = bytes;
+    e->texels = texels; e->texel_dirty = 1;
     e->color = color; e->depth = depth; e->stencil = stencil;
     memset(color,0,PIXELS*sizeof *color); memset(depth,0,PIXELS*sizeof *depth);
     memset(stencil,0,PIXELS);
@@ -593,13 +843,14 @@ struct gpu_emu *gpu_emu_create(uint8_t *ddr, uint32_t ddr_bytes)
     e->color = malloc(PIXELS*sizeof *e->color);
     e->depth = malloc(PIXELS*sizeof *e->depth);
     e->stencil = malloc(PIXELS);
-    if (!e->color || !e->depth || !e->stencil) { gpu_emu_destroy(e); return NULL; }
+    e->texels = malloc(87392*sizeof *e->texels);
+    if (!e->color || !e->depth || !e->stencil || !e->texels) { gpu_emu_destroy(e); return NULL; }
     e->ddr = ddr; e->ddr_bytes = ddr_bytes; reset(e);
     return e;
 }
 void gpu_emu_destroy(struct gpu_emu *e)
 {
-    if (e) { free(e->color); free(e->depth); free(e->stencil); free(e); }
+    if (e) { free(e->color); free(e->depth); free(e->stencil); free(e->texels); free(e); }
 }
 uint32_t gpu_emu_read(struct gpu_emu *e, uint32_t offset)
 {

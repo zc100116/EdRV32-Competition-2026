@@ -4,6 +4,7 @@
 #include "gpu_emu.c"
 void *test_buffer(struct gpu_emu *e, int kind)
 {
+    if (kind == 3 || kind == 4) e->texel_dirty = 1;
     switch (kind) {
     case 0: return e->color;
     case 1: return e->depth;
@@ -52,6 +53,7 @@ int test_op(struct gpu_emu *e, int op, uint8_t *data, int64_t *v)
 void test_sample(struct gpu_emu *e, int64_t u, int64_t v, int lod, int group,
                  int nearest, int64_t *out)
 {
+    prepare_texture(e,group);
     struct rgba a = sample(e,u,v,lod,group,nearest);
     for (int i = 0; i < 4; ++i) out[i] = a.c[i];
 }

@@ -29,9 +29,10 @@ for reg in SCHEMA['registers']:
                                                        + (i*dims[0]['stride'] if dims else 0))
 
 
-def build():
+def build(threads=3):
     BUILD.mkdir(parents=True, exist_ok=True)
-    flags = ['-std=c11', '-Wall', '-Wextra', '-Werror', '-O2']
+    flags = ['-std=c11', '-Wall', '-Wextra', '-Werror', '-O2',
+             f'-DGPU_EMU_THREADS={threads}', '-pthread']
     subprocess.run(['gcc', *flags, '-shared', '-fPIC', str(HERE/'test_bridge.c'),
                     '-o', str(BUILD/'libtest.so')], check=True)
     subprocess.run(['gcc', *flags, str(HERE/'gpu_emu.c'), str(HERE/'cli.c'),
@@ -378,8 +379,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--gt-only',action='store_true')
     parser.add_argument('--selftest-only',action='store_true')
+    parser.add_argument('--threads',type=int,default=3)
     args = parser.parse_args()
-    build()
+    build(args.threads)
     # Set the test allocator origin before importing scene builders or selftests.
     original_init = Scene.__init__
     def physical_init(self,base=0): original_init(self,base)
