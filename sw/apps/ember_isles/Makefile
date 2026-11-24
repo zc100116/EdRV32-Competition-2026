@@ -67,10 +67,11 @@ $(OUT)/ember_isles-spike.elf: $(SOURCES) $(APP)/src/spike.c $(GEN) $(HEADERS) \
 	    -Tsw/bsp/ld/ddr.ld $(SOURCES) $(APP)/src/spike.c \
 	    sw/drivers/gpu.c sw/bsp/start.S sw/bsp/host.c -lc -lgcc -o $@
 .PHONY: test
-test: $(OUT)/game-flow-test $(OUT)/sim-replay $(OUT)/audio-test
+test: $(OUT)/game-flow-test $(OUT)/sim-replay $(OUT)/audio-test $(OUT)/audio-ring-test
 	cd $(ROOT) && $(OUT)/game-flow-test
 	cd $(ROOT) && $(OUT)/sim-replay --test
 	cd $(ROOT) && $(OUT)/audio-test
+	cd $(ROOT) && $(OUT)/audio-ring-test
 $(OUT)/game-flow-test: $(APP)/tools/game_flow_test.c $(APP)/src/game.c \
     $(APP)/src/sim/sim.c $(APP)/src/core/core.c $(OUT)/generated/data.h $(HEADERS)
 	$(CC) $(CFLAGS) $(filter %.c,$^) -o $@
@@ -80,3 +81,7 @@ $(OUT)/sim-replay: $(APP)/tools/sim_replay.c $(APP)/src/sim/sim.c \
 $(OUT)/audio-test: $(APP)/src/audio/tests/audio_test.c $(APP)/src/audio/audio.c \
     $(OUT)/generated/music.h $(HEADERS)
 	$(CC) $(CFLAGS) -I$(APP)/src/audio $(filter %.c,$^) -o $@
+$(OUT)/audio-ring-test: $(SOURCES) $(APP)/src/game.c $(APP)/tools/audio_ring_test.c \
+    $(GEN) $(HEADERS) $(addprefix $(ROOT)/,$(DRIVERS) $(PC))
+	$(CC) $(PCFLAGS) $(SOURCES) $(APP)/src/game.c $(APP)/tools/audio_ring_test.c \
+	    $(addprefix $(ROOT)/,$(DRIVERS) $(PC)) -o $@

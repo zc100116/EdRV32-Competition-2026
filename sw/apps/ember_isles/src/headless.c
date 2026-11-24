@@ -8,6 +8,7 @@
 #include "pc_soc.h"
 #include "png.h"
 #include "plat.h"
+#include "aud.h"
 #include "mmio.h"
 #include "regs/gpu_regs.h"
 #include <stdio.h>
@@ -84,6 +85,7 @@ int main(int argc, char **argv)
         }
     }
     printf("END,%u,%u,%u\n", limit, ember_game_state()->phase, ember_game_state()->wave);
+    printf("AUDIO,underruns=%u\n", (unsigned)aud_underruns());
     pc_soc_destroy();
     return 0;
 }

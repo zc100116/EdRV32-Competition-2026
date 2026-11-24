@@ -34,3 +34,8 @@ assert pc_end == spike_end, 'PC/Spike final state mismatch'
 assert pc_end.split(',')[2:] == ['3', '5'], 'Replay did not clear wave five'
 print(pc_end)
 print(spike_end)
+
+print(next(line for line in pc if line.startswith('AUDIO,')))
+perf = [list(map(int, line.split(',')[2:])) for line in pc
+        if line.startswith('PERF,') and not line.startswith('PERF,frame')]
+print('GPU PERF maxima: ' + ','.join(str(max(row[i] for row in perf)) for i in range(9)))

@@ -10,6 +10,7 @@
 #include "plat.h"
 #include "aud.h"
 #include <stdlib.h>
+#include <stdatomic.h>
 static struct ember_sim simulation;
 static struct aud_ring audio_ring;
 static uint32_t samples[1024];
@@ -20,13 +21,41 @@ static uint8_t previous_keys;
 static unsigned replay_mode;
 static uint32_t run_number;
 static struct ember_replay recording;
-static void refill(void)
+/* The main loop publishes at most 256 events per frame. LOW refills every
+ * 1024 samples; queue capacity covers the frames between LOW refills.
+ * Only the refill service owns synthesizer state after startup. */
+static uint8_t audio_events[1024];
+static _Atomic unsigned audio_head, audio_tail;
+static void queue_audio(unsigned event)
 {
-    unsigned count = aud_space(&audio_ring) / 4u;
+    unsigned head = atomic_load_explicit(&audio_head, memory_order_relaxed);
+    audio_events[head % 1024] = (uint8_t)event;
+    atomic_store_explicit(&audio_head, head + 1, memory_order_release);
+}
+static void refill(struct aud_ring *ring, const struct aud_event *event, void *context)
+{
+    (void)event;
+    (void)context;
+    unsigned tail = atomic_load_explicit(&audio_tail, memory_order_relaxed);
+    unsigned head = atomic_load_explicit(&audio_head, memory_order_acquire);
+    while (tail != head) {
+        unsigned command = audio_events[tail % 1024];
+        if (command == 10) ember_audio_reset();
+        else ember_audio_event(command);
+        ++tail;
+    }
+    atomic_store_explicit(&audio_tail, tail, memory_order_release);
+    unsigned count = aud_space(ring) / 4u;
     if (count > 1024) count = 1024;
     count &= ~7u;
     ember_audio_mix(samples, count);
-    aud_write(&audio_ring, samples, count);
+    aud_write(ring, samples, count);
+}
+static void audio_irq(void *context)
+{
+    (void)context;
+    struct aud_event event = aud_irq_handle(&audio_ring);
+    if (event.error) { plat_printf("AUD error %u\n", (unsigned)event.error); abort(); }
 }
 void ember_game_init(void)
 {
@@ -35,8 +64,10 @@ void ember_game_init(void)
     ember_audio_reset();
     ember_gfx_init();
     aud_init(&audio_ring, plat_dma_alloc(16384, 512), 16384, 4096);
-    refill();
-    refill();
+    refill(&audio_ring, NULL, NULL);
+    refill(&audio_ring, NULL, NULL);
+    plat_irq_register(EDRV32_PLIC_SOURCE_AUD, audio_irq, NULL);
+    aud_irq_register(1, refill, NULL);
     aud_enable(1);
     previous_millis = plat_millis();
 }
@@ -63,7 +94,7 @@ void ember_game_frame(unsigned frame)
             recording.seed = 20261124u + ++run_number + plat_millis();
             recording.count = 0;
             ember_sim_init(&simulation, recording.seed);
-            ember_audio_reset();
+            queue_audio(10);
         }
     }
     if (!replay_mode && !returned_to_menu && simulation.phase != EMBER_WON &&
@@ -78,7 +109,7 @@ void ember_game_frame(unsigned frame)
     ember_sim_step(&simulation, keys);
     for (unsigned i = 0; i < simulation.events.count; ++i) {
         unsigned kind = simulation.events.item[i].kind;
-        if (kind < 10) ember_audio_event(kind);
+        queue_audio(kind);
     }
     uint32_t now = plat_millis();
     ++fps_frames;
@@ -89,7 +120,4 @@ void ember_game_frame(unsigned frame)
     }
     ember_gfx_prepare(&simulation, measured_fps, &ui);
     ember_gfx_submit(frame);
-    refill();
-    struct aud_event audio = aud_status();
-    if (audio.error) { plat_printf("AUD error %u\n", (unsigned)audio.error); abort(); }
 }

@@ -114,7 +114,7 @@ int main(void)
         uint32_t after_gfx = instret();
         for (unsigned j = 0; j < simulation.events.count; ++j) {
             unsigned kind = simulation.events.item[j].kind;
-            if (kind < 10) ember_audio_event(kind);
+            ember_audio_event(kind);
         }
         ember_audio_mix(samples, 800);
         uint32_t after_audio = instret();

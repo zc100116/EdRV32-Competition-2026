@@ -6,6 +6,7 @@
 #include "game.h"
 #include "ui/ui.h"
 #include "aud.h"
+#include "plat.h"
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -46,6 +47,19 @@ uint32_t aud_space(const struct aud_ring *ring) { (void)ring; return 0; }
 void aud_write(struct aud_ring *ring, const uint32_t *samples, uint32_t frames)
 {
     (void)ring; (void)samples; (void)frames;
+}
+void plat_irq_register(unsigned source, plat_irq_handler handler, void *context)
+{
+    (void)source; (void)handler; (void)context;
+}
+void aud_irq_register(unsigned priority, aud_refill refill, void *context)
+{
+    (void)priority; (void)refill; (void)context;
+}
+struct aud_event aud_irq_handle(struct aud_ring *ring)
+{
+    (void)ring;
+    return (struct aud_event){0};
 }
 void aud_enable(unsigned enable) { (void)enable; }
 struct aud_event aud_status(void) { return (struct aud_event){0}; }
