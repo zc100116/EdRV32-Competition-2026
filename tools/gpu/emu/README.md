@@ -124,10 +124,7 @@ GPU IDs are 16 + opcode (32 CLEAR, 48 DRAW_TRI, 49 DRAW_QUAD, 50 OBJ_STEP,
 64 TEX_LOAD, 65 PAL_LOAD, 80 RESOLVE, 17–21 state setup). The Linux headless
 frontend has no display-device or GDI calls, and its platform wait is immediate.
 Indexed texture caches retain indices across per-quad palette-group changes;
-quad index caches use one byte per texel (64 KiB for a 256x256 atlas), while
-triangle caches retain expanded RGBA for filtering. Opaque indexed quad pixels
-retain their palette's RGB565 value directly. Alpha blending still rounds
-source and destination products separately.
+alpha blending still rounds source and destination products separately.
 Use `--revision <commit>` for the same instrumentation on historical C sources;
 its output directory is `build/ember-perf/profile-<commit>/`.
 
