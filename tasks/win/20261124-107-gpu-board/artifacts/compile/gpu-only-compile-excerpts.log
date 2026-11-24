@@ -1,0 +1,58 @@
+Source: G:/codex_project/edrv32-card107/build/card107-pds-check/compile-crash/gpu-only/console.log
+Original line numbers follow.
+
+159: Start rtl-analyze.
+857: Executing : rtl-analyze successfully. Time elapsed: 1.343s wall, 0.031s user + 0.000s system = 0.031s CPU (2.3%)
+859: Start rtl-elaborate.
+2367: Executing : rtl-elaborate successfully. Time elapsed: 0.433s wall, 0.172s user + 0.000s system = 0.172s CPU (39.7%)
+2369: Start rtl-prep.
+2377: Executing : rtl-prep successfully. Time elapsed: 1.064s wall, 0.406s user + 0.000s system = 0.406s CPU (38.2%)
+2379: Start rtl-infer.
+2408: Start DFF-inference.
+2480: Executing : DFF-inference successfully.
+6290: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_texture.v(line number: 939)] Found Ram quad_r, depth=32, width=1.
+6291: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_read_dma.v(line number: 288)] Found Ram owner_r, depth=4, width=3.
+6292: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_read_dma.v(line number: 288)] Found Ram length_r, depth=4, width=5.
+6293: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_read_dma.v(line number: 288)] Found Ram length_r, depth=4, width=5.
+6294: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_read_dma.v(line number: 288)] Found Ram head_keep_r, depth=4, width=32.
+6295: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_read_dma.v(line number: 288)] Found Ram tail_keep_r, depth=4, width=32.
+6296: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_read_dma.v(line number: 288)] Found Ram logical_last_r, depth=4, width=1.
+6297: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_write_dma.v(line number: 231)] Found Ram strobe_r, depth=32, width=32.
+6298: Development error at line 2983 in G:\wf\2022.2\output_files\oem\FAB_Develop\branches\pds_2022.2\source\sw\ads\sdm\InferWriteMode.cpp
+6299:
+6300: pds_shell crashes.
+6301:
+6302: call stack dump:
+6303: 00000001404ef374
+6304: 00000001404ef9bf
+6305: 00000001404ef8eb
+6306: 000000014140b6df
+6307: 0000000141408b30
+6308: 0000000141408135
+6309: 000000014140f79a
+6310: 00000001406a405b
+6311: 00000001406ca590
+6312: 000000014014b9d2
+6313: 000000014014f13f
+6314: 000000014014ece9
+6315: 00007fff20d95664
+6316: 00007fff20d93dc3
+6317: 00007fff20d6c477
+6318: 00007fff20d6c539
+6319: 00007fff20d6e26e
+6320: 00007fff20db7690
+6321: 00007fff20d684fb
+6322: 00007fff20d6b4ab
+6323: 00000001401517f6
+6324: 00000001411dca7c
+6325: 00007ff84d0a259d
+6326: 00007ff84e40af78
+6327: 00000001401516f0
+6328:
+6329: Action compile: Real time elapsed is 0h:6m:45s
+6330: Action compile: CPU time elapsed is 0h:1m:24s
+6331: Action compile: Process CPU time elapsed is 0h:1m:24s
+6332: Current time: Tue Nov 24 13:41:22 2026
+6333: Action compile: Peak memory pool usage is 829 MB
+6334: E: Flow-0189: Internal error occurred.
+6335: E: Failed to execute the script :

@@ -1,0 +1,53 @@
+Source: G:/codex_project/EdRV32-FPGA/board_gpu/pds.log
+Original line numbers follow.
+
+35: I: Flow-6003: IP "ip_ram_gpu_texture_segment.idf" regenerate successfully.
+63: I: Flow-6003: IP "ip_ram_aud_fifo.idf" regenerate successfully.
+85: I: Flow-6003: IP "ip_pll_aud.idf" regenerate successfully.
+111: I: Flow-6003: IP "ip_lutram_gpu_palette_current.idf" regenerate successfully.
+139: I: Flow-6003: IP "ip_ram_gpu_palette_segment.idf" regenerate successfully.
+167: I: Flow-6003: IP "ip_ram_gpu_target_tail.idf" regenerate successfully.
+193: I: Flow-6003: IP "ip_lutram_gpu_read_pool.idf" regenerate successfully.
+221: I: Flow-6003: IP "ip_ram_gpu_target_segment.idf" regenerate successfully.
+243: I: Flow-6003: IP "ip_pll_gpu.idf" regenerate successfully.
+271: I: Flow-6003: IP "ip_ram_gpu_resolve_line.idf" regenerate successfully.
+301: I: Flow-6003: IP "ip_rom_gpu_recip_p18.idf" regenerate successfully.
+327: I: Flow-6003: IP "ip_lutram_gpu_write_pool.idf" regenerate successfully.
+357: I: Flow-6003: IP "ip_rom_gpu_recip_q30.idf" regenerate successfully.
+372: E: Verilog-4119: [G:/codex_project/edrv32-card107/rtl/tech/edrv32_ram_gpu_texture_segment.v(line number: 22)] Referenced port name 'clk_a' was not defined in module 'ip_ram_gpu_texture_segment'
+379: Process "Compile" started.
+15412: pds_shell crashes.
+15413:
+15414: call stack dump:
+15415: 00000001404ef374
+15416: 00000001404ef9bf
+15417: 00000001404ef8eb
+15418: 000000014140b6df
+15419: 0000000141408b30
+15420: 0000000141408135
+15421: 000000014140f79a
+15422: 00000001406a405b
+15423: 00000001406ca590
+15424: 000000014014b9d2
+15425: 000000014014f13f
+15426: 000000014014ece9
+15427: 00007fff20d95664
+15428: 00007fff20d93dc3
+15429: 00007fff20d6c477
+15430: 00007fff20d6c539
+15431: 00007fff20d6e26e
+15432: 00007fff20db7690
+15433: 00007fff20d684fb
+15434: 00007fff20d6b4ab
+15435: 00000001401517f6
+15436: 00000001411dca7c
+15437: 00007ff84d0a259d
+15438: 00007ff84e40af78
+15439: 00000001401516f0
+15440:
+15441: Action compile: Real time elapsed is 0h:10m:51s
+15442: Action compile: CPU time elapsed is 0h:1m:51s
+15443: Action compile: Process CPU time elapsed is 0h:1m:51s
+15444: Current time: Tue Nov 24 13:32:43 2026
+15445: Action compile: Peak memory pool usage is 960 MB
+15446: E: Flow-0189: Internal error occurred.

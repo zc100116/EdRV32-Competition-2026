@@ -1,0 +1,64 @@
+Source: G:/codex_project/edrv32-card107/build/card107-pds-check/compile-crash/strobe-only/console.log
+Original line numbers follow.
+
+23: Start rtl-analyze.
+30: Executing : rtl-analyze successfully. Time elapsed: 1.259s wall, 0.000s user + 0.000s system = 0.000s CPU (n/a%)
+32: Start rtl-elaborate.
+34: Executing : rtl-elaborate successfully. Time elapsed: 0.000s wall, 0.000s user + 0.000s system = 0.000s CPU (n/a%)
+36: Start rtl-prep.
+37: Executing : rtl-prep successfully. Time elapsed: 0.000s wall, 0.000s user + 0.000s system = 0.000s CPU (n/a%)
+39: Start rtl-infer.
+40: Start DFF-inference.
+41: Executing : DFF-inference successfully.
+42: I: Sdm-0001: [G:/codex_project/edrv32-card107/build/card107-pds-check/compile-crash/strobe-only/strobe_probe.v(line number: 11)] Found Ram strobe_r, depth=32, width=32.
+43: Executing : rtl-infer successfully. Time elapsed: 0.005s wall, 0.016s user + 0.000s system = 0.016s CPU (321.2%)
+45: Start rtl-control-opt.
+48: Start rtl-data-opt.
+58: Action compile: Real time elapsed is 0h:0m:3s
+59: Action compile: CPU time elapsed is 0h:0m:0s
+60: Action compile: Process CPU time elapsed is 0h:0m:0s
+62: Action compile: Peak memory pool usage is 132 MB
+66: Process "Compile" done.
+
+Source: G:/codex_project/edrv32-card107/build/card107-pds-check/compile-crash/write-dma/console.log
+Original line numbers follow.
+
+29: Start rtl-analyze.
+53: Executing : rtl-analyze successfully. Time elapsed: 1.307s wall, 0.000s user + 0.000s system = 0.000s CPU (n/a%)
+55: Start rtl-elaborate.
+71: Executing : rtl-elaborate successfully. Time elapsed: 0.005s wall, 0.000s user + 0.000s system = 0.000s CPU (n/a%)
+73: Start rtl-prep.
+74: Executing : rtl-prep successfully. Time elapsed: 0.006s wall, 0.000s user + 0.000s system = 0.000s CPU (n/a%)
+76: Start rtl-infer.
+78: Start DFF-inference.
+79: Executing : DFF-inference successfully.
+80: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_write_dma.v(line number: 231)] Found Ram strobe_r, depth=32, width=32.
+82: Executing : rtl-infer successfully. Time elapsed: 0.666s wall, 0.156s user + 0.047s system = 0.203s CPU (30.5%)
+84: Start rtl-control-opt.
+87: Start rtl-data-opt.
+118: Action compile: Real time elapsed is 0h:0m:5s
+119: Action compile: CPU time elapsed is 0h:0m:0s
+120: Action compile: Process CPU time elapsed is 0h:0m:0s
+122: Action compile: Peak memory pool usage is 140 MB
+126: Process "Compile" done.
+
+Source: G:/codex_project/edrv32-card107/build/card107-pds-check/compile-crash/texture-memory/console.log
+Original line numbers follow.
+
+23: Start rtl-analyze.
+30: Executing : rtl-analyze successfully. Time elapsed: 1.313s wall, 0.000s user + 0.031s system = 0.031s CPU (2.4%)
+32: Start rtl-elaborate.
+34: Executing : rtl-elaborate successfully. Time elapsed: 0.000s wall, 0.000s user + 0.000s system = 0.000s CPU (n/a%)
+36: Start rtl-prep.
+37: Executing : rtl-prep successfully. Time elapsed: 0.001s wall, 0.000s user + 0.000s system = 0.000s CPU (n/a%)
+39: Start rtl-infer.
+41: Start DFF-inference.
+74: Executing : DFF-inference successfully.
+83: Executing : rtl-infer successfully. Time elapsed: 0.191s wall, 0.047s user + 0.062s system = 0.109s CPU (57.1%)
+85: Start rtl-control-opt.
+88: Start rtl-data-opt.
+108: Action compile: Real time elapsed is 0h:0m:3s
+109: Action compile: CPU time elapsed is 0h:0m:0s
+110: Action compile: Process CPU time elapsed is 0h:0m:0s
+112: Action compile: Peak memory pool usage is 134 MB
+116: Process "Compile" done.

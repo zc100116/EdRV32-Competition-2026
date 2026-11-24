@@ -1,0 +1,12 @@
+PDS 2022.2-SP6.1 build 138931, PG2L200H-6 FBB676
+Generated IDF configuration, not measured on board.
+
+CLKIN1 = 27.00000000 MHz; internal feedback = CLKOUTF.
+Formula: VCO = CLKIN1 / IDIV * MDIV * FDIV; CLKOUT0 = VCO / ODIV0.
+clk_gpu: requested 180.00000000 MHz; configured 180.00000000 MHz;
+         VCO 1147.50000000 MHz; IDIV 1, MDIV 2, FDIV 21.25, ODIV0 6.375; 0.00 ppm.
+clk_aud: requested 12.28800000 MHz; configured 12.28798343 MHz;
+         VCO 1112.06250000 MHz; IDIV 2, MDIV 1, FDIV 82.375, ODIV0 90.5; -1.35 ppm.
+
+Source: board_gpu/ipcore/ip_pll_{gpu,aud}/ip_pll_{gpu,aud}.idf.
+The audio FDC still describes the nominal 12.288 MHz target. No frequency measurement available.

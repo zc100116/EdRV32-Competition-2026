@@ -1,0 +1,35 @@
+Source: G:/codex_project/EdRV32-FPGA/board_gpu/compile/run.log
+Original line numbers follow.
+
+1: #Build: Fabric Compiler 2022.2-SP6.1, Build 138931, Nov 01 09:11 2023
+2: #Install: G:\Program\pango\PDS_2022.2-SP6.1\bin
+3: #Application name: pds_shell.exe
+4: #OS: Windows 10 10.0.22631
+13: Start rtl-analyze.
+2545: Executing : rtl-analyze successfully. Time elapsed: 2.375s wall, 0.047s user + 0.000s system = 0.047s CPU (2.0%)
+2547: Start rtl-elaborate.
+10913: Executing : rtl-elaborate successfully. Time elapsed: 1.581s wall, 0.156s user + 0.016s system = 0.172s CPU (10.9%)
+10915: Start rtl-prep.
+10945: Executing : rtl-prep successfully. Time elapsed: 2.455s wall, 0.266s user + 0.000s system = 0.266s CPU (10.8%)
+10947: Start rtl-infer.
+10978: Start DFF-inference.
+11157: Executing : DFF-inference successfully.
+15021: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_texture.v(line number: 939)] Found Ram result_color_r, depth=32, width=24.
+15022: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_texture.v(line number: 939)] Found Ram result_color_r, depth=32, width=24.
+15023: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_texture.v(line number: 939)] Found Ram result_alpha_r, depth=32, width=8.
+15024: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_texture.v(line number: 939)] Found Ram result_alpha_r, depth=32, width=8.
+15025: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_texture.v(line number: 939)] Found Ram result_alpha_r, depth=32, width=8.
+15026: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_texture.v(line number: 939)] Found Ram quad_r, depth=32, width=1.
+15027: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_read_dma.v(line number: 288)] Found Ram owner_r, depth=4, width=3.
+15028: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_read_dma.v(line number: 288)] Found Ram length_r, depth=4, width=5.
+15029: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_read_dma.v(line number: 288)] Found Ram length_r, depth=4, width=5.
+15030: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_read_dma.v(line number: 288)] Found Ram head_keep_r, depth=4, width=32.
+15031: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_read_dma.v(line number: 288)] Found Ram tail_keep_r, depth=4, width=32.
+15032: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_read_dma.v(line number: 288)] Found Ram logical_last_r, depth=4, width=1.
+15033: I: Sdm-0001: [G:/codex_project/edrv32-card107/rtl/gpu/edrv32_gpu_write_dma.v(line number: 231)] Found Ram strobe_r, depth=32, width=32.
+15034: Development error at line 2983 in G:\wf\2022.2\output_files\oem\FAB_Develop\branches\pds_2022.2\source\sw\ads\sdm\InferWriteMode.cpp
+15035: Action compile: Real time elapsed is 0h:10m:51s
+15036: Action compile: CPU time elapsed is 0h:1m:51s
+15037: Action compile: Process CPU time elapsed is 0h:1m:51s
+15038: Current time: Tue Nov 24 13:32:43 2026
+15039: Action compile: Peak memory pool usage is 960 MB
