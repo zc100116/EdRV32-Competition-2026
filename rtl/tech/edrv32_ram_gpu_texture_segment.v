@@ -20,22 +20,22 @@ module edrv32_ram_gpu_texture_segment (
 );
 `ifdef EDRV32_FPGA_MEMORY_MODE
     ip_ram_gpu_texture_segment u_ip (
-        .clk_a(clk_i),
-        .rst_a(1'b0),
-        .clk_en_a(wr_en_i | rd_a_en_i),
-        .wr_en_a(wr_en_i),
-        .addr_a(wr_en_i ? wr_addr_i : rd_a_addr_i),
-        .wr_data_a(wr_data_i),
-        .byte_en_a(wr_keep_i),
-        .rd_data_a(rd_a_data_o),
-        .clk_b(clk_i),
-        .rst_b(1'b0),
-        .clk_en_b(rd_b_en_i),
-        .wr_en_b(1'b0),
-        .addr_b(rd_b_addr_i),
-        .wr_data_b(16'b0),
-        .byte_en_b(2'b0),
-        .rd_data_b(rd_b_data_o)
+        .a_clk(clk_i),
+        .a_rst(1'b0),
+        .a_clk_en(wr_en_i | rd_a_en_i),
+        .a_wr_en(wr_en_i),
+        .a_addr(wr_en_i ? wr_addr_i : rd_a_addr_i),
+        .a_wr_data(wr_data_i),
+        .a_wr_byte_en(wr_keep_i),
+        .a_rd_data(rd_a_data_o),
+        .b_clk(clk_i),
+        .b_rst(1'b0),
+        .b_clk_en(rd_b_en_i),
+        .b_wr_en(1'b0),
+        .b_addr(rd_b_addr_i),
+        .b_wr_data(16'b0),
+        .b_wr_byte_en(2'b0),
+        .b_rd_data(rd_b_data_o)
     );
 `else
     reg [15:0] memory_r [0:2047];
