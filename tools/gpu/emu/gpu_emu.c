@@ -38,7 +38,7 @@ struct gpu_emu {
     uint16_t *color, *depth;
     uint8_t *stencil;
     struct rgba *texels;
-    int texel_base[16], texel_group, texel_dirty;
+    int texel_base[16], texel_group, texel_dirty, palette_dirty;
     uint8_t ram[RAM_BYTES];
     uint32_t command_index;
     uint32_t palettes[16][256];
@@ -292,19 +292,23 @@ static struct rgba raw_texel(struct gpu_emu *e, int64_t u, int64_t v, int level,
     result.c[3] = ((color>>16)&15)*17;
     return result;
 }
-/* Quads cache indices across palette groups; triangles cache expanded RGBA
- * for their fixed group so bilinear sampling does not perform palette lookups.
+/* Nearest quads/triangles share indices across palette groups. Filtered
+ * triangles cache expanded RGBA so filtering does not perform palette lookups.
  * gpu-spec 2.6: at most 256^2 + 128^2 + ... + 1 = 87381 texels. */
 static void prepare_texture(struct gpu_emu *e, int group)
 {
-    if (!e->texel_dirty && e->texel_group == group) return;
-    for (int g = 0; g < 16; ++g) for (int i = 0; i < 256; ++i) {
-        uint32_t color = e->palettes[g][i];
-        e->palette_texels[g][i] = expand(color & 65535);
-        int alpha = ((color >> 16) & 15) * 17;
-        e->palette_texels[g][i].c[3] = alpha;
-        e->palette_quads[g][i] = (color & 65535) | (uint32_t)alpha << 16;
+    /* PAL_LOAD invalidates palette expansion independently of texture layout. */
+    if (e->palette_dirty) {
+        for (int g = 0; g < 16; ++g) for (int i = 0; i < 256; ++i) {
+            uint32_t color = e->palettes[g][i];
+            int alpha = ((color >> 16) & 15) * 17;
+            e->palette_texels[g][i] = expand(color & 65535);
+            e->palette_texels[g][i].c[3] = alpha;
+            e->palette_quads[g][i] = (color & 65535) | (uint32_t)alpha << 16;
+        }
+        e->palette_dirty = 0;
     }
+    if (!e->texel_dirty && e->texel_group == group) return;
     int base = 0;
     for (int l = 0; l < e->texture.levels; ++l) {
         e->texel_base[l] = base;
@@ -350,10 +354,11 @@ static struct rgba sample(struct gpu_emu *e, int64_t u, int64_t v, int lod,
     if (nearest) return cached_texel(e,texel(e,u>>8,v>>8,0,group),group);
     struct cmd_set_tex *t = &e->texture;
     if (t->levels == 1)
-        return t->sample ? bilinear(e,u,v,0,group) : texel(e,u>>8,v>>8,0,group);
+        return t->sample ? bilinear(e,u,v,0,group)
+                         : cached_texel(e,texel(e,u>>8,v>>8,0,group),group);
     lod = clamp(lod+t->lod_bias*16, 0, (t->levels-1)*256);
     int l = lod>>8;
-    if (!t->sample) return texel(e,u>>(8+l),v>>(8+l),l,group);
+    if (!t->sample) return cached_texel(e,texel(e,u>>(8+l),v>>(8+l),l,group),group);
     struct rgba a = bilinear(e,u,v,l,group);
     if (t->sample == 1 || l == t->levels-1) return a;
     struct rgba b = bilinear(e,u,v,l+1,group);
@@ -484,7 +489,7 @@ static void triangle(struct gpu_emu *e, struct vec a, struct vec b, struct vec c
     x1 = imin(x1,((imax(a.c[0],imax(b.c[0],c.c[0]))-8)>>4)+1);
     y1 = imin(y1,((imax(a.c[1],imax(b.c[1],c.c[1]))-8)>>4)+1);
     if (x0 >= x1 || y0 >= y1) return;
-    prepare_texture(e,e->texture.pal_group);
+    prepare_texture(e,e->texture.sample ? e->texture.pal_group : -1);
     int inclusive[3];
     for (int i = 0; i < 3; ++i) {
         struct vec s = v[(i+1)%3], t = v[(i+2)%3];
@@ -825,8 +830,6 @@ static void create_jobs(struct gpu_emu *e)
     if (!e->jobs) { fputs("GPU draw jobs allocation failed\n",stderr); abort(); }
     for (int i = 0; i < GPU_EMU_THREADS; ++i) {
         struct draw_job *j = &e->jobs[i];
-        j->local.texels = malloc(87392*sizeof *e->texels);
-        if (!j->local.texels) { fputs("GPU texture allocation failed\n",stderr); abort(); }
         if (i == GPU_EMU_THREADS-1) continue;
         signal_init(&j->start);
         signal_init(&j->done);
@@ -859,7 +862,6 @@ static void destroy_jobs(struct gpu_emu *e)
             signal_destroy(&j->start);
             signal_destroy(&j->done);
         }
-        free(j->local.texels);
     }
     free(e->jobs);
 }
@@ -871,15 +873,15 @@ static void parallel_draw(struct gpu_emu *e, uint32_t addr, int count, int trian
         return;
     }
     if (!e->jobs) create_jobs(e);
+    /* Every section reads the same descriptor and palette. Decode once before
+     * publishing jobs; the next command cannot change the cache until joins. */
+    prepare_texture(e,triangles && e->texture.sample ? e->texture.pal_group : -1);
     int x0,y0,x1,y1;
     bounds(e,&x0,&y0,&x1,&y1);
     int rows = imax(0,y1-y0);
     for (int i = 0; i < GPU_EMU_THREADS; ++i) {
         struct draw_job *j = &e->jobs[i];
-        struct rgba *texels = j->local.texels;
         memcpy(&j->local,e,sizeof *e);
-        j->local.texels = texels;
-        j->local.texel_dirty = 1;
         j->local.target.sc_y0 = y0+rows*i/GPU_EMU_THREADS;
         j->local.target.sc_y1 = y0+rows*(i+1)/GPU_EMU_THREADS;
         j->addr = addr; j->count = count; j->triangles = triangles;
@@ -964,6 +966,7 @@ static void command(struct gpu_emu *e, const uint8_t *data)
     case 49: {
         struct cmd_pal_load f = decode_cmd_pal_load(data);
         e->texel_dirty = 1;
+        e->palette_dirty = 1;
         for (int i = 0; i < f.entries; ++i)
             e->palettes[f.group][i] = load32(memory(e,f.src+4*(uint64_t)i,4));
         break;
