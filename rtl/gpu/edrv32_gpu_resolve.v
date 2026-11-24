@@ -1,5 +1,5 @@
 // File: edrv32_gpu_resolve.v
-// Spec: gpu-spec 2.10, 5; gpu-microarch 4.2, 4.6, 4.8.
+// Spec: gpu-spec 2.10, 5; gpu-microarch 4.2, 4.5, 4.8, 4.9.
 // Description: Three original-color rows feed four-lane edge filtering and Surface packing.
 // Region edges repeat their own pixel; target offsets affect reads, Surface stride affects writes.
 // Clock: clk_gpu.
@@ -87,7 +87,9 @@ module edrv32_gpu_resolve (
     reg [63:0] previous_north_r;
     reg [63:0] previous_south_r;
     reg [15:0] west_r;
-    reg [191:0] pack_r;
+    reg [255:0] pack_r;
+    reg [255:0] pack_data_w;
+    reg [31:0] pack_keep_r;
     reg row_done_r;
     reg done_r;
     reg finish_r;
@@ -101,6 +103,7 @@ module edrv32_gpu_resolve (
     reg [1:0] pack_group_r;
     reg [255:0] output_r [0:1];
     reg output_last_r [0:1];
+    reg [31:0] output_keep_r [0:1];
     reg output_head_r;
     reg output_tail_r;
     reg [1:0] output_count_r;
@@ -156,7 +159,7 @@ module edrv32_gpu_resolve (
     assign write_req_bytes_o = {15'b0, x1_r - x0_r, 1'b0};
     assign write_data_valid_o = output_count_r != 0;
     assign write_data_data_o = output_r[output_head_r];
-    assign write_data_keep_o = 32'hffffffff;
+    assign write_data_keep_o = output_keep_r[output_head_r];
     assign write_data_last_o = output_last_r[output_head_r];
     assign output_pop_w = write_data_valid_o && write_data_ready_i;
     assign advance_w = output_count_r < 2;
@@ -171,7 +174,14 @@ module edrv32_gpu_resolve (
     assign emit_w = advance_w && previous_valid_r && (read_valid_r || flush_w);
     assign east_w = flush_w ? previous_center_r[63:48] : current_center_w[15:0];
     assign pack_emit_w = advance_w && aa_valid_r[5];
-    assign beat_push_w = pack_emit_w && pack_group_r == 2'd3;
+    assign beat_push_w = pack_emit_w && (pack_group_r == 2'd3
+        || aa_group_r[5] + 9'd1 == groups_r);
+
+    // microarch 4.5/4.9: place four pixels at their aligned DDR byte lanes.
+    always @(*) begin
+        pack_data_w = pack_r;
+        pack_data_w[pack_group_r*64 +: 64] = filtered_w;
+    end
 
     generate
         for (bank = 0; bank < 3; bank = bank + 1) begin : g_line
@@ -291,9 +301,11 @@ module edrv32_gpu_resolve (
             previous_group_r <= read_group_r;
         end
         if (pack_emit_w) begin
-            if (!beat_push_w) pack_r[pack_group_r*64 +: 64] <= filtered_w;
+            pack_r <= pack_data_w;
             if (beat_push_w) begin
-                output_r[output_tail_r] <= {filtered_w, pack_r[191:0]};
+                output_r[output_tail_r] <= pack_data_w;
+                output_keep_r[output_tail_r] <= pack_keep_r
+                    | (32'hff << {pack_group_r, 3'b0});
                 output_last_r[output_tail_r] <= aa_group_r[5] + 9'd1 == groups_r;
             end
         end
@@ -323,6 +335,7 @@ module edrv32_gpu_resolve (
             read_group_r <= 9'b0;
             previous_valid_r <= 1'b0;
             pack_group_r <= 2'b0;
+            pack_keep_r <= 32'b0;
             output_head_r <= 1'b0;
             output_tail_r <= 1'b0;
             output_count_r <= 2'b0;
@@ -347,7 +360,11 @@ module edrv32_gpu_resolve (
                     scan_r <= scan_r + 9'd1;
                 end
                 if (read_valid_r) previous_valid_r <= 1'b1;
-                if (pack_emit_w) pack_group_r <= pack_group_r + 2'd1;
+                if (pack_emit_w) begin
+                    pack_group_r <= pack_group_r + 2'd1;
+                    pack_keep_r <= beat_push_w ? 32'b0
+                        : pack_keep_r | (32'hff << {pack_group_r, 3'b0});
+                end
                 if (flush_w && emit_w) previous_valid_r <= 1'b0;
             end
             if (beat_push_w) output_tail_r <= !output_tail_r;
@@ -405,7 +422,8 @@ module edrv32_gpu_resolve (
                         scan_r <= 9'b0;
                         previous_valid_r <= 1'b0;
                         read_valid_r <= 1'b0;
-                        pack_group_r <= 2'b0;
+                        pack_group_r <= x0_r[3:2];
+                        pack_keep_r <= 32'b0;
                         fill_y_r <= y_r + 16'd2;
                         fill_bank_r <= north_bank_r;
                         sent_r <= 9'b0;

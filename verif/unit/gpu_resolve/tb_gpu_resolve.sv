@@ -143,21 +143,24 @@ module tb_gpu_resolve;
             end
             if(write_data_valid_o && write_data_ready_i) begin
                 for(int k=0;k<16;k++) begin
-                    if(write_data_data_o[k*16+:16] !== expected(gx0+16*beat+k,row))
-                        $fatal(1,"FAIL resolve x=%0d y=%0d expected=%x actual=%x",gx0+16*beat+k,
-                            row,expected(gx0+16*beat+k,row),write_data_data_o[k*16+:16]);
+                    automatic int x=(gx0/16)*16+16*beat+k;
+                    if(write_data_keep_o[k*2+:2] !== ((x>=gx0 && x<gx1) ? 2'b11 : 2'b00))
+                        $fatal(1,"FAIL keep x=%0d y=%0d keep=%x",x,row,write_data_keep_o);
+                    if(x>=gx0 && x<gx1 && write_data_data_o[k*16+:16] !== expected(x,row))
+                        $fatal(1,"FAIL resolve x=%0d y=%0d expected=%x actual=%x",x,
+                            row,expected(x,row),write_data_data_o[k*16+:16]);
                 end
-                if(write_data_keep_o!==32'hffffffff
-                    || write_data_last_o !== (16*(beat+1)==gx1-gx0)) $fatal(1,"FAIL packing");
+                if(write_data_last_o !== ((gx0/16)*16+16*(beat+1)>=gx1))
+                    $fatal(1,"FAIL packing last");
                 beat++;
                 if(write_data_last_o) begin row++; b_due=cycle+8; end
             end
         end
     end
-    task run_case(input bit wide,input bit filter_on,input int th,input bit full_size,input bit abort_run=0);
-        gx0=full_size ? 0 : 64; gx1=full_size ? 640 : 128;
+    task run_case(input bit wide,input bit filter_on,input int th,input bit full_size,input bit abort_run=0, input int left=64, input int right=128);
+        gx0=full_size ? 0 : left; gx1=full_size ? 640 : right;
         gy0=full_size ? 0 : 15; gy1=full_size ? 180 : 19;
-        tx=full_size ? 0 : 20; ty=full_size ? 0 : 10;
+        tx=full_size || left<20 ? 0 : 20; ty=full_size ? 0 : 10;
         tw=wide ? 320 : 160; stride=wide ? 2816 : 1536;
         aa=filter_on; threshold=th; row=gy0; qh=0;qt=0; b_due=-1;
         @(negedge clk_i); active=1; finish_i=0;stop_i=0;
@@ -174,7 +177,8 @@ module tb_gpu_resolve;
         wait(unit_done_o); tick(); measured=cycle-start_cycle;
         if(row!=(abort_run?gy0+1:gy1) || qh!=qt) $fatal(1,"FAIL resolve drain rows=%0d",row);
         if(full_size && measured>45000) $fatal(1,"FAIL resolve AA budget cycles=%0d",measured);
-        $display("resolve wide=%0d AA=%0d threshold=%0d cycles=%0d",wide,aa,th,measured);
+        $display("resolve x0=%0d x1=%0d wide=%0d AA=%0d threshold=%0d cycles=%0d",
+            gx0,gx1,wide,aa,th,measured);
     endtask
     initial begin
         reset();
@@ -194,6 +198,9 @@ module tb_gpu_resolve;
         resolve_valid_i=1;tick();@(negedge clk_i);resolve_valid_i=0;finish_i=1;
         wait(unit_done_o);tick();
         if(write_req_valid_o || resolve_read_valid_o) $fatal(1,"FAIL empty resolve");
+        run_case(0,0,0,0,0,4,32);
+        run_case(0,1,24,0,0,64,76);
+        run_case(0,1,24,0,0,4,24);
         run_case(0,1,24,1);
         $display("PASS gpu_resolve formula/boundary/shapes/offset/stride/AA budget"); $finish;
     end
