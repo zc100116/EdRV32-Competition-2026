@@ -15,7 +15,7 @@ TEXT = {'id', 'name', 'tags', 'effect', 'attribute', 'calculation', 'passive', '
 def convert():
     out = ROOT / 'build/ember_isles/generated'
     out.mkdir(parents=True, exist_ok=True)
-    lines = ['/* Generated from the data CSV tables; gdd 10. */', '#ifndef EMBER_DATA_H',
+    lines = ['/* Generated CSV records; attributes include gameplay and numeric caps (gdd 2.2a). */', '#ifndef EMBER_DATA_H',
              '#define EMBER_DATA_H', '#include <stdint.h>']
     for path in sorted((APP / 'data').glob('*.csv')):
         with path.open(encoding='utf-8', newline='') as stream:
@@ -23,6 +23,11 @@ def convert():
             fields = reader.fieldnames
             rows = list(reader)
         table = path.stem
+        if table == 'attributes':
+            lines.append('enum ember_data_attribute_index {')
+            for index, row in enumerate(rows):
+                lines.append(f'    EMBER_DATA_ATTR_{row["id"].upper()} = {index},')
+            lines.append('};')
         lines.append(f'struct ember_{table}_row {{')
         for field in fields:
             kind = 'const char *' if field in TEXT else 'int32_t '

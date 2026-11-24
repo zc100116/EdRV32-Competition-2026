@@ -75,10 +75,10 @@ test: $(OUT)/game-flow-test $(OUT)/sim-replay $(OUT)/audio-test $(OUT)/audio-rin
 	cd $(ROOT) && $(OUT)/audio-ring-test
 	cd $(ROOT) && $(OUT)/pacing-test
 $(OUT)/game-flow-test: $(APP)/tools/game_flow_test.c $(APP)/src/game.c \
-    $(APP)/src/sim/sim.c $(APP)/src/core/core.c $(OUT)/generated/data.h $(HEADERS)
+    $(APP)/src/sim/sim.c $(APP)/src/sim/combat.c $(APP)/src/core/core.c $(OUT)/generated/data.h $(HEADERS)
 	$(CC) $(CFLAGS) $(filter %.c,$^) -o $@
 $(OUT)/sim-replay: $(APP)/tools/sim_replay.c $(APP)/src/sim/sim.c \
-    $(APP)/src/core/core.c $(APP)/src/core/replay.c $(OUT)/generated/data.h $(HEADERS)
+    $(APP)/src/sim/combat.c $(APP)/src/core/core.c $(APP)/src/core/replay.c $(OUT)/generated/data.h $(HEADERS)
 	$(CC) $(CFLAGS) $(filter %.c,$^) -o $@
 $(OUT)/audio-test: $(APP)/src/audio/tests/audio_test.c $(APP)/src/audio/audio.c \
     $(OUT)/generated/music.h $(HEADERS)

@@ -22,6 +22,7 @@ int main(void)
 {
     ember_game_init();
     for (frame = 1; frame <= 3; ++frame) {
+        pc_soc_game_input(frame == 1 ? EMBER_START : 0, (struct plat_pointer_state){0});
         ember_game_frame(frame);
         plat_wait_vsync();
     }

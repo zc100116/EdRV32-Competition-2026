@@ -1,5 +1,5 @@
 /* File: game.c
- * Spec: ember_isles tech 2-3 and E1/E2 scope.
+ * Spec: ember_isles tech 2-3 and E3 systems.
  * Description: Fixed-step simulation, read-only presentation and audio submission.
  * Clock domain: 60 Hz game frame; 48 kHz audio ring.
  */
@@ -19,7 +19,7 @@ static unsigned fps_frames, measured_fps = 60;
 static unsigned tick_frames;
 static uint32_t previous_tick_millis, tick_credit;
 static struct ember_ui_state ui;
-static uint8_t previous_keys;
+static uint16_t previous_keys;
 static unsigned replay_mode;
 static uint32_t run_number;
 static struct ember_replay recording;
@@ -85,8 +85,8 @@ const struct ember_sim *ember_game_state(void) { return &simulation; }
 void ember_game_tick(void)
 {
     ++tick_frames;
-    uint8_t keys = (uint8_t)plat_keys();
-    uint8_t pressed = keys & (uint8_t)~previous_keys;
+    uint16_t keys = (uint16_t)plat_game_keys();
+    uint16_t pressed = keys & (uint16_t)~previous_keys;
     previous_keys = keys;
     if (pressed & EMBER_SELECT) ui.show_perf ^= 1;
     unsigned returned_to_menu = 0;

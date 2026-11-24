@@ -20,7 +20,7 @@
 #include <sys/types.h>
 static struct ember_sim simulation;
 static struct ember_ui_state ui;
-static uint8_t previous_input;
+static uint16_t previous_input;
 static uint32_t samples[800];
 static uint8_t dma[8 * 1024 * 1024] __attribute__((aligned(4096)));
 static size_t dma_used;
@@ -107,7 +107,7 @@ int main(void)
         uint32_t begin = instret();
         ember_sim_step(&simulation, ember_demo_input[i]);
         uint32_t after_sim = instret();
-        uint8_t pressed = ember_demo_input[i] & (uint8_t)~previous_input;
+        uint16_t pressed = ember_demo_input[i] & (uint16_t)~previous_input;
         previous_input = ember_demo_input[i];
         if (pressed & EMBER_SELECT) ui.show_perf ^= 1;
         ember_gfx_prepare(&simulation, 60, &ui);
@@ -122,7 +122,7 @@ int main(void)
                (unsigned long)(after_sim - begin), (unsigned long)(after_gfx - after_sim),
                (unsigned long)(after_audio - after_gfx), (unsigned long)(after_audio - begin));
         if ((i + 1) % 60 == 0) {
-            char summary[1024];
+            char summary[2048];
             ember_sim_summary(&simulation, summary, sizeof(summary));
             printf("STATE,%s\n", summary);
         }

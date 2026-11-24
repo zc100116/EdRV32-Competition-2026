@@ -15,17 +15,31 @@
 #define EMBER_EVENTS 256
 #define EMBER_PARTICLES 8000
 #define EMBER_UP 1u
-#define EMBER_DOWN 2u
-#define EMBER_LEFT 4u
+#define EMBER_LEFT 2u
+#define EMBER_DOWN 4u
 #define EMBER_RIGHT 8u
-#define EMBER_A 16u
-#define EMBER_B 32u
-#define EMBER_SELECT 64u
-#define EMBER_START 128u
+#define EMBER_J 16u
+#define EMBER_K 32u
+#define EMBER_L 64u
+#define EMBER_U 128u
+#define EMBER_SWAP 256u
+#define EMBER_INTERACT 512u
+#define EMBER_DASH 1024u
+#define EMBER_SELECT 2048u
+#define EMBER_START 4096u
+#define EMBER_A EMBER_J
+#define EMBER_B EMBER_L
 typedef int32_t ember_fixed;
 struct ember_rng { uint32_t state; };
-struct ember_replay { uint32_t seed; uint32_t count; uint8_t input[EMBER_REPLAY_FRAMES]; };
-struct ember_event { uint16_t kind; uint16_t value; ember_fixed x; ember_fixed y; };
+struct ember_replay { uint32_t seed; uint32_t count; uint16_t input[EMBER_REPLAY_FRAMES]; };
+/* outcome: 0 hit, 1 dodge, 2 block; damage_type uses sim/combat.h ordering. */
+struct ember_event {
+    uint16_t kind;
+    uint32_t value;
+    ember_fixed x;
+    ember_fixed y;
+    uint8_t tier, damage_type, outcome;
+};
 struct ember_events { unsigned count; struct ember_event item[EMBER_EVENTS]; };
 uint32_t ember_random(struct ember_rng *rng);
 ember_fixed ember_mul(ember_fixed a, ember_fixed b);

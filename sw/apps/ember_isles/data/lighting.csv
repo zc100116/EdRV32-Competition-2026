@@ -1,0 +1,2 @@
+id,oil_max,radius_base,radius_per_oil,drain,tide_drain,ember_oil,pillar_cost,pillar_radius,ally_damage,enemy_slow,dark_damage,interact_radius,pillar_spacing
+coast,10000,48,120,100,200,300,3000,96,15,20,20,32,160

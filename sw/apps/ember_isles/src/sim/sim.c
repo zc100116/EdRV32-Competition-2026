@@ -1,5 +1,5 @@
 /* File: sim.c
- * Spec: ember_isles gdd 2-5, tech 2-3; approved E1/E2 combat slice.
+ * Spec: ember_isles gdd 2-5, tech 2-3; E3 systems on the E1/E2 content.
  * Description: Integer combat, tagged builds, bounded death triggers and five coast waves.
  * Clock domain: fixed 60 Hz simulation; no presentation or platform dependencies.
  */
@@ -45,6 +45,14 @@ static void velocity(ember_fixed dx, ember_fixed dy, int speed,
     *vx = (ember_fixed)((int64_t)dx * speed * EMBER_Q / (60 * (int64_t)length));
     *vy = (ember_fixed)((int64_t)dy * speed * EMBER_Q / (60 * (int64_t)length));
 }
+static int illuminated(const struct ember_sim *s, ember_fixed x, ember_fixed y)
+{
+    if (!s->lamp_disabled && within(x, y, s->player.x, s->player.y, s->lamp_radius)) return 1;
+    for (unsigned i = 0; i < 8; ++i)
+        if (s->pillars[i].lit && within(x, y, s->pillars[i].x, s->pillars[i].y,
+            ember_lighting[0].pillar_radius)) return 1;
+    return 0;
+}
 static int tagged(unsigned weapon, const char *tag)
 {
     return strstr(ember_weapons[weapon].tags, tag) != NULL;
@@ -66,8 +74,10 @@ static int32_t attribute(const struct ember_sim *s, unsigned a, int32_t base,
             (strcmp(r->effect, "stat") && r->tags[0] &&
              (!tag || !strstr(tag, r->tags)))) continue;
         flat += r->flat * s->player.relic_level[i];
-        increased += r->increased * s->player.relic_level[i];
+        if (a != EMBER_CRIT) increased += r->increased * s->player.relic_level[i];
     }
+    const struct ember_weapon_system *sub = &s->weapon_system[s->player.sub_weapon];
+    if (sub->rarity >= 1 && sub->offhand_attribute == a) flat += sub->offhand_flat;
     int64_t result = (int64_t)(base + flat) * (100 + increased) / 100;
     for (unsigned i = 0; i < EMBER_RELICS_COUNT; ++i) {
         const struct ember_relics_row *r = &ember_relics[i];
@@ -78,9 +88,12 @@ static int32_t attribute(const struct ember_sim *s, unsigned a, int32_t base,
         for (unsigned level = 0; level < s->player.relic_level[i]; ++level)
             result = result * (100 + r->more) / 100;
     }
-    return clamp((int32_t)result, ember_attributes[a].minimum, ember_attributes[a].maximum);
+    int64_t cap = minimum(ember_attributes[a].maximum + s->cap_raise[a],
+                          ember_attributes[a].range_maximum);
+    return (int32_t)(result < ember_attributes[a].minimum ? ember_attributes[a].minimum :
+                     result > cap ? cap : result);
 }
-static void attributes(struct ember_sim *s)
+void ember_sim_attributes(struct ember_sim *s)
 {
     const struct ember_characters_row *c = &ember_characters[0];
     const int32_t base[EMBER_ATTRIBUTE_COUNT] = {
@@ -90,13 +103,29 @@ static void attributes(struct ember_sim *s)
         c->tenacity, c->dash_count, c->dash_cooldown, c->status_chance,
         c->status_strength, c->status_duration, c->pickup,
         c->xp, c->gold, c->luck, c->healing, c->aura, c->threat, c->ember_damage,
-        c->tide_damage, c->iron_damage, c->star_damage, c->shadow_damage
+        c->tide_damage, c->iron_damage, c->star_damage, c->shadow_damage,
+        100, 100, 100, 0, 0, 0, 0, 0, 0
     };
     for (unsigned i = 0; i < EMBER_ATTRIBUTE_COUNT; ++i)
         s->attributes[i] = attribute(s, i, base[i], NULL);
     s->player.max_hp = s->attributes[EMBER_MAX_HP];
     s->player.armor = s->attributes[EMBER_ARMOR];
     s->player.speed = s->attributes[EMBER_SPEED];
+    s->player.defense.armor = s->player.armor;
+    s->player.defense.dodge = s->attributes[EMBER_DODGE];
+    s->player.defense.tenacity = s->attributes[EMBER_TENACITY];
+    s->player.defense.shield_max = s->attributes[EMBER_SHIELD];
+    s->player.defense.max_hp = s->player.max_hp;
+    for (unsigned i = 0; i < 4; ++i) {
+        s->player.defense.resistance[i] = s->attributes[EMBER_FIRE_RESIST + i];
+        s->player.defense.resistance_cap[i] =
+            ember_attributes[EMBER_FIRE_RESIST + i].maximum +
+            s->cap_raise[EMBER_FIRE_RESIST + i];
+    }
+    s->player.defense.all_resistance = s->attributes[EMBER_ALL_RESIST];
+    s->player.defense.reduction[0] = s->attributes[EMBER_REDUCTION];
+    s->player.defense.reduction_cap = ember_attributes[EMBER_REDUCTION].maximum +
+        s->cap_raise[EMBER_REDUCTION];
 }
 static void event(struct ember_sim *s, unsigned kind, unsigned value,
                   ember_fixed x, ember_fixed y)
@@ -151,39 +180,69 @@ static void pickup_drop(struct ember_sim *s, const struct ember_enemy *e)
 }
 static void area_hit(struct ember_sim *s, ember_fixed x, ember_fixed y,
                      int radius, int damage, unsigned weapon, unsigned depth, int periodic);
-static void enemy_hit(struct ember_sim *s, unsigned index, int damage,
-                      unsigned weapon, unsigned depth, int periodic)
+struct ember_damage_result ember_sim_hit(struct ember_sim *s, unsigned index,
+                                         const struct ember_attack *hit)
 {
     struct ember_enemy *e = &s->enemies[index];
-    if (!e->alive) return;
-    if (weapon < EMBER_WEAPONS_COUNT && e->burn && inscription(s, weapon, 2))
-        damage = damage * (100 + ember_inscriptions[2].value) / 100;
-    if (!periodic && ember_random(&s->combat_rng) % 100 < (unsigned)s->attributes[EMBER_CRIT])
-        damage = damage * s->attributes[EMBER_CRIT_DAMAGE] / 100;
-    damage = maximum(1, damage * 100 / (100 + ember_enemies[e->kind].armor));
-    int absorbed = minimum(e->shield, damage);
-    e->shield -= absorbed;
-    damage -= absorbed;
-    e->hp -= damage;
-    e->flash = 6;
-    s->damage_total += (unsigned)damage;
-    event(s, 1, (unsigned)damage, e->x, e->y);
-    if (!periodic) {
-        e->burn = (uint16_t)(ember_statuses[0].duration *
-            attribute(s, EMBER_STATUS_DURATION, s->attributes[EMBER_STATUS_DURATION], "ignite") /
-            100);
-        e->burn_weapon = (uint8_t)weapon;
+    if (!e->alive || hit->depth > 3u + s->trigger_bonus)
+        return (struct ember_damage_result){0};
+    if (hit->depth > s->trigger_peak) s->trigger_peak = hit->depth;
+    int frozen = e->defense.frozen;
+    struct ember_damage_result r = ember_damage(&s->combat_rng, hit, &e->defense, &e->hp);
+    e->shield = e->defense.permanent_shield + e->defense.temporary[EMBER_DAMAGE_TYPES];
+    if (r.dodged) {
+        event(s, 1, 0, e->x, e->y);
+        s->events.item[s->events.count - 1].outcome = 1;
+        return r;
     }
-    if (e->hp > 0) return;
+    if (!r.damage && !r.absorbed) return r;
+    if (hit->leech) s->player.hp = minimum(s->player.max_hp,
+        s->player.hp + r.damage * hit->leech / 100);
+    e->flash = 6;
+    s->damage_total += (unsigned)r.damage;
+    event(s, 1, (unsigned)(r.damage + r.absorbed), e->x, e->y);
+    s->events.item[s->events.count - 1].outcome = r.blocked ? 2 : 0;
+    s->events.item[s->events.count - 1].tier = r.crit;
+    s->events.item[s->events.count - 1].damage_type = r.dominant;
+    s->player.charge = (uint16_t)minimum(ember_characters[0].charge_max,
+        s->player.charge + (r.damage > 0));
+    if (e->hp > 0) {
+        if (hit->depth == 3 + s->trigger_bonus) return r;
+        struct ember_attack linked = {.attack = 100, .crit_damage = 150,
+                                       .depth = (uint8_t)(hit->depth + 1)};
+        if (frozen && r.part[EMBER_DAMAGE_IRON]) {
+            e->defense.frozen = 0;
+            linked.base = ember_system[0].shatter_damage;
+            linked.share[EMBER_DAMAGE_IRON] = 100;
+            for (unsigned n = 0; n < EMBER_ENEMIES; ++n)
+                if (s->enemies[n].alive && n != index && within(e->x, e->y,
+                    s->enemies[n].x, s->enemies[n].y, ember_system[0].chain_range))
+                    ember_sim_hit(s, n, &linked);
+        }
+        if (r.crit && e->defense.status[EMBER_BREAK_ARMOR].frames) {
+            linked.base = ember_system[0].heavy_damage;
+            linked.share[EMBER_DAMAGE_IRON] = 100;
+            ember_sim_hit(s, index, &linked);
+        }
+        if (r.crit && e->defense.status[EMBER_BLIND].frames &&
+            !illuminated(s, e->x, e->y)) {
+            linked.base = ember_system[0].blind_crit;
+            linked.share[EMBER_DAMAGE_IRON] = 0;
+            linked.share[EMBER_DAMAGE_SHADOW] = 100;
+            ember_sim_hit(s, index, &linked);
+        }
+        return r;
+    }
     e->alive = 0;
     --s->alive_count;
     ++s->player.kills;
+    if (e->defense.status[EMBER_CORRODE].frames)
+        s->player.hp = minimum(s->player.max_hp, s->player.hp + ember_system[0].corrode_heal);
     s->player.charge = (uint16_t)minimum(ember_characters[0].charge_max,
         s->player.charge + ember_characters[0].charge_kill);
     pickup_drop(s, e);
-    event(s, 2, (unsigned)damage, e->x, e->y);
-    /* gdd 4.5: originating hit is layer zero; three death explosions at most. */
-    if (e->burn && depth < 3) {
+    event(s, 2, (unsigned)r.damage, e->x, e->y);
+    if (e->burn && hit->depth < 3 + s->trigger_bonus) {
         int radius = ember_characters[0].passive_radius * s->attributes[EMBER_AREA] / 100;
         if (e->burn_weapon < EMBER_WEAPONS_COUNT && inscription(s, e->burn_weapon, 3))
             radius = radius * (100 + ember_inscriptions[3].value) / 100;
@@ -191,7 +250,105 @@ static void enemy_hit(struct ember_sim *s, unsigned index, int damage,
                                     ember_characters[0].passive_frames);
         p->tick = 1;
         area_hit(s, e->x, e->y, radius, ember_characters[0].passive_damage,
-                 e->burn_weapon, depth + 1, 0);
+                 e->burn_weapon, hit->depth + 1, 0);
+    }
+    return r;
+}
+void ember_sim_status(struct ember_sim *s, unsigned index, unsigned status, unsigned depth)
+{
+    struct ember_enemy *e = &s->enemies[index];
+    if (!e->alive || depth > 3u + s->trigger_bonus) return;
+    unsigned reaction = ember_status_apply(&e->defense, status,
+        ember_statuses[status].duration * s->attributes[EMBER_STATUS_DURATION] / 100,
+        s->attributes[EMBER_STATUS_STRENGTH]);
+    e->burn = e->defense.status[EMBER_IGNITE].frames;
+    if (reaction & 1u) area_hit(s, e->x, e->y, ember_system[0].chain_range,
+                               ember_system[0].steam_damage, 255, depth + 1, 0);
+    if (reaction & 2u) {
+        int last = (int)index;
+        uint8_t visited[EMBER_ENEMIES] = {0};
+        visited[index] = 1;
+        int damage = ember_statuses[EMBER_SHOCK].damage;
+        for (int jump = 0; jump < ember_system[0].chain_jumps; ++jump) {
+            int next = -1;
+            int64_t best = INT64_MAX;
+            int wet = !!s->enemies[last].defense.status[EMBER_WET].frames;
+            int range = ember_system[0].chain_range * (wet ? 150 : 100) / 100;
+            for (unsigned i = 0; i < EMBER_ENEMIES; ++i) {
+                struct ember_enemy *n = &s->enemies[i];
+                if (!n->alive || visited[i] || !within(n->x, n->y,
+                    s->enemies[last].x, s->enemies[last].y, range)) continue;
+                int64_t dist = distance2(n->x, n->y, s->enemies[last].x, s->enemies[last].y);
+                if (dist < best) { best = dist; next = (int)i; }
+            }
+            if (next < 0) break;
+            struct ember_attack linked = {.base = damage, .attack = 100, .crit_damage = 150,
+                .share = {0, 0, 0, 100, 0, 0}, .depth = (uint8_t)(depth + 1)};
+            ember_sim_hit(s, (unsigned)next, &linked);
+            damage = damage * (100 + ember_system[0].chain_growth) / 100;
+            if (!wet || jump) damage = damage * (100 - ember_system[0].chain_decay) / 100;
+            visited[next] = 1;
+            last = next;
+        }
+    }
+}
+static void enemy_hit(struct ember_sim *s, unsigned index, int damage,
+                      unsigned weapon, unsigned depth, int periodic)
+{
+    struct ember_enemy *e = &s->enemies[index];
+    if (!e->alive || depth > 3u + s->trigger_bonus) return;
+    struct ember_attack hit = {.base = damage, .attack = s->attributes[EMBER_ATTACK],
+        .crit = s->attributes[EMBER_CRIT], .crit_damage = s->attributes[EMBER_CRIT_DAMAGE],
+        .penetration = s->attributes[EMBER_PIERCE], .share = {0,100,0,0,0,0},
+        .depth = (uint8_t)depth, .flags = periodic ? EMBER_DOT : 0};
+    if ((int64_t)e->vx * (s->player.x - e->x) +
+        (int64_t)e->vy * (s->player.y - e->y) >= 0) hit.flags |= EMBER_FRONT;
+    if (s->dot_can_crit) hit.flags |= EMBER_DOT_CRIT;
+    if (s->in_light) hit.increased += ember_lighting[0].ally_damage *
+        s->attributes[EMBER_LIGHT_EFFECT] / 100;
+    if (e->defense.status[EMBER_CORRODE].frames) hit.leech = ember_system[0].corrode_leech;
+    if (weapon < EMBER_WEAPONS_COUNT) {
+        const struct ember_weapon_system *w = &s->weapon_system[weapon];
+        memcpy(hit.share, w->share, sizeof(hit.share));
+        memcpy(hit.added, w->added, sizeof(hit.added));
+        memcpy(hit.more, w->more, sizeof(hit.more));
+        uint32_t tags = w->tags;
+        for (unsigned i = 0; i < EMBER_TAGS_COUNT; ++i) {
+            if ((!strcmp(ember_tags[i].id, "light") && s->in_light) ||
+                (!strcmp(ember_tags[i].id, "dark") && !s->in_light)) tags |= 1u << i;
+            if (tags & (1u << i)) hit.increased += s->tag_damage[i];
+        }
+        hit.conversion = w->conversion;
+        hit.increased += w->increased;
+        hit.penetration += w->penetration;
+        if (e->burn && inscription(s, weapon, 2)) hit.more[0] += ember_inscriptions[2].value;
+    }
+    if (periodic) {
+        memset(hit.share, 0, sizeof(hit.share));
+        memset(hit.added, 0, sizeof(hit.added));
+        hit.share[EMBER_DAMAGE_FIRE] = 100;
+        hit.conversion = 0;
+    }
+    const unsigned attrs[5] = {EMBER_IRON_DAMAGE, EMBER_EMBER_DAMAGE, EMBER_TIDE_DAMAGE,
+                              EMBER_STAR_DAMAGE, EMBER_SHADOW_DAMAGE};
+    for (unsigned i = 0; i < 5; ++i)
+        hit.increased += (s->attributes[attrs[i]] - 100) * hit.share[i] / 100;
+    struct ember_damage_result result = ember_sim_hit(s, index, &hit);
+    if (e->alive && !periodic && !result.dodged && (result.damage || result.absorbed)) {
+        for (unsigned i = 0; i < 5; ++i) {
+            if (!hit.share[i] || (int)(ember_random(&s->combat_rng) % 100) >=
+                s->attributes[EMBER_STATUS_CHANCE]) continue;
+            unsigned state = i == EMBER_DAMAGE_FIRE ? EMBER_IGNITE :
+                i == EMBER_DAMAGE_WATER ? EMBER_WET :
+                i == EMBER_DAMAGE_STAR ? EMBER_SHOCK : i == EMBER_DAMAGE_SHADOW ? EMBER_CORRODE :
+                EMBER_BREAK_ARMOR;
+            ember_sim_status(s, index, state, depth);
+        }
+        if (weapon < EMBER_WEAPONS_COUNT)
+            for (unsigned state = 0; state < EMBER_STATUS_COUNT; ++state)
+                if (s->weapon_system[weapon].status_mask & (1u << state))
+                    ember_sim_status(s, index, state, depth);
+        e->burn_weapon = (uint8_t)weapon;
     }
 }
 static void area_hit(struct ember_sim *s, ember_fixed x, ember_fixed y,
@@ -220,18 +377,24 @@ static int nearest(const struct ember_sim *s)
     }
     return target;
 }
-static void player_hurt(struct ember_sim *s, int damage, unsigned wave)
+static void player_hurt(struct ember_sim *s, int damage, unsigned wave,
+                        ember_fixed source_x, ember_fixed source_y)
 {
     struct ember_player *p = &s->player;
-    if (p->invulnerable) return;
-    if (ember_random(&s->combat_rng) % 100 < (unsigned)s->attributes[EMBER_DODGE]) return;
-    damage = maximum(1, damage * ember_waves[wave - 1].damage_percent /
-                        (100 + p->armor));
-    p->hp -= damage;
-    p->invulnerable = (uint16_t)ember_characters[0].hurt_interval;
+    if (p->invulnerable || p->dash) return;
+    struct ember_attack hit = {.base = damage * ember_waves[wave - 1].damage_percent / 100,
+        .attack = 100, .crit_damage = 150, .share = {100,0,0,0,0,0}};
+    int lit = illuminated(s, source_x, source_y);
+    if (!lit) hit.increased = ember_lighting[0].dark_damage;
+    struct ember_damage_result r = ember_damage(&s->combat_rng, &hit, &p->defense, &p->hp);
+    if (r.dodged || (!r.damage && !r.absorbed)) return;
+    p->invulnerable = p->defense.invulnerable;
     p->flash = 8;
-    event(s, 8, (unsigned)damage, p->x, p->y);
-    if (p->hp <= 0) { p->hp = 0; s->phase = EMBER_LOST; }
+    p->action = EMBER_HURT;
+    p->action_time = 8;
+    p->charge = (uint16_t)minimum(ember_characters[0].charge_max, p->charge + r.damage);
+    event(s, 8, (unsigned)r.damage, p->x, p->y);
+    if (p->hp <= 0) { p->action = EMBER_DEAD; s->phase = EMBER_LOST; }
 }
 static void enemy_spawn(struct ember_sim *s)
 {
@@ -262,6 +425,10 @@ static void enemy_spawn(struct ember_sim *s)
             e->hp = e->hp * ember_affixes[e->affix - 1].hp_percent / 100;
             e->shield = ember_affixes[e->affix - 1].shield;
         }
+        ember_defense_init(&e->defense, e->hp);
+        e->defense.armor = ember_enemies[kind].armor;
+        if (w->elite) e->defense.tenacity = 50;
+        e->defense.temporary[EMBER_DAMAGE_TYPES] = e->shield;
         ++s->spawned;
         ++s->alive_count;
         return;
@@ -292,20 +459,34 @@ static void enemies_step(struct ember_sim *s)
         if (!e->alive) continue;
         const struct ember_enemies_row *d = &ember_enemies[e->kind];
         if (e->flash) --e->flash;
-        if (e->burn) {
-            if (++e->burn_tick >= ember_statuses[0].interval) {
-                e->burn_tick = 0;
-                int damage = ember_statuses[0].damage * s->attributes[EMBER_STATUS_STRENGTH];
-                for (unsigned n = 0; n < s->player.relic_level[5]; ++n)
-                    damage = damage * (100 + ember_relics[5].more) / 100;
-                damage += e->burn_fraction;
-                e->burn_fraction = (uint16_t)(damage % 100);
-                enemy_hit(s, i, damage / 100, e->burn_weapon, 0, 1);
-                if (!e->alive) continue;
-            }
-            --e->burn;
-        } else e->burn_tick = 0;
+        int controlled = e->defense.frozen || e->defense.status[EMBER_STUN].frames ||
+            e->defense.broken;
+        e->burn = e->defense.status[EMBER_IGNITE].frames;
+        if (e->burn && ++e->burn_tick >= ember_statuses[0].interval) {
+            e->burn_tick = 0;
+            int damage = ember_statuses[0].damage * e->defense.status[EMBER_IGNITE].stacks *
+                s->attributes[EMBER_STATUS_STRENGTH] / 100;
+            enemy_hit(s, i, damage, e->burn_weapon, 0, 1);
+            if (!e->alive) continue;
+        }
+        ember_defense_step(&e->defense);
+        e->burn = e->defense.status[EMBER_IGNITE].frames;
+        int max_hp = (int)((int64_t)e->defense.max_hp * (100 -
+            e->defense.status[EMBER_CORRODE].stacks *
+            ember_statuses[EMBER_CORRODE].strength) / 100);
+        e->hp = minimum(e->hp, max_hp);
+        if (controlled) {
+            e->vx = e->vy = 0;
+            continue;
+        }
         int speed = d->speed;
+        if (e->defense.status[EMBER_CHILL].frames)
+            speed = speed * (100 - e->defense.status[EMBER_CHILL].stacks *
+                ember_statuses[EMBER_CHILL].strength) / 100;
+        for (unsigned n = 0; n < 8; ++n)
+            if (s->pillars[n].lit && within(e->x, e->y, s->pillars[n].x, s->pillars[n].y,
+                ember_lighting[0].pillar_radius)) { speed = speed *
+                    (100 - ember_lighting[0].enemy_slow) / 100; break; }
         if (e->affix) speed = speed * ember_affixes[e->affix - 1].speed_percent / 100;
         if (e->timer) --e->timer;
         ember_fixed dx = s->player.x - e->x;
@@ -348,60 +529,110 @@ static void enemies_step(struct ember_sim *s)
         obstacles_resolve(s, &e->x, &e->y, d->radius);
         if (within(e->x, e->y, s->player.x, s->player.y,
                    d->radius + ember_characters[0].body_radius))
-            player_hurt(s, d->damage, e->wave);
+            if (!e->defense.status[EMBER_BLIND].frames ||
+                ember_random(&s->combat_rng) % 100 >=
+                    (unsigned)ember_statuses[EMBER_BLIND].strength)
+                player_hurt(s, d->damage, e->wave, e->x, e->y);
     }
 }
-static void weapons_step(struct ember_sim *s)
+static void weapon_fire(struct ember_sim *s, unsigned w)
 {
+    struct ember_player *player = &s->player;
     int target = nearest(s);
-    for (unsigned w = 0; w < EMBER_WEAPONS_COUNT; ++w) {
-        unsigned level = s->player.weapon_level[w];
-        if (!level) continue;
-        if (s->weapon_timer[w]) { --s->weapon_timer[w]; continue; }
-        if ((w == 0 || w == 3) && target < 0) continue;
-        const struct ember_weapons_row *d = &ember_weapons[w];
-        int damage = d->damage * (100 + d->damage_per_level * ((int)level - 1)) / 100;
-        damage = damage * s->attributes[EMBER_ATTACK] / 100;
-        damage = damage * s->attributes[EMBER_EMBER_DAMAGE] / 100;
-        int radius = d->radius * s->attributes[EMBER_AREA] / 100;
-        int count = d->count + s->attributes[EMBER_PROJECTILES] - 1;
-        if (inscription(s, w, 0)) count *= ember_inscriptions[0].value;
-        int rate = attribute(s, EMBER_ATTACK_SPEED, s->attributes[EMBER_ATTACK_SPEED], d->tags);
-        s->weapon_timer[w] = (uint16_t)maximum(1,
-            d->cooldown * (100 - s->attributes[EMBER_COOLDOWN]) / rate) - 1;
+    if (target < 0) return;
+    const struct ember_weapons_row *d = &ember_weapons[w];
+    unsigned category = s->weapon_system[w].category;
+    int damage = d->damage * (100 + d->damage_per_level *
+        ((int)player->weapon_level[w] - 1)) / 100;
+    if (s->dual_wield) damage = damage * 70 / 100;
+    int radius = d->radius * s->attributes[EMBER_AREA] / 100;
+    int count = d->count + s->attributes[EMBER_PROJECTILES] - 1;
+    if (category == EMBER_CROSSBOW) count = 3;
+    if (inscription(s, w, 0)) count *= ember_inscriptions[0].value;
+    int rate = attribute(s, EMBER_ATTACK_SPEED, s->attributes[EMBER_ATTACK_SPEED], d->tags);
+    s->weapon_timer[w] = (uint16_t)maximum(1,
+        d->cooldown * (100 - s->attributes[EMBER_COOLDOWN]) / rate);
+    ember_fixed dx = s->enemies[target].x - player->x;
+    ember_fixed dy = s->enemies[target].y - player->y;
+    player->facing = abs(dx) >= abs(dy) ? (dx >= 0 ? 0 : 2) : (dy >= 0 ? 1 : 3);
+    player->action = EMBER_ATTACKING;
+    player->action_time = (uint16_t)minimum(12, s->weapon_timer[w]);
+    unsigned combos = category == EMBER_SWORD || category == EMBER_SPEAR ? 3 :
+                      category == EMBER_BLADES ? 4 : category == EMBER_GREATSWORD ? 2 : 1;
+    player->combo = (uint8_t)((player->combo + 1) % combos);
+    if (category <= EMBER_HAMMER) {
+        int reach = maximum(40, radius);
+        if (category == EMBER_SPEAR) reach *= 2;
+        for (unsigned i = 0; i < EMBER_ENEMIES; ++i) {
+            struct ember_enemy *e = &s->enemies[i];
+            if (!e->alive || !within(player->x, player->y, e->x, e->y, reach)) continue;
+            int64_t ex = (e->x - player->x) / EMBER_Q;
+            int64_t ey = (e->y - player->y) / EMBER_Q;
+            int64_t ax = dx / EMBER_Q, ay = dy / EMBER_Q;
+            if (category != EMBER_HAMMER &&
+                ex * ax + ey * ay < 0) continue;
+            if (category == EMBER_SPEAR && llabs(ex * ay - ey * ax) >
+                (int64_t)16 * square_root(ax * ax + ay * ay)) continue;
+            enemy_hit(s, i, damage, w, 0, 0);
+            if (e->alive && category == EMBER_HAMMER) ember_sim_status(s, i, EMBER_STUN, 0);
+            if (e->alive && category == EMBER_GREATSWORD)
+                velocity(e->x - player->x, e->y - player->y,
+                    s->attributes[EMBER_KNOCKBACK], &e->vx, &e->vy);
+        }
+    } else {
+        unsigned kind = category == EMBER_CODEX ? 2 : 0;
         for (int n = 0; n < count; ++n) {
-            struct ember_shot *p = shot(s, w, s->player.x, s->player.y, damage, radius,
-                w == 1 ? d->area_frames : d->duration * s->attributes[EMBER_DURATION] / 100);
+            struct ember_shot *p = shot(s, kind, player->x, player->y, damage,
+                category == EMBER_CODEX ? maximum(radius, 40) : minimum(radius, 8),
+                maximum(d->area_frames, d->duration * s->attributes[EMBER_DURATION] / 100));
             p->weapon = (uint8_t)w;
-            p->follow = (uint8_t)inscription(s, w, 1);
-            p->pierce = (uint8_t)(d->pierce + s->attributes[EMBER_PIERCE]);
-            if (w == 0 || w == 3) {
-                ember_fixed dx = s->enemies[target].x - p->x;
-                ember_fixed dy = s->enemies[target].y - p->y;
-                int speed = d->speed * s->attributes[EMBER_PROJECTILE_SPEED] / 100;
-                velocity(dx, dy, speed, &p->vx, &p->vy);
-                /* Three sparks fan around the aimed direction, using exact integer rotations. */
-                if (count > 1) {
-                    uint16_t angle = (uint16_t)((n * 2 - count + 1) * d->spread_angle);
-                    ember_fixed vx = ember_mul(p->vx, ember_cos(angle)) -
-                                     ember_mul(p->vy, ember_sin(angle));
-                    p->vy = ember_mul(p->vx, ember_sin(angle)) +
-                            ember_mul(p->vy, ember_cos(angle));
-                    p->vx = vx;
-                }
-                if (w == 3) {
-                    p->vz = d->lob_speed_q16;
-                    p->life = (uint16_t)d->duration;
-                    /* Landing target is clamped to a single flight's travel distance. */
-                    uint32_t length = square_root((int64_t)dx * dx + (int64_t)dy * dy);
-                    if (length < (uint32_t)(speed * EMBER_Q * d->duration / 60)) {
-                        p->vx = dx / d->duration;
-                        p->vy = dy / d->duration;
-                    }
-                }
+            p->follow = (uint8_t)(category == EMBER_CODEX || inscription(s, w, 1));
+            p->pierce = (uint8_t)d->pierce;
+            if (kind == 0) {
+                velocity(dx, dy, maximum(180, d->speed) *
+                    s->attributes[EMBER_PROJECTILE_SPEED] / 100, &p->vx, &p->vy);
+                uint16_t angle = (uint16_t)((n * 2 - count + 1) * d->spread_angle);
+                ember_fixed vx = ember_mul(p->vx, ember_cos(angle)) -
+                                 ember_mul(p->vy, ember_sin(angle));
+                p->vy = ember_mul(p->vx, ember_sin(angle)) + ember_mul(p->vy, ember_cos(angle));
+                p->vx = vx;
             }
         }
-        event(s, 0, (unsigned)damage, s->player.x, s->player.y);
+    }
+    event(s, 0, (unsigned)damage, player->x, player->y);
+}
+static void weapons_step(struct ember_sim *s, uint16_t input)
+{
+    for (unsigned w = 0; w < 4; ++w) if (s->weapon_timer[w]) --s->weapon_timer[w];
+    struct ember_player *p = &s->player;
+    if (input & EMBER_J) {
+        if (!s->weapon_timer[p->main_weapon]) weapon_fire(s, p->main_weapon);
+        if (s->dual_wield && !s->weapon_timer[p->sub_weapon]) weapon_fire(s, p->sub_weapon);
+    }
+    unsigned sub = p->sub_weapon;
+    if (s->weapon_system[sub].rarity >= 2 && s->weapon_system[sub].offhand &&
+        !s->weapon_timer[sub]) weapon_fire(s, sub);
+    s->pet.x = p->x - 20 * EMBER_Q;
+    s->pet.y = p->y + 16 * EMBER_Q;
+    if (p->pet_weapon == 255) return;
+    if (p->pet_timer) { --p->pet_timer; return; }
+    int target = nearest(s);
+    if (target < 0) return;
+    p->pet_timer = s->pet.cooldown;
+    struct ember_attack h = {.base = s->pet.damage, .attack = 100, .crit_damage = 150,
+        .share = {100,0,0,0,0,0}};
+    struct ember_enemy *e = &s->enemies[target];
+    if (s->pet.category == 0) {
+        if (within(s->pet.x, s->pet.y, e->x, e->y, 48)) ember_sim_hit(s, target, &h);
+    } else if (s->pet.category == 3) {
+        for (unsigned i = 0; i < EMBER_ENEMIES; ++i)
+            if (s->enemies[i].alive && within(s->pet.x, s->pet.y,
+                s->enemies[i].x, s->enemies[i].y, ember_lighting[0].pillar_radius))
+                ember_sim_hit(s, i, &h);
+    } else {
+        struct ember_shot *q = shot(s, 0, s->pet.x, s->pet.y, s->pet.damage, 4, 120);
+        q->pet = 1;
+        velocity(e->x - q->x, e->y - q->y, 240, &q->vx, &q->vy);
     }
 }
 static void shots_step(struct ember_sim *s)
@@ -409,6 +640,11 @@ static void shots_step(struct ember_sim *s)
     for (unsigned i = 0; i < EMBER_SHOTS; ++i) {
         struct ember_shot *p = &s->shots[i];
         if (!p->alive) continue;
+        if (p->pet && s->pet.category == 2) {
+            int target = nearest(s);
+            if (target >= 0) velocity(s->enemies[target].x - p->x,
+                s->enemies[target].y - p->y, 240, &p->vx, &p->vy);
+        }
         p->x += p->vx;
         p->y += p->vy;
         if (p->follow && p->kind != 3) { p->x = s->player.x; p->y = s->player.y; }
@@ -420,7 +656,7 @@ static void shots_step(struct ember_sim *s)
         if (p->hostile) {
             if (within(p->x, p->y, s->player.x, s->player.y,
                        p->radius + ember_characters[0].body_radius)) {
-                player_hurt(s, p->damage, p->weapon);
+                player_hurt(s, p->damage, p->weapon, p->x, p->y);
                 p->alive = 0;
             }
         } else if (p->kind == 0) {
@@ -434,7 +670,11 @@ static void shots_step(struct ember_sim *s)
                         if (!p->alive || !enemy->alive || e == p->last_hit) continue;
                         if (within(p->x, p->y, enemy->x, enemy->y,
                                    p->radius + ember_enemies[enemy->kind].radius)) {
-                            enemy_hit(s, (unsigned)e, p->damage, p->weapon, 0, 0);
+                            if (p->pet) {
+                                struct ember_attack hit = {.base = p->damage, .attack = 100,
+                                    .crit_damage = 150, .share = {100,0,0,0,0,0}};
+                                ember_sim_hit(s, (unsigned)e, &hit);
+                            } else enemy_hit(s, (unsigned)e, p->damage, p->weapon, 0, 0);
                             p->last_hit = (int16_t)e;
                             if (p->pierce) --p->pierce;
                             else p->alive = 0;
@@ -464,9 +704,13 @@ static void shots_step(struct ember_sim *s)
         if (!p->alive) --s->shot_count;
     }
 }
-static void player_step(struct ember_sim *s, uint8_t input, uint8_t pressed)
+static void player_step(struct ember_sim *s, uint16_t input, uint16_t pressed)
 {
     struct ember_player *p = &s->player;
+    ember_defense_step(&p->defense);
+    if (p->action_time) --p->action_time;
+    else p->action = EMBER_IDLE;
+    if (p->cooldown_k) --p->cooldown_k;
     if (p->cooldown_a) --p->cooldown_a;
     if (p->cooldown_b) --p->cooldown_b;
     if (p->invulnerable) --p->invulnerable;
@@ -479,39 +723,61 @@ static void player_step(struct ember_sim *s, uint8_t input, uint8_t pressed)
     int dy = !!(input & EMBER_DOWN) - !!(input & EMBER_UP);
     if (dx) p->facing = dx > 0 ? 0 : 2;
     else if (dy) p->facing = dy > 0 ? 1 : 3;
-    if ((input & (EMBER_A | EMBER_B)) == (EMBER_A | EMBER_B)) {
-        if ((pressed & (EMBER_A | EMBER_B)) && p->charge == ember_characters[0].charge_max) {
-            shot(s, 5, p->x, p->y,
-                 ember_characters[0].ultimate_damage * s->attributes[EMBER_ATTACK] / 100,
-                 ember_characters[0].ultimate_radius * s->attributes[EMBER_AREA] / 100,
-                 ember_characters[0].ultimate_frames);
-            p->charge = 0;
-            event(s, 5, (unsigned)ember_characters[0].ultimate_damage, p->x, p->y);
+    if (pressed & EMBER_SWAP) {
+        unsigned old = p->main_weapon;
+        p->main_weapon = p->sub_weapon;
+        p->sub_weapon = (uint8_t)old;
+        p->combo = 0;
+        ember_sim_attributes(s);
+    }
+    if ((pressed & EMBER_U) && p->charge == ember_characters[0].charge_max) {
+        shot(s, 5, p->x, p->y, ember_characters[0].ultimate_damage,
+             ember_characters[0].ultimate_radius * s->attributes[EMBER_AREA] / 100,
+             ember_characters[0].ultimate_frames);
+        p->charge = 0;
+        p->action = EMBER_CAST;
+        p->action_time = 12;
+        event(s, 5, (unsigned)ember_characters[0].ultimate_damage, p->x, p->y);
+    }
+    if (((pressed & EMBER_DASH) && !p->cooldown_a) ||
+        ((pressed & EMBER_K) && !p->cooldown_k)) {
+        if (!dx && !dy) {
+            dx = p->facing == 0 ? 1 : p->facing == 2 ? -1 : 0;
+            dy = p->facing == 1 ? 1 : p->facing == 3 ? -1 : 0;
         }
-    } else {
-        if ((pressed & EMBER_A) && !p->cooldown_a) {
-            if (!dx && !dy) {
-                dx = p->facing == 0 ? 1 : p->facing == 2 ? -1 : 0;
-                dy = p->facing == 1 ? 1 : p->facing == 3 ? -1 : 0;
+        velocity(dx * EMBER_Q, dy * EMBER_Q,
+                 p->speed * ember_characters[0].dash_speed_percent / 100,
+                 &s->dash_vx, &s->dash_vy);
+        p->dash = (uint16_t)ember_characters[0].dash_frames;
+        p->defense.invulnerable = p->dash;
+        if (pressed & EMBER_K) p->cooldown_k = (uint16_t)s->attributes[EMBER_DASH_COOLDOWN];
+        else p->cooldown_a = (uint16_t)s->attributes[EMBER_DASH_COOLDOWN];
+        event(s, 3, 0, p->x, p->y);
+    }
+    if ((pressed & EMBER_L) && !p->cooldown_b) {
+        shot(s, 4, p->x, p->y, ember_characters[0].seed_damage,
+             ember_characters[0].seed_radius * s->attributes[EMBER_AREA] / 100,
+             ember_characters[0].seed_delay);
+        p->cooldown_b = (uint16_t)(ember_characters[0].seed_cooldown *
+            (100 - s->attributes[EMBER_COOLDOWN]) / 100);
+        p->action = EMBER_CAST;
+        p->action_time = 12;
+        event(s, 4, (unsigned)ember_characters[0].seed_damage, p->x, p->y);
+    }
+    if (pressed & EMBER_INTERACT) {
+        for (unsigned i = 0; i < 8; ++i) {
+            if (!s->pillars[i].lit && within(p->x, p->y, s->pillars[i].x, s->pillars[i].y,
+                ember_lighting[0].interact_radius) && s->oil >= ember_lighting[0].pillar_cost) {
+                s->oil -= ember_lighting[0].pillar_cost;
+                s->pillars[i].lit = 1;
+                p->action = EMBER_INTERACTING;
+                p->action_time = 12;
+                break;
             }
-            velocity(dx * EMBER_Q, dy * EMBER_Q,
-                     p->speed * ember_characters[0].dash_speed_percent / 100,
-                     &s->dash_vx, &s->dash_vy);
-            p->dash = (uint16_t)ember_characters[0].dash_frames;
-            p->cooldown_a = (uint16_t)s->attributes[EMBER_DASH_COOLDOWN];
-            event(s, 3, 0, p->x, p->y);
-        }
-        if ((pressed & EMBER_B) && !p->cooldown_b) {
-            shot(s, 4, p->x, p->y,
-                 ember_characters[0].seed_damage * s->attributes[EMBER_ATTACK] / 100,
-                 ember_characters[0].seed_radius * s->attributes[EMBER_AREA] / 100,
-                 ember_characters[0].seed_delay);
-            p->cooldown_b = (uint16_t)(ember_characters[0].seed_cooldown *
-                (100 - s->attributes[EMBER_COOLDOWN]) / 100);
-            event(s, 4, (unsigned)ember_characters[0].seed_damage, p->x, p->y);
         }
     }
     if (p->dash) {
+        p->action = EMBER_DASHING;
         p->x += s->dash_vx;
         p->y += s->dash_vy;
         if (p->dash % ember_characters[0].trail_interval == 0)
@@ -520,6 +786,7 @@ static void player_step(struct ember_sim *s, uint8_t input, uint8_t pressed)
                  ember_characters[0].trail_duration);
         --p->dash;
     } else {
+        if ((dx || dy) && !p->action_time) p->action = EMBER_MOVE;
         ember_fixed vx, vy;
         velocity(dx * EMBER_Q, dy * EMBER_Q, p->speed, &vx, &vy);
         p->x += vx;
@@ -537,6 +804,9 @@ static void pickups_step(struct ember_sim *s, int all)
         struct ember_pickup *p = &s->pickups[i];
         if (p->alive && (all || within(p->x, p->y, s->player.x, s->player.y,
                                       s->attributes[EMBER_PICKUP]))) {
+            s->oil = minimum(ember_lighting[0].oil_max, s->oil + ember_lighting[0].ember_oil);
+            s->player.charge = (uint16_t)minimum(ember_characters[0].charge_max,
+                s->player.charge + ember_characters[0].charge_kill);
             s->player.xp += p->xp * (unsigned)s->attributes[EMBER_XP] / 100;
             p->alive = 0;
             --s->pickup_count;
@@ -553,7 +823,7 @@ static void upgrade_offer(struct ember_sim *s)
     for (unsigned i = 0; i < EMBER_RELICS_COUNT; ++i) relics += !!s->player.relic_level[i];
     for (unsigned i = 0; i < EMBER_WEAPONS_COUNT; ++i) {
         if (s->player.weapon_level[i] < ember_weapons[i].level_max &&
-            (s->player.weapon_level[i] || weapons < 6))
+            (s->player.weapon_level[i] || weapons < 2))
             eligible[count++] = (struct ember_choice){0, (uint8_t)i, 0};
     }
     for (unsigned i = 0; i < EMBER_RELICS_COUNT; ++i)
@@ -569,7 +839,7 @@ static void upgrade_offer(struct ember_sim *s)
             eligible[count++] = (struct ember_choice){2, (uint8_t)i, (uint8_t)w};
         }
     }
-    /* E2's XP curve cannot exhaust its 58 weapon/relic/inscription upgrades. */
+    /* Existing five-wave content does not exhaust its eligible upgrades. */
     for (unsigned i = 0; i < 3; ++i) {
         unsigned pick = ember_random(&s->loot_rng) % count;
         s->choices[i] = eligible[pick];
@@ -586,13 +856,16 @@ static void upgrade_choose(struct ember_sim *s)
 {
     const struct ember_choice *c = &s->choices[s->selected];
     int old_hp = s->player.max_hp;
-    if (c->kind == 0) ++s->player.weapon_level[c->id];
+    if (c->kind == 0) {
+        if (!s->player.weapon_level[c->id]) s->player.sub_weapon = c->id;
+        ++s->player.weapon_level[c->id];
+    }
     else if (c->kind == 1) ++s->player.relic_level[c->id];
     else {
         unsigned slot = !!s->player.inscription[c->slot][0];
         s->player.inscription[c->slot][slot] = (uint8_t)(c->id + 1);
     }
-    attributes(s);
+    ember_sim_attributes(s);
     s->player.hp += s->player.max_hp - old_hp;
     s->phase = EMBER_PLAY;
     event(s, 7, 0, s->player.x, s->player.y);
@@ -620,14 +893,39 @@ void ember_sim_init(struct ember_sim *s, uint32_t seed)
     s->player.y = s->world_height / 2;
     s->player.level = 1;
     s->player.next_xp = (uint32_t)ember_characters[0].initial_xp;
-    s->player.weapon_level[0] = 1;
-    attributes(s);
+    s->player.weapon_level[0] = s->player.weapon_level[1] = 1;
+    s->player.main_weapon = 0;
+    s->player.sub_weapon = 1;
+    s->player.pet_weapon = 0;
+    ember_defense_init(&s->player.defense, ember_characters[0].max_hp);
+    s->player.defense.hurt_frames = (uint16_t)ember_characters[0].hurt_interval;
+    s->oil = ember_lighting[0].oil_max;
+    s->pet.damage = ember_system[0].pet_damage;
+    s->pet.cooldown = (uint16_t)ember_system[0].pet_cooldown;
+    for (unsigned i = 0; i < 4; ++i) {
+        s->weapon_system[i].category = i == 1 ? EMBER_CODEX : EMBER_STAFF;
+        s->weapon_system[i].share[EMBER_DAMAGE_FIRE] = 100;
+        for (unsigned t = 0; t < EMBER_TAGS_COUNT; ++t)
+            if (strstr(ember_weapons[i].tags, ember_tags[t].id))
+                s->weapon_system[i].tags |= 1u << t;
+    }
+    for (unsigned i = 0; i < 8; ++i) {
+        s->pillars[i].x = s->player.x + ((int)(i % 4) - 2) *
+            ember_lighting[0].pillar_spacing * EMBER_Q;
+        s->pillars[i].y = s->player.y + ((int)(i / 4) * 2 - 1) *
+            ember_lighting[0].pillar_spacing * EMBER_Q;
+    }
+    ember_sim_attributes(s);
     s->player.hp = s->player.max_hp;
+    s->pet.category = 1;
+    s->in_light = 1;
+    s->lamp_radius = ember_lighting[0].radius_base +
+        s->oil * ember_lighting[0].radius_per_oil / 10000;
     grid_build(s);
 }
-void ember_sim_step(struct ember_sim *s, uint8_t input)
+void ember_sim_step(struct ember_sim *s, uint16_t input)
 {
-    uint8_t pressed = input & (uint8_t)~s->previous_input;
+    uint16_t pressed = input & (uint16_t)~s->previous_input;
     s->previous_input = input;
     s->events.count = 0;
     ++s->frame;
@@ -646,6 +944,22 @@ void ember_sim_step(struct ember_sim *s, uint8_t input)
     if (s->paused) return;
     ++s->combat_frame;
     player_step(s, input, pressed);
+    const struct ember_lighting_row *light = &ember_lighting[0];
+    s->oil_fraction += s->combat_frame > (unsigned)ember_stages[0].time_limit ?
+        light->tide_drain * 100 / s->attributes[EMBER_FUEL_EFFICIENCY] :
+        light->drain * 100 / s->attributes[EMBER_FUEL_EFFICIENCY];
+    s->oil = maximum(0, s->oil - s->oil_fraction / 60);
+    s->oil_fraction %= 60;
+    s->lamp_radius = (light->radius_base + s->oil * light->radius_per_oil / 10000) *
+        s->attributes[EMBER_LAMP_RADIUS] / 100;
+    s->in_light = (uint8_t)illuminated(s, s->player.x, s->player.y);
+    for (unsigned i = 0; i < 8; ++i) {
+        if (s->pillars[i].x < s->safe_left || s->pillars[i].x > s->safe_right ||
+            s->pillars[i].y < s->safe_top || s->pillars[i].y > s->safe_bottom)
+            s->pillars[i].lit = 0;
+        if (s->pillars[i].lit && within(s->player.x, s->player.y,
+            s->pillars[i].x, s->pillars[i].y, light->pillar_radius)) s->in_light = 1;
+    }
     const struct ember_stages_row *stage = &ember_stages[0];
     if (s->combat_frame > (unsigned)stage->time_limit) {
         if ((s->combat_frame - stage->time_limit) % stage->shrink_interval == 0) {
@@ -658,7 +972,7 @@ void ember_sim_step(struct ember_sim *s, uint8_t input)
         if (s->combat_frame % 60 == 0 &&
             (s->player.x < s->safe_left || s->player.x > s->safe_right ||
              s->player.y < s->safe_top || s->player.y > s->safe_bottom))
-            player_hurt(s, stage->outside_damage, s->wave);
+            player_hurt(s, stage->outside_damage, s->wave, s->player.x, s->player.y);
     }
     const struct ember_waves_row *w = &ember_waves[s->wave - 1];
     if (!s->rest) {
@@ -669,8 +983,15 @@ void ember_sim_step(struct ember_sim *s, uint8_t input)
     grid_build(s);
     enemies_step(s);
     grid_build(s);
-    weapons_step(s);
+    weapons_step(s, input);
     shots_step(s);
+    s->player.action_frame = (uint8_t)((s->combat_frame / 4) % 8);
+    s->player.hand_x = (int16_t)(s->player.facing == 0 ? 8 : s->player.facing == 2 ? -8 : 0);
+    s->player.hand_y = (int16_t)(s->player.facing == 1 ? 8 : s->player.facing == 3 ? -8 : 2);
+    if (s->player.action == EMBER_ATTACKING) {
+        s->player.hand_x += (int16_t)((int)s->player.action_frame - 4);
+        s->player.hand_y -= (int16_t)(s->player.combo * 2);
+    }
     pickups_step(s, !!s->rest);
     if (s->phase == EMBER_LOST) return;
     if (s->rest) {
@@ -705,6 +1026,15 @@ void ember_sim_summary(const struct ember_sim *s, char *text, size_t bytes)
         enemy_shield += s->enemies[i].shield;
         burning += !!s->enemies[i].burn;
     }
+    unsigned status_frames[EMBER_STATUS_COUNT] = {0};
+    int32_t posture = 0;
+    unsigned pillars = 0;
+    for (unsigned i = 0; i < 8; ++i) pillars |= s->pillars[i].lit << i;
+    for (unsigned i = 0; i < EMBER_ENEMIES; ++i) if (s->enemies[i].alive) {
+        posture += s->enemies[i].defense.posture;
+        for (unsigned n = 0; n < EMBER_STATUS_COUNT; ++n)
+            status_frames[n] += s->enemies[i].defense.status[n].frames;
+    }
     snprintf(text, bytes,
         "frame=%u combat=%u phase=%u paused=%u wave=%u wave_frame=%u rest=%u spawned=%u "
         "enemies=%u shots=%u pickups=%u hp=%d max_hp=%d armor=%d speed=%d x=%d y=%d "
@@ -712,7 +1042,9 @@ void ember_sim_summary(const struct ember_sim *s, char *text, size_t bytes)
         "enemy_hp=%d enemy_shield=%d burning=%u weapons=%u,%u,%u,%u "
         "relics=%u,%u,%u,%u,%u,%u inscriptions=%u,%u,%u,%u,%u,%u,%u,%u "
         "attack=%d area=%d rate=%d timers=%u,%u,%u,%u safe=%d,%d,%d,%d "
-        "rng=%u,%u,%u seed=%u",
+        "rng=%u,%u,%u seed=%u oil=%d radius=%d light=%u slots=%u,%u,%u action=%u,%u "
+        "shield=%d chain=%u pillars=%u posture=%d statuses=%u,%u,%u,%u,%u,%u,%u,%u "
+        "pet=%d,%d,%u facing=%u hand=%d,%d",
         (unsigned)s->frame, (unsigned)s->combat_frame, (unsigned)s->phase, (unsigned)s->paused,
         (unsigned)s->wave, (unsigned)s->wave_frame, (unsigned)s->rest, (unsigned)s->spawned,
         (unsigned)s->alive_count, (unsigned)s->shot_count, (unsigned)s->pickup_count, (int)p->hp,
@@ -732,5 +1064,10 @@ void ember_sim_summary(const struct ember_sim *s, char *text, size_t bytes)
         (unsigned)s->weapon_timer[1], (unsigned)s->weapon_timer[2], (unsigned)s->weapon_timer[3],
         (int)s->safe_left, (int)s->safe_top, (int)s->safe_right, (int)s->safe_bottom,
         (unsigned)s->spawn_rng.state, (unsigned)s->combat_rng.state, (unsigned)s->loot_rng.state,
-        (unsigned)s->rng_seed);
+        (unsigned)s->rng_seed, (int)s->oil, (int)s->lamp_radius, s->in_light,
+        p->main_weapon, p->sub_weapon, p->pet_weapon, p->action, p->action_frame,
+        (int)p->defense.permanent_shield, s->trigger_peak, pillars, (int)posture,
+        status_frames[0], status_frames[1], status_frames[2], status_frames[3],
+        status_frames[4], status_frames[5], status_frames[6], status_frames[7],
+        (int)s->pet.x, (int)s->pet.y, p->pet_timer, p->facing, p->hand_x, p->hand_y);
 }

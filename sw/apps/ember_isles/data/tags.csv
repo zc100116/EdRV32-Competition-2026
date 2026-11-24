@@ -17,3 +17,10 @@ on_kill,on_kill,,,on_kill
 on_hurt,on_hurt,,,on_hurt
 on_dash,on_dash,,,on_dash
 periodic,periodic,,,periodic
+single,single,,single,
+group,group,,group,
+chain,chain,,chain,
+charge,charge,,charge,
+combo,combo,,combo,
+light,light,,light,
+dark,dark,,dark,

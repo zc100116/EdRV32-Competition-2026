@@ -13,7 +13,7 @@
 #include <stdlib.h>
 static unsigned keys, millis, show_perf;
 void plat_init(void) {}
-uint32_t plat_keys(void) { return keys; }
+uint32_t plat_game_keys(void) { return keys; }
 uint32_t plat_millis(void) { return millis; }
 void *plat_dma_alloc(size_t bytes, size_t alignment)
 {
@@ -110,6 +110,14 @@ int main(void)
     step(0);
     step(EMBER_START);
     assert(ember_game_state()->phase == EMBER_WON);
+    fixture->phase = EMBER_PLAY;
+    fixture->paused = 0;
+    fixture->rest = 10000;
+    step(0);
+    unsigned main = fixture->player.main_weapon;
+    step(EMBER_SWAP);
+    assert(fixture->player.sub_weapon == main);
+    assert(ember_game_recording()->input[0] == EMBER_START);
     puts("PASS game flow: title, run seed/recording, SELECT edge, pause, return, replay end");
     return 0;
 }

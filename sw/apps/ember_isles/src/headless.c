@@ -1,6 +1,6 @@
 /* File: headless.c
- * Spec: ember_isles tech 3-4; E1/E2 replay acceptance.
- * Description: Run recorded controller bytes through the shared GPU game loop.
+ * Spec: ember_isles tech 3-4; E3 replay acceptance.
+ * Description: Run recorded keyboard bitmaps through the shared GPU game loop.
  * Clock domain: virtual 60 Hz host frontend.
  */
 #include "game.h"
@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 static unsigned frame;
-static uint8_t keys;
+static uint16_t keys;
 static struct ember_replay replay;
 uint32_t pc_frontend_wait(void) { return 800; }
 uint32_t pc_frontend_keys(void) { return keys; }
@@ -67,10 +67,11 @@ int main(int argc, char **argv)
     puts("PERF,frame,busy,vertices,triangles,quads,pixels,tex_stall,read_wait,resolve,obj");
     for (frame = 1; frame <= limit; ++frame) {
         keys = replay.input[frame - 1];
+        pc_soc_game_input(keys, (struct plat_pointer_state){0});
         ember_game_frame(frame);
         plat_wait_vsync();
         if (frame % 60 == 0) {
-            char summary[1024];
+            char summary[2048];
             ember_sim_summary(ember_game_state(), summary, sizeof(summary));
             printf("STATE,%s\n", summary);
         }
