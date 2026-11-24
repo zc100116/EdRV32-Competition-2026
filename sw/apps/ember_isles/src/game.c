@@ -20,6 +20,8 @@ static unsigned tick_frames;
 static uint32_t previous_tick_millis, tick_credit;
 static struct ember_ui_state ui;
 static uint16_t previous_keys;
+static uint8_t previous_pointer_buttons;
+static uint16_t pointer_confirm;
 static unsigned replay_mode;
 static uint32_t run_number;
 static struct ember_replay recording;
@@ -82,10 +84,39 @@ void ember_game_replay(uint32_t seed)
 }
 const struct ember_replay *ember_game_recording(void) { return &recording; }
 const struct ember_sim *ember_game_state(void) { return &simulation; }
+/* Menu clicks become recorded keyboard commands; pointer coordinates never enter sim. */
+static uint16_t menu_pointer_keys(void)
+{
+    struct plat_pointer_state pointer = plat_pointer();
+    unsigned clicked = pointer.buttons & (uint8_t)~previous_pointer_buttons & 1u;
+    previous_pointer_buttons = pointer.buttons;
+    uint16_t keys = pointer_confirm;
+    pointer_confirm = 0;
+    if (!clicked) return keys;
+    int x = pointer.x;
+    int y = pointer.y;
+    if (simulation.phase == EMBER_UPGRADE && y >= 132 && y < 272) {
+        for (unsigned i = 0; i < 3; ++i) {
+            int left = 40 + (int)i * 190;
+            if (x < left || x >= left + 180) continue;
+            unsigned delta = (i + 3 - simulation.selected) % 3;
+            if (!delta) return EMBER_J;
+            pointer_confirm = EMBER_J;
+            return delta == 1 ? EMBER_RIGHT : EMBER_LEFT;
+        }
+    }
+    if ((simulation.phase == EMBER_MENU || simulation.phase == EMBER_WON ||
+         simulation.phase == EMBER_LOST) && x >= 218 && x < 422 && y >= 237 && y < 267)
+        return EMBER_START;
+    if (simulation.paused && x >= 218 && x < 422 && y >= 185 && y < 215)
+        return EMBER_START;
+    return keys;
+}
 void ember_game_tick(void)
 {
     ++tick_frames;
     uint16_t keys = (uint16_t)plat_game_keys();
+    if (!replay_mode) keys |= menu_pointer_keys();
     uint16_t pressed = keys & (uint16_t)~previous_keys;
     previous_keys = keys;
     if (pressed & EMBER_SELECT) ui.show_perf ^= 1;

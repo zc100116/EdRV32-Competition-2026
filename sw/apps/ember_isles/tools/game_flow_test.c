@@ -12,8 +12,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 static unsigned keys, millis, show_perf;
+static struct plat_pointer_state pointer;
 void plat_init(void) {}
 uint32_t plat_game_keys(void) { return keys; }
+struct plat_pointer_state plat_pointer(void) { return pointer; }
 uint32_t plat_millis(void) { return millis; }
 void *plat_dma_alloc(size_t bytes, size_t alignment)
 {
@@ -73,10 +75,12 @@ int main(void)
 {
     ember_game_init();
     assert(ember_game_state()->phase == EMBER_MENU);
-    step(EMBER_START);
+    pointer = (struct plat_pointer_state){320, 250, 1};
+    step(0);
     assert(ember_game_state()->phase == EMBER_PLAY);
     uint32_t seed = ember_game_state()->rng_seed;
     assert(ember_game_recording()->seed == seed && ember_game_recording()->count == 1);
+    pointer.buttons = 0;
     step(0);
     step(EMBER_SELECT);
     assert(show_perf);
@@ -92,6 +96,23 @@ int main(void)
     step(EMBER_START);
     assert(!ember_game_state()->paused);
     struct ember_sim *fixture = (struct ember_sim *)(uintptr_t)ember_game_state();
+    fixture->phase = EMBER_UPGRADE;
+    fixture->selected = 0;
+    fixture->choices[2] = (struct ember_choice){0, 0, 0};
+    pointer = (struct plat_pointer_state){450, 150, 1};
+    step(0);
+    assert(fixture->phase == EMBER_UPGRADE && fixture->selected == 2);
+    pointer.buttons = 0;
+    step(0);
+    assert(fixture->phase == EMBER_PLAY);
+    unsigned recorded = ember_game_recording()->count;
+    assert(ember_game_recording()->input[recorded - 2] == EMBER_LEFT);
+    assert(ember_game_recording()->input[recorded - 1] == EMBER_J);
+    pointer = (struct plat_pointer_state){450, 150, 1};
+    step(0);
+    assert(fixture->phase == EMBER_PLAY);
+    assert(ember_game_recording()->input[recorded] == 0);
+    pointer.buttons = 0;
     fixture->phase = EMBER_WON;
     step(0);
     unsigned count = ember_game_recording()->count;
