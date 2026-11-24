@@ -30,7 +30,7 @@ void ember_defense_init(struct ember_defense *d, int32_t max_hp)
 static void posture(struct ember_defense *d, int damage)
 {
     if (!d->posture_max || d->broken) return;
-    if (d->status[EMBER_STUN].frames) damage *= 2;
+    if (d->status[EMBER_STUN].frames) damage = damage * ember_system[0].stun_posture_percent / 100;
     d->posture = max(0, d->posture - damage);
     if (!d->posture) d->broken = (uint16_t)ember_system[0].broken_frames;
 }
@@ -38,19 +38,22 @@ unsigned ember_status_apply(struct ember_defense *d, unsigned status, int durati
 {
     const struct ember_statuses_row *row = &ember_statuses[status];
     struct ember_status_state *state = &d->status[status];
-    if (d->rank >= 2 && (status == EMBER_STUN || status == EMBER_CHILL)) {
+    if (d->rank >= 2 && status == EMBER_STUN) {
         posture(d, row->posture * strength / 100);
         return 0;
     }
+    if (d->rank >= 2 && status == EMBER_CHILL)
+        posture(d, row->posture * strength / 100);
     unsigned reaction = 0;
     if (status == EMBER_IGNITE && d->status[EMBER_WET].frames) {
         d->status[EMBER_WET] = (struct ember_status_state){0};
         reaction |= 1u; /* steam */
     }
     state->frames = (uint16_t)(duration *
-        (status == EMBER_CHILL || status == EMBER_STUN ? 100 - d->tenacity : 100) / 100);
+        ((status == EMBER_CHILL || status == EMBER_STUN || status == EMBER_BLIND) ?
+            100 - d->tenacity : 100) / 100);
     state->stacks = (uint8_t)min(row->stacks, state->stacks + 1);
-    if (status == EMBER_CHILL && state->stacks == row->stacks)
+    if (status == EMBER_CHILL && d->rank < 2 && state->stacks == row->stacks)
         d->frozen = (uint16_t)(row->freeze_frames * (100 - d->tenacity) / 100);
     if (status == EMBER_SHOCK) reaction |= 2u;
     return reaction;
@@ -90,7 +93,7 @@ struct ember_damage_result ember_damage(struct ember_rng *rng, const struct embe
     total = total * (100 + h->increased) / 100;
     for (unsigned i = 0; i < 4; ++i) total = total * (100 + h->more[i]) / 100;
     if (!(h->flags & EMBER_DOT) || (h->flags & EMBER_DOT_CRIT)) {
-        if ((int32_t)(ember_random(rng) % 100) < h->crit) {
+        if ((int32_t)(ember_random(rng) % 100) < h->crit || (h->flags & EMBER_FORCE_CRIT)) {
             total = total * h->crit_damage / 100;
             r.crit = 1;
             if (h->crit > 100 && (int32_t)(ember_random(rng) % 100) < h->crit - 100) {
@@ -124,12 +127,14 @@ struct ember_damage_result ember_damage(struct ember_rng *rng, const struct embe
         int share = shares[i] + h->added[i];
         if (share > dominant) { dominant = share; r.dominant = (uint8_t)i; }
         int64_t part = total * share / 100;
+        part = part * (100 + h->element_more[i]) / 100;
         if (i != EMBER_DAMAGE_TRUE) {
             if (r.blocked) part = part * (100 - d->block_strength) / 100;
             if (i == EMBER_DAMAGE_IRON) {
                 int armor = d->armor;
                 if (!d->immune_break) armor -= d->status[EMBER_BREAK_ARMOR].stacks *
-                    ember_statuses[EMBER_BREAK_ARMOR].strength;
+                    (ember_statuses[EMBER_BREAK_ARMOR].strength + d->break_bonus);
+                if (d->status[EMBER_WET].frames) armor = armor * (100 - d->rust) / 100;
                 armor = max(0, armor);
                 if (!d->immune_pierce) armor = armor * (100 - h->penetration) / 100;
                 part = part * ember_system[0].armor_k / (ember_system[0].armor_k + armor);

@@ -71,33 +71,36 @@ static void choice(struct ember_ui_canvas *out, const struct ember_sim *sim, uns
     const char *name;
     const char *tag;
     const char *effect;
-    static const char *weapon_effects[4] = {
-        "AUTO AIM / EMBER SHOT", "PULSE / AREA DAMAGE",
-        "LINGERING / BURN", "LOBBED / EXPLOSION"
-    };
-    static const char *inscription_effects[4] = {
-        "SPLIT INTO 3 SHOTS", "AREA FOLLOWS YOU",
-        "+25% VS BURNING", "LARGER DEATH BLAST"
-    };
     char detail[64];
     if (c->kind == 0) {
         name = ember_weapons[c->id].name;
-        tag = "WEAPON";
-        effect = weapon_effects[c->id];
+        tag = "武器";
+        effect = ember_weapons[c->id].description;
         (void)snprintf(detail, sizeof(detail), "LEVEL %u / %d",
                        sim->player.weapon_level[c->id] + 1, (int)ember_weapons[c->id].level_max);
     } else if (c->kind == 1) {
         name = ember_relics[c->id].name;
-        tag = "RELIC";
-        effect = "PASSIVE STAT BONUS";
+        tag = "遗物";
+        effect = ember_relics[c->id].description;
         (void)snprintf(detail, sizeof(detail), "%s +%d%s", ember_relics[c->id].attribute,
                        (int)(ember_relics[c->id].flat ? ember_relics[c->id].flat :
                        ember_relics[c->id].increased),
                        ember_relics[c->id].flat ? "" : "%");
+    } else if (c->kind == 3) {
+        name = c->id == 1 ? ember_weapons[c->slot].evolution_a :
+            ember_weapons[c->slot].evolution_b;
+        tag = "进化";
+        effect = ember_weapons[c->slot].description;
+        (void)snprintf(detail, sizeof(detail), "%s", ember_weapons[c->slot].name);
+    } else if (c->kind == 4) {
+        name = ember_pets[c->id].name;
+        tag = "宠物";
+        effect = "提高宠物伤害、攻速和技能效率";
+        (void)snprintf(detail, sizeof(detail), "%u / 5", sim->pet_level + 1);
     } else {
         name = ember_inscriptions[c->id].name;
-        tag = "INSCRIPTION";
-        effect = inscription_effects[c->id];
+        tag = "铭文";
+        effect = ember_inscriptions[c->id].description;
         (void)snprintf(detail, sizeof(detail), "FOR %s", ember_weapons[c->slot].name);
     }
     panel(out, x, 132, 180, 140, sim->selected == i);
