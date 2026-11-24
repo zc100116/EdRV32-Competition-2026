@@ -1,0 +1,96 @@
+{
+  "name": "initial-weapons",
+  "grid": [
+    68,
+    128
+  ],
+  "cell": [
+    34,
+    64
+  ],
+  "palette_file": "initial-weapons-palette.json",
+  "palette_entries": 32,
+  "format": 1,
+  "atlas_group": "initial-weapons",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "staff_ember/base",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "prop",
+      "action": "staff_ember/base",
+      "frame": 0,
+      "anchor": [
+        17,
+        42
+      ],
+      "grip": [
+        17,
+        42
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "codex_ember/base",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "prop",
+      "action": "codex_ember/base",
+      "frame": 0,
+      "anchor": [
+        17,
+        39
+      ],
+      "grip": [
+        17,
+        39
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "staff_ember/evo_a",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "prop",
+      "action": "staff_ember/evo_a",
+      "frame": 0,
+      "anchor": [
+        17,
+        42
+      ],
+      "grip": [
+        17,
+        42
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "staff_ember/evo_b",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "prop",
+      "action": "staff_ember/evo_b",
+      "frame": 0,
+      "anchor": [
+        17,
+        42
+      ],
+      "grip": [
+        17,
+        42
+      ],
+      "hand_primary": null
+    }
+  ]
+}

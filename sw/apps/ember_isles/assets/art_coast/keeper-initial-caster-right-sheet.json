@@ -1,0 +1,245 @@
+{
+  "name": "keeper-initial-caster-right",
+  "grid": [
+    256,
+    256
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "foot_baseline": 58,
+  "format": 1,
+  "pixel_edits": [],
+  "cells": [
+    {
+      "id": "right/cast/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "right",
+      "action": "cast",
+      "frame": 0,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/cast/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "right",
+      "action": "cast",
+      "frame": 1,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/cast/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "right",
+      "action": "cast",
+      "frame": 2,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/cast/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "right",
+      "action": "cast",
+      "frame": 3,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/attack_staff/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "right",
+      "action": "attack_staff",
+      "frame": 0,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/attack_staff/1",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "right",
+      "action": "attack_staff",
+      "frame": 1,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/attack_staff/2",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "right",
+      "action": "attack_staff",
+      "frame": 2,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/attack_staff/3",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "right",
+      "action": "attack_staff",
+      "frame": 3,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/attack_codex/0",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "right",
+      "action": "attack_codex",
+      "frame": 0,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/attack_codex/1",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "right",
+      "action": "attack_codex",
+      "frame": 1,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/attack_codex/2",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "right",
+      "action": "attack_codex",
+      "frame": 2,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/attack_codex/3",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "right",
+      "action": "attack_codex",
+      "frame": 3,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/charge_staff/0",
+      "cell": [
+        0,
+        3
+      ],
+      "direction": "right",
+      "action": "charge_staff",
+      "frame": 0,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/charge_staff/1",
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "right",
+      "action": "charge_staff",
+      "frame": 1,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/charge_staff/2",
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "right",
+      "action": "charge_staff",
+      "frame": 2,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "right/charge_staff/3",
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "right",
+      "action": "charge_staff",
+      "frame": 3,
+      "feet": [
+        32,
+        58
+      ]
+    }
+  ],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "atlas_group": "keeper",
+  "palette_file": "keeper-palette.json",
+  "palette_entries": 255
+}

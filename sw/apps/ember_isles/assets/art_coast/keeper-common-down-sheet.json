@@ -1,0 +1,244 @@
+{
+  "name": "keeper-common-down",
+  "grid": [
+    256,
+    256
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "foot_baseline": 58,
+  "format": 1,
+  "pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/dash/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "dash",
+      "frame": 0,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/dash/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "dash",
+      "frame": 1,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/dash/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "dash",
+      "frame": 2,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/dash/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "dash",
+      "frame": 3,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/hit/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "hit",
+      "frame": 0,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/hit/1",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "hit",
+      "frame": 1,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/hit/2",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "hit",
+      "frame": 2,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/hit/3",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "hit",
+      "frame": 3,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/death/0",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "death",
+      "frame": 0,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/death/1",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down",
+      "action": "death",
+      "frame": 1,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/death/2",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "down",
+      "action": "death",
+      "frame": 2,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/death/3",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "down",
+      "action": "death",
+      "frame": 3,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/interact/0",
+      "cell": [
+        0,
+        3
+      ],
+      "direction": "down",
+      "action": "interact",
+      "frame": 0,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/interact/1",
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "down",
+      "action": "interact",
+      "frame": 1,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/interact/2",
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "down",
+      "action": "interact",
+      "frame": 2,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/interact/3",
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "down",
+      "action": "interact",
+      "frame": 3,
+      "feet": [
+        32,
+        58
+      ]
+    }
+  ],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "atlas_group": "keeper",
+  "palette_file": "keeper-palette.json"
+}

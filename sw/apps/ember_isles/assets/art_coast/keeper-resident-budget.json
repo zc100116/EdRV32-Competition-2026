@@ -1,0 +1,60 @@
+{
+  "configuration": "keeper / staff_ember + codex_ember",
+  "half_limit_bytes": 98304,
+  "other_items": [
+    {
+      "id": "initial_weapons",
+      "actual_bytes": 4096,
+      "low_estimate": 1024,
+      "high_estimate": 4096,
+      "basis": "GPU-model packed actual I8 base staff+codex, or focused staff+codex; three material shapes remain CPU source, no runtime scaling/rotation workaround added"
+    },
+    {
+      "id": "initial_pet",
+      "actual_bytes": 0,
+      "basis": "sim init pet_kind=255; optional coast pet is a separate configuration"
+    },
+    {
+      "id": "projectiles_vfx",
+      "actual_bytes": null,
+      "low_estimate": 16384,
+      "high_estimate": 32768,
+      "basis": "provisional shared-palette/part allocation for staff projectile16 directions, codex area, cast/hit/death/status sequences; no production measurement"
+    },
+    {
+      "id": "damage_digits",
+      "actual_bytes": null,
+      "low_estimate": 2048,
+      "high_estimate": 4096,
+      "basis": "four10-glyph I4 sets, raw5x7+6x9+8x12+6x9 per digit=1195B, page padding still unmeasured"
+    },
+    {
+      "id": "current_ui",
+      "actual_bytes": null,
+      "low_estimate": 8192,
+      "high_estimate": 16384,
+      "basis": "current-screen icon/nine-slice cache target only; inactive global icons are CPU sources"
+    },
+    {
+      "id": "light_mask",
+      "actual_bytes": null,
+      "low_estimate": 8192,
+      "high_estimate": 8192,
+      "basis": "128x128 I4 allocation=8192B as in accepted sample; coast dithered source not yet converted"
+    },
+    {
+      "id": "current_glyphs",
+      "actual_bytes": null,
+      "low_estimate": 8192,
+      "high_estimate": 16384,
+      "basis": "estimate64..128 visible16x16 I4 glyphs; actual integration/measurement belongs to06b"
+    }
+  ],
+  "optional_coast_pet": {
+    "actual_bytes": null,
+    "low_estimate": 16384,
+    "high_estimate": 32768,
+    "basis": "unmeasured native22px pet with reused parts/frames; full60..80-frame raw I4 area14520..19360B before page packing"
+  },
+  "note": "These are explicit estimates, not a passed full resident measurement. Primary actor production stays I8."
+}

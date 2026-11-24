@@ -1,0 +1,245 @@
+{
+  "name": "keeper-combat-b-down",
+  "grid": [
+    256,
+    256
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "foot_baseline": 58,
+  "format": 1,
+  "pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/attack_dual_blades/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "attack_dual_blades",
+      "frame": 0,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_dual_blades/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "attack_dual_blades",
+      "frame": 1,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_dual_blades/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "attack_dual_blades",
+      "frame": 2,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_dual_blades/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "attack_dual_blades",
+      "frame": 3,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_hammer/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "attack_hammer",
+      "frame": 0,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_hammer/1",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "attack_hammer",
+      "frame": 1,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_hammer/2",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "attack_hammer",
+      "frame": 2,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_hammer/3",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "attack_hammer",
+      "frame": 3,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_bow/0",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "attack_bow",
+      "frame": 0,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_bow/1",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down",
+      "action": "attack_bow",
+      "frame": 1,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_bow/2",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "down",
+      "action": "attack_bow",
+      "frame": 2,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_bow/3",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "down",
+      "action": "attack_bow",
+      "frame": 3,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_crossbow/0",
+      "cell": [
+        0,
+        3
+      ],
+      "direction": "down",
+      "action": "attack_crossbow",
+      "frame": 0,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_crossbow/1",
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "down",
+      "action": "attack_crossbow",
+      "frame": 1,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_crossbow/2",
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "down",
+      "action": "attack_crossbow",
+      "frame": 2,
+      "feet": [
+        32,
+        58
+      ]
+    },
+    {
+      "id": "down/attack_crossbow/3",
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "down",
+      "action": "attack_crossbow",
+      "frame": 3,
+      "feet": [
+        32,
+        58
+      ]
+    }
+  ],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "atlas_group": "keeper",
+  "palette_file": "keeper-palette.json",
+  "palette_entries": 255
+}

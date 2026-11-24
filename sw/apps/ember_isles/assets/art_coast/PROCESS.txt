@@ -1,0 +1,67 @@
+ART-3 coast production in progress; NOT the complete ART-3 delivery.
+All source images use built-in image_gen. No CLI/API path or commercial asset is used.
+Approved identity reference: art_sample/02-keeper-grid-edit.png (read-only).
+The ART-3 dispatch authorizes AI pixel generation, grid normalization and authored repairs.
+
+Coordinator-approved global actor rules after the first checkpoint:
+1. Front/down and back/up walking must clearly alternate legs: lifted boot rises2–3px,
+   stride spreads at least3px; contact poses sink the torso1px and coat hem sways1–2px.
+   Down/up-v3 edit sources apply this rule; diagonal/profile strides were already accepted.
+2. Hair rim uses a brighter shade from the hair's own warm palette, never milk white.
+   Highlight only the hairline edge1px wide; no isolated bright pixel horns above the head.
+   The first two top contour rows are not highlighted. This applies to every actor.
+
+Sources keeper-idle and keeper-idle-corrected: rejected multi-facing grid trials.
+Source smith-idle: initial identity/direction trial, not accepted production animation.
+Sources keeper-{down,down-right,right,up-right,up}: first individual-facing trials.
+The declared canvas grid produced 47–50px bodies; fixed8px sampling produced40–44px.
+These trials are not the production baseline. Source pixel clusters are not exact squares.
+Their complete inputs, prompts and sheet metadata remain saved; no failed source is hidden.
+
+keeper-down-v2: use the coarse normalized44px trial as sole density reference, not the
+larger concept. It generated43px bodies on the declared256x128 grid, with uniform margins.
+The four other -v2 inputs edit this source to independent down-right/right/up-right/up views.
+Each input has4 idle and4 walk poses in64x64 cells. Left-facing views use horizontal flip.
+Each source has its own .txt prompt. Source inputs remain unchanged.
+
+Restore -v2 grids with color-edge projections around nominal source-square boundaries;
+take the center of every inferred square (no interpolation, silhouette scaling or redraw).
+The first checkpoint quantized to64 RGB565+A4 entries per sheet and aligned feet to y58.
+Its five palettes together contain255 unique GPU words; lossless union packing saves
+16384B and four banks:65536B/one bank instead of81920B/five banks, with identical pixels.
+keeper-palette.json fixes the accepted material colors for subsequent keeper sources;
+the former milk-white custom rim entry is replaced with warm hair highlight239/166/66.
+The original per-direction grid-normalized image is saved as *-before-repair.png.
+
+Coordinator's reply permits remaining1–2px material-row repairs only, identical for all
+frames of a direction, preserving face, hands, boots and grip shapes, with before/after.
+V2 down/right/up-right/up duplicate material row47 in coat/trousers to add exactly1px.
+Current down-v3 removes one redundant material row47; up-v3/right-v2/up-right-v2 insert
+one row47. Transparent-row padding keeps foot y58. Down-right needs no row repair.
+All explicit64-entry row maps are in sheets.json; no head rows are resized or deleted.
+Hand/face/boot shapes are retained; canvas hand anchors account for the translated torso.
+
+Use a1px warm upper-left hair rim on existing opaque contour pixels, never outside
+the silhouette or on its top two rows. Exact coordinates and GPU RGBA values are stored
+under final_pixel_edits in sheets.json. No higher alpha format is introduced.
+Primary hand/feet anchors are authored in64x64 canvas coordinates; mirrored x is63-x.
+
+keeper-actions-down: an early76-pose attack/common-action trial made before the coordinator
+requested a five-direction idle/walk approval checkpoint. Grid and checkerboard failed.
+keeper-actions-down-clean: built-in transparent-background edit removes those artifacts.
+Both remain source trials; neither counts as accepted action coverage or a GPU resident pack.
+Do not expand this trial until the coordinator approves the five-direction checkpoint.
+
+Conversion: python3 sw/apps/ember_isles/tools/art/coast_assets.py
+Preview: python3 sw/apps/ember_isles/tools/art/preview_coast.py
+GPU swizzle and all texel readback directly use tools/gpu/model/layout.py and Texture.
+Only build/ holds .bin/.pal files and measured directories; outputs/ holds review media.
+Current preview is material inspection, never described as actual gameplay footage.
+
+The broad generation loop stopped at the first charge-sheet request: built-in image_gen
+returned HTTP400 moderation_blocked, category violence, requestID
+4657f4b5-d084-4346-be3a-16c11f366bc1. No CLI/API fallback or credential request occurred.
+Only combat-a/b/c DOWN outputs were saved by that loop; other broad-production jobs did
+not run. The coordinator then requested an initial-configuration capacity checkpoint.
+Capacity work now covers only the missing staff/codex keeper poses, with non-graphic
+empty-hand gesture descriptions; other characters/enemies/biomes remain pending.

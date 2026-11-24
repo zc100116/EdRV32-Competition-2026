@@ -1,0 +1,28 @@
+06c global/non-coast icon handoff (not fulfilled by this coast checkpoint)
+No shared fallback icon is supplied. IDs refer to current data CSVs / GDD v2.0.
+This list does not transfer this task's unfinished COAST icons to06c.
+
+Characters: portrait and four separate ability icons each:
+characters/breaker: 碎浪者 / 寒潮、破浪斩、潮甲、海啸
+characters/hunter: 潮汐猎手 / 顺流、潮汐闪避、标记、潮涌齐射
+characters/gunner: 焰铳手 / 引信、装填、后跃、烈焰处决
+characters/seer: 观星者 / 星辉、星门、星链、星图领域
+characters/nameless: 无名者 / 无名、影步、蚀刃、吞光
+characters/lamplighter: 灯匠 / 灯芯、灯炮台、维修、灯网
+
+Non-coast pets: separate pet and skill icons:
+pets/firefly: 星萤 / 星闪
+pets/owl: 林鸮 / 鹰眼
+pets/slag: 熔渣虫 / 熔流
+pets/raven: 火鸦 / 衔灯
+
+Non-coast enemy codex icons, to derive from06c's own completed sprites:
+enemies/vine 藤缚者; enemies/firefly 星萤群; enemies/beetle 铁甲甲虫
+enemies/owl 林鸮射手; enemies/spore 孢子树; enemies/weaver 织网者
+enemies/forest_eye 森之眼
+enemies/slag 熔渣虫; enemies/ash 炉灰傀儡; enemies/raven 火鸦
+enemies/obsidian 黑曜射手; enemies/slug 岩浆蛞蝓
+enemies/forge_golem 锻炉巨像; enemies/ember_king 余烬之王
+
+Remaining COAST keeper/smith skills, items, all50 weapon forms/icons and12 pet weapons,
+gnawer/crab pet icons, coast enemies and UI are still06a work, not completed placeholders.
