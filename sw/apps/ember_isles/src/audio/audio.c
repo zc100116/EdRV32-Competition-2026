@@ -1,6 +1,6 @@
 /* File: audio.c
  * Spec: ember_isles tech 2, 3, 5-6; aud-spec 2.1.
- * Description: Integer square/triangle/noise voices, attack/decay envelopes,
+ * Description: Integer wavetable/noise voices with 32-sample envelope/pan updates,
  * original coastal sequence and ten layered game effects. No platform access.
  * Clock domain: caller-owned 48 kHz stream, independent of game frame size.
  */
@@ -8,13 +8,17 @@
 #include "music.h"
 #include <string.h>
 
-enum { SQUARE, TRIANGLE, NOISE, EFFECT_VOICES = 4, ATTACK_FRAMES = 240 };
+enum {
+    SQUARE, TRIANGLE, NOISE, EFFECT_VOICES = 4, ATTACK_FRAMES = 240,
+    BLOCK_FRAMES = 32, MIX_FRAMES = 256
+};
 #define HZ(hz) ((uint32_t)(((uint64_t)(hz) << 32) / 48000u))
 
 struct voice {
     uint32_t phase;
     uint32_t step;
     uint32_t noise;
+    uint32_t block_step;
     int32_t glide;
     int32_t gain;
     int32_t peak;
@@ -24,6 +28,9 @@ struct voice {
     unsigned frames;
     unsigned wave;
     unsigned pan;
+    unsigned block_left;
+    int left_gain;
+    int right_gain;
 };
 
 struct effect_note {
@@ -73,6 +80,7 @@ static struct voice effect_voices[EFFECT_VOICES];
 static unsigned effect_ids[EFFECT_VOICES];
 static unsigned effect_notes[EFFECT_VOICES];
 static unsigned next_effect;
+static int8_t waves[2][256];
 
 static void start_voice(struct voice *v, uint32_t start, uint32_t end, unsigned frames,
                         int peak, unsigned wave, unsigned pan)
@@ -88,6 +96,7 @@ static void start_voice(struct voice *v, uint32_t start, uint32_t end, unsigned 
     v->frames = frames;
     v->wave = wave;
     v->pan = pan;
+    v->block_left = 0;
 }
 
 static void start_effect(unsigned slot)
@@ -97,31 +106,86 @@ static void start_effect(unsigned slot)
                 n->peak, n->wave, n->pan);
 }
 
-static int sample_voice(struct voice *v)
+/* Control blocks belong to each voice, so splitting mix calls cannot move an
+ * envelope or pitch update. Note and attack boundaries still land on exact samples. */
+static void control_voice(struct voice *v)
 {
-    int wave;
-    v->phase += v->step;
-    v->step += (uint32_t)v->glide;
-    if (v->wave == NOISE) {
-        v->noise ^= v->noise << 13;
-        v->noise ^= v->noise >> 17;
-        v->noise ^= v->noise << 5;
-        wave = (int)(v->noise >> 24) - 128;
-    } else if (v->wave == TRIANGLE) {
-        unsigned ramp = v->phase >> 23;
-        wave = (int)(ramp < 256 ? ramp : 511 - ramp) - 128;
-    } else {
-        wave = v->phase < UINT32_C(0x80000000) ? 127 : -128;
-    }
-    int value = wave * v->gain / 524288;
+    unsigned count = BLOCK_FRAMES;
+    if (count > v->frames) count = v->frames;
+    if (v->attack && count > v->attack) count = v->attack;
+    int change = v->attack ? v->rise : -v->fall;
+    int gain = (v->gain + change * (int)(count / 2)) >> 12;
+    v->left_gain = gain * (int)(256 - v->pan) >> 8;
+    v->right_gain = gain * (int)v->pan >> 8;
+    v->gain += change * (int)count;
     if (v->attack) {
-        v->gain += v->rise;
-        if (--v->attack == 0) v->gain = v->peak;
-    } else {
-        v->gain -= v->fall;
+        v->attack -= count;
+        if (v->attack == 0) v->gain = v->peak;
     }
-    --v->frames;
-    return value;
+    v->block_step = v->step + (uint32_t)(v->glide * (int)(count / 2));
+    v->step += (uint32_t)(v->glide * (int)count);
+    v->block_left = count;
+}
+
+static void mix_voice(struct voice *v, int *left, int *right, int *middle, unsigned count)
+{
+    if (v->peak == 0) {
+        v->frames -= count;
+        return;
+    }
+    unsigned offset = 0;
+    while (offset < count && v->frames) {
+        if (v->block_left == 0) control_voice(v);
+        unsigned n = count - offset;
+        if (n > v->block_left) n = v->block_left;
+        uint32_t phase = v->phase;
+        uint32_t step = v->block_step;
+        int lg = v->left_gain;
+        int rg = v->right_gain;
+        /* Centered voices share a mono bus. Small unrolled loops amortize RV32
+         * loop branches; oscillator, gain and pan selection stay outside them. */
+        if (lg == rg && v->wave != NOISE) {
+            const int8_t *table = waves[v->wave];
+#pragma GCC unroll 4
+            for (unsigned j = offset; j < offset + n; ++j) {
+                phase += step;
+                int value = table[phase >> 24];
+                middle[j] += value * lg >> 7;
+            }
+        } else if (lg == rg) {
+            uint32_t noise = v->noise;
+#pragma GCC unroll 4
+            for (unsigned j = offset; j < offset + n; ++j) {
+                noise = noise * UINT32_C(1664525) + UINT32_C(1013904223);
+                int value = (int)(noise >> 24) - 128;
+                middle[j] += value * lg >> 7;
+            }
+            v->noise = noise;
+        } else if (v->wave == NOISE) {
+            uint32_t noise = v->noise;
+#pragma GCC unroll 4
+            for (unsigned j = offset; j < offset + n; ++j) {
+                noise = noise * UINT32_C(1664525) + UINT32_C(1013904223);
+                int value = (int)(noise >> 24) - 128;
+                left[j] += value * lg >> 7;
+                right[j] += value * rg >> 7;
+            }
+            v->noise = noise;
+        } else {
+            const int8_t *table = waves[v->wave];
+#pragma GCC unroll 4
+            for (unsigned j = offset; j < offset + n; ++j) {
+                phase += step;
+                int value = table[phase >> 24];
+                left[j] += value * lg >> 7;
+                right[j] += value * rg >> 7;
+            }
+        }
+        v->phase = phase;
+        v->frames -= n;
+        v->block_left -= n;
+        offset += n;
+    }
 }
 
 void ember_audio_reset(void)
@@ -137,6 +201,10 @@ void ember_audio_reset(void)
         effect_notes[i] = effects[0].count;
     }
     next_effect = 0;
+    for (unsigned i = 0; i < 256; ++i) {
+        waves[SQUARE][i] = i < 128 ? 127 : -128;
+        waves[TRIANGLE][i] = (int8_t)((int)(i < 128 ? i : 255 - i) * 2 - 128);
+    }
 }
 
 void ember_audio_event(unsigned event)
@@ -150,9 +218,12 @@ void ember_audio_event(unsigned event)
 
 void ember_audio_mix(uint32_t *stereo, unsigned frames)
 {
-    for (unsigned frame = 0; frame < frames; ++frame) {
-        int left = 0;
-        int right = 0;
+    while (frames) {
+        unsigned count = frames < MIX_FRAMES ? frames : MIX_FRAMES;
+        int left[MIX_FRAMES] = {0};
+        int right[MIX_FRAMES] = {0};
+        int middle[MIX_FRAMES] = {0};
+        /* End this shared work span at the nearest note boundary. */
         for (unsigned i = 0; i < EMBER_MUSIC_VOICES; ++i) {
             struct voice *v = &music_voices[i];
             const struct ember_music_track *track = &ember_music[i];
@@ -162,20 +233,22 @@ void ember_audio_mix(uint32_t *stereo, unsigned frames)
                 start_voice(v, n->step, n->step, n->frames,
                             n->step ? track->peak : 0, track->wave, track->pan);
             }
-            int value = sample_voice(v);
-            left += value * (int)(256 - v->pan) / 256;
-            right += value * (int)v->pan / 256;
+            if (count > v->frames) count = v->frames;
         }
         for (unsigned i = 0; i < EFFECT_VOICES; ++i) {
             struct voice *v = &effect_voices[i];
             if (v->frames == 0 && effect_notes[i] < effects[effect_ids[i]].count)
                 start_effect(i);
-            if (v->frames) {
-                int value = sample_voice(v);
-                left += value * (int)(256 - v->pan) / 256;
-                right += value * (int)v->pan / 256;
-            }
+            if (v->frames && count > v->frames) count = v->frames;
         }
-        stereo[frame] = (uint16_t)left | (uint32_t)(uint16_t)right << 16;
+        for (unsigned i = 0; i < EMBER_MUSIC_VOICES; ++i)
+            mix_voice(&music_voices[i], left, right, middle, count);
+        for (unsigned i = 0; i < EFFECT_VOICES; ++i)
+            if (effect_voices[i].frames) mix_voice(&effect_voices[i], left, right, middle, count);
+        for (unsigned j = 0; j < count; ++j)
+            stereo[j] = (uint16_t)(left[j] + middle[j]) |
+                        (uint32_t)(uint16_t)(right[j] + middle[j]) << 16;
+        stereo += count;
+        frames -= count;
     }
 }

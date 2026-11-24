@@ -74,8 +74,13 @@ int main(void)
                 "each completed cue leaves the continuing music unchanged");
         ember_audio_reset();
         ember_audio_event(event);
-        ember_audio_mix(actual, 800);
-        ember_audio_mix(actual + 800, CUE_FRAMES - 800);
+        offset = 0;
+        for (unsigned i = 0; offset < CUE_FRAMES; ++i) {
+            unsigned count = chunks[i % 5];
+            if (count > CUE_FRAMES - offset) count = CUE_FRAMES - offset;
+            ember_audio_mix(actual + offset, count);
+            offset += count;
+        }
         require(memcmp(cues[event], actual, sizeof(cues[event])) == 0,
                 "effect reset and chunking are deterministic");
         for (unsigned previous = 0; previous < event; ++previous)

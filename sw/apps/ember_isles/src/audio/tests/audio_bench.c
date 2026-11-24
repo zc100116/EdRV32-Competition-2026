@@ -1,7 +1,8 @@
 /* File: audio_bench.c
  * Spec: ember_isles tech 4; standalone retired-instruction measurement.
  * Description: Spike HTIF harness: print music-only and four-effect mix counts
- * for 800 stereo frames. Links independently of game, GPU and platform code.
+ * for 800 stereo frames, then a full-score four-noise-voice maximum.
+ * Links independently of game, GPU and platform code.
  * Clock domain: RV32 instret; 48 kHz generated stream.
  */
 #include <stdint.h>
@@ -48,6 +49,16 @@ int main(void)
     ember_audio_mix(samples, 800);
     end = instructions();
     print_number(end - start);
+    ember_audio_reset();
+    uint32_t maximum = 0;
+    for (unsigned frame = 0; frame < 1200; ++frame) {
+        for (unsigned i = 0; i < 4; ++i) ember_audio_event(1);
+        start = instructions();
+        ember_audio_mix(samples, 800);
+        end = instructions();
+        if (end - start > maximum) maximum = end - start;
+    }
+    print_number(maximum);
     __asm__ volatile("fence rw,rw" ::: "memory");
     tohost = 1;
     for (;;) {}
