@@ -54,9 +54,10 @@ module edrv32_gpu_raster (
     reg signed [17:0] clip_x1_r;
     reg signed [17:0] clip_y1_r;
     reg [3:0] palette_r;
+    wire [839:0] edge_w;
     wire unused_state_w;
     assign unused_state_w = ^{render_state_pixel_i, render_state_tex_i, render_state_target_i,
-        draw_command_i, draw_valid_i};
+        draw_command_i, draw_valid_i, triangle_setup_edge_i, edge_w};
     assign render_state_ready_o = 1'b1;
     assign draw_ready_o = 1'b1;
 
@@ -156,7 +157,7 @@ module edrv32_gpu_raster (
     reg [173:0] gradient_r;
     reg [2:0] inclusive_r;
     reg [9:0] valid_r;
-    reg [3:0] mask_r;
+    wire [3:0] mask_w;
     wire advance_w;
     wire input_push_w;
     wire input_pop_w;
@@ -172,10 +173,7 @@ module edrv32_gpu_raster (
     wire [15:0] unused_last_x_w;
     wire [15:0] unused_last_y_w;
     reg [63:0] input_bounds_r [0:1];
-    reg [479:0] input_edge_r [0:1];
     reg [31:0] input_origin_r [0:1];
-    reg [489:0] input_start_r [0:1];
-    reg [783:0] input_gradient_r [0:1];
     reg [69:0] input_h_r [0:1];
     reg [173:0] input_normal_gradient_r [0:1];
     reg [15:0] output_x_r [0:1];
@@ -186,8 +184,6 @@ module edrv32_gpu_raster (
     assign fragment_mask_o = output_mask_r[output_read_r];
     reg [0:0] output_quad_r [0:1];
     assign fragment_quad_o = output_quad_r[output_read_r];
-    reg [1959:0] output_plane_r [0:1];
-    assign fragment_plane_o = output_plane_r[output_read_r];
     reg [69:0] output_h_r [0:1];
     assign fragment_h_o = output_h_r[output_read_r];
     reg [173:0] output_gradient_r [0:1];
@@ -209,7 +205,7 @@ module edrv32_gpu_raster (
         (!active_r || (scan_w && last_w)) && advance_w && !stop_i;
     assign seed_load_w = state_r == S_LOAD && advance_w;
     assign load_w = seed_load_w || (scan_w && row_end_w && !last_w);
-    assign output_push_w = valid_r[9] && advance_w && mask_r != 0 && !stop_i;
+    assign output_push_w = valid_r[9] && advance_w && mask_w != 0 && !stop_i;
     assign offset_x_w = $signed({input_bounds_r[input_read_r][15],
         input_bounds_r[input_read_r][0 +: 16]}) -
         $signed({input_origin_r[input_read_r][15], input_origin_r[input_read_r][0 +: 16]});
@@ -218,52 +214,62 @@ module edrv32_gpu_raster (
         $signed({input_origin_r[input_read_r][31], input_origin_r[input_read_r][16 +: 16]});
     assign unused_last_x_w = input_bounds_r[input_read_r][32 +: 16] - 16'd1;
     assign unused_last_y_w = input_bounds_r[input_read_r][48 +: 16] - 16'd1;
-    reg [1959:0] plane_8_r;
-    reg [1959:0] plane_9_r;
-    reg [11:0] edge_nonzero_r;
-    reg [11:0] edge_negative_r;
-    reg [15:0] pipe_x_r [0:9];
-    reg [15:0] pipe_y_r [0:9];
-    reg [69:0] pipe_h_r [0:9];
-    reg [173:0] pipe_gradient_r [0:9];
-    reg [3:0] pipe_palette_r [0:9];
-    reg [2:0] pipe_inclusive_r [0:8];
-    reg [3:0] pipe_clip_r [0:8];
-    wire [1959:0] plane_w;
-    wire [839:0] edge_w;
-    integer index_r;
-    integer lane_r;
-    reg [279:0] next_seed_r [0:9];
-    reg [279:0] row_seed_r [0:9];
-    reg [69:0] seed_accumulator_r [0:9];
-    reg [69:0] row_accumulator_r [0:9];
-    reg [69:0] gx3_r [0:9];
-    wire [69:0] seed_result_w [0:9];
-    reg [69:0] gx_r [0:9];
-    reg [69:0] gy_r [0:9];
-    reg [69:0] base_r [0:9];
-    reg [69:0] prepare_gx_r [0:6];
-    reg [69:0] prepare_gy_r [0:6];
-    wire [69:0] signed_gx_w [0:6];
-    wire [69:0] signed_gy_w [0:6];
-    wire [69:0] accumulated_w [0:6];
+    wire [11:0] edge_nonzero_w;
+    wire [11:0] edge_negative_w;
+    wire [15:0] pipe_x_w [0:9];
+    wire [15:0] pipe_y_w [0:9];
+    wire [69:0] pipe_h_w [0:9];
+    wire [173:0] pipe_gradient_w [0:9];
+    wire [3:0] pipe_palette_w [0:9];
+    wire [2:0] pipe_inclusive_w [0:8];
+    wire [3:0] pipe_clip_w [0:8];
+    wire [2:0] edge_inclusive_w;
+    wire [3:0] clip_w;
     genvar stage;
     generate
-        for (stage = 1; stage < 10; stage = stage + 1) begin : g_metadata
+        // Ten scalar metadata stages; coverage uses nine stages.
+        for (stage = 0; stage < 10; stage = stage + 1) begin : g_metadata
+            reg [15:0] metadata_x_r;
+            assign pipe_x_w[stage] = metadata_x_r;
             always @(posedge clk_i) begin
-                if (advance_w) begin
-                    pipe_x_r[stage] <= pipe_x_r[stage-1];
-                    pipe_y_r[stage] <= pipe_y_r[stage-1];
-                    pipe_h_r[stage] <= pipe_h_r[stage-1];
-                    pipe_gradient_r[stage] <= pipe_gradient_r[stage-1];
-                    pipe_palette_r[stage] <= pipe_palette_r[stage-1];
-                end
+                if (advance_w) metadata_x_r <= stage == 0 ? x_r[15:0]
+                    : pipe_x_w[stage == 0 ? 0 : stage-1];
+            end
+            reg [15:0] metadata_y_r;
+            assign pipe_y_w[stage] = metadata_y_r;
+            always @(posedge clk_i) begin
+                if (advance_w) metadata_y_r <= stage == 0 ? y_r[15:0]
+                    : pipe_y_w[stage == 0 ? 0 : stage-1];
+            end
+            reg [69:0] metadata_h_r;
+            assign pipe_h_w[stage] = metadata_h_r;
+            always @(posedge clk_i) begin
+                if (advance_w) metadata_h_r <= stage == 0 ? h_r
+                    : pipe_h_w[stage == 0 ? 0 : stage-1];
+            end
+            reg [173:0] metadata_gradient_r;
+            assign pipe_gradient_w[stage] = metadata_gradient_r;
+            always @(posedge clk_i) begin
+                if (advance_w) metadata_gradient_r <= stage == 0 ? gradient_r
+                    : pipe_gradient_w[stage == 0 ? 0 : stage-1];
+            end
+            reg [3:0] metadata_palette_r;
+            assign pipe_palette_w[stage] = metadata_palette_r;
+            always @(posedge clk_i) begin
+                if (advance_w) metadata_palette_r <= stage == 0 ? palette_r
+                    : pipe_palette_w[stage == 0 ? 0 : stage-1];
             end
             if (stage < 9) begin : g_coverage
+                reg [2:0] metadata_inclusive_r;
+                reg [3:0] clip_r;
+                assign pipe_inclusive_w[stage] = metadata_inclusive_r;
+                assign pipe_clip_w[stage] = clip_r;
                 always @(posedge clk_i) begin
                     if (advance_w) begin
-                        pipe_inclusive_r[stage] <= pipe_inclusive_r[stage-1];
-                        pipe_clip_r[stage] <= pipe_clip_r[stage-1];
+                        metadata_inclusive_r <= stage == 0 ? inclusive_r
+                            : pipe_inclusive_w[stage == 0 ? 0 : stage-1];
+                        clip_r <= stage == 0 ? clip_w
+                            : pipe_clip_w[stage == 0 ? 0 : stage-1];
                     end
                 end
             end
@@ -272,46 +278,114 @@ module edrv32_gpu_raster (
     genvar attribute;
     genvar lane;
     generate
+        // Ten channels each own one seed adder, one feedback adder and three lane adders.
+        // Seven plane channels also own two sign adders and one CSA/preparation adder.
+        // Each adder retains four registered carry stages; preparation adds its CSA stage.
         for (attribute = 0; attribute < 10; attribute = attribute + 1) begin : g_attribute
+            reg [69:0] gx_r;
+            reg [69:0] gy_r;
+            reg [69:0] base_r;
+            reg [69:0] gx3_r;
+            reg [69:0] seed_accumulator_r;
+            reg [69:0] row_accumulator_r;
+            wire [279:0] next_seed_w;
+            reg [69:0] row_seed_r;
+            wire [69:0] seed_result_w;
             wire [69:0] seed_a_w;
             wire [69:0] seed_b_w;
             if (attribute < 7) begin : g_prepare
+                reg [69:0] prepare_gx_r;
+                reg [69:0] prepare_gy_r;
+                wire [69:0] signed_gx_w;
+                wire [69:0] signed_gy_w;
+                wire [69:0] accumulated_w;
+                reg [69:0] input_start_r [0:1];
+                reg [55:0] input_gx_r [0:1];
+                reg [55:0] input_gy_r [0:1];
+                always @(posedge clk_i) begin
+                    if (input_push_w) begin
+                        input_start_r[input_write_r] <= triangle_setup_start_i[attribute*70 +: 70];
+                        input_gx_r[input_write_r] <= triangle_setup_gradient_i[attribute*112 +: 56];
+                        input_gy_r[input_write_r] <=
+                            triangle_setup_gradient_i[attribute*112+56 +: 56];
+                    end
+                    if (advance_w) begin
+                        if (state_r == S_SIGN && wait_r == 4) begin
+                            prepare_gx_r <= signed_gx_w;
+                            prepare_gy_r <= signed_gy_w;
+                        end
+                        if (state_r == S_ACCUMULATE && wait_r == 5) begin
+                            prepare_gx_r <= prepare_gx_r << 1;
+                            prepare_gy_r <= prepare_gy_r << 1;
+                        end
+                    end
+                    if (input_pop_w) begin
+                        gx_r <= {{14{input_gx_r[input_read_r][55]}}, input_gx_r[input_read_r]};
+                        gy_r <= {{14{input_gy_r[input_read_r][55]}}, input_gy_r[input_read_r]};
+                    end
+                    if (input_pop_w || (advance_w && state_r == S_ACCUMULATE && wait_r == 5))
+                        base_r <= input_pop_w ? input_start_r[input_read_r] : accumulated_w;
+                end
                 edrv32_gpu_raster_add u_sign_x (
                     .clk_i(clk_i),
                     .en_i(advance_w),
-                    .a_i(gx_r[attribute] ^ {70{negative_x_r}}),
+                    .a_i(gx_r ^ {70{negative_x_r}}),
                     .b_i({69'b0, negative_x_r}),
-                    .sum_o(signed_gx_w[attribute])
+                    .sum_o(signed_gx_w)
                 );
                 edrv32_gpu_raster_add u_sign_y (
                     .clk_i(clk_i),
                     .en_i(advance_w),
-                    .a_i(gy_r[attribute] ^ {70{negative_y_r}}),
+                    .a_i(gy_r ^ {70{negative_y_r}}),
                     .b_i({69'b0, negative_y_r}),
-                    .sum_o(signed_gy_w[attribute])
+                    .sum_o(signed_gy_w)
                 );
                 edrv32_gpu_raster_prepare u_accumulate (
                     .clk_i(clk_i),
                     .en_i(advance_w),
-                    .a_i(base_r[attribute]),
-                    .b_i(offset_x_r[0] ? prepare_gx_r[attribute] : 70'b0),
-                    .c_i(offset_y_r[0] ? prepare_gy_r[attribute] : 70'b0),
-                    .sum_o(accumulated_w[attribute])
+                    .a_i(base_r),
+                    .b_i(offset_x_r[0] ? prepare_gx_r : 70'b0),
+                    .c_i(offset_y_r[0] ? prepare_gy_r : 70'b0),
+                    .sum_o(accumulated_w)
                 );
+            end else begin : g_edge_input
+                reg [39:0] input_start_r [0:1];
+                reg [39:0] input_gx_r [0:1];
+                reg [39:0] input_gy_r [0:1];
+                reg input_inclusive_r [0:1];
+                assign edge_inclusive_w[attribute-7] = input_inclusive_r[input_read_r];
+                always @(posedge clk_i) begin
+                    if (input_push_w) begin
+                        input_start_r[input_write_r] <=
+                            triangle_setup_edge_i[(attribute-7)*160 +: 40];
+                        input_gx_r[input_write_r] <=
+                            triangle_setup_edge_i[(attribute-7)*160+40 +: 40];
+                        input_gy_r[input_write_r] <=
+                            triangle_setup_edge_i[(attribute-7)*160+80 +: 40];
+                        input_inclusive_r[input_write_r] <=
+                            triangle_setup_edge_i[(attribute-7)*160+159] == 0;
+                    end
+                    if (input_pop_w) begin
+                        base_r <= {{30{input_start_r[input_read_r][39]}},
+                            input_start_r[input_read_r]};
+                        gx_r <= {{30{input_gx_r[input_read_r][39]}}, input_gx_r[input_read_r]};
+                        gy_r <= {{30{input_gy_r[input_read_r][39]}}, input_gy_r[input_read_r]};
+                    end
+                end
             end
-            assign seed_a_w = state_r == S_SIGN ? gx_r[attribute] :
-                state_r == S_SEED ? (seed_idx_r == 0 ? base_r[attribute] :
-                seed_accumulator_r[attribute]) :
-                (row_step_r == 0 ? row_seed_r[attribute][0 +: 70] : row_accumulator_r[attribute]);
-            assign seed_b_w = state_r == S_SIGN ? gx_r[attribute] << 1 :
-                state_r == S_SEED ? gx_r[attribute] << 2 :
-                (row_step_r == 0 ? gy_r[attribute] : gx_r[attribute] << 2);
+            assign seed_a_w = state_r == S_SIGN ? gx_r :
+                state_r == S_SEED ? (seed_idx_r == 0 ? base_r :
+                seed_accumulator_r) :
+                (row_step_r == 0 ? row_seed_r : row_accumulator_r);
+            assign seed_b_w = state_r == S_SIGN ? gx_r << 1 :
+                state_r == S_SEED ? gx_r << 2 :
+                (row_step_r == 0 ? gy_r : gx_r << 2);
             edrv32_gpu_raster_add u_seed (
                 .clk_i(clk_i),
                 .en_i(advance_w),
                 .a_i(seed_a_w),
                 .b_i(seed_b_w),
-                .sum_o(seed_result_w[attribute])
+                .sum_o(seed_result_w)
             );
             wire [69:0] base_w;
             edrv32_gpu_raster_plane u_plane (
@@ -320,64 +394,90 @@ module edrv32_gpu_raster (
                 .load_i(load_w),
                 .issue_i(scan_w),
                 .reuse_i($signed(x_r[17:2]) < reuse_limit_r),
-                .seed_i(next_seed_r[attribute]),
-                .delta_i(gx_r[attribute] << 4),
+                .seed_i(next_seed_w),
+                .delta_i(gx_r << 4),
                 .plane_o(base_w)
             );
-            reg [69:0] gx_pipe_r [0:3];
-            reg [69:0] gx3_pipe_r [0:3];
-            reg [69:0] base_pipe_r [0:3];
+            reg [69:0] gx_pipe_0_r;
+            reg [69:0] gx_pipe_1_r;
+            reg [69:0] gx_pipe_2_r;
+            reg [69:0] gx_pipe_3_r;
+            reg [69:0] gx3_pipe_0_r;
+            reg [69:0] gx3_pipe_1_r;
+            reg [69:0] gx3_pipe_2_r;
+            reg [69:0] gx3_pipe_3_r;
+            reg [69:0] base_pipe_0_r;
+            reg [69:0] base_pipe_1_r;
+            reg [69:0] base_pipe_2_r;
+            reg [69:0] base_pipe_3_r;
             always @(posedge clk_i) begin
                 if (advance_w) begin
-                    gx_pipe_r[0] <= gx_r[attribute];
-                    gx_pipe_r[1] <= gx_pipe_r[0];
-                    gx_pipe_r[2] <= gx_pipe_r[1];
-                    gx_pipe_r[3] <= gx_pipe_r[2];
-                    gx3_pipe_r[0] <= gx3_r[attribute];
-                    gx3_pipe_r[1] <= gx3_pipe_r[0];
-                    gx3_pipe_r[2] <= gx3_pipe_r[1];
-                    gx3_pipe_r[3] <= gx3_pipe_r[2];
-                    base_pipe_r[0] <= base_w;
-                    base_pipe_r[1] <= base_pipe_r[0];
-                    base_pipe_r[2] <= base_pipe_r[1];
-                    base_pipe_r[3] <= base_pipe_r[2];
+                    gx_pipe_0_r <= gx_r;
+                    gx_pipe_1_r <= gx_pipe_0_r;
+                    gx_pipe_2_r <= gx_pipe_1_r;
+                    gx_pipe_3_r <= gx_pipe_2_r;
+                    gx3_pipe_0_r <= gx3_r;
+                    gx3_pipe_1_r <= gx3_pipe_0_r;
+                    gx3_pipe_2_r <= gx3_pipe_1_r;
+                    gx3_pipe_3_r <= gx3_pipe_2_r;
+                    base_pipe_0_r <= base_w;
+                    base_pipe_1_r <= base_pipe_0_r;
+                    base_pipe_2_r <= base_pipe_1_r;
+                    base_pipe_3_r <= base_pipe_2_r;
                     if (state_r == S_SIGN && wait_r == 4) begin
-                        gx3_r[attribute] <= seed_result_w[attribute];
+                        gx3_r <= seed_result_w;
                     end
-                    if (state_r == S_SEED) begin
-                        if (seed_idx_r == 0 && wait_r == 0) begin
-                            next_seed_r[attribute][0 +: 70] <= base_r[attribute];
-                        end
-                        if (wait_r == 4) begin
-                            next_seed_r[attribute][({30'b0, seed_idx_r}+1)*70 +: 70] <=
-                                seed_result_w[attribute];
-                            seed_accumulator_r[attribute] <= seed_result_w[attribute];
-                        end
-                    end
-                    if (active_r && !next_row_ready_r && row_wait_r == 4) begin
-                        next_seed_r[attribute][row_step_r*70 +: 70] <= seed_result_w[attribute];
-                        row_accumulator_r[attribute] <= seed_result_w[attribute];
-                    end
-                    if (load_w) begin
-                        row_seed_r[attribute] <= next_seed_r[attribute];
-                    end
+                    if (state_r == S_SEED && wait_r == 4)
+                        seed_accumulator_r <= seed_result_w;
+                    if (active_r && !next_row_ready_r && row_wait_r == 4)
+                        row_accumulator_r <= seed_result_w;
+                    if (load_w) row_seed_r <= next_seed_w[69:0];
                 end
+            end
+            // Four independent 70-bit phase seeds; one priority-selected update per phase.
+            for (lane = 0; lane < 4; lane = lane + 1) begin : g_seed
+                reg [69:0] value_r;
+                wire initial_w;
+                wire step_w;
+                wire row_w;
+                assign initial_w = lane == 0 && state_r == S_SEED
+                    && seed_idx_r == 0 && wait_r == 0;
+                assign step_w = lane > 0 && state_r == S_SEED
+                    && seed_idx_r == lane-1 && wait_r == 4;
+                assign row_w = active_r && !next_row_ready_r && row_wait_r == 4
+                    && row_step_r == lane;
+                always @(posedge clk_i) begin
+                    if (advance_w && (initial_w || step_w || row_w))
+                        value_r <= row_w || step_w ? seed_result_w : base_r;
+                end
+                assign next_seed_w[lane*70 +: 70] = value_r;
             end
             for (lane = 0; lane < 4; lane = lane + 1) begin : g_lane
                 wire [69:0] attribute_w;
                 if (lane == 0) begin : g_base
-                    assign attribute_w = base_pipe_r[3];
+                    assign attribute_w = base_pipe_3_r;
                 end else begin : g_expand
                     edrv32_gpu_raster_add u_add (
                         .clk_i(clk_i),
                         .en_i(advance_w),
                         .a_i(base_w),
-                        .b_i(lane == 3 ? gx3_pipe_r[3] : gx_pipe_r[3] << (lane-1)),
+                        .b_i(lane == 3 ? gx3_pipe_3_r : gx_pipe_3_r << (lane-1)),
                         .sum_o(attribute_w)
                     );
                 end
                 if (attribute < 7) begin : g_plane
-                    assign plane_w[lane*490+attribute*70 +: 70] = attribute_w;
+                    reg [69:0] plane_8_r;
+                    reg [69:0] plane_9_r;
+                    reg [69:0] output_r [0:1];
+                    always @(posedge clk_i) begin
+                        if (advance_w) begin
+                            plane_8_r <= attribute_w;
+                            plane_9_r <= plane_8_r;
+                        end
+                        if (output_push_w) output_r[output_write_r] <= plane_9_r;
+                    end
+                    assign fragment_plane_o[lane*490+attribute*70 +: 70] =
+                        output_r[output_read_r];
                 end else begin : g_edge
                     assign edge_w[lane*210+(attribute-7)*70 +: 70] = attribute_w;
                 end
@@ -500,41 +600,11 @@ module edrv32_gpu_raster (
     always @(posedge clk_i) begin
         if (input_push_w) begin
             input_bounds_r[input_write_r] <= triangle_setup_bounds_i;
-            input_edge_r[input_write_r] <= triangle_setup_edge_i;
             input_origin_r[input_write_r] <= triangle_setup_origin_i;
-            input_start_r[input_write_r] <= triangle_setup_start_i;
-            input_gradient_r[input_write_r] <= triangle_setup_gradient_i;
             input_h_r[input_write_r] <= triangle_setup_h_i;
             input_normal_gradient_r[input_write_r] <= triangle_setup_normal_gradient_i;
         end
         if (advance_w) begin
-            pipe_x_r[0] <= x_r[15:0];
-            pipe_y_r[0] <= y_r[15:0];
-            pipe_h_r[0] <= h_r;
-            pipe_gradient_r[0] <= gradient_r;
-            pipe_palette_r[0] <= palette_r;
-            pipe_inclusive_r[0] <= inclusive_r;
-            plane_8_r <= plane_w;
-            plane_9_r <= plane_8_r;
-            for (lane_r = 0; lane_r < 4; lane_r = lane_r + 1) begin
-                pipe_clip_r[0][lane_r] <=
-                    $signed({x_r[17:2], lane_r[1:0]}) >= clip_x0_r &&
-                    $signed({x_r[17:2], lane_r[1:0]}) < clip_x1_r &&
-                    $signed({x_r[17:2], lane_r[1:0]}) < x1_r &&
-                    y_r >= clip_y0_r && y_r < clip_y1_r;
-                for (index_r = 0; index_r < 3; index_r = index_r + 1) begin
-                    edge_nonzero_r[lane_r*3+index_r] <=
-                        edge_w[lane_r*210+index_r*70 +: 39] != 0;
-                    edge_negative_r[lane_r*3+index_r] <= edge_w[lane_r*210+index_r*70+69];
-                end
-                mask_r[lane_r] <= pipe_clip_r[8][lane_r] &&
-                    !edge_negative_r[lane_r*3] &&
-                    (pipe_inclusive_r[8][0] || edge_nonzero_r[lane_r*3]) &&
-                    !edge_negative_r[lane_r*3+1] &&
-                    (pipe_inclusive_r[8][1] || edge_nonzero_r[lane_r*3+1]) &&
-                    !edge_negative_r[lane_r*3+2] &&
-                    (pipe_inclusive_r[8][2] || edge_nonzero_r[lane_r*3+2]);
-            end
             if (state_r == S_ACCUMULATE && wait_r == 5) begin
                 offset_x_r <= offset_x_r >> 1;
                 offset_y_r <= offset_y_r >> 1;
@@ -568,50 +638,55 @@ module edrv32_gpu_raster (
             last_y_r <= {{2{unused_last_y_w[15]}}, unused_last_y_w};
             h_r <= input_h_r[input_read_r];
             gradient_r <= input_normal_gradient_r[input_read_r];
-            for (index_r = 0; index_r < 3; index_r = index_r + 1) begin
-                inclusive_r[index_r] <= input_edge_r[input_read_r][index_r*160+159] == 0;
-            end
-        end
-        for (index_r = 0; index_r < 7; index_r = index_r + 1) begin
-            if (advance_w) begin
-                if (state_r == S_SIGN && wait_r == 4) begin
-                    prepare_gx_r[index_r] <= signed_gx_w[index_r];
-                    prepare_gy_r[index_r] <= signed_gy_w[index_r];
-                end
-                if (state_r == S_ACCUMULATE && wait_r == 5) begin
-                    base_r[index_r] <= accumulated_w[index_r];
-                    prepare_gx_r[index_r] <= prepare_gx_r[index_r] << 1;
-                    prepare_gy_r[index_r] <= prepare_gy_r[index_r] << 1;
-                end
-            end
-            if (input_pop_w) begin
-                base_r[index_r] <= input_start_r[input_read_r][index_r*70 +: 70];
-                gx_r[index_r] <= {{14{input_gradient_r[input_read_r][index_r*112+55]}},
-                    input_gradient_r[input_read_r][index_r*112 +: 56]};
-                gy_r[index_r] <= {{14{input_gradient_r[input_read_r][index_r*112+111]}},
-                    input_gradient_r[input_read_r][index_r*112+56 +: 56]};
-            end
-        end
-        for (index_r = 0; index_r < 3; index_r = index_r + 1) begin
-            if (input_pop_w) begin
-                base_r[index_r+7] <= {{30{input_edge_r[input_read_r][index_r*160+39]}},
-                    input_edge_r[input_read_r][index_r*160 +: 40]};
-                gx_r[index_r+7] <= {{30{input_edge_r[input_read_r][index_r*160+79]}},
-                    input_edge_r[input_read_r][index_r*160+40 +: 40]};
-                gy_r[index_r+7] <= {{30{input_edge_r[input_read_r][index_r*160+119]}},
-                    input_edge_r[input_read_r][index_r*160+80 +: 40]};
-            end
+            inclusive_r <= edge_inclusive_w;
         end
         if (output_push_w) begin
-            output_x_r[output_write_r] <= pipe_x_r[9];
-            output_y_r[output_write_r] <= pipe_y_r[9];
-            output_mask_r[output_write_r] <= mask_r;
-            output_plane_r[output_write_r] <= plane_9_r;
+            output_x_r[output_write_r] <= pipe_x_w[9];
+            output_y_r[output_write_r] <= pipe_y_w[9];
+            output_mask_r[output_write_r] <= mask_w;
             output_quad_r[output_write_r] <= 1'b0;
-            output_h_r[output_write_r] <= pipe_h_r[9];
-            output_gradient_r[output_write_r] <= pipe_gradient_r[9];
-            output_palette_r[output_write_r] <= pipe_palette_r[9];
+            output_h_r[output_write_r] <= pipe_h_w[9];
+            output_gradient_r[output_write_r] <= pipe_gradient_w[9];
+            output_palette_r[output_write_r] <= pipe_palette_w[9];
             output_alpha_r[output_write_r] <= 8'd255;
         end
     end
+    genvar coverage_lane;
+    genvar coverage_edge;
+    generate
+        // Four coverage lanes: three x bounds, two y bounds and three edge tests each.
+        for (coverage_lane = 0; coverage_lane < 4; coverage_lane = coverage_lane + 1) begin : g_mask
+            localparam [1:0] LANE = coverage_lane;
+            reg covered_r;
+            assign mask_w[coverage_lane] = covered_r;
+            assign clip_w[coverage_lane] =
+                $signed({x_r[17:2], LANE}) >= clip_x0_r &&
+                $signed({x_r[17:2], LANE}) < clip_x1_r &&
+                $signed({x_r[17:2], LANE}) < x1_r && y_r >= clip_y0_r && y_r < clip_y1_r;
+            always @(posedge clk_i) begin
+                if (advance_w) covered_r <= pipe_clip_w[8][coverage_lane] &&
+                    !edge_negative_w[coverage_lane*3] &&
+                    (pipe_inclusive_w[8][0] || edge_nonzero_w[coverage_lane*3]) &&
+                    !edge_negative_w[coverage_lane*3+1] &&
+                    (pipe_inclusive_w[8][1] || edge_nonzero_w[coverage_lane*3+1]) &&
+                    !edge_negative_w[coverage_lane*3+2] &&
+                    (pipe_inclusive_w[8][2] || edge_nonzero_w[coverage_lane*3+2]);
+            end
+            for (coverage_edge = 0; coverage_edge < 3;
+                coverage_edge = coverage_edge + 1) begin : g_edge
+                reg nonzero_r;
+                reg negative_r;
+                assign edge_nonzero_w[coverage_lane*3+coverage_edge] = nonzero_r;
+                assign edge_negative_w[coverage_lane*3+coverage_edge] = negative_r;
+                always @(posedge clk_i) begin
+                    if (advance_w) begin
+                        nonzero_r <=
+                            edge_w[coverage_lane*210+coverage_edge*70 +: 39] != 0;
+                        negative_r <=
+                            edge_w[coverage_lane*210+coverage_edge*70+69];
+                    end
+                end
+            end
+        end
+    endgenerate
 endmodule
