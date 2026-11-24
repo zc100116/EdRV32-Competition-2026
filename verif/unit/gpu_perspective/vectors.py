@@ -306,6 +306,8 @@ def run(kind):
     build.mkdir(parents=True, exist_ok=True)
     sources = ['-I'+str(ROOT/'rtl/include'), str(ROOT/f'rtl/gpu/edrv32_gpu_{kind}.v')]
     if kind == 'raster':
+        sources.append(str(ROOT/'rtl/tech/edrv32_ram_gpu_delay.v'))
+        sources.append(str(ROOT/'rtl/tech/edrv32_ram_gpu_read_pool.v'))
         sources.extend(str(p) for p in sorted((ROOT/'rtl/gpu').glob(
             'edrv32_gpu_raster_*.v')))
     if kind == 'perspective':

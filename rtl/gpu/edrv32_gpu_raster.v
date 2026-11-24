@@ -49,6 +49,8 @@ module edrv32_gpu_raster (
     output reg unit_done_o
 );
 
+    wire [2252:0] output_input_w;
+    wire [2303:0] unused_output_data_w;
     reg signed [17:0] clip_x0_r;
     reg signed [17:0] clip_y0_r;
     reg signed [17:0] clip_x1_r;
@@ -56,11 +58,6 @@ module edrv32_gpu_raster (
     reg [3:0] palette_r;
     wire [839:0] edge_w;
     wire unused_state_w;
-    assign unused_state_w = ^{render_state_pixel_i, render_state_tex_i, render_state_target_i,
-        draw_command_i, draw_valid_i, triangle_setup_edge_i, edge_w};
-    assign render_state_ready_o = 1'b1;
-    assign draw_ready_o = 1'b1;
-
     wire signed [17:0] target_x0_w;
     wire signed [17:0] target_y0_w;
     wire signed [17:0] target_x1_w;
@@ -69,14 +66,6 @@ module edrv32_gpu_raster (
     wire signed [17:0] scissor_y0_w;
     wire signed [17:0] scissor_x1_w;
     wire signed [17:0] scissor_y1_w;
-    assign target_x0_w = {{2{render_state_target_i[47]}}, render_state_target_i[32 +: 16]};
-    assign target_y0_w = {{2{render_state_target_i[63]}}, render_state_target_i[48 +: 16]};
-    assign target_x1_w = target_x0_w + (render_state_wide_i ? 18'sd1280 : 18'sd640);
-    assign target_y1_w = target_y0_w + (render_state_wide_i ? 18'sd90 : 18'sd180);
-    assign scissor_x0_w = {{2{render_state_target_i[79]}}, render_state_target_i[64 +: 16]};
-    assign scissor_y0_w = {{2{render_state_target_i[95]}}, render_state_target_i[80 +: 16]};
-    assign scissor_x1_w = {{2{render_state_target_i[111]}}, render_state_target_i[96 +: 16]};
-    assign scissor_y1_w = {{2{render_state_target_i[127]}}, render_state_target_i[112 +: 16]};
     reg cfg_pending_r;
     reg cfg_valid_r;
     reg signed [17:0] target_x0_r;
@@ -87,52 +76,17 @@ module edrv32_gpu_raster (
     reg signed [17:0] scissor_x1_r;
     reg signed [17:0] target_y1_r;
     reg signed [17:0] scissor_y1_r;
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
-            cfg_pending_r <= 0;
-            cfg_valid_r <= 0;
-        end else begin
-            cfg_pending_r <= render_state_valid_i;
-            if (cfg_pending_r) begin
-                cfg_valid_r <= 1;
-            end
-            if (render_state_valid_i) begin
-                cfg_valid_r <= 0;
-            end
-        end
-    end
-    always @(posedge clk_i) begin
-        if (render_state_valid_i) begin
-            target_x0_r <= target_x0_w;
-            scissor_x0_r <= scissor_x0_w;
-            target_y0_r <= target_y0_w;
-            scissor_y0_r <= scissor_y0_w;
-            target_x1_r <= target_x1_w;
-            scissor_x1_r <= scissor_x1_w;
-            target_y1_r <= target_y1_w;
-            scissor_y1_r <= scissor_y1_w;
-            palette_r <= render_state_tex_i[78 +: 4];
-        end
-        if (cfg_pending_r) begin
-            clip_x0_r <= target_x0_r > scissor_x0_r ? target_x0_r : scissor_x0_r;
-            clip_y0_r <= target_y0_r > scissor_y0_r ? target_y0_r : scissor_y0_r;
-            clip_x1_r <= target_x1_r < scissor_x1_r ? target_x1_r : scissor_x1_r;
-            clip_y1_r <= target_y1_r < scissor_y1_r ? target_y1_r : scissor_y1_r;
-        end
-    end
-
-    // Two input slots and two output slots isolate backpressure at both boundaries.
     reg [1:0] input_count_r;
     reg input_read_r;
     reg input_write_r;
-    reg [1:0] output_count_r;
-    reg output_read_r;
-    reg output_write_r;
-    localparam S_IDLE = 3'd0;
-    localparam S_SIGN = 3'd1;
-    localparam S_ACCUMULATE = 3'd2;
-    localparam S_SEED = 3'd3;
-    localparam S_LOAD = 3'd4;
+    reg [4:0] output_count_r;
+    reg [4:0] credit_used_r;
+    reg output_valid_r;
+    wire culled_w;
+    wire output_read_w;
+    wire [5:0] output_addr_w;
+    reg [5:0] output_read_r;
+    reg [5:0] output_write_r;
     reg [2:0] state_r;
     reg active_r;
     reg prepared_nonempty_r;
@@ -176,36 +130,96 @@ module edrv32_gpu_raster (
     reg [31:0] input_origin_r [0:1];
     reg [69:0] input_h_r [0:1];
     reg [173:0] input_normal_gradient_r [0:1];
-    reg [15:0] output_x_r [0:1];
-    assign fragment_x_o = output_x_r[output_read_r];
-    reg [15:0] output_y_r [0:1];
-    assign fragment_y_o = output_y_r[output_read_r];
-    reg [3:0] output_mask_r [0:1];
-    assign fragment_mask_o = output_mask_r[output_read_r];
-    reg [0:0] output_quad_r [0:1];
-    assign fragment_quad_o = output_quad_r[output_read_r];
-    reg [69:0] output_h_r [0:1];
-    assign fragment_h_o = output_h_r[output_read_r];
-    reg [173:0] output_gradient_r [0:1];
-    assign fragment_gradient_o = output_gradient_r[output_read_r];
-    reg [3:0] output_palette_r [0:1];
-    assign fragment_palette_o = output_palette_r[output_read_r];
-    reg [7:0] output_alpha_r [0:1];
-    assign fragment_alpha_o = output_alpha_r[output_read_r];
-    assign advance_w = output_count_r < 2;
-    assign fragment_valid_o = (output_count_r != 0) && !stop_i;
+    wire [11:0] edge_nonzero_w;
+    wire [11:0] edge_negative_w;
+    wire [2:0] edge_inclusive_w;
+    wire [3:0] clip_w;
+    reg [8:0] delay_write_r;
+    wire [6:0] metadata_9_input_w;
+    wire [71:0] unused_metadata_9_data_w;
+    wire [8:0] metadata_9_read_w;
+    wire [2:0] pipe_inclusive_w;
+    wire [3:0] pipe_clip_w;
+    wire [279:0] metadata_10_input_w;
+    wire [287:0] unused_metadata_10_data_w;
+    wire [8:0] metadata_10_read_w;
+    wire [15:0] pipe_x_w;
+    wire [15:0] pipe_y_w;
+    wire [69:0] pipe_h_w;
+    wire [173:0] pipe_gradient_w;
+    wire [3:0] pipe_palette_w;
+
+    assign unused_state_w = ^{render_state_pixel_i, render_state_tex_i, render_state_target_i,
+        draw_command_i, draw_valid_i, triangle_setup_edge_i, edge_w};
+    assign render_state_ready_o = 1'b1;
+    assign draw_ready_o = 1'b1;
+
+    assign target_x0_w = {{2{render_state_target_i[47]}}, render_state_target_i[32 +: 16]};
+    assign target_y0_w = {{2{render_state_target_i[63]}}, render_state_target_i[48 +: 16]};
+    assign target_x1_w = target_x0_w + (render_state_wide_i ? 18'sd1280 : 18'sd640);
+    assign target_y1_w = target_y0_w + (render_state_wide_i ? 18'sd90 : 18'sd180);
+    assign scissor_x0_w = {{2{render_state_target_i[79]}}, render_state_target_i[64 +: 16]};
+    assign scissor_y0_w = {{2{render_state_target_i[95]}}, render_state_target_i[80 +: 16]};
+    assign scissor_x1_w = {{2{render_state_target_i[111]}}, render_state_target_i[96 +: 16]};
+    assign scissor_y1_w = {{2{render_state_target_i[127]}}, render_state_target_i[112 +: 16]};
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            cfg_pending_r <= 0;
+            cfg_valid_r <= 0;
+        end else begin
+            cfg_pending_r <= render_state_valid_i;
+            if (cfg_pending_r) begin
+                cfg_valid_r <= 1;
+            end
+            if (render_state_valid_i) begin
+                cfg_valid_r <= 0;
+            end
+        end
+    end
+    always @(posedge clk_i) begin
+        if (render_state_valid_i) begin
+            target_x0_r <= target_x0_w;
+            scissor_x0_r <= scissor_x0_w;
+            target_y0_r <= target_y0_w;
+            scissor_y0_r <= scissor_y0_w;
+            target_x1_r <= target_x1_w;
+            scissor_x1_r <= scissor_x1_w;
+            target_y1_r <= target_y1_w;
+            scissor_y1_r <= scissor_y1_w;
+            palette_r <= render_state_tex_i[78 +: 4];
+        end
+        if (cfg_pending_r) begin
+            clip_x0_r <= target_x0_r > scissor_x0_r ? target_x0_r : scissor_x0_r;
+            clip_y0_r <= target_y0_r > scissor_y0_r ? target_y0_r : scissor_y0_r;
+            clip_x1_r <= target_x1_r < scissor_x1_r ? target_x1_r : scissor_x1_r;
+            clip_y1_r <= target_y1_r < scissor_y1_r ? target_y1_r : scissor_y1_r;
+        end
+    end
+
+    // Two setup slots and sixteen scan credits isolate downstream backpressure.
+    localparam S_IDLE = 3'd0;
+    localparam S_SIGN = 3'd1;
+    localparam S_ACCUMULATE = 3'd2;
+    localparam S_SEED = 3'd3;
+    localparam S_LOAD = 3'd4;
+    assign advance_w = 1'b1;
+    assign fragment_valid_o = output_valid_r && !stop_i;
     assign output_pop_w = fragment_valid_o && fragment_ready_i;
     assign triangle_setup_ready_o = input_count_r < 2 && cfg_valid_r;
     assign input_push_w = triangle_setup_valid_i && triangle_setup_ready_o && !stop_i;
     assign row_end_w = x_r[17:2] == unused_last_x_r[17:2];
     assign last_w = row_end_w && y_r == last_y_r;
-    assign scan_w = active_r && advance_w && !stop_i &&
+    assign scan_w = active_r && credit_used_r < 16 && !stop_i &&
         (!row_end_w || last_w || next_row_ready_r);
     assign input_pop_w = input_count_r != 0 && state_r == S_IDLE &&
         (!active_r || (scan_w && last_w)) && advance_w && !stop_i;
     assign seed_load_w = state_r == S_LOAD && advance_w;
     assign load_w = seed_load_w || (scan_w && row_end_w && !last_w);
     assign output_push_w = valid_r[9] && advance_w && mask_w != 0 && !stop_i;
+    assign culled_w = valid_r[9] && mask_w == 0 && !stop_i;
+    assign output_read_w = !stop_i && ((output_count_r != 0 && !output_valid_r) ||
+        (output_pop_w && output_count_r > 1));
+    assign output_addr_w = output_read_r + {5'b0, output_pop_w};
     assign offset_x_w = $signed({input_bounds_r[input_read_r][15],
         input_bounds_r[input_read_r][0 +: 16]}) -
         $signed({input_origin_r[input_read_r][15], input_origin_r[input_read_r][0 +: 16]});
@@ -214,67 +228,71 @@ module edrv32_gpu_raster (
         $signed({input_origin_r[input_read_r][31], input_origin_r[input_read_r][16 +: 16]});
     assign unused_last_x_w = input_bounds_r[input_read_r][32 +: 16] - 16'd1;
     assign unused_last_y_w = input_bounds_r[input_read_r][48 +: 16] - 16'd1;
-    wire [11:0] edge_nonzero_w;
-    wire [11:0] edge_negative_w;
-    wire [15:0] pipe_x_w [0:9];
-    wire [15:0] pipe_y_w [0:9];
-    wire [69:0] pipe_h_w [0:9];
-    wire [173:0] pipe_gradient_w [0:9];
-    wire [3:0] pipe_palette_w [0:9];
-    wire [2:0] pipe_inclusive_w [0:8];
-    wire [3:0] pipe_clip_w [0:8];
-    wire [2:0] edge_inclusive_w;
-    wire [3:0] clip_w;
-    genvar stage;
-    generate
-        // Ten scalar metadata stages; coverage uses nine stages.
-        for (stage = 0; stage < 10; stage = stage + 1) begin : g_metadata
-            reg [15:0] metadata_x_r;
-            assign pipe_x_w[stage] = metadata_x_r;
-            always @(posedge clk_i) begin
-                if (advance_w) metadata_x_r <= stage == 0 ? x_r[15:0]
-                    : pipe_x_w[stage == 0 ? 0 : stage-1];
-            end
-            reg [15:0] metadata_y_r;
-            assign pipe_y_w[stage] = metadata_y_r;
-            always @(posedge clk_i) begin
-                if (advance_w) metadata_y_r <= stage == 0 ? y_r[15:0]
-                    : pipe_y_w[stage == 0 ? 0 : stage-1];
-            end
-            reg [69:0] metadata_h_r;
-            assign pipe_h_w[stage] = metadata_h_r;
-            always @(posedge clk_i) begin
-                if (advance_w) metadata_h_r <= stage == 0 ? h_r
-                    : pipe_h_w[stage == 0 ? 0 : stage-1];
-            end
-            reg [173:0] metadata_gradient_r;
-            assign pipe_gradient_w[stage] = metadata_gradient_r;
-            always @(posedge clk_i) begin
-                if (advance_w) metadata_gradient_r <= stage == 0 ? gradient_r
-                    : pipe_gradient_w[stage == 0 ? 0 : stage-1];
-            end
-            reg [3:0] metadata_palette_r;
-            assign pipe_palette_w[stage] = metadata_palette_r;
-            always @(posedge clk_i) begin
-                if (advance_w) metadata_palette_r <= stage == 0 ? palette_r
-                    : pipe_palette_w[stage == 0 ? 0 : stage-1];
-            end
-            if (stage < 9) begin : g_coverage
-                reg [2:0] metadata_inclusive_r;
-                reg [3:0] clip_r;
-                assign pipe_inclusive_w[stage] = metadata_inclusive_r;
-                assign pipe_clip_w[stage] = clip_r;
-                always @(posedge clk_i) begin
-                    if (advance_w) begin
-                        metadata_inclusive_r <= stage == 0 ? inclusive_r
-                            : pipe_inclusive_w[stage == 0 ? 0 : stage-1];
-                        clip_r <= stage == 0 ? clip_w
-                            : pipe_clip_w[stage == 0 ? 0 : stage-1];
-                    end
-                end
-            end
-        end
-    endgenerate
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) delay_write_r <= 0;
+        else delay_write_r <= delay_write_r + 1'b1;
+    end
+    assign metadata_9_read_w = delay_write_r - 9'd8;
+    assign metadata_9_input_w[0 +: 3] = inclusive_r;
+    assign pipe_inclusive_w = unused_metadata_9_data_w[0 +: 3];
+    assign metadata_9_input_w[3 +: 4] = clip_w;
+    assign pipe_clip_w = unused_metadata_9_data_w[3 +: 4];
+    edrv32_ram_gpu_delay u_metadata_9_0 (
+        .clk_i(clk_i),
+        .wr_en_i(1'b1),
+        .wr_addr_i(delay_write_r),
+        .wr_data_i({65'b0, metadata_9_input_w[0 +: 7]}),
+        .rd_en_i(1'b1),
+        .rd_addr_i(metadata_9_read_w),
+        .rd_data_o(unused_metadata_9_data_w[0 +: 72])
+    );
+    assign metadata_10_read_w = delay_write_r - 9'd9;
+    assign metadata_10_input_w[0 +: 16] = x_r[15:0];
+    assign pipe_x_w = unused_metadata_10_data_w[0 +: 16];
+    assign metadata_10_input_w[16 +: 16] = y_r[15:0];
+    assign pipe_y_w = unused_metadata_10_data_w[16 +: 16];
+    assign metadata_10_input_w[32 +: 70] = h_r;
+    assign pipe_h_w = unused_metadata_10_data_w[32 +: 70];
+    assign metadata_10_input_w[102 +: 174] = gradient_r;
+    assign pipe_gradient_w = unused_metadata_10_data_w[102 +: 174];
+    assign metadata_10_input_w[276 +: 4] = palette_r;
+    assign pipe_palette_w = unused_metadata_10_data_w[276 +: 4];
+    edrv32_ram_gpu_delay u_metadata_10_0 (
+        .clk_i(clk_i),
+        .wr_en_i(1'b1),
+        .wr_addr_i(delay_write_r),
+        .wr_data_i(metadata_10_input_w[0 +: 72]),
+        .rd_en_i(1'b1),
+        .rd_addr_i(metadata_10_read_w),
+        .rd_data_o(unused_metadata_10_data_w[0 +: 72])
+    );
+    edrv32_ram_gpu_delay u_metadata_10_1 (
+        .clk_i(clk_i),
+        .wr_en_i(1'b1),
+        .wr_addr_i(delay_write_r),
+        .wr_data_i(metadata_10_input_w[72 +: 72]),
+        .rd_en_i(1'b1),
+        .rd_addr_i(metadata_10_read_w),
+        .rd_data_o(unused_metadata_10_data_w[72 +: 72])
+    );
+    edrv32_ram_gpu_delay u_metadata_10_2 (
+        .clk_i(clk_i),
+        .wr_en_i(1'b1),
+        .wr_addr_i(delay_write_r),
+        .wr_data_i(metadata_10_input_w[144 +: 72]),
+        .rd_en_i(1'b1),
+        .rd_addr_i(metadata_10_read_w),
+        .rd_data_o(unused_metadata_10_data_w[144 +: 72])
+    );
+    edrv32_ram_gpu_delay u_metadata_10_3 (
+        .clk_i(clk_i),
+        .wr_en_i(1'b1),
+        .wr_addr_i(delay_write_r),
+        .wr_data_i({8'b0, metadata_10_input_w[216 +: 64]}),
+        .rd_en_i(1'b1),
+        .rd_addr_i(metadata_10_read_w),
+        .rd_data_o(unused_metadata_10_data_w[216 +: 72])
+    );
     genvar attribute;
     genvar lane;
     generate
@@ -468,16 +486,16 @@ module edrv32_gpu_raster (
                 if (attribute < 7) begin : g_plane
                     reg [69:0] plane_8_r;
                     reg [69:0] plane_9_r;
-                    reg [69:0] output_r [0:1];
                     always @(posedge clk_i) begin
                         if (advance_w) begin
                             plane_8_r <= attribute_w;
                             plane_9_r <= plane_8_r;
                         end
-                        if (output_push_w) output_r[output_write_r] <= plane_9_r;
                     end
+                    assign output_input_w[293+lane*490+attribute*70 +: 70] =
+                        plane_9_r;
                     assign fragment_plane_o[lane*490+attribute*70 +: 70] =
-                        output_r[output_read_r];
+                        unused_output_data_w[293+lane*490+attribute*70 +: 70];
                 end else begin : g_edge
                     assign edge_w[lane*210+(attribute-7)*70 +: 70] = attribute_w;
                 end
@@ -491,6 +509,8 @@ module edrv32_gpu_raster (
             input_read_r <= 0;
             input_write_r <= 0;
             output_count_r <= 0;
+            credit_used_r <= 0;
+            output_valid_r <= 0;
             output_read_r <= 0;
             output_write_r <= 0;
             state_r <= S_IDLE;
@@ -514,6 +534,16 @@ module edrv32_gpu_raster (
             if (input_push_w != input_pop_w) begin
                 input_count_r <= input_push_w ? input_count_r + 1'b1 : input_count_r - 1'b1;
             end
+            begin
+                case ({scan_w, output_pop_w, culled_w})
+                    3'b100: credit_used_r <= credit_used_r + 1'b1;
+                    3'b001, 3'b010, 3'b111: credit_used_r <= credit_used_r - 1'b1;
+                    3'b011: credit_used_r <= credit_used_r - 5'd2;
+                    default: credit_used_r <= credit_used_r;
+                endcase
+            end
+            if (output_read_w) output_valid_r <= 1;
+            else if (output_pop_w) output_valid_r <= 0;
             if (output_push_w != output_pop_w) begin
                 output_count_r <= output_push_w ? output_count_r + 1'b1 : output_count_r - 1'b1;
             end
@@ -524,10 +554,10 @@ module edrv32_gpu_raster (
                 input_read_r <= !input_read_r;
             end
             if (output_push_w) begin
-                output_write_r <= !output_write_r;
+                output_write_r <= output_write_r + 1'b1;
             end
             if (output_pop_w) begin
-                output_read_r <= !output_read_r;
+                output_read_r <= output_read_r + 1'b1;
             end
             if (advance_w) begin
                 valid_r <= {valid_r[8:0], scan_w};
@@ -589,6 +619,8 @@ module edrv32_gpu_raster (
             if (stop_i) begin
                 input_count_r <= 0;
                 output_count_r <= 0;
+                credit_used_r <= 0;
+                output_valid_r <= 0;
                 input_read_r <= input_write_r;
                 output_read_r <= output_write_r;
                 state_r <= S_IDLE;
@@ -640,17 +672,105 @@ module edrv32_gpu_raster (
             gradient_r <= input_normal_gradient_r[input_read_r];
             inclusive_r <= edge_inclusive_w;
         end
-        if (output_push_w) begin
-            output_x_r[output_write_r] <= pipe_x_w[9];
-            output_y_r[output_write_r] <= pipe_y_w[9];
-            output_mask_r[output_write_r] <= mask_w;
-            output_quad_r[output_write_r] <= 1'b0;
-            output_h_r[output_write_r] <= pipe_h_w[9];
-            output_gradient_r[output_write_r] <= pipe_gradient_w[9];
-            output_palette_r[output_write_r] <= pipe_palette_w[9];
-            output_alpha_r[output_write_r] <= 8'd255;
-        end
     end
+    assign output_input_w[0 +: 16] = pipe_x_w;
+    assign fragment_x_o = unused_output_data_w[0 +: 16];
+    assign output_input_w[16 +: 16] = pipe_y_w;
+    assign fragment_y_o = unused_output_data_w[16 +: 16];
+    assign output_input_w[32 +: 4] = mask_w;
+    assign fragment_mask_o = unused_output_data_w[32 +: 4];
+    assign output_input_w[36 +: 1] = 1'b0;
+    assign fragment_quad_o = unused_output_data_w[36 +: 1];
+    assign output_input_w[37 +: 70] = pipe_h_w;
+    assign fragment_h_o = unused_output_data_w[37 +: 70];
+    assign output_input_w[107 +: 174] = pipe_gradient_w;
+    assign fragment_gradient_o = unused_output_data_w[107 +: 174];
+    assign output_input_w[281 +: 4] = pipe_palette_w;
+    assign fragment_palette_o = unused_output_data_w[281 +: 4];
+    assign output_input_w[285 +: 8] = 8'd255;
+    assign fragment_alpha_o = unused_output_data_w[285 +: 8];
+    edrv32_ram_gpu_read_pool u_output_0 (
+        .clk_i(clk_i),
+        .wr_en_i(output_push_w),
+        .wr_addr_i(output_write_r),
+        .wr_data_i(output_input_w[0 +: 256]),
+        .rd_en_i(output_read_w),
+        .rd_addr_i(output_addr_w),
+        .rd_data_o(unused_output_data_w[0 +: 256])
+    );
+    edrv32_ram_gpu_read_pool u_output_1 (
+        .clk_i(clk_i),
+        .wr_en_i(output_push_w),
+        .wr_addr_i(output_write_r),
+        .wr_data_i(output_input_w[256 +: 256]),
+        .rd_en_i(output_read_w),
+        .rd_addr_i(output_addr_w),
+        .rd_data_o(unused_output_data_w[256 +: 256])
+    );
+    edrv32_ram_gpu_read_pool u_output_2 (
+        .clk_i(clk_i),
+        .wr_en_i(output_push_w),
+        .wr_addr_i(output_write_r),
+        .wr_data_i(output_input_w[512 +: 256]),
+        .rd_en_i(output_read_w),
+        .rd_addr_i(output_addr_w),
+        .rd_data_o(unused_output_data_w[512 +: 256])
+    );
+    edrv32_ram_gpu_read_pool u_output_3 (
+        .clk_i(clk_i),
+        .wr_en_i(output_push_w),
+        .wr_addr_i(output_write_r),
+        .wr_data_i(output_input_w[768 +: 256]),
+        .rd_en_i(output_read_w),
+        .rd_addr_i(output_addr_w),
+        .rd_data_o(unused_output_data_w[768 +: 256])
+    );
+    edrv32_ram_gpu_read_pool u_output_4 (
+        .clk_i(clk_i),
+        .wr_en_i(output_push_w),
+        .wr_addr_i(output_write_r),
+        .wr_data_i(output_input_w[1024 +: 256]),
+        .rd_en_i(output_read_w),
+        .rd_addr_i(output_addr_w),
+        .rd_data_o(unused_output_data_w[1024 +: 256])
+    );
+    edrv32_ram_gpu_read_pool u_output_5 (
+        .clk_i(clk_i),
+        .wr_en_i(output_push_w),
+        .wr_addr_i(output_write_r),
+        .wr_data_i(output_input_w[1280 +: 256]),
+        .rd_en_i(output_read_w),
+        .rd_addr_i(output_addr_w),
+        .rd_data_o(unused_output_data_w[1280 +: 256])
+    );
+    edrv32_ram_gpu_read_pool u_output_6 (
+        .clk_i(clk_i),
+        .wr_en_i(output_push_w),
+        .wr_addr_i(output_write_r),
+        .wr_data_i(output_input_w[1536 +: 256]),
+        .rd_en_i(output_read_w),
+        .rd_addr_i(output_addr_w),
+        .rd_data_o(unused_output_data_w[1536 +: 256])
+    );
+    edrv32_ram_gpu_read_pool u_output_7 (
+        .clk_i(clk_i),
+        .wr_en_i(output_push_w),
+        .wr_addr_i(output_write_r),
+        .wr_data_i(output_input_w[1792 +: 256]),
+        .rd_en_i(output_read_w),
+        .rd_addr_i(output_addr_w),
+        .rd_data_o(unused_output_data_w[1792 +: 256])
+    );
+    edrv32_ram_gpu_read_pool u_output_8 (
+        .clk_i(clk_i),
+        .wr_en_i(output_push_w),
+        .wr_addr_i(output_write_r),
+        .wr_data_i({51'b0, output_input_w[2048 +: 205]}),
+        .rd_en_i(output_read_w),
+        .rd_addr_i(output_addr_w),
+        .rd_data_o(unused_output_data_w[2048 +: 256])
+    );
+
     genvar coverage_lane;
     genvar coverage_edge;
     generate
@@ -664,13 +784,13 @@ module edrv32_gpu_raster (
                 $signed({x_r[17:2], LANE}) < clip_x1_r &&
                 $signed({x_r[17:2], LANE}) < x1_r && y_r >= clip_y0_r && y_r < clip_y1_r;
             always @(posedge clk_i) begin
-                if (advance_w) covered_r <= pipe_clip_w[8][coverage_lane] &&
+                if (advance_w) covered_r <= pipe_clip_w[coverage_lane] &&
                     !edge_negative_w[coverage_lane*3] &&
-                    (pipe_inclusive_w[8][0] || edge_nonzero_w[coverage_lane*3]) &&
+                    (pipe_inclusive_w[0] || edge_nonzero_w[coverage_lane*3]) &&
                     !edge_negative_w[coverage_lane*3+1] &&
-                    (pipe_inclusive_w[8][1] || edge_nonzero_w[coverage_lane*3+1]) &&
+                    (pipe_inclusive_w[1] || edge_nonzero_w[coverage_lane*3+1]) &&
                     !edge_negative_w[coverage_lane*3+2] &&
-                    (pipe_inclusive_w[8][2] || edge_nonzero_w[coverage_lane*3+2]);
+                    (pipe_inclusive_w[2] || edge_nonzero_w[coverage_lane*3+2]);
             end
             for (coverage_edge = 0; coverage_edge < 3;
                 coverage_edge = coverage_edge + 1) begin : g_edge
