@@ -97,6 +97,10 @@ static void choice(struct ember_ui_canvas *out, const struct ember_sim *sim, uns
         tag = "宠物";
         effect = "提高宠物伤害、攻速和技能效率";
         (void)snprintf(detail, sizeof(detail), "%u / 5", sim->pet_level + 1);
+    } else if (c->kind == 5) {
+        name = ember_upgrade_fillers[c->id].name;
+        tag = "补给";
+        effect = ember_upgrade_fillers[c->id].description;
     } else {
         name = ember_inscriptions[c->id].name;
         tag = "铭文";

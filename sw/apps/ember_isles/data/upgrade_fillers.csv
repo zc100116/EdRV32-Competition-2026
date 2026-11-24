@@ -1,0 +1,4 @@
+id,name,description,value
+health,回复生命,回复30%生命,30
+gold,获得金币,金币 +40,40
+oil,补充灯油,灯油 +30,3000

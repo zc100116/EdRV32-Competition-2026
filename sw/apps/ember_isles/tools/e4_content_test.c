@@ -927,9 +927,53 @@ static void tag_membership(void)
     CHECK(tag_present("on_hit|on_crit|on_hurt", "on_crit"));
     CHECK(!tag_present("crit", "on_crit"));
 }
+static void upgrade_fillers(void)
+{
+    for (unsigned remaining = 0; remaining < 3; ++remaining) {
+        setup();
+        for (unsigned w = 0; w < 2; ++w) {
+            fixture.player.weapon_level[w] = remaining > w ? 4 : 5;
+            fixture.player.evolution[w] = remaining > w ? 0 : 1;
+            fixture.player.inscription[w][0] = EMBER_DATA_INSCRIPTIONS_LEECH + 1;
+            fixture.player.inscription[w][1] = EMBER_DATA_INSCRIPTIONS_IGNORE_BLOCK + 1;
+        }
+        for (unsigned r = 0; r < 6; ++r)
+            fixture.player.relic_level[r] = (uint8_t)ember_relics[r].level_max;
+        fixture.player.xp = fixture.player.next_xp;
+        upgrade_offer(&fixture);
+        unsigned ordinary = 0, seen = 0;
+        for (unsigned i = 0; i < 3; ++i) {
+            const struct ember_choice *c = &fixture.choices[i];
+            if (c->kind == 0) ++ordinary;
+            else {
+                CHECK(c->kind == 5 && c->id < EMBER_UPGRADE_FILLERS_COUNT);
+                CHECK(!(seen & (1u << c->id)));
+                seen |= 1u << c->id;
+            }
+        }
+        CHECK(ordinary == remaining);
+    }
+    for (unsigned reward = 0; reward < EMBER_UPGRADE_FILLERS_COUNT; ++reward) {
+        setup();
+        fixture.player.hp = 100;
+        fixture.gold = 10;
+        fixture.oil = 0;
+        ember_sim_attributes(&fixture);
+        int32_t attributes[EMBER_ATTRIBUTE_COUNT];
+        memcpy(attributes, fixture.attributes, sizeof(attributes));
+        fixture.choices[0] = (struct ember_choice){5, (uint8_t)reward, 0};
+        fixture.phase = EMBER_UPGRADE;
+        upgrade_choose(&fixture);
+        CHECK(fixture.player.hp == (reward == EMBER_DATA_UPGRADE_FILLERS_HEALTH ? 178 : 100));
+        CHECK(fixture.gold == (reward == EMBER_DATA_UPGRADE_FILLERS_GOLD ? 50u : 10u));
+        CHECK(fixture.oil == (reward == EMBER_DATA_UPGRADE_FILLERS_OIL ? 3000 : 0));
+        CHECK(!memcmp(attributes, fixture.attributes, sizeof(attributes)));
+    }
+}
 int main(void)
 {
     tag_membership();
+    upgrade_fillers();
     weapons(); evolutions(); relics(); relic_rules(); inscriptions(); characters(); pets(); pet_runes();
     enemies(); class_shapes(); entity_rules(); blessings(); resonances(); contracts(); builds(); interface_rules(); dark_projectile_snapshot(); vulnerability_and_dots(); skill_and_evolution_modifiers(); inherited_area_tags(); target_lifetimes(); healing_windows(); split_depth(); determinism();
     printf("PASS E4 assertions=%u\n", assertions);

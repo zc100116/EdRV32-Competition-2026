@@ -1486,7 +1486,10 @@ static void upgrade_offer(struct ember_sim *s)
     }
     if (s->pet_kind != 255 && s->pet_level < 5)
         eligible[count++] = (struct ember_choice){4, s->pet_kind, 0};
-    for (unsigned i = 0; i < 3; ++i) {
+    /* GDD 6: retain available ordinary choices, then fill the remaining slots
+     * with the specified resource rewards, without adding permanent attributes. */
+    unsigned ordinary = count < 3 ? count : 3;
+    for (unsigned i = 0; i < ordinary; ++i) {
         unsigned total = 0;
         for (unsigned n = 0; n < count; ++n) total += choice_weight(s, &eligible[n]);
         unsigned roll = ember_random(&s->loot_rng) % total;
@@ -1496,6 +1499,14 @@ static void upgrade_offer(struct ember_sim *s)
         }
         s->choices[i] = eligible[pick];
         eligible[pick] = eligible[--count];
+    }
+    uint8_t fillers[EMBER_UPGRADE_FILLERS_COUNT];
+    unsigned filler_count = EMBER_UPGRADE_FILLERS_COUNT;
+    for (unsigned i = 0; i < filler_count; ++i) fillers[i] = (uint8_t)i;
+    for (unsigned i = ordinary; i < 3; ++i) {
+        unsigned pick = ember_random(&s->loot_rng) % filler_count;
+        s->choices[i] = (struct ember_choice){5, fillers[pick], 0};
+        fillers[pick] = fillers[--filler_count];
     }
     s->selected = 0;
     s->phase = EMBER_UPGRADE;
@@ -1517,6 +1528,13 @@ static void upgrade_choose(struct ember_sim *s)
         ember_sim_evolve(s, c->slot, c->id);
         s->free_evolution = 0;
     } else if (c->kind == 4) ++s->pet_level;
+    else if (c->kind == 5) {
+        int value = ember_upgrade_fillers[c->id].value;
+        if (c->id == EMBER_DATA_UPGRADE_FILLERS_HEALTH)
+            heal(s, s->player.max_hp * value / 100);
+        else if (c->id == EMBER_DATA_UPGRADE_FILLERS_GOLD) s->gold += (unsigned)value;
+        else s->oil = minimum(ember_lighting[0].oil_max, s->oil + value);
+    }
     else {
         unsigned slot = !!s->player.inscription[c->slot][0];
         s->player.inscription[c->slot][slot] = (uint8_t)(c->id + 1);

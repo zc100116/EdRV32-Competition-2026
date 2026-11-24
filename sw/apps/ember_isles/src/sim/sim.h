@@ -63,7 +63,8 @@ struct ember_player {
     uint8_t pet_inscription[12];
 };
 /* IDs are zero-based CSV row indices; inscriptions store one plus that index.
- * Choice kind: 0 weapon, 1 relic, 2 inscription; slot is its weapon index.
+ * Choice kind: 0 weapon, 1 relic, 2 inscription, 3 evolution, 4 pet upgrade,
+ * 5 resource filler (GDD 6); slot is the target weapon index for runes/evolution.
  * Shot kind: 0 bolt, 1 ring, 2 ground, 3 pot, 4 seed, 5 burst, 6 hostile.
  * Affix: 0 none, 1 haste, 2 ward. Facing: 0 right, 1 down, 2 left, 3 up.
  */

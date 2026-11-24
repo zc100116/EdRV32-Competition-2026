@@ -20,7 +20,7 @@ make -C sw/apps/ember_isles all test -j1
 Windows仅交叉编译，未实机运行；板上仅构建，FPGA移植不在本包。
 可执行文件：outputs/ember_isles/ember_isles.exe（E3占位画面，非完整发行版）。
 
-录像：assets/replays/coast.txt，seed20261124，10800帧；第9947帧清第5波。
+E3基线录像：assets/replays/coast.txt，seed20261124，10800帧；第9947帧清第5波。
 PC/Spike每60帧180组摘要一致；双实例逐帧全状态一致；230击杀/260生命/14级。
 原始数据：build/g2/g22b-{pc-summary,baseline-summary,spike}.log。
 按最终模拟13879d601的Spike日志汇总（每帧10800行）：
@@ -87,3 +87,8 @@ I4部件69632B/81920B仍未计完整VFX/UI/字形，另有36姿势尺寸失败�
 
 PM集成补验：修复RV32摘要charge_frames格式类型及E4测试遗漏sim.c依赖；四目标构建/五组系统测试通过。
 命令仍为make all test -j1；日志build/g2/e4-integrated-build.log，warning/error均0；E4复核8060断言通过。
+
+E4长录像在6984帧因第三次升级抽取空池崩溃；已按GDD6接入3种资源补位（选择kind5/CSV初值）。
+0/1/2普通候选与资源效果回归通过，总8087断言；四目标/五组系统测试再次通过，日志e4-fillers-build.log。
+修复版10800帧ASan/UBSan无异常，旧工具因未通关退出1；旧输入停升级，不能充当E4胜利证据。
+调试记录：docs/debug/2026-11-24-upgrade-pool-exhaustion.md；PC/Spike与分项instret待本次长录像复核。
