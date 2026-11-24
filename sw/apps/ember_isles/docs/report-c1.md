@@ -82,3 +82,4 @@ content-30s.mp4为H264、640×360、15fps、450帧、30秒、3332001B，无音�
 各关实体/粒子峰值、两模式三关通关及开局快照录像待E5；不把素材预览当GPU游戏录像。
 outputs/ember_isles/ember_isles.exe仍是先前E3版；完整C版未生成，现E4b构建在build/。
 下一步：E4确认和缓存接口决策，续作海岸素材/06b真GPU检视，再做05模式及06c其余素材。
+本次dispatch以failed交接阶段成果：E4确认msg_f766955ae05a、缓存接口msg_840d883671ee及拆分msg_885165e0d2cf仍待答。
