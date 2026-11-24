@@ -92,7 +92,7 @@ uint32_t pc_frontend_wait(void)
     uint32_t frames = (uint32_t)(elapsed / (uint64_t)frequency.QuadPart);
     sample_remainder = elapsed % (uint64_t)frequency.QuadPart;
     previous = now;
-    if (now.QuadPart > deadline.QuadPart + frequency.QuadPart / 60) deadline = now;
+    if (now.QuadPart > deadline.QuadPart) deadline = now;
     return frames;
 }
 uint32_t pc_frontend_keys(void) { messages(); return keys; }
@@ -143,14 +143,17 @@ int main(int argc, char **argv)
     WAVEFORMATEX format = {WAVE_FORMAT_PCM, 2, 48000, 192000, 4, 16, 0};
     MMRESULT result = waveOutOpen(&audio, WAVE_MAPPER, &format, 0, 0, CALLBACK_NULL);
     if (result) win_error("waveOutOpen", result);
+    result = timeBeginPeriod(1);
+    if (result) win_error("timeBeginPeriod", result);
     QueryPerformanceFrequency(&frequency);
     QueryPerformanceCounter(&origin);
-    deadline = previous = origin;
     ember_game_init();
+    QueryPerformanceCounter(&deadline);
+    previous = deadline;
     ShowWindow(window, SW_SHOW);
     for (unsigned frame = 1; running; ++frame) {
         messages();
-        ember_game_frame(frame);
+        ember_game_realtime(frame);
         plat_wait_vsync();
         InvalidateRect(window, NULL, FALSE);
         UpdateWindow(window);
@@ -159,6 +162,7 @@ int main(int argc, char **argv)
     for (unsigned i = 0; i < 16; ++i) if (headers[i].dwFlags & WHDR_PREPARED)
         waveOutUnprepareHeader(audio, &headers[i], sizeof(headers[i]));
     waveOutClose(audio);
+    timeEndPeriod(1);
     pc_soc_destroy();
     return 0;
 }

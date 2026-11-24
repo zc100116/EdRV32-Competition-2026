@@ -335,8 +335,10 @@ static uint32_t expand565(uint16_t value)
 }
 static void display_frame(void)
 {
-    memset(pixels, 0, sizeof(pixels));
-    if (!(DR(CTRL) & D(CTRL_ENABLE_MASK))) return;
+    if (!(DR(CTRL) & D(CTRL_ENABLE_MASK))) {
+        memset(pixels, 0, sizeof(pixels));
+        return;
+    }
     unsigned next = DR(LAYER_CTRL);
     const uint32_t enabled[] = {D(LAYER_CTRL_L0_EN_MASK), D(LAYER_CTRL_L1_EN_MASK)};
     const uint32_t bases[] = {D(NEXT_BASE_OFFSET), D(L1_NEXT_BASE_OFFSET)};
@@ -363,37 +365,51 @@ static void display_frame(void)
     unsigned ly = (DR(L1_POS) & D(L1_POS_Y_MASK)) >> D(L1_POS_Y_POS);
     unsigned lw = DR(L1_SIZE) & D(L1_SIZE_W_MASK);
     unsigned lh = (DR(L1_SIZE) & D(L1_SIZE_H_MASK)) >> D(L1_SIZE_H_POS);
-    for (unsigned y = 0; y < 720; ++y) {
-        for (unsigned x = 0; x < 1280; ++x) {
-            uint32_t background = 0;
-            if (layers & D(LAYER_CTRL_L0_EN_MASK)) {
-                uint64_t address = (uint64_t)DR(CUR_BASE) +
-                    (sy + y / scale) * DR(STRIDE) + 2 * (sx + x / scale);
+    /* L0 is opaque. Expand each source pixel once and replicate X2 rows. */
+    if (layers & D(LAYER_CTRL_L0_EN_MASK)) {
+        for (unsigned y = 0; y < 720; y += scale) {
+            uint64_t row = (uint64_t)DR(CUR_BASE) + (sy + y / scale) * DR(STRIDE) + 2 * sx;
+            uint32_t *out = pixels + y * 1280;
+            for (unsigned x = 0; x < 1280 / scale; ++x) {
+                uint64_t address = row + 2 * x;
+                uint32_t color = 0;
                 if (address + 2 > DDR_BYTES) {
-                    DR(ERR_CODE) = 2; DR(IRQ_STAT) |= D(IRQ_STAT_ERROR_MASK);
+                    DR(ERR_CODE) = 2;
+                    DR(IRQ_STAT) |= D(IRQ_STAT_ERROR_MASK);
                 } else {
                     uint16_t value;
                     memcpy(&value, ddr + address, 2);
-                    background = expand565(value);
+                    color = expand565(value);
                 }
+                out[x * scale] = color;
+                if (scale == 2) out[x * scale + 1] = color;
             }
+            if (scale == 2) memcpy(out + 1280, out, 1280 * sizeof(*out));
+        }
+    } else memset(pixels, 0, sizeof(pixels));
+    if (!(layers & D(LAYER_CTRL_L1_EN_MASK))) return;
+    unsigned right = lx + lw < 1280 ? lx + lw : 1280;
+    unsigned bottom = ly + lh < 720 ? ly + lh : 720;
+    for (unsigned y = ly; y < bottom; ++y) {
+        uint64_t row = (uint64_t)DR(L1_CUR_BASE) + (y - ly) * DR(L1_STRIDE);
+        for (unsigned x = lx; x < right; ++x) {
+            uint64_t address = row + 4 * (x - lx);
             uint32_t foreground = 0;
-            if ((layers & D(LAYER_CTRL_L1_EN_MASK)) && x >= lx && x - lx < lw &&
-                y >= ly && y - ly < lh) {
-                uint64_t address = (uint64_t)DR(L1_CUR_BASE) +
-                    (y - ly) * DR(L1_STRIDE) + 4 * (x - lx);
-                if (address + 4 > DDR_BYTES) {
-                    DR(ERR_CODE) = 2; DR(IRQ_STAT) |= D(IRQ_STAT_ERROR_MASK);
-                } else memcpy(&foreground, ddr + address, 4);
-            }
+            if (address + 4 > DDR_BYTES) {
+                DR(ERR_CODE) = 2;
+                DR(IRQ_STAT) |= D(IRQ_STAT_ERROR_MASK);
+            } else memcpy(&foreground, ddr + address, 4);
             unsigned alpha = div255((foreground >> 24) * DR(L1_OPA));
+            if (!alpha) continue;
+            uint32_t *out = pixels + y * 1280 + x;
+            if (alpha == 255) { *out = foreground & 0xffffff; continue; }
             uint32_t output = 0;
             for (unsigned shift = 0; shift < 24; shift += 8) {
                 unsigned f = (foreground >> shift) & 255;
-                unsigned b = (background >> shift) & 255;
+                unsigned b = (*out >> shift) & 255;
                 output |= div255(alpha * f + (255 - alpha) * b) << shift;
             }
-            pixels[y * 1280 + x] = output;
+            *out = output;
         }
     }
 }

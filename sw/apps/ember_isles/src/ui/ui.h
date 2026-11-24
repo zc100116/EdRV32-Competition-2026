@@ -10,7 +10,7 @@
 enum { EMBER_UI_RECTS = 96, EMBER_UI_GLYPHS = 2048 };
 enum ember_ui_color { EMBER_PANEL = 2, EMBER_EDGE, EMBER_FIRE, EMBER_TIDE,
                       EMBER_PAPER, EMBER_HEALTH, EMBER_TRACK, EMBER_SHADE };
-struct ember_ui_state { unsigned show_perf; };
+struct ember_ui_state { unsigned show_perf; unsigned tick_rate; };
 struct ember_ui_canvas {
     struct gpu_quad *rects;
     struct gpu_quad *glyphs;

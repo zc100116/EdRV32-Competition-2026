@@ -16,6 +16,8 @@ static struct aud_ring audio_ring;
 static uint32_t samples[1024];
 static uint32_t previous_millis;
 static unsigned fps_frames, measured_fps = 60;
+static unsigned tick_frames;
+static uint32_t previous_tick_millis, tick_credit;
 static struct ember_ui_state ui;
 static uint8_t previous_keys;
 static unsigned replay_mode;
@@ -62,6 +64,7 @@ void ember_game_init(void)
     plat_init();
     ember_sim_init(&simulation, 20261124u);
     ember_audio_reset();
+    ui.tick_rate = 60;
     ember_gfx_init();
     aud_init(&audio_ring, plat_dma_alloc(16384, 512), 16384, 4096);
     refill(&audio_ring, NULL, NULL);
@@ -69,7 +72,8 @@ void ember_game_init(void)
     plat_irq_register(EDRV32_PLIC_SOURCE_AUD, audio_irq, NULL);
     aud_irq_register(1, refill, NULL);
     aud_enable(1);
-    previous_millis = plat_millis();
+    previous_tick_millis = previous_millis = plat_millis();
+    tick_credit = 1000;
 }
 void ember_game_replay(uint32_t seed)
 {
@@ -78,8 +82,9 @@ void ember_game_replay(uint32_t seed)
 }
 const struct ember_replay *ember_game_recording(void) { return &recording; }
 const struct ember_sim *ember_game_state(void) { return &simulation; }
-void ember_game_frame(unsigned frame)
+void ember_game_tick(void)
 {
+    ++tick_frames;
     uint8_t keys = (uint8_t)plat_keys();
     uint8_t pressed = keys & (uint8_t)~previous_keys;
     previous_keys = keys;
@@ -111,13 +116,36 @@ void ember_game_frame(unsigned frame)
         unsigned kind = simulation.events.item[i].kind;
         queue_audio(kind);
     }
+}
+void ember_game_render(unsigned frame)
+{
     uint32_t now = plat_millis();
     ++fps_frames;
     if (now - previous_millis >= 1000) {
         measured_fps = fps_frames * 1000u / (now - previous_millis);
+        ui.tick_rate = tick_frames * 1000u / (now - previous_millis);
+        tick_frames = 0;
         previous_millis = now;
         fps_frames = 0;
     }
     ember_gfx_prepare(&simulation, measured_fps, &ui);
     ember_gfx_submit(frame);
+}
+
+void ember_game_frame(unsigned frame)
+{
+    ember_game_tick();
+    ember_game_render(frame);
+}
+void ember_game_realtime(unsigned frame)
+{
+    uint32_t now = plat_millis();
+    tick_credit += (now - previous_tick_millis) * 60u;
+    previous_tick_millis = now;
+    unsigned due = tick_credit / 1000u;
+    tick_credit %= 1000u;
+    /* Coordinator-approved limit: discard excess debt; the HUD exposes both
+     * rates so sustained overload cannot silently reduce simulation speed. */
+    for (unsigned i = 0; i < due && i < 4; ++i) ember_game_tick();
+    ember_game_render(frame);
 }

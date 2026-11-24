@@ -7,7 +7,7 @@ int main(void)
 {
     ember_game_init();
     for (unsigned frame = 1;; ++frame) {
-        ember_game_frame(frame);
+        ember_game_realtime(frame);
         plat_wait_vsync();
     }
 }

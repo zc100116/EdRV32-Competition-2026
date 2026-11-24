@@ -5,7 +5,10 @@
 #define EMBER_GAME_H
 #include "sim/sim.h"
 void ember_game_init(void);
+void ember_game_tick(void);
+void ember_game_render(unsigned frame);
 void ember_game_frame(unsigned frame);
+void ember_game_realtime(unsigned frame);
 void ember_game_replay(uint32_t seed);
 const struct ember_sim *ember_game_state(void);
 const struct ember_replay *ember_game_recording(void);

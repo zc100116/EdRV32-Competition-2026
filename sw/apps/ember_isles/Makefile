@@ -8,7 +8,7 @@ CFLAGS := -std=c11 -O2 -Wall -Wextra -Werror -I$(APP)/src -I$(OUT)/generated \
     -I$(ROOT)/sw/bsp/include -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/lib \
     -I$(ROOT)/sw/lib/plat -I$(ROOT)/tools/gpu/emu -I$(ROOT)/tools/gpu/emu/pc
 MAP := -DEDRV32_SOC_MAP_H -include $(ROOT)/sw/bsp/include/gpu_soc_map.h
-PCFLAGS := -I$(ROOT)/sw/bsp/pc/include $(CFLAGS) $(MAP) \
+PCFLAGS := -I$(ROOT)/sw/bsp/pc/include $(CFLAGS) $(MAP) -O3 \
     -include $(ROOT)/sw/bsp/pc/include/mmio.h
 DRIVERS := sw/drivers/gpu.c sw/drivers/aud.c sw/drivers/disp.c sw/drivers/plic.c
 SOURCES = $(wildcard $(APP)/src/core/*.c $(APP)/src/sim/*.c \
@@ -41,7 +41,7 @@ $(OUT)/generated/replay.h: $(wildcard $(APP)/assets/replays/*) $(APP)/tools/repl
 $(OUT)/ember_isles: $(SOURCES) $(APP)/src/game.c $(APP)/src/headless.c $(GEN) $(HEADERS) \
     $(addprefix $(ROOT)/,$(DRIVERS) $(PC) tools/gpu/emu/pc/png.c)
 	mkdir -p $(OUT)
-	$(CC) $(PCFLAGS) $(SOURCES) $(APP)/src/game.c $(APP)/src/headless.c \
+	$(CC) -pthread $(PCFLAGS) $(SOURCES) $(APP)/src/game.c $(APP)/src/headless.c \
 	    $(addprefix $(ROOT)/,$(DRIVERS) $(PC) tools/gpu/emu/pc/png.c) -o $@
 $(OUT)/ember_isles.exe: $(SOURCES) $(APP)/src/game.c $(APP)/src/windows.c $(GEN) $(HEADERS) \
     $(addprefix $(ROOT)/,$(DRIVERS) $(PC))
@@ -67,11 +67,13 @@ $(OUT)/ember_isles-spike.elf: $(SOURCES) $(APP)/src/spike.c $(GEN) $(HEADERS) \
 	    -Tsw/bsp/ld/ddr.ld $(SOURCES) $(APP)/src/spike.c \
 	    sw/drivers/gpu.c sw/bsp/start.S sw/bsp/host.c -lc -lgcc -o $@
 .PHONY: test
-test: $(OUT)/game-flow-test $(OUT)/sim-replay $(OUT)/audio-test $(OUT)/audio-ring-test
+test: $(OUT)/game-flow-test $(OUT)/sim-replay $(OUT)/audio-test $(OUT)/audio-ring-test \
+    $(OUT)/pacing-test
 	cd $(ROOT) && $(OUT)/game-flow-test
 	cd $(ROOT) && $(OUT)/sim-replay --test
 	cd $(ROOT) && $(OUT)/audio-test
 	cd $(ROOT) && $(OUT)/audio-ring-test
+	cd $(ROOT) && $(OUT)/pacing-test
 $(OUT)/game-flow-test: $(APP)/tools/game_flow_test.c $(APP)/src/game.c \
     $(APP)/src/sim/sim.c $(APP)/src/core/core.c $(OUT)/generated/data.h $(HEADERS)
 	$(CC) $(CFLAGS) $(filter %.c,$^) -o $@
@@ -83,5 +85,10 @@ $(OUT)/audio-test: $(APP)/src/audio/tests/audio_test.c $(APP)/src/audio/audio.c 
 	$(CC) $(CFLAGS) -I$(APP)/src/audio $(filter %.c,$^) -o $@
 $(OUT)/audio-ring-test: $(SOURCES) $(APP)/src/game.c $(APP)/tools/audio_ring_test.c \
     $(GEN) $(HEADERS) $(addprefix $(ROOT)/,$(DRIVERS) $(PC))
-	$(CC) $(PCFLAGS) $(SOURCES) $(APP)/src/game.c $(APP)/tools/audio_ring_test.c \
+	$(CC) -pthread $(PCFLAGS) $(SOURCES) $(APP)/src/game.c $(APP)/tools/audio_ring_test.c \
 	    $(addprefix $(ROOT)/,$(DRIVERS) $(PC)) -o $@
+$(OUT)/pacing-test: $(SOURCES) $(APP)/src/game.c $(GEN) $(HEADERS) \
+    $(ROOT)/tools/gpu/emu/pc/ember_pacing_test.c $(addprefix $(ROOT)/,$(DRIVERS) $(PC))
+	$(CC) -pthread $(PCFLAGS) $(SOURCES) $(APP)/src/game.c \
+	    $(ROOT)/tools/gpu/emu/pc/ember_pacing_test.c $(addprefix $(ROOT)/,$(DRIVERS) $(PC)) \
+	    -Wl,--wrap=ember_gfx_prepare -Wl,--wrap=ember_gfx_submit -o $@

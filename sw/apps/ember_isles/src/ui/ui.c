@@ -188,8 +188,8 @@ void ember_ui_build(struct ember_ui_canvas *out, const struct ember_sim *sim,
         center(out, 197, "ENTER / START TO CONTINUE", 0);
     }
     if (state->show_perf) {
-        panel(out, 10, 55, 294, 60, 0);
-        (void)snprintf(text, sizeof(text), "FPS %u E %u S %u P %u", fps,
+        panel(out, 10, 55, 370, 60, 0);
+        (void)snprintf(text, sizeof(text), "FPS %u T %u E %u S %u P %u", fps, state->tick_rate,
                        (unsigned)sim->alive_count, (unsigned)sim->shot_count, particles);
         ember_ui_text(out, 20, 65, text, 0);
         (void)snprintf(text, sizeof(text), "GPU %u Q %u PX %u", (unsigned)perf[0],
