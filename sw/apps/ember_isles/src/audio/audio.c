@@ -156,7 +156,9 @@ static void mix_voice(struct voice *v, int *left, int *right, int *middle, unsig
             uint32_t noise = v->noise;
 #pragma GCC unroll 4
             for (unsigned j = offset; j < offset + n; ++j) {
-                noise = noise * UINT32_C(1664525) + UINT32_C(1013904223);
+                noise ^= noise << 13;
+                noise ^= noise >> 17;
+                noise ^= noise << 5;
                 int value = (int)(noise >> 24) - 128;
                 middle[j] += value * lg >> 7;
             }
@@ -165,7 +167,9 @@ static void mix_voice(struct voice *v, int *left, int *right, int *middle, unsig
             uint32_t noise = v->noise;
 #pragma GCC unroll 4
             for (unsigned j = offset; j < offset + n; ++j) {
-                noise = noise * UINT32_C(1664525) + UINT32_C(1013904223);
+                noise ^= noise << 13;
+                noise ^= noise >> 17;
+                noise ^= noise << 5;
                 int value = (int)(noise >> 24) - 128;
                 left[j] += value * lg >> 7;
                 right[j] += value * rg >> 7;

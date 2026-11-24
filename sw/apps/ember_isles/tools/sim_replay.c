@@ -133,8 +133,8 @@ static void tests(void)
     setup();
     ember_fixed x = sim.player.x;
     ember_sim_step(&sim, EMBER_A | EMBER_RIGHT);
-    require(sim.player.x > x && sim.player.dash && sim.player.invulnerable,
-            "dash moves and grants its invulnerability");
+    require(sim.player.x > x && sim.player.dash,
+            "dash moves along its burning trail");
     require(kind_count(2) == 1 && sim.player.cooldown_a, "dash leaves burning trail");
     ember_sim_step(&sim, 0);
     require(!sim.events.count, "events clear each simulation step");

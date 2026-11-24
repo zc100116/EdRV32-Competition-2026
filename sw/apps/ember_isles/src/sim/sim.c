@@ -498,7 +498,6 @@ static void player_step(struct ember_sim *s, uint8_t input, uint8_t pressed)
                      p->speed * ember_characters[0].dash_speed_percent / 100,
                      &s->dash_vx, &s->dash_vy);
             p->dash = (uint16_t)ember_characters[0].dash_frames;
-            p->invulnerable = 18;
             p->cooldown_a = (uint16_t)s->attributes[EMBER_DASH_COOLDOWN];
             event(s, 3, 0, p->x, p->y);
         }

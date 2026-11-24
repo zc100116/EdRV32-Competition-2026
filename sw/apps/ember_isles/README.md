@@ -17,7 +17,7 @@ Replay the original demonstration and capture selected frames into an existing d
 ```sh
 mkdir -p build/ember_isles/frames
 build/ember_isles/ember_isles --replay sw/apps/ember_isles/assets/replays/coast.txt \
-    --dump 120,3600,7200,10000 --out build/ember_isles/frames > build/ember_isles/pc.log
+    --dump 172,749,8283,9500 --out build/ember_isles/frames > build/ember_isles/pc.log
 python3 sw/apps/ember_isles/tools/measure.py
 ```
 
