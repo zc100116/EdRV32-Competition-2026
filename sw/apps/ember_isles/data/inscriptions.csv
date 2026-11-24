@@ -1,0 +1,5 @@
+id,name,tags,rarity,target,effect,value,duration,cooldown,slots,price
+split,Three Sparks,projectile,rare,projectile,split_three,3,0,0,1,0
+follow,Hearthbound,area,rare,area,follow_self,1,0,0,1,0
+scorch,Scorch Mark,ember,rare,ignite,more_vs_ignited,25,0,0,1,0
+wildfire,Wildfire,ember|area,rare,ignite,death_explosion_area,50,0,0,1,0

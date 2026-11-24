@@ -1,0 +1,2 @@
+id,name,tags,element,effect,damage,interval,duration,stacks,strength
+ignite,Ignite,ember|dot,ember,periodic_damage,3,30,180,1,100

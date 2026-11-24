@@ -1,0 +1,36 @@
+id,name,calculation,minimum,maximum
+max_hp,Maximum health,flat_increased_more,1,99999
+armor,Armor,flat_increased_more,0,9999
+speed,Move speed,flat_increased_more,1,1000
+attack,Attack,flat_increased_more,0,99999
+attack_speed,Attack speed,flat_increased_more,1,1000
+crit,Critical chance,flat_increased_more,0,100
+crit_damage,Critical damage,flat_increased_more,100,1000
+area,Area,flat_increased_more,1,1000
+projectiles,Projectile count,flat_increased_more,1,100
+projectile_speed,Projectile speed,flat_increased_more,1,1000
+duration,Duration,flat_increased_more,1,1000
+cooldown,Cooldown reduction,flat_increased_more,0,90
+pierce,Pierce,flat_increased_more,0,100
+knockback,Knockback,flat_increased_more,0,1000
+regen,Health regeneration,flat_increased_more,0,1000
+dodge,Dodge,flat_increased_more,0,90
+shield,Shield capacity,flat_increased_more,0,99999
+tenacity,Tenacity,flat_increased_more,0,90
+dash_count,Dash count,flat_increased_more,1,10
+dash_cooldown,Dash cooldown,flat_increased_more,1,36000
+status_chance,Status chance,flat_increased_more,0,100
+status_strength,Status strength,flat_increased_more,0,1000
+status_duration,Status duration,flat_increased_more,1,1000
+pickup,Pickup radius,flat_increased_more,1,1000
+xp,Experience gain,flat_increased_more,0,1000
+gold,Gold gain,flat_increased_more,0,1000
+luck,Luck,flat_increased_more,0,1000
+healing,Healing effect,flat_increased_more,0,1000
+aura,Aura radius,flat_increased_more,0,1000
+threat,Threat,flat_increased_more,0,1000
+ember_damage,ember damage,flat_increased_more,0,1000
+tide_damage,tide damage,flat_increased_more,0,1000
+iron_damage,iron damage,flat_increased_more,0,1000
+star_damage,star damage,flat_increased_more,0,1000
+shadow_damage,shadow damage,flat_increased_more,0,1000

@@ -1,0 +1,7 @@
+id,name,tags,rarity,attribute,effect,flat,increased,more,conversion_numerator,conversion_denominator,level_max,price
+heart,Coal Heart,,common,max_hp,stat,40,0,0,0,1,5,0
+mail,Iron Mail,,common,armor,stat,10,0,0,0,1,5,0
+boots,Shore Boots,,common,speed,stat,0,15,0,0,1,5,0
+lens,Hearth Lens,area,common,area,stat,0,20,0,0,1,5,0
+fletch,Ash Fletching,projectile,fine,attack_speed,tag_stat,0,20,0,0,1,5,0
+coal,Everlasting Coal,ignite,fine,status_duration,ignite_duration_damage,0,50,20,0,1,5,0
