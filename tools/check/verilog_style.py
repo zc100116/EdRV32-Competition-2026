@@ -80,6 +80,25 @@ def check(path):
     for match in re.finditer(pattern, clean):
         report(clean[:match.start()].count('\n') + 1,
                'generate-scope hierarchical reference is forbidden (PDS unsupported)')
+    # PDS accepts whole elements, but not a second select on generate-local wire arrays.
+    scopes = []
+    pattern = (r'\bbegin\b(?:\s*:\s*(\w+))?|\bend\b|'
+               r'\bwire\s+(?:signed\s+)?(?:\[[^]]+\]\s*)?'
+               r'(\w+)\s*\[[^]]+\]\s*;')
+    for match in re.finditer(pattern, clean):
+        token = match[0]
+        if token.startswith('begin'):
+            scopes.append((match.start(), bool(match[1] and match[1].startswith('g_')), []))
+        elif token == 'end':
+            start, _, arrays = scopes.pop()
+            for name in arrays:
+                select = rf'\b{re.escape(name)}\s*\[[^]]+\]\s*\['
+                for usage in re.finditer(select, clean[start:match.start()]):
+                    report(clean[:start + usage.start()].count('\n') + 1,
+                           'select on generate-local wire array element '
+                           'is forbidden (PDS Sdm-4000)')
+        elif any(scope[1] for scope in scopes):
+            scopes[-1][2].append(match[2])
     if path.suffix == '.v':
         modules = re.findall(r'\bmodule\s+(\w+)', clean)
         if modules != [path.stem] or not re.fullmatch(r'edrv32_[a-z0-9_]+', path.stem):
