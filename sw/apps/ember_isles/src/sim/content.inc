@@ -840,6 +840,7 @@ static void inherited_hit(struct ember_sim *s, unsigned target, int damage, unsi
 static void inherited_area(struct ember_sim *s, ember_fixed x, ember_fixed y,
                             int radius, int damage, unsigned depth)
 {
+    radius = radius * s->attributes[EMBER_AREA] / 100;
     for (unsigned i = 0; i < EMBER_ENEMIES; ++i)
         if (s->enemies[i].alive && within(x, y, s->enemies[i].x, s->enemies[i].y, radius))
             inherited_hit_tags(s, i, damage, depth, TAG_AREA | TAG_GROUP);
