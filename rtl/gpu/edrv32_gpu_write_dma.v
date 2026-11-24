@@ -87,7 +87,7 @@ module edrv32_gpu_write_dma (
     reg [3:0] done_r;
     reg [31:0] addr_r [0:3];
     reg [31:0] beats_r [0:3];
-    reg [31:0] first_keep_r [0:3];
+    wire [31:0] first_keep_w [0:3];
     reg [31:0] last_keep_r [0:3];
     reg [1:0] round_r;
     reg choose_valid_w;
@@ -177,7 +177,7 @@ module edrv32_gpu_write_dma (
 
     assign fill_w = filling_r && data_valid_w[owner_r[alloc_ptr_r]];
     assign fill_keep_w = keep_w[owner_r[alloc_ptr_r]]
-        & ((fill_beat_r == 0) ? first_keep_r[owner_r[alloc_ptr_r]] : 32'hffffffff)
+        & ((fill_beat_r == 0) ? first_keep_w[owner_r[alloc_ptr_r]] : 32'hffffffff)
         & (({1'b0, fill_beat_r} + 5'd1 == length_r[alloc_ptr_r])
             && logical_last_r[alloc_ptr_r]
             ? last_keep_r[owner_r[alloc_ptr_r]] : 32'hffffffff);
@@ -231,13 +231,10 @@ module edrv32_gpu_write_dma (
     always @(posedge clk_i) begin
         for (data_idx_r = 0; data_idx_r < 4; data_idx_r = data_idx_r + 1) begin
             if (req_valid_w[data_idx_r] && !active_r[data_idx_r] && !stop_i) begin
-                    first_keep_r[data_idx_r] <= 32'hffffffff << req_addr_w[data_idx_r][4:0];
                     last_keep_r[data_idx_r] <= 32'hffffffff
                         >> ((32'd0 - req_addr_w[data_idx_r] - req_bytes_w[data_idx_r]) & 32'd31);
             end
         end
-        if (fill_w && {1'b0, fill_beat_r} + 5'd1 == length_r[alloc_ptr_r])
-            first_keep_r[owner_r[alloc_ptr_r]] <= 32'hffffffff;
         if (!filling_r && choose_valid_w && !occupied_r[alloc_ptr_r]) begin
             owner_r[alloc_ptr_r] <= choose_w;
             burst_addr_r[alloc_ptr_r] <= addr_r[choose_w];
@@ -348,4 +345,24 @@ module edrv32_gpu_write_dma (
 
         end
     end
+    // 4 independent client masks are small registers, not a multi-write RAM array.
+    genvar keep_client;
+    generate
+        for (keep_client = 0; keep_client < 4; keep_client = keep_client + 1) begin : g_keep
+            localparam [1:0] CLIENT = keep_client;
+            reg [31:0] first_keep_r;
+            wire accept_w;
+            wire consumed_w;
+            assign accept_w = req_valid_w[keep_client] && !active_r[keep_client] && !stop_i;
+            assign consumed_w = (fill_w && {1'b0, fill_beat_r} + 5'd1 == length_r[alloc_ptr_r]) &&
+                owner_r[alloc_ptr_r] == CLIENT;
+            assign first_keep_w[keep_client] = first_keep_r;
+            always @(posedge clk_i) begin
+                if (accept_w || consumed_w) begin
+                    first_keep_r <= consumed_w ? 32'hffffffff :
+                        32'hffffffff << req_addr_w[keep_client][4:0];
+                end
+            end
+        end
+    endgenerate
 endmodule

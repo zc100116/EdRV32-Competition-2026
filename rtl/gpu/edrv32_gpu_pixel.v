@@ -86,6 +86,10 @@ module edrv32_gpu_pixel (
     wire process_w;
     wire read_w;
     wire returned_w;
+    wire old_write_w;
+    wire [4:0] old_addr_w;
+    wire [159:0] old_data_w;
+    wire [159:0] old_read_w;
     wire signed [16:0] local_x_w;
     wire signed [16:0] local_y_w;
     wire [31:0] address_w;
@@ -109,9 +113,16 @@ module edrv32_gpu_pixel (
     assign target_write_data_o = result_r[head_r];
     assign commit_w = valid_r[head_r] && (stop_i ? result_valid_r[head_r] :
         (target_write_valid_o && target_write_ready_i));
-    assign dispatch_w = undispatched_r != 0 && (stop_i ||
+    assign dispatch_w = undispatched_r != 0 &&
+        !(returned_w && (predecessor_w || stop_i)) && (stop_i ||
         ((!request_valid_r || read_w) &&
         (!predecessor_w || result_valid_r[predecessor_slot_w])));
+    // Target returns own the single old-value write port; forwarding waits one cycle.
+    assign old_read_w = old_r[process_r];
+    assign old_write_w = returned_w || (dispatch_w && (predecessor_w || stop_i));
+    assign old_addr_w = returned_w ? return_slot_r[return_rd_r] : dispatch_r;
+    assign old_data_w = returned_w ? target_old_data_i :
+        stop_i ? 160'b0 : result_r[predecessor_slot_w];
     assign process_w = unprocessed_r != 0 && old_valid_r[process_r];
     always @(*) begin
         predecessor_w = 0;
@@ -135,7 +146,7 @@ module edrv32_gpu_pixel (
             edrv32_gpu_pixel_lane u_lane (
                 .clk_i(clk_i),
                 .mask_i(mask_r[process_r][lane] && !stop_i),
-                .old_i(old_r[process_r][lane*40 +: 40]),
+                .old_i(old_read_w[lane*40 +: 40]),
                 .depth_i(depth_r[process_r][lane*16 +: 16]),
                 .color_i(color_r[process_r][lane*24 +: 24]),
                 .alpha_i(alpha_r[process_r][lane*8 +: 8]),
@@ -250,17 +261,11 @@ module edrv32_gpu_pixel (
             color_r[tail_r] <= shaded_color_i;
             alpha_r[tail_r] <= shaded_alpha_i;
         end
-        if (dispatch_w && (predecessor_w || stop_i)) begin
-            old_r[dispatch_r] <= stop_i ? 160'b0 : result_r[predecessor_slot_w];
-        end
         if (dispatch_w && !predecessor_w && !stop_i) begin
             request_slot_r <= dispatch_r;
         end
         if (read_w) begin
             return_slot_r[return_wr_r] <= request_slot_r;
-        end
-        if (returned_w) begin
-            old_r[return_slot_r[return_rd_r]] <= target_old_data_i;
         end
         pipe_slot_r[0] <= process_r;
         for (stage = 1; stage < 15; stage = stage + 1) begin
@@ -269,6 +274,9 @@ module edrv32_gpu_pixel (
         if (pipe_valid_r[14]) begin
             result_r[pipe_slot_r[14]] <= pipe_data_w;
         end
+    end
+    always @(posedge clk_i) begin
+        if (old_write_w) old_r[old_addr_w] <= old_data_w;
     end
     wire [479:0] unused_state_w;
     wire [17:0] unused_address_w;
