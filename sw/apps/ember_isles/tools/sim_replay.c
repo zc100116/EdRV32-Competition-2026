@@ -46,7 +46,7 @@ static void run(int generate, const char *path)
 {
     if (generate) {
         replay.seed = 20261124;
-        replay.count = EMBER_REPLAY_FRAMES;
+        replay.count = EMBER_DEMO_FRAMES;
     } else ember_replay_load(&replay, path);
     ember_sim_init(&sim, replay.seed);
     ember_sim_init(&twin, replay.seed);

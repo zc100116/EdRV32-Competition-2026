@@ -8,7 +8,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #define EMBER_Q 65536
-#define EMBER_REPLAY_FRAMES 10800
+#define EMBER_REPLAY_FRAMES 60000
+#define EMBER_DEMO_FRAMES 10800
 #define EMBER_ENEMIES 1500
 #define EMBER_SHOTS 3000
 #define EMBER_EVENTS 256

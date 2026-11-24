@@ -22,7 +22,8 @@ python3 sw/apps/ember_isles/tools/measure.py
 ```
 
 The replay starts with `EMBER1 seed count`, then one decimal eight-bit controller
-mask per frame. Its seed and bytes are embedded unchanged in the Spike target.
+mask per frame. Interactive runs retain up to 60,000 frames in RAM through
+`ember_game_recording()`; the 10,800-frame demonstration uses the same format. Its seed and bytes are embedded unchanged in the Spike target.
 `STATE` records list simulation fields every 60 frames, while `PERF` records the
 functional GPU counters. The GPU emulator does not simulate cycle timing.
 Spike reports actual retired instructions for simulation, CPU display preparation

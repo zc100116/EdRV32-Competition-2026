@@ -14,7 +14,7 @@ def convert(path):
         raise ValueError(f'{path}: expected EMBER1')
     seed, count = map(int, words[1:3])
     inputs = list(map(int, words[3:]))
-    if not 0 <= seed <= 0xffffffff or not 0 <= count <= 10800:
+    if not 0 <= seed <= 0xffffffff or not 0 <= count <= 60000:
         raise ValueError(f'{path}: seed or count outside replay format')
     if len(inputs) != count or any(not 0 <= value <= 255 for value in inputs):
         raise ValueError(f'{path}: expected {count} decimal eight-bit inputs')
