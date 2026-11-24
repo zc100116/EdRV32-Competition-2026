@@ -41,8 +41,8 @@ python3 sw/apps/ember_isles/tools/compare_replay.py \
     build/ember_isles/pc.log build/ember_isles/spike.log
 ```
 
-This comparison checks determinism and prints the ending state. The old coast
-input currently ends in an upgrade menu; it does not demonstrate a completed run.
+This comparison checks determinism and prints the ending state. Mode acceptance
+also requires a victorious ending; matching summaries alone do not prove a clear.
 
 Replays begin with `EMBER2 seed count`, followed by one decimal 16-bit keyboard
 bitmap per frame (tech section 3). Menu clicks become the same recorded keyboard
