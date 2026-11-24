@@ -74,7 +74,7 @@ static int content_enemy(struct ember_sim *s, unsigned index)
     ember_fixed tx, ty;
     enemy_target(s, e, &tx, &ty);
     ember_fixed dx = tx - e->x, dy = ty - e->y;
-    e->facing8 = (uint8_t)direction8(dx, dy);
+    if (!e->facing_lock) e->facing8 = (uint8_t)direction8(dx, dy);
     ++e->ai_timer;
     int speed = enemy_speed(s, e);
     if ((e->affix == 5 || e->second_affix == 5) &&
@@ -126,8 +126,8 @@ static int content_enemy(struct ember_sim *s, unsigned index)
     case 5:
         if (e->ai_timer % interval == 0 && within(e->x, e->y,
             s->player.x, s->player.y, d->skill_radius)) {
-            ember_status_apply(&s->player.defense, EMBER_CHILL, d->slow_frames, 100);
-            s->player.speed = s->player.speed * (100 - d->slow_percent) / 100;
+            ember_slow_apply(&s->player.defense, EMBER_SLOW_VINE,
+                d->slow_percent, d->slow_frames);
         }
         break;
     case 6:

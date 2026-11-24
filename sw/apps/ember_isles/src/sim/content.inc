@@ -30,6 +30,7 @@ void ember_sim_pet(struct ember_sim *s, unsigned kind, unsigned weapon)
 {
     s->pet_kind = (uint8_t)kind;
     s->pet_level = 1;
+    if (s->player.pet_weapon != weapon) weapon_change_event(s, EMBER_WEAPON_SLOT_PET, weapon);
     s->player.pet_weapon = (uint8_t)weapon;
     s->pet.x = s->player.x + ember_pets[kind].follow_x * EMBER_Q;
     s->pet.y = s->player.y;
@@ -89,6 +90,8 @@ static void summon(struct ember_sim *s, unsigned kind, int life, ember_fixed x, 
         s->summons[i].armor = d->armor + (d->inherit_armor ? s->attributes[EMBER_ARMOR] : 0);
         s->summons[i].damage = d->damage * (kind == 2 ?
             100 + (s->pet_level - 1) * ember_pets[0].damage_per_level : 100) / 100;
+        s->summons[i].base_armor = s->summons[i].armor;
+        s->summons[i].base_damage = s->summons[i].damage;
         s->summons[i].life = (uint16_t)life;
         s->summons[i].kind = (uint8_t)kind;
         s->summons[i].timer = 0;
@@ -273,6 +276,7 @@ static void content_skill(struct ember_sim *s, unsigned key)
             p->x = e->x - vx * c->skill_k_step_frames;
             p->y = e->y - vy * c->skill_k_step_frames;
             s->next_crit = 1;
+            e->facing_lock = (uint16_t)c->facing_lock_frames;
         }
         if (key == 1) p->hp -= p->hp * c->skill_l_value / 100;
         if (key == 2) {
@@ -291,8 +295,8 @@ static void content_skill(struct ember_sim *s, unsigned key)
             for (unsigned i = 0; i < 8; ++i) if (s->summons[i].life &&
                 within(p->x, p->y, s->summons[i].x, s->summons[i].y, c->skill_l_radius)) {
                 s->summons[i].hp = ember_summons[s->summons[i].kind].hp;
-                s->summons[i].armor += c->skill_l_value2;
-                s->summons[i].damage = s->summons[i].damage * (100 + c->skill_l_value) / 100;
+                s->summons[i].armor = s->summons[i].base_armor + c->skill_l_value2;
+                s->summons[i].damage = s->summons[i].base_damage * (100 + c->skill_l_value) / 100;
             }
             p->defense.permanent_shield = p->defense.shield_max;
         }
@@ -334,20 +338,19 @@ static void content_before_hit(struct ember_sim *s, unsigned index,
             (int)count / ember_blessings[8].value3 * ember_blessings[8].value);
     }
     if (s->blessings[9] && e->hp == e->defense.max_hp) h->base = h->base * (100 + ember_blessings[9].value) / 100;
-    int physical = h->share[EMBER_DAMAGE_IRON] * (100 - h->conversion) / 100;
-    int fire = h->share[EMBER_DAMAGE_FIRE] + h->share[EMBER_DAMAGE_IRON] * h->conversion / 100;
-    if (s->blessings[0]) h->increased +=
-        (s->attributes[EMBER_TIDE_DAMAGE] - 100) * fire / 100;
-    if (s->resonances[0]) h->increased +=
-        (s->attributes[EMBER_TIDE_DAMAGE] - 100) * fire * ember_resonances[0].value / 10000;
-    if (s->resonances[1] && e->burn) h->increased +=
-        (s->attributes[EMBER_EMBER_DAMAGE] - 100) * physical / 100;
-    if (s->resonances[1] && (h->flags & EMBER_DOT)) h->increased +=
+    if (s->blessings[0]) h->element_increased[EMBER_DAMAGE_FIRE] +=
+        (s->attributes[EMBER_TIDE_DAMAGE] - 100) * ember_blessings[0].value / 100;
+    if (s->resonances[0]) h->element_increased[EMBER_DAMAGE_FIRE] +=
+        (s->attributes[EMBER_TIDE_DAMAGE] - 100) * ember_resonances[0].value / 100;
+    if (s->resonances[1] && e->burn) h->element_increased[EMBER_DAMAGE_IRON] +=
+        s->attributes[EMBER_EMBER_DAMAGE] - 100;
+    if (s->resonances[1] && (h->flags & EMBER_DOT)) h->element_increased[EMBER_DAMAGE_FIRE] +=
         e->defense.status[EMBER_BREAK_ARMOR].stacks * ember_resonances[1].value;
-    if (s->resonances[7]) h->increased += s->attributes[EMBER_ARMOR] * ember_resonances[7].value * h->share[3] / 10000;
-    if (s->resonances[9] && !(s->in_light && relic(s, R_NIGHT))) h->increased +=
-        ember_resonances[9].value * h->share[s->in_light ? 4 : 3] / 100 *
-            (!s->in_light ? 100 + relic(s, R_NIGHT) : 100) / 100;
+    if (s->resonances[7]) h->element_increased[EMBER_DAMAGE_STAR] +=
+        s->attributes[EMBER_ARMOR] * ember_resonances[7].value / 100;
+    if (s->resonances[9] && !(s->in_light && relic(s, R_NIGHT)))
+        h->element_increased[s->in_light ? EMBER_DAMAGE_SHADOW : EMBER_DAMAGE_STAR] +=
+            ember_resonances[9].value * (!s->in_light ? 100 + relic(s, R_NIGHT) : 100) / 100;
     if (character == 6 && s->skill_time) h->leech += c->skill_l_value2;
     if (weapon < EMBER_WEAPONS_COUNT && s->player.evolution[weapon] == 2 &&
         s->weapon_system[weapon].category == EMBER_STAFF) {
@@ -712,7 +715,9 @@ static void ground_effect(struct ember_sim *s, struct ember_shot *p)
         if (!within(p->x, p->y, s->player.x, s->player.y, p->radius)) return;
         if (p->effect == 4) ember_status_apply(&s->player.defense, EMBER_WET, d->ground_slow_frames, 100);
         if (p->effect == 5 || p->effect == 8) {
-            ember_status_apply(&s->player.defense, EMBER_CHILL, d->ground_slow_frames, 100);
+            ember_slow_apply(&s->player.defense,
+                p->effect == 5 ? EMBER_SLOW_WEB : EMBER_SLOW_VORTEX,
+                d->ground_slow_percent, d->ground_slow_frames);
             if (p->effect == 8) {
                 s->player.x += (p->x - s->player.x) * d->ground_pull_percent / 100;
                 s->player.y += (p->y - s->player.y) * d->ground_pull_percent / 100;
@@ -727,7 +732,9 @@ static void ground_effect(struct ember_sim *s, struct ember_shot *p)
     for (unsigned i = 0; i < EMBER_ENEMIES; ++i) {
         struct ember_enemy *e = &s->enemies[i];
         if (!e->alive || !within(p->x, p->y, e->x, e->y, p->radius)) continue;
-        if (p->effect == 1) ember_sim_status(s, i, EMBER_CHILL, 0);
+        if (p->effect == 1) ember_slow_apply(&e->defense, EMBER_SLOW_GATE,
+            ember_characters[EMBER_DATA_CHARACTERS_SEER].skill_k_slow_percent,
+            ember_characters[EMBER_DATA_CHARACTERS_SEER].skill_k_slow_frames);
         if (p->effect == 2) {
             struct ember_attack hit = {.base = p->damage, .attack = 100,
                 .share = {0,0,0,0,100,0}, .leech = ember_resonances[3].value,
@@ -739,7 +746,8 @@ static void ground_effect(struct ember_sim *s, struct ember_shot *p)
             if (e->alive) ember_sim_status(s, i, EMBER_CORRODE, 0);
         }
         if (p->effect == 3) {
-            ember_sim_status(s, i, EMBER_CHILL, p->depth);
+            ember_slow_apply(&e->defense, EMBER_SLOW_ABYSS,
+                ember_resonances[6].value, ember_resonances[6].slow_frames);
             ember_sim_status(s, i, EMBER_CORRODE, p->depth);
         }
         if (p->effect == 10) {

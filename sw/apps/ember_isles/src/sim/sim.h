@@ -23,7 +23,7 @@ struct ember_enemy {
     uint16_t burn, timer, flash;
     uint8_t alive, kind, affix, mode, retiring;
     uint8_t burn_weapon, burn_pet;
-    uint16_t marked, hunter_mark, owl_mark, taunted, attacking;
+    uint16_t marked, hunter_mark, owl_mark, taunted, attacking, facing_lock;
     uint32_t ai_timer;
     uint8_t stage, facing, second_affix, capturable, real_shadow, illusion;
     uint8_t facing8, facing_frame, flip_x, in_dark;
@@ -120,11 +120,11 @@ struct ember_sim {
     int32_t saved_oil, energy_fraction, leech_fraction, healing_fraction;
     uint8_t reward_relic, has_reward_relic, reward_inscription, has_reward_inscription;
     uint32_t gold;
-    struct { ember_fixed x, y; int32_t hp, armor, damage; uint16_t life, timer;
+    struct { ember_fixed x, y; int32_t hp, armor, damage, base_armor, base_damage; uint16_t life, timer;
         uint8_t kind; } summons[8];
     uint32_t belt_frames[5], thorn_next, recoil_next;
     uint8_t belt_first, belt_count;
-    uint8_t hourglass_seen[EMBER_ENEMIES], hourglass_count;
+    uint8_t hourglass_seen[EMBER_ENEMIES], hourglass_count, hourglass_pending;
     int32_t attributes[EMBER_ATTRIBUTE_COUNT], cap_raise[EMBER_ATTRIBUTE_COUNT];
     int32_t oil, oil_fraction, lamp_radius;
     /* in_light is player light-zone membership; each enemy has its own in_dark.
