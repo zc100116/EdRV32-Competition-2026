@@ -312,6 +312,7 @@ def run(kind):
         sources.extend(str(p) for p in sorted((ROOT/'rtl/gpu').glob(
             'edrv32_gpu_perspective_*.v')))
         sources.append(str(ROOT/'rtl/tech/edrv32_rom_gpu_recip_p18.v'))
+        sources.append(str(ROOT/'rtl/tech/edrv32_ram_gpu_delay.v'))
     subprocess.run(['iverilog', '-g2012', '-DSIM_MODE', '-s', 'tb', '-o', str(build/'sim'),
                     *sources, str(unit/'tb.sv')], check=True)
     if kind == 'perspective':

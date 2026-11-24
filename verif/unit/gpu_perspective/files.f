@@ -1,4 +1,5 @@
 +incdir+../../../rtl/include
+../../../rtl/tech/edrv32_ram_gpu_delay.v
 ../../../rtl/gpu/edrv32_gpu_perspective.v
 ../../../rtl/tech/edrv32_rom_gpu_recip_p18.v
 ../../../rtl/gpu/edrv32_gpu_perspective_absolute.v
