@@ -59,7 +59,7 @@ static void run(int generate, const char *path)
     ember_sim_init(&sim, replay.seed);
     ember_sim_init(&twin, replay.seed);
     unsigned first_wave = 0, elite = 0, upgrade = 0, won = 0;
-    unsigned events[10] = {0};
+    unsigned events[EMBER_EVENT_COUNT] = {0};
     unsigned peak_enemies = 0, peak_shots = 0;
     for (unsigned frame = 0; frame < replay.count; ++frame) {
         if (generate) replay.input[frame] = demo_input();
@@ -67,7 +67,7 @@ static void run(int generate, const char *path)
         ember_sim_step(&twin, replay.input[frame]);
         require(!memcmp(&sim, &twin, sizeof(sim)), "same seed/input state differs");
         for (unsigned i = 0; i < sim.events.count; ++i) {
-            require(sim.events.item[i].kind < 10, "unfrozen event kind");
+            require(sim.events.item[i].kind < EMBER_EVENT_COUNT, "unfrozen event kind");
             ++events[sim.events.item[i].kind];
         }
         if (sim.alive_count > peak_enemies) peak_enemies = sim.alive_count;

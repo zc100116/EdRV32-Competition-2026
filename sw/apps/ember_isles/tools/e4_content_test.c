@@ -260,7 +260,7 @@ static void relic_rules(void)
         target(20 + (int)n * 20);
         enemy_hit(&fixture, n, 1, 0, 0, 0);
     }
-    CHECK(fixture.player.cooldown_k == 60);
+    CHECK(fixture.player.cooldown_k == 120 && fixture.hourglass_pending);
     setup(); fixture.player.relic_level[R_LAMP] = 1; target(400);
     fixture.enemies[0].burn = 180;
     CHECK(!enemy_in_dark(&fixture, fixture.enemies[0].x, fixture.enemies[0].y));
@@ -408,7 +408,7 @@ static void entity_rules(void)
         case 4: case 10:
             content_death(&fixture, i, 0, 0, 1);
             CHECK(fixture.shots[0].effect == (k == 4 ? 4 : 6)); break;
-        case 5: CHECK(fixture.player.defense.status[EMBER_CHILL].frames); break;
+        case 5: CHECK(fixture.player.defense.slow[EMBER_SLOW_VINE].frames); break;
         case 6: CHECK(fixture.player.defense.status[EMBER_SHOCK].frames); break;
         case 7: CHECK(fixture.player.defense.status[EMBER_BREAK_ARMOR].frames); break;
         case 8: CHECK(fixture.shots[0].pierce == d->pass_through); break;
@@ -465,7 +465,8 @@ static void blessings(void)
         switch (b) {
         case 0:
             fixture.attributes[EMBER_TIDE_DAMAGE] = 140;
-            content_before_hit(&fixture, 0, 0, &h); CHECK(h.increased == 40); break;
+            content_before_hit(&fixture, 0, 0, &h);
+            CHECK(h.element_increased[EMBER_DAMAGE_FIRE] == 40); break;
         case 1:
             fixture.dash_buff = 120;
             content_before_hit(&fixture, 0, 0, &h); CHECK(h.increased == 40); break;
@@ -530,7 +531,7 @@ static void resonances(void)
         case 1:
             fixture.enemies[0].defense.status[EMBER_BREAK_ARMOR].stacks = 3;
             h.flags = EMBER_DOT; content_before_hit(&fixture, 0, 0, &h);
-            CHECK(h.increased == 15); break;
+            CHECK(h.element_increased[EMBER_DAMAGE_FIRE] == 15); break;
         case 2:
             fixture.enemies[1].burn = 180;
             ember_sim_status(&fixture, 0, EMBER_SHOCK, 0);
@@ -555,7 +556,8 @@ static void resonances(void)
         case 7:
             fixture.attributes[EMBER_ARMOR] = 100;
             h.share[1] = 0; h.share[3] = 100;
-            content_before_hit(&fixture, 0, 0, &h); CHECK(h.increased == 10); break;
+            content_before_hit(&fixture, 0, 0, &h);
+            CHECK(h.element_increased[EMBER_DAMAGE_STAR] == 10); break;
         case 8:
             fixture.player.hp = fixture.player.max_hp;
             heal(&fixture, 10); CHECK(fixture.player.defense.temporary[6] == 10); break;
@@ -807,6 +809,7 @@ static void vulnerability_and_dots(void)
     fixture.events.count = 0; shots_step(&fixture);
     CHECK(fixture.events.item[0].tier == 1);
     setup(); target(20); ember_sim_pet(&fixture, 4, 7);
+    fixture.events.count = 0;
     fixture.attributes[EMBER_ATTACK] = 10000;
     struct ember_shot *ground = shot(&fixture, 2, fixture.player.x,
         fixture.player.y, 8, 60, 120);
@@ -971,8 +974,138 @@ static void upgrade_fillers(void)
         row("upgrade_fillers", ember_upgrade_fillers[reward].id);
     }
 }
+static void e4b_events(void)
+{
+    setup();
+    struct ember_rng spawn = fixture.spawn_rng, combat = fixture.combat_rng, loot = fixture.loot_rng;
+    fixture.pickups[0] = (struct ember_pickup){fixture.player.x,fixture.player.y,7,1,0,0};
+    fixture.pickup_count = 1;
+    pickups_step(&fixture, 0);
+    CHECK(fixture.events.count == 1 && fixture.events.item[0].kind == EMBER_EVENT_PICKUP &&
+        fixture.events.item[0].subtype == EMBER_PICKUP_XP && fixture.events.item[0].value == 7);
+    pickups_step(&fixture, 0); CHECK(fixture.events.count == 1);
+    fixture.events.count = 0;
+    fixture.pickups[0] = (struct ember_pickup){fixture.player.x,fixture.player.y,0,1,1,R_IRON};
+    fixture.pickup_count = 1; pickups_step(&fixture, 0);
+    CHECK(fixture.events.count == 1 && fixture.events.item[0].kind == EMBER_EVENT_PICKUP &&
+        fixture.events.item[0].subtype == EMBER_PICKUP_ITEM && fixture.events.item[0].value == R_IRON);
+    fixture.events.count = 0;
+    unsigned main = fixture.player.main_weapon, sub = fixture.player.sub_weapon;
+    player_step(&fixture, EMBER_SWAP, EMBER_SWAP);
+    CHECK(fixture.events.count == 2);
+    CHECK(fixture.events.item[0].kind == EMBER_EVENT_WEAPON_CHANGE &&
+        fixture.events.item[0].subtype == EMBER_WEAPON_SLOT_MAIN && fixture.events.item[0].value == sub);
+    CHECK(fixture.events.item[1].kind == EMBER_EVENT_WEAPON_CHANGE &&
+        fixture.events.item[1].subtype == EMBER_WEAPON_SLOT_SUB && fixture.events.item[1].value == main);
+    fixture.events.count = 0; ember_sim_pet(&fixture, 0, 3);
+    CHECK(fixture.events.count == 1 && fixture.events.item[0].kind == EMBER_EVENT_WEAPON_CHANGE &&
+        fixture.events.item[0].subtype == EMBER_WEAPON_SLOT_PET && fixture.events.item[0].value == 3);
+    CHECK(fixture.spawn_rng.state == spawn.state && fixture.combat_rng.state == combat.state &&
+        fixture.loot_rng.state == loot.state);
+}
+static void e4b_rules(void)
+{
+    struct ember_defense d;
+    struct ember_rng rng = {11};
+    int32_t hp = 1000;
+    ember_defense_init(&d, hp); d.armor = 100;
+    struct ember_attack h = {.base=100, .attack=100, .share={50,50,0,0,0,0}};
+    h.element_increased[EMBER_DAMAGE_FIRE] = 100;
+    struct ember_damage_result r = ember_damage(&rng, &h, &d, &hp);
+    CHECK(r.damage == 125 && r.part[0] == 25 && r.part[1] == 100);
+    CHECK(r.dominant == EMBER_DAMAGE_FIRE);
+    printf("E4b,mixed_damage,old=112,new=%d\n", r.damage);
+    ember_defense_init(&d, 1000); hp = 1000; d.armor = 100;
+    h = (struct ember_attack){.base=100,.attack=100,.share={100,0,0,0,0,0},
+        .conversion=50,.added={0,0,20,0,0,0}};
+    h.element_increased[1]=100; h.element_increased[2]=50;
+    r = ember_damage(&rng, &h, &d, &hp);
+    CHECK(r.damage == 155 && r.part[0] == 25 && r.part[1] == 100 && r.part[2] == 30);
+    ember_defense_init(&d, 1000); hp = 1000; d.armor = 300;
+    h = (struct ember_attack){.base=100,.attack=100,.share={70,30,0,0,0,0}};
+    d.temporary[1] = 100;
+    r = ember_damage(&rng, &h, &d, &hp);
+    CHECK(r.dominant == EMBER_DAMAGE_FIRE && r.part[0] == 17 && r.part[1] == 30);
+    CHECK(r.damage == 17 && r.absorbed == 30);
+    ember_defense_init(&d, 1000); hp = 1000; d.resistance[0] = 75;
+    h.share[0] = 40; h.share[1] = 60;
+    r = ember_damage(&rng, &h, &d, &hp);
+    CHECK(r.dominant == EMBER_DAMAGE_IRON && r.part[0] == 40 && r.part[1] == 15);
+    setup(); target(20); fixture.attributes[EMBER_EMBER_DAMAGE] = 200;
+    h = (struct ember_attack){.base=100,.attack=100,.share={50,50,0,0,0,0}};
+    fixture.enemies[0].defense.armor = 100;
+    player_modifiers(&fixture, 0, &h, TAG_IRON | TAG_FIRE);
+    CHECK(h.increased == 0 && h.element_increased[1] == 100);
+    CHECK(ember_sim_hit(&fixture, 0, &h).damage == 125);
+    ember_defense_init(&d, 1000); d.tenacity = 50;
+    ember_slow_apply(&d, EMBER_SLOW_GATE, 20, 10);
+    ember_slow_apply(&d, EMBER_SLOW_ABYSS, 40, 4);
+    CHECK(ember_slow_percent(&d) == 40 && d.slow[EMBER_SLOW_GATE].frames == 5);
+    ember_defense_step(&d); ember_defense_step(&d);
+    CHECK(ember_slow_percent(&d) == 20);
+    ember_slow_apply(&d, EMBER_SLOW_GATE, 20, 10);
+    CHECK(d.slow[EMBER_SLOW_GATE].frames == 5 && !d.frozen && !d.status[EMBER_CHILL].stacks);
+    for (unsigned n = 0; n < 5; ++n) ember_defense_step(&d);
+    CHECK(ember_slow_percent(&d) == 0);
+    setup(); target(20);
+    struct ember_shot *zone = shot(&fixture, 2, fixture.player.x, fixture.player.y, 0, 100, 180);
+    zone->effect = 1;
+    for (unsigned n = 0; n < 5; ++n) { zone->tick=0; ground_effect(&fixture, zone); }
+    CHECK(ember_slow_percent(&fixture.enemies[0].defense) ==
+        ember_characters[EMBER_DATA_CHARACTERS_SEER].skill_k_slow_percent);
+    CHECK(!fixture.enemies[0].defense.status[EMBER_CHILL].frames &&
+        !fixture.enemies[0].defense.frozen);
+    zone->effect = 3; zone->tick = 0; ground_effect(&fixture, zone);
+    CHECK(fixture.enemies[0].defense.slow[EMBER_SLOW_ABYSS].frames &&
+        fixture.enemies[0].defense.status[EMBER_CORRODE].frames);
+    zone->effect = 5; zone->enemy_kind = 16; zone->tick = 0;
+    ground_effect(&fixture, zone);
+    CHECK(fixture.player.defense.slow[EMBER_SLOW_WEB].frames &&
+        !fixture.player.defense.status[EMBER_CHILL].frames);
+    setup(); fixture.player.relic_level[R_HOURGLASS] = 1;
+    fixture.player.cooldown_k = 120; fixture.player.cooldown_b = 200; fixture.player.charge = 50;
+    for (unsigned n = 0; n < 10; ++n) {
+        target(20 + (int)n); player_hit_effects(&fixture, n,
+            (struct ember_damage_result){.damage=1}, TAG_PROJECTILE);
+    }
+    CHECK(fixture.hourglass_pending == 1 && fixture.player.cooldown_k == 120 &&
+        fixture.player.cooldown_b == 200 && fixture.player.charge == 50);
+    fixture.player.cooldown_k = 0;
+    int normal = ember_characters[fixture.player.character].skill_k_cooldown *
+        (100 - fixture.attributes[EMBER_COOLDOWN]) / 100;
+    player_step(&fixture, EMBER_K, EMBER_K);
+    CHECK(!fixture.hourglass_pending && fixture.player.cooldown_k == normal - 60);
+    fixture.player.cooldown_b = 0; fixture.hourglass_pending = 1;
+    normal = ember_characters[fixture.player.character].skill_l_cooldown *
+        (100 - fixture.attributes[EMBER_COOLDOWN]) / 100;
+    player_step(&fixture, EMBER_L, EMBER_L);
+    CHECK(!fixture.hourglass_pending && fixture.player.cooldown_b == normal - 60);
+    fixture.hourglass_pending = 1; fixture.player.charge = 100;
+    player_step(&fixture, EMBER_U, EMBER_U); CHECK(fixture.hourglass_pending);
+    setup(); ember_sim_character(&fixture, EMBER_DATA_CHARACTERS_NAMELESS);
+    target(50); fixture.enemies[0].facing8 = EMBER_EAST;
+    content_skill(&fixture, 0);
+    CHECK(fixture.enemies[0].facing_lock == 12 &&
+        !enemy_front(&fixture.enemies[0], fixture.player.x, fixture.player.y));
+    for (unsigned n = 0; n < 12; ++n) {
+        enemies_step(&fixture); CHECK(fixture.enemies[0].facing8 == EMBER_EAST);
+    }
+    CHECK(!fixture.enemies[0].facing_lock);
+    enemies_step(&fixture); CHECK(fixture.enemies[0].facing8 != EMBER_EAST);
+    setup(); ember_sim_character(&fixture, EMBER_DATA_CHARACTERS_LAMPLIGHTER);
+    summon(&fixture, 0, 180, fixture.player.x, fixture.player.y);
+    int armor = fixture.summons[0].armor, damage = fixture.summons[0].damage;
+    content_skill(&fixture, 1);
+    CHECK(fixture.summons[0].armor == armor + 10 &&
+        fixture.summons[0].damage == damage * 120 / 100);
+    fixture.summons[0].hp = 1; content_skill(&fixture, 1);
+    CHECK(fixture.summons[0].hp == ember_summons[0].hp &&
+        fixture.summons[0].armor == armor + 10 && fixture.summons[0].damage == damage * 120 / 100);
+}
 int main(void)
 {
+    e4b_events();
+    e4b_rules();
     tag_membership();
     upgrade_fillers();
     weapons(); evolutions(); relics(); relic_rules(); inscriptions(); characters(); pets(); pet_runes();
