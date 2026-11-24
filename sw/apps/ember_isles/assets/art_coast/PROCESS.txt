@@ -65,3 +65,38 @@ Only combat-a/b/c DOWN outputs were saved by that loop; other broad-production j
 not run. The coordinator then requested an initial-configuration capacity checkpoint.
 Capacity work now covers only the missing staff/codex keeper poses, with non-graphic
 empty-hand gesture descriptions; other characters/enemies/biomes remain pending.
+
+06a-2 streaming checkpoint (2026-11-24):
+Task explicitly restores full I8 frames in DDR; no I4 actor replacement and no
+semantic-part actor reconstruction is used. The obsolete semantic-parts task is ignored.
+Coordinator clarified the synthetic bound: one largest frame each for main actor,
+pet and elite, but five actions x five drawn facings x largest frame for each
+ordinary enemy kind sharing an animation clock. Full-body death clips are not
+expanded; latest tech uses burst plus at most two downed frames.
+
+smith-common-down-06a2-input.png: built-in imagegen trial using the saved smith
+identity and accepted keeper-down-v3 as references. Its seven-row prompt and
+original output are retained. This is NOT accepted animation coverage: the first
+output's head/body proportions and square-grid layout drift from the approved
+44px reference. No silhouette shrinking, code-drawn repair or fabricated head/
+torso measurement is used to claim it passed; expansion stopped at the cache probe.
+
+reef-crab-down-06a2-input.png: built-in imagegen redraw using the project's original
+art_sample/05-enemies-native.png only as style/identity reference, not a copied
+or scaled sprite. Exact prompt is saved beside the source. Grid normalization is
+256x128, eight64x64 cells; source1774x887 has equal6.9296875px logical-grid pitch.
+The new crab measures47–51px wide and38–40px high, four distinct idle and four
+walk frames. This is only the front direction, not the complete enemy package.
+Palette file has255 RGB565+A4 entries; all frames remain I8. No manual pixel
+edits were needed in this source. Before-repair and native files are retained.
+
+probe_coast_streaming.py rebuilds this source and exports the existing200 keeper
+frames plus8 crab frames, each cropped then padded to legal power-of-two texture
+sizes for direct independent TEX_LOAD. The descriptor records DDR offset, byte
+count, logical crop dimensions, texture dimensions, anchor, hand, direction,
+action, frame and palette bank. It imports the sole GPU model for swizzle and
+checks every texel including padding, then checks exact2x output pixels.
+The direct-frame-page format is a capacity probe, not an approved full package.
+Each actual crab frame requires64x64 I8=4096B under that format; the clarified
+conservative synchronized bound for that kind alone is5x5x4096=102400B, over80KiB.
+This bound failure pauses production pending the coordinator's cache-format decision.

@@ -49,3 +49,13 @@ game containing this font.
 
 The additional 12px U+2212 mathematical minus is an original Ember Isles glyph,
 dedicated by this project to **CC0**; it is separate from the upstream font.
+
+## ART-3 coast, 06a-2 source checkpoint
+
+The new `art_coast/sources/smith-common-down-06a2-input.png` and
+`reef-crab-down-06a2-input.png` are original outputs of the built-in imagegen tool,
+using this project's previously generated keeper/smith/crab images as references.
+Prompts, source images and processing notes are saved under `art_coast/`.
+The smith image is a rejected production trial; the crab image is a partial
+front-facing I8 capacity checkpoint, not a completed or quality-approved coast pack.
+No external commercial game assets or third-party source packs were used here.
