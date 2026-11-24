@@ -71,3 +71,8 @@ tech7自评：帧率未达标；美术/完整动作/大招全屏/中文图标界
 当前：04内容与06a海岸两角色素材并行；新体型44px、8向、96+96KiB预算尚待生产实测。
 后续：06b真实GPU海岸验证交用户，再扩三关；完整ART3/音频及两模式三关未完成。
 录像配置快照/相对动作计时契约已确认待后续接入；E3 Windows帧率仍待frame-times.txt。
+
+中文字体准备：Fusion Pixel 12px zh_Hans 2026.11.10，OFL及上游许可原文随assets/fonts保留。
+font_convert.py按当前CSV/UI提取690字形，位图16560B，C结构22080B；额外提供原生U+2212减号。
+命令：python3 sw/apps/ember_isles/tools/font_convert.py；C11/Wall/Wextra/Werror头文件编译及字形检查通过。
+CPU预览：outputs/ember_isles/font-cpu-preview.png；尚未接入GPU界面，不算中文HUD完成。

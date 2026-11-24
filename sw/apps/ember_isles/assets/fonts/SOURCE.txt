@@ -1,0 +1,14 @@
+Fusion Pixel Font 12px monospaced zh_Hans, release 2026.11.10
+Copyright (c) 2022, TakWolf (https://takwolf.com)
+Source: https://github.com/TakWolf/fusion-pixel-font
+Release: https://github.com/TakWolf/fusion-pixel-font/releases/tag/2026.11.10
+Package: fusion-pixel-font-12px-monospaced-bdf-v2026.11.10.zip
+Font license: SIL Open Font License 1.1; see OFL.txt and LICENSES/.
+The BDF is unmodified. Generated CPU glyph subsets stay in build/.
+Only glyphs used by the current UI and CSV content enter the subset;
+GPU texture caching is handled by the renderer, not this converter.
+
+The Ember UI subset adds one original native 12px glyph: U+2212 mathematical
+minus, advance 6px, four opaque pixels on row 5. It is declared explicitly in
+font_convert.py and dedicated to CC0 by this project. No missing character is
+replaced automatically. Fusion Pixel does not include this required symbol.
