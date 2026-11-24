@@ -219,6 +219,7 @@ FPGA 第一版只做单人，以下只作为设计约束：
 | `weapons.csv`、`relics.csv`、`inscriptions.csv`、`blessings.csv` | 物品 |
 | `statuses.csv` | 状态效果 |
 | `enemies.csv`、`affixes.csv`、`waves.csv` | 敌人、词缀、波次 |
+| `stages.csv`、`obstacles.csv` | 关卡（地图尺寸、时间上限、缩圈参数）、障碍物 |
 
 ## 11. 变更记录
 
