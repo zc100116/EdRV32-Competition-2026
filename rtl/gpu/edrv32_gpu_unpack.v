@@ -70,9 +70,11 @@ module edrv32_gpu_unpack (
     wire [4:0] last_w;
     wire [4:0] push_w;
     wire [4:0] pop_w;
-    reg [255:0] data_r [0:9];
-    reg [31:0] keep_r [0:9];
-    reg last_r [0:9];
+    wire [255:0] head_data_w [0:4];
+    wire [31:0] head_keep_w [1:4];
+    wire [4:1] head_last_w;
+    wire [255:0] matrix_second_w;
+    wire unused_matrix_w;
     reg [4:0] head_r;
     reg [4:0] tail_r;
     reg [1:0] count_r [0:4];
@@ -122,41 +124,65 @@ module edrv32_gpu_unpack (
     assign palette_read_data_ready_o = stop_i || count_r[4] < 2;
     assign push_w[4] = valid_w[4] && palette_read_data_ready_o && !stop_i;
     assign matrix_valid_o = busy_r && count_r[0] == 2 && !stop_i;
-    assign matrix_data_o = {data_r[{3'b0, !head_r[0]}], data_r[{3'b0, head_r[0]}]};
+    assign matrix_data_o = {matrix_second_w, head_data_w[0]};
     assign vertex_valid_o = busy_r && count_r[1] != 0 && !stop_i;
-    assign vertex_data_o = data_r[2+{31'b0, head_r[1]}][vertex_half_r*128 +: 128];
+    assign vertex_data_o = head_data_w[1][vertex_half_r*128 +: 128];
     assign vertex_fire_w = vertex_valid_o && vertex_ready_i;
     assign quad_record_valid_o = busy_r && count_r[2] != 0 && !stop_i;
-    assign quad_record_data_o = data_r[4+{31'b0, head_r[2]}][quad_half_r*128 +: 128];
+    assign quad_record_data_o = head_data_w[2][quad_half_r*128 +: 128];
     assign quad_fire_w = quad_record_valid_o && quad_record_ready_i;
     assign texture_load_valid_o = busy_r && count_r[3] != 0 && !stop_i;
     assign texture_load_addr_o = texture_addr_r;
-    assign texture_load_data_o = data_r[6+{31'b0, head_r[3]}];
-    assign texture_load_keep_o = keep_r[6+{31'b0, head_r[3]}];
+    assign texture_load_data_o = head_data_w[3];
+    assign texture_load_keep_o = head_keep_w[3];
     assign texture_fire_w = texture_load_valid_o && texture_load_ready_i;
     assign palette_load_valid_o = busy_r && count_r[4] != 0 && !stop_i;
     assign palette_load_idx_o = palette_idx_r;
-    assign palette_load_data_o = data_r[8+{31'b0, head_r[4]}][palette_word_r*32 +: 20];
+    assign palette_load_data_o = head_data_w[4][palette_word_r*32 +: 20];
     assign palette_fire_w = palette_load_valid_o && palette_load_ready_i;
     assign palette_end_w = palette_word_r == 3'd7
-        || (32'b0 == (keep_r[8+{31'b0, head_r[4]}] >> (({3'b0, palette_word_r}+6'd1)*6'd4)));
+        || (32'b0 == (head_keep_w[4] >> (({3'b0, palette_word_r}+6'd1)*6'd4)));
     assign pop_w[0] = matrix_valid_o && matrix_ready_i;
     assign pop_w[1] = vertex_fire_w && (vertex_half_r
-        || !keep_r[2+{31'b0, head_r[1]}][16]);
+        || !head_keep_w[1][16]);
     assign pop_w[2] = quad_fire_w && (quad_half_r
-        || !keep_r[4+{31'b0, head_r[2]}][16]);
+        || !head_keep_w[2][16]);
     assign pop_w[3] = texture_fire_w;
     assign pop_w[4] = palette_fire_w && palette_end_w;
 
     genvar c;
     generate
         for (c = 0; c < 5; c = c + 1) begin : g_return
+            // Two-slot return buffer per client in plain registers: a shared array
+            // written by five processes crashes PDS RAM inference (card 109).
+            reg [255:0] slot0_data_r;
+            reg [255:0] slot1_data_r;
             always @(posedge clk_i) begin
-                if (push_w[c]) begin
-                    data_r[c*2+{31'b0, tail_r[c]}] <= data_w[c];
-                    keep_r[c*2+{31'b0, tail_r[c]}] <= keep_w[c];
-                    last_r[c*2+{31'b0, tail_r[c]}] <= last_w[c];
+                if (push_w[c] && !tail_r[c]) slot0_data_r <= data_w[c];
+                if (push_w[c] && tail_r[c]) slot1_data_r <= data_w[c];
+            end
+            assign head_data_w[c] = head_r[c] ? slot1_data_r : slot0_data_r;
+            if (c == 0) begin : g_matrix
+                // The matrix client consumes both slots and never uses keep or last.
+                assign matrix_second_w = head_r[c] ? slot0_data_r : slot1_data_r;
+                assign unused_matrix_w = ^{keep_w[c], last_w[c]};
+            end else begin : g_tag
+                reg [31:0] slot0_keep_r;
+                reg [31:0] slot1_keep_r;
+                reg slot0_last_r;
+                reg slot1_last_r;
+                always @(posedge clk_i) begin
+                    if (push_w[c] && !tail_r[c]) begin
+                        slot0_keep_r <= keep_w[c];
+                        slot0_last_r <= last_w[c];
+                    end
+                    if (push_w[c] && tail_r[c]) begin
+                        slot1_keep_r <= keep_w[c];
+                        slot1_last_r <= last_w[c];
+                    end
                 end
+                assign head_keep_w[c] = head_r[c] ? slot1_keep_r : slot0_keep_r;
+                assign head_last_w[c] = head_r[c] ? slot1_last_r : slot0_last_r;
             end
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i) begin
@@ -210,10 +236,10 @@ module edrv32_gpu_unpack (
                 palette_idx_r <= palette_idx_r + 12'd1;
             end
             if (stop_i || pop_w[0]
-                || (pop_w[1] && last_r[2+{31'b0, head_r[1]}])
-                || (pop_w[2] && last_r[4+{31'b0, head_r[2]}])
-                || (pop_w[3] && last_r[6+{31'b0, head_r[3]}])
-                || (pop_w[4] && last_r[8+{31'b0, head_r[4]}])) begin
+                || (pop_w[1] && head_last_w[1])
+                || (pop_w[2] && head_last_w[2])
+                || (pop_w[3] && head_last_w[3])
+                || (pop_w[4] && head_last_w[4])) begin
                 busy_r <= 1'b0;
                 done_r <= 1'b1;
             end
