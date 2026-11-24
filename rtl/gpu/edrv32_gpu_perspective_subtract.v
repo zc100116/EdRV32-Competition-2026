@@ -10,7 +10,13 @@ module edrv32_gpu_perspective_subtract (
     // Arithmetic payload.
     input wire [28:0] a_i,
     input wire [28:0] b_i,
-    output wire [28:0] normal_o
+    output wire [28:0] normal_o,
+
+    // Shared delay RAM: 25-cycle bypass and 14-cycle exponent storage.
+    output wire [28:0] delay_bypass_wr_data_o,
+    input wire [28:0] delay_bypass_rd_data_i,
+    output wire [9:0] delay_exponent_wr_data_o,
+    input wire [9:0] delay_exponent_rd_data_i
 );
     reg [28:0] a_r;
     reg [28:0] b_r;
@@ -19,13 +25,10 @@ module edrv32_gpu_perspective_subtract (
     reg [9:0] difference_b_r [0:6];
     reg [21:0] aligned_a_r [0:6];
     reg [21:0] aligned_b_r [0:6];
-    reg [9:0] exponent_r [0:14];
     reg sign_a_r [0:8];
     reg sign_b_r [0:8];
-    reg [28:0] bypass_r [0:24];
     reg [24:0] bypass_valid_r;
     wire [28:0] normalized_w;
-    integer index_r;
     reg [19:0] round_low_a_r;
     reg round_carry_a_r;
     reg round_high_a_r;
@@ -94,13 +97,16 @@ module edrv32_gpu_perspective_subtract (
     assign unused_absolute_high_w =
         {1'b0, (unused_absolute_value_r[22:20] ^ {3{absolute_sign_r}})} +
         {3'b0, absolute_carry_r};
-    assign normal_o = bypass_valid_r[24] ? bypass_r[24] : normalized_w;
+    assign delay_bypass_wr_data_o = b_i[17:0] == 0 ? a_i :
+        {b_i[28:19], !b_i[18], b_i[17:0]};
+    assign delay_exponent_wr_data_o = maximum_r - 10'd3;
+    assign normal_o = bypass_valid_r[24] ? delay_bypass_rd_data_i : normalized_w;
     edrv32_gpu_perspective_normal u_normal (
         .clk_i(clk_i),
         .en_i(en_i),
         .magnitude_i({47'b0, absolute_r}),
         .sign_i(sign_r),
-        .exponent_i(exponent_r[14]),
+        .exponent_i(delay_exponent_rd_data_i),
         .normal_o(normalized_w)
     );
     always @(posedge clk_i) begin
@@ -110,15 +116,10 @@ module edrv32_gpu_perspective_subtract (
             maximum_r <= $signed(a_i[28:19]) > $signed(b_i[28:19]) ?
                 a_i[28:19] : b_i[28:19];
             bypass_valid_r <= {bypass_valid_r[23:0], a_i[17:0] == 0 || b_i[17:0] == 0};
-            bypass_r[0] <= b_i[17:0] == 0 ? a_i : {b_i[28:19], !b_i[18], b_i[17:0]};
-            for (index_r = 1; index_r < 25; index_r = index_r + 1) begin
-                bypass_r[index_r] <= bypass_r[index_r-1];
-            end
             difference_a_r[1] <= maximum_r - a_r[28:19];
             difference_b_r[1] <= maximum_r - b_r[28:19];
             aligned_a_r[1] <= {a_r[17:0], 4'b0};
             aligned_b_r[1] <= {b_r[17:0], 4'b0};
-            exponent_r[1] <= maximum_r - 10'd3;
             sign_a_r[1] <= a_r[18];
             sign_b_r[1] <= b_r[18];
             difference_a_r[2] <= difference_a_r[1];
@@ -151,19 +152,6 @@ module edrv32_gpu_perspective_subtract (
             difference_b_r[6] <= difference_b_r[5];
             aligned_b_r[6] <= difference_b_r[5][4] ?
                 aligned_b_r[5] >> 16 : aligned_b_r[5];
-            exponent_r[2] <= exponent_r[1];
-            exponent_r[3] <= exponent_r[2];
-            exponent_r[4] <= exponent_r[3];
-            exponent_r[5] <= exponent_r[4];
-            exponent_r[6] <= exponent_r[5];
-            exponent_r[7] <= exponent_r[6];
-            exponent_r[8] <= exponent_r[7];
-            exponent_r[9] <= exponent_r[8];
-            exponent_r[10] <= exponent_r[9];
-            exponent_r[11] <= exponent_r[10];
-            exponent_r[12] <= exponent_r[11];
-            exponent_r[13] <= exponent_r[12];
-            exponent_r[14] <= exponent_r[13];
             sign_a_r[2] <= sign_a_r[1];
             sign_b_r[2] <= sign_b_r[1];
             sign_a_r[3] <= sign_a_r[2];
