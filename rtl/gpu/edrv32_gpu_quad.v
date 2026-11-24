@@ -150,8 +150,6 @@ module edrv32_gpu_quad (
     assign fragment_mask_o = output_mask_r[output_read_r];
     reg [0:0] output_quad_r [0:1];
     assign fragment_quad_o = output_quad_r[output_read_r];
-    reg [1959:0] output_plane_r [0:1];
-    assign fragment_plane_o = output_plane_r[output_read_r];
     reg [69:0] output_h_r [0:1];
     assign fragment_h_o = output_h_r[output_read_r];
     reg [173:0] output_gradient_r [0:1];
@@ -164,15 +162,24 @@ module edrv32_gpu_quad (
     reg [1:0] prepared_r;
     reg [1:0] preparing_r;
     reg [1:0] prepare_index_r;
-    reg [127:0] prepare_data_r [0:1];
-    reg [17:0] prepare_x_r [0:1];
-    reg [17:0] prepare_y_r [0:1];
-    reg signed [17:0] prepare_begin_x_r [0:1];
-    reg signed [17:0] prepare_begin_y_r [0:1];
-    reg signed [17:0] prepare_end_x_r [0:1];
-    reg signed [17:0] prepare_end_y_r [0:1];
-    reg [8:0] prepare_width_r [0:1];
-    reg [8:0] prepare_height_r [0:1];
+    reg [127:0] prepare_data_0_r;
+    reg [127:0] prepare_data_1_r;
+    reg [17:0] prepare_x_0_r;
+    reg [17:0] unused_prepare_x_1_r;
+    reg [17:0] prepare_y_0_r;
+    reg [17:0] unused_prepare_y_1_r;
+    reg signed [17:0] prepare_begin_x_0_r;
+    reg signed [17:0] prepare_begin_x_1_r;
+    reg signed [17:0] prepare_begin_y_0_r;
+    reg signed [17:0] prepare_begin_y_1_r;
+    reg signed [17:0] prepare_end_x_0_r;
+    reg signed [17:0] prepare_end_x_1_r;
+    reg signed [17:0] prepare_end_y_0_r;
+    reg signed [17:0] prepare_end_y_1_r;
+    reg [8:0] prepare_width_0_r;
+    reg [8:0] prepare_width_1_r;
+    reg [8:0] prepare_height_0_r;
+    reg [8:0] prepare_height_1_r;
     reg signed [17:0] input_begin_x_r [0:1];
     reg signed [17:0] input_begin_y_r [0:1];
     reg signed [17:0] input_end_x_r [0:1];
@@ -192,10 +199,16 @@ module edrv32_gpu_quad (
     reg signed [17:0] last_y_r;
     reg [8:0] width_r;
     reg [8:0] height_r;
-    reg [15:0] pipe_x_r [0:2];
-    reg [15:0] pipe_y_r [0:2];
-    reg [127:0] unused_pipe_record_r [0:2];
-    reg [3:0] pipe_mask_r [0:2];
+    reg [15:0] pipe_x_0_r;
+    reg [15:0] pipe_x_1_r;
+    reg [15:0] pipe_x_2_r;
+    reg [15:0] pipe_y_0_r;
+    reg [15:0] pipe_y_1_r;
+    reg [15:0] pipe_y_2_r;
+    reg [127:0] unused_pipe_record_0_r;
+    reg [127:0] unused_pipe_record_1_r;
+    reg [127:0] unused_pipe_record_2_r;
+    wire [3:0] pipe_mask_w [0:2];
     wire advance_w;
     assign advance_w = output_count_r < 2;
     assign fragment_valid_o = (output_count_r != 0) && !stop_i;
@@ -204,7 +217,7 @@ module edrv32_gpu_quad (
     assign last_w = x_r[17:2] == unused_last_x_r[17:2] && y_r == last_y_r;
     assign input_pop_w = prepared_r[input_read_r] &&
         (!active_r || (scan_w && last_w)) && !stop_i;
-    assign output_push_w = valid_r[2] && pipe_mask_r[2] != 0 && advance_w && !stop_i;
+    assign output_push_w = valid_r[2] && pipe_mask_w[2] != 0 && advance_w && !stop_i;
     assign object_quad_ready_o = input_count_r < 2 && cfg_valid_r;
     assign quad_record_ready_o = input_count_r < 2 && cfg_valid_r;
     assign input_push_w = (object_quad_valid_i || quad_record_valid_i) &&
@@ -287,50 +300,49 @@ module edrv32_gpu_quad (
         end
     end
 
-    integer metadata_r;
     always @(posedge clk_i) begin
         prepare_index_r <= {prepare_index_r[0], input_write_r};
-        prepare_data_r[0] <= source_data_w;
-        prepare_data_r[1] <= prepare_data_r[0];
-        prepare_x_r[0] <= source_x_w;
-        prepare_y_r[0] <= source_y_w;
-        prepare_x_r[1] <= prepare_x_r[0];
-        prepare_y_r[1] <= prepare_y_r[0];
-        prepare_begin_x_r[0] <= source_x_w > clip_x0_r ? source_x_w : clip_x0_r;
-        prepare_begin_y_r[0] <= source_y_w > clip_y0_r ? source_y_w : clip_y0_r;
-        prepare_end_x_r[0] <= source_x_w + $signed({9'b0, source_data_w[32 +: 9]});
-        prepare_end_y_r[0] <= source_y_w + $signed({9'b0, source_data_w[41 +: 9]});
-        prepare_begin_x_r[1] <= prepare_begin_x_r[0];
-        prepare_begin_y_r[1] <= prepare_begin_y_r[0];
-        prepare_end_x_r[1] <= prepare_end_x_r[0] < clip_x1_r ?
-            prepare_end_x_r[0] : clip_x1_r;
-        prepare_end_y_r[1] <= prepare_end_y_r[0] < clip_y1_r ?
-            prepare_end_y_r[0] : clip_y1_r;
-        prepare_width_r[0] <= source_data_w[32 +: 9] - 9'd1;
-        prepare_height_r[0] <= source_data_w[41 +: 9] - 9'd1;
-        prepare_width_r[1] <= prepare_width_r[0];
-        prepare_height_r[1] <= prepare_height_r[0];
+        prepare_data_0_r <= source_data_w;
+        prepare_data_1_r <= prepare_data_0_r;
+        prepare_x_0_r <= source_x_w;
+        prepare_y_0_r <= source_y_w;
+        unused_prepare_x_1_r <= prepare_x_0_r;
+        unused_prepare_y_1_r <= prepare_y_0_r;
+        prepare_begin_x_0_r <= source_x_w > clip_x0_r ? source_x_w : clip_x0_r;
+        prepare_begin_y_0_r <= source_y_w > clip_y0_r ? source_y_w : clip_y0_r;
+        prepare_end_x_0_r <= source_x_w + $signed({9'b0, source_data_w[32 +: 9]});
+        prepare_end_y_0_r <= source_y_w + $signed({9'b0, source_data_w[41 +: 9]});
+        prepare_begin_x_1_r <= prepare_begin_x_0_r;
+        prepare_begin_y_1_r <= prepare_begin_y_0_r;
+        prepare_end_x_1_r <= prepare_end_x_0_r < clip_x1_r ?
+            prepare_end_x_0_r : clip_x1_r;
+        prepare_end_y_1_r <= prepare_end_y_0_r < clip_y1_r ?
+            prepare_end_y_0_r : clip_y1_r;
+        prepare_width_0_r <= source_data_w[32 +: 9] - 9'd1;
+        prepare_height_0_r <= source_data_w[41 +: 9] - 9'd1;
+        prepare_width_1_r <= prepare_width_0_r;
+        prepare_height_1_r <= prepare_height_0_r;
         if (preparing_r[1]) begin
-            input_data_r[prepare_index_r[1]] <= prepare_data_r[1];
-            input_x_r[prepare_index_r[1]] <= prepare_x_r[1][16:0];
-            input_y_r[prepare_index_r[1]] <= prepare_y_r[1][16:0];
-            input_begin_x_r[prepare_index_r[1]] <= prepare_begin_x_r[1];
-            input_begin_y_r[prepare_index_r[1]] <= prepare_begin_y_r[1];
-            input_end_x_r[prepare_index_r[1]] <= prepare_end_x_r[1];
-            input_end_y_r[prepare_index_r[1]] <= prepare_end_y_r[1];
-            input_width_r[prepare_index_r[1]] <= prepare_width_r[1];
-            input_height_r[prepare_index_r[1]] <= prepare_height_r[1];
+            input_data_r[prepare_index_r[1]] <= prepare_data_1_r;
+            input_x_r[prepare_index_r[1]] <= unused_prepare_x_1_r[16:0];
+            input_y_r[prepare_index_r[1]] <= unused_prepare_y_1_r[16:0];
+            input_begin_x_r[prepare_index_r[1]] <= prepare_begin_x_1_r;
+            input_begin_y_r[prepare_index_r[1]] <= prepare_begin_y_1_r;
+            input_end_x_r[prepare_index_r[1]] <= prepare_end_x_1_r;
+            input_end_y_r[prepare_index_r[1]] <= prepare_end_y_1_r;
+            input_width_r[prepare_index_r[1]] <= prepare_width_1_r;
+            input_height_r[prepare_index_r[1]] <= prepare_height_1_r;
         end
         if (advance_w) begin
-            pipe_x_r[0] <= x_r[15:0];
-            pipe_y_r[0] <= y_r[15:0];
-            unused_pipe_record_r[0] <= record_r;
-            for (metadata_r = 1; metadata_r < 3; metadata_r = metadata_r + 1) begin
-                pipe_x_r[metadata_r] <= pipe_x_r[metadata_r-1];
-                pipe_y_r[metadata_r] <= pipe_y_r[metadata_r-1];
-                unused_pipe_record_r[metadata_r] <= unused_pipe_record_r[metadata_r-1];
-                pipe_mask_r[metadata_r] <= pipe_mask_r[metadata_r-1];
-            end
+            pipe_x_0_r <= x_r[15:0];
+            pipe_y_0_r <= y_r[15:0];
+            unused_pipe_record_0_r <= record_r;
+            pipe_x_1_r <= pipe_x_0_r;
+            pipe_y_1_r <= pipe_y_0_r;
+            unused_pipe_record_1_r <= unused_pipe_record_0_r;
+            pipe_x_2_r <= pipe_x_1_r;
+            pipe_y_2_r <= pipe_y_1_r;
+            unused_pipe_record_2_r <= unused_pipe_record_1_r;
         end
         if (scan_w) begin
             if (x_r[17:2] == unused_last_x_r[17:2]) begin
@@ -354,17 +366,18 @@ module edrv32_gpu_quad (
             record_r <= input_data_r[input_read_r];
         end
         if (output_push_w) begin
-            output_x_r[output_write_r] <= pipe_x_r[2];
-            output_y_r[output_write_r] <= pipe_y_r[2];
-            output_mask_r[output_write_r] <= pipe_mask_r[2];
+            output_x_r[output_write_r] <= pipe_x_2_r;
+            output_y_r[output_write_r] <= pipe_y_2_r;
+            output_mask_r[output_write_r] <= pipe_mask_w[2];
             output_quad_r[output_write_r] <= 1'b1;
             output_h_r[output_write_r] <= {-10'sd8, -10'sd8, -10'sd8,
                 10'sd0, 10'sd0, 10'sd0, -10'sd16};
             output_gradient_r[output_write_r] <= 0;
-            output_unused_palette_r[output_write_r] <= unused_pipe_record_r[2][24 +: 4];
-            output_alpha_r[output_write_r] <= unused_pipe_record_r[2][50 +: 8];
+            output_unused_palette_r[output_write_r] <= unused_pipe_record_2_r[24 +: 4];
+            output_alpha_r[output_write_r] <= unused_pipe_record_2_r[50 +: 8];
         end
     end
+    // Four coordinate subtract/flip/add pipelines, preserving the three existing stages.
     genvar lane;
     generate
         for (lane = 0; lane < 4; lane = lane + 1) begin : g_lane
@@ -377,35 +390,65 @@ module edrv32_gpu_quad (
             reg signed [18:0] u_r;
             reg signed [18:0] v_r;
             wire signed [17:0] pixel_x_w;
+            reg [2:0] mask_r;
+            // Four lane-local 3-bit mask pipelines, advancing with the UV pipeline.
+            assign pipe_mask_w[0][lane] = mask_r[0];
+            assign pipe_mask_w[1][lane] = mask_r[1];
+            assign pipe_mask_w[2][lane] = mask_r[2];
             assign pixel_x_w = {x_r[17:2], lane[1:0]};
+            // Output stage: seven independent two-slot 70-bit field queues per lane.
+            reg [69:0] plane_0_r [0:1];
+            assign fragment_plane_o[lane*490+0 +: 70] = plane_0_r[output_read_r];
+            always @(posedge clk_i) begin
+                if (output_push_w)
+                    plane_0_r[output_write_r] <= {38'b0, unused_pipe_record_2_r[80 +: 16], 16'b0};
+            end
+            reg [69:0] plane_1_r [0:1];
+            assign fragment_plane_o[lane*490+70 +: 70] = plane_1_r[output_read_r];
+            always @(posedge clk_i) begin
+                if (output_push_w) plane_1_r[output_write_r] <= 70'd1073741824;
+            end
+            reg [69:0] plane_2_r [0:1];
+            assign fragment_plane_o[lane*490+140 +: 70] = plane_2_r[output_read_r];
+            always @(posedge clk_i) begin
+                if (output_push_w) plane_2_r[output_write_r] <= {{13{u_r[18]}}, u_r, 38'b0};
+            end
+            reg [69:0] plane_3_r [0:1];
+            assign fragment_plane_o[lane*490+210 +: 70] = plane_3_r[output_read_r];
+            always @(posedge clk_i) begin
+                if (output_push_w) plane_3_r[output_write_r] <= {{13{v_r[18]}}, v_r, 38'b0};
+            end
+            reg [69:0] plane_4_r [0:1];
+            assign fragment_plane_o[lane*490+280 +: 70] = plane_4_r[output_read_r];
+            always @(posedge clk_i) begin
+                if (output_push_w) plane_4_r[output_write_r] <= 70'd4278190080;
+            end
+            reg [69:0] plane_5_r [0:1];
+            assign fragment_plane_o[lane*490+350 +: 70] = plane_5_r[output_read_r];
+            always @(posedge clk_i) begin
+                if (output_push_w) plane_5_r[output_write_r] <= 70'd4278190080;
+            end
+            reg [69:0] plane_6_r [0:1];
+            assign fragment_plane_o[lane*490+420 +: 70] = plane_6_r[output_read_r];
+            always @(posedge clk_i) begin
+                if (output_push_w) plane_6_r[output_write_r] <= 70'd4278190080;
+            end
             always @(posedge clk_i) begin
                 if (advance_w) begin
                     column_r <= pixel_x_w - position_x_r;
                     row_r <= y_r - position_y_r;
                     width_minus_one_r <= width_r;
                     height_minus_one_r <= height_r;
-                    pipe_mask_r[0][lane] <= pixel_x_w >= clip_x0_r && pixel_x_w < x1_r &&
-                        pixel_x_w >= position_x_r;
-                    flipped_column_r <= unused_pipe_record_r[0][28] ?
+                    mask_r <= {mask_r[1:0], pixel_x_w >= clip_x0_r && pixel_x_w < x1_r &&
+                        pixel_x_w >= position_x_r};
+                    flipped_column_r <= unused_pipe_record_0_r[28] ?
                         $signed({9'b0, width_minus_one_r}) - column_r : column_r;
-                    flipped_row_r <= unused_pipe_record_r[0][29] ?
+                    flipped_row_r <= unused_pipe_record_0_r[29] ?
                         $signed({9'b0, height_minus_one_r}) - row_r : row_r;
                     u_r <= $signed({flipped_column_r[17], flipped_column_r}) +
-                        $signed({11'b0, unused_pipe_record_r[1][64 +: 8]});
+                        $signed({11'b0, unused_pipe_record_1_r[64 +: 8]});
                     v_r <= $signed({flipped_row_r[17], flipped_row_r}) +
-                        $signed({11'b0, unused_pipe_record_r[1][72 +: 8]});
-                end
-                if (output_push_w) begin
-                    output_plane_r[output_write_r][lane*490 +: 70] <=
-                        {38'b0, unused_pipe_record_r[2][80 +: 16], 16'b0};
-                    output_plane_r[output_write_r][lane*490+70 +: 70] <= 70'd1073741824;
-                    output_plane_r[output_write_r][lane*490+140 +: 70] <=
-                        {{13{u_r[18]}}, u_r, 38'b0};
-                    output_plane_r[output_write_r][lane*490+210 +: 70] <=
-                        {{13{v_r[18]}}, v_r, 38'b0};
-                    output_plane_r[output_write_r][lane*490+280 +: 70] <= 70'd4278190080;
-                    output_plane_r[output_write_r][lane*490+350 +: 70] <= 70'd4278190080;
-                    output_plane_r[output_write_r][lane*490+420 +: 70] <= 70'd4278190080;
+                        $signed({11'b0, unused_pipe_record_1_r[72 +: 8]});
                 end
             end
         end
