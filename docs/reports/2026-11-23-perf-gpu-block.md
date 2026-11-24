@@ -54,3 +54,11 @@ python3 tools/regress.py full --path verif/unit/gpu_raster -j 1
 完成协议问题见 [调试记录](../debug/2026-11-23-gpu-stale-unit-done.md)。
 逐命令周期生成于 `build/gpu/block/gt25/performance.txt` 和场景 `timing.txt`；结束后按要求清理构建和进程。
 本机与主机告警集合不同；已移动 TB 声明初始化，仅对 TB 可变正半周期豁免 ZERODLY；DUT 顶层 lint 0 告警且无 DUT 豁免。
+
+## I-2 集成遗留修复（2026-11-24）
+实现：RESOLVE `7257fa437`、object `382469085`、复位 `1aad898b8`、ST-08 超时 `06d94ada3`；三个 RTL 风格和 GPU SoC 顶层 `--lint-only -Wall` 均 0 告警。
+RESOLVE 原场景及新增首包、12 像素尾包、两端非 32 B 边界全部 PASS；object 15 组向量及无 cfg/finish 用例 PASS，II=1 邻拍检查 1272 次；两套新增测试在旧 RTL 分别复现 FAIL。复现：`python3 tools/regress.py smoke --path verif/unit/gpu_resolve -j 1`、`python3 verif/unit/gpu_object/run.py`。
+GT-15 原样单跑 PASS；GT-01–25 全部重跑 25/25 PASS；GT-25 性能复核 PASS，AA RESOLVE 仍为 79031 周期、0.439061 ms。完整回归命令见上；性能复核：`python3 verif/block/gpu/gt25/performance.py compare`。
+ST-14 原检查完整 PASS，纯仿真 31.563 s；SYS 等待各域一级副本，媒体软复位保持 SYS/MEM core。复现：`python3 verif/soc/gpu_reset/run.py`。
+ST-08 完整启动检查 PASS，纯仿真 2590.275 s；冷构建段约 270 s，分段合计 2860.275 s，加 50% 上取整后 timeout=4291 s。CPU PC/MTIME 持续推进，静默期对应正常 100 ms 按键采样。复现：`python3 verif/soc/gpu_boot/run.py`。
+计时与定位见 [ST-08 调试记录](../debug/2026-11-24-gpu-soc-st08-timeout.md)；本任务进程、构建目录及临时日志已清理。
