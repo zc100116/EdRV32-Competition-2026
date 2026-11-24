@@ -4,8 +4,8 @@
 游戏代码b871ee706；规格gdd/tech v2.0；字体准备0d8c859ec。
 E3模拟13879d601，平台10f5e5b12，GPU等价性能优化dc323266c。
 E4员工提交见report-e4.md；PM修复c99be1151、8e7d2e950、b871ee706。
-E4四项玩法待答：沙漏消费时机、中性减速、影步朝向窗口、灯匠维修强化叠加。
-另待冻结混伤元素提高的份额算法及伤害数字颜色口径；未自行改动。
+E4六项口径已冻结于GDD2.4（3fe7d291d），E4b员工接续实现并待集成。
+元素提高只作用对应份额；颜色按防御/独立减伤后、护盾前的最大实际份额。
 
 四目标及五组系统测试通过，GCC13.3/Zig0.17/xPack15.2，C11/Wall/Wextra/Werror。
 ```sh
@@ -65,7 +65,8 @@ I8精确部件基础163840B、爆核196608B，分别超98304B常驻半区65536B�
 I4比较为69632B、81920B；加其他项预留估算仍超，完整常驻/场景包未实测。
 每帧41–91个4x4小quad的测量不是最终语义共骨架方案；还有36姿势尺寸告警待核对。
 检视outputs/ember_isles/art3-coast-assets/index.html；I4比较keeper-i4-comparison.html。
-待协调者决定I8共骨架重构或I4例外；提案build/g2/subtasks/06a2-art3-semantic-parts.md。
+tech5b已改动画帧流式装载（64e52d15b）：DDR保存I8帧，TEX_LOAD+LRU缓存。
+固定48KiB/场景64KiB/缓存约80KiB、装载初值32KiB每帧待实测；旧整套常驻被取代。
 
 中文字体：0d8c859ec保存Fusion Pixel 12px原始BDF/OFL及上游许可，显式补U+2212减号。
 初次CPU子集690字形/22080B；当前工具按CSV与UI重生成，GPU界面缓存尚未接入。
@@ -73,11 +74,11 @@ CPU字体预览outputs/ember_isles/font-cpu-preview.png，不算中文HUD完成�
 音乐候选4首Eric Skiff（原页CC BY4.0），音效候选11个Kenney官方仓库OGG（CC0）。
 原始来源/许可/文件已保存build/g2/audio-research/，未试听验收或链接进游戏。
 30秒试听outputs/ember_isles/audio-candidates/candidate-{1,2,3,4}.wav及CREDITS.txt。
-07音频任务已备好，等待协调者代派；最终授权与字体统一汇入assets/CREDITS.md。
+07音频已派ctx_32765a00cf5b，与E4b并行；最终授权与字体统一汇入assets/CREDITS.md。
 
 E3截图及视频outputs/ember_isles/e3/；E4四图outputs/ember_isles/e4/frame*.png。
 E4 content-30s.mp4：实际GPU路径，640×360、15fps、450帧、30秒，3864621B，无音轨。
 E3/E4视频均沿用旧占位美术/HUD，不是ART3质量通过；各关实体/粒子峰值尚未测全。
 tech7自评：稳定帧率、量产美术/完整动作/VFX、中文图标界面、规模及声音均未达最终验收。
 outputs/ember_isles/ember_isles.exe仍为此前E3优化版；最终两模式三关Windows发行版尚未生成。
-下一步：答复E4玩法、派07、决定容量工艺，再完成06b实际海岸、05模式及06c其余素材。
+当前两员工E4b/07；06a-2待E4b结束再占第二槽，之后06b实际海岸、05模式及06c其余素材。
