@@ -1,0 +1,58 @@
+ART-2 sample production replay (built-in imagegen; no API fallback)
+
+Source of truth: GDD v2.0 sections 3.3, 5, 5a, 5c.1, 5e; tech v2.0 sections 5, 7.
+The dispatched ART-2 task explicitly authorizes direct pixel-style imagegen generation.
+The coordinator accepted skin using two shades and faces using one/two eye pixels.
+
+01-keeper-concept.txt -> 01-keeper-concept.png: initial character concept, NOT native art.
+02-keeper-grid-edit.txt + reference 01 -> 02-keeper-grid-edit.png: approved identity.
+03-keeper-native.png + 03-palette.txt: rejected bounding-box scaling trial, NOT consumed.
+04-keeper-animation.txt + reference 02 -> 04-keeper-animation-input.png.
+05-enemies.txt -> 05-enemies-opaque-input.png: backdrop was incorrectly opaque.
+05-enemies-alpha.txt + reference opaque input -> 05-enemies-input.png: alpha extraction.
+06-terrain.txt -> 06-terrain-striped-input.png: rejected dark borders / sand stripes.
+06-terrain-edit.txt + reference striped input -> 06-terrain-input.png: quiet sand.
+07-props.txt -> 07-props-input.png: six props, separate staff, shadow study.
+08-effects.txt -> 08-effects-input.png: VFX/shadows/four numeral tiers, black matte for ADD.
+09-directions.txt + reference 02 -> 09-directions-oversize-input.png: front/back walk trial.
+09-directions-edit.txt + reference oversize -> 09-directions-input.png: smaller grid redraw.
+10-upgrade.txt -> 10-upgrade-before-text-edit.png: three real item cards.
+10-upgrade-edit.txt + reference before-text -> 10-upgrade-input.png: correct staff name.
+
+Run from repository root:
+  python3 sw/apps/ember_isles/tools/art/reproduce_sample.py
+  python3 sw/apps/ember_isles/tools/art/verify_sample.py
+
+Generation is performed with the built-in imagegen tool, one call per recorded prompt.
+For edits, use the recorded reference PNG, inspect it, and request identity preservation.
+New imagegen runs are nondeterministic; the saved PNG inputs make normalization replayable.
+The script does not call an external image service or depend on an API key.
+
+normalize_atlases.py detects source cluster-edge projections near the logical grid,
+samples each square center (no interpolation or individual silhouette rescaling),
+removes isolated alpha specks, repairs bright exposed outer edges with navy,
+and quantizes to a per-sheet RGB565/A4 palette (48/64/192 entries, all <=256).
+Hero sheet logical grid 288x144, front/back 288x96, cells48x48.
+Enemy grid320x256, cells64x64; terrain448x192, cells64x64.
+Props192x128, cells48x64; effects256x128, cells32x32; upgrade640x360.
+Source cluster sizes are approximate because imagegen does not emit exact logical PNGs.
+Recorded grid-measurements.json reports source dimensions, inferred pitch and output grid.
+No high-resolution painted illustration is used as a source for the character animation.
+
+Manual pixel review correction: clear rectangle x230..239,y108..123 of keeper sheet,
+removing the AI-baked release orb while preserving the outstretched hand at x228.
+This correction is replayed verbatim by normalize_atlases.py; no character is code-drawn.
+The lantern remains decorative on the belt; the actual staff is always a separate layer.
+hand-anchors.json records feet, per-frame hands and staff grip; left uses x'=47-x.
+The eight-direction fireball preview rotates the AI fireball with nearest-pixel sampling.
+The radial 128-square mask uses sixteen A4 transparency steps, encoded as GPU I4.
+
+texture_sample.py trims transparent margins and packs power-of-two pages <=256 square.
+GPU swizzle is imported directly from tools/gpu/model/layout.py, no alternate layout.
+I8/I4 .bin, .pal and packed PNG previews go only to build/ember_isles/art_sample/.
+texture-measurements.json records exact packed sample bytes and explicit level estimates.
+Palette banks occupy separate GPU palette RAM; texture limits apply only to texture bytes.
+compose_sample.py writes 640x360, exact2x1280x720, 40-frame/10fps APNG and embedded HTML.
+The upgraded UI bitmap is a separate review screen, not co-resident with combat textures.
+The HTML embeds /tmp/refcmp/ref_35.png for comparison only; reference imagery is not tracked.
+No game source, GDD, tech, hardware specification or platform implementation is modified.

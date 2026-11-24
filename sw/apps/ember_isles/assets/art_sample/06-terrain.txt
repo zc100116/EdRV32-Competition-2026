@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: coast environment tiles atlas, original LOW RESOLUTION pixel art. Exactly SEVEN equal columns and THREE rows, edge-to-edge square tiles. Logical canvas 224x96 pixels, each tile 32x32 logical pixels, enlarged with nearest neighbor to display. Uniform square pixel grid, crisp clusters, 1-pixel dark outlines where appropriate. NO gaps, NO labels, NO decorative border.
+Columns, left to right:
+1 warm pale golden beach sand, broad irregular dune shapes and sparse tiny shells.
+2 peach wet sand with small reflective water pools.
+3 blue gray solid reef rock floor, irregular large broken stone plates.
+4 shallow turquoise water with scalloped foam shoreline, transitions to sand toward right.
+5 driftwood pier planks seen topdown, brass nail heads, uneven warm wooden grain.
+6 ancient pale stone wall TOP surfaces, bevels and cracks, distinct topdown blocks.
+7 same wall FRONT vertical facade, depth shadows, weathered seams and moss.
+Rows are THREE VARIANTS of each column: plain, cracks/shells, pools/salt/moss. Make variants structurally distinct. Ground textures quiet and clustered, never noisy or repeating stripes.
+Every material uses at least 3 shades plus highlights. Coastal bright vivid optimistic teal/turquoise/coral/gold, daylight, original game artwork, limited 64 color palette. True pixel art, not pixel-filtered illustration, no gradients, no antialiasing, no blur. Entire atlas opaque.

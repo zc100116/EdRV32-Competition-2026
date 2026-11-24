@@ -1,0 +1,128 @@
+[
+  {
+    "sheet": "04-keeper-animation",
+    "input": [
+      1774,
+      887
+    ],
+    "grid": [
+      288,
+      144
+    ],
+    "source_square_pitch": [
+      6.159722222222222,
+      6.159722222222222
+    ],
+    "grid_center_method": "cluster-edge projection, search +/- 1/5 nominal pitch",
+    "palette_entries": 48,
+    "format": "RGB565+A4 [19:0]"
+  },
+  {
+    "sheet": "05-enemies",
+    "input": [
+      1402,
+      1122
+    ],
+    "grid": [
+      320,
+      256
+    ],
+    "source_square_pitch": [
+      4.38125,
+      4.3828125
+    ],
+    "grid_center_method": "cluster-edge projection, search +/- 1/5 nominal pitch",
+    "palette_entries": 64,
+    "format": "RGB565+A4 [19:0]"
+  },
+  {
+    "sheet": "06-terrain",
+    "input": [
+      1855,
+      848
+    ],
+    "grid": [
+      448,
+      192
+    ],
+    "source_square_pitch": [
+      4.140625,
+      4.416666666666667
+    ],
+    "grid_center_method": "cluster-edge projection, search +/- 1/5 nominal pitch",
+    "palette_entries": 64,
+    "format": "RGB565+A4 [19:0]"
+  },
+  {
+    "sheet": "07-props",
+    "input": [
+      1536,
+      1024
+    ],
+    "grid": [
+      192,
+      128
+    ],
+    "source_square_pitch": [
+      8.0,
+      8.0
+    ],
+    "grid_center_method": "cluster-edge projection, search +/- 1/5 nominal pitch",
+    "palette_entries": 64,
+    "format": "RGB565+A4 [19:0]"
+  },
+  {
+    "sheet": "08-effects",
+    "input": [
+      1774,
+      887
+    ],
+    "grid": [
+      256,
+      128
+    ],
+    "source_square_pitch": [
+      6.9296875,
+      6.9296875
+    ],
+    "grid_center_method": "cluster-edge projection, search +/- 1/5 nominal pitch",
+    "palette_entries": 48,
+    "format": "RGB565+A4 [19:0]"
+  },
+  {
+    "sheet": "09-directions",
+    "input": [
+      2172,
+      724
+    ],
+    "grid": [
+      288,
+      96
+    ],
+    "source_square_pitch": [
+      7.541666666666667,
+      7.541666666666667
+    ],
+    "grid_center_method": "cluster-edge projection, search +/- 1/5 nominal pitch",
+    "palette_entries": 48,
+    "format": "RGB565+A4 [19:0]"
+  },
+  {
+    "sheet": "10-upgrade",
+    "input": [
+      1672,
+      941
+    ],
+    "grid": [
+      640,
+      360
+    ],
+    "source_square_pitch": [
+      2.6125,
+      2.613888888888889
+    ],
+    "grid_center_method": "cluster-edge projection, search +/- 1/5 nominal pitch",
+    "palette_entries": 192,
+    "format": "RGB565+A4 [19:0]"
+  }
+]
