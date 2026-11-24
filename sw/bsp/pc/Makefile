@@ -44,7 +44,7 @@ test: $(OUT)/soc_test $(OUT)/platform_input_test
 	$(OUT)/platform_input_test
 $(OUT)/platform_input_test: $(addprefix $(ROOT)/,sw/bsp/pc/soc.c sw/lib/plat/pc.c \
     sw/lib/virtual_input.c tools/gpu/emu/gpu_emu.c tools/gpu/emu/pc/platform_input_test.c \
-    sw/drivers/plic.c) $(HEADERS)
+    sw/drivers/plic.c) $(ROOT)/sw/lib/virtual_input.h $(HEADERS)
 	mkdir -p $(OUT)
 	$(CC) -pthread $(PCFLAGS) $(filter %.c,$^) -o $@
 $(OUT)/soc_test: $(addprefix $(ROOT)/,sw/bsp/pc/soc.c tools/gpu/emu/gpu_emu.c \

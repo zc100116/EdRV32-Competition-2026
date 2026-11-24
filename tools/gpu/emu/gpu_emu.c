@@ -308,9 +308,18 @@ static void prepare_texture(struct gpu_emu *e, int group)
     int base = 0;
     for (int l = 0; l < e->texture.levels; ++l) {
         e->texel_base[l] = base;
-        for (int y = 0; y < e->mip_height[l]; ++y)
-            for (int x = 0; x < e->mip_width[l]; ++x)
-                e->texels[base++] = raw_texel(e,x,y,l,group);
+        if (group < 0 && e->texture.format < 2) {
+            /* Quad indices use one byte per texel, keeping an I8 atlas in
+             * 64 KiB instead of the expanded RGBA cache's 1 MiB. */
+            uint8_t *indices = (uint8_t *)e->texels;
+            for (int y = 0; y < e->mip_height[l]; ++y)
+                for (int x = 0; x < e->mip_width[l]; ++x)
+                    indices[base++] = (uint8_t)raw_texel(e,x,y,l,group).c[0];
+        } else {
+            for (int y = 0; y < e->mip_height[l]; ++y)
+                for (int x = 0; x < e->mip_width[l]; ++x)
+                    e->texels[base++] = raw_texel(e,x,y,l,group);
+        }
     }
     e->texel_group = group;
     e->texel_dirty = 0;
@@ -326,7 +335,10 @@ static struct rgba texel(struct gpu_emu *e, int64_t u, int64_t v, int level, int
 {
     (void)group;
     int w = e->mip_width[level], h = e->mip_height[level];
-    return e->texels[e->texel_base[level]+(v & (h-1))*w+(u & (w-1))];
+    int index = e->texel_base[level]+(v & (h-1))*w+(u & (w-1));
+    if (e->texel_group < 0 && e->texture.format < 2)
+        return (struct rgba){{((uint8_t *)e->texels)[index],0,0,0}};
+    return e->texels[index];
 }
 static struct rgba bilinear(struct gpu_emu *e, int64_t u, int64_t v, int l, int g)
 {
@@ -386,10 +398,11 @@ static void quad(struct gpu_emu *e, struct quad q)
             const uint32_t *palette = e->palette_quads[q.pal_group];
             for (int y = y0; y < y1; ++y) {
                 int v = q.v0+(q.flip_v ? q.h-1-(y-q.y) : y-q.y);
-                const struct rgba *row = e->texels+e->texel_base[0]+(v & (h-1))*w;
+                const uint8_t *row = (const uint8_t *)e->texels +
+                    e->texel_base[0]+(v & (h-1))*w;
                 uint16_t *out = e->color+address(e,x0,y);
                 for (int x = x0, u = u0; x < x1; ++x, u += du, ++out) {
-                    uint32_t color = palette[row[u & (w-1)].c[0]];
+                    uint32_t color = palette[row[u & (w-1)]];
                     if (!(color >> 16)) continue;
                     int alpha = d((int)(color >> 16)*q.alpha);
                     if (state->bl_fs == 1 || alpha == 255) *out = (uint16_t)color;
