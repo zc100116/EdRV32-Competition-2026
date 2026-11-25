@@ -49,6 +49,7 @@ struct ember_shot {
     uint16_t life, radius, tick, trigger_radius, delay;
     uint8_t alive, kind, hostile, pierce;
     uint8_t weapon, follow, pet, enemy_kind, room;
+    uint8_t presentation_evolution; /* Weapon branch frozen on emission; gfx only. */
     int16_t last_hit;
     ember_fixed origin_x, origin_y;
 };

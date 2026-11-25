@@ -1262,6 +1262,7 @@ static void weapon_fire_once(struct ember_sim *s, unsigned w, unsigned repeat)
                     p->damage = damage;
                     p->radius = (uint16_t)radius;
                     p->follow = player->evolution[w] != 2;
+                    p->presentation_evolution = player->evolution[w];
                     return;
                 }
             }
@@ -1274,6 +1275,7 @@ static void weapon_fire_once(struct ember_sim *s, unsigned w, unsigned repeat)
                 category == EMBER_CODEX ? radius : d->projectile_radius,
                 d->duration * s->attributes[EMBER_DURATION] / 100);
             p->weapon = (uint8_t)w;
+            p->presentation_evolution = player->evolution[w];
             p->repeat_slot = (uint8_t)repeat;
             if (category == EMBER_CROSSBOW && player->evolution[w] != 1)
                 p->delay = (uint16_t)(n * d->burst_interval);
@@ -1313,6 +1315,7 @@ static void weapon_fire_once(struct ember_sim *s, unsigned w, unsigned repeat)
     if (category == EMBER_SPEAR && player->evolution[w] == 1) {
         struct ember_shot *blade = shot(s, 0, player->x, player->y, damage, d->evo_projectile_radius, d->evo_a_duration);
         blade->weapon = (uint8_t)w;
+        blade->presentation_evolution = player->evolution[w];
         blade->pierce = (uint8_t)d->evo_a_pierce;
         blade->speed = d->evo_a_speed;
         velocity(dx, dy, d->evo_a_speed, &blade->vx, &blade->vy);
