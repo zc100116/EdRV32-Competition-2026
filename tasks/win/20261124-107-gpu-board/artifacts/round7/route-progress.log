@@ -1,0 +1,71 @@
+Card 107 round 7 | upstream 1ff65121 | local run 574b1e39
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | snapshot 2026-11-25 21:00:47 +08:00
+
+Snapshot of live place_route/run.log. Last log write 2026-11-25 20:58:56 +08:00.
+Latest completed general routing iteration at capture: 12. Route final time and congestion map are pending.
+MT total route time is the per-iteration field printed by PDS.
+
+Placement and before-route timing checkpoints
+9422: C: Place-2039: The placement site of clk_i_ibuf/opit_1 and u_pll_sys/u_gpll/gpll_inst is incompatible.
+9438: 1st GP placement takes 45.67 sec.
+9456: Clock placement takes 3.02 sec.
+9459: Pre global placement takes 49.88 sec.
+9610: Fixed placement takes 22.94 sec.
+9618: Process placement takes 0.00 sec.
+9621: IO placement takes 0.61 sec.
+9635: Worst slack after global placement is -15329
+9636: 2nd GP placement takes 159.08 sec.
+9639: Global placement takes 190.62 sec.
+9645: Macro cell placement takes 38.55 sec.
+9652: Worst slack after post global placement is -15866
+9653: 3rd GP placement takes 8.38 sec.
+9659: Post global placement takes 54.95 sec.
+9668: Worst slack before Replication Place is -15974.
+9669: Replication placement takes 9.86 sec.
+9673: Worst slack before detailed placement is -15761, TNS before detailed placement is -252465736.
+9704: Worst slack after detailed placement is -13422, TNS after detailed placement is -248456935.
+9705: Swapping placement takes 4.39 sec.
+9839: Timing-driven detailed placement takes 14.38 sec.
+9841: Worst slack is -13441, TNS after placement is -248449007.
+9842: Placement done.
+9843: Total placement takes 327.86 sec.
+9844: Finished placement.
+9857: Worst slack is -13441, TNS before route is -248449007.
+
+Routing from its start through the captured end of the log
+9846: Routing started.
+9847: Build routing arch for double attribute device.
+9848: Enter timing driven router mode.
+9849: Route thread size: 5
+9850: Building routing graph takes 12.39 sec.
+9851: Init coarse delay table.
+9852: Read place coarse delay table takes 0.41 sec.
+9853: Build SRB system takes 0.45 sec.
+9854: Setup STE netlist take 15737 msec.
+9855: Dispose control chain take 3329 msec.
+9856: Collect const net info take 1744 msec.
+9857: Worst slack is -13441, TNS before route is -248449007.
+9858: Total nets for routing: 220097.
+9859: Total loads for routing: 947313.
+9860: Direct connect net size: 10685
+9861: Build all design net take 13588 msec.
+9862: Processing design graph takes 34.45 sec.
+9863: Delay table total memory: 72.78639603 MB
+9864: Route graph total memory: 430.19445515 MB
+9865: Route design total memory: 261.09376526 MB
+9866: Global routing takes 0.00 sec.
+9867: Total 220095 subnets.
+9868: Unrouted clock nets at iteration 0 (0.861 sec): 12
+9869: Unrouted clock nets at iteration 1 (0.736 sec): 5
+9870: Unrouted clock nets at iteration 2 (0.486 sec): 4
+9871: Unrouted clock nets at iteration 3 (0.174 sec): 2
+9872: Unrouted clock nets at iteration 4 (0.101 sec): 0
+9873: Total route nets size: 220055
+9874: Pre route takes 98.673 sec
+9875: Unrouted general nets at iteration 6 (MT total route time: 32.741 sec): 196009(overused: 1492533)
+9876: Unrouted general nets at iteration 7 (MT total route time: 45.550 sec): 184204(overused: 1289628)
+9877: Unrouted general nets at iteration 8 (MT total route time: 95.329 sec): 173990(overused: 1106242)
+9878: Unrouted general nets at iteration 9 (MT total route time: 240.252 sec): 164899(overused: 975239)
+9879: Unrouted general nets at iteration 10 (MT total route time: 314.284 sec): 158071(overused: 886395)
+9880: Unrouted general nets at iteration 11 (MT total route time: 794.134 sec): 133321(overused: 783027)
+9881: Unrouted general nets at iteration 12 (MT total route time: 1311.289 sec): 120352(overused: 682056)

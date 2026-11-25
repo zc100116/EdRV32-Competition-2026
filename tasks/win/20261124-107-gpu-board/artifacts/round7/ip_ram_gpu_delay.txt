@@ -1,0 +1,61 @@
+Card 107 round 7 | upstream 1ff65121 | local run 574b1e39
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | snapshot 2026-11-25 21:00:47 +08:00
+
+Source: IP Compiler generate.log and generated IDF. The generated Verilog port names match the IDF and task wrapper.
+IP Generator (Version 2022.2-SP6.1 build 138931)
+Check out license ...
+Start generating at 2026-11-25 19:25
+Instance: ip_ram_gpu_delay (G:\codex_project\EdRV32-FPGA\board_gpu\ipcore\ip_ram_gpu_delay\ip_ram_gpu_delay.idf)
+IP: Pango DRM Based Simple Dual Port RAM (1.10)
+Part: Logos2-PG2L200H-FBB676--6
+Create directory 'rtl' ...
+Copy 'rtl\ipm2l_sdpram_v1_10.v.xml' to 'rtl' ...
+Compile file 'rtl\ipm2l_sdpram_v1_10.v.xml' to 'rtl\ipm2l_sdpram_v1_10_ip_ram_gpu_delay.v' ...
+Copy 'ipm2l_sdpram_wrapper_v1_10.v.xml' ...
+Compile file 'ipm2l_sdpram_wrapper_v1_10.v.xml' to 'ip_ram_gpu_delay.v' ...
+Found top module 'ip_ram_gpu_delay' in file 'ip_ram_gpu_delay.v'.
+Copy 'ipm2l_sdpram_wrapper_v1_0_tb.v.xml' ...
+Compile file 'ipm2l_sdpram_wrapper_v1_0_tb.v.xml' to 'ip_ram_gpu_delay_tb.v' ...
+Copy 'init_param_bin_exmp.dat' ...
+Copy 'init_param_hex_exmp.dat' ...
+Run file 'createParam.tcl' ...
+Run file 'creatResetValue.tcl' ...
+Create template file 'ip_ram_gpu_delay_tmpl.v' ...
+Create template file 'ip_ram_gpu_delay_tmpl.vhdl' ...
+There are 2 source files to synthesize.
+Synthesis is disabled.
+Done: 0 error(s), 0 warning(s)
+
+Saved configuration
+CAS_MODE: 36K
+WR_ADDR_WIDTH: 9
+WR_DATA_WIDTH: 72
+RD_ADDR_WIDTH: 9
+RD_DATA_WIDTH: 72
+WR_BYTE_EN: false
+RD_CLK_EN: true
+OUTPUT_REG: false
+FAB_REG: false
+INIT_EN: false
+INIT_FILE: NONE
+
+Ports (direction, width)
+wr_data: input, 72
+wr_addr: input, 9
+wr_en: input, 1
+wr_clk: input, 1
+wr_rst: input, 1
+rd_addr: input, 9
+rd_data: output, 72
+rd_clk: input, 1
+rd_clk_en: input, 1
+rd_rst: input, 1
+
+Synthesis hierarchy: each U_ipm2l_sdpram_ip_ram_gpu_delay row accounts for 1 DRM36K.
+u_geometry: 4
+u_object: 1
+u_perspective: 39
+u_raster: 3
+u_setup: 2
+u_texture: 2
+Total: 51 DRM36K for this IP in the synthesized design.

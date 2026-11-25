@@ -1,0 +1,36 @@
+Card 107 round 7 | upstream 1ff65121 | local run 574b1e39
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | snapshot 2026-11-25 21:00:47 +08:00
+
+Source: pds.log and stage logs, original line numbers.
+35: I: Flow-6003: IP "ip_ram_gpu_delay.idf" regenerate successfully.
+40: Process "Compile" started.
+16778: Action compile: Real time elapsed is 0h:2m:22s
+16779: Action compile: CPU time elapsed is 0h:0m:4s
+16780: Action compile: Process CPU time elapsed is 0h:0m:4s
+16782: Action compile: Peak memory pool usage is 788 MB
+16786: Process "Compile" done.
+16789: Process "Synthesize" started.
+41338: Action synthesize: Real time elapsed is 0h:14m:4s
+41339: Action synthesize: CPU time elapsed is 0h:1m:21s
+41340: Action synthesize: Process CPU time elapsed is 0h:1m:25s
+41342: Action synthesize: Peak memory pool usage is 3,472 MB
+41346: Process "Synthesize" done.
+41349: Process "Device Map" started.
+44938: Action dev_map: Real time elapsed is 0h:2m:57s
+44939: Action dev_map: CPU time elapsed is 0h:0m:17s
+44940: Action dev_map: Process CPU time elapsed is 0h:0m:19s
+44942: Action dev_map: Peak memory pool usage is 2,974 MB
+44946: Process "Device Map" done.
+44949: Process "Place & Route" started.
+
+compile/run.log, all E: lines:
+(none at snapshot)
+
+synthesize/run.log, all E: lines:
+(none at snapshot)
+
+device_map/run.log, all E: lines:
+(none at snapshot)
+
+place_route/run.log, all E: lines:
+(none at snapshot)
