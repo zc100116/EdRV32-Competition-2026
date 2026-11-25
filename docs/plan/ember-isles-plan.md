@@ -2,8 +2,9 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v1.1 |
+| 版本 | v1.1（已归档） |
 | 日期 | 2026-11-25 |
+| 状态 | **已归档（用户 2026-11-25）**：游戏改在独立仓库重新开发，本仓库停止。代码见 tag `archive/ember-isles-20261125`（73cb14ee2）；进度、资产和试玩反馈见 `outputs/ember_isles-archive-20261125/README.md`（不入库） |
 | 依据 | `sw/apps/ember_isles/docs/gdd.md` v2.0、`tech.md` v2.0 |
 
 ## 1. 目标和完成标准
