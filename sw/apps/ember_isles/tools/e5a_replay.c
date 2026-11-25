@@ -310,6 +310,7 @@ int main(int argc, char **argv)
         replay.seed = 20261125;
         ember_run_config_default(&replay.config);
         replay.config.mode = (uint8_t)strtoul(argv[2], NULL, 10);
+        if (replay.config.mode == EMBER_ARENA) replay.config.sub_weapon = 2;
         replay.count = EMBER_REPLAY_FRAMES;
     } else if (argc == 2) { path = argv[1]; ember_replay_load(&replay, path); }
     else { fputs("e5a-replay --generate mode path | replay-path\n", stderr); return 1; }
@@ -340,10 +341,13 @@ int main(int argc, char **argv)
     }
     if (generate) ember_replay_save(&replay, path);
     end_record();
-    if (simulation.phase != EMBER_WON || simulation.config.stage != 2 ||
-        simulation.wave != 30 || simulation.alive_count || simulation.queued_spawns ||
-        simulation.bosses_defeated != ((1u << 18) | (1u << 19) | (1u << 20))) {
-        fputs("Replay did not win all three stages through normal input\n", stderr);
+    unsigned stages = (unsigned)ember_modes[replay.config.mode].stages;
+    unsigned bosses = 0;
+    for (unsigned stage = 0; stage < stages; ++stage) bosses |= 1u << (18 + stage);
+    if (simulation.phase != EMBER_WON || simulation.config.stage + 1u != stages ||
+        simulation.wave != stages * 10 || simulation.alive_count || simulation.queued_spawns ||
+        simulation.bosses_defeated != bosses) {
+        fputs("Replay did not clear its complete mode through normal input\n", stderr);
         return 1;
     }
     return 0;

@@ -97,7 +97,7 @@ static void meta_test(void)
 }
 static void inventory_test(void)
 {
-    setup(EMBER_ARENA);
+    setup(EMBER_ROUTE);
     fixture.player.sub_weapon = 1; fixture.player.weapon_level[1] = 1;
     fixture.player.weapon_level[0] = 5; fixture.player.evolution[0] = 2;
     fixture.player.inscription[0][0] = 2; fixture.player.inscription[0][1] = 7;
@@ -143,7 +143,7 @@ static void inventory_test(void)
     item_receive(&fixture, (struct ember_choice){EMBER_ITEM_WEAPON, 3, 255});
     panel_step(&fixture, EMBER_INTERACT);
     assert(fixture.player.main_weapon == 0 && !fixture.player.weapon_level[3]);
-    setup(EMBER_ARENA);
+    setup(EMBER_ROUTE);
     ember_sim_pet(&fixture, 0, 255);
     fixture.events.count = 0;
     fixture.choices[0] = (struct ember_choice){EMBER_ITEM_PET_WEAPON, 0, 255};
@@ -160,7 +160,7 @@ static void inventory_test(void)
 }
 static void economy_test(void)
 {
-    setup(EMBER_ARENA);
+    setup(EMBER_ROUTE);
     drop_resource(&fixture, EMBER_DROP_XP, 0, 0, 7, 0, 0);
     drop_resource(&fixture, EMBER_DROP_XP, 0, 0, 11, 0, 0);
     drop_resource(&fixture, EMBER_DROP_GOLD, 0, 0, 9, 0, 0);
@@ -275,7 +275,7 @@ static void modes_test(void)
     fixture.wave_scheduled[9] = (uint16_t)ember_waves[9].count;
     arena_milestones(&fixture);
     modes_cleared(&fixture);
-    assert(fixture.stage_clear && fixture.shop_available);
+    assert(fixture.stage_clear && !fixture.shop_available);
     unsigned clock = fixture.stage_frame;
     fixture.combat_frame = 60;
     fixture.player.hp -= 100;
@@ -285,9 +285,10 @@ static void modes_test(void)
     ember_sim_step(&fixture, EMBER_RIGHT);
     assert(fixture.stage_frame == clock);
     fixture.player.x = fixture.exit.x; fixture.player.y = fixture.exit.y;
-    assert(modes_interact(&fixture) && fixture.config.stage == 1 && fixture.wave == 11);
+    assert(modes_interact(&fixture) && fixture.phase == EMBER_WON &&
+        fixture.config.stage == 0 && fixture.wave == 10);
     puts("PASS modes: branch adds 1-2 islands, forward return, lighthouse/bridges,");
-    puts("  all three clues, hidden reward/one visit, boss rest and real stage transition");
+    puts("  all three clues, hidden reward/one visit, boss rest and real coast exit");
 }
 static void terrain_and_species_test(void)
 {
@@ -313,7 +314,7 @@ static void terrain_and_species_test(void)
                 fixture.enemies[e].defense.status[EMBER_BLIND].frames);
         }
     }
-    setup(EMBER_ARENA);
+    setup(EMBER_ROUTE);
     ember_sim_spawn(&fixture, 0, 0, 0, 0);
     unsigned charger = ember_sim_spawn(&fixture, 1, 0, 0, 0);
     ember_sim_spawn(&fixture, 2, 0, 0, 0);

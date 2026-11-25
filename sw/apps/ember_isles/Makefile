@@ -142,3 +142,7 @@ $(OUT)/e4-content-test: $(APP)/tools/e4_content_test.c $(APP)/src/sim/sim.c \
     $(APP)/src/sim/combat.c $(APP)/src/core/core.c $(OUT)/generated/data.h $(HEADERS)
 	$(CC) $(CFLAGS) $(APP)/tools/e4_content_test.c $(APP)/src/sim/combat.c \
 	    $(APP)/src/core/core.c -o $@
+$(OUT)/e5a-coast-test: $(APP)/tools/e5a_coast_test.c $(APP)/src/sim/sim.c \
+    $(APP)/src/sim/combat.c $(APP)/src/core/core.c $(OUT)/generated/data.h $(HEADERS)
+	$(CC) $(CFLAGS) $(APP)/tools/e5a_coast_test.c $(APP)/src/sim/combat.c \
+	    $(APP)/src/core/core.c -o $@

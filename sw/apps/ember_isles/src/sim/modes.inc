@@ -71,7 +71,8 @@ static void modes_init(struct ember_sim *s)
     s->altars_available = s->shop_available = s->altar_generated = 0;
     s->shop_refreshes = 0;
     s->altars_used = 0;
-    s->rifts_count = (uint8_t)(1 + ember_random(&s->map_rng) % 2);
+    s->rifts_count = (uint8_t)(m->rifts_min + ember_random(&s->map_rng) %
+        (unsigned)(m->rifts_max - m->rifts_min + 1));
     s->rifts_available = s->rifts_count;
     s->rifts_used = 0;
     for (unsigned i = 0; i < s->rifts_count; ++i) {
@@ -157,7 +158,8 @@ static void arena_milestones(struct ember_sim *s)
         s->wave_finished[i] = 1;
         pickups_step(s, 1);
         if (i % 10 == 2 || i % 10 == 6) ++s->altars_available;
-        if (i % 10 == 4 || (i % 10 == 9 && s->config.stage < 2)) {
+        if (i % 10 == 4 || (i % 10 == 9 && (unsigned)s->config.stage + 1 <
+            (unsigned)ember_modes[s->config.mode].stages)) {
             s->shop_available = 1;
             shop_stock(s);
         }
@@ -185,7 +187,8 @@ static void modes_cleared(struct ember_sim *s)
         if (local != 9) { s->rest = (unsigned)ember_waves[s->wave - 1].rest_frames; return; }
     }
     s->stage_clear = 1;
-    if (s->config.stage == 2) s->shop_available = 0;
+    if ((unsigned)s->config.stage + 1 == (unsigned)ember_modes[s->config.mode].stages)
+        s->shop_available = 0;
     pickups_step(s, 2);
     s->rest = 0;
 }
@@ -212,7 +215,7 @@ static void room_enter(struct ember_sim *s)
 }
 static void stage_exit(struct ember_sim *s)
 {
-    if (s->config.stage == 2) {
+    if ((unsigned)s->config.stage + 1 == (unsigned)ember_modes[s->config.mode].stages) {
         s->phase = EMBER_WON;
         event(s, EMBER_EVENT_VICTORY, s->config.mode, s->player.x, s->player.y);
         return;

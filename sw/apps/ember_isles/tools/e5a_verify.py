@@ -52,23 +52,24 @@ def measurements(name):
 
 def main():
     tests = ['e5a-grid-test', 'e5a-upgrade-test', 'e5a-content-test', 'e4-content-test',
-             'e5a-replay', 'e5a-stress']
-    run(make('all', 'test', *(OUT / name for name in tests)), 'e5a-build-tests.log')
-    for name in tests[:4]:
+             'e5a-coast-test', 'e5a-replay', 'e5a-stress']
+    run(make('all', 'test', *(OUT / name for name in tests)), 'e5a-v1-build-tests.log')
+    for name in tests[:5]:
         run([OUT / name], f'{name}.log')
-    # Leave the final generated header and ordinary Spike executable on arena.
-    for name in ['route', 'arena']:
+    # The first-version menu exposes only the coast arena.
+    for name in ['coast']:
         replay = APP / f'assets/replays/{name}.txt'
         run([OUT / 'e5a-replay', replay], f'e5a-{name}-pc.log')
         run(['python3', APP / 'tools/replay_convert.py', replay], f'e5a-{name}-convert.log')
         run(make('spike'), f'e5a-{name}-build.log')
         run([*SPIKE, OUT / 'ember_isles-spike.elf'], f'e5a-{name}-spike.log')
         measurements(name)
-    run(['python3', APP / 'tools/e5a_profile.py'], 'e5a-profile-measure.txt')
-    run(make(OUT / 'ember_isles-stress-spike.elf'), 'e5a-stress-build.log')
-    run([OUT / 'e5a-stress'], 'e5a-stress-pc.log')
-    run([*SPIKE, OUT / 'ember_isles-stress-spike.elf'], 'e5a-stress-spike.log')
-    measurements('stress')
+    run(['python3', APP / 'tools/e5a_profile.py'], 'e5a-v1-profile-measure.txt')
+    run(make(OUT / 'ember_isles-stress-spike.elf'), 'e5a-v1-stress-build.log')
+    run([OUT / 'e5a-stress'], 'e5a-coast-stress-pc.log')
+    run([*SPIKE, OUT / 'ember_isles-stress-spike.elf'], 'e5a-coast-stress-spike.log')
+    measurements('coast-stress')
+    run(make('all'), 'e5a-v1-four-final-build.log')
 
 
 if __name__ == '__main__':

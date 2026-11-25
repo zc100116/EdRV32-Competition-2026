@@ -160,11 +160,13 @@ int main(void)
     assert(fixture->player.sub_weapon == main);
     assert(ember_game_recording()->input[0] == EMBER_START);
     step(0);
+    fixture->config.mode = EMBER_ROUTE; fixture->room_lit = 1;
     fixture->stage_clear = 1;
     fixture->exit = (struct ember_point){fixture->player.x,fixture->player.y};
     step(EMBER_INTERACT);
     assert(fixture->config.stage == 1 && requested_stage == 1);
     step(0);
+    fixture->config.mode = EMBER_ROUTE; fixture->room_lit = 1;
     fixture->stage_clear = 1;
     fixture->exit = (struct ember_point){fixture->player.x,fixture->player.y};
     step(EMBER_INTERACT);

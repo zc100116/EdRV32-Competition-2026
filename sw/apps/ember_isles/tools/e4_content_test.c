@@ -11,6 +11,7 @@ static unsigned assertions;
 static void setup(void)
 {
     ember_sim_init(&fixture, 11);
+    fixture.config.mode = EMBER_ROUTE;
     fixture.phase = EMBER_PLAY;
     fixture.wave = 1;
     fixture.rest = 60000;

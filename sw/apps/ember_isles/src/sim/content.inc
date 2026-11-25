@@ -899,10 +899,11 @@ unsigned ember_sim_altar_choices(struct ember_sim *s, struct ember_altar_choice 
     unsigned score[23], count = 0;
     const char *elements[] = {"ember", "tide", "iron", "star", "shadow"};
     if (!s->guaranteed_resonance)
-        for (unsigned i = 0; i < EMBER_BLESSINGS_COUNT; ++i) if (!s->blessings[i]) {
+        for (unsigned i = 0; i < EMBER_BLESSINGS_COUNT; ++i)
+            if (!s->blessings[i] && item_allowed(s, EMBER_ITEM_BLESSING, i)) {
             pool[count] = (struct ember_altar_choice){0, (uint8_t)i}; score[count++] = 0;
         }
-    for (unsigned i = 0; i < 10; ++i) {
+    for (unsigned i = 0; i < 10 && s->config.mode == EMBER_ROUTE; ++i) {
         if (s->resonances[i]) continue;
         if (!s->guaranteed_resonance && !ember_sim_resonance_ready(s, i)) continue;
         pool[count] = (struct ember_altar_choice){1, (uint8_t)i};

@@ -2,6 +2,14 @@
  * Included by sim.c; all acquisition commits emit the frozen pickup/change events.
  * Clock domain: fixed 60 Hz input decisions; panel idle does not advance simulation.
  */
+static int item_allowed(const struct ember_sim *s, unsigned kind, unsigned id)
+{
+    if (s->config.mode == EMBER_ROUTE) return 1;
+    for (unsigned i = 0; i < EMBER_COAST_POOL_COUNT; ++i)
+        if ((unsigned)ember_coast_pool[i].kind == kind &&
+            (unsigned)ember_coast_pool[i].item_index == id) return 1;
+    return 0;
+}
 static int inventory_owned(const struct ember_sim *s, unsigned kind, unsigned id)
 {
     const struct ember_player *p = &s->player;
@@ -43,16 +51,19 @@ static unsigned item_pool(const struct ember_sim *s, struct ember_choice *pool,
     unsigned count = 0;
     if (!shop)
         for (unsigned w = 0; w < 50; ++w)
-            if (!inventory_owned(s, EMBER_ITEM_WEAPON, w) &&
+            if (item_allowed(s, EMBER_ITEM_WEAPON, w) &&
+                !inventory_owned(s, EMBER_ITEM_WEAPON, w) &&
                 (unsigned)ember_weapons[w].grade >= minimum_grade)
                 pool[count++] = (struct ember_choice){EMBER_ITEM_WEAPON, (uint8_t)w, 255};
     for (unsigned r = 0; r < 38; ++r)
-        if (!inventory_owned(s, EMBER_ITEM_RELIC, r) &&
+        if (item_allowed(s, EMBER_ITEM_RELIC, r) &&
+            !inventory_owned(s, EMBER_ITEM_RELIC, r) &&
             (unsigned)ember_relics[r].grade >= minimum_grade)
             pool[count++] = (struct ember_choice){EMBER_ITEM_RELIC, (uint8_t)r, 255};
     unsigned targets[3] = {s->player.main_weapon, s->player.sub_weapon,
         s->player.pet_weapon == 255 ? 255 : 50u + s->player.pet_weapon};
     for (unsigned i = 0; i < 18; ++i) {
+        if (!item_allowed(s, EMBER_ITEM_INSCRIPTION, i)) continue;
         if (inventory_owned(s, EMBER_ITEM_INSCRIPTION, i) ||
             (unsigned)ember_inscriptions[i].grade < minimum_grade) continue;
         for (unsigned t = 0; t < 3; ++t)

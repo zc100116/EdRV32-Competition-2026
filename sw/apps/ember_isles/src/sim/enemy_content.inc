@@ -129,7 +129,8 @@ static int content_enemy(struct ember_sim *s, unsigned index)
         e->defense.max_hp * (int64_t)ember_affixes[5].threshold_percent)
         interval = interval * 100 / (100 + ember_affixes[5].value);
     if (d->rank == 3 && e->ai_timer >= (uint32_t)d->enrage_frames) interval = interval * 100 / (100 + d->enrage_attack_more);
-    if (e->affix && d->pet_kind != 255 && e->hp * 100LL <= e->defense.max_hp * (int64_t)ember_system[0].elite_capture_percent)
+    if (s->config.mode == EMBER_ROUTE && e->affix && d->pet_kind != 255 &&
+        e->hp * 100LL <= e->defense.max_hp * (int64_t)ember_system[0].elite_capture_percent)
         e->capturable = 1;
     if (e->capturable) { e->vx = e->vy = 0; return 1; }
     if (e->kind < 3) return 0;
@@ -266,7 +267,7 @@ static void content_death(struct ember_sim *s, unsigned index, unsigned depth,
         unsigned choices[38], count = 0;
         for (unsigned n = 0; n < EMBER_RELICS_COUNT; ++n)
             if (!strcmp(ember_relics[n].rarity, "common") && !s->player.relic_level[n])
-                choices[count++] = n;
+                if (item_allowed(s, EMBER_ITEM_RELIC, n)) choices[count++] = n;
         if (count) drop_resource(s, EMBER_DROP_RELIC,
             choices[ember_random(&s->loot_rng) % count], 0, 0, e->x, e->y);
     }

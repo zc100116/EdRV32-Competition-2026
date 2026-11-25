@@ -35,7 +35,7 @@ void ember_replay_load(struct ember_replay *replay, const char *path)
                     (uint8_t)values[9], (uint8_t)values[10]}, .difficulty = (uint8_t)values[11]};
     const struct ember_run_config *c = &replay->config;
     /* GDD 3.3/5c/6: serialized catalog IDs, unique slots and per-row talent choices. */
-    if (c->mode > EMBER_ROUTE || c->stage >= EMBER_STAGES_COUNT ||
+    if (c->mode > EMBER_ROUTE || c->stage >= (unsigned)ember_modes[c->mode].stages ||
         c->character >= EMBER_CHARACTERS_COUNT || c->main_weapon >= EMBER_WEAPONS_COUNT ||
         (c->sub_weapon != 255 && (c->sub_weapon >= EMBER_WEAPONS_COUNT ||
             c->sub_weapon == c->main_weapon)) ||

@@ -39,4 +39,4 @@ def convert(path):
 
 
 if __name__ == '__main__':
-    convert(Path(sys.argv[1]) if len(sys.argv) > 1 else APP / 'assets/replays/arena.txt')
+    convert(Path(sys.argv[1]) if len(sys.argv) > 1 else APP / 'assets/replays/coast.txt')

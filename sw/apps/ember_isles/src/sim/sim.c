@@ -1,6 +1,6 @@
 /* File: sim.c
  * Spec: ember_isles gdd 2-5, tech 2-3; E3 systems on the E1/E2 content.
- * Description: Integer combat, tagged builds, bounded death triggers and five coast waves.
+ * Description: Integer combat, tagged builds, bounded death triggers and mode progression.
  * Clock domain: fixed 60 Hz simulation; no presentation or platform dependencies.
  */
 #include "sim.h"
@@ -38,6 +38,7 @@ static void content_before_hit(struct ember_sim *s, unsigned index,
 static void content_after_hit(struct ember_sim *s, unsigned index, unsigned weapon,
                               struct ember_damage_result r, unsigned depth);
 static int inventory_owned(const struct ember_sim *s, unsigned kind, unsigned id);
+static int item_allowed(const struct ember_sim *s, unsigned kind, unsigned id);
 static int rune_allowed(const struct ember_sim *s, unsigned id, unsigned target);
 static void panel_step(struct ember_sim *s, uint16_t pressed);
 static void modes_init(struct ember_sim *s);
@@ -1681,18 +1682,21 @@ static void upgrade_offer(struct ember_sim *s)
     for (unsigned i = 0; i < EMBER_WEAPONS_COUNT; ++i) weapons += !!s->player.weapon_level[i];
     for (unsigned i = 0; i < EMBER_RELICS_COUNT; ++i) relics += !!s->player.relic_level[i];
     for (unsigned i = 0; i < EMBER_WEAPONS_COUNT; ++i) {
+        if (!item_allowed(s, EMBER_ITEM_WEAPON, i)) continue;
         if (s->player.weapon_level[i] < ember_weapons[i].level_max &&
             (s->player.weapon_level[i] || (weapons < 2 &&
                 !inventory_owned(s, EMBER_ITEM_WEAPON, i))))
             eligible[count++] = (struct ember_choice){0, (uint8_t)i, 0};
     }
     for (unsigned i = 0; i < EMBER_RELICS_COUNT; ++i)
-        if (s->player.relic_level[i] < ember_relics[i].level_max &&
+        if (item_allowed(s, EMBER_ITEM_RELIC, i) &&
+            s->player.relic_level[i] < ember_relics[i].level_max &&
             (s->player.relic_level[i] || relics < 6))
             eligible[count++] = (struct ember_choice){1, (uint8_t)i, 0};
     for (unsigned w = 0; w < EMBER_WEAPONS_COUNT; ++w) {
         if (!s->player.weapon_level[w] || s->player.inscription[w][1]) continue;
         for (unsigned i = 0; i < EMBER_INSCRIPTIONS_COUNT; ++i) {
+            if (!item_allowed(s, EMBER_ITEM_INSCRIPTION, i)) continue;
             if (inventory_owned(s, EMBER_ITEM_INSCRIPTION, i)) continue;
             if (i == 10 && !charging_weapon(s, w)) continue;
             if ((i == 0 || i == 1 || i == 6 || i == 7 || i == 8) &&
@@ -1970,7 +1974,10 @@ void ember_sim_begin(struct ember_sim *s, uint32_t seed, const struct ember_run_
 void ember_sim_stress(struct ember_sim *s)
 {
     const struct ember_stress_row *c = &ember_stress[0];
-    ember_sim_init(s, (uint32_t)c->seed);
+    struct ember_run_config config;
+    ember_run_config_default(&config);
+    config.sub_weapon = 2;
+    ember_sim_begin(s, (uint32_t)c->seed, &config);
     s->phase = EMBER_PLAY;
     s->wave = 1;
     s->rest = (unsigned)c->frames + 1;

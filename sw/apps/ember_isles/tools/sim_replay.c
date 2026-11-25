@@ -4,6 +4,7 @@
  * Clock domain: fixed 60 Hz simulation.
  */
 #include "sim/sim.h"
+#include "data.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,8 +55,10 @@ static void run(const char *path)
             "levelup=%u choose=%u hurt=%u victory=%u\n",
             events[0], events[1], events[2], events[3], events[4], events[5],
             events[6], events[7], events[8], events[9]);
-    require(sim.phase == EMBER_WON && sim.wave == 30 && sim.config.stage == 2 &&
-            sim.alive_count == 0, "replay must clear all three stages and take the exit");
+    unsigned stages = (unsigned)ember_modes[replay.config.mode].stages;
+    require(sim.phase == EMBER_WON && sim.wave == stages * 10 &&
+            sim.config.stage + 1u == stages && sim.alive_count == 0,
+            "replay must clear its complete mode and take the exit");
     require(events[6] && events[7], "demo must offer and confirm upgrades");
     require(events[3] && events[4] && events[5], "demo must demonstrate all active skills");
     printf("END,%u,%u,%u,%u,%u\n", replay.count, sim.phase, sim.wave,

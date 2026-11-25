@@ -71,6 +71,7 @@ void ember_game_init(void)
     plat_init();
     ember_meta_init(&progression);
     ember_meta_config(&progression, 0, 255, 0, &next_config);
+    next_config.sub_weapon = 2;
     ember_sim_begin(&simulation, 20261124u, &next_config);
     ember_audio_stage(simulation.config.stage);
     ember_audio_reset();
