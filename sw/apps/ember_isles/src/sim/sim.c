@@ -47,6 +47,20 @@ static void modes_step(struct ember_sim *s, uint16_t input);
 static void modes_cleared(struct ember_sim *s);
 static void peaks_step(struct ember_sim *s);
 static void arena_milestones(struct ember_sim *s);
+static void enemy_present(struct ember_enemy *enemy,unsigned action)
+{
+    enemy->presentation_action=(uint8_t)action;
+    enemy->action_ticks=0;
+}
+static void enemy_present_motion(struct ember_enemy *enemy)
+{
+    if (enemy->presentation_action==EMBER_ENEMY_HIT && enemy->flash) return;
+    if (enemy->presentation_action>=EMBER_ENEMY_ATTACK && enemy->presentation_action!=EMBER_ENEMY_SHIELD &&
+        enemy->action_ticks<(unsigned)ember_system[0].attack_frames) return;
+    unsigned action=enemy->vx || enemy->vy ? EMBER_ENEMY_WALK :
+        ember_enemies[enemy->kind].ai==15 && enemy->defense.front_block ? EMBER_ENEMY_SHIELD : EMBER_ENEMY_IDLE;
+    if (enemy->presentation_action!=action) enemy_present(enemy,action);
+}
 static int enemy_affix(const struct ember_enemy *e, unsigned affix)
 {
     return e->affix == affix || e->second_affix == affix ||
@@ -420,6 +434,7 @@ struct ember_damage_result ember_sim_hit(struct ember_sim *s, unsigned index,
     }
     if (hit->leech) leech(s, r.damage, hit->leech);
     e->flash = (uint16_t)ember_system[0].enemy_flash_frames;
+    enemy_present(e,EMBER_ENEMY_HIT);
     s->damage_total += (unsigned)r.damage;
     event(s, EMBER_EVENT_HIT, (unsigned)(r.damage + r.absorbed), e->x, e->y);
     s->events.item[s->events.count - 1].outcome = r.blocked ? 2 : 0;
@@ -447,6 +462,7 @@ struct ember_damage_result ember_sim_hit(struct ember_sim *s, unsigned index,
     }
     e->retiring = 1;
     e->alive = 0;
+    enemy_present(e,EMBER_ENEMY_DEATH);
     --s->alive_count;
     if (!e->defense.rank) --s->ordinary_count[e->kind];
     content_death(s, index, hit->depth, hit->source_weapon, r.damage);
@@ -998,7 +1014,11 @@ static void enemies_step(struct ember_sim *s)
 {
     for (unsigned i = 0; i < EMBER_ENEMIES; ++i) {
         struct ember_enemy *e = &s->enemies[i];
-        if (!e->alive) continue;
+        if (!e->alive) {
+            if (e->presentation_action==EMBER_ENEMY_DEATH) ++e->action_ticks;
+            continue;
+        }
+        ++e->action_ticks;
         const struct ember_enemies_row *d = &ember_enemies[e->kind];
         if (e->flash) --e->flash;
         if (e->hunter_mark) --e->hunter_mark;
@@ -1029,6 +1049,7 @@ static void enemies_step(struct ember_sim *s)
         if (controlled) {
             if (e->facing_lock) --e->facing_lock;
             e->vx = e->vy = 0;
+            enemy_present_motion(e);
             continue;
         }
         int speed = enemy_speed(s, e);
@@ -1042,6 +1063,7 @@ static void enemies_step(struct ember_sim *s)
         } else if (e->kind == 1) {
             if (e->mode == 1 && !e->timer) {
                 e->mode = 2;
+                enemy_present(e,EMBER_ENEMY_ATTACK);
                 e->timer = (uint16_t)d->charge_duration;
                 velocity(dx, dy, d->charge_speed, &e->vx, &e->vy);
             } else if (e->mode == 2 && !e->timer) {
@@ -1068,6 +1090,7 @@ static void enemies_step(struct ember_sim *s)
                 struct ember_shot *p = shot(s, 6, e->x, e->y, d->damage,
                                             d->projectile_radius, d->projectile_life);
                 e->attacking = (uint16_t)ember_system[0].attack_frames;
+                enemy_present(e,EMBER_ENEMY_ATTACK);
                 p->hostile = 1;
                 p->damage_type = (uint8_t)d->element_index;
                 p->enemy_increased = enemy_in_dark(s, e->x, e->y) ?
@@ -1089,6 +1112,13 @@ static void enemies_step(struct ember_sim *s)
         e->x = clamp(e->x + e->vx, ember_system[0].enemy_boundary_margin * EMBER_Q, s->world_width - ember_system[0].enemy_boundary_margin * EMBER_Q);
         e->y = clamp(e->y + e->vy, ember_system[0].enemy_boundary_margin * EMBER_Q, s->world_height - ember_system[0].enemy_boundary_margin * EMBER_Q);
         obstacles_resolve(s, &e->x, &e->y, d->radius);
+        enemy_present_motion(e);
+        if (within(e->x,e->y,s->player.x,s->player.y,
+            d->radius+ember_characters[s->player.character].body_radius) &&
+            (e->presentation_action==EMBER_ENEMY_IDLE || e->presentation_action==EMBER_ENEMY_WALK ||
+                e->presentation_action==EMBER_ENEMY_SHIELD || (e->presentation_action==EMBER_ENEMY_ATTACK &&
+                e->action_ticks>=(unsigned)ember_system[0].attack_frames)))
+            enemy_present(e,EMBER_ENEMY_ATTACK);
         if (within(e->x, e->y, s->player.x, s->player.y,
                    d->radius + ember_characters[s->player.character].body_radius))
             if (!e->defense.status[EMBER_BLIND].frames ||

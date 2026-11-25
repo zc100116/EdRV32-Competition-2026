@@ -18,6 +18,12 @@
 enum ember_direction { EMBER_SOUTH, EMBER_SOUTHEAST, EMBER_EAST, EMBER_NORTHEAST,
     EMBER_NORTH, EMBER_NORTHWEST, EMBER_WEST, EMBER_SOUTHWEST };
 enum ember_phase { EMBER_MENU, EMBER_PLAY, EMBER_UPGRADE, EMBER_WON, EMBER_LOST };
+enum ember_enemy_presentation_action {
+    EMBER_ENEMY_IDLE, EMBER_ENEMY_WALK, EMBER_ENEMY_HIT, EMBER_ENEMY_DEATH,
+    EMBER_ENEMY_ATTACK, EMBER_ENEMY_SUMMON, EMBER_ENEMY_SHIELD,
+    EMBER_ENEMY_TIDE_SWEEP_COLUMN, EMBER_ENEMY_TIDE_EBB,
+    EMBER_ENEMY_TIDE_VORTEX, EMBER_ENEMY_TIDE_BLACKTIDE
+};
 struct ember_enemy {
     ember_fixed x, y, vx, vy;
     int32_t hp, shield;
@@ -26,6 +32,8 @@ struct ember_enemy {
     uint8_t burn_weapon, burn_pet;
     uint16_t marked, hunter_mark, owl_mark, taunted, attacking, facing_lock;
     uint32_t ai_timer;
+    uint32_t action_ticks;
+    uint8_t presentation_action; /* Read-only action clock; no combat timing effects. */
     uint8_t stage, facing, second_affix, capturable, real_shadow, illusion, extra_affixes;
     uint8_t facing8, facing_frame, flip_x, in_dark;
     uint16_t burn_tick, burn_fraction;

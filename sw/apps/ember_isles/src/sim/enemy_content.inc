@@ -64,6 +64,7 @@ static void enemy_projectile(struct ember_sim *s, struct ember_enemy *e,
     struct ember_shot *p = shot(s, 6, e->x, e->y, d->damage,
         d->projectile_radius, d->projectile_life);
     e->attacking = (uint16_t)ember_system[0].attack_frames;
+    enemy_present(e,EMBER_ENEMY_ATTACK);
     p->hostile = 1; p->weapon = (uint8_t)e->wave;
     p->damage_type = (uint8_t)type; p->hit_flags = (uint8_t)flags;
     p->enemy_increased = enemy_in_dark(s, e->x, e->y) ? ember_lighting[0].dark_damage : 0;
@@ -74,6 +75,7 @@ static void enemy_ground(struct ember_sim *s, struct ember_enemy *e, int effect,
 {
     const struct ember_enemies_row *d = &ember_enemies[e->kind];
     struct ember_shot *p = shot(s, 2, e->x, e->y, d->ground_damage, radius, d->ground_life);
+    enemy_present(e,EMBER_ENEMY_ATTACK);
     p->effect = (uint8_t)effect; p->enemy_kind = e->kind;
     p->weapon = (uint8_t)e->wave;
 }
@@ -107,6 +109,7 @@ static int content_enemy(struct ember_sim *s, unsigned index)
         if (d->rank == 2) stage = e->hp * 100LL < e->defense.max_hp * (int64_t)d->miniboss_phase_percent;
         if (stage != e->stage) {
             e->stage = (uint8_t)stage;
+            if (d->ai==18 && stage) enemy_present(e,stage==1?EMBER_ENEMY_TIDE_EBB:EMBER_ENEMY_TIDE_BLACKTIDE);
             if (d->rank == 3) e->defense.invulnerable = (uint16_t)d->phase_invulnerable;
             if (d->ai == 19 && stage == 2) {
                 for (unsigned i = 0; i < 8; ++i) s->pillars[i].lit = 0;
@@ -161,6 +164,7 @@ static int content_enemy(struct ember_sim *s, unsigned index)
         if (e->ai_timer % interval == 0) {
             struct ember_shot *p = shot(s, 6, e->x, e->y, d->damage, d->projectile_radius, d->projectile_life);
             e->attacking = (uint16_t)ember_system[0].attack_frames;
+    enemy_present(e,EMBER_ENEMY_ATTACK);
     p->hostile = 1; p->weapon = (uint8_t)e->wave;
             p->damage_type = d->ai == 13 ? EMBER_DAMAGE_TRUE : EMBER_DAMAGE_STAR;
             p->enemy_increased = enemy_in_dark(s, e->x, e->y) ?
@@ -182,8 +186,10 @@ static int content_enemy(struct ember_sim *s, unsigned index)
         break;
     case 15:
         e->defense.front_block = 1; e->defense.block_strength = d->block_percent;
-        if (e->stage && e->ai_timer % interval == 0)
+        if (e->stage && e->ai_timer % interval == 0) {
+            enemy_present(e,EMBER_ENEMY_SUMMON);
             ember_sim_spawn(s, 0, 0, e->x + d->summon_offset * EMBER_Q, e->y);
+        }
         break;
     case 16:
         e->vx = e->vy = 0;
@@ -197,6 +203,7 @@ static int content_enemy(struct ember_sim *s, unsigned index)
     case 18:
         if (e->ai_timer % interval == 0) {
             if (!e->stage) {
+                enemy_present(e,EMBER_ENEMY_TIDE_SWEEP_COLUMN);
                 if (within(e->x, e->y, s->player.x, s->player.y, d->tail_radius))
                     player_hurt_typed(s, d->tail_damage, e->wave, e->x, e->y, 2, 0);
                 struct ember_shot *p = shot(s, 2, s->player.x, s->player.y, d->wave_damage, d->wave_radius, d->wave_life);
@@ -204,8 +211,12 @@ static int content_enemy(struct ember_sim *s, unsigned index)
             } else if (e->stage == 1) {
                 e->defense.vulnerability = d->vulnerability;
                 enemy_ground(s, e, 8, d->ground_radius);
-            } else if (s->player.x < s->world_width / 2 && !s->in_light)
-                player_hurt_typed(s, d->dark_damage, e->wave, e->x, e->y, 4, 0);
+                enemy_present(e,EMBER_ENEMY_TIDE_VORTEX);
+            } else {
+                enemy_present(e,EMBER_ENEMY_TIDE_BLACKTIDE);
+                if (s->player.x < s->world_width / 2 && !s->in_light)
+                    player_hurt_typed(s, d->dark_damage, e->wave, e->x, e->y, 4, 0);
+            }
         }
         break;
     case 19:
