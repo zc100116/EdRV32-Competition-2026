@@ -111,5 +111,7 @@
       ],
       "hand_primary": null
     }
-  ]
+  ],
+  "source_input": "sources/coast-elite-aura-reflect-06a2f-v2-input.png",
+  "source_prompt": "sources/coast-elite-aura-reflect-06a2f-v2-prompt.txt"
 }

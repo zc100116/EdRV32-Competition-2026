@@ -108,3 +108,7 @@ the first16 entries of existing RGB565+A4 groups. A common index permutation
 preserves every previous palette color and elemental variant, including the
 star group's reserved light indices. Fanatic and health reuse the keeper's
 crimson scarf ramp. No commercial game artwork or external asset pack is used.
+
+The three `coast-elite-aura-{fanatic,reflect,dim}-06a2f` sources are built-in
+imagegen edits for thinner heartbeat rings, separated mirror shards and an open
+vortex. Their edit prompts and originals remain in `art_coast/sources/`.

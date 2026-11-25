@@ -178,3 +178,6 @@ debris：死亡5–8块，速度20–60，寿命16–28，重力100，普通透�
 一次转换及验收：`python3 sw/apps/ember_isles/tools/art/preview_coast_auras_06a2e.py`；全包回读及旧帧RGBA比较均在此命令。
 包/日志：build/ember_isles/art_coast_auras_06a2e/、同级art_coast_auras_06a2e-accept.log；py_compile、git diff --check通过。
 未完成项仅V1游戏接入与06b实际缓存峰值；本卡未改sim/UI/gfx/Makefile/规格，源图和完整提示词随提交保留。
+06a-2f（本节同提交）：fanatic改带缺口细脉动环、仅第2/4帧最亮；reflect为前后淡金镜面碎弧；dim中空外缘漩涡；三套仍各6帧I4，fanatic/reflect/dim最大块面积4896/3200/5776纹素、2448/1600/2888B；五元素索引4↔97及星灯光同步置换，无新增色板组。
+06a-2f验收：GPU回读39976960纹素、精确2×1027716像素通过；与806d51110比较除三套外1628帧/2422色板用例/4080657个RGBA像素，不一致帧0；原138968B加dim+elemental后144592B≤147456B，余2864B，两份最大dim为144744B；PC/FPGA各48个I4光环帧。
+06a-2f复现：依次运行`python3 sw/apps/ember_isles/tools/art/refine_coast_auras_06a2f.py`、`python3 sw/apps/ember_isles/tools/art/preview_coast_auras_06a2f.py`；全28对峰/谷检视、HTML和索引对照在outputs/ember_isles/art3-coast-assets/06a2e/06a2f/，日志build/ember_isles/art_coast_auras_06a2f-accept.log；py_compile/git diff --check通过，剩余V1重载色板。

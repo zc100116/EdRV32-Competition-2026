@@ -28,8 +28,8 @@ def baseline_file(name):
                                    ':sw/apps/ember_isles/assets/art_coast/' + name], cwd=ROOT)
 
 
-def compare_baseline(records):
-    """Compare all original native/variant RGBA frames directly with git 8a0eff2f1."""
+def compare_baseline(records, excluded_actions):
+    """Compare unmodified native/variant RGBA frames directly with the git baseline."""
     current = {r['name']: (i, r) for i, r in enumerate(records)}
     frames, cases, pixels, mismatches = 0, 0, 0, 0
     manifest = json.loads(baseline_file('production-06a2d.json'))
@@ -46,7 +46,7 @@ def compare_baseline(records):
             k: json.loads(baseline_file(v)) for k, v in sheet.get('palette_variants', {}).items()}
         cw, ch = sheet['cell']
         for cell in sheet['cells']:
-            if cell['action'] not in item['actions']:
+            if cell['action'] not in item['actions'] or cell['action'] in excluded_actions:
                 continue
             cx, cy = cell['cell']
             canvas = [tuple(raw[((cy * ch + y) * width + cx * cw + x) * 4:
@@ -86,11 +86,11 @@ def embed(path):
     return 'data:image/png;base64,' + base64.b64encode(path.read_bytes()).decode()
 
 
-def main():
+def main(excluded_actions=()):
     OUTPUT.mkdir(parents=True, exist_ok=True)
     packet = json.loads((BUILD / 'frames.json').read_text())
     records = packet['frames']
-    baseline = compare_baseline(records)
+    baseline = compare_baseline(records, excluded_actions)
     native = load_native_frames()
     fpga = json.loads((BUILD / 'fpga-frames.json').read_text())['frames']
     palette_bytes = (BUILD / 'palettes.bin').read_bytes()
