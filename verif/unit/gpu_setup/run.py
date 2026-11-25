@@ -18,6 +18,14 @@ def pack(values, width):
     return sum((v & ((1 << width) - 1)) << (i * width) for i, v in enumerate(values))
 
 
+def pack_widths(values, widths):
+    value, offset = 0, 0
+    for v, w in zip(values, widths):
+        value |= (v & ((1 << w)-1)) << offset
+        offset += w
+    return value
+
+
 def vectors():
     rng = random.Random(0x5232)
     incoming, expected = [], []
@@ -55,7 +63,7 @@ def vectors():
         arithmetic = PixelArithmetic(vertices, area)
         xr, yr = arithmetic.origin
         x0 = ((min(v[0] for v in vertices) + 7) // 16 // 4) * 4
-        y0 = (min(v[1] for v in vertices) + 7) // 16
+        y0 = (min(v[1] for v in vertices) + 7) // 32 * 2
         x1 = (max(v[0] for v in vertices) - 8) // 16 + 1
         y1 = (max(v[1] for v in vertices) - 8) // 16 + 1
         a, b, c = vertices
@@ -64,22 +72,18 @@ def vectors():
             edges += [edge(start, end, 16*x0+8, 16*y0+8),
                       (start[1]-end[1])*16, (end[0]-start[0])*16,
                       0 if top_left(start, end) else -1]
-        normals = []
-        for axis in range(2):
-            for mantissa, exponent in arithmetic.gradients[axis]:
-                normals.append((abs(mantissa) | (int(mantissa < 0) << 18)
-                                | ((exponent & 1023) << 19)))
         fields = [(pack([x0,y0,x1,y1],16),64), (pack(edges,40),480),
                   (pack([xr,yr],16),32),
-                  (pack([c[0] for c in arithmetic.coefficients],70),490),
-                  (pack([v for c in arithmetic.coefficients for v in c[1:]],56),784),
-                  (pack([e+f for e,f in zip(arithmetic.exponents,(0,30,38,38,16,16,16))],10),70),
-                  (pack(normals,29),174)]
+                  (pack_widths([c[0] for c in arithmetic.coefficients], arithmetic.WIDTHS),434),
+                  (pack_widths([v for c in arithmetic.coefficients for v in c[1:]],
+                               [w-14 for w in arithmetic.WIDTHS for _ in range(2)]),672),
+                  (pack([e+f-d for e,f,d in zip(arithmetic.exponents,
+                        (0,30,38,38,16,16,16), arithmetic.DROPS)],10),70)]
         value, offset = 0, 0
         for field, width in fields:
             value |= field << offset
             offset += width
-        expected.append(f'{value:0524x}\n')
+        expected.append(f'{value:0438x}\n')
     out = ROOT / 'build/gpu_setup'
     out.mkdir(parents=True, exist_ok=True)
     (out / 'input.hex').write_text(''.join(incoming))

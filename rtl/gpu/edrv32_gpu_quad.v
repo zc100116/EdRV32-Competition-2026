@@ -36,9 +36,8 @@ module edrv32_gpu_quad (
     output wire [15:0] fragment_y_o,
     output wire [3:0] fragment_mask_o,
     output wire fragment_quad_o,
-    output wire [1959:0] fragment_plane_o,
+    output wire [1735:0] fragment_plane_o,
     output wire [69:0] fragment_h_o,
-    output wire [173:0] fragment_gradient_o,
     output wire [3:0] fragment_palette_o,
     output wire [7:0] fragment_alpha_o,
 
@@ -152,8 +151,6 @@ module edrv32_gpu_quad (
     assign fragment_quad_o = output_quad_r[output_read_r];
     reg [69:0] output_h_r [0:1];
     assign fragment_h_o = output_h_r[output_read_r];
-    reg [173:0] output_gradient_r [0:1];
-    assign fragment_gradient_o = output_gradient_r[output_read_r];
     reg [3:0] output_unused_palette_r [0:1];
     assign fragment_palette_o = output_unused_palette_r[output_read_r];
     reg [7:0] output_alpha_r [0:1];
@@ -372,7 +369,6 @@ module edrv32_gpu_quad (
             output_quad_r[output_write_r] <= 1'b1;
             output_h_r[output_write_r] <= {-10'sd8, -10'sd8, -10'sd8,
                 10'sd0, 10'sd0, 10'sd0, -10'sd16};
-            output_gradient_r[output_write_r] <= 0;
             output_unused_palette_r[output_write_r] <= unused_pipe_record_2_r[24 +: 4];
             output_alpha_r[output_write_r] <= unused_pipe_record_2_r[50 +: 8];
         end
@@ -397,41 +393,41 @@ module edrv32_gpu_quad (
             assign pipe_mask_w[2][lane] = mask_r[2];
             assign pixel_x_w = {x_r[17:2], lane[1:0]};
             // Output stage: seven independent two-slot 70-bit field queues per lane.
-            reg [69:0] plane_0_r [0:1];
-            assign fragment_plane_o[lane*490+0 +: 70] = plane_0_r[output_read_r];
+            reg [61:0] plane_0_r [0:1];
+            assign fragment_plane_o[lane*434+0 +: 62] = plane_0_r[output_read_r];
             always @(posedge clk_i) begin
                 if (output_push_w)
-                    plane_0_r[output_write_r] <= {38'b0, unused_pipe_record_2_r[80 +: 16], 16'b0};
+                    plane_0_r[output_write_r] <= {38'b0, unused_pipe_record_2_r[80 +: 16], 8'b0};
             end
-            reg [69:0] plane_1_r [0:1];
-            assign fragment_plane_o[lane*490+70 +: 70] = plane_1_r[output_read_r];
+            reg [65:0] plane_1_r [0:1];
+            assign fragment_plane_o[lane*434+62 +: 66] = plane_1_r[output_read_r];
             always @(posedge clk_i) begin
-                if (output_push_w) plane_1_r[output_write_r] <= 70'd1073741824;
+                if (output_push_w) plane_1_r[output_write_r] <= 66'd67108864;
             end
-            reg [69:0] plane_2_r [0:1];
-            assign fragment_plane_o[lane*490+140 +: 70] = plane_2_r[output_read_r];
+            reg [65:0] plane_2_r [0:1];
+            assign fragment_plane_o[lane*434+128 +: 66] = plane_2_r[output_read_r];
             always @(posedge clk_i) begin
-                if (output_push_w) plane_2_r[output_write_r] <= {{13{u_r[18]}}, u_r, 38'b0};
+                if (output_push_w) plane_2_r[output_write_r] <= {{13{u_r[18]}}, u_r, 34'b0};
             end
-            reg [69:0] plane_3_r [0:1];
-            assign fragment_plane_o[lane*490+210 +: 70] = plane_3_r[output_read_r];
+            reg [65:0] plane_3_r [0:1];
+            assign fragment_plane_o[lane*434+194 +: 66] = plane_3_r[output_read_r];
             always @(posedge clk_i) begin
-                if (output_push_w) plane_3_r[output_write_r] <= {{13{v_r[18]}}, v_r, 38'b0};
+                if (output_push_w) plane_3_r[output_write_r] <= {{13{v_r[18]}}, v_r, 34'b0};
             end
-            reg [69:0] plane_4_r [0:1];
-            assign fragment_plane_o[lane*490+280 +: 70] = plane_4_r[output_read_r];
+            reg [57:0] plane_4_r [0:1];
+            assign fragment_plane_o[lane*434+260 +: 58] = plane_4_r[output_read_r];
             always @(posedge clk_i) begin
-                if (output_push_w) plane_4_r[output_write_r] <= 70'd4278190080;
+                if (output_push_w) plane_4_r[output_write_r] <= 58'd1044480;
             end
-            reg [69:0] plane_5_r [0:1];
-            assign fragment_plane_o[lane*490+350 +: 70] = plane_5_r[output_read_r];
+            reg [57:0] plane_5_r [0:1];
+            assign fragment_plane_o[lane*434+318 +: 58] = plane_5_r[output_read_r];
             always @(posedge clk_i) begin
-                if (output_push_w) plane_5_r[output_write_r] <= 70'd4278190080;
+                if (output_push_w) plane_5_r[output_write_r] <= 58'd1044480;
             end
-            reg [69:0] plane_6_r [0:1];
-            assign fragment_plane_o[lane*490+420 +: 70] = plane_6_r[output_read_r];
+            reg [57:0] plane_6_r [0:1];
+            assign fragment_plane_o[lane*434+376 +: 58] = plane_6_r[output_read_r];
             always @(posedge clk_i) begin
-                if (output_push_w) plane_6_r[output_write_r] <= 70'd4278190080;
+                if (output_push_w) plane_6_r[output_write_r] <= 58'd1044480;
             end
             always @(posedge clk_i) begin
                 if (advance_w) begin

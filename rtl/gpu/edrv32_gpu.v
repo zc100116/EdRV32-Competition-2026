@@ -78,11 +78,10 @@ module edrv32_gpu (
     wire [31:0] err_code_w;
     wire error_w;
     wire [7:0] fragment_alpha_w;
-    wire [173:0] fragment_gradient_w;
     wire [69:0] fragment_h_w;
     wire [3:0] fragment_mask_w;
     wire [3:0] fragment_palette_w;
-    wire [1959:0] fragment_plane_w;
+    wire [1735:0] fragment_plane_w;
     wire fragment_quad_w;
     wire fragment_ready_w;
     wire fragment_valid_w;
@@ -240,11 +239,10 @@ module edrv32_gpu (
     wire quad_draw_valid_w;
     wire quad_finish_w;
     wire [7:0] quad_fragment_alpha_w;
-    wire [173:0] quad_fragment_gradient_w;
     wire [69:0] quad_fragment_h_w;
     wire [3:0] quad_fragment_mask_w;
     wire [3:0] quad_fragment_palette_w;
-    wire [1959:0] quad_fragment_plane_w;
+    wire [1735:0] quad_fragment_plane_w;
     wire quad_fragment_quad_w;
     wire quad_fragment_ready_w;
     wire quad_fragment_valid_w;
@@ -274,11 +272,10 @@ module edrv32_gpu (
     wire raster_draw_valid_w;
     wire raster_finish_w;
     wire [7:0] raster_fragment_alpha_w;
-    wire [173:0] raster_fragment_gradient_w;
     wire [69:0] raster_fragment_h_w;
     wire [3:0] raster_fragment_mask_w;
     wire [3:0] raster_fragment_palette_w;
-    wire [1959:0] raster_fragment_plane_w;
+    wire [1735:0] raster_fragment_plane_w;
     wire raster_fragment_quad_w;
     wire raster_fragment_ready_w;
     wire raster_fragment_valid_w;
@@ -392,12 +389,11 @@ module edrv32_gpu (
     wire texture_unit_done_w;
     wire [63:0] triangle_setup_bounds_w;
     wire [479:0] triangle_setup_edge_w;
-    wire [783:0] triangle_setup_gradient_w;
+    wire [671:0] triangle_setup_gradient_w;
     wire [69:0] triangle_setup_h_w;
-    wire [173:0] triangle_setup_normal_gradient_w;
     wire [31:0] triangle_setup_origin_w;
     wire triangle_setup_ready_w;
-    wire [489:0] triangle_setup_start_w;
+    wire [433:0] triangle_setup_start_w;
     wire triangle_setup_valid_w;
     wire [255:0] unpack_command_w;
     wire unpack_done_w;
@@ -600,12 +596,27 @@ module edrv32_gpu (
         ? quad_fragment_mask_w : raster_fragment_mask_w;
     assign fragment_quad_w = fragment_quad_select_r
         ? quad_fragment_quad_w : raster_fragment_quad_w;
-    assign fragment_plane_w = fragment_quad_select_r
-        ? quad_fragment_plane_w : raster_fragment_plane_w;
+    // Select each fixed-width field independently (CLAUDE.md 5.5).
+    genvar fragment_lane;
+    genvar fragment_attribute;
+    generate
+        for (fragment_lane = 0; fragment_lane < 4;
+            fragment_lane = fragment_lane + 1) begin : g_fragment_lane
+            localparam LANE_OFFSET = fragment_lane*434;
+            for (fragment_attribute = 0; fragment_attribute < 7;
+                fragment_attribute = fragment_attribute + 1) begin : g_fragment_attribute
+                localparam WIDTH = fragment_attribute == 0 ? 62 :
+                    fragment_attribute < 4 ? 66 : 58;
+                localparam OFFSET = fragment_attribute == 0 ? 0 : fragment_attribute < 4 ?
+                    62 + (fragment_attribute-1)*66 : 260 + (fragment_attribute-4)*58;
+                assign fragment_plane_w[LANE_OFFSET+OFFSET +: WIDTH] = fragment_quad_select_r
+                    ? quad_fragment_plane_w[LANE_OFFSET+OFFSET +: WIDTH]
+                    : raster_fragment_plane_w[LANE_OFFSET+OFFSET +: WIDTH];
+            end
+        end
+    endgenerate
     assign fragment_h_w = fragment_quad_select_r
         ? quad_fragment_h_w : raster_fragment_h_w;
-    assign fragment_gradient_w = fragment_quad_select_r
-        ? quad_fragment_gradient_w : raster_fragment_gradient_w;
     assign fragment_palette_w = fragment_quad_select_r
         ? quad_fragment_palette_w : raster_fragment_palette_w;
     assign fragment_alpha_w = fragment_quad_select_r
@@ -1423,7 +1434,6 @@ module edrv32_gpu (
         .triangle_setup_start_o(triangle_setup_start_w),
         .triangle_setup_gradient_o(triangle_setup_gradient_w),
         .triangle_setup_h_o(triangle_setup_h_w),
-        .triangle_setup_normal_gradient_o(triangle_setup_normal_gradient_w),
 
         // Command lifetime and performance event.
         .finish_i(setup_finish_w),
@@ -1458,7 +1468,6 @@ module edrv32_gpu (
         .triangle_setup_start_i(triangle_setup_start_w),
         .triangle_setup_gradient_i(triangle_setup_gradient_w),
         .triangle_setup_h_i(triangle_setup_h_w),
-        .triangle_setup_normal_gradient_i(triangle_setup_normal_gradient_w),
 
         // Ordered fragment stream.
         .fragment_valid_o(raster_fragment_valid_w),
@@ -1469,7 +1478,6 @@ module edrv32_gpu (
         .fragment_quad_o(raster_fragment_quad_w),
         .fragment_plane_o(raster_fragment_plane_w),
         .fragment_h_o(raster_fragment_h_w),
-        .fragment_gradient_o(raster_fragment_gradient_w),
         .fragment_palette_o(raster_fragment_palette_w),
         .fragment_alpha_o(raster_fragment_alpha_w),
 
@@ -1515,7 +1523,6 @@ module edrv32_gpu (
         .fragment_quad_o(quad_fragment_quad_w),
         .fragment_plane_o(quad_fragment_plane_w),
         .fragment_h_o(quad_fragment_h_w),
-        .fragment_gradient_o(quad_fragment_gradient_w),
         .fragment_palette_o(quad_fragment_palette_w),
         .fragment_alpha_o(quad_fragment_alpha_w),
 
@@ -1541,7 +1548,6 @@ module edrv32_gpu (
         .fragment_quad_i(fragment_quad_w),
         .fragment_plane_i(fragment_plane_w),
         .fragment_h_i(fragment_h_w),
-        .fragment_gradient_i(fragment_gradient_w),
         .fragment_palette_i(fragment_palette_w),
         .fragment_alpha_i(fragment_alpha_w),
 

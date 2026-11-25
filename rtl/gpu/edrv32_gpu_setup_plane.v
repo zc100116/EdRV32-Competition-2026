@@ -26,10 +26,9 @@ module edrv32_gpu_setup_plane (
     // Complete coefficient for the tagged attribute.
     output wire plane_valid_o,
     output wire [6:0] plane_tag_o,
-    output wire [69:0] plane_start_o,
-    output wire [111:0] plane_gradient_o,
-    output wire [9:0] plane_h_o,
-    output wire [57:0] plane_normal_o
+    output wire [65:0] plane_start_o,
+    output wire [103:0] plane_gradient_o,
+    output wire [9:0] plane_h_o
 );
     reg signed [9:0] h_first_r;
     reg signed [9:0] h_last_r;
@@ -50,7 +49,6 @@ module edrv32_gpu_setup_plane (
     reg [71:0] delta_r;
     wire signed [51:0] product_w [0:3];
     wire signed [73:0] origin_product_w [0:1];
-    wire [28:0] normal_w [0:1];
     wire [32:0] scaled_w [0:2];
     wire [50:0] maximum_01_w;
     wire [50:0] maximum_w;
@@ -98,7 +96,6 @@ module edrv32_gpu_setup_plane (
     assign plane_valid_o = valid_r[14];
     assign plane_tag_o = tag_w[14];
     assign plane_h_o = h_last_r;
-    assign plane_normal_o = {normal_w[1], normal_w[0]};
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) valid_r <= 15'd0;
         else if (stop_i) valid_r <= 15'd0;
@@ -224,7 +221,20 @@ module edrv32_gpu_setup_plane (
             assign rounded_w = inverse_8_r[86]
                 ? -unused_rounded_w[55:0] : unused_rounded_w[55:0];
             assign origin_product_w[axis] = origin_12_r;
-            assign plane_gradient_o[axis*56 +: 56] = $signed(gradient_pipe_w[280 +: 56]);
+            wire [55:0] stored_raw_w;
+            wire [55:0] stored_magnitude_w;
+            wire [55:0] unused_stored_shift_w;
+            wire [51:0] stored_rounded_w;
+            wire [3:0] drop_w;
+            assign drop_w = tag_w[14][2:0] == 0 ? 4'd8 :
+                tag_w[14][2:0] < 4 ? 4'd4 : 4'd12;
+            assign stored_raw_w = gradient_pipe_w[280 +: 56];
+            assign stored_magnitude_w = stored_raw_w[55] ? -stored_raw_w : stored_raw_w;
+            assign unused_stored_shift_w = stored_magnitude_w >> (drop_w - 1'b1);
+            assign stored_rounded_w = unused_stored_shift_w[52:1]
+                + {51'b0, unused_stored_shift_w[0]};
+            assign plane_gradient_o[axis*52 +: 52] = stored_raw_w[55] ?
+                -stored_rounded_w : stored_rounded_w;
             always @(posedge clk_i) begin
                 if (enable_i) begin
                     difference_r <= $signed({1'b0, scaled_w[axis+1]})
@@ -250,61 +260,6 @@ module edrv32_gpu_setup_plane (
                         : $signed(gradient_pipe_w[56*((stage == 9 ? 9 : stage-1)-9) +: 56]);
                 end
             end
-            wire [55:0] normal_magnitude_w;
-            assign normal_magnitude_w = gradient_pipe_w[279]
-                ? -$signed(gradient_pipe_w[224 +: 56]) : $signed(gradient_pipe_w[224 +: 56]);
-            wire [63:0] normal_leading_data64_w;
-            wire [5:0] normal_leading_w;
-            wire normal_leading_bit0_w;
-            wire normal_leading_bit1_w;
-            wire normal_leading_bit2_w;
-            wire normal_leading_bit3_w;
-            wire normal_leading_bit4_w;
-            wire normal_leading_bit5_w;
-            assign normal_leading_w = {normal_leading_bit5_w, normal_leading_bit4_w,
-                normal_leading_bit3_w, normal_leading_bit2_w,
-                normal_leading_bit1_w, normal_leading_bit0_w};
-            assign normal_leading_data64_w = {8'd0, normal_magnitude_w};
-            wire [31:0] normal_leading_data32_w;
-            assign normal_leading_bit5_w = |normal_leading_data64_w[63:32];
-            assign normal_leading_data32_w = normal_leading_bit5_w
-                ? normal_leading_data64_w[63:32] : normal_leading_data64_w[31:0];
-            wire [15:0] normal_leading_data16_w;
-            assign normal_leading_bit4_w = |normal_leading_data32_w[31:16];
-            assign normal_leading_data16_w = normal_leading_bit4_w
-                ? normal_leading_data32_w[31:16] : normal_leading_data32_w[15:0];
-            wire [7:0] normal_leading_data8_w;
-            assign normal_leading_bit3_w = |normal_leading_data16_w[15:8];
-            assign normal_leading_data8_w = normal_leading_bit3_w
-                ? normal_leading_data16_w[15:8] : normal_leading_data16_w[7:0];
-            wire [3:0] normal_leading_data4_w;
-            assign normal_leading_bit2_w = |normal_leading_data8_w[7:4];
-            assign normal_leading_data4_w = normal_leading_bit2_w
-                ? normal_leading_data8_w[7:4] : normal_leading_data8_w[3:0];
-            wire [1:0] unused_normal_leading_data2_w;
-            assign normal_leading_bit1_w = |normal_leading_data4_w[3:2];
-            assign unused_normal_leading_data2_w = normal_leading_bit1_w
-                ? normal_leading_data4_w[3:2] : normal_leading_data4_w[1:0];
-            assign normal_leading_bit0_w = unused_normal_leading_data2_w[1];
-            wire signed [9:0] amount_w;
-            wire [56:0] rounded_normal_w;
-            wire [56:0] unused_adjusted_normal_w;
-            wire signed [9:0] normal_exponent_w;
-            reg [28:0] normal_r;
-            assign amount_w = $signed({4'd0, normal_leading_w}) - 10'sd17;
-            assign rounded_normal_w = amount_w > 0
-                ? ({1'b0, normal_magnitude_w} + (57'd1 << (amount_w - 10'sd1))) >> amount_w
-                : {1'b0, normal_magnitude_w} << -amount_w;
-            assign unused_adjusted_normal_w = rounded_normal_w[18]
-                ? rounded_normal_w >> 1 : rounded_normal_w;
-            assign normal_exponent_w = normal_h_w
-                - (tag_w[13][2:0] == 1 ? 10'sd30 : 10'sd38)
-                + amount_w + (rounded_normal_w[18] ? 10'sd1 : 10'sd0);
-            assign normal_w[axis] = normal_r;
-            always @(posedge clk_i) begin
-                if (enable_i) normal_r <= normal_magnitude_w == 0 ? 29'd0
-                    : {normal_exponent_w, gradient_pipe_w[279], unused_adjusted_normal_w[17:0]};
-            end
         end
     endgenerate
     // Stage 13: one 75-bit origin sum and rounding adder; stage 14 delays the start.
@@ -313,7 +268,16 @@ module edrv32_gpu_setup_plane (
     wire signed [74:0] origin_rounded_w;
     wire signed [74:0] unused_origin_signed_w;
     reg [69:0] start_13_r;
-    reg [69:0] start_14_r;
+    reg [65:0] start_14_r;
+    wire [69:0] start_magnitude_w;
+    wire [69:0] unused_start_shift_w;
+    wire [65:0] start_rounded_w;
+    wire [3:0] drop_start_w;
+    assign drop_start_w = tag_w[13][2:0] == 0 ? 4'd8 :
+        tag_w[13][2:0] < 4 ? 4'd4 : 4'd12;
+    assign start_magnitude_w = start_13_r[69] ? -start_13_r : start_13_r;
+    assign unused_start_shift_w = start_magnitude_w >> (drop_start_w - 1'b1);
+    assign start_rounded_w = unused_start_shift_w[66:1] + {65'b0, unused_start_shift_w[0]};
     assign origin_sum_w = {origin_product_w[0][73], origin_product_w[0]}
         + {origin_product_w[1][73], origin_product_w[1]};
     assign origin_magnitude_w = origin_sum_w[74] ? -origin_sum_w : origin_sum_w;
@@ -323,7 +287,7 @@ module edrv32_gpu_setup_plane (
     always @(posedge clk_i) begin
         if (enable_i) begin
             start_13_r <= {37'd0, first_w} + unused_origin_signed_w[69:0];
-            start_14_r <= start_13_r;
+            start_14_r <= start_13_r[69] ? -start_rounded_w : start_rounded_w;
         end
     end
 endmodule

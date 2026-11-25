@@ -25,10 +25,9 @@ module edrv32_gpu_setup (
     output wire [63:0] triangle_setup_bounds_o,
     output wire [479:0] triangle_setup_edge_o,
     output wire [31:0] triangle_setup_origin_o,
-    output wire [489:0] triangle_setup_start_o,
-    output wire [783:0] triangle_setup_gradient_o,
+    output wire [433:0] triangle_setup_start_o,
+    output wire [671:0] triangle_setup_gradient_o,
     output wire [69:0] triangle_setup_h_o,
-    output wire [173:0] triangle_setup_normal_gradient_o,
 
     // Command lifetime and performance event.
     input wire finish_i,
@@ -98,10 +97,9 @@ module edrv32_gpu_setup (
     reg [5:0] attribute_exponent_r;
     wire plane_valid_w;
     wire [6:0] plane_tag_w;
-    wire [69:0] plane_start_w;
-    wire [111:0] plane_gradient_w;
+    wire [65:0] plane_start_w;
+    wire [103:0] plane_gradient_w;
     wire [9:0] plane_h_w;
-    wire [57:0] plane_normal_w;
     reg complete_r;
     reg [3:0] complete_tag_r;
     reg signed [17:0] x_w [0:2];
@@ -158,7 +156,7 @@ module edrv32_gpu_setup (
         origin_x_w = minimum_x_w >>> 4;
         origin_y_w = minimum_y_w >>> 4;
         bound_x0_w = ((minimum_x_w + 18'sd7) >>> 6) <<< 2;
-        bound_y0_w = (minimum_y_w + 18'sd7) >>> 4;
+        bound_y0_w = ((minimum_y_w + 18'sd7) >>> 5) <<< 1;
         unused_bound_x1_w = ((maximum_x_w - 18'sd8) >>> 4) + 18'sd1;
         unused_bound_y1_w = ((maximum_y_w - 18'sd8) >>> 4) + 18'sd1;
         difference_x_w[0] = x_w[1] - x_w[0];
@@ -255,8 +253,7 @@ module edrv32_gpu_setup (
         .plane_tag_o(plane_tag_w),
         .plane_start_o(plane_start_w),
         .plane_gradient_o(plane_gradient_w),
-        .plane_h_o(plane_h_w),
-        .plane_normal_o(plane_normal_w)
+        .plane_h_o(plane_h_w)
     );
 
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -450,22 +447,29 @@ module edrv32_gpu_setup (
                     screen_triangle_color_i[120 +: 24], 27'd0,
                     screen_triangle_color_i[48 +: 24]};
             end
-            reg [69:0] start_r [0:15];
-            reg [69:0] output_start_r [0:1];
-            assign triangle_setup_start_o[attribute*70 +: 70] =
+            localparam WIDTH = attribute == 0 ? 62 : attribute < 4 ? 66 : 58;
+            localparam GRAD_WIDTH = WIDTH - 14;
+            localparam START_OFFSET = attribute == 0 ? 0 : attribute < 4 ?
+                62 + (attribute-1)*66 : 260 + (attribute-4)*58;
+            localparam GRAD_OFFSET = attribute == 0 ? 0 : attribute < 4 ?
+                96 + (attribute-1)*104 : 408 + (attribute-4)*88;
+            reg [WIDTH-1:0] start_r [0:15];
+            reg [WIDTH-1:0] output_start_r [0:1];
+            assign triangle_setup_start_o[START_OFFSET +: WIDTH] =
                 output_start_r[output_read_r];
             always @(posedge clk_i) begin
                 if (enable_w && plane_valid_w && plane_tag_w[2:0] == attribute)
-                    start_r[plane_tag_w[6:3]] <= plane_start_w;
+                    start_r[plane_tag_w[6:3]] <= plane_start_w[WIDTH-1:0];
                 if (push_w) output_start_r[output_write_r] <= start_r[complete_tag_r];
             end
-            reg [111:0] gradient_r [0:15];
-            reg [111:0] output_gradient_r [0:1];
-            assign triangle_setup_gradient_o[attribute*112 +: 112] =
+            reg [2*GRAD_WIDTH-1:0] gradient_r [0:15];
+            reg [2*GRAD_WIDTH-1:0] output_gradient_r [0:1];
+            assign triangle_setup_gradient_o[GRAD_OFFSET +: 2*GRAD_WIDTH] =
                 output_gradient_r[output_read_r];
             always @(posedge clk_i) begin
                 if (enable_w && plane_valid_w && plane_tag_w[2:0] == attribute)
-                    gradient_r[plane_tag_w[6:3]] <= plane_gradient_w;
+                    gradient_r[plane_tag_w[6:3]] <= {plane_gradient_w[52 +: GRAD_WIDTH],
+                        plane_gradient_w[0 +: GRAD_WIDTH]};
                 if (push_w) output_gradient_r[output_write_r] <= gradient_r[complete_tag_r];
             end
             reg [9:0] h_r [0:15];
@@ -531,19 +535,6 @@ module edrv32_gpu_setup (
                 output_dy_r[output_read_r];
             assign triangle_setup_edge_o[edge_bank*160+120 +: 40] =
                 output_bias_r[output_read_r];
-        end
-    endgenerate
-    genvar normal;
-    generate
-        for (normal = 0; normal < 6; normal = normal + 1) begin : g_normal
-            reg [28:0] value_r [0:15];
-            reg [28:0] output_r [0:1];
-            always @(posedge clk_i) begin
-                if (enable_w && plane_valid_w && plane_tag_w[2:0] == (normal % 3) + 1)
-                    value_r[plane_tag_w[6:3]] <= plane_normal_w[(normal / 3)*29 +: 29];
-                if (push_w) output_r[output_write_r] <= value_r[complete_tag_r];
-            end
-            assign triangle_setup_normal_gradient_o[normal*29 +: 29] = output_r[output_read_r];
         end
     endgenerate
 endmodule

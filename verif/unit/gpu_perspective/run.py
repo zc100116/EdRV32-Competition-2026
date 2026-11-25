@@ -6,7 +6,8 @@
 from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'gpu_perspective'))
-from vectors import run
+from vectors import run, run_normal
 
 if __name__ == '__main__':
+    run_normal()
     run('perspective')

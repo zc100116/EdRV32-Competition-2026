@@ -1,5 +1,5 @@
 // File: edrv32_gpu_perspective_subtract.v
-// Spec: gpu-spec 2.13; microarch 4.6, 4.10.
+// Spec: gpu-spec 2.13; microarch 4.13.
 // Description: Fixed-width registered arithmetic; global enable preserves pipeline alignment.
 // Clock domain: clk_gpu.
 module edrv32_gpu_perspective_subtract (
@@ -29,10 +29,12 @@ module edrv32_gpu_perspective_subtract (
     assign delay_bypass_wr_data_o = b_i[17:0] == 0 ? a_i :
         {b_i[28:19], !b_i[18], b_i[17:0]};
     assign normal_o = bypass_valid_r[9] ? delay_bypass_rd_data_i : normalized_w;
-    edrv32_gpu_perspective_normal u_normal (
+    edrv32_gpu_perspective_normal #(
+        .WIDTH(23)
+    ) u_normal (
         .clk_i(clk_i),
         .en_i(en_i),
-        .magnitude_i({47'b0, absolute_r}),
+        .magnitude_i(absolute_r),
         .sign_i(sign_r),
         .exponent_i(exponent_r[50 +: 10]),
         .normal_o(normalized_w)
@@ -45,18 +47,28 @@ module edrv32_gpu_perspective_subtract (
             reg [9:0] alignment_r;
             reg [21:0] magnitude_r;
             reg [21:0] aligned_r;
+            wire [21:0] shift_1_w;
+            wire [21:0] shift_4_w;
             reg [21:0] rounded_r;
             reg [22:0] signed_r;
             reg [2:0] negative_r;
             assign value_w = operand == 0 ? a_r : b_r;
             assign signed_w[operand] = signed_r;
+            assign shift_1_w = alignment_r[1] ?
+                (alignment_r[0] ? {3'b0, magnitude_r[21:3]} :
+                {2'b0, magnitude_r[21:2]}) :
+                (alignment_r[0] ? {1'b0, magnitude_r[21:1]} : magnitude_r);
+            assign shift_4_w = alignment_r[3] ?
+                (alignment_r[2] ? {12'b0, shift_1_w[21:12]} :
+                {8'b0, shift_1_w[21:8]}) :
+                (alignment_r[2] ? {4'b0, shift_1_w[21:4]} : shift_1_w);
             always @(posedge clk_i) begin
                 if (en_i) begin
                     alignment_r <= maximum_r - value_w[28:19];
                     magnitude_r <= {value_w[17:0], 4'b0};
                     negative_r <= {negative_r[1:0], value_w[18]};
                     aligned_r <= alignment_r[9:5] != 0 ? 22'b0 :
-                        magnitude_r >> alignment_r[4:0];
+                        alignment_r[4] ? {16'b0, shift_4_w[21:16]} : shift_4_w;
                     rounded_r <= {1'b0, aligned_r[21:1]} + {21'b0, aligned_r[0]};
                     signed_r <= ({1'b0, rounded_r} ^ {23{negative_r[2]}})
                         + {22'b0, negative_r[2]};
