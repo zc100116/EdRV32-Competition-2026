@@ -414,6 +414,8 @@ static void modes_step(struct ember_sim *s, uint16_t input)
                     s->hidden[i].point.x, s->hidden[i].point.y);
                 s->events.item[s->events.count - 1].damage_type =
                     (uint8_t)ember_weapons[w].element_index;
+                s->events.item[s->events.count - 1].source_weapon = (uint8_t)w;
+                s->events.item[s->events.count - 1].source_evolution = s->player.evolution[w];
             } else if (s->hidden[i].clue == 1 && !s->lamp_disabled &&
                 within(s->player.x, s->player.y, s->hidden[i].point.x,
                     s->hidden[i].point.y, s->lamp_radius)) s->hidden[i].found = 1;

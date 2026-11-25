@@ -401,6 +401,12 @@ static void shatter(struct ember_sim *s, unsigned index, unsigned depth)
             s->enemies[n].x, s->enemies[n].y, ember_system[0].chain_range))
             ember_sim_hit(s, n, &linked);
 }
+static void hit_event_source(struct ember_sim *s,const struct ember_attack *hit)
+{
+    struct ember_event *e=&s->events.item[s->events.count-1];
+    e->source_weapon=hit->source_weapon?(uint8_t)(hit->source_weapon-1):255;
+    e->source_evolution=hit->source_evolution;
+}
 struct ember_damage_result ember_sim_hit(struct ember_sim *s, unsigned index,
                                          const struct ember_attack *hit)
 {
@@ -422,12 +428,14 @@ struct ember_damage_result ember_sim_hit(struct ember_sim *s, unsigned index,
     e->shield = e->defense.permanent_shield + e->defense.temporary[EMBER_DAMAGE_TYPES];
     if (r.dodged) {
         event(s, EMBER_EVENT_HIT, 0, e->x, e->y);
+        hit_event_source(s,hit);
         s->events.item[s->events.count - 1].outcome = 1;
         return r;
     }
     if (!r.damage && !r.absorbed) {
         if (r.blocked) {
             event(s, EMBER_EVENT_HIT, 0, e->x, e->y);
+            hit_event_source(s,hit);
             s->events.item[s->events.count - 1].outcome = 2;
         }
         return r;
@@ -437,6 +445,7 @@ struct ember_damage_result ember_sim_hit(struct ember_sim *s, unsigned index,
     enemy_present(e,EMBER_ENEMY_HIT);
     s->damage_total += (unsigned)r.damage;
     event(s, EMBER_EVENT_HIT, (unsigned)(r.damage + r.absorbed), e->x, e->y);
+    hit_event_source(s,hit);
     s->events.item[s->events.count - 1].outcome = r.blocked ? 2 : 0;
     s->events.item[s->events.count - 1].tier = r.crit;
     s->events.item[s->events.count - 1].damage_type = r.dominant;
@@ -642,7 +651,8 @@ static void enemy_hit_flags(struct ember_sim *s, unsigned index, int damage,
         .crit = s->attributes[EMBER_CRIT], .crit_damage = s->attributes[EMBER_CRIT_DAMAGE],
         .penetration = s->attributes[EMBER_PIERCE], .share = {0,100,0,0,0,0},
         .depth = (uint8_t)depth, .flags = periodic ? EMBER_DOT : 0,
-        .source_weapon = weapon < EMBER_WEAPONS_COUNT ? (uint8_t)(weapon + 1) : 0};
+        .source_weapon = weapon < EMBER_WEAPONS_COUNT ? (uint8_t)(weapon + 1) : 0,
+        .source_evolution = weapon < EMBER_WEAPONS_COUNT ? s->player.evolution[weapon] : 0};
     hit.flags |= (uint8_t)(flags & ~HIT_DIRECTION_SET);
     if (!(flags & HIT_DIRECTION_SET) && enemy_front(e, s->player.x, s->player.y))
         hit.flags |= EMBER_FRONT;

@@ -36,7 +36,8 @@ struct ember_attack {
     int32_t penetration, share[EMBER_DAMAGE_TYPES], conversion, added[EMBER_DAMAGE_TYPES];
     int32_t element_more[EMBER_DAMAGE_TYPES], element_increased[EMBER_DAMAGE_TYPES];
     int32_t posture, status_strength, leech;
-    uint8_t flags, depth, source_weapon;
+    uint8_t flags, depth, source_weapon; /* Existing combat source: weapon ID + 1, zero means none. */
+    uint8_t source_evolution; /* Read-only hit-event branch snapshot. */
 };
 struct ember_damage_result {
     int32_t damage, absorbed, part[EMBER_DAMAGE_TYPES], before_defense;

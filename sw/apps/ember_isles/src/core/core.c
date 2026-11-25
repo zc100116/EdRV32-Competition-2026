@@ -37,7 +37,7 @@ void ember_event_push(struct ember_events *events, unsigned kind, unsigned value
         fputs("ember event pool exhausted\n", stderr);
         abort();
     }
-    events->item[events->count++] = (struct ember_event){.kind = (uint16_t)kind, .value = value, .x = x, .y = y};
+    events->item[events->count++] = (struct ember_event){.kind = (uint16_t)kind, .value = value, .x = x, .y = y, .source_weapon = 255};
 }
 
 void ember_run_config_default(struct ember_run_config *config)

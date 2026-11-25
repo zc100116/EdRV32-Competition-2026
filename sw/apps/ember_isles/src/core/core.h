@@ -63,6 +63,7 @@ struct ember_event {
     ember_fixed x;
     ember_fixed y;
     uint8_t tier, damage_type, outcome, subtype;
+    uint8_t source_weapon, source_evolution; /* HIT: CSV ID or 255; branch 0/1/2. */
 };
 struct ember_events { unsigned count; struct ember_event item[EMBER_EVENTS]; };
 uint32_t ember_random(struct ember_rng *rng);
