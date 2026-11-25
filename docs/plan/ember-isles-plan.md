@@ -25,6 +25,11 @@
 | 平台 | PC 先可玩，然后移植到 FPGA 板上运行 |
 | 以后再做 | 其余 7 名角色和 48 把武器、宠物、闯关模式、密林和火山口、局外成长（天赋、解锁、图鉴、黑潮难度）、契约、共鸣 |
 
+第一版条目清单（协调者 2026-11-25，围绕守火人的烬、范围、持续伤害，以及剑和杖）：
+- 遗物 12：普通 余烬袋 ember_bag、磨刀石 whetstone、鹰羽 eagle_feather、灯油壶 oil_flask；精良 炉镜 furnace_mirror、慢燃炭 slow_coal、战士腰带 warrior_belt、守灯徽 lamp_badge；稀有 炉心 furnace_core、单点透镜 single_lens；传说 余火即灯 ember_lamp、炽热之骨 hot_bone。
+- 祝福 6：疾行之火 moving_fire、灯守 lamp_guard、收获 harvest、能量涌流 energy、群体审判 judgment、一击之誓 first_hit。
+- 铭文 12：05a 已列（锐化、散射、引燃、重击、吸取、三星火、追踪、回旋、随身、爆裂、余烬地、双发），对两把武器都无效的去掉。
+
 已经完成并有测试的通用代码（数据表、结算、事件等）保留，不为第一版删掉；未完成的后续功能不继续做，也不留空接口。
 
 ## 2. 前置条件
