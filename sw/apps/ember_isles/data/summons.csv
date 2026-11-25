@@ -1,0 +1,4 @@
+id,name,hp,armor,inherit_armor,damage,attack,crit,crit_damage,speed,attack_cooldown,range_pixels,contact_radius,hurt_interval,light_radius,element_index,spawn_spacing
+iron_guard,铁卫,100,0,1,20,100,0,150,100,45,50,18,60,0,0,20
+lamp_turret,灯炮台,100,0,0,20,100,0,150,0,45,240,18,60,60,0,20
+phantom_gnawer,幻影潮啮,100,0,0,12,100,5,150,240,45,50,18,60,0,2,20

@@ -42,3 +42,55 @@ def build(c, rng):
                         address = run.scene.records('VERTEX', records)
                         run.scene.command('DRAW_TRI', ADDR=address, COUNT=1)
                         run.resolve(16,16)
+    # v0.4: 1/2/3-pixel groups, shared triangle edges, and odd target/scissor row limits.
+    boundary = Case()
+    c.runs.append(boundary)
+    boundary.ready(TGT_Y0=1, SC_Y0=1, SC_Y1=181, VP_H=256)
+    boundary.matrix([1/32, 0, 0, -1, 0, -1/128, 0, 1,
+                     0, 0, 0, .5, 0, 0, 0, 1])
+    lod_texture(boundary)
+    for y in (0, 3, 178, 180):
+        boundary.triangles([(4,y,1), (6,y,1), (4,y+2,1),
+                            (8,y,1), (10,y,1), (10,y+2,1),
+                            (12,y,1), (14,y+2,1), (12,y+2,1),
+                            (16,y,1), (18,y,1), (17,y+2,1)])
+    boundary.target(TGT_Y0=1, SC_Y0=3, SC_Y1=7, VP_H=256)
+    boundary.triangles([(0,2,1), (16,2,1), (0,8,1)])
+    resolve_rows(boundary, 32, 1, 181)
+
+    # Constant world X gives Q = (31.5 - screen_x) or (31 - screen_x).
+    # The covered x=30.5 pixel shares its 2x2 group with Q=0 or negative at x=31.5.
+    # W spans the near-plane value 1/16 to 16, exercising extrapolation beyond the edge.
+    for offset in (1/1024, 1/512):
+        helper = Case()
+        c.runs.append(helper)
+        helper.ready()
+        helper.matrix([1/32, 0, -offset, 0, 0, -1/32, 0, 0,
+                       0, 0, 1/32, 0, 0, 0, 1/16, 0])
+        lod_texture(helper)
+        records = [dict(X=-1, Y=y, Z=z, NZ=127, COLOR=0xffff, U=u, V=v)
+                   for y,z,u,v in [(0,1,0,0), (-35,256,65535,0),
+                                   (35,256,0,65535)]]
+        address = helper.scene.records('VERTEX', records)
+        helper.scene.command('DRAW_TRI', ADDR=address, COUNT=1)
+        helper.resolve()
+
+
+def lod_texture(c):
+    levels = [[(x*1973+y*3907+level*7391) & 65535
+               for y in range(max(1,64 >> level)) for x in range(max(1,64 >> level))]
+              for level in range(7)]
+    address, count = c.scene.texture(levels, format=2, width=64, height=64)
+    c.scene.command('TEX_LOAD', SRC=address, DST=0, BYTES=count)
+    c.scene.command('SET_TEX', OFFSET=0, LOG2_W=6, LOG2_H=6, FORMAT=2,
+                    LEVELS=7, SAMPLE=2)
+
+
+def resolve_rows(c, width, y0, y1):
+    stride = (width*2+31)//32*32
+    address = c.scene.reserve(stride*y1, alignment=4096)
+    c.scene.memory.write(address, bytes([0xa5])*(stride*y1))
+    c.scene.command('RESOLVE', BASE=address, STRIDE=stride, X0=0, Y0=y0,
+                    X1=width, Y1=y1)
+    c.surfaces.append(dict(address=address, size=stride*y1,
+                           width=width, height=y1, stride=stride))

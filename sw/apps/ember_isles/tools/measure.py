@@ -17,6 +17,8 @@ pc_states = [line for line in pc if line.startswith('STATE,')]
 spike_states = [line for line in spike if line.startswith('STATE,')]
 assert pc_states == spike_states, 'PC/Spike field-by-field state mismatch'
 assert pc_states, 'No replay summaries were produced'
+assert ',stage=0,' in next(line for line in pc if line.startswith('RUN,')), (
+    'Complete mode acceptance must start at stage zero')
 rows = [list(map(int, line.split(',')[1:])) for line in spike
         if line.startswith('INST,') and not line.startswith('INST,frame')]
 print(f'PC/Spike identical summaries: {len(pc_states)}')
@@ -31,7 +33,8 @@ for column, name, budget in [(1, 'simulation', 1200000), (2, 'presentation', 500
 pc_end = next(line for line in pc if line.startswith('END,'))
 spike_end = next(line for line in spike if line.startswith('END,'))
 assert pc_end == spike_end, 'PC/Spike final state mismatch'
-assert pc_end.split(',')[2:] == ['3', '5'], 'Replay did not clear wave five'
+assert pc_end.split(',')[2:4] == ['3', '10'] and pc_end.split(',')[5] == '0', (
+    'Replay did not finish the coast arena at the exit')
 print(pc_end)
 print(spike_end)
 

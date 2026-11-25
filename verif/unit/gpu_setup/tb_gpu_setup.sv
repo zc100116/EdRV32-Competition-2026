@@ -15,10 +15,10 @@ module tb_gpu_setup;
     reg output_ready = 1;
     wire output_valid;
     reg [776:0] input_data;
-    wire [2093:0] output_data;
+    wire [1751:0] output_data;
     reg [776:0] inputs [0:263];
-    reg [2093:0] expected [0:261];
-    reg [2093:0] held;
+    reg [1751:0] expected [0:261];
+    reg [1751:0] held;
     reg holding = 0;
     integer sent = 0;
     integer received = 0;
@@ -45,10 +45,9 @@ module tb_gpu_setup;
         .triangle_setup_bounds_o(output_data[0 +: 64]),
         .triangle_setup_edge_o(output_data[64 +: 480]),
         .triangle_setup_origin_o(output_data[544 +: 32]),
-        .triangle_setup_start_o(output_data[576 +: 490]),
-        .triangle_setup_gradient_o(output_data[1066 +: 784]),
-        .triangle_setup_h_o(output_data[1850 +: 70]),
-        .triangle_setup_normal_gradient_o(output_data[1920 +: 174]),
+        .triangle_setup_start_o(output_data[576 +: 434]),
+        .triangle_setup_gradient_o(output_data[1010 +: 672]),
+        .triangle_setup_h_o(output_data[1682 +: 70]),
         .finish_i(finish_i),
         .stop_i(stop_i),
         .unit_done_o(unit_done_o),

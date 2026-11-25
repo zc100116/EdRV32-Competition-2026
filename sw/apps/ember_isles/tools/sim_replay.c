@@ -1,9 +1,10 @@
 /* File: sim_replay.c
  * Spec: ember_isles tech 3; E2 deterministic replay acceptance.
- * Description: Original demo input recording and field/state comparison on a host.
+ * Description: Full-run input playback and field/state comparison on a host.
  * Clock domain: fixed 60 Hz simulation.
  */
 #include "sim/sim.h"
+#include "data.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,60 +15,22 @@ static void require(int condition, const char *message)
 {
     if (!condition) { fprintf(stderr, "FAIL frame %u: %s\n", sim.frame, message); exit(1); }
 }
-static int choice_score(const struct ember_choice *c)
+static void run(const char *path)
 {
-    if (c->kind == 0) return sim.player.weapon_level[c->id] ? (c->id == 0 ? 90 : 80) : 100;
-    if (c->kind == 2) return c->id == 0 ? 90 : c->id == 2 ? 75 : 60;
-    return c->id == 0 && sim.player.hp < 80 ? 95 : c->id == 3 ? 75 : 50;
-}
-static uint16_t demo_input(void)
-{
-    if (sim.phase == EMBER_MENU) return EMBER_START;
-    if (sim.phase == EMBER_UPGRADE) {
-        unsigned best = 0;
-        for (unsigned i = 1; i < 3; ++i)
-            if (choice_score(&sim.choices[i]) > choice_score(&sim.choices[best])) best = i;
-        if (sim.selected != best)
-            return sim.previous_input & EMBER_RIGHT ? 0 : EMBER_RIGHT;
-        return sim.previous_input & EMBER_A ? 0 : EMBER_A;
-    }
-    if (sim.phase != EMBER_PLAY) return 0;
-    /* A compact clockwise route gathers XP while leaving burning ground to pursue through. */
-    unsigned leg = (sim.combat_frame / 120) % 4;
-    uint16_t input = leg == 0 ? EMBER_RIGHT : leg == 1 ? EMBER_DOWN :
-                    leg == 2 ? EMBER_LEFT : EMBER_UP;
-    if (sim.combat_frame < 81) {
-        int32_t distance = sim.pillars[2].y - sim.player.y;
-        input = distance < -24 * EMBER_Q ? EMBER_UP :
-                distance > 24 * EMBER_Q ? EMBER_DOWN : EMBER_INTERACT;
-    }
-    input |= sim.combat_frame % 120 == 119 ? 0 : EMBER_J;
-    if (sim.combat_frame == 1500 || sim.combat_frame == 1620) input |= EMBER_SWAP;
-    if (sim.player.charge == 1000) input |= EMBER_U;
-    if (sim.combat_frame % 240 == 0) input |= EMBER_L;
-    if (sim.combat_frame % 180 == 0) input |= EMBER_K;
-    if (sim.combat_frame % 600 == 0) input |= EMBER_DASH;
-    if (sim.combat_frame == 100) input |= EMBER_INTERACT;
-    return input;
-}
-static void run(int generate, const char *path)
-{
-    if (generate) {
-        replay.seed = 20261124;
-        replay.count = EMBER_DEMO_FRAMES;
-    } else ember_replay_load(&replay, path);
-    ember_sim_init(&sim, replay.seed);
-    ember_sim_init(&twin, replay.seed);
+    ember_replay_load(&replay, path);
+    ember_sim_begin(&sim, replay.seed, &replay.config);
+    ember_sim_begin(&twin, replay.seed, &replay.config);
+    printf("RUN,mode=%u,stage=%u,seed=%u\n", replay.config.mode,
+        replay.config.stage, replay.seed);
     unsigned first_wave = 0, elite = 0, upgrade = 0, won = 0;
-    unsigned events[10] = {0};
+    unsigned events[EMBER_EVENT_COUNT] = {0};
     unsigned peak_enemies = 0, peak_shots = 0;
     for (unsigned frame = 0; frame < replay.count; ++frame) {
-        if (generate) replay.input[frame] = demo_input();
         ember_sim_step(&sim, replay.input[frame]);
         ember_sim_step(&twin, replay.input[frame]);
         require(!memcmp(&sim, &twin, sizeof(sim)), "same seed/input state differs");
         for (unsigned i = 0; i < sim.events.count; ++i) {
-            require(sim.events.item[i].kind < 10, "unfrozen event kind");
+            require(sim.events.item[i].kind < EMBER_EVENT_COUNT, "unfrozen event kind");
             ++events[sim.events.item[i].kind];
         }
         if (sim.alive_count > peak_enemies) peak_enemies = sim.alive_count;
@@ -81,22 +44,25 @@ static void run(int generate, const char *path)
             ember_sim_summary(&sim, summary, sizeof(summary));
             ember_sim_summary(&twin, other, sizeof(other));
             require(!strcmp(summary, other), "field summaries differ");
-            puts(summary);
+            printf("STATE,%s\n", summary);
         }
     }
-    fprintf(stderr, "frames=%u victory=%u wave1=%u elite=%u wave5=%u upgrade=%u "
+    fprintf(stderr, "frames=%u victory=%u wave1=%u elite=%u upgrade=%u "
             "peak_enemies=%u peak_shots=%u hp=%d kills=%u level=%u\n",
-            replay.count, won, first_wave, elite, elite + 1, upgrade,
+            replay.count, won, first_wave, elite, upgrade,
             peak_enemies, peak_shots, sim.player.hp, sim.player.kills, sim.player.level);
     fprintf(stderr, "events shot=%u hit=%u kill=%u dash=%u seed=%u ultimate=%u "
             "levelup=%u choose=%u hurt=%u victory=%u\n",
             events[0], events[1], events[2], events[3], events[4], events[5],
             events[6], events[7], events[8], events[9]);
-    require(sim.phase == EMBER_WON && sim.wave == 5 && sim.alive_count == 0,
-            "demo must clear five waves");
+    unsigned stages = (unsigned)ember_modes[replay.config.mode].stages;
+    require(sim.phase == EMBER_WON && sim.wave == stages * 10 &&
+            sim.config.stage + 1u == stages && sim.alive_count == 0,
+            "replay must clear its complete mode and take the exit");
     require(events[6] && events[7], "demo must offer and confirm upgrades");
     require(events[3] && events[4] && events[5], "demo must demonstrate all active skills");
-    if (generate) ember_replay_save(&replay, path);
+    printf("END,%u,%u,%u,%u,%u\n", replay.count, sim.phase, sim.wave,
+        sim.config.mode, sim.config.stage);
 }
 static void setup(void)
 {
@@ -226,7 +192,7 @@ static void tests(void)
     sim.oil=0; ember_sim_step(&sim,0); require(sim.in_light,"pillar is independent light source");
     setup(); for(unsigned i=0;i<60;++i) ember_sim_step(&sim,0);
     require(sim.oil==9900,"CSV oil drain per second");
-    setup(); target(0,100,10000); sim.player.pet_weapon=0;
+    setup(); target(0,100,10000); ember_sim_pet(&sim, 0, 3);
     ember_sim_step(&sim,0); require(shots()==1,"pet weapon autonomous attack");
     setup(); target(0,100,10000); ember_sim_status(&sim,0,EMBER_WET,0);
     ember_sim_status(&sim,0,EMBER_IGNITE,0);
@@ -268,7 +234,9 @@ static void tests(void)
     ember_sim_hit(&sim,0,&h);
     require(!sim.enemies[0].alive && !sim.enemies[0].defense.frozen &&
             sim.enemies[1].hp==9990 && sim.player.kills==1 && sim.alive_count==1 &&
-            sim.pickup_count==1 && sim.trigger_peak==1,
+            sim.pickup_count==3 && sim.pickups[0].kind==EMBER_DROP_XP &&
+            sim.pickups[1].kind==EMBER_DROP_GOLD && sim.pickups[2].kind==EMBER_DROP_EMBER &&
+            sim.trigger_peak==1,
             "fatal iron hit shatters and processes death once");
     setup(); target(0,20,10000);
     ember_sim_status(&sim,0,EMBER_BREAK_ARMOR,0);
@@ -309,7 +277,7 @@ static void tests(void)
     r=ember_sim_hit(&sim,0,&h);
     require(!r.blocked && r.damage==100 && sim.events.count==2 &&
             !sim.events.item[1].outcome,"pure true damage publishes ordinary hit outcome");
-    setup(); sim.player.charge=1000; ember_sim_step(&sim,EMBER_U);
+    setup(); sim.player.charge=100; ember_sim_step(&sim,EMBER_U);
     require(!sim.player.charge && sim.player.action==EMBER_CAST,"U casts ultimate");
     setup(); ember_sim_step(&sim,EMBER_K); require(sim.player.cooldown_k,"K skill");
     setup(); ember_sim_step(&sim,EMBER_L); require(sim.player.cooldown_b,"L skill");
@@ -323,7 +291,8 @@ static void tests(void)
     setup(); target(0,20,10000); sim.tag_damage[0]=20;
     sim.attributes[EMBER_EMBER_DAMAGE]=120;
     ember_sim_step(&sim,EMBER_J); ember_sim_step(&sim,EMBER_J);
-    require(sim.enemies[0].hp==9957,"element and tag bonuses share increased damage zone");
+    require(sim.enemies[0].hp==9942,
+            "element and tag bonuses share increased zone on staff impact and splash");
     RESET(); h=(struct ember_attack){.base=100,.attack=100,.share={100,0,0,0,0,0}};
     d.active_block=1; d.block_strength=50; HIT(50,"active block");
     setup(); target(0,100,10000); ember_sim_status(&sim,0,EMBER_IGNITE,0);
@@ -343,8 +312,7 @@ static void tests(void)
 int main(int argc, char **argv)
 {
     if (argc == 2 && !strcmp(argv[1], "--test")) tests();
-    else if (argc == 3 && !strcmp(argv[1], "--generate")) run(1, argv[2]);
-    else if (argc == 2) run(0, argv[1]);
-    else { fputs("usage: sim_replay --test | [--generate] replay.txt\n", stderr); return 1; }
+    else if (argc == 2) run(argv[1]);
+    else { fputs("usage: sim_replay --test | replay.txt\n", stderr); return 1; }
     return 0;
 }

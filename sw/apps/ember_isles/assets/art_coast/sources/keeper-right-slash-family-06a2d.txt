@@ -1,0 +1,14 @@
+Use case: precise-object-edit. Production true pixel sprite atlas of approved copper-haired keeper, warm copper1px hair rim and dark top2rows, red scarf, navy long coat brass trim, slim long legs and boots. Exact RIGHT strict side profile in EVERY cell, preserve the referenced native44px standing body proportions: head and torso pixel dimensions NEVER grow or shrink during movement. Render ONE logical64x64cell for each pose in strict4columns x3rows, logicalcanvas256x192, solid COARSE square pixels, transparent background. Centerx32, feetbaseline58; idle headtopy15; posed bodies bend at joints without scaling. Match reference same native pixel pitch. In reading order:
+1: attack_slash frame0 — draw empty right grip back to left waist; primary palm at [25,39]
+2: attack_slash frame1 — torso twists preparing horizontal cut; primary palm at [26,34]
+3: attack_slash frame2 — full horizontal empty-hand grip extended right; primary palm at [48,35]
+4: attack_slash frame3 — follow through across body at low height; primary palm at [46,45]
+5: attack_slash frame4 — wind grip back on right side for reverse cut; primary palm at [44,33]
+6: attack_slash frame5 — begin reverse sweep; primary palm at [40,29]
+7: attack_slash frame6 — full reverse empty grip extended left; primary palm at [20,36]
+8: attack_slash frame7 — reverse follow-through and knee flex; primary palm at [24,44]
+9: attack_slash frame8 — raise grip for final cut; primary palm at [33,22]
+10: attack_slash frame9 — downward finishing cut with grip near opposite knee; primary palm at [43,48]
+11: attack_slash frame10 — settle from final cut; primary palm at [41,43]
+12: attack_slash frame11 — return to ready stance; primary palm at [40,39]
+Empty hands and primary right hand visible for separate weapon layer. Do not bake weapons, spells, particles, glow, afterimages or shadows into bodies. Each pose distinct. Walk is alternating feet with2–3px vertical lift,3pxstride and1pxbodybob, coat/apron sway1–2px; back views show lifted soles. Copper rim only existing hair contour, no white spikes. No text, gridlines, checkerboard, antialiasing or painterly shading. Any unused final cells completely empty.

@@ -1,0 +1,32 @@
+{
+  "name": "coast-pickup-gold-06a2e",
+  "grid": [
+    24,
+    24
+  ],
+  "cell": [
+    24,
+    24
+  ],
+  "format": 1,
+  "palette_file": "coast-ui-06a2d-palette.json",
+  "atlas_group": "coast_ui_icons",
+  "resource": "coast_ui_icons/gold",
+  "cells": [
+    {
+      "id": "down/gold/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "gold",
+      "frame": 0,
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    }
+  ]
+}

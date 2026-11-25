@@ -1,0 +1,15 @@
+id,kind,index,x_percent,y_percent
+pillar_0,0,0,20,33
+pillar_1,0,1,40,33
+pillar_2,0,2,60,33
+pillar_3,0,3,80,33
+pillar_4,0,4,20,67
+pillar_5,0,5,40,67
+pillar_6,0,6,60,67
+pillar_7,0,7,80,67
+altar,1,0,45,50
+merchant,2,0,55,50
+door_0,3,0,25,12
+door_1,3,1,50,12
+door_2,3,2,75,12
+lighthouse,4,0,50,50

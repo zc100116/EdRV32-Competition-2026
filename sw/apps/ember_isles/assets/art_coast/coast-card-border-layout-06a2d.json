@@ -1,0 +1,401 @@
+{
+  "source": "coast-card-frames-06a2d",
+  "layouts": [
+    {
+      "rarity": "common",
+      "source_cell": [
+        0,
+        0
+      ],
+      "source_size": [
+        35,
+        49
+      ],
+      "corners": [
+        8,
+        8
+      ],
+      "center": "transparent",
+      "edge_mode": "repeat native8px strips",
+      "pieces": [
+        {
+          "name": "top_left",
+          "frame_id": "coast_card_borders/down/common/0",
+          "source_rect": [
+            7,
+            6,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "top_right",
+          "frame_id": "coast_card_borders/down/common/1",
+          "source_rect": [
+            34,
+            6,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "bottom_left",
+          "frame_id": "coast_card_borders/down/common/2",
+          "source_rect": [
+            7,
+            47,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "bottom_right",
+          "frame_id": "coast_card_borders/down/common/3",
+          "source_rect": [
+            34,
+            47,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "top",
+          "frame_id": "coast_card_borders/down/common/4",
+          "source_rect": [
+            20,
+            6,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "right",
+          "frame_id": "coast_card_borders/down/common/5",
+          "source_rect": [
+            34,
+            26,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "bottom",
+          "frame_id": "coast_card_borders/down/common/6",
+          "source_rect": [
+            20,
+            47,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "left",
+          "frame_id": "coast_card_borders/down/common/7",
+          "source_rect": [
+            7,
+            26,
+            8,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "rarity": "fine",
+      "source_cell": [
+        1,
+        0
+      ],
+      "source_size": [
+        36,
+        49
+      ],
+      "corners": [
+        8,
+        8
+      ],
+      "center": "transparent",
+      "edge_mode": "repeat native8px strips",
+      "pieces": [
+        {
+          "name": "top_left",
+          "frame_id": "coast_card_borders/down/fine/0",
+          "source_rect": [
+            5,
+            6,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "top_right",
+          "frame_id": "coast_card_borders/down/fine/1",
+          "source_rect": [
+            33,
+            6,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "bottom_left",
+          "frame_id": "coast_card_borders/down/fine/2",
+          "source_rect": [
+            5,
+            47,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "bottom_right",
+          "frame_id": "coast_card_borders/down/fine/3",
+          "source_rect": [
+            33,
+            47,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "top",
+          "frame_id": "coast_card_borders/down/fine/4",
+          "source_rect": [
+            19,
+            6,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "right",
+          "frame_id": "coast_card_borders/down/fine/5",
+          "source_rect": [
+            33,
+            26,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "bottom",
+          "frame_id": "coast_card_borders/down/fine/6",
+          "source_rect": [
+            19,
+            47,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "left",
+          "frame_id": "coast_card_borders/down/fine/7",
+          "source_rect": [
+            5,
+            26,
+            8,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "rarity": "rare",
+      "source_cell": [
+        0,
+        1
+      ],
+      "source_size": [
+        35,
+        49
+      ],
+      "corners": [
+        8,
+        8
+      ],
+      "center": "transparent",
+      "edge_mode": "repeat native8px strips",
+      "pieces": [
+        {
+          "name": "top_left",
+          "frame_id": "coast_card_borders/down/rare/0",
+          "source_rect": [
+            7,
+            6,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "top_right",
+          "frame_id": "coast_card_borders/down/rare/1",
+          "source_rect": [
+            34,
+            6,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "bottom_left",
+          "frame_id": "coast_card_borders/down/rare/2",
+          "source_rect": [
+            7,
+            47,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "bottom_right",
+          "frame_id": "coast_card_borders/down/rare/3",
+          "source_rect": [
+            34,
+            47,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "top",
+          "frame_id": "coast_card_borders/down/rare/4",
+          "source_rect": [
+            20,
+            6,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "right",
+          "frame_id": "coast_card_borders/down/rare/5",
+          "source_rect": [
+            34,
+            26,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "bottom",
+          "frame_id": "coast_card_borders/down/rare/6",
+          "source_rect": [
+            20,
+            47,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "left",
+          "frame_id": "coast_card_borders/down/rare/7",
+          "source_rect": [
+            7,
+            26,
+            8,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "rarity": "legendary",
+      "source_cell": [
+        1,
+        1
+      ],
+      "source_size": [
+        36,
+        49
+      ],
+      "corners": [
+        8,
+        8
+      ],
+      "center": "transparent",
+      "edge_mode": "repeat native8px strips",
+      "pieces": [
+        {
+          "name": "top_left",
+          "frame_id": "coast_card_borders/down/legendary/0",
+          "source_rect": [
+            5,
+            6,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "top_right",
+          "frame_id": "coast_card_borders/down/legendary/1",
+          "source_rect": [
+            33,
+            6,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "bottom_left",
+          "frame_id": "coast_card_borders/down/legendary/2",
+          "source_rect": [
+            5,
+            47,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "bottom_right",
+          "frame_id": "coast_card_borders/down/legendary/3",
+          "source_rect": [
+            33,
+            47,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "top",
+          "frame_id": "coast_card_borders/down/legendary/4",
+          "source_rect": [
+            19,
+            6,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "right",
+          "frame_id": "coast_card_borders/down/legendary/5",
+          "source_rect": [
+            33,
+            26,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "bottom",
+          "frame_id": "coast_card_borders/down/legendary/6",
+          "source_rect": [
+            19,
+            47,
+            8,
+            8
+          ]
+        },
+        {
+          "name": "left",
+          "frame_id": "coast_card_borders/down/legendary/7",
+          "source_rect": [
+            5,
+            26,
+            8,
+            8
+          ]
+        }
+      ]
+    }
+  ]
+}

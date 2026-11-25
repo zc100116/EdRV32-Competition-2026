@@ -1,45 +1,45 @@
 id,name,calculation,minimum,maximum,range_maximum
-max_hp,Maximum health,flat_increased_more,1,99999,2000000000
-armor,Armor,flat_increased_more,0,9999,1000000
-speed,Move speed,flat_increased_more,1,1000,1000000
-attack,Attack,flat_increased_more,0,99999,1000000
-attack_speed,Attack speed,flat_increased_more,1,300,1000000
-crit,Critical chance,flat_more,0,100,1000000
-crit_damage,Critical damage,flat_increased_more,100,300,1000000
-area,Area,flat_increased_more,1,1000,1000000
-projectiles,Projectile count,flat_increased_more,1,100,1000000
-projectile_speed,Projectile speed,flat_increased_more,1,1000,1000000
-duration,Duration,flat_increased_more,1,1000,1000000
-cooldown,Cooldown reduction,flat_increased_more,0,75,1000000
-pierce,Pierce,flat_increased_more,0,100,1000000
-knockback,Knockback,flat_increased_more,0,1000,1000000
-regen,Health regeneration,flat_increased_more,0,1000,1000000
-dodge,Dodge,flat_increased_more,0,60,1000000
-shield,Shield capacity,flat_increased_more,0,99999,1000000
-tenacity,Tenacity,flat_increased_more,0,75,1000000
-dash_count,Dash count,flat_increased_more,1,10,1000000
-dash_cooldown,Dash cooldown,flat_increased_more,1,36000,1000000
-status_chance,Status chance,flat_increased_more,0,100,1000000
-status_strength,Status strength,flat_increased_more,0,1000,1000000
-status_duration,Status duration,flat_increased_more,1,1000,1000000
-pickup,Pickup radius,flat_increased_more,1,1000,1000000
-xp,Experience gain,flat_increased_more,0,1000,1000000
-gold,Gold gain,flat_increased_more,0,1000,1000000
-luck,Luck,flat_increased_more,0,1000,1000000
-healing,Healing effect,flat_increased_more,0,1000,1000000
-aura,Aura radius,flat_increased_more,0,1000,1000000
-threat,Threat,flat_increased_more,0,1000,1000000
-ember_damage,ember damage,flat_increased_more,0,1000,1000000
-tide_damage,tide damage,flat_increased_more,0,1000,1000000
-iron_damage,iron damage,flat_increased_more,0,1000,1000000
-star_damage,star damage,flat_increased_more,0,1000,1000000
-shadow_damage,shadow damage,flat_increased_more,0,1000,1000000
-lamp_radius,Lamp radius,flat_increased_more,1,1000,10000
-fuel_efficiency,Fuel efficiency,flat_increased_more,1,1000,10000
-light_effect,Light effect,flat_increased_more,0,300,1000
-fire_resist,fire_resist,flat_increased_more,-100,75,100
-tide_resist,tide_resist,flat_increased_more,-100,75,100
-star_resist,star_resist,flat_increased_more,-100,75,100
-shadow_resist,shadow_resist,flat_increased_more,-100,75,100
-all_resist,All elemental resistance,flat_increased_more,-100,100,100
-reduction,Independent reduction,flat_increased_more,0,80,100
+max_hp,最大生命,flat_increased_more,1,99999,2000000000
+armor,护甲,flat_increased_more,0,9999,1000000
+speed,移速,flat_increased_more,1,1000,1000000
+attack,攻击力,flat_increased_more,0,99999,1000000
+attack_speed,攻速,flat_increased_more,1,300,1000000
+crit,暴击率,flat_more,0,100,1000000
+crit_damage,暴击伤害,flat_increased_more,100,300,1000000
+area,范围,flat_increased_more,1,1000,1000000
+projectiles,投射物数量,flat_increased_more,1,100,1000000
+projectile_speed,投射物速度,flat_increased_more,1,1000,1000000
+duration,持续时间,flat_increased_more,1,1000,1000000
+cooldown,冷却缩减,flat_increased_more,0,75,1000000
+pierce,穿透,flat_increased_more,0,100,1000000
+knockback,击退,flat_increased_more,0,1000,1000000
+regen,生命回复,flat_increased_more,0,1000,1000000
+dodge,闪避,flat_increased_more,0,60,1000000
+shield,护盾上限,flat_increased_more,0,99999,1000000
+tenacity,韧性,flat_increased_more,0,75,1000000
+dash_count,冲刺次数,flat_increased_more,1,10,1000000
+dash_cooldown,冲刺冷却,flat_increased_more,1,36000,1000000
+status_chance,状态触发几率,flat_increased_more,0,100,1000000
+status_strength,状态强度,flat_increased_more,0,1000,1000000
+status_duration,状态持续时间,flat_increased_more,1,1000,1000000
+pickup,拾取范围,flat_increased_more,1,1000,1000000
+xp,经验获取,flat_increased_more,0,1000,1000000
+gold,金币获取,flat_increased_more,0,1000,1000000
+luck,幸运,flat_increased_more,0,1000,1000000
+healing,治疗效果,flat_increased_more,0,1000,1000000
+aura,光环范围,flat_increased_more,0,1000,1000000
+threat,仇恨,flat_increased_more,0,1000,1000000
+ember_damage,烬伤害,flat_increased_more,0,1000,1000000
+tide_damage,潮伤害,flat_increased_more,0,1000,1000000
+iron_damage,铁伤害,flat_increased_more,0,1000,1000000
+star_damage,星伤害,flat_increased_more,0,1000,1000000
+shadow_damage,影伤害,flat_increased_more,0,1000,1000000
+lamp_radius,灯光半径,flat_increased_more,1,1000,10000
+fuel_efficiency,燃料效率,flat_increased_more,1,1000,10000
+light_effect,光区效果,flat_increased_more,0,300,1000
+fire_resist,烬抗性,flat_increased_more,-100,75,100
+tide_resist,潮抗性,flat_increased_more,-100,75,100
+star_resist,星抗性,flat_increased_more,-100,75,100
+shadow_resist,影抗性,flat_increased_more,-100,75,100
+all_resist,全元素抗性,flat_increased_more,-100,100,100
+reduction,减伤,flat_increased_more,0,80,100

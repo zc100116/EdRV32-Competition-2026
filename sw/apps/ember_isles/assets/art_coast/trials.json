@@ -1,0 +1,929 @@
+[
+  {
+    "name": "keeper-idle-corrected",
+    "grid": [
+      240,
+      240
+    ],
+    "cell": [
+      48,
+      48
+    ],
+    "palette_entries": 64,
+    "format": 1,
+    "pixel_edits": [],
+    "cells": [
+      {
+        "id": "down/idle/0",
+        "cell": [
+          0,
+          0
+        ],
+        "direction": "down",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "down/idle/1",
+        "cell": [
+          1,
+          0
+        ],
+        "direction": "down",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "down/idle/2",
+        "cell": [
+          2,
+          0
+        ],
+        "direction": "down",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "down/idle/3",
+        "cell": [
+          3,
+          0
+        ],
+        "direction": "down",
+        "action": "idle",
+        "frame": 3
+      },
+      {
+        "id": "down_right/idle/0",
+        "cell": [
+          0,
+          1
+        ],
+        "direction": "down_right",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "down_right/idle/1",
+        "cell": [
+          1,
+          1
+        ],
+        "direction": "down_right",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "down_right/idle/2",
+        "cell": [
+          2,
+          1
+        ],
+        "direction": "down_right",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "down_right/idle/3",
+        "cell": [
+          3,
+          1
+        ],
+        "direction": "down_right",
+        "action": "idle",
+        "frame": 3
+      },
+      {
+        "id": "right/idle/0",
+        "cell": [
+          0,
+          2
+        ],
+        "direction": "right",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "right/idle/1",
+        "cell": [
+          1,
+          2
+        ],
+        "direction": "right",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "right/idle/2",
+        "cell": [
+          2,
+          2
+        ],
+        "direction": "right",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "right/idle/3",
+        "cell": [
+          3,
+          2
+        ],
+        "direction": "right",
+        "action": "idle",
+        "frame": 3
+      },
+      {
+        "id": "up_right/idle/0",
+        "cell": [
+          0,
+          3
+        ],
+        "direction": "up_right",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "up_right/idle/1",
+        "cell": [
+          1,
+          3
+        ],
+        "direction": "up_right",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "up_right/idle/2",
+        "cell": [
+          2,
+          3
+        ],
+        "direction": "up_right",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "up_right/idle/3",
+        "cell": [
+          3,
+          3
+        ],
+        "direction": "up_right",
+        "action": "idle",
+        "frame": 3
+      },
+      {
+        "id": "up/idle/0",
+        "cell": [
+          0,
+          4
+        ],
+        "direction": "up",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "up/idle/1",
+        "cell": [
+          1,
+          4
+        ],
+        "direction": "up",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "up/idle/2",
+        "cell": [
+          2,
+          4
+        ],
+        "direction": "up",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "up/idle/3",
+        "cell": [
+          3,
+          4
+        ],
+        "direction": "up",
+        "action": "idle",
+        "frame": 3
+      }
+    ]
+  },
+  {
+    "name": "smith-idle",
+    "grid": [
+      240,
+      240
+    ],
+    "cell": [
+      48,
+      48
+    ],
+    "palette_entries": 64,
+    "format": 1,
+    "pixel_edits": [],
+    "cells": [
+      {
+        "id": "down/idle/0",
+        "cell": [
+          0,
+          0
+        ],
+        "direction": "down",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "down/idle/1",
+        "cell": [
+          1,
+          0
+        ],
+        "direction": "down",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "down/idle/2",
+        "cell": [
+          2,
+          0
+        ],
+        "direction": "down",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "down/idle/3",
+        "cell": [
+          3,
+          0
+        ],
+        "direction": "down",
+        "action": "idle",
+        "frame": 3
+      },
+      {
+        "id": "down_right/idle/0",
+        "cell": [
+          0,
+          1
+        ],
+        "direction": "down_right",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "down_right/idle/1",
+        "cell": [
+          1,
+          1
+        ],
+        "direction": "down_right",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "down_right/idle/2",
+        "cell": [
+          2,
+          1
+        ],
+        "direction": "down_right",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "down_right/idle/3",
+        "cell": [
+          3,
+          1
+        ],
+        "direction": "down_right",
+        "action": "idle",
+        "frame": 3
+      },
+      {
+        "id": "right/idle/0",
+        "cell": [
+          0,
+          2
+        ],
+        "direction": "right",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "right/idle/1",
+        "cell": [
+          1,
+          2
+        ],
+        "direction": "right",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "right/idle/2",
+        "cell": [
+          2,
+          2
+        ],
+        "direction": "right",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "right/idle/3",
+        "cell": [
+          3,
+          2
+        ],
+        "direction": "right",
+        "action": "idle",
+        "frame": 3
+      },
+      {
+        "id": "up_right/idle/0",
+        "cell": [
+          0,
+          3
+        ],
+        "direction": "up_right",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "up_right/idle/1",
+        "cell": [
+          1,
+          3
+        ],
+        "direction": "up_right",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "up_right/idle/2",
+        "cell": [
+          2,
+          3
+        ],
+        "direction": "up_right",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "up_right/idle/3",
+        "cell": [
+          3,
+          3
+        ],
+        "direction": "up_right",
+        "action": "idle",
+        "frame": 3
+      },
+      {
+        "id": "up/idle/0",
+        "cell": [
+          0,
+          4
+        ],
+        "direction": "up",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "up/idle/1",
+        "cell": [
+          1,
+          4
+        ],
+        "direction": "up",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "up/idle/2",
+        "cell": [
+          2,
+          4
+        ],
+        "direction": "up",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "up/idle/3",
+        "cell": [
+          3,
+          4
+        ],
+        "direction": "up",
+        "action": "idle",
+        "frame": 3
+      }
+    ]
+  },
+  {
+    "name": "keeper-down",
+    "grid": [
+      256,
+      128
+    ],
+    "cell": [
+      64,
+      64
+    ],
+    "foot_baseline": 58,
+    "palette_entries": 64,
+    "format": 1,
+    "pixel_edits": [],
+    "cells": [
+      {
+        "id": "down/idle/0",
+        "cell": [
+          0,
+          0
+        ],
+        "direction": "down",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "down/idle/1",
+        "cell": [
+          1,
+          0
+        ],
+        "direction": "down",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "down/idle/2",
+        "cell": [
+          2,
+          0
+        ],
+        "direction": "down",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "down/idle/3",
+        "cell": [
+          3,
+          0
+        ],
+        "direction": "down",
+        "action": "idle",
+        "frame": 3
+      },
+      {
+        "id": "down/walk/0",
+        "cell": [
+          0,
+          1
+        ],
+        "direction": "down",
+        "action": "walk",
+        "frame": 0
+      },
+      {
+        "id": "down/walk/1",
+        "cell": [
+          1,
+          1
+        ],
+        "direction": "down",
+        "action": "walk",
+        "frame": 1
+      },
+      {
+        "id": "down/walk/2",
+        "cell": [
+          2,
+          1
+        ],
+        "direction": "down",
+        "action": "walk",
+        "frame": 2
+      },
+      {
+        "id": "down/walk/3",
+        "cell": [
+          3,
+          1
+        ],
+        "direction": "down",
+        "action": "walk",
+        "frame": 3
+      }
+    ],
+    "row_edits": [],
+    "source_pitch": 8.0
+  },
+  {
+    "name": "keeper-down-right",
+    "grid": [
+      256,
+      128
+    ],
+    "cell": [
+      64,
+      64
+    ],
+    "foot_baseline": 58,
+    "palette_entries": 64,
+    "format": 1,
+    "pixel_edits": [],
+    "cells": [
+      {
+        "id": "down_right/idle/0",
+        "cell": [
+          0,
+          0
+        ],
+        "direction": "down_right",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "down_right/idle/1",
+        "cell": [
+          1,
+          0
+        ],
+        "direction": "down_right",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "down_right/idle/2",
+        "cell": [
+          2,
+          0
+        ],
+        "direction": "down_right",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "down_right/idle/3",
+        "cell": [
+          3,
+          0
+        ],
+        "direction": "down_right",
+        "action": "idle",
+        "frame": 3
+      },
+      {
+        "id": "down_right/walk/0",
+        "cell": [
+          0,
+          1
+        ],
+        "direction": "down_right",
+        "action": "walk",
+        "frame": 0
+      },
+      {
+        "id": "down_right/walk/1",
+        "cell": [
+          1,
+          1
+        ],
+        "direction": "down_right",
+        "action": "walk",
+        "frame": 1
+      },
+      {
+        "id": "down_right/walk/2",
+        "cell": [
+          2,
+          1
+        ],
+        "direction": "down_right",
+        "action": "walk",
+        "frame": 2
+      },
+      {
+        "id": "down_right/walk/3",
+        "cell": [
+          3,
+          1
+        ],
+        "direction": "down_right",
+        "action": "walk",
+        "frame": 3
+      }
+    ],
+    "row_edits": [],
+    "source_pitch": 8.0
+  },
+  {
+    "name": "keeper-right",
+    "grid": [
+      256,
+      128
+    ],
+    "cell": [
+      64,
+      64
+    ],
+    "foot_baseline": 58,
+    "palette_entries": 64,
+    "format": 1,
+    "pixel_edits": [],
+    "cells": [
+      {
+        "id": "right/idle/0",
+        "cell": [
+          0,
+          0
+        ],
+        "direction": "right",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "right/idle/1",
+        "cell": [
+          1,
+          0
+        ],
+        "direction": "right",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "right/idle/2",
+        "cell": [
+          2,
+          0
+        ],
+        "direction": "right",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "right/idle/3",
+        "cell": [
+          3,
+          0
+        ],
+        "direction": "right",
+        "action": "idle",
+        "frame": 3
+      },
+      {
+        "id": "right/walk/0",
+        "cell": [
+          0,
+          1
+        ],
+        "direction": "right",
+        "action": "walk",
+        "frame": 0
+      },
+      {
+        "id": "right/walk/1",
+        "cell": [
+          1,
+          1
+        ],
+        "direction": "right",
+        "action": "walk",
+        "frame": 1
+      },
+      {
+        "id": "right/walk/2",
+        "cell": [
+          2,
+          1
+        ],
+        "direction": "right",
+        "action": "walk",
+        "frame": 2
+      },
+      {
+        "id": "right/walk/3",
+        "cell": [
+          3,
+          1
+        ],
+        "direction": "right",
+        "action": "walk",
+        "frame": 3
+      }
+    ],
+    "row_edits": [],
+    "source_pitch": 8.0
+  },
+  {
+    "name": "keeper-up-right",
+    "grid": [
+      256,
+      128
+    ],
+    "cell": [
+      64,
+      64
+    ],
+    "foot_baseline": 58,
+    "palette_entries": 64,
+    "format": 1,
+    "pixel_edits": [],
+    "cells": [
+      {
+        "id": "up_right/idle/0",
+        "cell": [
+          0,
+          0
+        ],
+        "direction": "up_right",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "up_right/idle/1",
+        "cell": [
+          1,
+          0
+        ],
+        "direction": "up_right",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "up_right/idle/2",
+        "cell": [
+          2,
+          0
+        ],
+        "direction": "up_right",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "up_right/idle/3",
+        "cell": [
+          3,
+          0
+        ],
+        "direction": "up_right",
+        "action": "idle",
+        "frame": 3
+      },
+      {
+        "id": "up_right/walk/0",
+        "cell": [
+          0,
+          1
+        ],
+        "direction": "up_right",
+        "action": "walk",
+        "frame": 0
+      },
+      {
+        "id": "up_right/walk/1",
+        "cell": [
+          1,
+          1
+        ],
+        "direction": "up_right",
+        "action": "walk",
+        "frame": 1
+      },
+      {
+        "id": "up_right/walk/2",
+        "cell": [
+          2,
+          1
+        ],
+        "direction": "up_right",
+        "action": "walk",
+        "frame": 2
+      },
+      {
+        "id": "up_right/walk/3",
+        "cell": [
+          3,
+          1
+        ],
+        "direction": "up_right",
+        "action": "walk",
+        "frame": 3
+      }
+    ],
+    "row_edits": [],
+    "source_pitch": 8.0
+  },
+  {
+    "name": "keeper-up",
+    "grid": [
+      256,
+      128
+    ],
+    "cell": [
+      64,
+      64
+    ],
+    "foot_baseline": 58,
+    "palette_entries": 64,
+    "format": 1,
+    "pixel_edits": [],
+    "cells": [
+      {
+        "id": "up/idle/0",
+        "cell": [
+          0,
+          0
+        ],
+        "direction": "up",
+        "action": "idle",
+        "frame": 0
+      },
+      {
+        "id": "up/idle/1",
+        "cell": [
+          1,
+          0
+        ],
+        "direction": "up",
+        "action": "idle",
+        "frame": 1
+      },
+      {
+        "id": "up/idle/2",
+        "cell": [
+          2,
+          0
+        ],
+        "direction": "up",
+        "action": "idle",
+        "frame": 2
+      },
+      {
+        "id": "up/idle/3",
+        "cell": [
+          3,
+          0
+        ],
+        "direction": "up",
+        "action": "idle",
+        "frame": 3
+      },
+      {
+        "id": "up/walk/0",
+        "cell": [
+          0,
+          1
+        ],
+        "direction": "up",
+        "action": "walk",
+        "frame": 0
+      },
+      {
+        "id": "up/walk/1",
+        "cell": [
+          1,
+          1
+        ],
+        "direction": "up",
+        "action": "walk",
+        "frame": 1
+      },
+      {
+        "id": "up/walk/2",
+        "cell": [
+          2,
+          1
+        ],
+        "direction": "up",
+        "action": "walk",
+        "frame": 2
+      },
+      {
+        "id": "up/walk/3",
+        "cell": [
+          3,
+          1
+        ],
+        "direction": "up",
+        "action": "walk",
+        "frame": 3
+      }
+    ],
+    "row_edits": [],
+    "source_pitch": 8.0
+  }
+]

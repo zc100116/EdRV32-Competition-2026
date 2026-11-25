@@ -1,0 +1,5 @@
+id,name,weight,luck_factor
+common,普通,100,0
+fine,精良,50,1
+rare,稀有,20,2
+legendary,传说,5,3

@@ -1,0 +1,127 @@
+[
+  {
+    "metadata": "keeper-down-v3-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ]
+  },
+  {
+    "metadata": "keeper-down-right-v2-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ]
+  },
+  {
+    "metadata": "keeper-right-v2-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ]
+  },
+  {
+    "metadata": "keeper-up-right-v2-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ]
+  },
+  {
+    "metadata": "keeper-up-v3-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ]
+  },
+  {
+    "metadata": "keeper-common-down-v2-sheet.json",
+    "actions": [
+      "dash",
+      "hit",
+      "death",
+      "interact"
+    ]
+  },
+  {
+    "metadata": "keeper-initial-caster-down-sheet.json",
+    "actions": [
+      "cast",
+      "attack_staff",
+      "attack_codex",
+      "charge_staff"
+    ]
+  },
+  {
+    "metadata": "keeper-initial-common-down-right-sheet.json",
+    "actions": [
+      "dash",
+      "hit",
+      "death",
+      "interact"
+    ]
+  },
+  {
+    "metadata": "keeper-initial-caster-down-right-sheet.json",
+    "actions": [
+      "cast",
+      "attack_staff",
+      "attack_codex",
+      "charge_staff"
+    ]
+  },
+  {
+    "metadata": "keeper-initial-common-right-sheet.json",
+    "actions": [
+      "dash",
+      "hit",
+      "death",
+      "interact"
+    ]
+  },
+  {
+    "metadata": "keeper-initial-caster-right-sheet.json",
+    "actions": [
+      "cast",
+      "attack_staff",
+      "attack_codex",
+      "charge_staff"
+    ]
+  },
+  {
+    "metadata": "keeper-initial-common-up-right-sheet.json",
+    "actions": [
+      "dash",
+      "hit",
+      "death",
+      "interact"
+    ]
+  },
+  {
+    "metadata": "keeper-initial-caster-up-right-sheet.json",
+    "actions": [
+      "cast",
+      "attack_staff",
+      "attack_codex",
+      "charge_staff"
+    ]
+  },
+  {
+    "metadata": "keeper-initial-common-up-sheet.json",
+    "actions": [
+      "dash",
+      "hit",
+      "death",
+      "interact"
+    ]
+  },
+  {
+    "metadata": "keeper-initial-caster-up-sheet.json",
+    "actions": [
+      "cast",
+      "attack_staff",
+      "attack_codex",
+      "charge_staff"
+    ]
+  }
+]

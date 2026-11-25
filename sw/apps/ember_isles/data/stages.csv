@@ -1,2 +1,4 @@
 id,width,height,time_limit,shrink_interval,shrink_pixels,outside_damage
-coast,2560,1440,43200,60,2,10
+coast,3840,2160,43200,60,2,10
+forest,3840,2160,43200,60,2,10
+volcano,3840,2160,43200,60,2,10

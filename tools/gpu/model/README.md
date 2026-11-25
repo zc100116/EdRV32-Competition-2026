@@ -1,12 +1,11 @@
-# GPU reference model (gpu-spec v0.3 numeric proposal)
+# GPU reference model (gpu-spec v0.4)
 
 Python 3 standard library only. The model implements sections 2–6 with fixed arithmetic
 from 2.12; command/record layouts come from `rtl/include/regs/gpu.json`. The default pixel
-algorithm is the v0.3 proposal in `docs/reports/2026-11-24-model-gpu-numeric-v03.md`:
-block-scaled integer planes and 18-bit normalized perspective/derivative products.
-Vertex arithmetic and all external APIs remain v0.2 compatible. `study_v03.py` alone
-retains the exact v0.2 fragment algorithm and temporary candidate width subclasses;
-remove that study in a separate task after v0.3 is finalized.
+algorithm implements spec 2.13: precision G integer planes, 18-bit normalized
+perspective products, and screen-aligned 2x2 difference LOD. Vertex arithmetic and
+external command APIs retain the existing format. The research scripts preserve
+historical analytic LOD only in their study classes.
 
 The verification worker can create input DDR, commands and register writes with `Scene`
 (see `../scene/README.md`), then run the same image through the oracle:
@@ -58,10 +57,15 @@ updated `ddr.hex`, and `registers.json`. Binary target buffers use physical row-
 coordinates; subtract SET_TARGET.TGT_X0/Y0 from screen coordinates to index them.
 Rendering is entirely integer: MVP s15.16, clip coordinates 40-bit Q16, q Q30 with a
 10-bit midpoint ROM and one Newton step at vertices; planes use 32 significant input
-bits for q/uq/vq, depth Q16, color Q24, and exact signed 70-bit accumulation.
-Per-pixel perspective and derivatives use
+bits for q/uq/vq, depth Q16, color Q24 before coefficient rounding. Setup rounds start and gradients by
+`d = [8,4,4,4,12,12,12]`; accumulators retain signed
+`W = [62,66,66,66,58,58,58]` bits without rounding during stepping.
+Perspective and adjacent-coordinate subtraction use
 18-bit sign/magnitude mantissas, three subtraction alignment guard bits, and a signed
-10-bit exponent. Span is rounded to Q16; LOD retains the 8-bit-index Q8 log2 ROM.
+10-bit exponent. Every covered 2x2 screen group evaluates all four U/V values, including helpers
+outside coverage, clipping and target bounds. Q=0 produces w=U=V=0; negative Q
+produces a negative reciprocal. The maximum of eight absolute adjacent differences
+is rounded to Q16; all four pixels share its LOD using the 8-bit-index Q8 log2 ROM.
 Planes start at the integer bounding-box origin, independent of target/scissor; all
 step additions retain the entire accumulator, so direct evaluation and stripes agree.
 Bilinear filtering subtracts half a texel after selecting/scaling each mip level;

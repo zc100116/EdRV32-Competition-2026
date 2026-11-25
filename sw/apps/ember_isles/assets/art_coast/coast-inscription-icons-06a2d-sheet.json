@@ -1,0 +1,212 @@
+{
+  "name": "coast-inscription-icons-06a2d",
+  "grid": [
+    96,
+    72
+  ],
+  "cell": [
+    24,
+    24
+  ],
+  "palette_file": "coast-ui-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_ui_icons",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/sharp/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "sharp",
+      "frame": 0,
+      "icon_kind": "inscription",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/scatter/0",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "scatter",
+      "frame": 0,
+      "icon_kind": "inscription",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/ignite/0",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "ignite",
+      "frame": 0,
+      "icon_kind": "inscription",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/heavy/0",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "heavy",
+      "frame": 0,
+      "icon_kind": "inscription",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/leech/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "leech",
+      "frame": 0,
+      "icon_kind": "inscription",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/split/0",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "split",
+      "frame": 0,
+      "icon_kind": "inscription",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/homing/0",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "homing",
+      "frame": 0,
+      "icon_kind": "inscription",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/return/0",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "return",
+      "frame": 0,
+      "icon_kind": "inscription",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/follow/0",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "follow",
+      "frame": 0,
+      "icon_kind": "inscription",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/burst/0",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down",
+      "action": "burst",
+      "frame": 0,
+      "icon_kind": "inscription",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/ember_ground/0",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "down",
+      "action": "ember_ground",
+      "frame": 0,
+      "icon_kind": "inscription",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/double/0",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "down",
+      "action": "double",
+      "frame": 0,
+      "icon_kind": "inscription",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    }
+  ]
+}

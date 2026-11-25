@@ -1,0 +1,12 @@
+Use case: precise-object-edit. Production true pixel sprite atlas of approved iron smith, dark brown swept hair, broad adult shoulders, leather apron with round brass furnace buckle, navy sleeves, iron bracers and boots. Exact DOWN-RIGHT front three-quarter in EVERY cell, preserve the referenced native44px standing body proportions: head and torso pixel dimensions NEVER grow or shrink during movement. Render ONE logical64x64cell for each pose in strict4columns x3rows, logicalcanvas256x192, solid COARSE square pixels, transparent background. Centerx32, feetbaseline58; idle headtopy15; posed bodies bend at joints without scaling. Match reference same native pixel pitch. In reading order:
+1: idle frame0 — neutral44px
+2: idle frame1 — scarf/apron slight sway; same44px
+3: idle frame2 — breathe torso onepixel
+4: idle frame3 — settle hem; same44px
+5: walk frame0 — left forward contact
+6: walk frame1 — left lift
+7: walk frame2 — passing right forward
+8: walk frame3 — right contact
+9: walk frame4 — right lift
+10: walk frame5 — passing left forward
+Empty hands and primary right hand visible for separate weapon layer. Do not bake weapons, spells, particles, glow, afterimages or shadows into bodies. Each pose distinct. Walk is alternating feet with2–3px vertical lift,3pxstride and1pxbodybob, coat/apron sway1–2px; back views show lifted soles. Copper rim only existing hair contour, no white spikes. No text, gridlines, checkerboard, antialiasing or painterly shading. Any unused final cells completely empty.

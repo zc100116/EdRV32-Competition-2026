@@ -1,0 +1,10 @@
+id,name,effect,count,speed_min,speed_max,angle_min,angle_max,gravity,life_min,life_max,scale_start,scale_end,alpha_start,alpha_end,blend
+sparkle,闪光星,sparkle,8,128,512,0,15,0,14,24,100,50,255,0,1
+light_dot,光点,light_dot,2,32,96,2,6,0,30,60,75,125,180,0,1
+ember,火星,ember,8,80,256,2,6,-16,24,44,100,40,255,0,1
+water,水花,water,8,160,480,0,15,96,18,32,100,60,230,0,0
+ice,冰晶,ice,6,96,320,0,15,24,20,34,100,40,240,0,0
+stardust,星屑,stardust,7,80,288,0,15,0,18,36,100,50,255,0,1
+shadow,影雾,shadow,5,32,128,0,15,-8,26,48,60,150,160,0,0
+iron,铁屑火花,iron,10,192,640,0,15,128,12,24,100,40,255,0,1
+debris,碎屑烟尘,debris,12,96,384,0,15,64,20,38,100,65,210,0,0

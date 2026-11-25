@@ -1,0 +1,10 @@
+Use case: precise-object-edit. Production true pixel sprite atlas of approved copper-haired keeper, warm copper1px hair rim and dark top2rows, red scarf, navy long coat brass trim, slim long legs and boots. Exact DOWN/front facing viewer in EVERY cell, preserve the referenced native44px standing body proportions: head and torso pixel dimensions NEVER grow or shrink during movement. Render ONE logical64x64cell for each pose in strict4columns x2rows, logicalcanvas256x128, solid COARSE square pixels, transparent background. Centerx32, feetbaseline58; idle headtopy15; posed bodies bend at joints without scaling. Match reference same native pixel pitch. In reading order:
+1: death frame1 — one knee collapses, torso tips
+2: death frame2 — one hand braces ground, body rolls sideways
+3: death frame3 — falls side-on, knees curled
+4: death frame4 — lying down body settles
+5: death frame5 — final still fallen pose
+6: interact frame0 — reach forward to light lamp
+7: interact frame1 — hold hand at waist-height object
+8: interact frame2 — draw hand back to resting position
+Empty hands and primary right hand visible for separate weapon layer. Do not bake weapons, spells, particles, glow, afterimages or shadows into bodies. Each pose distinct. Walk is alternating feet with2–3px vertical lift,3pxstride and1pxbodybob, coat/apron sway1–2px; back views show lifted soles. Copper rim only existing hair contour, no white spikes. No text, gridlines, checkerboard, antialiasing or painterly shading. Any unused final cells completely empty.

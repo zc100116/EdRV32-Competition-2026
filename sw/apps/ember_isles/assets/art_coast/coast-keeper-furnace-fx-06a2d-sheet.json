@@ -1,0 +1,147 @@
+{
+  "name": "coast-keeper-furnace-fx-06a2d",
+  "grid": [
+    384,
+    192
+  ],
+  "cell": [
+    96,
+    96
+  ],
+  "palette_file": "coast-weapon-fx-iron-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_large_fx",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/keeper_furnace_eruption/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "keeper_furnace_eruption",
+      "frame": 0,
+      "anchor": [
+        48,
+        48
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/keeper_furnace_eruption/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "keeper_furnace_eruption",
+      "frame": 1,
+      "anchor": [
+        48,
+        48
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/keeper_furnace_eruption/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "keeper_furnace_eruption",
+      "frame": 2,
+      "anchor": [
+        48,
+        48
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/keeper_furnace_eruption/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "keeper_furnace_eruption",
+      "frame": 3,
+      "anchor": [
+        48,
+        48
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/keeper_furnace_eruption/4",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "keeper_furnace_eruption",
+      "frame": 4,
+      "anchor": [
+        48,
+        48
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/keeper_furnace_eruption/5",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "keeper_furnace_eruption",
+      "frame": 5,
+      "anchor": [
+        48,
+        48
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/keeper_furnace_eruption/6",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "keeper_furnace_eruption",
+      "frame": 6,
+      "anchor": [
+        48,
+        48
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/keeper_furnace_eruption/7",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "keeper_furnace_eruption",
+      "frame": 7,
+      "anchor": [
+        48,
+        48
+      ],
+      "hand_primary": null
+    }
+  ],
+  "palette_variants": {
+    "ember": "coast-weapon-fx-ember-06a2d-palette.json",
+    "tide": "coast-weapon-fx-tide-06a2d-palette.json",
+    "star": "coast-weapon-fx-star-06a2d-palette.json",
+    "shadow": "coast-weapon-fx-shadow-06a2d-palette.json"
+  },
+  "preferred_element": "ember"
+}

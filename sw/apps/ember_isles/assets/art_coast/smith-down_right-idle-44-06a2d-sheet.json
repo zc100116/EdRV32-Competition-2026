@@ -1,0 +1,93 @@
+{
+  "name": "smith-down_right-idle-44-06a2d",
+  "grid": [
+    256,
+    64
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "palette_file": "smith-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "smith",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down_right/idle/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down_right",
+      "action": "idle",
+      "frame": 0,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        39
+      ]
+    },
+    {
+      "id": "down_right/idle/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down_right",
+      "action": "idle",
+      "frame": 1,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        39
+      ]
+    },
+    {
+      "id": "down_right/idle/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down_right",
+      "action": "idle",
+      "frame": 2,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        39
+      ]
+    },
+    {
+      "id": "down_right/idle/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down_right",
+      "action": "idle",
+      "frame": 3,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        39
+      ]
+    }
+  ],
+  "foot_baseline": 58
+}

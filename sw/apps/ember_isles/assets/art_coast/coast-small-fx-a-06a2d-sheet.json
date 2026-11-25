@@ -1,0 +1,451 @@
+{
+  "name": "coast-small-fx-a-06a2d",
+  "grid": [
+    96,
+    144
+  ],
+  "cell": [
+    24,
+    24
+  ],
+  "palette_file": "coast-weapon-fx-iron-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_small_fx",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/sword_trail/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "sword_trail",
+      "frame": 0,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null,
+      "fixed_loadout": "sword/base"
+    },
+    {
+      "id": "down/sword_trail/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "sword_trail",
+      "frame": 1,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null,
+      "fixed_loadout": "sword/base"
+    },
+    {
+      "id": "down/sword_trail/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "sword_trail",
+      "frame": 2,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null,
+      "fixed_loadout": "sword/base"
+    },
+    {
+      "id": "down/sword_trail/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "sword_trail",
+      "frame": 3,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null,
+      "fixed_loadout": "sword/base"
+    },
+    {
+      "id": "down/staff_cast/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "staff_cast",
+      "frame": 0,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null,
+      "fixed_loadout": "staff/base"
+    },
+    {
+      "id": "down/staff_cast/1",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "staff_cast",
+      "frame": 1,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null,
+      "fixed_loadout": "staff/base"
+    },
+    {
+      "id": "down/staff_cast/2",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "staff_cast",
+      "frame": 2,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null,
+      "fixed_loadout": "staff/base"
+    },
+    {
+      "id": "down/staff_cast/3",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "staff_cast",
+      "frame": 3,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null,
+      "fixed_loadout": "staff/base"
+    },
+    {
+      "id": "down/staff_projectile/0",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "staff_projectile",
+      "frame": 0,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null,
+      "fixed_loadout": "staff/base",
+      "staff_projectile_branch": "base",
+      "cache": "fixed",
+      "cache_by_staff_branch": {
+        "base": "fixed",
+        "evolution_a": "stream",
+        "evolution_b": "stream"
+      }
+    },
+    {
+      "id": "down/staff_projectile/1",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down",
+      "action": "staff_projectile",
+      "frame": 1,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null,
+      "fixed_loadout": "staff/base",
+      "staff_projectile_branch": "base",
+      "cache": "fixed",
+      "cache_by_staff_branch": {
+        "base": "fixed",
+        "evolution_a": "stream",
+        "evolution_b": "stream"
+      }
+    },
+    {
+      "id": "down/staff_projectile/2",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "down",
+      "action": "staff_projectile",
+      "frame": 2,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null,
+      "fixed_loadout": "staff/base",
+      "staff_projectile_branch": "base",
+      "cache": "fixed",
+      "cache_by_staff_branch": {
+        "base": "fixed",
+        "evolution_a": "stream",
+        "evolution_b": "stream"
+      }
+    },
+    {
+      "id": "down/staff_projectile/3",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "down",
+      "action": "staff_projectile",
+      "frame": 3,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null,
+      "fixed_loadout": "staff/base",
+      "staff_projectile_branch": "base",
+      "cache": "fixed",
+      "cache_by_staff_branch": {
+        "base": "fixed",
+        "evolution_a": "stream",
+        "evolution_b": "stream"
+      }
+    },
+    {
+      "id": "down/impact_ember/0",
+      "cell": [
+        0,
+        3
+      ],
+      "direction": "down",
+      "action": "impact_ember",
+      "frame": 0,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/impact_ember/1",
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "down",
+      "action": "impact_ember",
+      "frame": 1,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/impact_ember/2",
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "down",
+      "action": "impact_ember",
+      "frame": 2,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/impact_ember/3",
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "down",
+      "action": "impact_ember",
+      "frame": 3,
+      "preferred_element": "ember",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/impact_tide/0",
+      "cell": [
+        0,
+        4
+      ],
+      "direction": "down",
+      "action": "impact_tide",
+      "frame": 0,
+      "preferred_element": "tide",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/impact_tide/1",
+      "cell": [
+        1,
+        4
+      ],
+      "direction": "down",
+      "action": "impact_tide",
+      "frame": 1,
+      "preferred_element": "tide",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/impact_tide/2",
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "down",
+      "action": "impact_tide",
+      "frame": 2,
+      "preferred_element": "tide",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/impact_tide/3",
+      "cell": [
+        3,
+        4
+      ],
+      "direction": "down",
+      "action": "impact_tide",
+      "frame": 3,
+      "preferred_element": "tide",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/impact_iron/0",
+      "cell": [
+        0,
+        5
+      ],
+      "direction": "down",
+      "action": "impact_iron",
+      "frame": 0,
+      "preferred_element": "iron",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/impact_iron/1",
+      "cell": [
+        1,
+        5
+      ],
+      "direction": "down",
+      "action": "impact_iron",
+      "frame": 1,
+      "preferred_element": "iron",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/impact_iron/2",
+      "cell": [
+        2,
+        5
+      ],
+      "direction": "down",
+      "action": "impact_iron",
+      "frame": 2,
+      "preferred_element": "iron",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/impact_iron/3",
+      "cell": [
+        3,
+        5
+      ],
+      "direction": "down",
+      "action": "impact_iron",
+      "frame": 3,
+      "preferred_element": "iron",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    }
+  ],
+  "palette_variants": {
+    "ember": "coast-weapon-fx-ember-06a2d-palette.json",
+    "tide": "coast-weapon-fx-tide-06a2d-palette.json",
+    "star": "coast-weapon-fx-star-06a2d-palette.json",
+    "shadow": "coast-weapon-fx-shadow-06a2d-palette.json"
+  },
+  "preferred_element": "iron"
+}

@@ -13,10 +13,10 @@ module tb;
     wire source_ready_w;
     reg sink_ready_r = 0;
     wire sink_valid_w;
-    reg [2093:0] stimulus_r [0:32767];
-    reg [2252:0] expected_r [0:262143];
-    reg [2093:0] source_r = 0;
-    wire [2252:0] actual_w;
+    reg [1751:0] stimulus_r [0:32767];
+    reg [1854:0] expected_r [0:262143];
+    reg [1751:0] source_r = 0;
+    wire [1854:0] actual_w;
     integer input_total_r;
     integer output_total_r;
     integer sent_r = 0;
@@ -36,21 +36,19 @@ module tb;
     wire [63:0] triangle_setup_bounds_w;
     wire [479:0] triangle_setup_edge_w;
     wire [31:0] triangle_setup_origin_w;
-    wire [489:0] triangle_setup_start_w;
-    wire [783:0] triangle_setup_gradient_w;
+    wire [433:0] triangle_setup_start_w;
+    wire [671:0] triangle_setup_gradient_w;
     wire [69:0] triangle_setup_h_w;
-    wire [173:0] triangle_setup_normal_gradient_w;
     wire [15:0] fragment_x_w;
     wire [15:0] fragment_y_w;
     wire [3:0] fragment_mask_w;
     wire [0:0] fragment_quad_w;
-    wire [1959:0] fragment_plane_w;
+    wire [1735:0] fragment_plane_w;
     wire [69:0] fragment_h_w;
-    wire [173:0] fragment_gradient_w;
     wire [3:0] fragment_palette_w;
     wire [7:0] fragment_alpha_w;
-    assign {triangle_setup_normal_gradient_w, triangle_setup_h_w, triangle_setup_gradient_w, triangle_setup_start_w, triangle_setup_origin_w, triangle_setup_edge_w, triangle_setup_bounds_w} = source_r;
-    assign actual_w = {fragment_alpha_w, fragment_palette_w, fragment_gradient_w, fragment_h_w, fragment_plane_w, fragment_quad_w, fragment_mask_w, fragment_y_w, fragment_x_w};
+    assign {triangle_setup_h_w, triangle_setup_gradient_w, triangle_setup_start_w, triangle_setup_origin_w, triangle_setup_edge_w, triangle_setup_bounds_w} = source_r;
+    assign actual_w = {fragment_alpha_w, fragment_palette_w, fragment_h_w, fragment_plane_w, fragment_quad_w, fragment_mask_w, fragment_y_w, fragment_x_w};
     reg state_valid_r = 0;
     reg [255:0] target_r = 0;
     wire state_ready_w;
@@ -78,7 +76,6 @@ module tb;
         .triangle_setup_start_i(triangle_setup_start_w),
         .triangle_setup_gradient_i(triangle_setup_gradient_w),
         .triangle_setup_h_i(triangle_setup_h_w),
-        .triangle_setup_normal_gradient_i(triangle_setup_normal_gradient_w),
         .fragment_valid_o(sink_valid_w),
         .fragment_ready_i(sink_ready_r),
         .fragment_x_o(fragment_x_w),
@@ -87,7 +84,6 @@ module tb;
         .fragment_quad_o(fragment_quad_w),
         .fragment_plane_o(fragment_plane_w),
         .fragment_h_o(fragment_h_w),
-        .fragment_gradient_o(fragment_gradient_w),
         .fragment_palette_o(fragment_palette_w),
         .fragment_alpha_o(fragment_alpha_w)
     );

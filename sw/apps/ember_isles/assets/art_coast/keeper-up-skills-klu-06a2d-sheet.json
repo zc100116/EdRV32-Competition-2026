@@ -1,0 +1,363 @@
+{
+  "name": "keeper-up-skills-klu-06a2d",
+  "grid": [
+    256,
+    320
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "palette_file": "keeper-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "keeper",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "up/skill_k/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "up",
+      "action": "skill_k",
+      "frame": 0,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        38,
+        42
+      ]
+    },
+    {
+      "id": "up/skill_k/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "up",
+      "action": "skill_k",
+      "frame": 1,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        46,
+        39
+      ]
+    },
+    {
+      "id": "up/skill_k/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "up",
+      "action": "skill_k",
+      "frame": 2,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        49,
+        40
+      ]
+    },
+    {
+      "id": "up/skill_k/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "up",
+      "action": "skill_k",
+      "frame": 3,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        42,
+        44
+      ]
+    },
+    {
+      "id": "up/skill_l/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "up",
+      "action": "skill_l",
+      "frame": 0,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        37,
+        43
+      ]
+    },
+    {
+      "id": "up/skill_l/1",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "up",
+      "action": "skill_l",
+      "frame": 1,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        31,
+        31
+      ]
+    },
+    {
+      "id": "up/skill_l/2",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "up",
+      "action": "skill_l",
+      "frame": 2,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        35,
+        20
+      ]
+    },
+    {
+      "id": "up/skill_l/3",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "up",
+      "action": "skill_l",
+      "frame": 3,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        48,
+        31
+      ]
+    },
+    {
+      "id": "up/skill_l/4",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "up",
+      "action": "skill_l",
+      "frame": 4,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        45,
+        39
+      ]
+    },
+    {
+      "id": "up/skill_u/0",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "up",
+      "action": "skill_u",
+      "frame": 0,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        39,
+        43
+      ]
+    },
+    {
+      "id": "up/skill_u/1",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "up",
+      "action": "skill_u",
+      "frame": 1,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        36,
+        36
+      ]
+    },
+    {
+      "id": "up/skill_u/2",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "up",
+      "action": "skill_u",
+      "frame": 2,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        35,
+        33
+      ]
+    },
+    {
+      "id": "up/skill_u/3",
+      "cell": [
+        0,
+        3
+      ],
+      "direction": "up",
+      "action": "skill_u",
+      "frame": 3,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        38,
+        27
+      ]
+    },
+    {
+      "id": "up/skill_u/4",
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "up",
+      "action": "skill_u",
+      "frame": 4,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        36,
+        20
+      ]
+    },
+    {
+      "id": "up/skill_u/5",
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "up",
+      "action": "skill_u",
+      "frame": 5,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        34,
+        15
+      ]
+    },
+    {
+      "id": "up/skill_u/6",
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "up",
+      "action": "skill_u",
+      "frame": 6,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        48,
+        29
+      ]
+    },
+    {
+      "id": "up/skill_u/7",
+      "cell": [
+        0,
+        4
+      ],
+      "direction": "up",
+      "action": "skill_u",
+      "frame": 7,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        48,
+        33
+      ]
+    },
+    {
+      "id": "up/skill_u/8",
+      "cell": [
+        1,
+        4
+      ],
+      "direction": "up",
+      "action": "skill_u",
+      "frame": 8,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        43,
+        40
+      ]
+    },
+    {
+      "id": "up/skill_u/9",
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "up",
+      "action": "skill_u",
+      "frame": 9,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        39
+      ]
+    }
+  ],
+  "foot_baseline": 58
+}

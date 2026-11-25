@@ -7,7 +7,7 @@ import struct
 
 from ..scene import SCHEMA, LAYOUTS, OPCODES, BusError, pack, unpack
 from .arithmetic import (CLIP_BITS, CLIP_FRAC, GUARD, RECIPROCAL_FRAC, W_NEAR,
-                         d, divide, edge, expand, p565, reciprocal, saturate,
+                         d, divide, edge, expand, logarithm, p565, reciprocal, saturate,
                          shift, signed, top_left)
 from .texture import Texture
 from .planes import PixelArithmetic
@@ -328,7 +328,12 @@ class GPU:
         arithmetic = self._pixel_arithmetic((a, b, c), area)
         # Canonical origin is independent of target/scissor. No step is rounded.
         row = arithmetic.at(x0, y0)
+        quad_row = None
+        lod_cache = {}
         for y in range(y0, y1):
+            if quad_row != y // 2:
+                lod_cache.clear()
+                quad_row = y // 2
             attrs = row.copy()
             for group in range((x0 // 4) * 4, x1, 4):
                 for x in range(max(x0, group), min(group + 4, x1)):
@@ -337,7 +342,14 @@ class GPU:
                     covered = all(value > 0 or (value == 0 and include)
                                   for value, include in zip(weights, inclusive))
                     if covered:
-                        yield x, y, *arithmetic.shade(attrs)
+                        depth, u, v, lod, colors = arithmetic.shade(attrs)
+                        if arithmetic.LOD_QUAD:
+                            key = x // 2
+                            if key not in lod_cache:
+                                span = arithmetic.quad_span(x, y)
+                                lod_cache[key] = logarithm(span) if span else 0
+                            lod = lod_cache[key]
+                        yield x, y, depth, u, v, lod, colors
                     attrs = [value + coeff[1] for value, coeff in
                              zip(attrs, arithmetic.coefficients)]
             row = [value + coeff[2] for value, coeff in zip(row, arithmetic.coefficients)]

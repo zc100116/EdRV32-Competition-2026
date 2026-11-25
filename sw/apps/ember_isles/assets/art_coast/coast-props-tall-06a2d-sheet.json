@@ -1,0 +1,81 @@
+{
+  "name": "coast-props-tall-06a2d",
+  "grid": [
+    128,
+    64
+  ],
+  "cell": [
+    32,
+    64
+  ],
+  "palette_file": "coast-props-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_props",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/pillar/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "pillar",
+      "frame": 0,
+      "anchor": [
+        16,
+        63
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/pole/0",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "pole",
+      "frame": 0,
+      "anchor": [
+        16,
+        63
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/dead_tree/0",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "dead_tree",
+      "frame": 0,
+      "anchor": [
+        16,
+        63
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/broken_lamp/0",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "broken_lamp",
+      "frame": 0,
+      "anchor": [
+        16,
+        63
+      ],
+      "hand_primary": null
+    }
+  ],
+  "foot_baseline": 63
+}

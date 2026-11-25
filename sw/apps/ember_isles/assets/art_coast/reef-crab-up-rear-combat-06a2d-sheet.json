@@ -1,0 +1,141 @@
+{
+  "name": "reef-crab-up-rear-combat-06a2d",
+  "grid": [
+    256,
+    128
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "palette_file": "reef-crab-down-06a2-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "reef_crab",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "up/walk/4",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "up",
+      "action": "walk",
+      "frame": 4,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up/walk/5",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "up",
+      "action": "walk",
+      "frame": 5,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up/attack/0",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "up",
+      "action": "attack",
+      "frame": 0,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up/attack/1",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "up",
+      "action": "attack",
+      "frame": 1,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up/attack/2",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "up",
+      "action": "attack",
+      "frame": 2,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up/attack/3",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "up",
+      "action": "attack",
+      "frame": 3,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up/attack/4",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "up",
+      "action": "attack",
+      "frame": 4,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up/attack/5",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "up",
+      "action": "attack",
+      "frame": 5,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    }
+  ],
+  "foot_baseline": 58
+}

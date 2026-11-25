@@ -1,0 +1,378 @@
+{
+  "authoring": "Literal native pixel drawings; no shape formulas, scaling or rotation.",
+  "approval": "msg_aac2628fcd8c",
+  "palette_file": "coast-weapon-fx-iron-06a2d-palette.json",
+  "codes": {
+    ".": 0,
+    "t": 60,
+    "b": 182,
+    "c": 100
+  },
+  "code_roles": {
+    "t": "dark tail/edge",
+    "b": "body highlight",
+    "c": "bright core"
+  },
+  "rejected_studies": "sources/coast-particle-*-06a2d-input.png; sparse-grid light_dot imported empty, flash_star below intended size",
+  "particles": [
+    {
+      "id": "sparkle",
+      "element": "iron",
+      "frames": [
+        [
+          "..b..",
+          "..c..",
+          "bcccb",
+          "..c..",
+          "..b.."
+        ],
+        [
+          "...b...",
+          "...b...",
+          "..bcb..",
+          "bbcccbb",
+          "..bcb..",
+          "...b...",
+          "...b..."
+        ],
+        [
+          ".....t.....",
+          ".....b.....",
+          "....bcb....",
+          "....bcb....",
+          "..bbcccbb..",
+          "tbbcccccbbt",
+          "..bbcccbb..",
+          "....bcb....",
+          "....bcb....",
+          ".....b.....",
+          ".....t....."
+        ],
+        [
+          "..t..",
+          "..b..",
+          "tbbbt",
+          "..b..",
+          "..t.."
+        ]
+      ]
+    },
+    {
+      "id": "light_dot",
+      "element": "star",
+      "frames": [
+        [
+          "cc",
+          "cc"
+        ],
+        [
+          ".b.",
+          "bcb",
+          ".b."
+        ],
+        [
+          "tb",
+          "bt"
+        ]
+      ]
+    },
+    {
+      "id": "ember",
+      "element": "ember",
+      "frames": [
+        [
+          ".b.",
+          "bcb",
+          ".c.",
+          ".b.",
+          ".t.",
+          "..t"
+        ],
+        [
+          "..b.",
+          ".ccb",
+          ".bb.",
+          "..b.",
+          "..t.",
+          "...t"
+        ],
+        [
+          "..b..",
+          ".bcb.",
+          "..cb.",
+          "..b..",
+          ".t...",
+          "t...."
+        ],
+        [
+          ".b.",
+          "bcb",
+          ".b.",
+          ".t."
+        ]
+      ]
+    },
+    {
+      "id": "water",
+      "element": "tide",
+      "frames": [
+        [
+          ".b.",
+          "bcb",
+          "bcb",
+          ".b."
+        ],
+        [
+          ".bb.",
+          ".bc.",
+          "bccb",
+          "bccb",
+          ".bb.",
+          "..b.",
+          "..t."
+        ],
+        [
+          "b......b",
+          ".b....b.",
+          "..b..b..",
+          "tbbccbbt",
+          "..tttt.."
+        ],
+        [
+          "b..c..b",
+          ".b.b.b.",
+          "..t.t.."
+        ]
+      ]
+    },
+    {
+      "id": "ice",
+      "element": "tide",
+      "frames": [
+        [
+          "..b...",
+          ".bcb..",
+          "bbccbb",
+          ".bccb.",
+          "..bb..",
+          "...t.."
+        ],
+        [
+          "...b...",
+          "..bcb..",
+          ".bbcc..",
+          "bbcccbb",
+          "..ccb..",
+          "..bb...",
+          "...t..."
+        ],
+        [
+          "....b...",
+          "...bcb..",
+          "..bbcc..",
+          ".bbcccbb",
+          "bbcccb..",
+          "..cbb...",
+          "..bt....",
+          "...t...."
+        ],
+        [
+          ".b....b",
+          "bcb..bc",
+          ".b..bb.",
+          "...bt..",
+          "..t...."
+        ]
+      ]
+    },
+    {
+      "id": "stardust",
+      "element": "star",
+      "frames": [
+        [
+          ".c..",
+          "bcb.",
+          "..c.",
+          "...t"
+        ],
+        [
+          "..b..",
+          ".bcb.",
+          "bcctb",
+          ".cb..",
+          "..t.."
+        ],
+        [
+          "...c..",
+          "..bcb.",
+          "bbccbt",
+          ".bcb..",
+          "..t.b.",
+          ".....t"
+        ],
+        [
+          ".b..",
+          "bcb.",
+          "..t.",
+          "...b"
+        ]
+      ]
+    },
+    {
+      "id": "shadow",
+      "element": "shadow",
+      "frames": [
+        [
+          "..tt....",
+          ".tbbtt..",
+          "tbbbbbtt",
+          "tbb.bbbt",
+          ".tbbbbt.",
+          "..tttt.."
+        ],
+        [
+          "...ttt....",
+          ".ttbbbt...",
+          "tbbbbbbtt.",
+          "tbb..bbbbt",
+          ".bbbb.bbbt",
+          "ttbbbbbbt.",
+          "..tbbttt..",
+          "...tt....."
+        ],
+        [
+          "...ttt......",
+          ".ttbbbt.tt..",
+          "tbbbbbbtbbt.",
+          "tbb..bbbbbbt",
+          ".bbbb.bbbbt.",
+          "ttbbbb..bbt.",
+          ".tbb.bbbbt..",
+          "..tbbbbttt..",
+          "...tttt.....",
+          "....t......."
+        ],
+        [
+          "....ttt.........",
+          "..ttbbbt..tt....",
+          ".tbbbbbbttbbt...",
+          "tbbb..bbbbbbbt..",
+          "tbbbb.bbb.bbbtt.",
+          ".tbbbb..bbbbbbbt",
+          "ttbb.bbbbb..bbbt",
+          ".tbbbb.bbbbbbbt.",
+          "..tbbbbbb.bbbt..",
+          "...ttbbbbbttt...",
+          "....tttttt......",
+          "......t........."
+        ],
+        [
+          ".....tt.......",
+          "..tttbbt...t..",
+          ".tbb.bbbt.tbt.",
+          "tbb...bbbbbbbt",
+          ".tbbbb..bb.bbt",
+          "ttbb.bbbb.bbt.",
+          ".tbbbb.bbbtt..",
+          "..ttbbbbbtt...",
+          "....tttt......",
+          "......t......."
+        ],
+        [
+          "...tt...",
+          ".ttbbt..",
+          "tb..bbtt",
+          ".tbbb.bt",
+          "..tbttt.",
+          "...t...."
+        ]
+      ]
+    },
+    {
+      "id": "iron",
+      "element": "iron",
+      "frames": [
+        [
+          "c....",
+          ".b...",
+          "..b..",
+          "...t.",
+          "....t"
+        ],
+        [
+          "...c",
+          "..bb",
+          ".bt.",
+          "t..."
+        ],
+        [
+          "..c",
+          ".b.",
+          "t.."
+        ]
+      ]
+    },
+    {
+      "id": "debris",
+      "element": "iron",
+      "frames": [
+        [
+          "..b...",
+          ".bcb..",
+          "tbbbt.",
+          ".ttt.."
+        ],
+        [
+          ".c........",
+          "bb...b....",
+          ".t..bcb...",
+          "...tbbbt..",
+          "..tbb.bbtt",
+          "...tbbbt..",
+          "....ttt..."
+        ],
+        [
+          "c...........",
+          ".b....c.....",
+          ".....bb.....",
+          "..b...t..b..",
+          ".bcb....bcb.",
+          "..t..tt..b..",
+          "....tbbtt...",
+          "..ttbb.bbt..",
+          "...tbbbt.t..",
+          "....ttt....."
+        ],
+        [
+          ".b..........",
+          ".......c....",
+          "......bb....",
+          "..t.......b.",
+          "....b....bcb",
+          "...bcb....t.",
+          "....t..tt...",
+          "..tt..tbbt..",
+          "...tbb.bt...",
+          "....tttt...."
+        ],
+        [
+          ".......b..",
+          "..b.......",
+          ".bcb....t.",
+          "..t...b...",
+          ".....bcb..",
+          "..tt..t...",
+          "...tbt....",
+          "....tt...."
+        ],
+        [
+          ".b....",
+          "..t...",
+          "....b.",
+          ".tt..t",
+          "..t..."
+        ]
+      ]
+    }
+  ]
+}

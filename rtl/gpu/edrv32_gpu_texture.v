@@ -90,12 +90,13 @@ module edrv32_gpu_texture (
     reg [7:0] alpha_r [0:31];
     reg quad_r [0:31];
     reg [3:0] palette_r [0:31];
+    reg [4:0] cfg_wait_r;
     reg [1:0] batch_r;
     reg [3:0] nearest_pending_r;
     assign occupancy_w = allocate_r - retire_r;
-    assign sample_ready_o = occupancy_w < 6'd32 && !stop_i;
+    assign sample_ready_o = occupancy_w < 6'd32 && cfg_wait_r == 0 && !stop_i;
     assign accept_w = sample_valid_i && sample_ready_o;
-    assign render_state_ready_o = occupancy_w == 0;
+    assign render_state_ready_o = occupancy_w == 0 && cfg_wait_r == 0;
     assign shaded_valid_o = occupancy_w != 0 && completed_w[retire_r[4:0]] == 4'hf
                             && !stop_i;
     assign retire_w = shaded_valid_o && shaded_ready_i;
@@ -370,10 +371,10 @@ module edrv32_gpu_texture (
             endcase
         end
     endfunction
-    // Four lanes, each with seven 96-bit normalization registers and one 256-entry lookup ROM.
-    // Nine-stage LOD path: seven leading-one normalization decisions, ROM, clamp.
-    reg [8:0] lod_valid_r;
-    wire [4:0] lod_slot_r [0:8];
+    // Four lanes: leading-one count, grouped shift, logarithm ROM and clamp.
+    // Four-stage LOD path; only the eight fraction bits cross the shift boundary.
+    reg [3:0] lod_valid_r;
+    wire [4:0] lod_slot_r [0:3];
     reg [6:0] filter_valid_r;
     wire [4:0] filter_slot_r [0:6];
     wire [3:0] filter_done_r [0:6];
@@ -386,9 +387,6 @@ module edrv32_gpu_texture (
     genvar lane;
     generate
         for (lane = 0; lane < 4; lane = lane + 1) begin : g_lod
-            wire [96*7-1:0] unused_normalized_w;
-            wire [7*7-1:0] shift_w;
-            wire [6:0] zero_w;
             reg [31:0] u_r [0:31];
             reg [31:0] v_r [0:31];
             reg [11:0] lod_r [0:31];
@@ -412,48 +410,57 @@ module edrv32_gpu_texture (
                     result_mask_r[filter_slot_r[6]] <= shade_mask_r[lane];
                 end
             end
-            reg [95:0] normalized_0_r;
-            assign unused_normalized_w[0 +: 96] = normalized_0_r;
-            reg [6:0] shift_0_r;
-            assign shift_w[0 +: 7] = shift_0_r;
-            reg [0:0] zero_0_r;
-            assign zero_w[0] = zero_0_r;
-            reg [95:0] normalized_1_r;
-            assign unused_normalized_w[96 +: 96] = normalized_1_r;
-            reg [6:0] shift_1_r;
-            assign shift_w[7 +: 7] = shift_1_r;
-            reg [0:0] zero_1_r;
-            assign zero_w[1] = zero_1_r;
-            reg [95:0] normalized_2_r;
-            assign unused_normalized_w[192 +: 96] = normalized_2_r;
-            reg [6:0] shift_2_r;
-            assign shift_w[14 +: 7] = shift_2_r;
-            reg [0:0] zero_2_r;
-            assign zero_w[2] = zero_2_r;
-            reg [95:0] normalized_3_r;
-            assign unused_normalized_w[288 +: 96] = normalized_3_r;
-            reg [6:0] shift_3_r;
-            assign shift_w[21 +: 7] = shift_3_r;
-            reg [0:0] zero_3_r;
-            assign zero_w[3] = zero_3_r;
-            reg [95:0] normalized_4_r;
-            assign unused_normalized_w[384 +: 96] = normalized_4_r;
-            reg [6:0] shift_4_r;
-            assign shift_w[28 +: 7] = shift_4_r;
-            reg [0:0] zero_4_r;
-            assign zero_w[4] = zero_4_r;
-            reg [95:0] normalized_5_r;
-            assign unused_normalized_w[480 +: 96] = normalized_5_r;
-            reg [6:0] shift_5_r;
-            assign shift_w[35 +: 7] = shift_5_r;
-            reg [0:0] zero_5_r;
-            assign zero_w[5] = zero_5_r;
-            reg [95:0] normalized_6_r;
-            assign unused_normalized_w[576 +: 96] = normalized_6_r;
-            reg [6:0] shift_6_r;
-            assign shift_w[42 +: 7] = shift_6_r;
-            reg [0:0] zero_6_r;
-            assign zero_w[6] = zero_6_r;
+            wire high_w;
+            wire [63:0] count_value_w;
+            wire [7:0] group_w;
+            wire [23:0] position_w;
+            reg [5:0] leading_w;
+            reg [63:0] count_value_r;
+            reg [5:0] amount_r;
+            reg [6:0] shift_r;
+            reg [6:0] shift_last_r;
+            reg zero_r;
+            reg zero_last_r;
+            wire [63:0] unused_shifted_w;
+            reg [7:0] fraction_r;
+            assign high_w = |sample_span_i[lane*96+64 +: 32];
+            assign count_value_w = high_w ? sample_span_i[lane*96+32 +: 64]
+                : sample_span_i[lane*96 +: 64];
+            assign unused_shifted_w = count_value_r << amount_r;
+            genvar group_idx;
+                // Eight parallel 8-bit encoders and an eight-way group encoder.
+                for (group_idx = 0; group_idx < 8; group_idx = group_idx + 1) begin : g_count
+                    reg [2:0] position_select_w;
+                    assign group_w[group_idx] = |count_value_w[group_idx*8 +: 8];
+                    assign position_w[group_idx*3 +: 3] = position_select_w;
+                    always @(*) begin
+                        position_select_w = 0;
+                        casez (count_value_w[group_idx*8 +: 8])
+                            8'b1???????: position_select_w = 7;
+                            8'b01??????: position_select_w = 6;
+                            8'b001?????: position_select_w = 5;
+                            8'b0001????: position_select_w = 4;
+                            8'b00001???: position_select_w = 3;
+                            8'b000001??: position_select_w = 2;
+                            8'b0000001?: position_select_w = 1;
+                            default: begin end
+                        endcase
+                    end
+                end
+            always @(*) begin
+                leading_w = 0;
+                casez (group_w)
+                    8'b1???????: leading_w = {3'd7, position_w[21 +: 3]};
+                    8'b01??????: leading_w = {3'd6, position_w[18 +: 3]};
+                    8'b001?????: leading_w = {3'd5, position_w[15 +: 3]};
+                    8'b0001????: leading_w = {3'd4, position_w[12 +: 3]};
+                    8'b00001???: leading_w = {3'd3, position_w[9 +: 3]};
+                    8'b000001??: leading_w = {3'd2, position_w[6 +: 3]};
+                    8'b0000001?: leading_w = {3'd1, position_w[3 +: 3]};
+                    8'b00000001: leading_w = {3'd0, position_w[0 +: 3]};
+                    default: begin end
+                endcase
+            end
             reg signed [15:0] logarithm_r;
             wire signed [15:0] biased_w;
             wire signed [15:0] maximum_w;
@@ -463,119 +470,104 @@ module edrv32_gpu_texture (
             assign clamped_w = biased_w < 0 ? 12'd0 :
                                 biased_w > maximum_w ? maximum_w[11:0] : biased_w[11:0];
             always @(posedge clk_i) begin
-                normalized_0_r <= sample_span_i[lane*96+48 +: 48] == 0
-                                    ? sample_span_i[lane*96 +: 96] << 48
-                                    : sample_span_i[lane*96 +: 96];
-                shift_0_r <= sample_span_i[lane*96+48 +: 48] == 0 ? 7'd48 : 7'd0;
-                zero_0_r <= sample_span_i[lane*96 +: 96] == 0;
-                logarithm_r <= zero_w[6] ? 16'sd0 :
-                    (16'sd79 - $signed({9'b0, shift_w[42 +: 7]})) * 16'sd256
-                    + $signed({7'b0, log_fraction(unused_normalized_w[663 +: 8])});
-                if (lod_valid_r[7]) begin
-                    lod_r[lod_slot_r[7]] <= clamped_w;
-                end
-            end
-            always @(posedge clk_i) begin
-                normalized_1_r <= unused_normalized_w[72 +: 24] == 0
-                                        ? unused_normalized_w[0 +: 96] << 24
-                                        : unused_normalized_w[0 +: 96];
-                shift_1_r <= shift_w[0 +: 7]
-                                + (unused_normalized_w[72 +: 24] == 0 ? 7'd24 : 7'd0);
-                zero_1_r <= zero_w[0];
-            end
-            always @(posedge clk_i) begin
-                normalized_2_r <= unused_normalized_w[180 +: 12] == 0
-                                        ? unused_normalized_w[96 +: 96] << 12
-                                        : unused_normalized_w[96 +: 96];
-                shift_2_r <= shift_w[7 +: 7]
-                                + (unused_normalized_w[180 +: 12] == 0 ? 7'd12 : 7'd0);
-                zero_2_r <= zero_w[1];
-            end
-            always @(posedge clk_i) begin
-                normalized_3_r <= unused_normalized_w[282 +: 6] == 0
-                                        ? unused_normalized_w[192 +: 96] << 6
-                                        : unused_normalized_w[192 +: 96];
-                shift_3_r <= shift_w[14 +: 7]
-                                + (unused_normalized_w[282 +: 6] == 0 ? 7'd6 : 7'd0);
-                zero_3_r <= zero_w[2];
-            end
-            always @(posedge clk_i) begin
-                normalized_4_r <= unused_normalized_w[381 +: 3] == 0
-                                        ? unused_normalized_w[288 +: 96] << 3
-                                        : unused_normalized_w[288 +: 96];
-                shift_4_r <= shift_w[21 +: 7]
-                                + (unused_normalized_w[381 +: 3] == 0 ? 7'd3 : 7'd0);
-                zero_4_r <= zero_w[3];
-            end
-            always @(posedge clk_i) begin
-                normalized_5_r <= unused_normalized_w[478 +: 2] == 0
-                                        ? unused_normalized_w[384 +: 96] << 2
-                                        : unused_normalized_w[384 +: 96];
-                shift_5_r <= shift_w[28 +: 7]
-                                + (unused_normalized_w[478 +: 2] == 0 ? 7'd2 : 7'd0);
-                zero_5_r <= zero_w[4];
-            end
-            always @(posedge clk_i) begin
-                normalized_6_r <= unused_normalized_w[575 +: 1] == 0
-                                        ? unused_normalized_w[480 +: 96] << 1
-                                        : unused_normalized_w[480 +: 96];
-                shift_6_r <= shift_w[35 +: 7]
-                                + (unused_normalized_w[575 +: 1] == 0 ? 7'd1 : 7'd0);
-                zero_6_r <= zero_w[5];
+                count_value_r <= count_value_w;
+                amount_r <= 6'd63 - leading_w;
+                shift_r <= (high_w ? 7'd0 : 7'd32) + 7'd63 - {1'b0, leading_w};
+                zero_r <= sample_span_i[lane*96 +: 96] == 0;
+                fraction_r <= unused_shifted_w[62:55];
+                shift_last_r <= shift_r;
+                zero_last_r <= zero_r;
+                logarithm_r <= zero_last_r ? 16'sd0 :
+                    (16'sd79 - $signed({9'b0, shift_last_r})) * 16'sd256
+                    + $signed({7'b0, log_fraction(fraction_r)});
+                if (lod_valid_r[2]) lod_r[lod_slot_r[2]] <= clamped_w;
             end
         end
     endgenerate
 
-    // Schedule stage: one shared nine-level mip prefix chain and eight tap address units.
-    // Each mip level has one 9x9 size product and one 17-bit offset adder.
-    wire [8:0] mip_width_w [0:9];
-    wire [8:0] mip_height_w [0:9];
-    wire [8:0] mip_groups_x_w [0:9];
-    // Split constant slices so lint follows each combinational chain element independently.
-    wire [80:0] mip_width_chain_w /* verilator split_var */;
-    wire [80:0] mip_height_chain_w /* verilator split_var */;
-    wire [80:0] mip_groups_x_chain_w /* verilator split_var */;
-    wire [80:0] mip_groups_y_chain_w /* verilator split_var */;
-    wire [152:0] mip_offset_chain_w /* verilator split_var */;
+    // SET_TEX constants settle before sampling: dimensions take one stage per level,
+    // sizes and prefix offsets take two. No mip prefix arithmetic lies on a tap path.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) cfg_wait_r <= 0;
+        else if (render_state_valid_i && render_state_ready_o) cfg_wait_r <= 20;
+        else if (cfg_wait_r != 0) cfg_wait_r <= cfg_wait_r - 1'b1;
+    end
+    wire [16:0] offset_base_w;
+    assign offset_base_w = offset_r[17:1];
+    wire [8:0] mip_mask_x_w [0:9];
+    wire [8:0] mip_mask_y_w [0:9];
+    wire [3:0] mip_row_shift_w [0:9];
     wire [16:0] mip_offset_w [0:9];
+    wire [80:0] mip_width_chain_w;
+    wire [80:0] mip_height_chain_w;
+    wire [80:0] mip_groups_x_chain_w;
+    wire [80:0] mip_groups_y_chain_w;
+    wire [152:0] mip_offset_chain_w;
     genvar mip;
     generate
         for (mip = 0; mip < 10; mip = mip + 1) begin : g_mip
+            localparam [3:0] RGB_ROW_LEVEL = mip + 1;
+            localparam [3:0] INDEX_ROW_LEVEL = mip + 2;
+            reg [8:0] mask_x_r;
+            reg [8:0] mask_y_r;
+            reg [3:0] row_shift_r;
+            reg [8:0] unused_width_r;
+            reg [8:0] unused_height_r;
+            reg [8:0] unused_groups_x_r;
+            reg [8:0] unused_groups_y_r;
+            reg [16:0] level_offset_r;
             wire [8:0] width_w;
             wire [8:0] height_w;
-            wire [8:0] blocks_x_w;
-            wire [8:0] blocks_y_w;
             wire [8:0] groups_x_w;
-            wire [8:0] unused_groups_y_w;
-            wire [16:0] offset_w;
-            assign mip_width_w[mip] = width_w;
-            assign mip_height_w[mip] = height_w;
-            assign mip_groups_x_w[mip] = groups_x_w;
-            assign mip_offset_w[mip] = offset_w;
+            wire [8:0] groups_y_w;
+            assign mip_mask_x_w[mip] = mask_x_r;
+            assign mip_mask_y_w[mip] = mask_y_r;
+            assign mip_row_shift_w[mip] = row_shift_r;
+            assign mip_offset_w[mip] = level_offset_r;
             if (mip < 9) begin : g_chain
-                assign mip_width_chain_w[mip*9 +: 9] = width_w;
-                assign mip_height_chain_w[mip*9 +: 9] = height_w;
-                assign mip_groups_x_chain_w[mip*9 +: 9] = groups_x_w;
-                assign mip_groups_y_chain_w[mip*9 +: 9] = unused_groups_y_w;
-                assign mip_offset_chain_w[mip*17 +: 17] = offset_w;
+                assign mip_width_chain_w[mip*9 +: 9] = unused_width_r;
+                assign mip_height_chain_w[mip*9 +: 9] = unused_height_r;
+                assign mip_groups_x_chain_w[mip*9 +: 9] = unused_groups_x_r;
+                assign mip_groups_y_chain_w[mip*9 +: 9] = unused_groups_y_r;
+                assign mip_offset_chain_w[mip*17 +: 17] = level_offset_r;
             end
-            assign blocks_x_w = format_r == 2 ? width_w : (width_w + 9'd1) >> 1;
-            assign blocks_y_w = format_r == 0 ? (height_w + 9'd1) >> 1 : height_w;
-            assign groups_x_w = (blocks_x_w + 9'd1) >> 1;
-            assign unused_groups_y_w = (blocks_y_w + 9'd1) >> 1;
+            // All dimensions are powers of two, including padded one-block levels.
+            assign groups_x_w = format_r == 2 ?
+                (width_w > 1 ? width_w >> 1 : 9'd1) :
+                (width_w > 2 ? width_w >> 2 : 9'd1);
+            assign groups_y_w = format_r == 0 ?
+                (height_w > 2 ? height_w >> 2 : 9'd1) :
+                (height_w > 1 ? height_w >> 1 : 9'd1);
+            always @(posedge clk_i) begin
+                mask_x_r <= width_w - 9'd1;
+                mask_y_r <= height_w - 9'd1;
+                row_shift_r <= format_r == 2 ?
+                    (log2_w_r > RGB_ROW_LEVEL ? log2_w_r - RGB_ROW_LEVEL : 4'd0) :
+                    (log2_w_r > INDEX_ROW_LEVEL ? log2_w_r - INDEX_ROW_LEVEL : 4'd0);
+                unused_width_r <= width_w;
+                unused_height_r <= height_w;
+                unused_groups_x_r <= groups_x_w;
+                unused_groups_y_r <= groups_y_w;
+            end
             if (mip == 0) begin : g_first
                 assign width_w = 9'd1 << log2_w_r;
                 assign height_w = 9'd1 << log2_h_r;
-                assign offset_w = offset_r[17:1];
+                always @(posedge clk_i) begin
+                    level_offset_r <= offset_base_w;
+                end
             end else begin : g_next
-                wire [16:0] size_w;
-                assign size_w = (mip_groups_x_chain_w[(mip-1)*9 +: 9] *
-                    mip_groups_y_chain_w[(mip-1)*9 +: 9]) << 2;
-                assign offset_w = mip_offset_chain_w[(mip-1)*17 +: 17] + size_w;
+                reg [16:0] size_r;
+                reg [16:0] base_r;
                 assign width_w = mip_width_chain_w[(mip-1)*9 +: 9] > 1 ?
-                    mip_width_chain_w[(mip-1)*9 +: 9] >> 1 : mip_width_chain_w[(mip-1)*9 +: 9];
+                    mip_width_chain_w[(mip-1)*9 +: 9] >> 1 : 9'd1;
                 assign height_w = mip_height_chain_w[(mip-1)*9 +: 9] > 1 ?
-                    mip_height_chain_w[(mip-1)*9 +: 9] >> 1 : mip_height_chain_w[(mip-1)*9 +: 9];
+                    mip_height_chain_w[(mip-1)*9 +: 9] >> 1 : 9'd1;
+                always @(posedge clk_i) begin
+                    size_r <= (mip_groups_x_chain_w[(mip-1)*9 +: 9] *
+                        mip_groups_y_chain_w[(mip-1)*9 +: 9]) << 2;
+                    base_r <= mip_offset_chain_w[(mip-1)*17 +: 17];
+                    level_offset_r <= base_r + size_r;
+                end
             end
         end
     endgenerate
@@ -626,7 +618,7 @@ module edrv32_gpu_texture (
             wire [8:0] wrapped_y_w;
             wire [8:0] block_x_w;
             wire [8:0] block_y_w;
-            wire [16:0] row_product_w;
+            wire [16:0] unused_row_product_w;
             wire [16:0] halfword_w;
             wire [8:0] weight_x_w;
             wire [8:0] weight_y_w;
@@ -646,15 +638,16 @@ module edrv32_gpu_texture (
                 ((launch_mode_w != 0 && (tap % 2) != 0) ? 9'd1 : 9'd0);
             assign y_w = centered_v_w[16:8] +
                 ((launch_mode_w != 0 && ((tap/2) % 2) != 0) ? 9'd1 : 9'd0);
-            assign wrapped_x_w = x_w & (mip_width_w[level_w] - 9'd1);
-            assign wrapped_y_w = y_w & (mip_height_w[level_w] - 9'd1);
+            assign wrapped_x_w = x_w & mip_mask_x_w[level_w];
+            assign wrapped_y_w = y_w & mip_mask_y_w[level_w];
             assign block_x_w = format_r == 2 ? wrapped_x_w : wrapped_x_w >> 1;
             assign block_y_w = format_r == 0 ? wrapped_y_w >> 1 : wrapped_y_w;
-            // Eight 8x9 row products, coordinate shifts/adders and 9x9 filter products.
-            assign row_product_w = block_y_w[8:1] * mip_groups_x_w[level_w];
-            assign halfword_w = mip_offset_w[level_w] +
-                ((row_product_w + {9'd0, block_x_w[8:1]}) << 2) +
-                {16'd0, block_x_w[0]} + {15'd0, block_y_w[0], 1'b0};
+            // Power-of-two rows make multiplication a shift. The column occupies
+            // only the zero low bits of the row; the bank bits never carry into it.
+            assign unused_row_product_w = {9'b0, block_y_w[8:1]} << mip_row_shift_w[level_w];
+            assign halfword_w = {mip_offset_w[level_w][16:2] +
+                (unused_row_product_w[14:0] | {7'b0, block_x_w[8:1]}),
+                block_y_w[0], block_x_w[0]};
             assign tap_address_w[tap] = {format_r == 0 ?
                 {wrapped_y_w[0], wrapped_x_w[0], 2'b0} : format_r == 1 ?
                 {wrapped_x_w[0], 3'b0} : 4'd0, halfword_w};
@@ -732,8 +725,36 @@ module edrv32_gpu_texture (
     wire [3:0] return_done_r [0:8];
     wire [23:0] return_port_r [0:4];
     wire [31:0] return_subword_r [0:4];
-    wire [135:0] return_weight_r [0:8];
-    wire [7:0] return_fraction_r [0:8];
+    wire [135:0] return_weight_w;
+    wire [7:0] return_fraction_w;
+    // Nine-cycle filter metadata: one 144-bit circular RAM, split into two DRM banks.
+    reg [8:0] metadata_write_r;
+    wire [8:0] metadata_read_w;
+    wire [143:0] metadata_input_w;
+    wire [143:0] metadata_data_w;
+    assign metadata_read_w = metadata_write_r - 9'd8;
+    assign metadata_input_w = {launch_fraction_w, tap_weight_w};
+    assign return_weight_w = metadata_data_w[135:0];
+    assign return_fraction_w = metadata_data_w[143:136];
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) metadata_write_r <= 0;
+        else metadata_write_r <= metadata_write_r + 1'b1;
+    end
+    genvar metadata_bank;
+    generate
+        for (metadata_bank = 0; metadata_bank < 2;
+            metadata_bank = metadata_bank + 1) begin : g_delay
+            edrv32_ram_gpu_delay u_metadata (
+                .clk_i(clk_i),
+                .wr_en_i(1'b1),
+                .wr_addr_i(metadata_write_r),
+                .wr_data_i(metadata_input_w[metadata_bank*72 +: 72]),
+                .rd_en_i(1'b1),
+                .rd_addr_i(metadata_read_w),
+                .rd_data_o(metadata_data_w[metadata_bank*72 +: 72])
+            );
+        end
+    endgenerate
     wire [127:0] direct_r [0:3];
     wire [127:0] direct_w;
     generate
@@ -937,7 +958,7 @@ module edrv32_gpu_texture (
         end
     endgenerate
     always @(posedge clk_i) begin
-        filter_weight_r <= return_weight_r[8];
+        filter_weight_r <= return_weight_w;
         expanded_r <= {expanded_w[7], expanded_w[6], expanded_w[5], expanded_w[4],
             expanded_w[3], expanded_w[2], expanded_w[1], expanded_w[0]};
         bilinear_r <= bilinear_w;
@@ -961,7 +982,7 @@ module edrv32_gpu_texture (
             filter_valid_r <= 0;
             unit_done_o <= 1'b0;
         end else begin
-            lod_valid_r <= {lod_valid_r[7:0], accept_w};
+            lod_valid_r <= {lod_valid_r[2:0], accept_w};
             return_valid_r <= {return_valid_r[7:0], schedule_valid_w};
             filter_valid_r <= {filter_valid_r[5:0], return_valid_r[8]};
             if (accept_w) begin
@@ -1039,8 +1060,8 @@ module edrv32_gpu_texture (
                             (filter_valid_r[6] && filter_slot_r[6] == context_idx))
                         completed_r <= completed_next_w;
                     if ((accept_w && allocate_r[4:0] == context_idx) ||
-                            (lod_valid_r[8] && lod_slot_r[8] == context_idx))
-                        lod_ready_r <= lod_valid_r[8] && lod_slot_r[8] == context_idx ?
+                            (lod_valid_r[3] && lod_slot_r[3] == context_idx))
+                        lod_ready_r <= lod_valid_r[3] && lod_slot_r[3] == context_idx ?
                             4'hf : 4'd0;
                 end
             end
@@ -1051,7 +1072,7 @@ module edrv32_gpu_texture (
     // Metadata stages: independent local registers, one assignment per register.
     genvar pipe_stage;
     generate
-        for (pipe_stage = 0; pipe_stage < 9; pipe_stage = pipe_stage + 1) begin : g_lod_slot
+        for (pipe_stage = 0; pipe_stage < 4; pipe_stage = pipe_stage + 1) begin : g_lod_slot
             reg [4:0] data_r;
             wire [4:0] data_w;
             assign lod_slot_r[pipe_stage] = data_r;
@@ -1142,32 +1163,6 @@ module edrv32_gpu_texture (
                 data_r <= data_w;
             end
         end
-        for (pipe_stage = 0; pipe_stage < 9; pipe_stage = pipe_stage + 1) begin : g_return_weight
-            reg [135:0] data_r;
-            wire [135:0] data_w;
-            assign return_weight_r[pipe_stage] = data_r;
-            if (pipe_stage == 0) begin : g_first
-                assign data_w = tap_weight_w;
-            end else begin : g_previous
-                assign data_w = return_weight_r[pipe_stage-1];
-            end
-            always @(posedge clk_i) begin
-                data_r <= data_w;
-            end
-        end
-        for (pipe_stage = 0; pipe_stage < 9; pipe_stage = pipe_stage + 1) begin : g_return_fraction
-            reg [7:0] data_r;
-            wire [7:0] data_w;
-            assign return_fraction_r[pipe_stage] = data_r;
-            if (pipe_stage == 0) begin : g_first
-                assign data_w = launch_fraction_w;
-            end else begin : g_previous
-                assign data_w = return_fraction_r[pipe_stage-1];
-            end
-            always @(posedge clk_i) begin
-                data_r <= data_w;
-            end
-        end
         for (pipe_stage = 0; pipe_stage < 4; pipe_stage = pipe_stage + 1) begin : g_direct
             reg [127:0] data_r;
             wire [127:0] data_w;
@@ -1238,7 +1233,7 @@ module edrv32_gpu_texture (
             wire [7:0] data_w;
             assign filter_fraction_r[pipe_stage] = data_r;
             if (pipe_stage == 0) begin : g_first
-                assign data_w = return_fraction_r[8];
+                assign data_w = return_fraction_w;
             end else begin : g_previous
                 assign data_w = filter_fraction_r[pipe_stage-1];
             end

@@ -31,7 +31,9 @@ void __wrap_ember_gfx_submit(unsigned frame) { (void)frame; }
 int main(void)
 {
     ember_game_init();
-    ember_game_replay(20261124u);
+    static struct ember_replay replay = {.seed = 20261124u};
+    ember_run_config_default(&replay.config);
+    ember_game_replay(&replay);
     for (millis = 0; millis <= 1023; millis += 33) {
         pc_soc_game_input(millis == 0 ? PLAT_KEY_ENTER : 0, (struct plat_pointer_state){0});
         ember_game_realtime(renders + 1);

@@ -9,7 +9,8 @@ APP = Path(__file__).resolve().parents[1]
 ROOT = APP.parents[2]
 TEXT = {'id', 'name', 'tags', 'effect', 'attribute', 'calculation', 'passive', 'skill_a',
         'skill_b', 'ultimate', 'talents', 'affinity', 'weapon', 'rarity', 'element',
-        'shape', 'trigger', 'enemy', 'affix', 'stage', 'behavior', 'target'}
+        'shape', 'trigger', 'enemy', 'affix', 'stage', 'behavior', 'target',
+        'evolution_a', 'evolution_b', 'condition_a', 'condition_b', 'description'}
 
 
 def convert():
@@ -27,6 +28,11 @@ def convert():
             lines.append('enum ember_data_attribute_index {')
             for index, row in enumerate(rows):
                 lines.append(f'    EMBER_DATA_ATTR_{row["id"].upper()} = {index},')
+            lines.append('};')
+        if table != 'attributes':
+            lines.append(f'enum ember_{table}_index {{')
+            for index, row in enumerate(rows):
+                lines.append(f'    EMBER_DATA_{table.upper()}_{row["id"].upper()} = {index},')
             lines.append('};')
         lines.append(f'struct ember_{table}_row {{')
         for field in fields:

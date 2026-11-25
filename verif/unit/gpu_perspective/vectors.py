@@ -14,11 +14,10 @@ from tools.gpu.model.planes import PixelArithmetic, pixel_seed
 from tools.gpu.model.renderer import GPU
 from types import SimpleNamespace
 
-FRAG = dict(x=16, y=16, mask=4, quad=1, plane=1960, h=70, gradient=174, palette=4, alpha=8)
+FRAG = dict(x=16, y=16, mask=4, quad=1, plane=1736, h=70, palette=4, alpha=8)
 SAMPLE = dict(x=16, y=16, mask=4, quad=1, u=128, v=128, span=384,
               depth=64, color=96, palette=4, alpha=8)
-SETUP = dict(bounds=64, edge=480, origin=32, start=490, gradient=784, h=70,
-             normal_gradient=174)
+SETUP = dict(bounds=64, edge=480, origin=32, start=434, gradient=672, h=70)
 QUAD = dict(data=128, x=17, y=17)
 
 
@@ -38,10 +37,6 @@ def record(fields, layout):
 def norm(value):
     mantissa, exponent = value
     return packed([abs(mantissa), mantissa < 0, exponent], [18, 1, 10])
-
-
-def normalized_gradients(arithmetic):
-    return packed([norm(x) for axis in arithmetic.gradients for x in axis], [29]*6)
 
 
 def limits(wide):
@@ -98,12 +93,12 @@ def quad_case(x, y, w, h, flip_h, flip_v, wide, serial):
                     assert (u << 8, v << 8, serial % 16, serial % 65536,
                             serial % 256) == (pu, pv, pal, z, alpha)
                     u, v = pu >> 8, pv >> 8
-                lanes.extend([serial % 65536 << 16, 1 << 30, u << 38, v << 38,
-                              255 << 24, 255 << 24, 255 << 24])
+                lanes.extend([serial % 65536 << 8, 1 << 26, u << 34, v << 34,
+                              255 << 12, 255 << 12, 255 << 12])
             result.append(record(dict(x=gx, y=py, mask=mask, quad=1,
-                                      plane=packed(lanes, [70]*28),
+                                      plane=packed(lanes, list(PixelArithmetic.WIDTHS)*4),
                                       h=packed([-16, 0, 0, 0, -8, -8, -8], [10]*7),
-                                      gradient=0, palette=serial % 16,
+                                      palette=serial % 16,
                                       alpha=serial % 256), FRAG))
     return item, result
 
@@ -145,7 +140,7 @@ def triangle_case(verts, wide):
     if area == 0:
         # Setup discards degenerates; represent its empty traversal when directly testing raster.
         return record(dict(bounds=0, edge=0, origin=0, start=0, gradient=0, h=0,
-                           normal_gradient=0), SETUP), [], None
+                           ), SETUP), [], None
     if area < 0:
         b, c = c, b
         area = -area
@@ -156,7 +151,7 @@ def triangle_case(verts, wide):
     y1 = (max(a[1], b[1], c[1])-8)//16+1
     cx0, cy0, cx1, cy1 = limits(wide)
     x0 = max(x0, cx0)//4*4
-    y0 = max(y0, cy0)
+    y0 = max(y0, cy0)//2*2
     x1 = min(x1, cx1)
     y1 = min(y1, cy1)
     edges = ((b, c), (c, a), (a, b))
@@ -168,31 +163,33 @@ def triangle_case(verts, wide):
     item = record(dict(bounds=packed([x0, y0, x1, y1], [16]*4),
                        edge=packed(edge_values, [40]*12),
                        origin=packed(ar.origin, [16]*2),
-                       start=packed([c[0] for c in ar.coefficients], [70]*7),
+                       start=packed([c[0] for c in ar.coefficients], ar.WIDTHS),
                        gradient=packed([v for coeff in ar.coefficients for v in coeff[1:]],
-                                       [56]*14),
-                       h=packed([e+f for e, f in zip(ar.exponents,
-                                [0, 30, 38, 38, 16, 16, 16])], [10]*7),
-                       normal_gradient=normalized_gradients(ar)), SETUP)
+                                       [w-14 for w in ar.WIDTHS for _ in range(2)]),
+                       h=packed([e+f-d for e, f, d in zip(ar.exponents,
+                                [0, 30, 38, 38, 16, 16, 16], ar.DROPS)], [10]*7)), SETUP)
     cx0, cy0, cx1, cy1 = limits(wide)
     result = []
-    for y in range(y0, y1):
+    for block_y in range(y0, y1, 2):
         for x in range(x0, x1, 4):
-            mask = 0
-            for lane in range(4):
-                px = x+lane
-                weights = [edge(start, end, px*16+8, y*16+8) for start, end in edges]
-                covered = all(w > 0 or (w == 0 and top_left(*e))
-                              for w, e in zip(weights, edges))
-                if covered and px < x1 and cx0 <= px < cx1 and cy0 <= y < cy1:
-                    mask |= 1 << lane
-            if mask:
-                result.append(record(dict(x=x, y=y, mask=mask, quad=0,
+            pair = []
+            for y in (block_y, block_y+1):
+                mask = 0
+                for lane in range(4):
+                    px = x+lane
+                    weights = [edge(start, end, px*16+8, y*16+8) for start, end in edges]
+                    covered = all(w > 0 or (w == 0 and top_left(*e))
+                                  for w, e in zip(weights, edges))
+                    if covered and px < x1 and cx0 <= px < cx1 and cy0 <= y < cy1:
+                        mask |= 1 << lane
+                pair.append(record(dict(x=x, y=y, mask=mask, quad=0,
                                           plane=packed([v for lane in range(4)
-                                                        for v in ar.at(x+lane, y)], [70]*28),
-                                          h=(item >> (64+480+32+490+784)) & ((1 << 70)-1),
-                                          gradient=normalized_gradients(ar), palette=0,
-                                          alpha=255), FRAG))
+                                                        for v in ar.at(x+lane, y)],
+                                                       list(ar.WIDTHS)*4),
+                                          h=(item >> (64+480+32+434+672)) & ((1 << 70)-1),
+                                          palette=0, alpha=255), FRAG))
+            if any((row >> 32) & 15 for row in pair):
+                result.extend(pair)
     return item, result, ar
 
 
@@ -223,81 +220,102 @@ def raster_vectors(wide):
     return inputs, outputs
 
 
-def shade(ar, attrs):
-    # Exercise the model's exact normal/multiply/subtract/inverse operations; keep span
-    # before logarithm so this unit's Q16 boundary is checked directly.
-    q, uq, vq = [ar.normal(attrs[c], ar.exponents[c]) for c in (1, 2, 3)]
-    w = ar.inverse(q)
-    uv = [ar.multiply(value, w) for value in (uq, vq)]
-    span = 0
-    for dq, duq, dvq in ar.gradients:
-        for gradient, coordinate in zip((duq, dvq), uv):
-            delta = ar.subtract(gradient, ar.multiply(coordinate, dq))
-            value, exponent = ar.multiply(delta, w)
-            span = max(span, shift(abs(value), -exponent-16))
-    model = ar.shade(attrs)
-    return model[0], model[1], model[2], span, model[4]
-
-
 def perspective_vectors():
     inputs, outputs = [], []
     rng = random.Random(734199)
-    for i in range(1800):
+    for i in range(900):
         ar = PixelArithmetic.__new__(PixelArithmetic)
-        ar.exponents = [-16, rng.randrange(-65, -15), rng.randrange(-65, -15),
-                        rng.randrange(-65, -15), -24, -24, -24]
-        ar.gradients = [[ar.normal(rng.randrange(-(1 << 44), 1 << 44),
-                                  ar.exponents[c]) for c in (1, 2, 3)] for _ in range(2)]
-        if 1060 <= i < 1080:
-            ar.exponents = [-16, -30, -38, -38, -24, -24, -24]
-            ar.gradients = [[ar.normal(0), ar.normal(0), ar.normal(0)],
-                            [ar.normal(1 << 30, -30), ar.normal(1 << 38, -38),
-                             ar.normal(-(1 << 38), -38)]]
-        lanes, zs, us, vs, spans, colors = [], [], [], [], [], []
-        quad = i >= 1060 and i % 13 == 0
-        for lane in range(4):
-            # Include sign/tie/carry boundaries and large depth/color clamps.
-            attrs = [rng.randrange(-(1 << 17), 1 << 34),
-                     rng.randrange(1 << 40, 1 << 52),
-                     rng.randrange(-(1 << 52), 1 << 52),
-                     rng.randrange(-(1 << 52), 1 << 52),
-                     *[rng.randrange(-(1 << 24), 1 << 34) for _ in range(3)]]
-            if 1060 <= i < 1080:
-                attrs[1:4] = [1 << 30, (0 if lane == 0 else 1 << 38),
-                              0 if lane == 1 else -(1 << 38)]
-            if i < 1024:
-                attrs[1] = (131072 + i*128 + 64) << 20
-            elif i < 1060:
-                attrs[1] = (1 << 48) - 1
-                attrs[2] = -((1 << 48) - 1)
-                attrs[3] = (1 << 48) - 1
-            if quad:
-                attrs[1:4] = [1 << 30, rng.randrange(-100000, 100000) << 30,
-                              rng.randrange(-100000, 100000) << 30]
-                z = saturate(shift(attrs[0], 16), 0, 65535)
-                u, v, span = attrs[2] >> 30, attrs[3] >> 30, 0
-                color = [saturate(shift(a, 24), 0, 255) for a in attrs[4:]]
-            else:
-                z, u, v, span, color = shade(ar, attrs)
-            lanes.extend(attrs)
-            zs.append(z); us.append(u); vs.append(v); spans.append(span)
-            colors.extend(color)
-        x, y, mask = (i*4) % 1280, i % 90, rng.randrange(1, 16)
-        palette, alpha = i % 16, i % 256
-        h = packed([e+f for e, f in zip(ar.exponents, [0, 30, 38, 38, 16, 16, 16])], [10]*7)
-        inputs.append(record(dict(x=x, y=y, mask=mask, quad=quad,
-                                  plane=packed(lanes, [70]*28), h=h,
-                                  gradient=normalized_gradients(ar), palette=palette,
-                                  alpha=alpha), FRAG))
-        outputs.append(record(dict(x=x, y=y, mask=mask, quad=quad,
-                                   u=packed(us, [32]*4), v=packed(vs, [32]*4),
-                                   span=packed(spans, [96]*4), depth=packed(zs, [16]*4),
-                                   color=packed(colors, [8]*12), palette=palette,
-                                   alpha=alpha), SAMPLE))
-    # All seed values are generated from the same bit-accurate model primitive.
+        ar.exponents = [-8, rng.randrange(-61, -11), rng.randrange(-61, -11),
+                        rng.randrange(-61, -11), -12, -12, -12]
+        quad = i >= 530 and i % 13 == 0
+        rows = []
+        for row in range(2):
+            lanes = []
+            for lane in range(4):
+                attrs = [rng.randrange(-(1 << 17), 1 << 34),
+                         rng.randrange(1 << 40, 1 << 52),
+                         rng.randrange(-(1 << 52), 1 << 52),
+                         rng.randrange(-(1 << 52), 1 << 52),
+                         *[rng.randrange(-(1 << 24), 1 << 34) for _ in range(3)]]
+                serial = i*2+row
+                if serial < 1024:
+                    attrs[1] = (131072 + serial*128 + 64) << 20
+                elif serial < 1060:
+                    attrs[1:4] = [(1 << 48)-1, -((1 << 48)-1), (1 << 48)-1]
+                if i % 17 == 0 and lane in (1, 2):
+                    attrs[1] = 0 if lane == 1 else -attrs[1]
+                if quad:
+                    attrs[1:4] = [1 << 26, rng.randrange(-100000, 100000) << 26,
+                                  rng.randrange(-100000, 100000) << 26]
+                lanes.append(attrs)
+            rows.append(lanes)
+        spans = [0, 0]
+        if not quad:
+            uv = [[ar.coordinates(attrs) for attrs in lanes] for lanes in rows]
+            for q in range(2):
+                samples = [uv[r][q*2+l] for r in range(2) for l in range(2)]
+                for a, b in ((0, 1), (2, 3), (0, 2), (1, 3)):
+                    for channel in (0, 1):
+                        v, e = ar.subtract(samples[b][channel], samples[a][channel])
+                        spans[q] = max(spans[q], shift(abs(v), -e-16))
+        for row, lanes in enumerate(rows):
+            zs, us, vs, colors = [], [], [], []
+            for attrs in lanes:
+                z, u, v, _, color = ar.shade(attrs)
+                if quad:
+                    z = saturate(shift(attrs[0], 8), 0, 65535)
+                    u, v = attrs[2] >> 26, attrs[3] >> 26
+                    color = [saturate(shift(a, 12), 0, 255) for a in attrs[4:]]
+                zs.append(z); us.append(u); vs.append(v); colors.extend(color)
+            serial = i*2+row
+            x, y = (i*4) % 1280, (i % 45)*2+row
+            mask = 1 if i % 17 == 0 else rng.randrange(16)
+            palette, alpha = i % 16, serial % 256
+            h = packed([e+f-d for e, f, d in zip(ar.exponents,
+                        [0, 30, 38, 38, 16, 16, 16], ar.DROPS)], [10]*7)
+            inputs.append(record(dict(x=x, y=y, mask=mask, quad=quad,
+                                      plane=packed([v for attrs in lanes for v in attrs],
+                                                   list(ar.WIDTHS)*4),
+                                      h=h, palette=palette, alpha=alpha), FRAG))
+            outputs.append(record(dict(x=x, y=y, mask=mask, quad=quad,
+                                       u=packed(us, [32]*4), v=packed(vs, [32]*4),
+                                       span=packed([spans[0]]*2+[spans[1]]*2, [96]*4),
+                                       depth=packed(zs, [16]*4), color=packed(colors, [8]*12),
+                                       palette=palette, alpha=alpha), SAMPLE))
     assert all(pixel_seed(i, 18) == ((1 << 28)+(2049+2*i)//2)//(2049+2*i)
                for i in range(1024))
     return inputs, outputs
+
+
+def run_normal():
+    """Exercise every coarse-window boundary, rounding carry and common-enable hold."""
+    rng = random.Random(0x20413)
+    magnitudes = [0, 1, 2, 3, (1 << 66)-1]
+    for bit in range(66):
+        magnitudes.extend(v for v in ((1 << bit)-1, 1 << bit, (1 << bit)+1)
+                          if v < 1 << 66)
+    magnitudes.extend(rng.randrange(1 << 66) for _ in range(1024))
+    arithmetic = PixelArithmetic.__new__(PixelArithmetic)
+    inputs, outputs = [], []
+    for magnitude in magnitudes:
+        for sign in (0, 1):
+            exponent = rng.randrange(-256, 257)
+            inputs.append(packed([magnitude, sign, exponent], [66, 1, 10]))
+            outputs.append(packed([norm(arithmetic.normal(
+                (-1 if sign else 1)*(magnitude & ((1 << width)-1)), exponent))
+                for width in (23, 36, 66)], [29]*3))
+    unit = ROOT/'verif/unit/gpu_perspective'
+    build = ROOT/'build/unit/gpu_perspective'
+    build.mkdir(parents=True, exist_ok=True)
+    inp, out = build/'normal-input.hex', build/'normal-expected.hex'
+    inp.write_text(''.join(f'{x:x}\n' for x in inputs))
+    out.write_text(''.join(f'{x:x}\n' for x in outputs))
+    subprocess.run(['iverilog', '-g2012', '-s', 'tb_normal', '-o', str(build/'normal-sim'),
+                    str(ROOT/'rtl/gpu/edrv32_gpu_perspective_normal.v'),
+                    str(unit/'tb_normal.sv')], check=True)
+    for stall in (0, 1):
+        subprocess.run(['vvp', str(build/'normal-sim'), f'+INPUT={inp}', f'+EXPECTED={out}',
+                        f'+COUNT={len(inputs)}', f'+STALL={stall}'], check=True)
 
 
 def run(kind):
@@ -306,12 +324,15 @@ def run(kind):
     build.mkdir(parents=True, exist_ok=True)
     sources = ['-I'+str(ROOT/'rtl/include'), str(ROOT/f'rtl/gpu/edrv32_gpu_{kind}.v')]
     if kind == 'raster':
+        sources.append(str(ROOT/'rtl/tech/edrv32_ram_gpu_delay.v'))
+        sources.append(str(ROOT/'rtl/tech/edrv32_ram_gpu_read_pool.v'))
         sources.extend(str(p) for p in sorted((ROOT/'rtl/gpu').glob(
             'edrv32_gpu_raster_*.v')))
     if kind == 'perspective':
         sources.extend(str(p) for p in sorted((ROOT/'rtl/gpu').glob(
             'edrv32_gpu_perspective_*.v')))
         sources.append(str(ROOT/'rtl/tech/edrv32_rom_gpu_recip_p18.v'))
+        sources.append(str(ROOT/'rtl/tech/edrv32_ram_gpu_delay.v'))
     subprocess.run(['iverilog', '-g2012', '-DSIM_MODE', '-s', 'tb', '-o', str(build/'sim'),
                     *sources, str(unit/'tb.sv')], check=True)
     if kind == 'perspective':

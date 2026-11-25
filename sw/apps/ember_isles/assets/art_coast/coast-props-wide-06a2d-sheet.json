@@ -1,0 +1,141 @@
+{
+  "name": "coast-props-wide-06a2d",
+  "grid": [
+    192,
+    64
+  ],
+  "cell": [
+    48,
+    32
+  ],
+  "palette_file": "coast-props-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_props",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/driftwood/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "driftwood",
+      "frame": 0,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/ruined_wall/0",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "ruined_wall",
+      "frame": 0,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/broken_fence/0",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "broken_fence",
+      "frame": 0,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/wreck_planks/0",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "wreck_planks",
+      "frame": 0,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/flat_slab/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "flat_slab",
+      "frame": 0,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/ship_rib/0",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "ship_rib",
+      "frame": 0,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/rope_coil/0",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "rope_coil",
+      "frame": 0,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/net_pile/0",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "net_pile",
+      "frame": 0,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    }
+  ],
+  "foot_baseline": 31
+}

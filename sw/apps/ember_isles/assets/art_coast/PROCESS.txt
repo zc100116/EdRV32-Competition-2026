@@ -1,0 +1,230 @@
+ART-3 coast production in progress; NOT the complete ART-3 delivery.
+All source images use built-in image_gen. No CLI/API path or commercial asset is used.
+Approved identity reference: art_sample/02-keeper-grid-edit.png (read-only).
+The ART-3 dispatch authorizes AI pixel generation, grid normalization and authored repairs.
+
+Coordinator-approved global actor rules after the first checkpoint:
+1. Front/down and back/up walking must clearly alternate legs: lifted boot rises2–3px,
+   stride spreads at least3px; contact poses sink the torso1px and coat hem sways1–2px.
+   Down/up-v3 edit sources apply this rule; diagonal/profile strides were already accepted.
+2. Hair rim uses a brighter shade from the hair's own warm palette, never milk white.
+   Highlight only the hairline edge1px wide; no isolated bright pixel horns above the head.
+   The first two top contour rows are not highlighted. This applies to every actor.
+
+Sources keeper-idle and keeper-idle-corrected: rejected multi-facing grid trials.
+Source smith-idle: initial identity/direction trial, not accepted production animation.
+Sources keeper-{down,down-right,right,up-right,up}: first individual-facing trials.
+The declared canvas grid produced 47–50px bodies; fixed8px sampling produced40–44px.
+These trials are not the production baseline. Source pixel clusters are not exact squares.
+Their complete inputs, prompts and sheet metadata remain saved; no failed source is hidden.
+
+keeper-down-v2: use the coarse normalized44px trial as sole density reference, not the
+larger concept. It generated43px bodies on the declared256x128 grid, with uniform margins.
+The four other -v2 inputs edit this source to independent down-right/right/up-right/up views.
+Each input has4 idle and4 walk poses in64x64 cells. Left-facing views use horizontal flip.
+Each source has its own .txt prompt. Source inputs remain unchanged.
+
+Restore -v2 grids with color-edge projections around nominal source-square boundaries;
+take the center of every inferred square (no interpolation, silhouette scaling or redraw).
+The first checkpoint quantized to64 RGB565+A4 entries per sheet and aligned feet to y58.
+Its five palettes together contain255 unique GPU words; lossless union packing saves
+16384B and four banks:65536B/one bank instead of81920B/five banks, with identical pixels.
+keeper-palette.json fixes the accepted material colors for subsequent keeper sources;
+the former milk-white custom rim entry is replaced with warm hair highlight239/166/66.
+The original per-direction grid-normalized image is saved as *-before-repair.png.
+
+Coordinator's reply permits remaining1–2px material-row repairs only, identical for all
+frames of a direction, preserving face, hands, boots and grip shapes, with before/after.
+V2 down/right/up-right/up duplicate material row47 in coat/trousers to add exactly1px.
+Current down-v3 removes one redundant material row47; up-v3/right-v2/up-right-v2 insert
+one row47. Transparent-row padding keeps foot y58. Down-right needs no row repair.
+All explicit64-entry row maps are in sheets.json; no head rows are resized or deleted.
+Hand/face/boot shapes are retained; canvas hand anchors account for the translated torso.
+
+Use a1px warm upper-left hair rim on existing opaque contour pixels, never outside
+the silhouette or on its top two rows. Exact coordinates and GPU RGBA values are stored
+under final_pixel_edits in sheets.json. No higher alpha format is introduced.
+Primary hand/feet anchors are authored in64x64 canvas coordinates; mirrored x is63-x.
+
+keeper-actions-down: an early76-pose attack/common-action trial made before the coordinator
+requested a five-direction idle/walk approval checkpoint. Grid and checkerboard failed.
+keeper-actions-down-clean: built-in transparent-background edit removes those artifacts.
+Both remain source trials; neither counts as accepted action coverage or a GPU resident pack.
+Do not expand this trial until the coordinator approves the five-direction checkpoint.
+
+Conversion: python3 sw/apps/ember_isles/tools/art/coast_assets.py
+Preview: python3 sw/apps/ember_isles/tools/art/preview_coast.py
+GPU swizzle and all texel readback directly use tools/gpu/model/layout.py and Texture.
+Only build/ holds .bin/.pal files and measured directories; outputs/ holds review media.
+Current preview is material inspection, never described as actual gameplay footage.
+
+The broad generation loop stopped at the first charge-sheet request: built-in image_gen
+returned HTTP400 moderation_blocked, category violence, requestID
+4657f4b5-d084-4346-be3a-16c11f366bc1. No CLI/API fallback or credential request occurred.
+Only combat-a/b/c DOWN outputs were saved by that loop; other broad-production jobs did
+not run. The coordinator then requested an initial-configuration capacity checkpoint.
+Capacity work now covers only the missing staff/codex keeper poses, with non-graphic
+empty-hand gesture descriptions; other characters/enemies/biomes remain pending.
+
+06a-2 streaming checkpoint (2026-11-24):
+Task explicitly restores full I8 frames in DDR; no I4 actor replacement and no
+semantic-part actor reconstruction is used. The obsolete semantic-parts task is ignored.
+Coordinator clarified the synthetic bound: one largest frame each for main actor,
+pet and elite, but five actions x five drawn facings x largest frame for each
+ordinary enemy kind sharing an animation clock. Full-body death clips are not
+expanded; latest tech uses burst plus at most two downed frames.
+
+smith-common-down-06a2-input.png: built-in imagegen trial using the saved smith
+identity and accepted keeper-down-v3 as references. Its seven-row prompt and
+original output are retained. This is NOT accepted animation coverage: the first
+output's head/body proportions and square-grid layout drift from the approved
+44px reference. No silhouette shrinking, code-drawn repair or fabricated head/
+torso measurement is used to claim it passed; expansion stopped at the cache probe.
+
+reef-crab-down-06a2-input.png: built-in imagegen redraw using the project's original
+art_sample/05-enemies-native.png only as style/identity reference, not a copied
+or scaled sprite. Exact prompt is saved beside the source. Grid normalization is
+256x128, eight64x64 cells; source1774x887 has equal6.9296875px logical-grid pitch.
+The new crab measures47–51px wide and38–40px high, four distinct idle and four
+walk frames. This is only the front direction, not the complete enemy package.
+Palette file has255 RGB565+A4 entries; all frames remain I8. No manual pixel
+edits were needed in this source. Before-repair and native files are retained.
+
+probe_coast_streaming.py rebuilds this source and exports the existing200 keeper
+frames plus8 crab frames, each cropped then padded to legal power-of-two texture
+sizes for direct independent TEX_LOAD. The descriptor records DDR offset, byte
+count, logical crop dimensions, texture dimensions, anchor, hand, direction,
+action, frame and palette bank. It imports the sole GPU model for swizzle and
+checks every texel including padding, then checks exact2x output pixels.
+The direct-frame-page format is a capacity probe, not an approved full package.
+Each actual crab frame requires64x64 I8=4096B under that format; the clarified
+conservative synchronized bound for that kind alone is5x5x4096=102400B, over80KiB.
+This bound failure pauses production pending the coordinator's cache-format decision.
+
+06a-2c compact-frame checkpoint (2026-11-25):
+compact_coast_frames.py stores cropped I8 frames in complete 4x2-texel/8-byte
+four-bank groups. DDR frame starts are32-byte aligned; frame rectangles are not
+padded to powers of two. Each record includes DDR offset, aligned size, crop,
+feet/hand anchors, palette group, facing, action and frame. Verification copies
+the saved DDR groups to UV(4,2) in a legal128x128 texture at OFFSET32, then uses
+the sole GPU model to read every page texel, including all transparent margins.
+This is offline format verification, not the06b runtime page/LRU implementation.
+
+New original built-in imagegen source strips are tide-biter-down-06a2c,
+salt-charger-down-06a2c-v2, drowned-watcher-down-06a2c-v2 and
+mist-jellyfish-down-06a2c: each has4 front idle and4 front walk frames.
+Normalization samples the declared256x128 logical grid and quantizes to I8
+RGB565+A4 palettes. Only transparent placement changes to foot baseline58;
+no silhouette, head or torso scaling or code-generated poses are used.
+The first salt-charger/drowned-watcher20-pose sources have excessively fine
+painted density and are rejected trials, preserved with their prompts.
+The tide-biter strip is also NOT accepted production art: idle height38–40px
+and width37–39px exceed tech5b's small-swarm24–30px/width<=36px requirements.
+It stays visible in the review media and is excluded from the decisive bound.
+
+Even excluding tide-biter, the four remaining kinds' sampled maxima total7360B;
+tech5b's5actions x5facings yields184000B, above144KiB by36544B before other
+actors or scenery. This is a lower bound on the prescribed conservative upper
+bound, not a measured wave's actual live contents. Production stops here.
+The full fixed region, pet/elite/scenery and complete DDR library are unmeasured.
+The received action-family and dedicated-skill follow-up is recorded as pending
+production after this stop; old generic cast poses do not fulfill art-plan2.4.
+Preserved keeper front/back walking repairs and warm hair rim are unchanged.
+Preview: preview_compact_coast.py;06a2c/index.html embeds all images and30s video.
+
+06a-2d production decisions (coordinator2026-11-25):
+msg_517f2b727c53: redraw coast terrain at32x32, matching the sim grid; bound uses
+30 different tiles plus12 props. Compute ordinary and Boss waves separately;
+Boss wave contains the Boss's parts plus tide-biter only.
+msg_22093b18cb4c: guardian body/shield/weapon each have5 facings; Deep Throat
+is a fixed-front encounter with body, mouth, tail and mirrored fins. Each phase
+and hit animation uses front parts; no5 complete Boss facings. Coordinator
+will record this decision in art-plan3; this task does not edit art-plan.
+msg_f17579e25ae8:12 concrete props total18000B estimated, not12x largest prop.
+At most2 medium enemy kinds among the3 ordinary kinds; conservative selection
+is largest2 medium kinds plus largest swarm kind. New tide-biter is measured
+from redrawn art, never a scaled copy of the rejected06a-2c source.
+
+Coordinator follow-up: produce complete PC enemies (idle4/walk6/attack6/hit2/
+death6,5 facings); FPGA tables select walk+attack and front death0–1 without
+removing PC source art. Both profiles retain the same underlying DDR frame data.
+msg_12b770a416a4: mist-jellyfish is radially symmetric, so both profiles use one
+full facing plus2–3 drifting-lean variants, mirrored for horizontal motion.
+The first crab UP/UP_RIGHT candidates still showed frontal features and are
+retained as unused studies. New *rear-base/combat/hit-death sheets redraw a
+rear rock-shell view with the face hidden. This is orientation repair, no
+rotation or scaling of old sprite bitmaps.
+The first drowned-watcher front extras output had an opaque white backdrop;
+normalization explicitly failed. Its original is retained; the built-in
+background-extraction edit is saved separately as *extras-transparent*.
+
+msg_6b01bbe6b6b7 authorizes per-frame authored native-pixel repairs:1–2px
+cloth/leg seams and whole-head1:1 copies translated to the pose's head position.
+No head, torso or whole-frame scaling or rotation is permitted. Every edited
+frame retains source PNG, before/after native sheets and a pixel-difference map.
+Coordinates and reference origins are in each sheet's head_copies/row_edits.
+The converter only executes these literal authored coordinates; it does not
+derive a silhouette fit. Differences are written beside the review media.
+
+06a-2d batch1 native repairs: smith right idle removes two trouser seam rows;
+back idle removes one; rear diagonal adds one or two trouser seam rows. The
+redrawn front diagonal idle removes one seam row. All twenty smith idle frames
+are44px, preserving original head and torso pixels. Exact row lists are artwork.
+The first diagonal idle redraw is35–36px and rejected, not stretched. Its raw,
+native and metadata remain with include_frames=false. The second is45px before
+the one-row trouser repair. The first guardian body is86–87px and rejected;
+the newly drawn coarser80px-cell study has72px idle height and is retained.
+
+msg_ece1ed9fce77: fixed-region report separates measured weapon/FX/particle
+material from a16KiB unmeasured UI/digits/glyph/light-mask reservation, including
+8KiB light mask. Final48KiB verdict belongs to06b integrated measurement.
+
+msg_09aa9817f999 /71a4c7df4 narrows the first release to keeper, ember sword
+and ember staff, coast arena. Smith sources already generated are retained,
+but excluded from the first-release package; no more smith or iron-guard work.
+Keeper slash family, four weapon evolutions, weapon/skill/item icons and four
+rarity card borders are added. Unsettled item IDs await05a; no invented effects.
+msg_da34df3aa4cb authorizes1:1 native terrain edge-band/corner composition
+and explicit1–2-row seam copies, without rotation/scale or newly synthesized art.
+The terrain review includes a6x6 randomized stitching sample.
+
+msg_a1cc520c14a6 /cf0a12be0: small repeated projectile/trail/impact/particle
+frames remain fixed; one-off skill/ultimate/evolution/explosion frames stream.
+The bound includes at mosttwo simultaneous large-effect frame maxima. PC art
+keeps its full resolution and frame count; no capacity-driven part splitting.
+
+Part assembly exposed two rejectedsemanticstudies: the firstguardianweapon
+baked in a chest/lanternhead, and the firstBossmouth repeatedtorsoarmor with
+column drift. Both are excluded. Object-onlyanchorweapon andthree smallhead
+strips are newbuilt-inimagegen redraws, not scaled orrepaired torso bitmaps.
+
+Integration failure msg_280015474226 was the rejected light_dot input study: both
+4x4 cells (0,0) and(1,0) ofcoast-particle-light_dot-06a2d-native.png containzero
+opaque texels. Literal38-frame native particle art replacesit byauthorization
+msg_aac2628fcd8c; thebadstudyisretainedbutnotselected. No empty-cellskip wasadded.
+Rawsourceimports now publish their manifest entryafter nativeimport completes.
+The frozen particle actionnames are sparkle/light_dot/ember/water/ice/stardust/
+shadow/iron/debris. Full1425-frame export passes33177600 RGBA GPUreadbacktexels.
+
+Final06a-2d: guardian falling/death poses keep their authored native grid, with
+no standing-foot recentering that would crop a sideways body. Fixed pose anchors
+remain explicit. The completed source library has1593frames; smith retained but
+inactive, no iron guards/pet under71a4c7df4. Confirmed05a item IDs include12relics,
+6blessings and12inscriptions; all are original built-inimagegen icons.
+msg_7b0a751943de adds hostile tide projectile/orb/telegraph-column, with16-way
+GPU rotation metadata, tails and shared tide impacts. No simulation code changed.
+msg_164d7644a991 authorizes functional64x64radial/Bayer light-mask construction:
+lantern Fs0/FdS/ADD, transparent-white center; zone FsSa/Fd1/ADD warm additive.
+Both request bilinear filtering. They use RGB565+A4 in an existing I8 palette.
+msg_b24c9fad7b4a authorizes only unused star-bank indices:39 currently referenced
+indices retain exactly their RGBA words;117 indices are 灯光遮罩保留 and future
+star effects must not use them. The complete protected/reserved index sets and
+words are in coast-light-palette-layout-06a2d.json and all exported frame packets.
+The64-level ramps share some existing colors; no seventeenth palette group added.
+msg_b69f6ed05e32 fixes the current-run working set: hostile_tide_column is
+one-off stream material. Staff projectile/base,cluster/evolution_a,core/evolution_b
+have explicit staff_projectile_branch and cache_by_staff_branch maps. The default
+cache field represents the initial base branch; only the current branch is fixed.
+The integration layer pins retired projectile frames still visible in stream
+pages. Budgeting conservatively includes all frames of both noncurrent branches,
+not only a single visible projectile frame. Source pixels/frame counts are intact.

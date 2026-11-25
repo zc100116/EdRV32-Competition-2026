@@ -1,0 +1,128 @@
+{
+  "name": "coast-hostile-tide-column-06a2d",
+  "grid": [
+    96,
+    96
+  ],
+  "cell": [
+    32,
+    48
+  ],
+  "palette_file": "coast-weapon-fx-iron-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_small_fx",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/hostile_tide_column/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "hostile_tide_column",
+      "frame": 0,
+      "effect_phase": "telegraph",
+      "anchor": [
+        16,
+        44
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/hostile_tide_column/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "hostile_tide_column",
+      "frame": 1,
+      "effect_phase": "telegraph",
+      "anchor": [
+        16,
+        44
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/hostile_tide_column/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "hostile_tide_column",
+      "frame": 2,
+      "effect_phase": "telegraph",
+      "anchor": [
+        16,
+        44
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/hostile_tide_column/3",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "hostile_tide_column",
+      "frame": 3,
+      "effect_phase": "falling",
+      "anchor": [
+        16,
+        44
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/hostile_tide_column/4",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "hostile_tide_column",
+      "frame": 4,
+      "effect_phase": "falling",
+      "anchor": [
+        16,
+        44
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/hostile_tide_column/5",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "hostile_tide_column",
+      "frame": 5,
+      "effect_phase": "falling",
+      "anchor": [
+        16,
+        44
+      ],
+      "hand_primary": null
+    }
+  ],
+  "palette_variants": {
+    "ember": "coast-weapon-fx-ember-06a2d-palette.json",
+    "tide": "coast-weapon-fx-tide-06a2d-palette.json",
+    "star": "coast-weapon-fx-star-06a2d-palette.json",
+    "shadow": "coast-weapon-fx-shadow-06a2d-palette.json"
+  },
+  "preferred_element": "tide",
+  "blend": {
+    "Fs": "Sa",
+    "Fd": "1-Sa",
+    "op": "ADD"
+  }
+}

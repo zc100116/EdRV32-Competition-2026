@@ -1,0 +1,32 @@
+{
+  "name": "coast-pickup-oil-06a2e",
+  "grid": [
+    24,
+    24
+  ],
+  "cell": [
+    24,
+    24
+  ],
+  "format": 1,
+  "palette_file": "coast-ui-06a2d-palette.json",
+  "atlas_group": "coast_ui_icons",
+  "resource": "coast_ui_icons/oil",
+  "cells": [
+    {
+      "id": "down/oil/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "oil",
+      "frame": 0,
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    }
+  ]
+}

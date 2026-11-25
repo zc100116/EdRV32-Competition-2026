@@ -1,0 +1,110 @@
+{
+  "name": "tide-lord-head-death-06a2d",
+  "grid": [
+    336,
+    160
+  ],
+  "cell": [
+    112,
+    80
+  ],
+  "palette_file": "tide-lord-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "tide_lord_mouth",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/death/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "death",
+      "frame": 0,
+      "anchor": [
+        56,
+        65
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/death/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "death",
+      "frame": 1,
+      "anchor": [
+        56,
+        65
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/death/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "death",
+      "frame": 2,
+      "anchor": [
+        56,
+        65
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/death/3",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "death",
+      "frame": 3,
+      "anchor": [
+        56,
+        65
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/death/4",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "death",
+      "frame": 4,
+      "anchor": [
+        56,
+        65
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/death/5",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "death",
+      "frame": 5,
+      "anchor": [
+        56,
+        65
+      ],
+      "hand_primary": null
+    }
+  ]
+}

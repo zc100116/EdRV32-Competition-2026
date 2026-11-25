@@ -1,0 +1,117 @@
+{
+  "name": "coast-elite-aura-dim-06a2e",
+  "grid": [
+    240,
+    160
+  ],
+  "cell": [
+    80,
+    80
+  ],
+  "format": 0,
+  "texture_format": 0,
+  "palette_file": "coast-weapon-fx-shadow-06a2d-palette.json",
+  "atlas_group": "coast_small_fx",
+  "resource": "coast_small_fx/elite_aura_dim",
+  "animation_ticks": 6,
+  "animation_loop": true,
+  "direction_independent": true,
+  "global_alpha": 145,
+  "aura_region": "body",
+  "blend": "alpha",
+  "filter": "nearest",
+  "cells": [
+    {
+      "id": "down/elite_aura_dim/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "elite_aura_dim",
+      "frame": 0,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_dim/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "elite_aura_dim",
+      "frame": 1,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_dim/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "elite_aura_dim",
+      "frame": 2,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_dim/3",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "elite_aura_dim",
+      "frame": 3,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_dim/4",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "elite_aura_dim",
+      "frame": 4,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_dim/5",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "elite_aura_dim",
+      "frame": 5,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    }
+  ],
+  "source_input": "sources/coast-elite-aura-dim-06a2f-v2-input.png",
+  "source_prompt": "sources/coast-elite-aura-dim-06a2f-v2-prompt.txt"
+}

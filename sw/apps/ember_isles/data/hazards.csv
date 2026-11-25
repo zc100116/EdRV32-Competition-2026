@@ -1,0 +1,4 @@
+id,stage_index,period,warning,active_frames,damage,damage_type,status,slow_percent,slow_frames,region_percent,radius
+flood,0,1800,120,600,0,2,255,30,90,18,0
+fog,1,1500,120,600,4,4,7,0,0,30,100
+rockfall,2,600,60,1,35,0,255,0,0,0,56

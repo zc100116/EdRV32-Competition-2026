@@ -1,0 +1,116 @@
+{
+  "name": "coast-blessing-icons-06a2d",
+  "grid": [
+    72,
+    48
+  ],
+  "cell": [
+    24,
+    24
+  ],
+  "palette_file": "coast-ui-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_ui_icons",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/moving_fire/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "moving_fire",
+      "frame": 0,
+      "icon_kind": "blessing",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/lamp_guard/0",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "lamp_guard",
+      "frame": 0,
+      "icon_kind": "blessing",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/harvest/0",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "harvest",
+      "frame": 0,
+      "icon_kind": "blessing",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/energy/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "energy",
+      "frame": 0,
+      "icon_kind": "blessing",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/judgment/0",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "judgment",
+      "frame": 0,
+      "icon_kind": "blessing",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/first_hit/0",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "first_hit",
+      "frame": 0,
+      "icon_kind": "blessing",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    }
+  ]
+}

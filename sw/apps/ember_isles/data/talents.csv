@@ -1,0 +1,9 @@
+id,row,option,cost,value
+weapon_a,0,0,0,0
+weapon_b,0,1,10,0
+health,1,0,15,15
+shield,1,1,15,20
+gold,2,0,15,40
+oil,2,1,15,3000
+passive,3,0,25,0
+cooldown,3,1,25,10

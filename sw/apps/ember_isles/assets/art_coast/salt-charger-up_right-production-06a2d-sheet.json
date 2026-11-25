@@ -1,0 +1,201 @@
+{
+  "name": "salt-charger-up_right-production-06a2d",
+  "grid": [
+    256,
+    192
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "palette_file": "salt-charger-down-06a2c-v2-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "salt_charger",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "up_right/walk/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "up_right",
+      "action": "walk",
+      "frame": 0,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/walk/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "up_right",
+      "action": "walk",
+      "frame": 1,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/walk/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "up_right",
+      "action": "walk",
+      "frame": 2,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/walk/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "up_right",
+      "action": "walk",
+      "frame": 3,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/walk/4",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "up_right",
+      "action": "walk",
+      "frame": 4,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/walk/5",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "up_right",
+      "action": "walk",
+      "frame": 5,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/attack/0",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "up_right",
+      "action": "attack",
+      "frame": 0,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/attack/1",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "up_right",
+      "action": "attack",
+      "frame": 1,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/attack/2",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "up_right",
+      "action": "attack",
+      "frame": 2,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/attack/3",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "up_right",
+      "action": "attack",
+      "frame": 3,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/attack/4",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "up_right",
+      "action": "attack",
+      "frame": 4,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/attack/5",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "up_right",
+      "action": "attack",
+      "frame": 5,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    }
+  ],
+  "foot_baseline": 58
+}

@@ -1,0 +1,95 @@
+{
+  "name": "coast-known-icons-06a2d",
+  "grid": [
+    72,
+    48
+  ],
+  "cell": [
+    24,
+    24
+  ],
+  "palette_file": "coast-ui-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_ui_icons",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/sword_ember/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "sword_ember",
+      "frame": 0,
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/staff_ember/0",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "staff_ember",
+      "frame": 0,
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/keeper_k/0",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "keeper_k",
+      "frame": 0,
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/keeper_l/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "keeper_l",
+      "frame": 0,
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/keeper_u/0",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "keeper_u",
+      "frame": 0,
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    }
+  ]
+}

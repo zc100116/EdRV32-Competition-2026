@@ -1,0 +1,212 @@
+{
+  "name": "coast-relic-icons-06a2d",
+  "grid": [
+    96,
+    72
+  ],
+  "cell": [
+    24,
+    24
+  ],
+  "palette_file": "coast-ui-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_ui_icons",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/ember_bag/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "ember_bag",
+      "frame": 0,
+      "icon_kind": "relic",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/whetstone/0",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "whetstone",
+      "frame": 0,
+      "icon_kind": "relic",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/eagle_feather/0",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "eagle_feather",
+      "frame": 0,
+      "icon_kind": "relic",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/oil_flask/0",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "oil_flask",
+      "frame": 0,
+      "icon_kind": "relic",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/furnace_mirror/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "furnace_mirror",
+      "frame": 0,
+      "icon_kind": "relic",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/slow_coal/0",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "slow_coal",
+      "frame": 0,
+      "icon_kind": "relic",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/warrior_belt/0",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "warrior_belt",
+      "frame": 0,
+      "icon_kind": "relic",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/lamp_badge/0",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "lamp_badge",
+      "frame": 0,
+      "icon_kind": "relic",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/furnace_core/0",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "furnace_core",
+      "frame": 0,
+      "icon_kind": "relic",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/single_lens/0",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down",
+      "action": "single_lens",
+      "frame": 0,
+      "icon_kind": "relic",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/ember_lamp/0",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "down",
+      "action": "ember_lamp",
+      "frame": 0,
+      "icon_kind": "relic",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/hot_bone/0",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "down",
+      "action": "hot_bone",
+      "frame": 0,
+      "icon_kind": "relic",
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    }
+  ]
+}

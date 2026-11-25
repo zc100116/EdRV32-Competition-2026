@@ -1,0 +1,11 @@
+id,island_index,waves,exits,side
+island_1,0,1,2,0
+island_2,1,2,2,0
+island_3,2,1,3,1
+island_4,3,3,2,0
+island_5,4,1,2,0
+island_6,5,2,2,0
+island_7,6,1,3,1
+island_8,7,2,2,0
+island_9,8,1,2,0
+island_10,9,1,2,0

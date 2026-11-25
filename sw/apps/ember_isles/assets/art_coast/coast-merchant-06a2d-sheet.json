@@ -1,0 +1,111 @@
+{
+  "name": "coast-merchant-06a2d",
+  "grid": [
+    96,
+    96
+  ],
+  "cell": [
+    32,
+    48
+  ],
+  "palette_file": "coast-props-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_landmarks",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/merchant/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "merchant",
+      "frame": 0,
+      "anchor": [
+        16,
+        47
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/merchant/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "merchant",
+      "frame": 1,
+      "anchor": [
+        16,
+        47
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/merchant/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "merchant",
+      "frame": 2,
+      "anchor": [
+        16,
+        47
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/merchant/3",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "merchant",
+      "frame": 3,
+      "anchor": [
+        16,
+        47
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/merchant_barter/0",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "merchant_barter",
+      "frame": 0,
+      "anchor": [
+        16,
+        47
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/merchant_barter/1",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "merchant_barter",
+      "frame": 1,
+      "anchor": [
+        16,
+        47
+      ],
+      "hand_primary": null
+    }
+  ],
+  "foot_baseline": 47
+}

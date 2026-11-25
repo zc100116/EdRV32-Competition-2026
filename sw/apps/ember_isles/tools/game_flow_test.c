@@ -1,17 +1,19 @@
 /* File: game_flow_test.c
- * Spec: E1/E2 basic menus, per-run seeds and presentation-only SELECT state.
+ * Spec: V1 title, both weapon choices, volume, win/loss menus, per-run seeds and presentation-only SELECT state.
  * Description: Check game-loop transitions using real simulation and media stubs.
  * Clock domain: deterministic host test frames.
  */
 #include "game.h"
 #include "ui/ui.h"
+#include "audio/audio.h"
 #include "aud.h"
 #include "plat.h"
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-static unsigned keys, millis, show_perf;
+static unsigned keys, millis, show_perf, requested_stage, requested_volume;
+static struct ember_ui_state menu;
 static struct plat_pointer_state pointer;
 void plat_init(void) {}
 uint32_t plat_game_keys(void) { return keys; }
@@ -36,10 +38,17 @@ void ember_gfx_prepare(const struct ember_sim *sim, unsigned fps,
 {
     (void)sim; (void)fps;
     show_perf = ui->show_perf;
+    menu = *ui;
 }
 void ember_gfx_submit(unsigned frame) { (void)frame; }
 void ember_audio_reset(void) {}
+void ember_audio_volume(unsigned percent) { requested_volume = percent; }
+void ember_audio_stage(unsigned stage) { requested_stage = stage; }
 void ember_audio_event(unsigned event) { (void)event; }
+void ember_audio_result(unsigned kind, unsigned damage_type, unsigned outcome)
+{
+    (void)kind; (void)damage_type; (void)outcome;
+}
 void ember_audio_mix(uint32_t *samples, unsigned frames) { (void)samples; (void)frames; }
 void aud_init(struct aud_ring *ring, uint32_t *samples, uint32_t bytes, uint32_t level)
 {
@@ -75,11 +84,32 @@ int main(void)
 {
     ember_game_init();
     assert(ember_game_state()->phase == EMBER_MENU);
-    pointer = (struct plat_pointer_state){320, 250, 1};
-    step(0);
+    struct ember_meta *meta = ember_game_meta();
+    meta->fragments = 100;
+    assert(ember_meta_unlock_talent(meta, 0, 2));
+    ember_game_save("build/ember_isles/e5a-game-save.txt");
+    ember_game_load("build/ember_isles/e5a-game-save.txt");
+    struct ember_run_config configured;
+    ember_meta_config(ember_game_meta(), 0, 255, 0, &configured);
+    ember_game_configure(&configured);
+    step(EMBER_DOWN);
+    step(0); step(EMBER_START);
+    assert(menu.menu_page == EMBER_SETTINGS && ember_game_state()->phase == EMBER_MENU);
+    step(0); step(EMBER_LEFT);
+    assert(menu.volume == 90 && requested_volume == 90);
+    step(0); step(EMBER_INTERACT);
+    assert(menu.menu_page == EMBER_TITLE);
+    step(0); step(EMBER_UP);
+    step(0); step(EMBER_START);
+    assert(menu.menu_page == EMBER_WEAPON_MENU && ember_game_state()->phase == EMBER_MENU);
+    step(0); step(EMBER_RIGHT);
+    step(0); step(EMBER_START);
     assert(ember_game_state()->phase == EMBER_PLAY);
+    assert(ember_game_state()->player.main_weapon == 0 && ember_game_state()->player.sub_weapon == 2);
     uint32_t seed = ember_game_state()->rng_seed;
     assert(ember_game_recording()->seed == seed && ember_game_recording()->count == 1);
+    assert(ember_game_recording()->config.talents[1] == 0);
+    assert(ember_game_state()->player.max_hp == 299);
     pointer.buttons = 0;
     step(0);
     step(EMBER_SELECT);
@@ -117,13 +147,27 @@ int main(void)
     step(0);
     unsigned count = ember_game_recording()->count;
     step(EMBER_START);
-    assert(ember_game_state()->phase == EMBER_MENU);
+    assert(ember_game_state()->phase == EMBER_MENU && menu.menu_page == EMBER_TITLE);
     assert(ember_game_recording()->count == count);
     step(0);
     step(EMBER_START);
+    assert(ember_game_state()->phase == EMBER_MENU && menu.menu_page == EMBER_WEAPON_MENU);
+    step(0); step(EMBER_J);
     assert(ember_game_state()->phase == EMBER_PLAY && ember_game_state()->rng_seed != seed);
+    assert(ember_game_state()->player.main_weapon == 2 && ember_game_state()->player.sub_weapon == 0);
     assert(ember_game_recording()->count == 1);
-    ember_game_replay(7);
+    fixture->phase = EMBER_LOST;
+    step(0); step(EMBER_J);
+    assert(fixture->phase == EMBER_MENU && menu.menu_page == EMBER_TITLE);
+    step(0); step(EMBER_J);
+    assert(menu.menu_page == EMBER_WEAPON_MENU);
+    step(0); step(EMBER_J);
+    assert(fixture->phase == EMBER_PLAY);
+    static struct ember_replay replay;
+    replay.seed = 7;
+    ember_run_config_default(&replay.config);
+    replay.config.sub_weapon = 1;
+    ember_game_replay(&replay);
     step(0);
     step(EMBER_START);
     assert(ember_game_state()->rng_seed == 7);
@@ -139,6 +183,18 @@ int main(void)
     step(EMBER_SWAP);
     assert(fixture->player.sub_weapon == main);
     assert(ember_game_recording()->input[0] == EMBER_START);
+    step(0);
+    fixture->config.mode = EMBER_ROUTE; fixture->room_lit = 1;
+    fixture->stage_clear = 1;
+    fixture->exit = (struct ember_point){fixture->player.x,fixture->player.y};
+    step(EMBER_INTERACT);
+    assert(fixture->config.stage == 1 && requested_stage == 1);
+    step(0);
+    fixture->config.mode = EMBER_ROUTE; fixture->room_lit = 1;
+    fixture->stage_clear = 1;
+    fixture->exit = (struct ember_point){fixture->player.x,fixture->player.y};
+    step(EMBER_INTERACT);
+    assert(fixture->config.stage == 2 && requested_stage == 2);
     puts("PASS game flow: title, run seed/recording, SELECT edge, pause, return, replay end");
     return 0;
 }

@@ -1,0 +1,110 @@
+{
+  "name": "keeper-fire-seed-06a2d",
+  "grid": [
+    128,
+    96
+  ],
+  "cell": [
+    32,
+    32
+  ],
+  "palette_file": "coast-weapon-fx-ember-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "fire_seed_study",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/fire_seed_explosion/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "fire_seed_explosion",
+      "frame": 0,
+      "anchor": [
+        16,
+        24
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/fire_seed_explosion/1",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "fire_seed_explosion",
+      "frame": 1,
+      "anchor": [
+        16,
+        24
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/fire_seed_explosion/2",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "fire_seed_explosion",
+      "frame": 2,
+      "anchor": [
+        16,
+        24
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/fire_seed_explosion/3",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "fire_seed_explosion",
+      "frame": 3,
+      "anchor": [
+        16,
+        24
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/fire_seed_explosion/4",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "fire_seed_explosion",
+      "frame": 4,
+      "anchor": [
+        16,
+        24
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/fire_seed_explosion/5",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down",
+      "action": "fire_seed_explosion",
+      "frame": 5,
+      "anchor": [
+        16,
+        24
+      ],
+      "hand_primary": null
+    }
+  ]
+}

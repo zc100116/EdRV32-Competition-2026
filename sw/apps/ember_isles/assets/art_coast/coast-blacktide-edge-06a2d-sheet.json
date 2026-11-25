@@ -1,0 +1,141 @@
+{
+  "name": "coast-blacktide-edge-06a2d",
+  "grid": [
+    256,
+    64
+  ],
+  "cell": [
+    64,
+    32
+  ],
+  "palette_file": "coast-props-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_landmarks",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/blacktide_edge/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "blacktide_edge",
+      "frame": 0,
+      "anchor": [
+        32,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/blacktide_edge/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "blacktide_edge",
+      "frame": 1,
+      "anchor": [
+        32,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/blacktide_edge/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "blacktide_edge",
+      "frame": 2,
+      "anchor": [
+        32,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/blacktide_edge/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "blacktide_edge",
+      "frame": 3,
+      "anchor": [
+        32,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/blacktide_edge/4",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "blacktide_edge",
+      "frame": 4,
+      "anchor": [
+        32,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/blacktide_edge/5",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "blacktide_edge",
+      "frame": 5,
+      "anchor": [
+        32,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/blacktide_edge/6",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "blacktide_edge",
+      "frame": 6,
+      "anchor": [
+        32,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/blacktide_edge/7",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "blacktide_edge",
+      "frame": 7,
+      "anchor": [
+        32,
+        31
+      ],
+      "hand_primary": null
+    }
+  ],
+  "foot_baseline": 31
+}

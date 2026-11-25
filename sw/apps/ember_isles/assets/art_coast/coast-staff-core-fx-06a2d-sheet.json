@@ -1,0 +1,237 @@
+{
+  "name": "coast-staff-core-fx-06a2d",
+  "grid": [
+    256,
+    256
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "palette_file": "coast-weapon-fx-iron-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_large_fx",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/staff_core_charge/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "staff_core_charge",
+      "frame": 0,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/staff_core_charge/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "staff_core_charge",
+      "frame": 1,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/staff_core_charge/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "staff_core_charge",
+      "frame": 2,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/staff_core_charge/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "staff_core_charge",
+      "frame": 3,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/staff_core_charge/4",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "staff_core_charge",
+      "frame": 4,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/staff_core_charge/5",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "staff_core_charge",
+      "frame": 5,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/staff_core_blast/0",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "staff_core_blast",
+      "frame": 0,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/staff_core_blast/1",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "staff_core_blast",
+      "frame": 1,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/staff_core_blast/2",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "staff_core_blast",
+      "frame": 2,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/staff_core_blast/3",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down",
+      "action": "staff_core_blast",
+      "frame": 3,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/staff_core_blast/4",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "down",
+      "action": "staff_core_blast",
+      "frame": 4,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/staff_core_blast/5",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "down",
+      "action": "staff_core_blast",
+      "frame": 5,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/staff_core_blast/6",
+      "cell": [
+        0,
+        3
+      ],
+      "direction": "down",
+      "action": "staff_core_blast",
+      "frame": 6,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/staff_core_blast/7",
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "down",
+      "action": "staff_core_blast",
+      "frame": 7,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    }
+  ],
+  "palette_variants": {
+    "ember": "coast-weapon-fx-ember-06a2d-palette.json",
+    "tide": "coast-weapon-fx-tide-06a2d-palette.json",
+    "star": "coast-weapon-fx-star-06a2d-palette.json",
+    "shadow": "coast-weapon-fx-shadow-06a2d-palette.json"
+  },
+  "preferred_element": "ember"
+}

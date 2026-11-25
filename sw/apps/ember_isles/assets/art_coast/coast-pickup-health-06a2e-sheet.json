@@ -1,0 +1,32 @@
+{
+  "name": "coast-pickup-health-06a2e",
+  "grid": [
+    24,
+    24
+  ],
+  "cell": [
+    24,
+    24
+  ],
+  "format": 1,
+  "palette_file": "keeper-palette.json",
+  "atlas_group": "coast_ui_icons",
+  "resource": "coast_ui_icons/health",
+  "cells": [
+    {
+      "id": "down/health/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "health",
+      "frame": 0,
+      "anchor": [
+        12,
+        12
+      ],
+      "hand_primary": null
+    }
+  ]
+}

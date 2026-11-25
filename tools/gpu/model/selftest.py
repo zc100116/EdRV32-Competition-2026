@@ -180,6 +180,23 @@ def test_plane_steps():
         assert product == arithmetic.normal(1)
 
 
+def test_quad_lod():
+    vertices = [[0, 0, 17, 1 << 30, 0, 0, *([77 << 16] * 3)],
+                [64, 0, 17, 1 << 30, 4 << 38, 0, *([77 << 16] * 3)],
+                [0, 64, 17, 1 << 30, 0, 4 << 38, *([77 << 16] * 3)]]
+    arithmetic = PixelArithmetic(vertices, edge(*vertices[:2], *vertices[2][:2]))
+    assert arithmetic.quad_span(0, 0) == 1 << 16
+    assert arithmetic.quad_span(1, 1) == arithmetic.quad_span(0, 0)
+    assert arithmetic.inverse((0, 0)) == (0, 0)
+    for power in range(-25, 25):
+        positive = arithmetic.inverse(arithmetic.normal(1, power))
+        negative = arithmetic.inverse(arithmetic.normal(-1, power))
+        assert negative == (-positive[0], positive[1])
+    attrs = arithmetic.at(0, 0)
+    attrs[1] = 0
+    assert arithmetic.coordinates(attrs) == [(0, 0), (0, 0)]
+
+
 def test_objects():
     scene = Scene()
     objects = [dict(ALIVE=1, PX=10 * 256, PY=10 * 256, VX=256, VY=0, AX=2048,
@@ -470,7 +487,7 @@ def test_clipping_and_arithmetic():
 
 def main():
     start = time.perf_counter()
-    for test in (test_shared_edges, test_hand_computed, test_strips, test_plane_steps, test_objects,
+    for test in (test_shared_edges, test_hand_computed, test_strips, test_plane_steps, test_quad_lod, test_objects,
                  test_texture, test_bilinear_triangle, test_viewport, test_texture_layout,
                  test_command_stream, test_stencil_blend_and_aa,
                  test_clipping_and_arithmetic):

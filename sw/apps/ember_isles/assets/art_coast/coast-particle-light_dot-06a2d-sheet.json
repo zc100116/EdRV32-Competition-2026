@@ -1,0 +1,57 @@
+{
+  "name": "coast-particle-light_dot-06a2d",
+  "grid": [
+    8,
+    4
+  ],
+  "cell": [
+    4,
+    4
+  ],
+  "palette_file": "coast-weapon-fx-iron-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_particles",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/light_dot/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "light_dot",
+      "frame": 0,
+      "anchor": [
+        2,
+        2
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/light_dot/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "light_dot",
+      "frame": 1,
+      "anchor": [
+        2,
+        2
+      ],
+      "hand_primary": null
+    }
+  ],
+  "palette_variants": {
+    "ember": "coast-weapon-fx-ember-06a2d-palette.json",
+    "tide": "coast-weapon-fx-tide-06a2d-palette.json",
+    "star": "coast-weapon-fx-star-06a2d-palette.json",
+    "shadow": "coast-weapon-fx-shadow-06a2d-palette.json"
+  },
+  "preferred_element": "iron"
+}

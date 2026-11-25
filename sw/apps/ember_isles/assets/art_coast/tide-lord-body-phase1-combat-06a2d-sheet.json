@@ -1,0 +1,110 @@
+{
+  "name": "tide-lord-body-phase1-combat-06a2d",
+  "grid": [
+    384,
+    224
+  ],
+  "cell": [
+    128,
+    112
+  ],
+  "palette_file": "tide-lord-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "tide_lord_body",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/phase1_attack/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "phase1_attack",
+      "frame": 0,
+      "anchor": [
+        64,
+        100
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/phase1_attack/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "phase1_attack",
+      "frame": 1,
+      "anchor": [
+        64,
+        100
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/phase1_attack/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "phase1_attack",
+      "frame": 2,
+      "anchor": [
+        64,
+        100
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/phase1_attack/3",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "phase1_attack",
+      "frame": 3,
+      "anchor": [
+        64,
+        100
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/phase1_hit/0",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "phase1_hit",
+      "frame": 0,
+      "anchor": [
+        64,
+        100
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/phase1_hit/1",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "phase1_hit",
+      "frame": 1,
+      "anchor": [
+        64,
+        100
+      ],
+      "hand_primary": null
+    }
+  ]
+}
