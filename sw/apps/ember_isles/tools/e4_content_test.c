@@ -484,8 +484,11 @@ static void blessings(void)
             fixture.enemies[0].affix = 1;
             fixture.enemies[0].hp = 1;
             ember_sim_hit(&fixture, 0, &h);
-            CHECK(fixture.pickup_count == 2);
-            CHECK(fixture.pickups[0].kind || fixture.pickups[1].kind); break;
+            CHECK(fixture.pickup_count == 4);
+            CHECK(fixture.pickups[0].kind == EMBER_DROP_RELIC);
+            CHECK(fixture.pickups[1].kind == EMBER_DROP_XP);
+            CHECK(fixture.pickups[2].kind == EMBER_DROP_GOLD);
+            CHECK(fixture.pickups[3].kind == EMBER_DROP_EMBER); break;
         case 5:
             fixture.player.defense.shield_max = 10;
             fixture.player.defense.since_hurt = 180;
@@ -738,7 +741,10 @@ static void interface_rules(void)
     ember_sim_hit(&fixture, e, &h);
     CHECK(fixture.alive_count == 3 && fixture.player.kills == 1);
     CHECK(!fixture.enemies[e].alive && !fixture.enemies[e].retiring);
-    CHECK(fixture.pickup_count == 1);
+    CHECK(fixture.pickup_count == 3);
+    CHECK(fixture.pickups[0].kind == EMBER_DROP_XP);
+    CHECK(fixture.pickups[1].kind == EMBER_DROP_GOLD);
+    CHECK(fixture.pickups[2].kind == EMBER_DROP_EMBER);
 }
 static void dark_projectile_snapshot(void)
 {
@@ -978,14 +984,14 @@ static void e4b_events(void)
 {
     setup();
     struct ember_rng spawn = fixture.spawn_rng, combat = fixture.combat_rng, loot = fixture.loot_rng;
-    fixture.pickups[0] = (struct ember_pickup){fixture.player.x,fixture.player.y,7,1,0,0};
+    fixture.pickups[0] = (struct ember_pickup){fixture.player.x,fixture.player.y,7,1,0,0,0,0};
     fixture.pickup_count = 1;
     pickups_step(&fixture, 0);
     CHECK(fixture.events.count == 1 && fixture.events.item[0].kind == EMBER_EVENT_PICKUP &&
         fixture.events.item[0].subtype == EMBER_PICKUP_XP && fixture.events.item[0].value == 7);
     pickups_step(&fixture, 0); CHECK(fixture.events.count == 1);
     fixture.events.count = 0;
-    fixture.pickups[0] = (struct ember_pickup){fixture.player.x,fixture.player.y,0,1,1,R_IRON};
+    fixture.pickups[0] = (struct ember_pickup){fixture.player.x,fixture.player.y,0,1,1,R_IRON,0,0};
     fixture.pickup_count = 1; pickups_step(&fixture, 0);
     CHECK(fixture.events.count == 1 && fixture.events.item[0].kind == EMBER_EVENT_PICKUP &&
         fixture.events.item[0].subtype == EMBER_PICKUP_ITEM && fixture.events.item[0].value == R_IRON);

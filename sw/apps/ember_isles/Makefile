@@ -12,7 +12,7 @@ PCFLAGS := -I$(ROOT)/sw/bsp/pc/include $(CFLAGS) $(MAP) -O3 \
     -DGPU_EMU_TEXTURE_BYTES=262144 \
     -include $(ROOT)/sw/bsp/pc/include/mmio.h
 DRIVERS := sw/drivers/gpu.c sw/drivers/aud.c sw/drivers/disp.c sw/drivers/plic.c
-SOURCES = $(wildcard $(APP)/src/core/*.c $(APP)/src/sim/*.c \
+SOURCES = $(wildcard $(APP)/src/core/*.c $(APP)/src/sim/*.c $(APP)/src/meta/*.c \
     $(APP)/src/gfx2d/*.c $(APP)/src/ui/*.c $(APP)/src/audio/*.c)
 PC := sw/lib/plat/pc.c sw/bsp/pc/soc.c sw/bsp/pc/cache.c tools/gpu/emu/gpu_emu.c
 BOARD := sw/lib/plat/board.c sw/bsp/start.S sw/bsp/host.c sw/bsp/cache.c \
@@ -77,7 +77,8 @@ test: $(OUT)/game-flow-test $(OUT)/sim-replay $(OUT)/audio-test $(OUT)/audio-rin
 	cd $(ROOT) && $(OUT)/audio-ring-test
 	cd $(ROOT) && $(OUT)/pacing-test
 $(OUT)/game-flow-test: $(APP)/tools/game_flow_test.c $(APP)/src/game.c \
-    $(APP)/src/sim/sim.c $(APP)/src/sim/combat.c $(APP)/src/core/core.c $(OUT)/generated/data.h $(HEADERS)
+    $(APP)/src/sim/sim.c $(APP)/src/sim/combat.c $(APP)/src/core/core.c \
+    $(APP)/src/meta/meta.c $(OUT)/generated/data.h $(HEADERS)
 	$(CC) $(CFLAGS) $(filter %.c,$^) -o $@
 $(OUT)/sim-replay: $(APP)/tools/sim_replay.c $(APP)/src/sim/sim.c \
     $(APP)/src/sim/combat.c $(APP)/src/core/core.c $(APP)/src/core/replay.c $(OUT)/generated/data.h $(HEADERS)
@@ -94,3 +95,50 @@ $(OUT)/pacing-test: $(SOURCES) $(APP)/src/game.c $(GEN) $(HEADERS) \
 	$(CC) -pthread $(PCFLAGS) $(SOURCES) $(APP)/src/game.c \
 	    $(ROOT)/tools/gpu/emu/pc/ember_pacing_test.c $(addprefix $(ROOT)/,$(DRIVERS) $(PC)) \
 	    -Wl,--wrap=ember_gfx_prepare -Wl,--wrap=ember_gfx_submit -o $@
+
+.PHONY: e5a-grid e5a-stress
+e5a-grid: $(OUT)/e5a-grid-test
+	$(OUT)/e5a-grid-test
+e5a-stress: $(OUT)/e5a-stress
+	$(OUT)/e5a-stress > $(OUT)/e5a-stress.csv
+$(OUT)/e5a-grid-test: $(APP)/tools/e5a_grid_test.c $(APP)/src/sim/sim.c \
+    $(APP)/src/sim/combat.c $(APP)/src/core/core.c $(OUT)/generated/data.h $(HEADERS)
+	$(CC) $(CFLAGS) $(APP)/tools/e5a_grid_test.c $(APP)/src/sim/combat.c \
+	    $(APP)/src/core/core.c -o $@
+$(OUT)/e5a-stress: $(APP)/tools/e5a_stress.c $(APP)/src/sim/sim.c \
+    $(APP)/src/sim/combat.c $(APP)/src/core/core.c $(OUT)/generated/data.h $(HEADERS)
+	$(CC) $(CFLAGS) $(APP)/tools/e5a_stress.c $(APP)/src/sim/sim.c $(APP)/src/sim/combat.c \
+	    $(APP)/src/core/core.c -o $@
+$(OUT)/e5a-stress-profile: $(APP)/tools/e5a_stress.c $(APP)/src/sim/sim.c \
+    $(APP)/src/sim/combat.c $(APP)/src/core/core.c $(OUT)/generated/data.h $(HEADERS)
+	$(CC) $(CFLAGS) -pg $(APP)/tools/e5a_stress.c $(APP)/src/sim/sim.c $(APP)/src/sim/combat.c \
+	    $(APP)/src/core/core.c -o $@
+
+$(OUT)/ember_isles-stress-spike.elf: $(SOURCES) $(APP)/src/spike.c $(GEN) $(HEADERS) \
+    $(ROOT)/sw/drivers/gpu.c $(ROOT)/sw/bsp/start.S $(ROOT)/sw/bsp/host.c
+	$(MAKE) -C $(ROOT)/sw $(ROOT)/build/sw/soc_memory.ld -j1
+	cd $(ROOT) && riscv-none-elf-gcc $(CFLAGS) $(MAP) -DEMBER_STRESS_DIAGNOSTIC \
+	    -march=rv32im_zicsr_zicntr -mabi=ilp32 -ffunction-sections -fdata-sections \
+	    -nostdlib -Wl,--gc-sections -Tsw/bsp/ld/ddr.ld \
+	    $(SOURCES) $(APP)/src/spike.c sw/drivers/gpu.c sw/bsp/start.S sw/bsp/host.c \
+	    -lc -lgcc -o $@
+.PHONY: e5a-upgrade
+e5a-upgrade: $(OUT)/e5a-upgrade-test
+	$(OUT)/e5a-upgrade-test
+$(OUT)/e5a-upgrade-test: $(APP)/tools/e5a_upgrade_test.c $(APP)/src/sim/sim.c \
+    $(APP)/src/sim/combat.c $(APP)/src/core/core.c $(OUT)/generated/data.h $(HEADERS)
+	$(CC) $(CFLAGS) $(APP)/tools/e5a_upgrade_test.c $(APP)/src/sim/combat.c \
+	    $(APP)/src/core/core.c -o $@
+$(OUT)/e5a-replay: $(APP)/tools/e5a_replay.c $(APP)/src/sim/sim.c \
+    $(APP)/src/sim/combat.c $(APP)/src/core/core.c $(APP)/src/core/replay.c \
+    $(OUT)/generated/data.h $(HEADERS)
+	$(CC) $(CFLAGS) $(filter %.c,$^) -o $@
+$(OUT)/e5a-content-test: $(APP)/tools/e5a_content_test.c $(APP)/src/sim/sim.c \
+    $(APP)/src/sim/combat.c $(APP)/src/core/core.c $(APP)/src/meta/meta.c \
+    $(OUT)/generated/data.h $(HEADERS)
+	$(CC) $(CFLAGS) $(APP)/tools/e5a_content_test.c $(APP)/src/sim/combat.c \
+	    $(APP)/src/core/core.c $(APP)/src/meta/meta.c -o $@
+$(OUT)/e4-content-test: $(APP)/tools/e4_content_test.c $(APP)/src/sim/sim.c \
+    $(APP)/src/sim/combat.c $(APP)/src/core/core.c $(OUT)/generated/data.h $(HEADERS)
+	$(CC) $(CFLAGS) $(APP)/tools/e4_content_test.c $(APP)/src/sim/combat.c \
+	    $(APP)/src/core/core.c -o $@

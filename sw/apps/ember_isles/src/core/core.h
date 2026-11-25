@@ -8,8 +8,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #define EMBER_Q 65536
-#define EMBER_REPLAY_FRAMES 60000
-#define EMBER_DEMO_FRAMES 10800
+#define EMBER_REPLAY_FRAMES 262144
 #define EMBER_ENEMIES 1500
 #define EMBER_SHOTS 3000
 #define EMBER_EVENTS 256
@@ -31,7 +30,18 @@
 #define EMBER_B EMBER_L
 typedef int32_t ember_fixed;
 struct ember_rng { uint32_t state; };
-struct ember_replay { uint32_t seed; uint32_t count; uint16_t input[EMBER_REPLAY_FRAMES]; };
+enum ember_mode { EMBER_ARENA, EMBER_ROUTE };
+/* Snapshot values are CSV row indices; 255 means empty sub/pet or unselected talent. */
+struct ember_run_config {
+    uint8_t mode, stage, character, main_weapon, sub_weapon, pet, pet_weapon;
+    uint8_t talents[4], difficulty;
+};
+struct ember_replay {
+    uint32_t seed, count;
+    struct ember_run_config config;
+    uint16_t input[EMBER_REPLAY_FRAMES];
+};
+void ember_run_config_default(struct ember_run_config *config);
 enum ember_event_kind {
     EMBER_EVENT_SHOT, EMBER_EVENT_HIT, EMBER_EVENT_KILL, EMBER_EVENT_DASH,
     EMBER_EVENT_SEED, EMBER_EVENT_ULTIMATE, EMBER_EVENT_LEVELUP, EMBER_EVENT_CHOOSE,

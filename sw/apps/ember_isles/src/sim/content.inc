@@ -29,9 +29,13 @@ void ember_sim_character(struct ember_sim *s, unsigned id)
 void ember_sim_pet(struct ember_sim *s, unsigned kind, unsigned weapon)
 {
     s->pet_kind = (uint8_t)kind;
+    s->discoveries.pets[kind] = 1;
+    if (weapon != 255) s->discoveries.pet_weapons[weapon] = 1;
     s->pet_level = 1;
     if (s->player.pet_weapon != weapon) weapon_change_event(s, EMBER_WEAPON_SLOT_PET, weapon);
     s->player.pet_weapon = (uint8_t)weapon;
+    if (weapon != 255 && !s->player.pet_weapon_level[weapon])
+        s->player.pet_weapon_level[weapon] = 1;
     s->pet.x = s->player.x + ember_pets[kind].follow_x * EMBER_Q;
     s->pet.y = s->player.y;
     struct ember_pet_weapons_row data = pet_weapon_data(s);
@@ -40,8 +44,10 @@ void ember_sim_pet(struct ember_sim *s, unsigned kind, unsigned weapon)
     s->pet.cooldown = (uint16_t)data.attack_cooldown;
     ember_sim_attributes(s);
 }
-void ember_sim_blessing(struct ember_sim *s, unsigned id) { s->blessings[id] = 1; }
-void ember_sim_resonance(struct ember_sim *s, unsigned id) { s->resonances[id] = 1; }
+void ember_sim_blessing(struct ember_sim *s, unsigned id)
+{ s->blessings[id] = 1; s->discoveries.blessings[id] = 1; }
+void ember_sim_resonance(struct ember_sim *s, unsigned id)
+{ s->resonances[id] = 1; s->discoveries.resonances[id] = 1; }
 void ember_sim_contract(struct ember_sim *s, unsigned curse, unsigned reward)
 {
     s->curses[curse] = 1;
@@ -49,17 +55,23 @@ void ember_sim_contract(struct ember_sim *s, unsigned curse, unsigned reward)
     case 0: {
         unsigned choices[38], count = 0;
         for (unsigned i = 0; i < EMBER_RELICS_COUNT; ++i)
-            if (!strcmp(ember_relics[i].rarity, "legendary")) choices[count++] = i;
+            if (!strcmp(ember_relics[i].rarity, "legendary") &&
+                !inventory_owned(s, EMBER_ITEM_RELIC, i)) choices[count++] = i;
         s->reward_relic = (uint8_t)choices[ember_random(&s->loot_rng) % count];
         s->has_reward_relic = 1;
         break;
     }
-    case 1: s->free_evolution = 1; break;
+    case 1: ++s->free_evolution; break;
     case 2: s->guaranteed_resonance = 1; break;
     case 3: {
         unsigned choices[18], count = 0;
         for (unsigned i = 0; i < EMBER_INSCRIPTIONS_COUNT; ++i)
-            if (!strcmp(ember_inscriptions[i].rarity, "rare")) choices[count++] = i;
+            if (!strcmp(ember_inscriptions[i].rarity, "rare") &&
+                !inventory_owned(s, EMBER_ITEM_INSCRIPTION, i) &&
+                (rune_allowed(s, i, s->player.main_weapon) ||
+                 (s->player.sub_weapon != 255 && rune_allowed(s, i, s->player.sub_weapon)) ||
+                 (s->player.pet_weapon != 255 && rune_allowed(s, i, 50u + s->player.pet_weapon))))
+                choices[count++] = i;
         s->reward_inscription = (uint8_t)choices[ember_random(&s->loot_rng) % count];
         s->has_reward_inscription = 1;
         s->gold += (uint32_t)ember_contracts[3].reward_gold;
@@ -83,6 +95,7 @@ void ember_sim_evolve(struct ember_sim *s, unsigned weapon, unsigned branch)
 static void summon(struct ember_sim *s, unsigned kind, int life, ember_fixed x, ember_fixed y)
 {
     for (unsigned i = 0; i < 8; ++i) if (!s->summons[i].life) {
+        s->summons[i].room = s->room_serial;
         s->summons[i].x = x;
         s->summons[i].y = y;
         const struct ember_summons_row *d = &ember_summons[kind];
@@ -293,6 +306,7 @@ static void content_skill(struct ember_sim *s, unsigned key)
         if (key == 0) summon(s, 1, c->skill_k_lifetime, p->x, p->y);
         if (key == 1) {
             for (unsigned i = 0; i < 8; ++i) if (s->summons[i].life &&
+                s->summons[i].room == s->room_serial &&
                 within(p->x, p->y, s->summons[i].x, s->summons[i].y, c->skill_l_radius)) {
                 s->summons[i].hp = ember_summons[s->summons[i].kind].hp;
                 s->summons[i].armor = s->summons[i].base_armor + c->skill_l_value2;
@@ -326,8 +340,10 @@ static void content_before_hit(struct ember_sim *s, unsigned index,
     }
     if (character == 2) h->crit = minimum(100 + s->cap_raise[EMBER_CRIT],
         h->crit + minimum(ember_characters[s->player.character].moving_crit_maximum,
-            s->moving_frames * ember_characters[s->player.character].moving_crit_per_second / 60));
-    if (character == 6 && !s->in_light) h->crit_damage += c->passive_value * (100 + relic(s, R_NIGHT)) / 100;
+            s->moving_frames * talent_passive(s, c->moving_crit_per_second, 3) / 60));
+    if (character == 6 && !s->in_light)
+        h->crit_damage += talent_passive(s, c->passive_value, 1) *
+            (100 + relic(s, R_NIGHT)) / 100;
     if (s->dash_buff && s->blessings[1]) h->increased += ember_blessings[1].value;
     if (s->blessings[8]) {
         unsigned count = 0;
@@ -396,7 +412,8 @@ static void content_after_hit(struct ember_sim *s, unsigned index, unsigned weap
         if (s->fuse_stacks == c->passive_value) {
             s->fuse_stacks = 0;
             e->defense.status[EMBER_IGNITE] = (struct ember_status_state){0};
-            skill_hit_tags(s, index, 1, r.damage * c->passive_value2 / 100, EMBER_STATUS_COUNT,
+            skill_hit_tags(s, index, 1,
+                r.damage * talent_passive(s, c->passive_value2, 2) / 100, EMBER_STATUS_COUNT,
                 TAG_SINGLE, depth + 1);
         } else ++s->fuse_stacks;
     }
@@ -458,12 +475,12 @@ static void content_step(struct ember_sim *s)
             (100 + relic(s, R_NIGHT)) / 100) / 100;
     else p->speed = s->attributes[EMBER_SPEED];
     if (character == 5 && s->combat_frame % c->passive_interval == 0) {
-        heal(s, c->passive_value);
+        heal(s, talent_passive(s, c->passive_value, 1));
         for (unsigned i = 0; i < 8; ++i)
-            if (s->summons[i].life && within(p->x, p->y,
+            if (s->summons[i].life && s->summons[i].room == s->room_serial && within(p->x, p->y,
                     s->summons[i].x, s->summons[i].y, c->passive_radius))
                     s->summons[i].hp = minimum(ember_summons[s->summons[i].kind].hp,
-                        s->summons[i].hp + c->passive_value);
+                        s->summons[i].hp + talent_passive(s, c->passive_value, 1));
     }
     if (s->tide_shield && !p->defense.temporary[2]) {
         s->tide_shield = 0;
@@ -474,7 +491,8 @@ static void content_step(struct ember_sim *s)
                 if (s->enemies[i].defense.rank < 2) s->enemies[i].defense.frozen = (uint16_t)c->skill_l_freeze_frames;
             }
     }
-    for (unsigned i = 0; i < 8; ++i) if (s->summons[i].life) {
+    for (unsigned i = 0; i < 8; ++i) if (s->summons[i].life &&
+        s->summons[i].room == s->room_serial) {
         const struct ember_summons_row *d = &ember_summons[s->summons[i].kind];
         --s->summons[i].life;
         for (unsigned n = 0; n < EMBER_ENEMIES; ++n) {
@@ -507,7 +525,7 @@ static void content_step(struct ember_sim *s)
             }
             if (character == 7 && s->summons[i].kind != 2 &&
                 light_zone_at(s, s->summons[i].x, s->summons[i].y))
-                h.added[3] = c->passive_value;
+                h.added[3] = talent_passive(s, c->passive_value, 1);
             ember_sim_hit(s, (unsigned)target, &h);
             if (s->resonances[7] && e->alive) ember_sim_status(s, target, EMBER_SHOCK, 1);
             s->summons[i].timer = (uint16_t)(d->attack_cooldown * 100 /
@@ -516,7 +534,9 @@ static void content_step(struct ember_sim *s)
     }
     if (character == 7 && s->ultimate_time && s->combat_frame % c->ultimate_interval == 0)
         for (unsigned a = 0; a < 8; ++a) for (unsigned b = a + 1; b < 8; ++b) {
-            if (!s->summons[a].life || !s->summons[b].life) continue;
+            if (!s->summons[a].life || !s->summons[b].life ||
+                s->summons[a].room != s->room_serial ||
+                s->summons[b].room != s->room_serial) continue;
             int64_t dx = (s->summons[b].x - s->summons[a].x) / EMBER_Q;
             int64_t dy = (s->summons[b].y - s->summons[a].y) / EMBER_Q;
             for (unsigned i = 0; i < EMBER_ENEMIES; ++i) {
@@ -691,7 +711,7 @@ static void pet_step(struct ember_sim *s)
     case 5: {
         int pillar = -1;
         int64_t best = INT64_MAX;
-        for (unsigned i = 0; i < 8; ++i) if (!s->pillars[i].lit) {
+        for (unsigned i = 0; i < s->pillar_count; ++i) if (!s->pillars[i].lit) {
             int64_t distance = distance2(s->pet.x, s->pet.y, s->pillars[i].x, s->pillars[i].y);
             if (distance < best) { best = distance; pillar = (int)i; }
         }
@@ -783,7 +803,8 @@ void ember_sim_reward_cap(struct ember_sim *s, unsigned attr)
 }
 int32_t ember_sim_price(const struct ember_sim *s, int32_t base)
 {
-    return base * (100 + (s->curses[5] ? ember_contracts[5].value : 0)) / 100;
+    return base * (100 + (s->curses[5] ? ember_contracts[5].value : 0) +
+        (s->config.difficulty >= 7 ? ember_difficulty[6].price_percent : 0)) / 100;
 }
 
 unsigned ember_sim_tag_count(const struct ember_sim *s, const char *tag)
@@ -858,9 +879,21 @@ int ember_sim_contract_reward_available(const struct ember_sim *s, unsigned rewa
 {
     unsigned count = 0;
     for (unsigned i = 0; i < 10; ++i) count += !!s->resonances[i];
-    return reward != 2 || count < (unsigned)ember_system[0].resonance_limit;
+    if (reward == 2) return count < (unsigned)ember_system[0].resonance_limit;
+    if (reward == 5) return s->pet_kind != 255;
+    if (reward == 3) {
+        for (unsigned i = 0; i < 18; ++i)
+            if (ember_inscriptions[i].grade == 2 &&
+                !inventory_owned(s, EMBER_ITEM_INSCRIPTION, i) &&
+                (rune_allowed(s, i, s->player.main_weapon) ||
+                 (s->player.sub_weapon != 255 && rune_allowed(s, i, s->player.sub_weapon)) ||
+                 (s->player.pet_weapon != 255 && rune_allowed(s, i, 50u + s->player.pet_weapon))))
+                return 1;
+        return 0;
+    }
+    return 1;
 }
-void ember_sim_altar_choices(struct ember_sim *s, struct ember_altar_choice choices[3])
+unsigned ember_sim_altar_choices(struct ember_sim *s, struct ember_altar_choice choices[3])
 {
     struct ember_altar_choice pool[23];
     unsigned score[23], count = 0;
@@ -877,7 +910,8 @@ void ember_sim_altar_choices(struct ember_sim *s, struct ember_altar_choice choi
             !!ember_sim_tag_count(s, elements[ember_resonances[i].element_a]) +
             !!ember_sim_tag_count(s, elements[ember_resonances[i].element_b]) : 0;
     }
-    for (unsigned pick = 0; pick < 3; ++pick) {
+    unsigned offered = count < 3 ? count : 3;
+    for (unsigned pick = 0; pick < offered; ++pick) {
         unsigned best = 0, indices[23], candidates = 0;
         for (unsigned i = 0; i < count; ++i) if (score[i] > best) best = score[i];
         for (unsigned i = 0; i < count; ++i) if (score[i] == best) indices[candidates++] = i;
@@ -886,6 +920,7 @@ void ember_sim_altar_choices(struct ember_sim *s, struct ember_altar_choice choi
         pool[index] = pool[--count]; score[index] = score[count];
     }
     s->guaranteed_resonance = 0;
+    return offered;
 }
 
 static void leech(struct ember_sim *s, int damage, int percent)

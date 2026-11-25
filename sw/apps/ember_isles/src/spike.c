@@ -11,6 +11,7 @@
 #include "ui/ui.h"
 #include "edrv32.h"
 #include "replay.h"
+#include "data.h"
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -99,16 +100,37 @@ off_t _lseek(int file, off_t offset, int origin)
 }
 int main(void)
 {
-    ember_sim_init(&simulation, ember_demo_seed);
+#ifdef EMBER_STRESS_DIAGNOSTIC
+    ember_sim_stress(&simulation);
+    unsigned frame_count = (unsigned)ember_stress[0].frames;
+#else
+    ember_sim_begin(&simulation, ember_demo_seed, &ember_demo_config);
+    unsigned frame_count = ember_demo_count;
+#endif
+    ember_audio_stage(simulation.config.stage);
     ember_audio_reset();
     ember_gfx_init();
-    puts("INST,frame,sim,gfx,audio,total");
-    for (unsigned i = 0; i < ember_demo_count; ++i) {
+    printf("RUN,mode=%u,stage=%u,seed=%lu", simulation.config.mode, simulation.config.stage,
+        (unsigned long)simulation.rng_seed);
+#ifdef EMBER_STRESS_DIAGNOSTIC
+    printf(",diagnostic=stress");
+#endif
+    putchar('\n');
+    puts("INST,frame,sim,gfx,audio,total,mode,stage");
+    for (unsigned i = 0; i < frame_count; ++i) {
+#ifdef EMBER_STRESS_DIAGNOSTIC
+        uint16_t input = simulation.phase == EMBER_UPGRADE &&
+            !(simulation.previous_input & EMBER_J) ? EMBER_J : 0;
+#else
+        uint16_t input = ember_demo_input[i];
+#endif
+        unsigned previous_stage = simulation.config.stage;
         uint32_t begin = instret();
-        ember_sim_step(&simulation, ember_demo_input[i]);
+        ember_sim_step(&simulation, input);
         uint32_t after_sim = instret();
-        uint16_t pressed = ember_demo_input[i] & (uint16_t)~previous_input;
-        previous_input = ember_demo_input[i];
+        if (simulation.config.stage != previous_stage) ember_audio_stage(simulation.config.stage);
+        uint16_t pressed = input & (uint16_t)~previous_input;
+        previous_input = input;
         if (pressed & EMBER_SELECT) ui.show_perf ^= 1;
         ember_gfx_prepare(&simulation, 60, &ui);
         uint32_t after_gfx = instret();
@@ -118,17 +140,18 @@ int main(void)
         }
         ember_audio_mix(samples, 800);
         uint32_t after_audio = instret();
-        printf("INST,%u,%lu,%lu,%lu,%lu\n", i + 1,
+        printf("INST,%u,%lu,%lu,%lu,%lu,%u,%u\n", i + 1,
                (unsigned long)(after_sim - begin), (unsigned long)(after_gfx - after_sim),
-               (unsigned long)(after_audio - after_gfx), (unsigned long)(after_audio - begin));
+               (unsigned long)(after_audio - after_gfx), (unsigned long)(after_audio - begin),
+               simulation.config.mode, simulation.config.stage);
         if ((i + 1) % 60 == 0) {
             char summary[2048];
             ember_sim_summary(&simulation, summary, sizeof(summary));
             printf("STATE,%s\n", summary);
         }
     }
-    printf("END,%lu,%u,%lu\n", (unsigned long)ember_demo_count, simulation.phase,
-           (unsigned long)simulation.wave);
+    printf("END,%lu,%u,%lu,%u,%u\n", (unsigned long)frame_count, simulation.phase,
+           (unsigned long)simulation.wave, simulation.config.mode, simulation.config.stage);
     fflush(stdout);
     return 0;
 }

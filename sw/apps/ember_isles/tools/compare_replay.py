@@ -11,6 +11,9 @@ from pathlib import Path
 def compare(pc_path, spike_path):
     pc = pc_path.read_text().splitlines()
     spike = spike_path.read_text().splitlines()
+    pc_run = next(line for line in pc if line.startswith('RUN,'))
+    spike_run = next(line for line in spike if line.startswith('RUN,'))
+    assert pc_run == spike_run, f'RUN mismatch: {pc_run}; {spike_run}'
     pc_end = next(line for line in pc if line.startswith('END,'))
     spike_end = next(line for line in spike if line.startswith('END,'))
     assert pc_end == spike_end, f'END mismatch: PC {pc_end}; Spike {spike_end}'
@@ -29,6 +32,7 @@ def compare(pc_path, spike_path):
     assert len(rows) == frames, f'INST row count {len(rows)}, frames {frames}'
     for index, row in enumerate(rows, 1):
         assert row[0] == index, f'INST frame {row[0]}, expected {index}'
+        assert len(row) == 7 and row[4] == sum(row[1:4]), f'Incomplete INST frame {index}'
     print(f'PASS PC/Spike summaries: {len(pc_states)}; input frames: {frames}')
     print(pc_end)
     for column, name, budget in [(1, 'simulation', 1200000), (2, 'presentation', 500000),

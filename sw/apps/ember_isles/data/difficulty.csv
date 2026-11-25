@@ -1,0 +1,9 @@
+id,level,move_percent,hp_percent,damage_percent,elite_percent,oil_percent,extra_affixes,price_percent,guardian_shield_percent
+tide,1,10,0,0,0,0,0,0,0
+armor,2,0,20,0,0,0,0,0,0
+sharp,3,0,0,15,0,0,0,0,0
+elite,4,0,0,0,100,0,0,0,0
+night,5,0,0,0,0,50,0,0,0
+empowered,6,0,0,0,0,0,1,0,0
+greed,7,0,0,0,0,0,0,25,0
+guardian,8,0,0,0,0,0,0,0,20

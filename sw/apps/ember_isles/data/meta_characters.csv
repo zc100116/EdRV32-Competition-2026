@@ -1,0 +1,9 @@
+id,character_index,initial,unlock_kind,unlock_target,unlock_required,unlock_cost,weapon_a,weapon_b,passive_field,passive_value
+keeper,0,1,0,0,0,0,0,1,0,22
+smith,1,1,0,0,0,0,24,9,1,25
+breaker,2,0,1,18,1,30,8,13,4,12
+hunter,3,1,0,0,0,0,28,33,3,6
+gunner,4,0,1,19,1,30,37,32,2,450
+seer,5,1,0,0,0,0,48,44,1,4
+nameless,6,0,2,0,3,30,21,16,1,60
+lamplighter,7,0,3,0,50,30,34,24,1,35

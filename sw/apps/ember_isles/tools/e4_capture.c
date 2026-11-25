@@ -75,7 +75,11 @@ static void avi_end(void)
 }
 int main(void)
 {
-    ember_game_init(); ember_game_replay(20261124);
+    static struct ember_replay replay;
+    replay.seed = 20261124;
+    ember_run_config_default(&replay.config);
+    replay.config.sub_weapon = 1;
+    ember_game_init(); ember_game_replay(&replay);
     avi_begin();
     for (frame = 1; frame <= 1800; ++frame) {
         unsigned local = (frame - 1) % 225;

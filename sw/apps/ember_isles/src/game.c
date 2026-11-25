@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <stdatomic.h>
 static struct ember_sim simulation;
+static struct ember_meta progression;
+static struct ember_run_config next_config;
+static unsigned meta_committed;
 static struct aud_ring audio_ring;
 static uint32_t samples[1024];
 static uint32_t previous_millis;
@@ -66,7 +69,10 @@ static void audio_irq(void *context)
 void ember_game_init(void)
 {
     plat_init();
-    ember_sim_init(&simulation, 20261124u);
+    ember_meta_init(&progression);
+    ember_meta_config(&progression, 0, 255, 0, &next_config);
+    ember_sim_begin(&simulation, 20261124u, &next_config);
+    ember_audio_stage(simulation.config.stage);
     ember_audio_reset();
     ui.tick_rate = 60;
     ember_gfx_init();
@@ -79,11 +85,25 @@ void ember_game_init(void)
     previous_tick_millis = previous_millis = plat_millis();
     tick_credit = 1000;
 }
-void ember_game_replay(uint32_t seed)
+void ember_game_replay(const struct ember_replay *replay)
 {
     replay_mode = 1;
-    ember_sim_init(&simulation, seed);
+    ember_sim_begin(&simulation, replay->seed, &replay->config);
+    ember_audio_stage(replay->config.stage);
 }
+void ember_game_configure(const struct ember_run_config *config) { next_config = *config; }
+struct ember_meta *ember_game_meta(void) { return &progression; }
+void ember_game_load(const char *path)
+{
+    ember_meta_load(&progression, path);
+    struct ember_run_config loaded;
+    ember_meta_config(&progression, next_config.character, next_config.pet,
+        next_config.difficulty, &loaded);
+    loaded.mode = next_config.mode;
+    loaded.stage = next_config.stage;
+    next_config = loaded;
+}
+void ember_game_save(const char *path) { ember_meta_save(&progression, path); }
 const struct ember_replay *ember_game_recording(void) { return &recording; }
 const struct ember_sim *ember_game_state(void) { return &simulation; }
 /* Menu clicks become recorded keyboard commands; pointer coordinates never enter sim. */
@@ -121,17 +141,21 @@ void ember_game_tick(void)
     if (!replay_mode) keys |= menu_pointer_keys();
     uint16_t pressed = keys & (uint16_t)~previous_keys;
     previous_keys = keys;
-    if (pressed & EMBER_SELECT) ui.show_perf ^= 1;
+    if ((pressed & EMBER_SELECT) && !simulation.panel && simulation.phase != EMBER_UPGRADE)
+        ui.show_perf ^= 1;
     unsigned returned_to_menu = 0;
     if (!replay_mode && (pressed & EMBER_START)) {
         if (simulation.phase == EMBER_WON || simulation.phase == EMBER_LOST) {
-            ember_sim_init(&simulation, recording.seed);
+            ember_sim_begin(&simulation, recording.seed, &next_config);
             simulation.previous_input = keys;
             returned_to_menu = 1;
         } else if (simulation.phase == EMBER_MENU) {
             recording.seed = 20261124u + ++run_number + plat_millis();
             recording.count = 0;
-            ember_sim_init(&simulation, recording.seed);
+            recording.config = next_config;
+            meta_committed = 0;
+            ember_sim_begin(&simulation, recording.seed, &recording.config);
+            ember_audio_stage(recording.config.stage);
             queue_audio(UINT16_MAX, 0, 0);
         }
     }
@@ -144,7 +168,14 @@ void ember_game_tick(void)
         }
         recording.input[recording.count++] = keys;
     }
+    unsigned previous_stage = simulation.config.stage;
     ember_sim_step(&simulation, keys);
+    if (simulation.config.stage != previous_stage) ember_audio_stage(simulation.config.stage);
+    if (!replay_mode && !meta_committed &&
+        (simulation.phase == EMBER_WON || simulation.phase == EMBER_LOST)) {
+        ember_meta_commit(&progression, &simulation);
+        meta_committed = 1;
+    }
     for (unsigned i = 0; i < simulation.events.count; ++i) {
         const struct ember_event *event = &simulation.events.item[i];
         queue_audio(event->kind, event->damage_type, event->outcome);

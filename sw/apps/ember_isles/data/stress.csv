@@ -1,0 +1,2 @@
+id,seed,enemy_count,shot_count,frames,enemy_kind,weapon_index,damage,radius,lifetime,speed,columns,spacing_x,spacing_y,origin_x,origin_y,shot_offset_x,shot_offset_y
+full,20261125,1500,3000,120,0,2,1,2,300,60,50,74,64,64,64,24,20

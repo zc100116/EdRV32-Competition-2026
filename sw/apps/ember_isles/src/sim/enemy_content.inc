@@ -16,8 +16,11 @@ unsigned ember_sim_spawn(struct ember_sim *s, unsigned kind, unsigned affix,
             if (s->shots[shot_id].alive)
                 s->shots[shot_id].hit_bits[i / 32] &= ~(1u << (i % 32));
         e->alive = 1; e->kind = (uint8_t)kind; e->affix = (uint8_t)affix;
-        e->x = x; e->y = y; e->hp = d->hp; e->wave = s->wave;
-        ember_defense_init(&e->defense, d->hp);
+        e->x = x; e->y = y;
+        e->hp = d->hp * (100 + (s->config.difficulty >= 2 ?
+            ember_difficulty[1].hp_percent : 0)) / 100;
+        e->wave = s->wave;
+        ember_defense_init(&e->defense, e->hp);
         e->defense.armor = d->armor;
         e->defense.rank = (uint8_t)d->rank;
         e->defense.posture = e->defense.posture_max = d->posture;
@@ -39,7 +42,14 @@ unsigned ember_sim_spawn(struct ember_sim *s, unsigned kind, unsigned affix,
                 e->defense.shield_frames[d->element_index] = (uint16_t)ember_affixes[6].duration;
             }
         }
+        if (affix && s->config.difficulty >= 6)
+            elite_extra(e, (unsigned)ember_difficulty[5].extra_affixes);
+        if (s->config.difficulty >= 8 && d->rank >= 2)
+            e->defense.temporary[6] = e->hp * ember_difficulty[7].guardian_shield_percent / 100;
         ++s->alive_count;
+        if (!e->defense.rank) ++s->ordinary_count[kind];
+        if (s->alive_count > s->peaks[s->config.stage].enemies)
+            s->peaks[s->config.stage].enemies = s->alive_count;
         return i;
     }
     fputs("ember enemy pool exhausted\n", stderr);
@@ -77,10 +87,10 @@ static int content_enemy(struct ember_sim *s, unsigned index)
     if (!e->facing_lock) e->facing8 = (uint8_t)direction8(dx, dy);
     ++e->ai_timer;
     int speed = enemy_speed(s, e);
-    if ((e->affix == 5 || e->second_affix == 5) &&
+    if ((enemy_affix(e, 5)) &&
         within(e->x, e->y, s->player.x, s->player.y, ember_affixes[4].radius))
         s->lamp_radius = s->lamp_radius * (100 - ember_affixes[4].value) / 100;
-    if ((e->affix == 8 || e->second_affix == 8) && e->ai_timer % ember_affixes[7].duration == 0) {
+    if ((enemy_affix(e, 8)) && e->ai_timer % ember_affixes[7].duration == 0) {
         e->x = s->player.x + ember_affixes[7].teleport_radius * ember_cos((uint16_t)ember_random(&s->spawn_rng));
         e->y = s->player.y + ember_affixes[7].teleport_radius * ember_sin((uint16_t)ember_random(&s->spawn_rng));
     }
@@ -106,14 +116,18 @@ static int content_enemy(struct ember_sim *s, unsigned index)
             if (d->ai == 20 && stage == 1)
                 for (unsigned i = 0; i < (unsigned)d->pillar_count; ++i) {
                     s->pillars[i].lit = 0;
-                    s->pillars[i].x = e->x + d->pillar_radius * ember_cos((uint16_t)(i * 65536 / d->pillar_count));
-                    s->pillars[i].y = e->y + d->pillar_radius * ember_sin((uint16_t)(i * 65536 / d->pillar_count));
+                    s->pillars[i].x = clamp(e->x + d->pillar_radius *
+                        ember_cos((uint16_t)(i * 65536 / d->pillar_count)), 0, s->world_width);
+                    s->pillars[i].y = clamp(e->y + d->pillar_radius *
+                        ember_sin((uint16_t)(i * 65536 / d->pillar_count)), 0, s->world_height);
                 }
         }
     }
     int interval = d->attack_cooldown;
     if (d->rank == 2 && e->stage) interval = interval * 100 / (100 + d->phase_attack_more);
-    if ((e->affix == 6 || e->second_affix == 6) && e->hp * 100LL < e->defense.max_hp * (int64_t)ember_affixes[5].threshold_percent) interval = interval * 100 / (100 + ember_affixes[5].value);
+    if (enemy_affix(e, 6) && e->hp * 100LL <
+        e->defense.max_hp * (int64_t)ember_affixes[5].threshold_percent)
+        interval = interval * 100 / (100 + ember_affixes[5].value);
     if (d->rank == 3 && e->ai_timer >= (uint32_t)d->enrage_frames) interval = interval * 100 / (100 + d->enrage_attack_more);
     if (e->affix && d->pet_kind != 255 && e->hp * 100LL <= e->defense.max_hp * (int64_t)ember_system[0].elite_capture_percent)
         e->capturable = 1;
@@ -251,23 +265,16 @@ static void content_death(struct ember_sim *s, unsigned index, unsigned depth,
     if (s->blessings[4] && e->affix) {
         unsigned choices[38], count = 0;
         for (unsigned n = 0; n < EMBER_RELICS_COUNT; ++n)
-            if (!strcmp(ember_relics[n].rarity, "common")) choices[count++] = n;
-        for (unsigned n = 0; n < EMBER_ENEMIES; ++n) if (!s->pickups[n].alive) {
-            s->pickups[n] = (struct ember_pickup){e->x, e->y, 0, 1, 1,
-                (uint8_t)choices[ember_random(&s->loot_rng) % count]};
-            ++s->pickup_count;
-            break;
-        }
+            if (!strcmp(ember_relics[n].rarity, "common") && !s->player.relic_level[n])
+                choices[count++] = n;
+        if (count) drop_resource(s, EMBER_DROP_RELIC,
+            choices[ember_random(&s->loot_rng) % count], 0, 0, e->x, e->y);
     }
     if (ai == 4) enemy_ground(s, e, 4, d->ground_radius);
     if (ai == 10) enemy_ground(s, e, 6, d->ground_radius);
-    if ((e->affix == 3 || e->second_affix == 3) && depth < 3u + s->trigger_bonus)
-        for (unsigned n = 0; n < (unsigned)ember_affixes[2].split_count; ++n) {
-            unsigned child = ember_sim_spawn(s, e->kind, 0,
-                e->x + ((int)n * 2 - ember_affixes[2].split_count + 1) * ember_affixes[2].split_spacing / 2 * EMBER_Q, e->y);
-            s->enemies[child].hp /= ember_affixes[2].split_count;
-            s->enemies[child].defense.max_hp /= ember_affixes[2].split_count;
-        }
+    if ((enemy_affix(e, 3)) && depth < 3u + s->trigger_bonus)
+        for (unsigned n = 0; n < (unsigned)ember_affixes[2].split_count; ++n)
+            split_spawn(s, e, n);
 }
 static void skill_reflect(struct ember_sim *s, ember_fixed x, ember_fixed y, int damage)
 {

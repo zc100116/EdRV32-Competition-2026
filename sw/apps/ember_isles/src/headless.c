@@ -63,7 +63,8 @@ int main(int argc, char **argv)
     if (!limit) limit = replay.count;
     if (limit > replay.count) { fputs("Requested frames exceed replay\n", stderr); return 1; }
     ember_game_init();
-    ember_game_replay(replay.seed);
+    ember_game_replay(&replay);
+    printf("RUN,mode=%u,stage=%u,seed=%u\n", replay.config.mode, replay.config.stage, replay.seed);
     puts("PERF,frame,busy,vertices,triangles,quads,pixels,tex_stall,read_wait,resolve,obj");
     for (frame = 1; frame <= limit; ++frame) {
         keys = replay.input[frame - 1];
@@ -85,7 +86,9 @@ int main(int argc, char **argv)
             pc_png_write(path, pc_soc_pixels());
         }
     }
-    printf("END,%u,%u,%u\n", limit, ember_game_state()->phase, ember_game_state()->wave);
+    printf("END,%u,%u,%u,%u,%u\n", limit, ember_game_state()->phase,
+        ember_game_state()->wave, ember_game_state()->config.mode,
+        ember_game_state()->config.stage);
     printf("AUDIO,underruns=%u\n", (unsigned)aud_underruns());
     pc_soc_destroy();
     return 0;
