@@ -9,6 +9,9 @@
 #include "png.h"
 #include "plat.h"
 #include "aud.h"
+#include "gfx2d/gfx.h"
+#include "gfx2d/cache.h"
+#include <time.h>
 #include "mmio.h"
 #include "regs/gpu_regs.h"
 #include <stdio.h>
@@ -66,20 +69,33 @@ int main(int argc, char **argv)
     ember_game_replay(&replay);
     printf("RUN,mode=%u,stage=%u,seed=%u\n", replay.config.mode, replay.config.stage, replay.seed);
     puts("PERF,frame,busy,vertices,triangles,quads,pixels,tex_stall,read_wait,resolve,obj");
+    uint32_t previous_perf[9] = {0};
     for (frame = 1; frame <= limit; ++frame) {
         keys = replay.input[frame - 1];
         pc_soc_game_input(keys, (struct plat_pointer_state){0});
+        struct timespec began, ended;
+        timespec_get(&began, TIME_UTC);
         ember_game_frame(frame);
+        timespec_get(&ended, TIME_UTC);
         plat_wait_vsync();
-        if (frame % 60 == 0) {
+        {
             char summary[2048];
             ember_sim_summary(ember_game_state(), summary, sizeof(summary));
             printf("STATE,%s\n", summary);
         }
         printf("PERF,%u", frame);
-        for (unsigned i = 0; i < 9; ++i)
-            printf(",%u", mmio_read32(EDRV32_GPU_BASE + EDRV32_GPU_PERF_OFFSET(i)));
+        for (unsigned i = 0; i < 9; ++i) {
+            uint32_t value = mmio_read32(EDRV32_GPU_BASE + EDRV32_GPU_PERF_OFFSET(i));
+            printf(",%u", value - previous_perf[i]);
+            previous_perf[i] = value;
+        }
         putchar('\n');
+        const struct ember_gfx_stats *g = ember_gfx_statistics();
+        long long ns = (long long)(ended.tv_sec - began.tv_sec) * 1000000000LL + ended.tv_nsec - began.tv_nsec;
+        printf("GFX,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%lld,%u,%u,%u,%u,%u,%u,%u,%u\n", frame,
+            (unsigned)ember_game_state()->wave, g->fixed_bytes, g->cache_bytes,
+            g->visible_bytes, g->load_bytes, g->particles, g->fixed_peak,
+            g->cache_peak, g->load_peak, ns / 1000,g->particle_visible,g->particle_visible_peak,g->number_objects,g->facing_mask,g->dir16_mask,g->elites,g->heads,g->bosses);
         if (selected(dump, frame)) {
             char path[512];
             snprintf(path, sizeof(path), "%s/frame%05u.png", out, frame);
@@ -89,6 +105,10 @@ int main(int argc, char **argv)
     printf("END,%u,%u,%u,%u,%u\n", limit, ember_game_state()->phase,
         ember_game_state()->wave, ember_game_state()->config.mode,
         ember_game_state()->config.stage);
+    unsigned first_wave_alive=0;
+    for (unsigned i=0;i<EMBER_ENEMIES;++i)
+        first_wave_alive+=ember_game_state()->enemies[i].alive && ember_game_state()->enemies[i].wave==1;
+    printf("WAVE_ALIVE,1,%u\n",first_wave_alive);
     printf("AUDIO,underruns=%u\n", (unsigned)aud_underruns());
     pc_soc_destroy();
     return 0;

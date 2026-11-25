@@ -8,8 +8,10 @@ CFLAGS := -std=c11 -O2 -Wall -Wextra -Werror -I$(APP)/src -I$(OUT)/generated \
     -I$(ROOT)/sw/bsp/include -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/lib \
     -I$(ROOT)/sw/lib/plat -I$(ROOT)/tools/gpu/emu -I$(ROOT)/tools/gpu/emu/pc
 MAP := -DEDRV32_SOC_MAP_H -include $(ROOT)/sw/bsp/include/gpu_soc_map.h
+FPGA_ART ?= 0
+TEXTURE_BYTES ?= 262144
 PCFLAGS := -I$(ROOT)/sw/bsp/pc/include $(CFLAGS) $(MAP) -O3 \
-    -DGPU_EMU_TEXTURE_BYTES=262144 \
+    -DGPU_EMU_TEXTURE_BYTES=$(TEXTURE_BYTES) -DEMBER_FPGA_ART=$(FPGA_ART) \
     -include $(ROOT)/sw/bsp/pc/include/mmio.h
 DRIVERS := sw/drivers/gpu.c sw/drivers/aud.c sw/drivers/disp.c sw/drivers/plic.c
 SOURCES = $(wildcard $(APP)/src/core/*.c $(APP)/src/sim/*.c $(APP)/src/meta/*.c \
@@ -23,7 +25,7 @@ HEADERS = $(APP)/Makefile $(wildcard $(APP)/src/*.h $(APP)/src/*/*.h $(APP)/src/
     $(ROOT)/sw/bsp/include/*.h $(ROOT)/sw/bsp/pc/include/*.h \
     $(ROOT)/sw/lib/plat/*.h $(ROOT)/tools/gpu/emu/*.h $(ROOT)/tools/gpu/emu/pc/*.h)
 GEN := $(OUT)/generated/data.h $(OUT)/generated/atlas.h \
-    $(OUT)/generated/music.h $(OUT)/generated/replay.h
+    $(OUT)/generated/music.h $(OUT)/generated/replay.h $(OUT)/generated/font.h
 .PHONY: all linux windows board spike assets
 all: linux windows board spike
 linux: $(OUT)/ember_isles
@@ -33,8 +35,11 @@ spike: $(OUT)/ember_isles-spike.elf
 assets: $(GEN)
 $(OUT)/generated/data.h: $(wildcard $(APP)/data/*.csv) $(APP)/tools/data_convert.py
 	python3 $(APP)/tools/data_convert.py
-$(OUT)/generated/atlas.h: $(wildcard $(APP)/assets/art/*) $(APP)/tools/atlas_convert.py
+$(OUT)/generated/atlas.h: $(wildcard $(APP)/assets/art_coast/*.json $(APP)/assets/art_coast/*.png $(APP)/tools/art/*.py $(ROOT)/tools/gpu/model/*.py) $(APP)/tools/atlas_convert.py
+	python3 $(APP)/tools/art/coast_production.py
 	python3 $(APP)/tools/atlas_convert.py
+$(OUT)/generated/font.h: $(APP)/tools/font_convert.py $(wildcard $(APP)/assets/fonts/* $(APP)/data/*.csv $(APP)/src/ui/*.[ch] $(APP)/src/gfx2d/*.[ch]) $(APP)/src/game.c
+	python3 $(APP)/tools/font_convert.py
 $(OUT)/generated/music.h: $(wildcard $(APP)/assets/music/* $(APP)/assets/audio/*) \
     $(APP)/tools/music_convert.py
 	python3 $(APP)/tools/music_convert.py
@@ -56,7 +61,7 @@ $(OUT)/ember_isles.elf: $(SOURCES) $(APP)/src/game.c $(APP)/src/main.c $(GEN) $(
     $(addprefix $(ROOT)/,$(DRIVERS) $(BOARD))
 	mkdir -p $(OUT)
 	$(MAKE) -C $(ROOT)/sw $(ROOT)/build/sw/soc_memory.ld -j1
-	cd $(ROOT) && riscv-none-elf-gcc $(CFLAGS) $(MAP) -march=rv32im_zicsr -mabi=ilp32 \
+	cd $(ROOT) && riscv-none-elf-gcc $(CFLAGS) $(MAP) -DEMBER_FPGA_ART=1 -march=rv32im_zicsr -mabi=ilp32 \
 	    -ffunction-sections -fdata-sections -nostdlib -Wl,--gc-sections \
 	    -Tsw/bsp/ld/ddr.ld $(SOURCES) $(APP)/src/game.c $(APP)/src/main.c \
 	    $(addprefix $(ROOT)/,$(DRIVERS) $(BOARD)) -lc -lgcc -o $@
@@ -64,7 +69,7 @@ $(OUT)/ember_isles-spike.elf: $(SOURCES) $(APP)/src/spike.c $(GEN) $(HEADERS) \
     $(ROOT)/sw/drivers/gpu.c $(ROOT)/sw/bsp/start.S $(ROOT)/sw/bsp/host.c
 	mkdir -p $(OUT)
 	$(MAKE) -C $(ROOT)/sw $(ROOT)/build/sw/soc_memory.ld -j1
-	cd $(ROOT) && riscv-none-elf-gcc $(CFLAGS) $(MAP) -march=rv32im_zicsr_zicntr \
+	cd $(ROOT) && riscv-none-elf-gcc $(CFLAGS) $(MAP) -DEMBER_FPGA_ART=1 -march=rv32im_zicsr_zicntr \
 	    -mabi=ilp32 -ffunction-sections -fdata-sections -nostdlib -Wl,--gc-sections \
 	    -Tsw/bsp/ld/ddr.ld $(SOURCES) $(APP)/src/spike.c \
 	    sw/drivers/gpu.c sw/bsp/start.S sw/bsp/host.c -lc -lgcc -o $@
@@ -117,7 +122,7 @@ $(OUT)/e5a-stress-profile: $(APP)/tools/e5a_stress.c $(APP)/src/sim/sim.c \
 $(OUT)/ember_isles-stress-spike.elf: $(SOURCES) $(APP)/src/spike.c $(GEN) $(HEADERS) \
     $(ROOT)/sw/drivers/gpu.c $(ROOT)/sw/bsp/start.S $(ROOT)/sw/bsp/host.c
 	$(MAKE) -C $(ROOT)/sw $(ROOT)/build/sw/soc_memory.ld -j1
-	cd $(ROOT) && riscv-none-elf-gcc $(CFLAGS) $(MAP) -DEMBER_STRESS_DIAGNOSTIC \
+	cd $(ROOT) && riscv-none-elf-gcc $(CFLAGS) $(MAP) -DEMBER_FPGA_ART=1 -DEMBER_STRESS_DIAGNOSTIC \
 	    -march=rv32im_zicsr_zicntr -mabi=ilp32 -ffunction-sections -fdata-sections \
 	    -nostdlib -Wl,--gc-sections -Tsw/bsp/ld/ddr.ld \
 	    $(SOURCES) $(APP)/src/spike.c sw/drivers/gpu.c sw/bsp/start.S sw/bsp/host.c \
@@ -146,3 +151,32 @@ $(OUT)/e5a-coast-test: $(APP)/tools/e5a_coast_test.c $(APP)/src/sim/sim.c \
     $(APP)/src/sim/combat.c $(APP)/src/core/core.c $(OUT)/generated/data.h $(HEADERS)
 	$(CC) $(CFLAGS) $(APP)/tools/e5a_coast_test.c $(APP)/src/sim/combat.c \
 	    $(APP)/src/core/core.c -o $@
+
+$(OUT)/v1-accept: $(SOURCES) $(APP)/src/game.c $(APP)/src/gfx2d/tests/v1_accept.c $(GEN) $(HEADERS) \
+    $(addprefix $(ROOT)/,$(DRIVERS) $(PC) tools/gpu/emu/pc/png.c)
+	$(CC) -pthread $(PCFLAGS) $(SOURCES) $(APP)/src/game.c $(APP)/src/gfx2d/tests/v1_accept.c \
+	    $(addprefix $(ROOT)/,$(DRIVERS) $(PC) tools/gpu/emu/pc/png.c) -o $@
+
+FPGA_PCFLAGS = $(filter-out -DGPU_EMU_TEXTURE_BYTES=% -DEMBER_FPGA_ART=%,$(PCFLAGS)) \
+    -DGPU_EMU_TEXTURE_BYTES=196608 -DEMBER_FPGA_ART=1
+.PHONY: linux-fpga
+linux-fpga: $(OUT)/ember_isles-fpga
+$(OUT)/ember_isles-fpga: $(SOURCES) $(APP)/src/game.c $(APP)/src/headless.c $(GEN) $(HEADERS) \
+    $(addprefix $(ROOT)/,$(DRIVERS) $(PC) tools/gpu/emu/pc/png.c)
+	$(CC) -pthread $(FPGA_PCFLAGS) $(SOURCES) $(APP)/src/game.c $(APP)/src/headless.c \
+	    $(addprefix $(ROOT)/,$(DRIVERS) $(PC) tools/gpu/emu/pc/png.c) -o $@
+$(OUT)/v1-accept-fpga: $(SOURCES) $(APP)/src/game.c $(APP)/src/gfx2d/tests/v1_accept.c $(GEN) $(HEADERS) \
+    $(addprefix $(ROOT)/,$(DRIVERS) $(PC) tools/gpu/emu/pc/png.c)
+	$(CC) -pthread $(FPGA_PCFLAGS) $(SOURCES) $(APP)/src/game.c $(APP)/src/gfx2d/tests/v1_accept.c \
+	    $(addprefix $(ROOT)/,$(DRIVERS) $(PC) tools/gpu/emu/pc/png.c) -o $@
+
+$(OUT)/v1-particles-test: $(SOURCES) $(APP)/src/gfx2d/tests/particles_test.c $(GEN) $(HEADERS) \
+    $(addprefix $(ROOT)/,$(DRIVERS) $(PC))
+	$(CC) -pthread $(PCFLAGS) $(filter-out $(APP)/src/gfx2d/particles.c,$(SOURCES)) \
+	    $(APP)/src/gfx2d/tests/particles_test.c $(addprefix $(ROOT)/,$(DRIVERS) $(PC)) -o $@
+
+$(OUT)/v1-ui-test: $(APP)/src/gfx2d/tests/ui_test.c $(APP)/src/ui/ui.c $(APP)/src/ui/font.c \
+    $(APP)/src/sim/sim.c $(APP)/src/sim/combat.c $(APP)/src/core/core.c \
+    $(APP)/src/core/replay.c $(APP)/src/meta/meta.c $(ROOT)/sw/drivers/gpu.c \
+    $(OUT)/generated/data.h $(OUT)/generated/font.h $(HEADERS)
+	$(CC) $(PCFLAGS) -ffunction-sections -fdata-sections -Wl,--gc-sections $(filter %.c,$^) -o $@

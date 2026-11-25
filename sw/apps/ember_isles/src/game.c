@@ -76,6 +76,9 @@ void ember_game_init(void)
     ember_audio_stage(simulation.config.stage);
     ember_audio_reset();
     ui.tick_rate = 60;
+    ui.volume = 100;
+    ui.menu_page = EMBER_TITLE;
+    ui.menu_selected = 0;
     ember_gfx_init();
     aud_init(&audio_ring, plat_dma_alloc(16384, 512), 16384, 4096);
     refill(&audio_ring, NULL, NULL);
@@ -118,7 +121,7 @@ static uint16_t menu_pointer_keys(void)
     if (!clicked) return keys;
     int x = pointer.x;
     int y = pointer.y;
-    if (simulation.phase == EMBER_UPGRADE && y >= 132 && y < 272) {
+    if (simulation.phase == EMBER_UPGRADE && y >= 112 && y < 306) {
         for (unsigned i = 0; i < 3; ++i) {
             int left = 40 + (int)i * 190;
             if (x < left || x >= left + 180) continue;
@@ -128,9 +131,17 @@ static uint16_t menu_pointer_keys(void)
             return delta == 1 ? EMBER_RIGHT : EMBER_LEFT;
         }
     }
-    if ((simulation.phase == EMBER_MENU || simulation.phase == EMBER_WON ||
-         simulation.phase == EMBER_LOST) && x >= 218 && x < 422 && y >= 237 && y < 267)
-        return EMBER_START;
+    if (simulation.phase == EMBER_MENU) {
+        if (ui.menu_page == EMBER_TITLE && x >= 218 && x < 422) {
+            if (y >= 170 && y < 206) { ui.menu_selected = 0; return EMBER_START; }
+            if (y >= 222 && y < 258) { ui.menu_selected = 1; return EMBER_START; }
+        } else if (ui.menu_page == EMBER_WEAPON_MENU && y >= 179 && y < 244) {
+            if (x >= 154 && x < 306) { ui.menu_selected = 0; return EMBER_START; }
+            if (x >= 334 && x < 486) { ui.menu_selected = 1; return EMBER_START; }
+        }
+    }
+    if ((simulation.phase == EMBER_WON || simulation.phase == EMBER_LOST) &&
+        x >= 128 && x < 512 && y >= 230 && y < 283) return EMBER_START;
     if (simulation.paused && x >= 218 && x < 422 && y >= 185 && y < 215)
         return EMBER_START;
     return keys;
@@ -142,14 +153,49 @@ void ember_game_tick(void)
     if (!replay_mode) keys |= menu_pointer_keys();
     uint16_t pressed = keys & (uint16_t)~previous_keys;
     previous_keys = keys;
-    if ((pressed & EMBER_SELECT) && !simulation.panel && simulation.phase != EMBER_UPGRADE)
+    if ((pressed & EMBER_SELECT) && !simulation.panel && simulation.phase == EMBER_PLAY)
         ui.show_perf ^= 1;
+    if (!replay_mode && simulation.phase == EMBER_MENU) {
+        unsigned confirm = pressed & (EMBER_START | EMBER_J);
+        unsigned back = pressed & (EMBER_INTERACT | EMBER_SELECT);
+        if (ui.menu_page == EMBER_SETTINGS) {
+            if (pressed & (EMBER_LEFT | EMBER_DOWN)) ui.volume = ui.volume >= 10 ? ui.volume - 10 : 0;
+            if (pressed & (EMBER_RIGHT | EMBER_UP)) ui.volume = ui.volume <= 90 ? ui.volume + 10 : 100;
+            ember_audio_volume(ui.volume);
+            if (back) { ui.menu_page = EMBER_TITLE; ui.menu_selected = 1; }
+            ember_sim_step(&simulation, 0);
+            return;
+        }
+        if (pressed & (EMBER_LEFT | EMBER_UP | EMBER_RIGHT | EMBER_DOWN)) ui.menu_selected ^= 1;
+        if (ui.menu_page == EMBER_TITLE) {
+            if (confirm) {
+                ui.menu_page = ui.menu_selected ? EMBER_SETTINGS : EMBER_WEAPON_MENU;
+                ui.menu_selected = 0;
+            }
+            ember_sim_step(&simulation, 0);
+            return;
+        }
+        if (back) {
+            ui.menu_page = EMBER_TITLE; ui.menu_selected = 0;
+            ember_sim_step(&simulation, 0);
+            return;
+        }
+        if (!confirm) { ember_sim_step(&simulation, 0); return; }
+        next_config.main_weapon = ui.menu_selected ? 0 : 2;
+        next_config.sub_weapon = ui.menu_selected ? 2 : 0;
+        keys = EMBER_START;
+        pressed = EMBER_START;
+    }
+    if (!replay_mode && (simulation.phase == EMBER_WON || simulation.phase == EMBER_LOST) &&
+        (pressed & EMBER_J)) { pressed |= EMBER_START; keys |= EMBER_START; }
     unsigned returned_to_menu = 0;
     if (!replay_mode && (pressed & EMBER_START)) {
         if (simulation.phase == EMBER_WON || simulation.phase == EMBER_LOST) {
             ember_sim_begin(&simulation, recording.seed, &next_config);
             simulation.previous_input = keys;
             returned_to_menu = 1;
+            ui.menu_page = EMBER_TITLE;
+            ui.menu_selected = 0;
         } else if (simulation.phase == EMBER_MENU) {
             recording.seed = 20261124u + ++run_number + plat_millis();
             recording.count = 0;
@@ -170,7 +216,7 @@ void ember_game_tick(void)
         recording.input[recording.count++] = keys;
     }
     unsigned previous_stage = simulation.config.stage;
-    ember_sim_step(&simulation, keys);
+    ember_sim_step(&simulation, returned_to_menu ? 0 : keys);
     if (simulation.config.stage != previous_stage) ember_audio_stage(simulation.config.stage);
     if (!replay_mode && !meta_committed &&
         (simulation.phase == EMBER_WON || simulation.phase == EMBER_LOST)) {
