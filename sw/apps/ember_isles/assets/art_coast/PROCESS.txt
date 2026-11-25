@@ -100,3 +100,34 @@ The direct-frame-page format is a capacity probe, not an approved full package.
 Each actual crab frame requires64x64 I8=4096B under that format; the clarified
 conservative synchronized bound for that kind alone is5x5x4096=102400B, over80KiB.
 This bound failure pauses production pending the coordinator's cache-format decision.
+
+06a-2c compact-frame checkpoint (2026-11-25):
+compact_coast_frames.py stores cropped I8 frames in complete 4x2-texel/8-byte
+four-bank groups. DDR frame starts are32-byte aligned; frame rectangles are not
+padded to powers of two. Each record includes DDR offset, aligned size, crop,
+feet/hand anchors, palette group, facing, action and frame. Verification copies
+the saved DDR groups to UV(4,2) in a legal128x128 texture at OFFSET32, then uses
+the sole GPU model to read every page texel, including all transparent margins.
+This is offline format verification, not the06b runtime page/LRU implementation.
+
+New original built-in imagegen source strips are tide-biter-down-06a2c,
+salt-charger-down-06a2c-v2, drowned-watcher-down-06a2c-v2 and
+mist-jellyfish-down-06a2c: each has4 front idle and4 front walk frames.
+Normalization samples the declared256x128 logical grid and quantizes to I8
+RGB565+A4 palettes. Only transparent placement changes to foot baseline58;
+no silhouette, head or torso scaling or code-generated poses are used.
+The first salt-charger/drowned-watcher20-pose sources have excessively fine
+painted density and are rejected trials, preserved with their prompts.
+The tide-biter strip is also NOT accepted production art: idle height38–40px
+and width37–39px exceed tech5b's small-swarm24–30px/width<=36px requirements.
+It stays visible in the review media and is excluded from the decisive bound.
+
+Even excluding tide-biter, the four remaining kinds' sampled maxima total7360B;
+tech5b's5actions x5facings yields184000B, above144KiB by36544B before other
+actors or scenery. This is a lower bound on the prescribed conservative upper
+bound, not a measured wave's actual live contents. Production stops here.
+The full fixed region, pet/elite/scenery and complete DDR library are unmeasured.
+The received action-family and dedicated-skill follow-up is recorded as pending
+production after this stop; old generic cast poses do not fulfill art-plan2.4.
+Preserved keeper front/back walking repairs and warm hair rim are unchanged.
+Preview: preview_compact_coast.py;06a2c/index.html embeds all images and30s video.

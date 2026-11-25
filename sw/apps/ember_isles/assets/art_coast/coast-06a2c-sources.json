@@ -1,0 +1,482 @@
+[
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-down-06a2c-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "measurement": {
+      "name": "tide-biter-down-06a2c",
+      "source_size": [
+        1774,
+        887
+      ],
+      "grid": [
+        256,
+        128
+      ],
+      "pitch": [
+        6.9296875,
+        6.9296875
+      ],
+      "colors": 255,
+      "distinct_frames": {
+        "down/idle": 4,
+        "down/walk": 4
+      },
+      "bounds": [
+        {
+          "id": "tide_biter/down/idle/0",
+          "size": [
+            38,
+            38
+          ],
+          "trim": [
+            13,
+            21
+          ]
+        },
+        {
+          "id": "tide_biter/down/idle/1",
+          "size": [
+            39,
+            40
+          ],
+          "trim": [
+            13,
+            19
+          ]
+        },
+        {
+          "id": "tide_biter/down/idle/2",
+          "size": [
+            37,
+            37
+          ],
+          "trim": [
+            13,
+            22
+          ]
+        },
+        {
+          "id": "tide_biter/down/idle/3",
+          "size": [
+            38,
+            38
+          ],
+          "trim": [
+            14,
+            21
+          ]
+        },
+        {
+          "id": "tide_biter/down/walk/0",
+          "size": [
+            36,
+            40
+          ],
+          "trim": [
+            14,
+            19
+          ]
+        },
+        {
+          "id": "tide_biter/down/walk/1",
+          "size": [
+            36,
+            41
+          ],
+          "trim": [
+            14,
+            18
+          ]
+        },
+        {
+          "id": "tide_biter/down/walk/2",
+          "size": [
+            36,
+            39
+          ],
+          "trim": [
+            14,
+            20
+          ]
+        },
+        {
+          "id": "tide_biter/down/walk/3",
+          "size": [
+            36,
+            41
+          ],
+          "trim": [
+            14,
+            18
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "actor": "salt_charger",
+    "metadata": "salt-charger-down-06a2c-v2-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "measurement": {
+      "name": "salt-charger-down-06a2c-v2",
+      "source_size": [
+        1774,
+        887
+      ],
+      "grid": [
+        256,
+        128
+      ],
+      "pitch": [
+        6.9296875,
+        6.9296875
+      ],
+      "colors": 255,
+      "distinct_frames": {
+        "down/idle": 4,
+        "down/walk": 4
+      },
+      "bounds": [
+        {
+          "id": "salt_charger/down/idle/0",
+          "size": [
+            44,
+            40
+          ],
+          "trim": [
+            10,
+            19
+          ]
+        },
+        {
+          "id": "salt_charger/down/idle/1",
+          "size": [
+            44,
+            40
+          ],
+          "trim": [
+            10,
+            19
+          ]
+        },
+        {
+          "id": "salt_charger/down/idle/2",
+          "size": [
+            44,
+            40
+          ],
+          "trim": [
+            10,
+            19
+          ]
+        },
+        {
+          "id": "salt_charger/down/idle/3",
+          "size": [
+            44,
+            40
+          ],
+          "trim": [
+            10,
+            19
+          ]
+        },
+        {
+          "id": "salt_charger/down/walk/0",
+          "size": [
+            44,
+            41
+          ],
+          "trim": [
+            10,
+            18
+          ]
+        },
+        {
+          "id": "salt_charger/down/walk/1",
+          "size": [
+            44,
+            41
+          ],
+          "trim": [
+            10,
+            18
+          ]
+        },
+        {
+          "id": "salt_charger/down/walk/2",
+          "size": [
+            44,
+            41
+          ],
+          "trim": [
+            10,
+            18
+          ]
+        },
+        {
+          "id": "salt_charger/down/walk/3",
+          "size": [
+            44,
+            41
+          ],
+          "trim": [
+            10,
+            18
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "actor": "drowned_watcher",
+    "metadata": "drowned-watcher-down-06a2c-v2-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "measurement": {
+      "name": "drowned-watcher-down-06a2c-v2",
+      "source_size": [
+        1774,
+        887
+      ],
+      "grid": [
+        256,
+        128
+      ],
+      "pitch": [
+        6.9296875,
+        6.9296875
+      ],
+      "colors": 255,
+      "distinct_frames": {
+        "down/idle": 4,
+        "down/walk": 4
+      },
+      "bounds": [
+        {
+          "id": "drowned_watcher/down/idle/0",
+          "size": [
+            37,
+            43
+          ],
+          "trim": [
+            13,
+            16
+          ]
+        },
+        {
+          "id": "drowned_watcher/down/idle/1",
+          "size": [
+            37,
+            43
+          ],
+          "trim": [
+            13,
+            16
+          ]
+        },
+        {
+          "id": "drowned_watcher/down/idle/2",
+          "size": [
+            33,
+            43
+          ],
+          "trim": [
+            16,
+            16
+          ]
+        },
+        {
+          "id": "drowned_watcher/down/idle/3",
+          "size": [
+            40,
+            43
+          ],
+          "trim": [
+            13,
+            16
+          ]
+        },
+        {
+          "id": "drowned_watcher/down/walk/0",
+          "size": [
+            38,
+            42
+          ],
+          "trim": [
+            12,
+            17
+          ]
+        },
+        {
+          "id": "drowned_watcher/down/walk/1",
+          "size": [
+            37,
+            43
+          ],
+          "trim": [
+            14,
+            16
+          ]
+        },
+        {
+          "id": "drowned_watcher/down/walk/2",
+          "size": [
+            37,
+            43
+          ],
+          "trim": [
+            13,
+            16
+          ]
+        },
+        {
+          "id": "drowned_watcher/down/walk/3",
+          "size": [
+            39,
+            43
+          ],
+          "trim": [
+            13,
+            16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "actor": "mist_jellyfish",
+    "metadata": "mist-jellyfish-down-06a2c-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "measurement": {
+      "name": "mist-jellyfish-down-06a2c",
+      "source_size": [
+        1774,
+        887
+      ],
+      "grid": [
+        256,
+        128
+      ],
+      "pitch": [
+        6.9296875,
+        6.9296875
+      ],
+      "colors": 255,
+      "distinct_frames": {
+        "down/idle": 4,
+        "down/walk": 4
+      },
+      "bounds": [
+        {
+          "id": "mist_jellyfish/down/idle/0",
+          "size": [
+            37,
+            37
+          ],
+          "trim": [
+            14,
+            22
+          ]
+        },
+        {
+          "id": "mist_jellyfish/down/idle/1",
+          "size": [
+            37,
+            38
+          ],
+          "trim": [
+            14,
+            21
+          ]
+        },
+        {
+          "id": "mist_jellyfish/down/idle/2",
+          "size": [
+            37,
+            37
+          ],
+          "trim": [
+            14,
+            22
+          ]
+        },
+        {
+          "id": "mist_jellyfish/down/idle/3",
+          "size": [
+            37,
+            36
+          ],
+          "trim": [
+            14,
+            23
+          ]
+        },
+        {
+          "id": "mist_jellyfish/down/walk/0",
+          "size": [
+            46,
+            34
+          ],
+          "trim": [
+            9,
+            25
+          ]
+        },
+        {
+          "id": "mist_jellyfish/down/walk/1",
+          "size": [
+            43,
+            36
+          ],
+          "trim": [
+            10,
+            23
+          ]
+        },
+        {
+          "id": "mist_jellyfish/down/walk/2",
+          "size": [
+            43,
+            37
+          ],
+          "trim": [
+            10,
+            22
+          ]
+        },
+        {
+          "id": "mist_jellyfish/down/walk/3",
+          "size": [
+            43,
+            33
+          ],
+          "trim": [
+            11,
+            26
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-down-06a2-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ]
+  }
+]

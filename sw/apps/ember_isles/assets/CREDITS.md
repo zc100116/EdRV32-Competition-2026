@@ -59,3 +59,15 @@ Prompts, source images and processing notes are saved under `art_coast/`.
 The smith image is a rejected production trial; the crab image is a partial
 front-facing I8 capacity checkpoint, not a completed or quality-approved coast pack.
 No external commercial game assets or third-party source packs were used here.
+
+## ART-3 coast, 06a-2c compact-frame checkpoint
+
+The six new PNG source images under `art_coast/sources/*06a2c*-input.png` are
+original built-in imagegen outputs: tide biter, salt charger (two trials),
+drowned watcher (two trials), and mist jellyfish. Prompts are saved beside each
+image; existing project enemy/crab art supplies only style and pixel-grid references.
+Native grid samples, palettes and foot-anchor placement are produced by the
+standard-library art converter. Rejected fine-density trials and the oversized
+tide-biter draft are retained and identified in `art_coast/PROCESS.txt`.
+These are incomplete front-facing source studies, not an approved full coast pack.
+No external source pack or commercial game artwork is included.

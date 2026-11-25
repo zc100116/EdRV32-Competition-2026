@@ -1,0 +1,141 @@
+{
+  "name": "mist-jellyfish-down-06a2c",
+  "grid": [
+    256,
+    128
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "palette_file": "mist-jellyfish-down-06a2c-palette.json",
+  "palette_entries": 255,
+  "format": 1,
+  "atlas_group": "mist_jellyfish",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "foot_baseline": 58,
+  "cells": [
+    {
+      "id": "mist_jellyfish/down/idle/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "idle",
+      "frame": 0,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "mist_jellyfish/down/idle/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "idle",
+      "frame": 1,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "mist_jellyfish/down/idle/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "idle",
+      "frame": 2,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "mist_jellyfish/down/idle/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "idle",
+      "frame": 3,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "mist_jellyfish/down/walk/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "walk",
+      "frame": 0,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "mist_jellyfish/down/walk/1",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "walk",
+      "frame": 1,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "mist_jellyfish/down/walk/2",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "walk",
+      "frame": 2,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "mist_jellyfish/down/walk/3",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "walk",
+      "frame": 3,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    }
+  ]
+}
