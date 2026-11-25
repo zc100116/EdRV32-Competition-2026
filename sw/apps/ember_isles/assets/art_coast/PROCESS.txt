@@ -205,3 +205,26 @@ msg_aac2628fcd8c; thebadstudyisretainedbutnotselected. No empty-cellskip wasadde
 Rawsourceimports now publish their manifest entryafter nativeimport completes.
 The frozen particle actionnames are sparkle/light_dot/ember/water/ice/stardust/
 shadow/iron/debris. Full1425-frame export passes33177600 RGBA GPUreadbacktexels.
+
+Final06a-2d: guardian falling/death poses keep their authored native grid, with
+no standing-foot recentering that would crop a sideways body. Fixed pose anchors
+remain explicit. The completed source library has1593frames; smith retained but
+inactive, no iron guards/pet under71a4c7df4. Confirmed05a item IDs include12relics,
+6blessings and12inscriptions; all are original built-inimagegen icons.
+msg_7b0a751943de adds hostile tide projectile/orb/telegraph-column, with16-way
+GPU rotation metadata, tails and shared tide impacts. No simulation code changed.
+msg_164d7644a991 authorizes functional64x64radial/Bayer light-mask construction:
+lantern Fs0/FdS/ADD, transparent-white center; zone FsSa/Fd1/ADD warm additive.
+Both request bilinear filtering. They use RGB565+A4 in an existing I8 palette.
+msg_b24c9fad7b4a authorizes only unused star-bank indices:39 currently referenced
+indices retain exactly their RGBA words;117 indices are 灯光遮罩保留 and future
+star effects must not use them. The complete protected/reserved index sets and
+words are in coast-light-palette-layout-06a2d.json and all exported frame packets.
+The64-level ramps share some existing colors; no seventeenth palette group added.
+msg_b69f6ed05e32 fixes the current-run working set: hostile_tide_column is
+one-off stream material. Staff projectile/base,cluster/evolution_a,core/evolution_b
+have explicit staff_projectile_branch and cache_by_staff_branch maps. The default
+cache field represents the initial base branch; only the current branch is fixed.
+The integration layer pins retired projectile frames still visible in stream
+pages. Budgeting conservatively includes all frames of both noncurrent branches,
+not only a single visible projectile frame. Source pixels/frame counts are intact.

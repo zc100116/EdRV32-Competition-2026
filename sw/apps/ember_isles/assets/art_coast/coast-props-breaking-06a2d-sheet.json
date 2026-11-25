@@ -1,0 +1,261 @@
+{
+  "name": "coast-props-breaking-06a2d",
+  "grid": [
+    192,
+    128
+  ],
+  "cell": [
+    48,
+    32
+  ],
+  "palette_file": "coast-props-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_props",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/barrel_break/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "barrel_break",
+      "frame": 0,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/barrel_break/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "barrel_break",
+      "frame": 1,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/barrel_break/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "barrel_break",
+      "frame": 2,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/barrel_break/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "barrel_break",
+      "frame": 3,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/crate_break/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "crate_break",
+      "frame": 0,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/crate_break/1",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "crate_break",
+      "frame": 1,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/crate_break/2",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "crate_break",
+      "frame": 2,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/crate_break/3",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "crate_break",
+      "frame": 3,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/vase_break/0",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "vase_break",
+      "frame": 0,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/vase_break/1",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down",
+      "action": "vase_break",
+      "frame": 1,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/vase_break/2",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "down",
+      "action": "vase_break",
+      "frame": 2,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/vase_break/3",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "down",
+      "action": "vase_break",
+      "frame": 3,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/broken_fence_break/0",
+      "cell": [
+        0,
+        3
+      ],
+      "direction": "down",
+      "action": "broken_fence_break",
+      "frame": 0,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/broken_fence_break/1",
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "down",
+      "action": "broken_fence_break",
+      "frame": 1,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/broken_fence_break/2",
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "down",
+      "action": "broken_fence_break",
+      "frame": 2,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/broken_fence_break/3",
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "down",
+      "action": "broken_fence_break",
+      "frame": 3,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    }
+  ],
+  "foot_baseline": 31
+}

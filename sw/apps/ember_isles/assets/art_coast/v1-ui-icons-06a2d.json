@@ -1,0 +1,198 @@
+{
+  "scope": "71a4c7df4 first release: keeper, ember sword, ember staff, coast arena",
+  "icon_cell": [
+    24,
+    24
+  ],
+  "rarities": [
+    "common",
+    "fine",
+    "rare",
+    "legendary"
+  ],
+  "known": [
+    {
+      "id": "sword_ember",
+      "kind": "weapon",
+      "label": "余烬剑"
+    },
+    {
+      "id": "staff_ember",
+      "kind": "weapon",
+      "label": "余火杖"
+    },
+    {
+      "id": "keeper_k",
+      "kind": "skill",
+      "label": "火焰冲刺"
+    },
+    {
+      "id": "keeper_l",
+      "kind": "skill",
+      "label": "火种"
+    },
+    {
+      "id": "keeper_u",
+      "kind": "skill",
+      "label": "炉心爆发"
+    }
+  ],
+  "confirmed_05a_ids": {
+    "relics": [
+      [
+        "ember_bag",
+        "余烬袋",
+        "drawstringpouch spillingtinyorangeembers"
+      ],
+      [
+        "whetstone",
+        "磨刀石",
+        "slate sharpeningstone withsmallbladeglint"
+      ],
+      [
+        "eagle_feather",
+        "鹰羽",
+        "singleivoryeaglefeather withgoldenquill"
+      ],
+      [
+        "oil_flask",
+        "灯油壶",
+        "amberoilflask withcopperhandleandstopper"
+      ],
+      [
+        "furnace_mirror",
+        "炉镜",
+        "copperhandmirror reflectingasmallflame"
+      ],
+      [
+        "slow_coal",
+        "慢燃炭",
+        "charcoalchunk withsubtleorangecracks"
+      ],
+      [
+        "warrior_belt",
+        "战士腰带",
+        "leatherwarriorbelt withbrasssquarebuckle"
+      ],
+      [
+        "lamp_badge",
+        "守灯徽",
+        "smallcopperlantern-shieldbadge"
+      ],
+      [
+        "furnace_core",
+        "炉心",
+        "gearedironfurnaceheart withglowingambercenter"
+      ],
+      [
+        "single_lens",
+        "单点透镜",
+        "one brassroundlens withsinglebrightglint"
+      ],
+      [
+        "ember_lamp",
+        "余火即灯",
+        "smallgoldenlantern surroundedbyemberflames"
+      ],
+      [
+        "hot_bone",
+        "炽热之骨",
+        "ivoryfantasybone withorangefireveins, non-graphic"
+      ]
+    ],
+    "blessings": [
+      [
+        "moving_fire",
+        "疾行之火",
+        "bootwithorangeflamestreak"
+      ],
+      [
+        "lamp_guard",
+        "灯守",
+        "lampinsidelightblueprotectiveshield"
+      ],
+      [
+        "harvest",
+        "收获",
+        "goldenwheatbranchandonecrystal"
+      ],
+      [
+        "energy",
+        "能量涌流",
+        "spiralinggoldenergystream enteringamberorb"
+      ],
+      [
+        "judgment",
+        "群体审判",
+        "smallgoldgavel withradialjudgmentburst"
+      ],
+      [
+        "first_hit",
+        "一击之誓",
+        "onebladestrike overa singleroundtarget"
+      ]
+    ],
+    "inscriptions": [
+      [
+        "sharp",
+        "锐化",
+        "silverpointedshard etchedonarunestone"
+      ],
+      [
+        "scatter",
+        "散射",
+        "threeoutwarddivergingarrowlines onsmallstone"
+      ],
+      [
+        "ignite",
+        "引燃",
+        "brightflamerune oncharcoalrunechip"
+      ],
+      [
+        "heavy",
+        "重击",
+        "heavyhammerdown-strikerune onstone"
+      ],
+      [
+        "leech",
+        "吸取",
+        "reddropletwithcurlingupwardenergyline onstone"
+      ],
+      [
+        "split",
+        "三星火",
+        "three littlefireballs splittingsymmetrically onstone"
+      ],
+      [
+        "homing",
+        "追踪",
+        "curvedarrow bendingtowardonebrightsmalltarget"
+      ],
+      [
+        "return",
+        "回旋",
+        "circularreturnarrow withonebrightarrowhead"
+      ],
+      [
+        "follow",
+        "随身",
+        "tinyfootstepsinsidefloatingringonstone"
+      ],
+      [
+        "burst",
+        "爆裂",
+        "starburst breakingacrackedcircleonstone"
+      ],
+      [
+        "ember_ground",
+        "余烬地",
+        "smallburninggroundtilewiththreeflametongues"
+      ],
+      [
+        "double",
+        "双发",
+        "twoparallelsame-directionstreaks andtwoarrowheads"
+      ]
+    ]
+  }
+}

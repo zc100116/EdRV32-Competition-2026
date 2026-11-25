@@ -29,6 +29,11 @@ def main():
             rgb = [(ramp[interval][i] * (255 - fraction)
                     + ramp[interval + 1][i] * fraction + 127) // 255 for i in range(3)]
             palette.append(color_word(tuple(rgb) + (rgba[3],)) if rgba[3] else 0)
+        if element == 'star':
+            layout = json.loads((ASSETS / 'coast-light-palette-layout-06a2d.json').read_text())
+            palette += [0] * (256 - len(palette))
+            for index, word in layout['light_reserved_words'].items():
+                palette[int(index)] = word
         (ASSETS / f'coast-weapon-fx-{element}-06a2d-palette.json').write_text(
             json.dumps(palette) + '\n')
     print(f'Four elemental I8 groups, {len(base)} entries each; native indices unchanged')

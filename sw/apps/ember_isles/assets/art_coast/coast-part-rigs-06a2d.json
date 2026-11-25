@@ -1,0 +1,28 @@
+{
+  "lighthouse_guardian": {
+    "canvas": [128, 128],
+    "root": [64, 108],
+    "body": "lighthouse_guardian_body",
+    "layers": [
+      {"actor": "lighthouse_guardian_weapon", "attachment": "hand"},
+      {"actor": "lighthouse_guardian_body", "attachment": "root"},
+      {"actor": "lighthouse_guardian_shield", "attachment": "hand_secondary"}
+    ],
+    "preview_action": "idle",
+    "directions": ["down", "down_right", "right", "up_right", "up"]
+  },
+  "tide_lord": {
+    "canvas": [208, 176],
+    "root": [104, 166],
+    "direction": "down",
+    "layers": [
+      {"actor": "tide_lord_tail", "offset": [0, -44], "action": "idle"},
+      {"actor": "tide_lord_fin", "offset": [-48, -62], "action": "idle"},
+      {"actor": "tide_lord_fin", "offset": [48, -62], "action": "idle", "flip_x": true},
+      {"actor": "tide_lord_body", "offset": [0, -12], "action": "phase{phase}_idle"},
+      {"actor": "tide_lord_mouth", "offset": [0, -92], "action": "phase{phase}_idle"}
+    ],
+    "phase3_fin_action": "phase3_idle",
+    "phases": [1, 2, 3]
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "name": "coast-lamp-halo-fx-06a2d",
+  "grid": [
+    192,
+    128
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "palette_file": "coast-weapon-fx-iron-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_large_fx",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/lamp_ignite_halo/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "lamp_ignite_halo",
+      "frame": 0,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/lamp_ignite_halo/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "lamp_ignite_halo",
+      "frame": 1,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/lamp_ignite_halo/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "lamp_ignite_halo",
+      "frame": 2,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/lamp_ignite_halo/3",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "lamp_ignite_halo",
+      "frame": 3,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/lamp_ignite_halo/4",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "lamp_ignite_halo",
+      "frame": 4,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/lamp_ignite_halo/5",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "lamp_ignite_halo",
+      "frame": 5,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null
+    }
+  ],
+  "palette_variants": {
+    "ember": "coast-weapon-fx-ember-06a2d-palette.json",
+    "tide": "coast-weapon-fx-tide-06a2d-palette.json",
+    "star": "coast-weapon-fx-star-06a2d-palette.json",
+    "shadow": "coast-weapon-fx-shadow-06a2d-palette.json"
+  },
+  "preferred_element": "ember"
+}

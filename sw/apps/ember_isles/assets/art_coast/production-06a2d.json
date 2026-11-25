@@ -2107,5 +2107,246 @@
     "normalize_source": false,
     "cache": "fixed",
     "role": "particle"
+  },
+  {
+    "actor": "lighthouse_guardian_weapon",
+    "metadata": "lighthouse-guardian-anchor-weapon-v2-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "raise",
+      "attack_shield",
+      "hit"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "tide_lord_mouth",
+    "metadata": "tide-lord-head-redraw-1-06a2d-sheet.json",
+    "actions": [
+      "phase1_idle",
+      "phase2_idle",
+      "phase3_idle",
+      "water_column"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "boss"
+  },
+  {
+    "actor": "coast_large_fx",
+    "metadata": "coast-lamp-halo-fx-06a2d-sheet.json",
+    "actions": [
+      "lamp_ignite_halo"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "large_effect"
+  },
+  {
+    "actor": "coast_small_fx",
+    "metadata": "coast-evolved-projectiles-06a2d-sheet.json",
+    "actions": [
+      "staff_cluster_projectile",
+      "staff_core_projectile",
+      "keeper_seed_flight"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "fixed",
+    "role": "effect"
+  },
+  {
+    "actor": "coast_props",
+    "metadata": "coast-props-breaking-06a2d-sheet.json",
+    "actions": [
+      "barrel_break",
+      "crate_break",
+      "vase_break",
+      "broken_fence_break"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "prop"
+  },
+  {
+    "actor": "tide_lord_mouth",
+    "metadata": "tide-lord-head-redraw-2-06a2d-sheet.json",
+    "actions": [
+      "water_column",
+      "vortex"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "boss"
+  },
+  {
+    "actor": "tide_lord_mouth",
+    "metadata": "tide-lord-head-redraw-3-06a2d-sheet.json",
+    "actions": [
+      "vortex",
+      "blacktide_roar",
+      "hit"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "boss"
+  },
+  {
+    "actor": "coast_ui_icons",
+    "metadata": "coast-relic-icons-06a2d-sheet.json",
+    "actions": [
+      "ember_bag",
+      "whetstone",
+      "eagle_feather",
+      "oil_flask",
+      "furnace_mirror",
+      "slow_coal",
+      "warrior_belt",
+      "lamp_badge",
+      "furnace_core",
+      "single_lens",
+      "ember_lamp",
+      "hot_bone"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "fixed",
+    "role": "ui"
+  },
+  {
+    "actor": "coast_ui_icons",
+    "metadata": "coast-blessing-icons-06a2d-sheet.json",
+    "actions": [
+      "moving_fire",
+      "lamp_guard",
+      "harvest",
+      "energy",
+      "judgment",
+      "first_hit"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "fixed",
+    "role": "ui"
+  },
+  {
+    "actor": "coast_ui_icons",
+    "metadata": "coast-inscription-icons-06a2d-sheet.json",
+    "actions": [
+      "sharp",
+      "scatter",
+      "ignite",
+      "heavy",
+      "leech",
+      "split",
+      "homing",
+      "return",
+      "follow",
+      "burst",
+      "ember_ground",
+      "double"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "fixed",
+    "role": "ui"
+  },
+  {
+    "actor": "lighthouse_guardian_body",
+    "metadata": "lighthouse-guardian-death-late-06a2d-sheet.json",
+    "actions": [
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "tide_lord_body",
+    "metadata": "tide-lord-body-death-06a2d-sheet.json",
+    "actions": [
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "boss"
+  },
+  {
+    "actor": "tide_lord_mouth",
+    "metadata": "tide-lord-head-death-06a2d-sheet.json",
+    "actions": [
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "boss"
+  },
+  {
+    "actor": "coast_large_fx",
+    "metadata": "coast-boss-water-column-v2-06a2d-sheet.json",
+    "actions": [
+      "boss_water_column"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "large_effect"
+  },
+  {
+    "actor": "coast_large_fx",
+    "metadata": "coast-boss-vortex-v2-06a2d-sheet.json",
+    "actions": [
+      "boss_vortex"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "large_effect"
+  },
+  {
+    "actor": "coast_small_fx",
+    "metadata": "coast-hostile-tide-projectiles-06a2d-sheet.json",
+    "actions": [
+      "hostile_tide_projectile",
+      "hostile_tide_orb"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "fixed",
+    "role": "effect"
+  },
+  {
+    "actor": "coast_small_fx",
+    "metadata": "coast-hostile-tide-column-06a2d-sheet.json",
+    "actions": [
+      "hostile_tide_column"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "effect"
+  },
+  {
+    "actor": "coast_light",
+    "metadata": "coast-light-masks-06a2d-sheet.json",
+    "actions": [
+      "lantern_view",
+      "light_zone"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "fixed",
+    "role": "light"
   }
 ]

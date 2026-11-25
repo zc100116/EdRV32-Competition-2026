@@ -89,3 +89,10 @@ are original literal pixel drawings by Codex, authorized by msg_aac2628fcd8c.
 Their38 frames are copied1:1 from the saved ASCII artwork, with five elemental
 palette groups; no procedural shape formula, bitmap scaling or rotation is used.
 The rejected built-in imagegen particle studies are retained under `sources/`.
+
+The two64×64 functional light textures in `art_coast/coast-light-masks-06a2d-native.png`
+are original mathematical radial gradients with a4×4 Bayer pattern, authorized
+by msg_164d7644a991. They reuse unreferenced indices of the existing star palette;
+they are functional blend masks rather than imagegen artwork or external textures.
+The remaining06a-2d guardian/Boss death parts, hostile tide effects and30item icons
+are original built-in imagegen material; prompts and raw inputs remain in `art_coast/sources/`.

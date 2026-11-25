@@ -1,0 +1,58 @@
+{
+  "name": "coast-light-masks-06a2d",
+  "grid": [
+    128,
+    64
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "palette_file": "coast-weapon-fx-star-06a2d-palette.json",
+  "format": 1,
+  "atlas_group": "coast_light",
+  "cells": [
+    {
+      "id": "down/lantern_view/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "lantern_view",
+      "frame": 0,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null,
+      "filter": "bilinear",
+      "blend": {
+        "Fs": "0",
+        "Fd": "S",
+        "op": "ADD"
+      }
+    },
+    {
+      "id": "down/light_zone/0",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "light_zone",
+      "frame": 0,
+      "anchor": [
+        32,
+        32
+      ],
+      "hand_primary": null,
+      "filter": "bilinear",
+      "blend": {
+        "Fs": "Sa",
+        "Fd": "1",
+        "op": "ADD"
+      }
+    }
+  ]
+}

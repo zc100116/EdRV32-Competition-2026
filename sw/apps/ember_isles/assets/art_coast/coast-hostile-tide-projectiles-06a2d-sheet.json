@@ -1,0 +1,160 @@
+{
+  "name": "coast-hostile-tide-projectiles-06a2d",
+  "grid": [
+    160,
+    64
+  ],
+  "cell": [
+    40,
+    32
+  ],
+  "palette_file": "coast-weapon-fx-iron-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_small_fx",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "right/hostile_tide_projectile/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "right",
+      "action": "hostile_tide_projectile",
+      "frame": 0,
+      "rotation_steps": 16,
+      "anchor": [
+        26,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/hostile_tide_projectile/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "right",
+      "action": "hostile_tide_projectile",
+      "frame": 1,
+      "rotation_steps": 16,
+      "anchor": [
+        26,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/hostile_tide_projectile/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "right",
+      "action": "hostile_tide_projectile",
+      "frame": 2,
+      "rotation_steps": 16,
+      "anchor": [
+        26,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/hostile_tide_projectile/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "right",
+      "action": "hostile_tide_projectile",
+      "frame": 3,
+      "rotation_steps": 16,
+      "anchor": [
+        26,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/hostile_tide_orb/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "right",
+      "action": "hostile_tide_orb",
+      "frame": 0,
+      "rotation_steps": 16,
+      "anchor": [
+        26,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/hostile_tide_orb/1",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "right",
+      "action": "hostile_tide_orb",
+      "frame": 1,
+      "rotation_steps": 16,
+      "anchor": [
+        26,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/hostile_tide_orb/2",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "right",
+      "action": "hostile_tide_orb",
+      "frame": 2,
+      "rotation_steps": 16,
+      "anchor": [
+        26,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/hostile_tide_orb/3",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "right",
+      "action": "hostile_tide_orb",
+      "frame": 3,
+      "rotation_steps": 16,
+      "anchor": [
+        26,
+        16
+      ],
+      "hand_primary": null
+    }
+  ],
+  "palette_variants": {
+    "ember": "coast-weapon-fx-ember-06a2d-palette.json",
+    "tide": "coast-weapon-fx-tide-06a2d-palette.json",
+    "star": "coast-weapon-fx-star-06a2d-palette.json",
+    "shadow": "coast-weapon-fx-shadow-06a2d-palette.json"
+  },
+  "preferred_element": "tide",
+  "blend": {
+    "Fs": "Sa",
+    "Fd": "1-Sa",
+    "op": "ADD"
+  }
+}

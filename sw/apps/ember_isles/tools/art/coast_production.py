@@ -44,7 +44,10 @@ def load_native_frames():
             if 'preferred_element' in sheet:
                 frame['preferred_element'] = sheet['preferred_element']
             for field in ('preferred_element', 'fixed_loadout', 'neighbor_mask_NESW', 'slice_name',
-                          'slice_source_rect'):
+                          'slice_source_rect', 'blend', 'filter', 'rotation_steps', 'effect_phase',
+                          'cache', 'staff_projectile_branch', 'cache_by_staff_branch'):
+                if field in sheet:
+                    frame[field] = sheet[field]
                 if field in cell:
                     frame[field] = cell[field]
         frames.extend(added)
@@ -87,6 +90,9 @@ def main():
                                  'bounds': [{'name': f['name'], 'size': [f['w'], f['h']]}
                                             for f in selected]})
     records, ddr_bytes, texels = convert(frames, BUILD)
+    light_allocation = json.loads((ASSETS / 'coast-light-palette-layout-06a2d.json').read_text())
+    light_allocation['palette_group'] = next(r['palette_group'] for r in records
+                                            if r['actor'] == 'coast_light')
     fpga = [record for record in records if fpga_frame(record)]
     direction_maps = {'left': ['right', True], 'down_left': ['down_right', True],
                       'up_left': ['up_right', True],
@@ -94,17 +100,18 @@ def main():
                           'walk_horizontal': ['lean_right', 'flip when moving left']}}
     (BUILD / 'pc-frames.json').write_text(json.dumps(
         {'frames': records, 'ddr_library': 'frames.bin', 'ddr_library_bytes': ddr_bytes,
-         'direction_maps': direction_maps},
+         'direction_maps': direction_maps, 'light_palette_allocation': light_allocation},
         indent=2) + '\n')
     (BUILD / 'fpga-frames.json').write_text(json.dumps(
         {'frames': fpga, 'ddr_library': 'frames.bin',
          'selected_payload_bytes': sum(f['bytes'] for f in fpga),
-         'direction_maps': direction_maps, 'ordinary_death_direction': 'down'},
+         'direction_maps': direction_maps, 'ordinary_death_direction': 'down',
+         'light_palette_allocation': light_allocation},
         indent=2) + '\n')
     (BUILD / 'frames.json').write_text(json.dumps(
         {'frames': records, 'ddr_library_bytes': ddr_bytes,
          'source_frames': len(records), 'gpu_readback_texels': texels,
-         'sheets': measurements}, indent=2) + '\n')
+         'sheets': measurements, 'light_palette_allocation': light_allocation}, indent=2) + '\n')
     print(f'GPU page readback PASS: {len(records)} frames/{texels} texels; DDR {ddr_bytes} B')
 
 

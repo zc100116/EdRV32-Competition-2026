@@ -30,7 +30,8 @@
         12,
         12
       ],
-      "hand_primary": null
+      "hand_primary": null,
+      "fixed_loadout": "sword/base"
     },
     {
       "id": "down/sword_trail/1",
@@ -46,7 +47,8 @@
         12,
         12
       ],
-      "hand_primary": null
+      "hand_primary": null,
+      "fixed_loadout": "sword/base"
     },
     {
       "id": "down/sword_trail/2",
@@ -62,7 +64,8 @@
         12,
         12
       ],
-      "hand_primary": null
+      "hand_primary": null,
+      "fixed_loadout": "sword/base"
     },
     {
       "id": "down/sword_trail/3",
@@ -78,7 +81,8 @@
         12,
         12
       ],
-      "hand_primary": null
+      "hand_primary": null,
+      "fixed_loadout": "sword/base"
     },
     {
       "id": "down/staff_cast/0",
@@ -94,7 +98,8 @@
         12,
         12
       ],
-      "hand_primary": null
+      "hand_primary": null,
+      "fixed_loadout": "staff/base"
     },
     {
       "id": "down/staff_cast/1",
@@ -110,7 +115,8 @@
         12,
         12
       ],
-      "hand_primary": null
+      "hand_primary": null,
+      "fixed_loadout": "staff/base"
     },
     {
       "id": "down/staff_cast/2",
@@ -126,7 +132,8 @@
         12,
         12
       ],
-      "hand_primary": null
+      "hand_primary": null,
+      "fixed_loadout": "staff/base"
     },
     {
       "id": "down/staff_cast/3",
@@ -142,7 +149,8 @@
         12,
         12
       ],
-      "hand_primary": null
+      "hand_primary": null,
+      "fixed_loadout": "staff/base"
     },
     {
       "id": "down/staff_projectile/0",
@@ -158,7 +166,15 @@
         12,
         12
       ],
-      "hand_primary": null
+      "hand_primary": null,
+      "fixed_loadout": "staff/base",
+      "staff_projectile_branch": "base",
+      "cache": "fixed",
+      "cache_by_staff_branch": {
+        "base": "fixed",
+        "evolution_a": "stream",
+        "evolution_b": "stream"
+      }
     },
     {
       "id": "down/staff_projectile/1",
@@ -174,7 +190,15 @@
         12,
         12
       ],
-      "hand_primary": null
+      "hand_primary": null,
+      "fixed_loadout": "staff/base",
+      "staff_projectile_branch": "base",
+      "cache": "fixed",
+      "cache_by_staff_branch": {
+        "base": "fixed",
+        "evolution_a": "stream",
+        "evolution_b": "stream"
+      }
     },
     {
       "id": "down/staff_projectile/2",
@@ -190,7 +214,15 @@
         12,
         12
       ],
-      "hand_primary": null
+      "hand_primary": null,
+      "fixed_loadout": "staff/base",
+      "staff_projectile_branch": "base",
+      "cache": "fixed",
+      "cache_by_staff_branch": {
+        "base": "fixed",
+        "evolution_a": "stream",
+        "evolution_b": "stream"
+      }
     },
     {
       "id": "down/staff_projectile/3",
@@ -206,7 +238,15 @@
         12,
         12
       ],
-      "hand_primary": null
+      "hand_primary": null,
+      "fixed_loadout": "staff/base",
+      "staff_projectile_branch": "base",
+      "cache": "fixed",
+      "cache_by_staff_branch": {
+        "base": "fixed",
+        "evolution_a": "stream",
+        "evolution_b": "stream"
+      }
     },
     {
       "id": "down/impact_ember/0",
