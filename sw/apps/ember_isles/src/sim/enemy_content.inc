@@ -65,7 +65,7 @@ static void enemy_projectile(struct ember_sim *s, struct ember_enemy *e,
         d->projectile_radius, d->projectile_life);
     e->attacking = (uint16_t)ember_system[0].attack_frames;
     enemy_present(e,EMBER_ENEMY_ATTACK);
-    p->hostile = 1; p->weapon = (uint8_t)e->wave;
+    p->hostile = 1; p->weapon = (uint8_t)e->wave; p->enemy_kind = e->kind;
     p->damage_type = (uint8_t)type; p->hit_flags = (uint8_t)flags;
     p->enemy_increased = enemy_in_dark(s, e->x, e->y) ? ember_lighting[0].dark_damage : 0;
     p->vx = (ember_fixed)((int64_t)ember_cos(angle) * speed / 60);
@@ -165,7 +165,7 @@ static int content_enemy(struct ember_sim *s, unsigned index)
             struct ember_shot *p = shot(s, 6, e->x, e->y, d->damage, d->projectile_radius, d->projectile_life);
             e->attacking = (uint16_t)ember_system[0].attack_frames;
     enemy_present(e,EMBER_ENEMY_ATTACK);
-    p->hostile = 1; p->weapon = (uint8_t)e->wave;
+    p->hostile = 1; p->weapon = (uint8_t)e->wave; p->enemy_kind = e->kind;
             p->damage_type = d->ai == 13 ? EMBER_DAMAGE_TRUE : EMBER_DAMAGE_STAR;
             p->enemy_increased = enemy_in_dark(s, e->x, e->y) ?
                 ember_lighting[0].dark_damage : 0;

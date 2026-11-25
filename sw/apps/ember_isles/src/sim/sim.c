@@ -1102,6 +1102,7 @@ static void enemies_step(struct ember_sim *s)
                 e->attacking = (uint16_t)ember_system[0].attack_frames;
                 enemy_present(e,EMBER_ENEMY_ATTACK);
                 p->hostile = 1;
+                p->enemy_kind = e->kind;
                 p->damage_type = (uint8_t)d->element_index;
                 p->enemy_increased = enemy_in_dark(s, e->x, e->y) ?
                     ember_lighting[0].dark_damage : 0;
