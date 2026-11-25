@@ -16,8 +16,36 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from tools.gpu.model import GPU, interleave_texture
 from tools.gpu.model.arithmetic import (RECIPROCAL_FRAC, divide, edge, expand, logarithm,
                                         reciprocal, saturate, shift, top_left)
-from tools.gpu.model.planes import PixelArithmetic
+from tools.gpu.model.planes import PixelArithmetic as CurrentPixelArithmetic
 from tools.gpu.scene import Memory
+
+
+class PixelArithmetic(CurrentPixelArithmetic):
+    """Historical v0.3 baseline, retained only for numeric experiments."""
+    DROPS = (0,) * 7
+    LOD_QUAD = False
+
+    def __init__(self, vertices, area):
+        super().__init__(vertices, area)
+        self.gradients = [[self.normal(self.coefficients[c][axis], self.exponents[c])
+                           for c in (1, 2, 3)] for axis in (1, 2)]
+
+    def shade(self, attrs):
+        depth = saturate(shift(attrs[0], -self.exponents[0]), 0, 65535)
+        q, uq, vq = [self.normal(attrs[c], self.exponents[c]) for c in (1, 2, 3)]
+        w = self.inverse(q)
+        uv = [self.multiply(value, w) for value in (uq, vq)]
+        coordinates = [shift(value, -exponent - 8) for value, exponent in uv]
+        span = 0
+        for dq, duq, dvq in self.gradients:
+            for gradient, coordinate in zip((duq, dvq), uv):
+                delta = self.subtract(gradient, self.multiply(coordinate, dq))
+                value, exponent = self.multiply(delta, w)
+                span = max(span, shift(abs(value), -exponent - 16))
+        lod = logarithm(span) if span else 0
+        colors = [saturate(shift(attrs[c], -self.exponents[c]), 0, 255)
+                  for c in (4, 5, 6)]
+        return depth, *coordinates, lod, colors
 
 
 class ExactGPU(GPU):

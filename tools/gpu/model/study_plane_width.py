@@ -12,9 +12,8 @@ import time
 
 from study_v03 import (GPU, Ideal, ScreenIdeal, Memory, Metrics, FilterMetrics,
                        corpus, screen_cases, fixed_fragments, texture_levels,
-                       float_filter, interleave_texture, costs)
+                       float_filter, interleave_texture, costs, PixelArithmetic)
 from tools.gpu.model.arithmetic import edge, logarithm, saturate, shift
-from tools.gpu.model.planes import PixelArithmetic
 from tools.gpu.model.texture import Texture
 
 Q_DROPS = (0, 4, 16, 20)
@@ -46,10 +45,6 @@ def conservative_width(drop, bits=32):
     return signed_width(bound)
 
 
-class UndefinedQ(ArithmeticError):
-    """A sampled perspective coordinate has no reciprocal after quantization."""
-
-
 class Reduced(PixelArithmetic):
     DROPS = (0,) * 7
     MODE = 'q'
@@ -57,7 +52,10 @@ class Reduced(PixelArithmetic):
     widths = [0] * 7
 
     def __init__(self, vertices, area):
+        drops = self.DROPS
+        self.DROPS = (0,) * 7
         super().__init__(vertices, area)
+        self.DROPS = drops
         if self.PLANE_BITS != 32:
             fixed = PixelArithmetic(vertices, area)
             for c in (0, 4, 5, 6):
@@ -79,7 +77,7 @@ class Reduced(PixelArithmetic):
         # Helper pixels extrapolate outside coverage, so q can have either sign.
         magnitude, exponent = q
         if magnitude == 0:
-            raise UndefinedQ('2x2 UV evaluation has zero interpolated q after rounding')
+            return [(0, 0), (0, 0)]
         w = self.inverse((abs(magnitude), exponent))
         if magnitude < 0:
             w = -w[0], w[1]
@@ -215,7 +213,6 @@ def scan(profiles, auxiliary=True):
     filter_deltas = {profile: FilterMetrics() for profile in profiles}
     cases = [(n, v, False) for n, v in corpus()]
     cases += [(n, v, True) for n, v in screen_cases()]
-    invalid = {}
     for scene, vertices, screen in cases:
         ideal = (ScreenIdeal if screen else Ideal)(matrix, light).fragments(vertices)
         baseline = fixed_fragments(engines['q', (32, 18, False, 0)], vertices, screen)
@@ -225,15 +222,8 @@ def scan(profiles, auxiliary=True):
                 round(f[0] * 256), round(f[1] * 256), round(f[3] * 256))
                 for p, f in baseline.items()}
         for key, gpu in engines.items():
-            if key in invalid:
-                continue
-            try:
-                fixed = (baseline if key == ('q', (32, 18, False, 0))
-                         else fixed_fragments(gpu, vertices, screen))
-            except UndefinedQ as error:
-                invalid[key] = f'{scene}: {error}'
-                print(f'INVALID {key}: {invalid[key]}', flush=True)
-                continue
+            fixed = (baseline if key == ('q', (32, 18, False, 0))
+                     else fixed_fragments(gpu, vertices, screen))
             # Z/RGB variants do not affect UV, LOD or texture filtering.
             if key[0] != 'q':
                 fixed = {p: (baseline[p][0], baseline[p][1], f[2], baseline[p][3], *f[4:])
@@ -248,7 +238,7 @@ def scan(profiles, auxiliary=True):
                         filters[key[1]].add(sampled, float_colors[p])
                     if p in fixed_colors:
                         filter_deltas[key[1]].add(sampled, fixed_colors[p])
-    return engines, totals, deltas, filters, filter_deltas, invalid
+    return engines, totals, deltas, filters, filter_deltas
 
 
 def passes(delta, filtered):
@@ -261,17 +251,10 @@ def passes(delta, filtered):
 
 def assemble(scenario, data, auxiliary):
     name, bits, precision, quad, q, z, c = scenario
-    engines, totals, deltas, filters, filter_deltas, invalid = data
+    engines, totals, deltas, filters, filter_deltas = data
     profile = bits, precision, quad, q
     qkey = 'q', profile
     widths = [conservative_width(z), conservative_width(q, bits), conservative_width(c)]
-    if qkey in invalid:
-        return dict(name=name, bits=bits, precision=precision,
-                    lod='quad' if quad else 'analytic', drops_q_z_rgb=[q, z, c],
-                    widths_z_q_rgb=widths, measured_widths_z_q_rgb=None,
-                    v03_delta=None, float=None, trilinear_v03_max_rms=None,
-                    trilinear_float_max_rms=None, cost=estimate(widths, precision, quad),
-                    passes=False, invalid_reason=invalid[qkey])
     az, ac = auxiliary[z, 0], auxiliary[0, c]
     delta = compose(deltas[qkey].result(), az['v03_delta'], ac['v03_delta'])
     ideal = compose(totals[qkey].result(), az['float'], ac['float'])
@@ -294,7 +277,7 @@ def run(reuse=None, case=None):
     profiles = list(dict.fromkeys([(32, 18, False, 0)]
                                  + [tuple(s[1:5]) for s in selected]))
     data = scan(profiles, auxiliary=reuse is None)
-    engines, totals, deltas, _, _, _ = data
+    engines, totals, deltas, _, _ = data
     auxiliary = {}
     if reuse is not None:
         cached = json.loads(reuse.read_text())
@@ -338,8 +321,6 @@ def choose(results):
     cheaper = [r for r in results if r['cost']['lut'] < recommended['cost']['lut']
                and r['cost']['apm'] <= recommended['cost']['apm']]
     def violation(r):
-        if 'invalid_reason' in r:
-            return float('inf')
         d = r['v03_delta']
         f = r['trilinear_v03_max_rms']
         return max(d['max'][0] * 16, d['rms'][0] * 64, d['max'][1] / 4,
