@@ -96,3 +96,15 @@ by msg_164d7644a991. They reuse unreferenced indices of the existing star palett
 they are functional blend masks rather than imagegen artwork or external textures.
 The remaining06a-2d guardian/Boss death parts, hostile tide effects and30item icons
 are original built-in imagegen material; prompts and raw inputs remain in `art_coast/sources/`.
+
+## ART-3 coast, 06a-2e elite auras and pickups
+
+The eight `coast-elite-aura-*-06a2e` six-frame sheets and five
+`coast-pickup-*-06a2e` icons are original built-in imagegen outputs for this project.
+Full prompts and raw images are preserved in `art_coast/sources/`, including the
+rejected ward checkerboard study and its transparency correction prompt.
+Native sheets restore the declared square-pixel grids; the eight I4 auras use
+the first16 entries of existing RGB565+A4 groups. A common index permutation
+preserves every previous palette color and elemental variant, including the
+star group's reserved light indices. Fanatic and health reuse the keeper's
+crimson scarf ramp. No commercial game artwork or external asset pack is used.

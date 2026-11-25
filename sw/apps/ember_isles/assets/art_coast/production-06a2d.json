@@ -2348,5 +2348,148 @@
     "normalize_source": false,
     "cache": "fixed",
     "role": "light"
+  },
+  {
+    "actor": "coast_small_fx",
+    "metadata": "coast-elite-aura-haste-06a2e-sheet.json",
+    "actions": [
+      "elite_aura_haste"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "elite_aura"
+  },
+  {
+    "actor": "coast_small_fx",
+    "metadata": "coast-elite-aura-ward-06a2e-sheet.json",
+    "actions": [
+      "elite_aura_ward"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "elite_aura"
+  },
+  {
+    "actor": "coast_small_fx",
+    "metadata": "coast-elite-aura-split-06a2e-sheet.json",
+    "actions": [
+      "elite_aura_split"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "elite_aura"
+  },
+  {
+    "actor": "coast_small_fx",
+    "metadata": "coast-elite-aura-reflect-06a2e-sheet.json",
+    "actions": [
+      "elite_aura_reflect"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "elite_aura"
+  },
+  {
+    "actor": "coast_small_fx",
+    "metadata": "coast-elite-aura-dim-06a2e-sheet.json",
+    "actions": [
+      "elite_aura_dim"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "elite_aura"
+  },
+  {
+    "actor": "coast_small_fx",
+    "metadata": "coast-elite-aura-fanatic-06a2e-sheet.json",
+    "actions": [
+      "elite_aura_fanatic"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "elite_aura"
+  },
+  {
+    "actor": "coast_small_fx",
+    "metadata": "coast-elite-aura-elemental-06a2e-sheet.json",
+    "actions": [
+      "elite_aura_elemental"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "elite_aura"
+  },
+  {
+    "actor": "coast_small_fx",
+    "metadata": "coast-elite-aura-teleport-06a2e-sheet.json",
+    "actions": [
+      "elite_aura_teleport"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "elite_aura"
+  },
+  {
+    "actor": "coast_ui_icons",
+    "metadata": "coast-pickup-xp-06a2e-sheet.json",
+    "actions": [
+      "xp"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "fixed",
+    "role": "ui_icon"
+  },
+  {
+    "actor": "coast_ui_icons",
+    "metadata": "coast-pickup-gold-06a2e-sheet.json",
+    "actions": [
+      "gold"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "fixed",
+    "role": "ui_icon"
+  },
+  {
+    "actor": "coast_ui_icons",
+    "metadata": "coast-pickup-ember-06a2e-sheet.json",
+    "actions": [
+      "ember"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "fixed",
+    "role": "ui_icon"
+  },
+  {
+    "actor": "coast_ui_icons",
+    "metadata": "coast-pickup-health-06a2e-sheet.json",
+    "actions": [
+      "health"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "fixed",
+    "role": "ui_icon"
+  },
+  {
+    "actor": "coast_ui_icons",
+    "metadata": "coast-pickup-oil-06a2e-sheet.json",
+    "actions": [
+      "oil"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "fixed",
+    "role": "ui_icon"
   }
 ]

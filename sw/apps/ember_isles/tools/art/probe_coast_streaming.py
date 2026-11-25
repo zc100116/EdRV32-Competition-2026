@@ -42,7 +42,8 @@ def cells(sheet, actions, actor):
                        'frame': cell['frame'], 'w': x1 - x0, 'h': y1 - y0,
                        'trim': [x0, y0], 'anchor': [anchor[0] - x0, anchor[1] - y0],
                        'hand': None if hand is None else [hand[0] - x0, hand[1] - y0],
-                       'pixels': pixels, 'palette_file': sheet['palette_file']})
+                       'pixels': pixels, 'palette_file': sheet['palette_file'],
+                       'texture_format': sheet['format']})
         if 'hand_secondary' in cell:
             point = cell['hand_secondary']
             frames[-1]['hand_secondary'] = (None if point is None else

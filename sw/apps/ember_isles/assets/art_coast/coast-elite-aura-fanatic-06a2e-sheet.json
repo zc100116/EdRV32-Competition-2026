@@ -1,0 +1,115 @@
+{
+  "name": "coast-elite-aura-fanatic-06a2e",
+  "grid": [
+    240,
+    160
+  ],
+  "cell": [
+    80,
+    80
+  ],
+  "format": 0,
+  "texture_format": 0,
+  "palette_file": "keeper-palette.json",
+  "atlas_group": "coast_small_fx",
+  "resource": "coast_small_fx/elite_aura_fanatic",
+  "animation_ticks": 6,
+  "animation_loop": true,
+  "direction_independent": true,
+  "global_alpha": 190,
+  "aura_region": "body",
+  "blend": "alpha",
+  "filter": "nearest",
+  "cells": [
+    {
+      "id": "down/elite_aura_fanatic/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "elite_aura_fanatic",
+      "frame": 0,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_fanatic/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "elite_aura_fanatic",
+      "frame": 1,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_fanatic/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "elite_aura_fanatic",
+      "frame": 2,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_fanatic/3",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "elite_aura_fanatic",
+      "frame": 3,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_fanatic/4",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "elite_aura_fanatic",
+      "frame": 4,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_fanatic/5",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "elite_aura_fanatic",
+      "frame": 5,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    }
+  ]
+}

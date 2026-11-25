@@ -158,3 +158,23 @@ shadow：场区每8帧1团，向上2–5，寿命30–50，透明混合；iron�
 debris：死亡5–8块，速度20–60，寿命16–28，重力100，普通透明混合；以上不含发射器/推进实现。
 正背步态/暖铜发缘和1:1整头平移保留；改像素坐标/试稿/源图留存，不缩放身体来凑容量。
 未完成项仅06b实际缓存/字形数字/发射器与游戏接入；本卡不改sim/UI/gfx/Makefile/规格。
+
+## 06a-2e：八种精英词缀光环
+2026-11-25；提交以本节的 `git log -1 --format=%h` 定位；Python3.12标准库、内置imagegen、GPU唯一参照tools/gpu/model。
+资源 `coast_small_fx/elite_aura_{haste,ward,split,reflect,dim,fanatic,elemental,teleport}`；各6帧、每帧6 ticks循环、不分向。
+全部48帧为I4，各7–12色含透明，PC/FPGA各保留48；80×80逻辑格、脚锚(40,64)，怪物1.25倍、光环原尺寸共用。
+最大块面积（纹素）：haste1344、ward4608、split3136、reflect5184、dim4896、fanatic5776、elemental5472、teleport2176。
+最大帧字节依次672、2304、1568、2592、2448、2888、2736、1088；4×4纹素/8B交织组，DDR起点32B对齐。
+原普通波138968B加最坏两种fanatic+elemental后144592B，低于147456B，余2864B；两份最大fanatic为144744B。
+沿用06a-2d的30种地形/12种摆件场景假设；上述为帧块上界，实际游戏TEX_LOAD峰值仍未测。
+完整1646帧DDR2883008B，16组色板另16384B；元素护盾共用烬/潮/铁/影色板变体，无额外纹理。
+六组现有色板仅重排索引供I4使用前16项；星组灯光保留索引同步更新，旧原生帧未改像素。
+直接读取git 8a0eff2f1对比1593个已有帧、2369个色板用例、3897205个RGBA像素，不一致帧0。
+完整包GPU逐纹素回读39976960次通过；新增光环/图标含变体1163264次；精确2×1057360像素一致。
+追加 `coast_ui_icons/{xp,gold,ember,health,oil}` 五个I8图标，共1832B固定载荷；煤块/油滴与遗物袋/油壶分开。
+自包含检视：outputs/ember_isles/art3-coast-assets/06a2e/index.html；8种动图、两种1.25倍精英、全28对和五地形图标。
+完整索引旧→新对照：同目录palette-index-map.txt；V1已收到，负责I4缓存/atlas格式、光环100%尺寸及混合参数接入。
+复现导入：`python3 sw/apps/ember_isles/tools/art/coast_auras_06a2e.py`。
+一次转换及验收：`python3 sw/apps/ember_isles/tools/art/preview_coast_auras_06a2e.py`；全包回读及旧帧RGBA比较均在此命令。
+包/日志：build/ember_isles/art_coast_auras_06a2e/、同级art_coast_auras_06a2e-accept.log；py_compile、git diff --check通过。
+未完成项仅V1游戏接入与06b实际缓存峰值；本卡未改sim/UI/gfx/Makefile/规格，源图和完整提示词随提交保留。

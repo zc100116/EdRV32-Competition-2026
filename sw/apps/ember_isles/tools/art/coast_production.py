@@ -45,7 +45,10 @@ def load_native_frames():
                 frame['preferred_element'] = sheet['preferred_element']
             for field in ('preferred_element', 'fixed_loadout', 'neighbor_mask_NESW', 'slice_name',
                           'slice_source_rect', 'blend', 'filter', 'rotation_steps', 'effect_phase',
-                          'cache', 'staff_projectile_branch', 'cache_by_staff_branch'):
+                          'cache', 'staff_projectile_branch', 'cache_by_staff_branch',
+                          'resource', 'animation_ticks', 'animation_loop',
+                          'direction_independent', 'global_alpha', 'aura_region',
+                          'texture_format'):
                 if field in sheet:
                     frame[field] = sheet[field]
                 if field in cell:

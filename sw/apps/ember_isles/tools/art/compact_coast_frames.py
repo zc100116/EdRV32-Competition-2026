@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""compact_coast_frames.py — tech 5b / gpu-spec 2.6 compact I8 DDR frames.
-Host-only standard-library conversion. Complete four-bank groups are 4x2 texels;
+"""compact_coast_frames.py — tech 5b / gpu-spec 2.6 compact I8/I4 DDR frames.
+Host-only standard-library conversion. Four-bank groups are 4x2(I8) or 4x4(I4);
 the library is not a SET_TEX descriptor. Readback splices groups into legal pages.
 """
 import json
@@ -84,17 +84,20 @@ def convert(frames, build=BUILD):
     readback_directory.mkdir(parents=True, exist_ok=True)
     readback_texels = 0
     for frame_index, frame in enumerate(frames):
-        # gpu-spec 2.6: 2x2 halfwords per group; I8 halfwords hold 2x1 texels.
+        # gpu-spec 2.6: I8 groups are 4x2 texels, I4 groups are 4x4 texels.
+        fmt = frame['texture_format']
+        group_height = 4 if fmt == 0 else 2
         width = (frame['w'] + 3) // 4 * 4
-        height = (frame['h'] + 1) // 2 * 2
+        height = (frame['h'] + group_height - 1) // group_height * group_height
         bank = palette_files.index(frame['palette_file'])
-        lookup = {word: i for i, word in enumerate(palettes[bank])}
+        active_palette = palettes[bank][:16] if fmt == 0 else palettes[bank]
+        lookup = {word: i for i, word in enumerate(active_palette)}
         lookup[0] = 0
         indices = [0] * (width * height)
         for y in range(frame['h']):
             for x in range(frame['w']):
                 indices[y * width + x] = lookup[color_word(frame['pixels'][y * frame['w'] + x])]
-        packed = interleave_texture([indices], width, height, 1)
+        packed = interleave_texture([indices], width, height, fmt)
         blob.extend(bytes((-len(blob)) % 32))
         offset = len(blob)
         blob.extend(packed)
@@ -107,25 +110,26 @@ def convert(frames, build=BUILD):
                        {'ddr_offset': offset, 'bytes': len(packed),
                         'block_aligned_size': [width, height], 'palette_group': selected_bank,
                         'native_palette_group': bank,
-                        'format': 'I8', 'storage_group_texels': [4, 2],
+                        'format': 'I4' if fmt == 0 else 'I8',
+                        'storage_group_texels': [4, group_height],
                         'palette_variants': (variants
                                                    if frame.get('palette_variants') else {})})
         # A compact frame is never sampled as an illegal non-power-of-two texture.
-        # Copy its 8-byte groups to nonzero UV in a 128x128 page, OFFSET=32.
+        # Copy its 8-byte groups to aligned nonzero UV in a 128x128 page, OFFSET=32.
         page_width = 128 if width <= 124 else 256
         page_height = 128 if height <= 126 else 256
-        u0, v0 = 4, 2
+        u0, v0 = 4, group_height
         page = bytearray(32 + page_width * page_height)
-        for y in range(0, height, 2):
+        for y in range(0, height, group_height):
             for x in range(0, width, 4):
-                source, _ = texel_address(x, y, width, height, 1, offset)
+                source, _ = texel_address(x, y, width, height, fmt, offset)
                 destination, _ = texel_address(x + u0, y + v0,
-                                               page_width, page_height, 1, 32)
+                                               page_width, page_height, fmt, 32)
                 page[destination:destination + 8] = blob[source:source + 8]
         texture = Texture(page, palettes,
                           {'LOG2_W': page_width.bit_length() - 1,
                            'LOG2_H': page_height.bit_length() - 1, 'LEVELS': 1,
-                           'FORMAT': 1, 'OFFSET': 32, 'PAL_GROUP': bank})
+                           'FORMAT': fmt, 'OFFSET': 32, 'PAL_GROUP': bank})
         banks = [bank] + [palette_files.index(p)
                          for p in frame.get('palette_variants', {}).values()]
         for palette_bank in banks:

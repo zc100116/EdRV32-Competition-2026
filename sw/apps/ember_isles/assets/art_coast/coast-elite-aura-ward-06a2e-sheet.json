@@ -1,0 +1,115 @@
+{
+  "name": "coast-elite-aura-ward-06a2e",
+  "grid": [
+    240,
+    160
+  ],
+  "cell": [
+    80,
+    80
+  ],
+  "format": 0,
+  "texture_format": 0,
+  "palette_file": "coast-weapon-fx-tide-06a2d-palette.json",
+  "atlas_group": "coast_small_fx",
+  "resource": "coast_small_fx/elite_aura_ward",
+  "animation_ticks": 6,
+  "animation_loop": true,
+  "direction_independent": true,
+  "global_alpha": 180,
+  "aura_region": "body",
+  "blend": "alpha",
+  "filter": "nearest",
+  "cells": [
+    {
+      "id": "down/elite_aura_ward/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "elite_aura_ward",
+      "frame": 0,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_ward/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "elite_aura_ward",
+      "frame": 1,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_ward/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "elite_aura_ward",
+      "frame": 2,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_ward/3",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "elite_aura_ward",
+      "frame": 3,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_ward/4",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "elite_aura_ward",
+      "frame": 4,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/elite_aura_ward/5",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "elite_aura_ward",
+      "frame": 5,
+      "anchor": [
+        40,
+        64
+      ],
+      "hand_primary": null
+    }
+  ]
+}
