@@ -1,7 +1,7 @@
 // File: edrv32_gpu_raster.v
 // Spec: gpu-spec 2.5, 2.8, 2.13; microarch 4.2, 4.4, 4.6.
 // Description: Top-left triangle coverage and lossless four-pixel plane stepping.
-//              Four interleaved phases, sliced carries and registered coverage.
+//              Two interleaved phases, sliced carries and registered coverage.
 // Clock domain: clk_gpu.
 module edrv32_gpu_raster (
     // Clock and reset.,
@@ -92,8 +92,8 @@ module edrv32_gpu_raster (
     reg prepared_nonempty_r;
     reg [4:0] wait_r;
     reg [4:0] bit_r;
-    reg [1:0] seed_idx_r;
-    reg [1:0] row_step_r;
+    reg seed_idx_r;
+    reg row_step_r;
     reg [2:0] row_wait_r;
     reg next_row_ready_r;
     reg [16:0] offset_x_r;
@@ -110,7 +110,7 @@ module edrv32_gpu_raster (
     reg [69:0] h_r;
     reg [173:0] gradient_r;
     reg [2:0] inclusive_r;
-    reg [9:0] valid_r;
+    reg [5:0] valid_r;
     wire [3:0] mask_w;
     wire advance_w;
     wire input_push_w;
@@ -215,8 +215,8 @@ module edrv32_gpu_raster (
         (!active_r || (scan_w && last_w)) && advance_w && !stop_i;
     assign seed_load_w = state_r == S_LOAD && advance_w;
     assign load_w = seed_load_w || (scan_w && row_end_w && !last_w);
-    assign output_push_w = valid_r[9] && advance_w && mask_w != 0 && !stop_i;
-    assign culled_w = valid_r[9] && mask_w == 0 && !stop_i;
+    assign output_push_w = valid_r[5] && advance_w && mask_w != 0 && !stop_i;
+    assign culled_w = valid_r[5] && mask_w == 0 && !stop_i;
     assign output_read_w = !stop_i && ((output_count_r != 0 && !output_valid_r) ||
         (output_pop_w && output_count_r > 1));
     assign output_addr_w = output_read_r + {5'b0, output_pop_w};
@@ -232,7 +232,7 @@ module edrv32_gpu_raster (
         if (!rst_n_i) delay_write_r <= 0;
         else delay_write_r <= delay_write_r + 1'b1;
     end
-    assign metadata_9_read_w = delay_write_r - 9'd8;
+    assign metadata_9_read_w = delay_write_r - 9'd4;
     assign metadata_9_input_w[0 +: 3] = inclusive_r;
     assign pipe_inclusive_w = unused_metadata_9_data_w[0 +: 3];
     assign metadata_9_input_w[3 +: 4] = clip_w;
@@ -246,7 +246,7 @@ module edrv32_gpu_raster (
         .rd_addr_i(metadata_9_read_w),
         .rd_data_o(unused_metadata_9_data_w[0 +: 72])
     );
-    assign metadata_10_read_w = delay_write_r - 9'd9;
+    assign metadata_10_read_w = delay_write_r - 9'd5;
     assign metadata_10_input_w[0 +: 16] = x_r[15:0];
     assign pipe_x_w = unused_metadata_10_data_w[0 +: 16];
     assign metadata_10_input_w[16 +: 16] = y_r[15:0];
@@ -298,7 +298,7 @@ module edrv32_gpu_raster (
     generate
         // Ten channels each own one seed adder, one feedback adder and three lane adders.
         // Seven plane channels also own two sign adders and one CSA/preparation adder.
-        // Each adder retains four registered carry stages; preparation adds its CSA stage.
+        // Each adder retains two registered carry stages; preparation adds its CSA stage.
         for (attribute = 0; attribute < 10; attribute = attribute + 1) begin : g_attribute
             reg [69:0] gx_r;
             reg [69:0] gy_r;
@@ -306,7 +306,7 @@ module edrv32_gpu_raster (
             reg [69:0] gx3_r;
             reg [69:0] seed_accumulator_r;
             reg [69:0] row_accumulator_r;
-            wire [279:0] next_seed_w;
+            wire [139:0] next_seed_w;
             reg [69:0] row_seed_r;
             wire [69:0] seed_result_w;
             wire [69:0] seed_a_w;
@@ -328,11 +328,11 @@ module edrv32_gpu_raster (
                             triangle_setup_gradient_i[attribute*112+56 +: 56];
                     end
                     if (advance_w) begin
-                        if (state_r == S_SIGN && wait_r == 4) begin
+                        if (state_r == S_SIGN && wait_r == 2) begin
                             prepare_gx_r <= signed_gx_w;
                             prepare_gy_r <= signed_gy_w;
                         end
-                        if (state_r == S_ACCUMULATE && wait_r == 5) begin
+                        if (state_r == S_ACCUMULATE && wait_r == 3) begin
                             prepare_gx_r <= prepare_gx_r << 1;
                             prepare_gy_r <= prepare_gy_r << 1;
                         end
@@ -341,7 +341,7 @@ module edrv32_gpu_raster (
                         gx_r <= {{14{input_gx_r[input_read_r][55]}}, input_gx_r[input_read_r]};
                         gy_r <= {{14{input_gy_r[input_read_r][55]}}, input_gy_r[input_read_r]};
                     end
-                    if (input_pop_w || (advance_w && state_r == S_ACCUMULATE && wait_r == 5))
+                    if (input_pop_w || (advance_w && state_r == S_ACCUMULATE && wait_r == 3))
                         base_r <= input_pop_w ? input_start_r[input_read_r] : accumulated_w;
                 end
                 edrv32_gpu_raster_add u_sign_x (
@@ -413,47 +413,35 @@ module edrv32_gpu_raster (
                 .issue_i(scan_w),
                 .reuse_i($signed(x_r[17:2]) < reuse_limit_r),
                 .seed_i(next_seed_w),
-                .delta_i(gx_r << 4),
+                .delta_i(gx_r << 3),
                 .plane_o(base_w)
             );
             reg [69:0] gx_pipe_0_r;
             reg [69:0] gx_pipe_1_r;
-            reg [69:0] gx_pipe_2_r;
-            reg [69:0] gx_pipe_3_r;
             reg [69:0] gx3_pipe_0_r;
             reg [69:0] gx3_pipe_1_r;
-            reg [69:0] gx3_pipe_2_r;
-            reg [69:0] gx3_pipe_3_r;
             reg [69:0] base_pipe_0_r;
             reg [69:0] base_pipe_1_r;
-            reg [69:0] base_pipe_2_r;
-            reg [69:0] base_pipe_3_r;
             always @(posedge clk_i) begin
                 if (advance_w) begin
                     gx_pipe_0_r <= gx_r;
                     gx_pipe_1_r <= gx_pipe_0_r;
-                    gx_pipe_2_r <= gx_pipe_1_r;
-                    gx_pipe_3_r <= gx_pipe_2_r;
                     gx3_pipe_0_r <= gx3_r;
                     gx3_pipe_1_r <= gx3_pipe_0_r;
-                    gx3_pipe_2_r <= gx3_pipe_1_r;
-                    gx3_pipe_3_r <= gx3_pipe_2_r;
                     base_pipe_0_r <= base_w;
                     base_pipe_1_r <= base_pipe_0_r;
-                    base_pipe_2_r <= base_pipe_1_r;
-                    base_pipe_3_r <= base_pipe_2_r;
-                    if (state_r == S_SIGN && wait_r == 4) begin
+                    if (state_r == S_SIGN && wait_r == 2) begin
                         gx3_r <= seed_result_w;
                     end
-                    if (state_r == S_SEED && wait_r == 4)
+                    if (state_r == S_SEED && wait_r == 2)
                         seed_accumulator_r <= seed_result_w;
-                    if (active_r && !next_row_ready_r && row_wait_r == 4)
+                    if (active_r && !next_row_ready_r && row_wait_r == 2)
                         row_accumulator_r <= seed_result_w;
                     if (load_w) row_seed_r <= next_seed_w[69:0];
                 end
             end
-            // Four independent 70-bit phase seeds; one priority-selected update per phase.
-            for (lane = 0; lane < 4; lane = lane + 1) begin : g_seed
+            // Two independent 70-bit phase seeds; one priority-selected update per phase.
+            for (lane = 0; lane < 2; lane = lane + 1) begin : g_seed
                 reg [69:0] value_r;
                 wire initial_w;
                 wire step_w;
@@ -461,8 +449,8 @@ module edrv32_gpu_raster (
                 assign initial_w = lane == 0 && state_r == S_SEED
                     && seed_idx_r == 0 && wait_r == 0;
                 assign step_w = lane > 0 && state_r == S_SEED
-                    && seed_idx_r == lane-1 && wait_r == 4;
-                assign row_w = active_r && !next_row_ready_r && row_wait_r == 4
+                    && seed_idx_r == lane-1 && wait_r == 2;
+                assign row_w = active_r && !next_row_ready_r && row_wait_r == 2
                     && row_step_r == lane;
                 always @(posedge clk_i) begin
                     if (advance_w && (initial_w || step_w || row_w))
@@ -473,13 +461,13 @@ module edrv32_gpu_raster (
             for (lane = 0; lane < 4; lane = lane + 1) begin : g_lane
                 wire [69:0] attribute_w;
                 if (lane == 0) begin : g_base
-                    assign attribute_w = base_pipe_3_r;
+                    assign attribute_w = base_pipe_1_r;
                 end else begin : g_expand
                     edrv32_gpu_raster_add u_add (
                         .clk_i(clk_i),
                         .en_i(advance_w),
                         .a_i(base_w),
-                        .b_i(lane == 3 ? gx3_pipe_3_r : gx_pipe_3_r << (lane-1)),
+                        .b_i(lane == 3 ? gx3_pipe_1_r : gx_pipe_1_r << (lane-1)),
                         .sum_o(attribute_w)
                     );
                 end
@@ -560,13 +548,13 @@ module edrv32_gpu_raster (
                 output_read_r <= output_read_r + 1'b1;
             end
             if (advance_w) begin
-                valid_r <= {valid_r[8:0], scan_w};
+                valid_r <= {valid_r[4:0], scan_w};
                 if (active_r && !next_row_ready_r) begin
                     row_wait_r <= row_wait_r + 1'b1;
-                    if (row_wait_r == 4) begin
+                    if (row_wait_r == 2) begin
                         row_wait_r <= 0;
                         row_step_r <= row_step_r + 1'b1;
-                        if (row_step_r == 3) begin
+                        if (row_step_r == 1) begin
                             next_row_ready_r <= 1;
                         end
                     end
@@ -582,11 +570,11 @@ module edrv32_gpu_raster (
                 if (state_r == S_SIGN || state_r == S_ACCUMULATE || state_r == S_SEED) begin
                     wait_r <= wait_r + 1'b1;
                 end
-                if (state_r == S_SIGN && wait_r == 4) begin
+                if (state_r == S_SIGN && wait_r == 2) begin
                     state_r <= S_ACCUMULATE;
                     wait_r <= 0;
                 end
-                if (state_r == S_ACCUMULATE && wait_r == 5) begin
+                if (state_r == S_ACCUMULATE && wait_r == 3) begin
                     wait_r <= 0;
                     bit_r <= bit_r + 1'b1;
                     if (bit_r == 16) begin
@@ -594,10 +582,10 @@ module edrv32_gpu_raster (
                         seed_idx_r <= 0;
                     end
                 end
-                if (state_r == S_SEED && wait_r == 4) begin
+                if (state_r == S_SEED && wait_r == 2) begin
                     wait_r <= 0;
                     seed_idx_r <= seed_idx_r + 1'b1;
-                    if (seed_idx_r == 2) begin
+                    if (seed_idx_r == 0) begin
                         state_r <= S_LOAD;
                     end
                 end
@@ -637,7 +625,7 @@ module edrv32_gpu_raster (
             input_normal_gradient_r[input_write_r] <= triangle_setup_normal_gradient_i;
         end
         if (advance_w) begin
-            if (state_r == S_ACCUMULATE && wait_r == 5) begin
+            if (state_r == S_ACCUMULATE && wait_r == 3) begin
                 offset_x_r <= offset_x_r >> 1;
                 offset_y_r <= offset_y_r >> 1;
             end
@@ -651,7 +639,7 @@ module edrv32_gpu_raster (
             end
         end
         if (advance_w && state_r == S_SIGN && wait_r == 0) begin
-            reuse_limit_r <= $signed(unused_last_x_r[17:2]) - 16'sd3;
+            reuse_limit_r <= $signed(unused_last_x_r[17:2]) - 16'sd1;
         end
         if (input_pop_w) begin
             negative_x_r <= offset_x_w[16];

@@ -1,6 +1,6 @@
 // File: edrv32_gpu_raster_prepare.v
 // Spec: gpu-spec 2.13.7; microarch 4.6, 4.10.
-// Description: Lossless 70-bit arithmetic with four registered 20-bit carry slices.
+// Description: One CSA stage followed by two registered carry stages.
 // Clock domain: clk_gpu.
 module edrv32_gpu_raster_prepare (
     // Clock and shared pipeline enable.

@@ -52,7 +52,7 @@ module edrv32_gpu_perspective (
     wire [8:0] output_addr_w;
     reg [8:0] output_read_r;
     reg [8:0] output_write_r;
-    reg [104:0] valid_r;
+    reg [52:0] valid_r;
     wire advance_w;
     wire input_push_w;
     wire input_pop_w;
@@ -92,8 +92,8 @@ module edrv32_gpu_perspective (
     wire [39:0] delay_12_input_w;
     wire [71:0] unused_delay_12_data_w;
     wire [8:0] delay_12_read_w;
-    wire [391:0] delay_14_input_w;
-    wire [431:0] unused_delay_14_data_w;
+    wire [231:0] delay_14_input_w;
+    wire [287:0] unused_delay_14_data_w;
     wire [8:0] delay_14_read_w;
     wire [57:0] delay_41_input_w;
     wire [71:0] unused_delay_41_data_w;
@@ -121,14 +121,14 @@ module edrv32_gpu_perspective (
     wire [8:0] delay_25_read_w;
 
 
-    // Two input slots decouple acceptance; 128 result credits cover all 105 stages.
+    // Two input slots decouple acceptance; 128 result credits cover the 53-stage arithmetic pipeline.
 
     assign advance_w = 1'b1;
     assign fragment_ready_o = input_count_r < 2 && outstanding_r < 128;
     assign sample_valid_o = output_valid_r && !stop_i;
     assign input_push_w = fragment_valid_i && fragment_ready_o && !stop_i;
     assign input_pop_w = (input_count_r != 0) && !stop_i;
-    assign output_push_w = valid_r[104] && !stop_i;
+    assign output_push_w = valid_r[52] && !stop_i;
     assign output_pop_w = sample_valid_o && sample_ready_i;
     // The RAM output holds the prefetched head during downstream backpressure.
     assign output_read_w = !stop_i && ((output_count_r != 0 && !output_valid_r) ||
@@ -196,7 +196,7 @@ module edrv32_gpu_perspective (
                     output_read_r <= output_read_r + 1'b1;
                 end
                 if (advance_w) begin
-                    valid_r <= {valid_r[103:0], input_pop_w};
+                    valid_r <= {valid_r[51:0], input_pop_w};
                 end
             end
         end
@@ -364,7 +364,7 @@ module edrv32_gpu_perspective (
         if (!rst_n_i) delay_write_r <= 0;
         else if (advance_w) delay_write_r <= delay_write_r + 1'b1;
     end
-    assign delay_9_read_w = delay_write_r - 9'd8;
+    assign delay_9_read_w = delay_write_r - 9'd3;
     edrv32_ram_gpu_delay u_delay_9_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
@@ -416,12 +416,12 @@ module edrv32_gpu_perspective (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
-        .wr_data_i(delay_14_input_w[216 +: 72]),
+        .wr_data_i({56'b0, delay_14_input_w[216 +: 16]}),
         .rd_en_i(advance_w),
         .rd_addr_i(delay_14_read_w),
         .rd_data_o(unused_delay_14_data_w[216 +: 72])
     );
-    assign delay_41_read_w = delay_write_r - 9'd40;
+    assign delay_41_read_w = delay_write_r - 9'd24;
     edrv32_ram_gpu_delay u_delay_41_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
@@ -431,7 +431,7 @@ module edrv32_gpu_perspective (
         .rd_addr_i(delay_41_read_w),
         .rd_data_o(unused_delay_41_data_w[0 +: 72])
     );
-    assign delay_51_read_w = delay_write_r - 9'd50;
+    assign delay_51_read_w = delay_write_r - 9'd21;
     edrv32_ram_gpu_delay u_delay_51_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
@@ -450,7 +450,7 @@ module edrv32_gpu_perspective (
         .rd_addr_i(delay_51_read_w),
         .rd_data_o(unused_delay_51_data_w[72 +: 72])
     );
-    assign delay_53_read_w = delay_write_r - 9'd52;
+    assign delay_53_read_w = delay_write_r - 9'd22;
     edrv32_ram_gpu_delay u_delay_53_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
@@ -487,7 +487,7 @@ module edrv32_gpu_perspective (
         .rd_addr_i(delay_53_read_w),
         .rd_data_o(unused_delay_53_data_w[216 +: 72])
     );
-    assign delay_54_read_w = delay_write_r - 9'd53;
+    assign delay_54_read_w = delay_write_r - 9'd30;
     edrv32_ram_gpu_delay u_delay_54_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
@@ -506,7 +506,7 @@ module edrv32_gpu_perspective (
         .rd_addr_i(delay_54_read_w),
         .rd_data_o(unused_delay_54_data_w[72 +: 72])
     );
-    assign delay_103_read_w = delay_write_r - 9'd102;
+    assign delay_103_read_w = delay_write_r - 9'd50;
     edrv32_ram_gpu_delay u_delay_103_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
@@ -534,7 +534,7 @@ module edrv32_gpu_perspective (
         .rd_addr_i(delay_103_read_w),
         .rd_data_o(unused_delay_103_data_w[144 +: 72])
     );
-    assign delay_105_read_w = delay_write_r - 9'd104;
+    assign delay_105_read_w = delay_write_r - 9'd52;
     edrv32_ram_gpu_delay u_delay_105_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
@@ -591,25 +591,7 @@ module edrv32_gpu_perspective (
         input_quad_r[input_read_r], input_mask_r[input_read_r],
         input_y_r[input_read_r], input_x_r[input_read_r]};
 
-    edrv32_ram_gpu_delay u_delay_14_4 (
-        .clk_i(clk_i),
-        .wr_en_i(advance_w),
-        .wr_addr_i(delay_write_r),
-        .wr_data_i(delay_14_input_w[288 +: 72]),
-        .rd_en_i(advance_w),
-        .rd_addr_i(delay_14_read_w),
-        .rd_data_o(unused_delay_14_data_w[288 +: 72])
-    );
-    edrv32_ram_gpu_delay u_delay_14_5 (
-        .clk_i(clk_i),
-        .wr_en_i(advance_w),
-        .wr_addr_i(delay_write_r),
-        .wr_data_i({40'b0, delay_14_input_w[360 +: 32]}),
-        .rd_en_i(advance_w),
-        .rd_addr_i(delay_14_read_w),
-        .rd_data_o(unused_delay_14_data_w[360 +: 72])
-    );
-    assign delay_8_read_w = delay_write_r - 9'd7;
+    assign delay_8_read_w = delay_write_r - 9'd2;
     edrv32_ram_gpu_delay u_delay_8_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
@@ -628,7 +610,7 @@ module edrv32_gpu_perspective (
         .rd_addr_i(delay_8_read_w),
         .rd_data_o(unused_delay_8_data_w[72 +: 72])
     );
-    assign delay_25_read_w = delay_write_r - 9'd24;
+    assign delay_25_read_w = delay_write_r - 9'd9;
     edrv32_ram_gpu_delay u_delay_25_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
@@ -729,7 +711,7 @@ module edrv32_gpu_perspective (
             reg [17:0] seed_r;
             wire [17:0] q_mantissa_w;
             assign q_mantissa_w = unused_q_w[17:0];
-            reg [17:0] delay_1_r [0:2];
+            reg [53:0] delay_1_r;
             wire [35:0] unused_newton_first_w;
             wire [0:0] unused_newton_first_sign_w;
             wire [9:0] unused_newton_first_exponent_w;
@@ -738,7 +720,7 @@ module edrv32_gpu_perspective (
                 + {19'b0, unused_newton_first_w[16]};
             reg [17:0] newton_t_r;
             reg [17:0] newton_term_r;
-            reg [17:0] delay_2_r [0:4];
+            reg [89:0] delay_2_r;
             wire [35:0] unused_newton_second_w;
             wire [0:0] unused_newton_second_sign_w;
             wire [9:0] unused_newton_second_exponent_w;
@@ -970,7 +952,7 @@ module edrv32_gpu_perspective (
             edrv32_gpu_perspective_multiply u_newton_first (
                 .clk_i(clk_i),
                 .en_i(advance_w),
-                .a_i(delay_1_r[2]),
+                .a_i(delay_1_r[36 +: 18]),
                 .b_i(seed_r),
                 .sign_i(1'b0),
                 .exponent_i(10'b0),
@@ -981,7 +963,7 @@ module edrv32_gpu_perspective (
             edrv32_gpu_perspective_multiply u_newton_second (
                 .clk_i(clk_i),
                 .en_i(advance_w),
-                .a_i(delay_2_r[4]),
+                .a_i(delay_2_r[72 +: 18]),
                 .b_i(newton_term_r),
                 .sign_i(1'b0),
                 .exponent_i(10'b0),
@@ -1083,8 +1065,6 @@ module edrv32_gpu_perspective (
                 .en_i(advance_w),
                 .delay_bypass_wr_data_o(delay_25_input_w[lane*116+0 +: 29]),
                 .delay_bypass_rd_data_i(unused_delay_25_data_w[lane*116+0 +: 29]),
-                .delay_exponent_wr_data_o(delay_14_input_w[232+lane*40+0 +: 10]),
-                .delay_exponent_rd_data_i(unused_delay_14_data_w[232+lane*40+0 +: 10]),
                 .a_i(delay_11_w),
                 .b_i(gradient_0_w),
                 .normal_o(delta_0_w)
@@ -1141,8 +1121,6 @@ module edrv32_gpu_perspective (
                 .en_i(advance_w),
                 .delay_bypass_wr_data_o(delay_25_input_w[lane*116+29 +: 29]),
                 .delay_bypass_rd_data_i(unused_delay_25_data_w[lane*116+29 +: 29]),
-                .delay_exponent_wr_data_o(delay_14_input_w[232+lane*40+10 +: 10]),
-                .delay_exponent_rd_data_i(unused_delay_14_data_w[232+lane*40+10 +: 10]),
                 .a_i(delay_14_w),
                 .b_i(gradient_1_w),
                 .normal_o(delta_1_w)
@@ -1199,8 +1177,6 @@ module edrv32_gpu_perspective (
                 .en_i(advance_w),
                 .delay_bypass_wr_data_o(delay_25_input_w[lane*116+58 +: 29]),
                 .delay_bypass_rd_data_i(unused_delay_25_data_w[lane*116+58 +: 29]),
-                .delay_exponent_wr_data_o(delay_14_input_w[232+lane*40+20 +: 10]),
-                .delay_exponent_rd_data_i(unused_delay_14_data_w[232+lane*40+20 +: 10]),
                 .a_i(delay_17_w),
                 .b_i(gradient_2_w),
                 .normal_o(delta_2_w)
@@ -1257,8 +1233,6 @@ module edrv32_gpu_perspective (
                 .en_i(advance_w),
                 .delay_bypass_wr_data_o(delay_25_input_w[lane*116+87 +: 29]),
                 .delay_bypass_rd_data_i(unused_delay_25_data_w[lane*116+87 +: 29]),
-                .delay_exponent_wr_data_o(delay_14_input_w[232+lane*40+30 +: 10]),
-                .delay_exponent_rd_data_i(unused_delay_14_data_w[232+lane*40+30 +: 10]),
                 .a_i(delay_20_w),
                 .b_i(gradient_3_w),
                 .normal_o(delta_3_w)
@@ -1316,16 +1290,10 @@ module edrv32_gpu_perspective (
                 if (advance_w) begin
                     seed_address_r <= unused_q_w[16:7];
                     seed_r <= seed_rom_w;
-                    delay_1_r[0] <= q_mantissa_w;
-                    delay_1_r[1] <= delay_1_r[0];
-                    delay_1_r[2] <= delay_1_r[1];
+                    delay_1_r <= {delay_1_r[35:0], q_mantissa_w};
                     newton_t_r <= unused_newton_t_sum_w[17:0];
                     newton_term_r <= -newton_t_r;
-                    delay_2_r[0] <= seed_r;
-                    delay_2_r[1] <= delay_2_r[0];
-                    delay_2_r[2] <= delay_2_r[1];
-                    delay_2_r[3] <= delay_2_r[2];
-                    delay_2_r[4] <= delay_2_r[3];
+                    delay_2_r <= {delay_2_r[71:0], seed_r};
                     newton_r1_r <= unused_newton_r1_sum_w[17:0];
                     inverse_mantissa_r <= newton_r1_r[17] ? newton_r1_r : {newton_r1_r[16:0], 1'b0};
                     inverse_exponent_r <= -10'd34 - delay_3_w - {9'b0, !newton_r1_r[17]};

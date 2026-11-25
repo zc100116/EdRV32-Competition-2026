@@ -12,65 +12,39 @@ module edrv32_gpu_perspective_scale (
     input wire [9:0] exponent_i,
     output wire [95:0] magnitude_o,
 
-    // Shared eight-cycle RAM holds direction and the high shift-amount bits.
+    // Shared three-cycle RAM holds direction and the high shift-amount bits.
     output wire [4:0] delay_scale_wr_data_o,
     input wire [4:0] delay_scale_rd_data_i
 );
-    reg [6:0] amount_r [0:6];
-    wire [10:0] unused_amount_w;
-    reg [95:0] left_value_r [0:7];
-    reg [18:0] right_value_r [0:7];
-    reg [95:0] result_r;
-    wire [18:0] rounded_w;
-    assign rounded_w = {1'b0, right_value_r[7][18:1]} +
-        {18'b0, right_value_r[7][0]};
     wire signed [10:0] exponent_w;
+    wire [10:0] amount_w;
+    reg [4:0] amount_1_r;
+    reg [2:0] amount_2_r;
+    reg [20:0] left_1_r;
+    reg [32:0] left_2_r;
+    reg [95:0] left_3_r;
+    reg [18:0] right_1_r;
+    reg [18:0] right_2_r;
+    reg [18:0] right_3_r;
+    wire [18:0] rounded_w;
+    reg [95:0] result_r;
     assign exponent_w = {exponent_i[9], exponent_i};
+    assign amount_w = exponent_w < 0 ? $unsigned(-exponent_w) : $unsigned(exponent_w);
+    assign delay_scale_wr_data_o = {exponent_w >= 0, amount_w[10:7]};
+    assign rounded_w = {1'b0, right_3_r[18:1]} + {18'b0, right_3_r[0]};
     assign magnitude_o = result_r;
-    assign unused_amount_w = exponent_w < 0 ? $unsigned(-exponent_w) : $unsigned(exponent_w);
-    assign delay_scale_wr_data_o = {exponent_w >= 0, unused_amount_w[10:7]};
     always @(posedge clk_i) begin
         if (en_i) begin
-            amount_r[0] <= unused_amount_w[6:0];
-            left_value_r[0] <= {78'b0, magnitude_i};
-            right_value_r[0] <= {magnitude_i, 1'b0};
-            amount_r[1] <= amount_r[0];
-            left_value_r[1] <= amount_r[0][0] ?
-                left_value_r[0] << 1 : left_value_r[0];
-            right_value_r[1] <= amount_r[0][0] ?
-                right_value_r[0] >> 1 : right_value_r[0];
-            amount_r[2] <= amount_r[1];
-            left_value_r[2] <= amount_r[1][1] ?
-                left_value_r[1] << 2 : left_value_r[1];
-            right_value_r[2] <= amount_r[1][1] ?
-                right_value_r[1] >> 2 : right_value_r[1];
-            amount_r[3] <= amount_r[2];
-            left_value_r[3] <= amount_r[2][2] ?
-                left_value_r[2] << 4 : left_value_r[2];
-            right_value_r[3] <= amount_r[2][2] ?
-                right_value_r[2] >> 4 : right_value_r[2];
-            amount_r[4] <= amount_r[3];
-            left_value_r[4] <= amount_r[3][3] ?
-                left_value_r[3] << 8 : left_value_r[3];
-            right_value_r[4] <= amount_r[3][3] ?
-                right_value_r[3] >> 8 : right_value_r[3];
-            amount_r[5] <= amount_r[4];
-            left_value_r[5] <= amount_r[4][4] ?
-                left_value_r[4] << 16 : left_value_r[4];
-            right_value_r[5] <= amount_r[4][4] ?
-                right_value_r[4] >> 16 : right_value_r[4];
-            amount_r[6] <= amount_r[5];
-            left_value_r[6] <= amount_r[5][5] ?
-                left_value_r[5] << 32 : left_value_r[5];
-            right_value_r[6] <= amount_r[5][5] ?
-                right_value_r[5] >> 32 : right_value_r[5];
-            left_value_r[7] <= amount_r[6][6] ?
-                left_value_r[6] << 64 : left_value_r[6];
-            right_value_r[7] <= amount_r[6][6] ?
-                right_value_r[6] >> 64 : right_value_r[6];
+            amount_1_r <= amount_w[6:2];
+            amount_2_r <= amount_1_r[4:2];
+            left_1_r <= {3'b0, magnitude_i} << amount_w[1:0];
+            right_1_r <= {magnitude_i, 1'b0} >> amount_w[1:0];
+            left_2_r <= {12'b0, left_1_r} << {amount_1_r[1:0], 2'b0};
+            right_2_r <= right_1_r >> {amount_1_r[1:0], 2'b0};
+            left_3_r <= {63'b0, left_2_r} << {amount_2_r, 4'b0};
+            right_3_r <= right_2_r >> {amount_2_r, 4'b0};
             result_r <= delay_scale_rd_data_i[3:0] != 0 ? 96'b0 :
-                delay_scale_rd_data_i[4] ? left_value_r[7] :
-                {77'b0, rounded_w};
+                delay_scale_rd_data_i[4] ? left_3_r : {77'b0, rounded_w};
         end
     end
 endmodule

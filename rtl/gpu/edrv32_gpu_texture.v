@@ -371,10 +371,10 @@ module edrv32_gpu_texture (
             endcase
         end
     endfunction
-    // Four lanes, each with seven 96-bit normalization registers and one 256-entry lookup ROM.
-    // Nine-stage LOD path: seven leading-one normalization decisions, ROM, clamp.
-    reg [8:0] lod_valid_r;
-    wire [4:0] lod_slot_r [0:8];
+    // Four lanes: leading-one count, grouped shift, logarithm ROM and clamp.
+    // Four-stage LOD path; only the eight fraction bits cross the shift boundary.
+    reg [3:0] lod_valid_r;
+    wire [4:0] lod_slot_r [0:3];
     reg [6:0] filter_valid_r;
     wire [4:0] filter_slot_r [0:6];
     wire [3:0] filter_done_r [0:6];
@@ -387,9 +387,6 @@ module edrv32_gpu_texture (
     genvar lane;
     generate
         for (lane = 0; lane < 4; lane = lane + 1) begin : g_lod
-            wire [96*7-1:0] unused_normalized_w;
-            wire [7*7-1:0] shift_w;
-            wire [6:0] zero_w;
             reg [31:0] u_r [0:31];
             reg [31:0] v_r [0:31];
             reg [11:0] lod_r [0:31];
@@ -413,48 +410,57 @@ module edrv32_gpu_texture (
                     result_mask_r[filter_slot_r[6]] <= shade_mask_r[lane];
                 end
             end
-            reg [95:0] normalized_0_r;
-            assign unused_normalized_w[0 +: 96] = normalized_0_r;
-            reg [6:0] shift_0_r;
-            assign shift_w[0 +: 7] = shift_0_r;
-            reg [0:0] zero_0_r;
-            assign zero_w[0] = zero_0_r;
-            reg [95:0] normalized_1_r;
-            assign unused_normalized_w[96 +: 96] = normalized_1_r;
-            reg [6:0] shift_1_r;
-            assign shift_w[7 +: 7] = shift_1_r;
-            reg [0:0] zero_1_r;
-            assign zero_w[1] = zero_1_r;
-            reg [95:0] normalized_2_r;
-            assign unused_normalized_w[192 +: 96] = normalized_2_r;
-            reg [6:0] shift_2_r;
-            assign shift_w[14 +: 7] = shift_2_r;
-            reg [0:0] zero_2_r;
-            assign zero_w[2] = zero_2_r;
-            reg [95:0] normalized_3_r;
-            assign unused_normalized_w[288 +: 96] = normalized_3_r;
-            reg [6:0] shift_3_r;
-            assign shift_w[21 +: 7] = shift_3_r;
-            reg [0:0] zero_3_r;
-            assign zero_w[3] = zero_3_r;
-            reg [95:0] normalized_4_r;
-            assign unused_normalized_w[384 +: 96] = normalized_4_r;
-            reg [6:0] shift_4_r;
-            assign shift_w[28 +: 7] = shift_4_r;
-            reg [0:0] zero_4_r;
-            assign zero_w[4] = zero_4_r;
-            reg [95:0] normalized_5_r;
-            assign unused_normalized_w[480 +: 96] = normalized_5_r;
-            reg [6:0] shift_5_r;
-            assign shift_w[35 +: 7] = shift_5_r;
-            reg [0:0] zero_5_r;
-            assign zero_w[5] = zero_5_r;
-            reg [95:0] normalized_6_r;
-            assign unused_normalized_w[576 +: 96] = normalized_6_r;
-            reg [6:0] shift_6_r;
-            assign shift_w[42 +: 7] = shift_6_r;
-            reg [0:0] zero_6_r;
-            assign zero_w[6] = zero_6_r;
+            wire high_w;
+            wire [63:0] count_value_w;
+            wire [7:0] group_w;
+            wire [23:0] position_w;
+            reg [5:0] leading_w;
+            reg [63:0] count_value_r;
+            reg [5:0] amount_r;
+            reg [6:0] shift_r;
+            reg [6:0] shift_last_r;
+            reg zero_r;
+            reg zero_last_r;
+            wire [63:0] unused_shifted_w;
+            reg [7:0] fraction_r;
+            assign high_w = |sample_span_i[lane*96+64 +: 32];
+            assign count_value_w = high_w ? sample_span_i[lane*96+32 +: 64]
+                : sample_span_i[lane*96 +: 64];
+            assign unused_shifted_w = count_value_r << amount_r;
+            genvar group_idx;
+                // Eight parallel 8-bit encoders and an eight-way group encoder.
+                for (group_idx = 0; group_idx < 8; group_idx = group_idx + 1) begin : g_count
+                    reg [2:0] position_select_w;
+                    assign group_w[group_idx] = |count_value_w[group_idx*8 +: 8];
+                    assign position_w[group_idx*3 +: 3] = position_select_w;
+                    always @(*) begin
+                        position_select_w = 0;
+                        casez (count_value_w[group_idx*8 +: 8])
+                            8'b1???????: position_select_w = 7;
+                            8'b01??????: position_select_w = 6;
+                            8'b001?????: position_select_w = 5;
+                            8'b0001????: position_select_w = 4;
+                            8'b00001???: position_select_w = 3;
+                            8'b000001??: position_select_w = 2;
+                            8'b0000001?: position_select_w = 1;
+                            default: begin end
+                        endcase
+                    end
+                end
+            always @(*) begin
+                leading_w = 0;
+                casez (group_w)
+                    8'b1???????: leading_w = {3'd7, position_w[21 +: 3]};
+                    8'b01??????: leading_w = {3'd6, position_w[18 +: 3]};
+                    8'b001?????: leading_w = {3'd5, position_w[15 +: 3]};
+                    8'b0001????: leading_w = {3'd4, position_w[12 +: 3]};
+                    8'b00001???: leading_w = {3'd3, position_w[9 +: 3]};
+                    8'b000001??: leading_w = {3'd2, position_w[6 +: 3]};
+                    8'b0000001?: leading_w = {3'd1, position_w[3 +: 3]};
+                    8'b00000001: leading_w = {3'd0, position_w[0 +: 3]};
+                    default: begin end
+                endcase
+            end
             reg signed [15:0] logarithm_r;
             wire signed [15:0] biased_w;
             wire signed [15:0] maximum_w;
@@ -464,65 +470,17 @@ module edrv32_gpu_texture (
             assign clamped_w = biased_w < 0 ? 12'd0 :
                                 biased_w > maximum_w ? maximum_w[11:0] : biased_w[11:0];
             always @(posedge clk_i) begin
-                normalized_0_r <= sample_span_i[lane*96+48 +: 48] == 0
-                                    ? sample_span_i[lane*96 +: 96] << 48
-                                    : sample_span_i[lane*96 +: 96];
-                shift_0_r <= sample_span_i[lane*96+48 +: 48] == 0 ? 7'd48 : 7'd0;
-                zero_0_r <= sample_span_i[lane*96 +: 96] == 0;
-                logarithm_r <= zero_w[6] ? 16'sd0 :
-                    (16'sd79 - $signed({9'b0, shift_w[42 +: 7]})) * 16'sd256
-                    + $signed({7'b0, log_fraction(unused_normalized_w[663 +: 8])});
-                if (lod_valid_r[7]) begin
-                    lod_r[lod_slot_r[7]] <= clamped_w;
-                end
-            end
-            always @(posedge clk_i) begin
-                normalized_1_r <= unused_normalized_w[72 +: 24] == 0
-                                        ? unused_normalized_w[0 +: 96] << 24
-                                        : unused_normalized_w[0 +: 96];
-                shift_1_r <= shift_w[0 +: 7]
-                                + (unused_normalized_w[72 +: 24] == 0 ? 7'd24 : 7'd0);
-                zero_1_r <= zero_w[0];
-            end
-            always @(posedge clk_i) begin
-                normalized_2_r <= unused_normalized_w[180 +: 12] == 0
-                                        ? unused_normalized_w[96 +: 96] << 12
-                                        : unused_normalized_w[96 +: 96];
-                shift_2_r <= shift_w[7 +: 7]
-                                + (unused_normalized_w[180 +: 12] == 0 ? 7'd12 : 7'd0);
-                zero_2_r <= zero_w[1];
-            end
-            always @(posedge clk_i) begin
-                normalized_3_r <= unused_normalized_w[282 +: 6] == 0
-                                        ? unused_normalized_w[192 +: 96] << 6
-                                        : unused_normalized_w[192 +: 96];
-                shift_3_r <= shift_w[14 +: 7]
-                                + (unused_normalized_w[282 +: 6] == 0 ? 7'd6 : 7'd0);
-                zero_3_r <= zero_w[2];
-            end
-            always @(posedge clk_i) begin
-                normalized_4_r <= unused_normalized_w[381 +: 3] == 0
-                                        ? unused_normalized_w[288 +: 96] << 3
-                                        : unused_normalized_w[288 +: 96];
-                shift_4_r <= shift_w[21 +: 7]
-                                + (unused_normalized_w[381 +: 3] == 0 ? 7'd3 : 7'd0);
-                zero_4_r <= zero_w[3];
-            end
-            always @(posedge clk_i) begin
-                normalized_5_r <= unused_normalized_w[478 +: 2] == 0
-                                        ? unused_normalized_w[384 +: 96] << 2
-                                        : unused_normalized_w[384 +: 96];
-                shift_5_r <= shift_w[28 +: 7]
-                                + (unused_normalized_w[478 +: 2] == 0 ? 7'd2 : 7'd0);
-                zero_5_r <= zero_w[4];
-            end
-            always @(posedge clk_i) begin
-                normalized_6_r <= unused_normalized_w[575 +: 1] == 0
-                                        ? unused_normalized_w[480 +: 96] << 1
-                                        : unused_normalized_w[480 +: 96];
-                shift_6_r <= shift_w[35 +: 7]
-                                + (unused_normalized_w[575 +: 1] == 0 ? 7'd1 : 7'd0);
-                zero_6_r <= zero_w[5];
+                count_value_r <= count_value_w;
+                amount_r <= 6'd63 - leading_w;
+                shift_r <= (high_w ? 7'd0 : 7'd32) + 7'd63 - {1'b0, leading_w};
+                zero_r <= sample_span_i[lane*96 +: 96] == 0;
+                fraction_r <= unused_shifted_w[62:55];
+                shift_last_r <= shift_r;
+                zero_last_r <= zero_r;
+                logarithm_r <= zero_last_r ? 16'sd0 :
+                    (16'sd79 - $signed({9'b0, shift_last_r})) * 16'sd256
+                    + $signed({7'b0, log_fraction(fraction_r)});
+                if (lod_valid_r[2]) lod_r[lod_slot_r[2]] <= clamped_w;
             end
         end
     endgenerate
@@ -1024,7 +982,7 @@ module edrv32_gpu_texture (
             filter_valid_r <= 0;
             unit_done_o <= 1'b0;
         end else begin
-            lod_valid_r <= {lod_valid_r[7:0], accept_w};
+            lod_valid_r <= {lod_valid_r[2:0], accept_w};
             return_valid_r <= {return_valid_r[7:0], schedule_valid_w};
             filter_valid_r <= {filter_valid_r[5:0], return_valid_r[8]};
             if (accept_w) begin
@@ -1102,8 +1060,8 @@ module edrv32_gpu_texture (
                             (filter_valid_r[6] && filter_slot_r[6] == context_idx))
                         completed_r <= completed_next_w;
                     if ((accept_w && allocate_r[4:0] == context_idx) ||
-                            (lod_valid_r[8] && lod_slot_r[8] == context_idx))
-                        lod_ready_r <= lod_valid_r[8] && lod_slot_r[8] == context_idx ?
+                            (lod_valid_r[3] && lod_slot_r[3] == context_idx))
+                        lod_ready_r <= lod_valid_r[3] && lod_slot_r[3] == context_idx ?
                             4'hf : 4'd0;
                 end
             end
@@ -1114,7 +1072,7 @@ module edrv32_gpu_texture (
     // Metadata stages: independent local registers, one assignment per register.
     genvar pipe_stage;
     generate
-        for (pipe_stage = 0; pipe_stage < 9; pipe_stage = pipe_stage + 1) begin : g_lod_slot
+        for (pipe_stage = 0; pipe_stage < 4; pipe_stage = pipe_stage + 1) begin : g_lod_slot
             reg [4:0] data_r;
             wire [4:0] data_w;
             assign lod_slot_r[pipe_stage] = data_r;
