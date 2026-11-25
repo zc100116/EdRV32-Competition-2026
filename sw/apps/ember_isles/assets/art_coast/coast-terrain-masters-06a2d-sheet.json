@@ -1,0 +1,395 @@
+{
+  "name": "coast-terrain-masters-06a2d",
+  "grid": [
+    160,
+    160
+  ],
+  "cell": [
+    32,
+    32
+  ],
+  "palette_file": "coast-terrain-06a2d-palette.json",
+  "create_palette": true,
+  "format": 1,
+  "atlas_group": "coast_terrain_masters",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/0_base/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "0_base",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/0_north/0",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "0_north",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/0_east/0",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "0_east",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/0_south/0",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "0_south",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/0_west/0",
+      "cell": [
+        4,
+        0
+      ],
+      "direction": "down",
+      "action": "0_west",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/1_base/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "1_base",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/1_north/0",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "1_north",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/1_east/0",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "1_east",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/1_south/0",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "1_south",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/1_west/0",
+      "cell": [
+        4,
+        1
+      ],
+      "direction": "down",
+      "action": "1_west",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/2_base/0",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "2_base",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/2_north/0",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down",
+      "action": "2_north",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/2_east/0",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "down",
+      "action": "2_east",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/2_south/0",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "down",
+      "action": "2_south",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/2_west/0",
+      "cell": [
+        4,
+        2
+      ],
+      "direction": "down",
+      "action": "2_west",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/3_base/0",
+      "cell": [
+        0,
+        3
+      ],
+      "direction": "down",
+      "action": "3_base",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/3_north/0",
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "down",
+      "action": "3_north",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/3_east/0",
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "down",
+      "action": "3_east",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/3_south/0",
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "down",
+      "action": "3_south",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/3_west/0",
+      "cell": [
+        4,
+        3
+      ],
+      "direction": "down",
+      "action": "3_west",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/4_base/0",
+      "cell": [
+        0,
+        4
+      ],
+      "direction": "down",
+      "action": "4_base",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/4_north/0",
+      "cell": [
+        1,
+        4
+      ],
+      "direction": "down",
+      "action": "4_north",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/4_east/0",
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "down",
+      "action": "4_east",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/4_south/0",
+      "cell": [
+        3,
+        4
+      ],
+      "direction": "down",
+      "action": "4_south",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/4_west/0",
+      "cell": [
+        4,
+        4
+      ],
+      "direction": "down",
+      "action": "4_west",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    }
+  ]
+}

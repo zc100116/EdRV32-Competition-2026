@@ -39,6 +39,14 @@ def load_native_frames():
             frame['source_sheet'] = sheet['name']
             frame['source_cell'] = cell['cell']
             frame['cell_size'] = sheet['cell']
+            if 'palette_variants' in sheet:
+                frame['palette_variants'] = sheet['palette_variants']
+            if 'preferred_element' in sheet:
+                frame['preferred_element'] = sheet['preferred_element']
+            for field in ('preferred_element', 'fixed_loadout', 'neighbor_mask_NESW', 'slice_name',
+                          'slice_source_rect'):
+                if field in cell:
+                    frame[field] = cell[field]
         frames.extend(added)
     return frames
 

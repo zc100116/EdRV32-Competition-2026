@@ -1,0 +1,245 @@
+{
+  "name": "coast-staff-forms-06a2d",
+  "grid": [
+    320,
+    192
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "palette_file": "coast-weapon-fx-iron-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "weapon_staff",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/base/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "base",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down_right/base/0",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down_right",
+      "action": "base",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/base/0",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "right",
+      "action": "base",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/base/0",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "up_right",
+      "action": "base",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up/base/0",
+      "cell": [
+        4,
+        0
+      ],
+      "direction": "up",
+      "action": "base",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/evolution_a/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "evolution_a",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down_right/evolution_a/0",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down_right",
+      "action": "evolution_a",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/evolution_a/0",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "right",
+      "action": "evolution_a",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/evolution_a/0",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "up_right",
+      "action": "evolution_a",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up/evolution_a/0",
+      "cell": [
+        4,
+        1
+      ],
+      "direction": "up",
+      "action": "evolution_a",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/evolution_b/0",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "evolution_b",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down_right/evolution_b/0",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down_right",
+      "action": "evolution_b",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/evolution_b/0",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "right",
+      "action": "evolution_b",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/evolution_b/0",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "up_right",
+      "action": "evolution_b",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up/evolution_b/0",
+      "cell": [
+        4,
+        2
+      ],
+      "direction": "up",
+      "action": "evolution_b",
+      "frame": 0,
+      "anchor": [
+        32,
+        43
+      ],
+      "hand_primary": null
+    }
+  ]
+}

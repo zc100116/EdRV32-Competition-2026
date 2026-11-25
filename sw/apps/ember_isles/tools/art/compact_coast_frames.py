@@ -8,7 +8,7 @@ import struct
 
 from coast_assets import ASSETS, ROOT, normalize
 from normalize_atlases import grid_centers
-from normalize_sample import decode_png, palette_for
+from normalize_sample import decode_png, expand, palette_for, png
 from probe_coast_streaming import cells
 from texture_sample import color_word
 from tools.gpu.model.layout import interleave_texture, texel_address
@@ -72,12 +72,18 @@ def load_frames():
 
 
 def convert(frames, build=BUILD):
-    palette_files = list(dict.fromkeys(f['palette_file'] for f in frames))
+    palette_files = list(dict.fromkeys(
+        [f['palette_file'] for f in frames]
+        + [p for f in frames for p in f.get('palette_variants', {}).values()]))
     palettes = [json.loads((ASSETS / p).read_text()) for p in palette_files]
     palettes = [p + [0] * (256 - len(p)) for p in palettes]
+    rgba_palettes = [[expand((w >> 11 & 31, w >> 5 & 63, w & 31, w >> 16 & 15))
+                      for w in palette] for palette in palettes]
     blob, records = bytearray(), []
+    readback_directory = build / 'gpu-readback'
+    readback_directory.mkdir(parents=True, exist_ok=True)
     readback_texels = 0
-    for frame in frames:
+    for frame_index, frame in enumerate(frames):
         # gpu-spec 2.6: 2x2 halfwords per group; I8 halfwords hold 2x1 texels.
         width = (frame['w'] + 3) // 4 * 4
         height = (frame['h'] + 1) // 2 * 2
@@ -92,11 +98,18 @@ def convert(frames, build=BUILD):
         blob.extend(bytes((-len(blob)) % 32))
         offset = len(blob)
         blob.extend(packed)
+        variants = {'iron': bank} | {name: palette_files.index(path)
+                                    for name, path in frame.get('palette_variants', {}).items()}
+        selected_bank = (variants[frame['preferred_element']]
+                         if 'preferred_element' in frame else bank)
         records.append({k: v for k, v in frame.items()
-                        if k not in ('pixels', 'palette_file')} |
+                        if k not in ('pixels', 'palette_file', 'palette_variants')} |
                        {'ddr_offset': offset, 'bytes': len(packed),
-                        'block_aligned_size': [width, height], 'palette_group': bank,
-                        'format': 'I8', 'storage_group_texels': [4, 2]})
+                        'block_aligned_size': [width, height], 'palette_group': selected_bank,
+                        'native_palette_group': bank,
+                        'format': 'I8', 'storage_group_texels': [4, 2],
+                        'palette_variants': (variants
+                                                   if frame.get('palette_variants') else {})})
         # A compact frame is never sampled as an illegal non-power-of-two texture.
         # Copy its 8-byte groups to nonzero UV in a 128x128 page, OFFSET=32.
         page_width = 128 if width <= 124 else 256
@@ -113,17 +126,28 @@ def convert(frames, build=BUILD):
                           {'LOG2_W': page_width.bit_length() - 1,
                            'LOG2_H': page_height.bit_length() - 1, 'LEVELS': 1,
                            'FORMAT': 1, 'OFFSET': 32, 'PAL_GROUP': bank})
-        for y in range(page_height):
-            for x in range(page_width):
-                sx, sy = x - u0, y - v0
-                expected = (frame['pixels'][sy * frame['w'] + sx]
-                            if 0 <= sx < frame['w'] and 0 <= sy < frame['h']
-                            else (0, 0, 0, 0))
-                actual = texture.texel(x, y, 0, bank)
-                if actual != expected and not actual[3] == expected[3] == 0:
-                    raise ValueError(f'{frame["name"]}: GPU page readback {x},{y}: '
-                                     f'{actual} != {expected}')
-                readback_texels += 1
+        banks = [bank] + [palette_files.index(p)
+                         for p in frame.get('palette_variants', {}).values()]
+        for palette_bank in banks:
+            actual_pixels = []
+            for y in range(page_height):
+                for x in range(page_width):
+                    sx, sy = x - u0, y - v0
+                    if 0 <= sx < frame['w'] and 0 <= sy < frame['h']:
+                        expected = (frame['pixels'][sy * frame['w'] + sx]
+                                    if palette_bank == bank else
+                                    rgba_palettes[palette_bank][indices[sy * width + sx]])
+                    else:
+                        expected = (0, 0, 0, 0)
+                    actual = texture.texel(x, y, 0, palette_bank)
+                    if 0 <= sx < frame['w'] and 0 <= sy < frame['h']:
+                        actual_pixels.append(actual)
+                    if actual != expected:
+                        raise ValueError(f'{frame["name"]}: GPU page bank{palette_bank} '
+                                         f'readback {x},{y}: {actual} != {expected}')
+                    readback_texels += 1
+            png(readback_directory / f'{frame_index:04d}-{palette_bank}.png',
+                frame['w'], frame['h'], actual_pixels)
     (build / 'frames.bin').write_bytes(blob)
     (build / 'palettes.bin').write_bytes(b''.join(struct.pack('<256I', *p) for p in palettes))
     return records, len(blob), readback_texels

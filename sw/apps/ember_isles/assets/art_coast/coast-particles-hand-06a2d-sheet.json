@@ -1,0 +1,630 @@
+{
+  "name": "coast-particles-hand-06a2d",
+  "grid": [
+    128,
+    80
+  ],
+  "cell": [
+    16,
+    16
+  ],
+  "format": 1,
+  "palette_file": "coast-weapon-fx-iron-06a2d-palette.json",
+  "palette_variants": {
+    "ember": "coast-weapon-fx-ember-06a2d-palette.json",
+    "tide": "coast-weapon-fx-tide-06a2d-palette.json",
+    "star": "coast-weapon-fx-star-06a2d-palette.json",
+    "shadow": "coast-weapon-fx-shadow-06a2d-palette.json"
+  },
+  "atlas_group": "coast_particles",
+  "cells": [
+    {
+      "id": "down/sparkle/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "sparkle",
+      "frame": 0,
+      "preferred_element": "iron",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/sparkle/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "sparkle",
+      "frame": 1,
+      "preferred_element": "iron",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/sparkle/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "sparkle",
+      "frame": 2,
+      "preferred_element": "iron",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/sparkle/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "sparkle",
+      "frame": 3,
+      "preferred_element": "iron",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/light_dot/0",
+      "cell": [
+        4,
+        0
+      ],
+      "direction": "down",
+      "action": "light_dot",
+      "frame": 0,
+      "preferred_element": "star",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/light_dot/1",
+      "cell": [
+        5,
+        0
+      ],
+      "direction": "down",
+      "action": "light_dot",
+      "frame": 1,
+      "preferred_element": "star",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/light_dot/2",
+      "cell": [
+        6,
+        0
+      ],
+      "direction": "down",
+      "action": "light_dot",
+      "frame": 2,
+      "preferred_element": "star",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/ember/0",
+      "cell": [
+        7,
+        0
+      ],
+      "direction": "down",
+      "action": "ember",
+      "frame": 0,
+      "preferred_element": "ember",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/ember/1",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "ember",
+      "frame": 1,
+      "preferred_element": "ember",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/ember/2",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "ember",
+      "frame": 2,
+      "preferred_element": "ember",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/ember/3",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "ember",
+      "frame": 3,
+      "preferred_element": "ember",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/water/0",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "water",
+      "frame": 0,
+      "preferred_element": "tide",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/water/1",
+      "cell": [
+        4,
+        1
+      ],
+      "direction": "down",
+      "action": "water",
+      "frame": 1,
+      "preferred_element": "tide",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/water/2",
+      "cell": [
+        5,
+        1
+      ],
+      "direction": "down",
+      "action": "water",
+      "frame": 2,
+      "preferred_element": "tide",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/water/3",
+      "cell": [
+        6,
+        1
+      ],
+      "direction": "down",
+      "action": "water",
+      "frame": 3,
+      "preferred_element": "tide",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/ice/0",
+      "cell": [
+        7,
+        1
+      ],
+      "direction": "down",
+      "action": "ice",
+      "frame": 0,
+      "preferred_element": "tide",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/ice/1",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "ice",
+      "frame": 1,
+      "preferred_element": "tide",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/ice/2",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down",
+      "action": "ice",
+      "frame": 2,
+      "preferred_element": "tide",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/ice/3",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "down",
+      "action": "ice",
+      "frame": 3,
+      "preferred_element": "tide",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/stardust/0",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "down",
+      "action": "stardust",
+      "frame": 0,
+      "preferred_element": "star",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/stardust/1",
+      "cell": [
+        4,
+        2
+      ],
+      "direction": "down",
+      "action": "stardust",
+      "frame": 1,
+      "preferred_element": "star",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/stardust/2",
+      "cell": [
+        5,
+        2
+      ],
+      "direction": "down",
+      "action": "stardust",
+      "frame": 2,
+      "preferred_element": "star",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/stardust/3",
+      "cell": [
+        6,
+        2
+      ],
+      "direction": "down",
+      "action": "stardust",
+      "frame": 3,
+      "preferred_element": "star",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/shadow/0",
+      "cell": [
+        7,
+        2
+      ],
+      "direction": "down",
+      "action": "shadow",
+      "frame": 0,
+      "preferred_element": "shadow",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/shadow/1",
+      "cell": [
+        0,
+        3
+      ],
+      "direction": "down",
+      "action": "shadow",
+      "frame": 1,
+      "preferred_element": "shadow",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/shadow/2",
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "down",
+      "action": "shadow",
+      "frame": 2,
+      "preferred_element": "shadow",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/shadow/3",
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "down",
+      "action": "shadow",
+      "frame": 3,
+      "preferred_element": "shadow",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/shadow/4",
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "down",
+      "action": "shadow",
+      "frame": 4,
+      "preferred_element": "shadow",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/shadow/5",
+      "cell": [
+        4,
+        3
+      ],
+      "direction": "down",
+      "action": "shadow",
+      "frame": 5,
+      "preferred_element": "shadow",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/iron/0",
+      "cell": [
+        5,
+        3
+      ],
+      "direction": "down",
+      "action": "iron",
+      "frame": 0,
+      "preferred_element": "iron",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/iron/1",
+      "cell": [
+        6,
+        3
+      ],
+      "direction": "down",
+      "action": "iron",
+      "frame": 1,
+      "preferred_element": "iron",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/iron/2",
+      "cell": [
+        7,
+        3
+      ],
+      "direction": "down",
+      "action": "iron",
+      "frame": 2,
+      "preferred_element": "iron",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/debris/0",
+      "cell": [
+        0,
+        4
+      ],
+      "direction": "down",
+      "action": "debris",
+      "frame": 0,
+      "preferred_element": "iron",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/debris/1",
+      "cell": [
+        1,
+        4
+      ],
+      "direction": "down",
+      "action": "debris",
+      "frame": 1,
+      "preferred_element": "iron",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/debris/2",
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "down",
+      "action": "debris",
+      "frame": 2,
+      "preferred_element": "iron",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/debris/3",
+      "cell": [
+        3,
+        4
+      ],
+      "direction": "down",
+      "action": "debris",
+      "frame": 3,
+      "preferred_element": "iron",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/debris/4",
+      "cell": [
+        4,
+        4
+      ],
+      "direction": "down",
+      "action": "debris",
+      "frame": 4,
+      "preferred_element": "iron",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/debris/5",
+      "cell": [
+        5,
+        4
+      ],
+      "direction": "down",
+      "action": "debris",
+      "frame": 5,
+      "preferred_element": "iron",
+      "anchor": [
+        8,
+        8
+      ],
+      "hand_primary": null
+    }
+  ]
+}

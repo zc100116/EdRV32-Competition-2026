@@ -43,6 +43,10 @@ def cells(sheet, actions, actor):
                        'trim': [x0, y0], 'anchor': [anchor[0] - x0, anchor[1] - y0],
                        'hand': None if hand is None else [hand[0] - x0, hand[1] - y0],
                        'pixels': pixels, 'palette_file': sheet['palette_file']})
+        if 'hand_secondary' in cell:
+            point = cell['hand_secondary']
+            frames[-1]['hand_secondary'] = (None if point is None else
+                                             [point[0] - x0, point[1] - y0])
     return frames
 
 

@@ -1,0 +1,720 @@
+{
+  "name": "coast-card-border-slices-06a2d",
+  "grid": [
+    64,
+    32
+  ],
+  "cell": [
+    8,
+    8
+  ],
+  "format": 1,
+  "palette_file": "coast-ui-06a2d-palette.json",
+  "atlas_group": "coast_ui",
+  "cells": [
+    {
+      "id": "down/common/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "common",
+      "frame": 0,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "top_left",
+      "slice_source_rect": [
+        7,
+        6,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/common/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "common",
+      "frame": 1,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "top_right",
+      "slice_source_rect": [
+        34,
+        6,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/common/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "common",
+      "frame": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "bottom_left",
+      "slice_source_rect": [
+        7,
+        47,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/common/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "common",
+      "frame": 3,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "bottom_right",
+      "slice_source_rect": [
+        34,
+        47,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/common/4",
+      "cell": [
+        4,
+        0
+      ],
+      "direction": "down",
+      "action": "common",
+      "frame": 4,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "top",
+      "slice_source_rect": [
+        20,
+        6,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/common/5",
+      "cell": [
+        5,
+        0
+      ],
+      "direction": "down",
+      "action": "common",
+      "frame": 5,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "right",
+      "slice_source_rect": [
+        34,
+        26,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/common/6",
+      "cell": [
+        6,
+        0
+      ],
+      "direction": "down",
+      "action": "common",
+      "frame": 6,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "bottom",
+      "slice_source_rect": [
+        20,
+        47,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/common/7",
+      "cell": [
+        7,
+        0
+      ],
+      "direction": "down",
+      "action": "common",
+      "frame": 7,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "left",
+      "slice_source_rect": [
+        7,
+        26,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/fine/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "fine",
+      "frame": 0,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "top_left",
+      "slice_source_rect": [
+        5,
+        6,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/fine/1",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "fine",
+      "frame": 1,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "top_right",
+      "slice_source_rect": [
+        33,
+        6,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/fine/2",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "fine",
+      "frame": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "bottom_left",
+      "slice_source_rect": [
+        5,
+        47,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/fine/3",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "fine",
+      "frame": 3,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "bottom_right",
+      "slice_source_rect": [
+        33,
+        47,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/fine/4",
+      "cell": [
+        4,
+        1
+      ],
+      "direction": "down",
+      "action": "fine",
+      "frame": 4,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "top",
+      "slice_source_rect": [
+        19,
+        6,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/fine/5",
+      "cell": [
+        5,
+        1
+      ],
+      "direction": "down",
+      "action": "fine",
+      "frame": 5,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "right",
+      "slice_source_rect": [
+        33,
+        26,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/fine/6",
+      "cell": [
+        6,
+        1
+      ],
+      "direction": "down",
+      "action": "fine",
+      "frame": 6,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "bottom",
+      "slice_source_rect": [
+        19,
+        47,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/fine/7",
+      "cell": [
+        7,
+        1
+      ],
+      "direction": "down",
+      "action": "fine",
+      "frame": 7,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "left",
+      "slice_source_rect": [
+        5,
+        26,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/rare/0",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "rare",
+      "frame": 0,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "top_left",
+      "slice_source_rect": [
+        7,
+        6,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/rare/1",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down",
+      "action": "rare",
+      "frame": 1,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "top_right",
+      "slice_source_rect": [
+        34,
+        6,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/rare/2",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "down",
+      "action": "rare",
+      "frame": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "bottom_left",
+      "slice_source_rect": [
+        7,
+        47,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/rare/3",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "down",
+      "action": "rare",
+      "frame": 3,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "bottom_right",
+      "slice_source_rect": [
+        34,
+        47,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/rare/4",
+      "cell": [
+        4,
+        2
+      ],
+      "direction": "down",
+      "action": "rare",
+      "frame": 4,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "top",
+      "slice_source_rect": [
+        20,
+        6,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/rare/5",
+      "cell": [
+        5,
+        2
+      ],
+      "direction": "down",
+      "action": "rare",
+      "frame": 5,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "right",
+      "slice_source_rect": [
+        34,
+        26,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/rare/6",
+      "cell": [
+        6,
+        2
+      ],
+      "direction": "down",
+      "action": "rare",
+      "frame": 6,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "bottom",
+      "slice_source_rect": [
+        20,
+        47,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/rare/7",
+      "cell": [
+        7,
+        2
+      ],
+      "direction": "down",
+      "action": "rare",
+      "frame": 7,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "left",
+      "slice_source_rect": [
+        7,
+        26,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/legendary/0",
+      "cell": [
+        0,
+        3
+      ],
+      "direction": "down",
+      "action": "legendary",
+      "frame": 0,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "top_left",
+      "slice_source_rect": [
+        5,
+        6,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/legendary/1",
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "down",
+      "action": "legendary",
+      "frame": 1,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "top_right",
+      "slice_source_rect": [
+        33,
+        6,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/legendary/2",
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "down",
+      "action": "legendary",
+      "frame": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "bottom_left",
+      "slice_source_rect": [
+        5,
+        47,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/legendary/3",
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "down",
+      "action": "legendary",
+      "frame": 3,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "bottom_right",
+      "slice_source_rect": [
+        33,
+        47,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/legendary/4",
+      "cell": [
+        4,
+        3
+      ],
+      "direction": "down",
+      "action": "legendary",
+      "frame": 4,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "top",
+      "slice_source_rect": [
+        19,
+        6,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/legendary/5",
+      "cell": [
+        5,
+        3
+      ],
+      "direction": "down",
+      "action": "legendary",
+      "frame": 5,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "right",
+      "slice_source_rect": [
+        33,
+        26,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/legendary/6",
+      "cell": [
+        6,
+        3
+      ],
+      "direction": "down",
+      "action": "legendary",
+      "frame": 6,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "bottom",
+      "slice_source_rect": [
+        19,
+        47,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "down/legendary/7",
+      "cell": [
+        7,
+        3
+      ],
+      "direction": "down",
+      "action": "legendary",
+      "frame": 7,
+      "anchor": [
+        0,
+        0
+      ],
+      "hand_primary": null,
+      "slice_name": "left",
+      "slice_source_rect": [
+        5,
+        26,
+        8,
+        8
+      ]
+    }
+  ]
+}

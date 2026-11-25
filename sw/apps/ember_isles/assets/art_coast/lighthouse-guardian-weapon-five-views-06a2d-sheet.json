@@ -1,0 +1,320 @@
+{
+  "name": "lighthouse-guardian-weapon-five-views-06a2d",
+  "grid": [
+    320,
+    320
+  ],
+  "cell": [
+    64,
+    80
+  ],
+  "palette_file": "lighthouse-guardian-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "lighthouse_guardian_weapon",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/idle/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "idle",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down_right/idle/0",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down_right",
+      "action": "idle",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/idle/0",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "right",
+      "action": "idle",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/idle/0",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "up_right",
+      "action": "idle",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up/idle/0",
+      "cell": [
+        4,
+        0
+      ],
+      "direction": "up",
+      "action": "idle",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/raise/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "raise",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down_right/raise/0",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down_right",
+      "action": "raise",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/raise/0",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "right",
+      "action": "raise",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/raise/0",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "up_right",
+      "action": "raise",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up/raise/0",
+      "cell": [
+        4,
+        1
+      ],
+      "direction": "up",
+      "action": "raise",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/attack_shield/0",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "attack_shield",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down_right/attack_shield/0",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down_right",
+      "action": "attack_shield",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/attack_shield/0",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "right",
+      "action": "attack_shield",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/attack_shield/0",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "up_right",
+      "action": "attack_shield",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up/attack_shield/0",
+      "cell": [
+        4,
+        2
+      ],
+      "direction": "up",
+      "action": "attack_shield",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/hit/0",
+      "cell": [
+        0,
+        3
+      ],
+      "direction": "down",
+      "action": "hit",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down_right/hit/0",
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "down_right",
+      "action": "hit",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/hit/0",
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "right",
+      "action": "hit",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up_right/hit/0",
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "up_right",
+      "action": "hit",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "up/hit/0",
+      "cell": [
+        4,
+        3
+      ],
+      "direction": "up",
+      "action": "hit",
+      "frame": 0,
+      "anchor": [
+        32,
+        54
+      ],
+      "hand_primary": null
+    }
+  ]
+}

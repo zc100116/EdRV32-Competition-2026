@@ -1,0 +1,155 @@
+{
+  "name": "coast-shallow-flat-masters-06a2d",
+  "grid": [
+    96,
+    96
+  ],
+  "cell": [
+    32,
+    32
+  ],
+  "palette_file": "coast-terrain-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_shallow_masters",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/base/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "base",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/north/0",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "north",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/east/0",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "east",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/south/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "south",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/west/0",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "west",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/variation0/0",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "variation0",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/variation1/0",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "variation1",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/variation2/0",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down",
+      "action": "variation2",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/variation3/0",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "down",
+      "action": "variation3",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    }
+  ]
+}

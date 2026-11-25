@@ -1,0 +1,81 @@
+{
+  "name": "coast-altar-06a2d",
+  "grid": [
+    192,
+    32
+  ],
+  "cell": [
+    48,
+    32
+  ],
+  "palette_file": "coast-props-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_landmarks",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/altar/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "altar",
+      "frame": 0,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/altar/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "altar",
+      "frame": 1,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/altar/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "altar",
+      "frame": 2,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/altar/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "altar",
+      "frame": 3,
+      "anchor": [
+        24,
+        31
+      ],
+      "hand_primary": null
+    }
+  ],
+  "foot_baseline": 31
+}

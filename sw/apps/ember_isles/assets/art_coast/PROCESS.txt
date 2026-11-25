@@ -178,3 +178,30 @@ the newly drawn coarser80px-cell study has72px idle height and is retained.
 msg_ece1ed9fce77: fixed-region report separates measured weapon/FX/particle
 material from a16KiB unmeasured UI/digits/glyph/light-mask reservation, including
 8KiB light mask. Final48KiB verdict belongs to06b integrated measurement.
+
+msg_09aa9817f999 /71a4c7df4 narrows the first release to keeper, ember sword
+and ember staff, coast arena. Smith sources already generated are retained,
+but excluded from the first-release package; no more smith or iron-guard work.
+Keeper slash family, four weapon evolutions, weapon/skill/item icons and four
+rarity card borders are added. Unsettled item IDs await05a; no invented effects.
+msg_da34df3aa4cb authorizes1:1 native terrain edge-band/corner composition
+and explicit1–2-row seam copies, without rotation/scale or newly synthesized art.
+The terrain review includes a6x6 randomized stitching sample.
+
+msg_a1cc520c14a6 /cf0a12be0: small repeated projectile/trail/impact/particle
+frames remain fixed; one-off skill/ultimate/evolution/explosion frames stream.
+The bound includes at mosttwo simultaneous large-effect frame maxima. PC art
+keeps its full resolution and frame count; no capacity-driven part splitting.
+
+Part assembly exposed two rejectedsemanticstudies: the firstguardianweapon
+baked in a chest/lanternhead, and the firstBossmouth repeatedtorsoarmor with
+column drift. Both are excluded. Object-onlyanchorweapon andthree smallhead
+strips are newbuilt-inimagegen redraws, not scaled orrepaired torso bitmaps.
+
+Integration failure msg_280015474226 was the rejected light_dot input study: both
+4x4 cells (0,0) and(1,0) ofcoast-particle-light_dot-06a2d-native.png containzero
+opaque texels. Literal38-frame native particle art replacesit byauthorization
+msg_aac2628fcd8c; thebadstudyisretainedbutnotselected. No empty-cellskip wasadded.
+Rawsourceimports now publish their manifest entryafter nativeimport completes.
+The frozen particle actionnames are sparkle/light_dot/ember/water/ice/stardust/
+shadow/iron/debris. Full1425-frame export passes33177600 RGBA GPUreadbacktexels.

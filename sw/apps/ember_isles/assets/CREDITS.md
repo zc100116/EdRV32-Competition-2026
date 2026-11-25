@@ -83,3 +83,9 @@ sheets are retained; the inspection page displays their actual pixel difference.
 Rejected size, facing or transparency trials remain identified by the production
 manifest and PROCESS notes. They are not included in the delivered frame table.
 No commercial game art, external source pack or third-party generated asset is used.
+
+The nine2–16px particle types in `art_coast/coast-particle-pixels-06a2d.json`
+are original literal pixel drawings by Codex, authorized by msg_aac2628fcd8c.
+Their38 frames are copied1:1 from the saved ASCII artwork, with five elemental
+palette groups; no procedural shape formula, bitmap scaling or rotation is used.
+The rejected built-in imagegen particle studies are retained under `sources/`.

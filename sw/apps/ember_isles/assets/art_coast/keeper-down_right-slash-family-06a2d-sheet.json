@@ -1,0 +1,237 @@
+{
+  "name": "keeper-down_right-slash-family-06a2d",
+  "grid": [
+    256,
+    192
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "palette_file": "keeper-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "keeper",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down_right/attack_slash/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down_right",
+      "action": "attack_slash",
+      "frame": 0,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        25,
+        39
+      ]
+    },
+    {
+      "id": "down_right/attack_slash/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down_right",
+      "action": "attack_slash",
+      "frame": 1,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        26,
+        34
+      ]
+    },
+    {
+      "id": "down_right/attack_slash/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down_right",
+      "action": "attack_slash",
+      "frame": 2,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        48,
+        35
+      ]
+    },
+    {
+      "id": "down_right/attack_slash/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down_right",
+      "action": "attack_slash",
+      "frame": 3,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        46,
+        45
+      ]
+    },
+    {
+      "id": "down_right/attack_slash/4",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down_right",
+      "action": "attack_slash",
+      "frame": 4,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        44,
+        33
+      ]
+    },
+    {
+      "id": "down_right/attack_slash/5",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down_right",
+      "action": "attack_slash",
+      "frame": 5,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        29
+      ]
+    },
+    {
+      "id": "down_right/attack_slash/6",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down_right",
+      "action": "attack_slash",
+      "frame": 6,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        20,
+        36
+      ]
+    },
+    {
+      "id": "down_right/attack_slash/7",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down_right",
+      "action": "attack_slash",
+      "frame": 7,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        24,
+        44
+      ]
+    },
+    {
+      "id": "down_right/attack_slash/8",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down_right",
+      "action": "attack_slash",
+      "frame": 8,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        33,
+        22
+      ]
+    },
+    {
+      "id": "down_right/attack_slash/9",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down_right",
+      "action": "attack_slash",
+      "frame": 9,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        43,
+        48
+      ]
+    },
+    {
+      "id": "down_right/attack_slash/10",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "down_right",
+      "action": "attack_slash",
+      "frame": 10,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        41,
+        43
+      ]
+    },
+    {
+      "id": "down_right/attack_slash/11",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "down_right",
+      "action": "attack_slash",
+      "frame": 11,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        39
+      ]
+    }
+  ],
+  "foot_baseline": 58
+}

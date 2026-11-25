@@ -1,0 +1,321 @@
+{
+  "name": "coast-props-small-06a2d",
+  "grid": [
+    128,
+    160
+  ],
+  "cell": [
+    32,
+    32
+  ],
+  "palette_file": "coast-props-06a2d-palette.json",
+  "create_palette": true,
+  "format": 1,
+  "atlas_group": "coast_props",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/barrel/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "barrel",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/crate/0",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "crate",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/coral/0",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "coral",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/rock/0",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "rock",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/grass/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "grass",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/seaweed/0",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "seaweed",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/shell_cluster/0",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "shell_cluster",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/starfish/0",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "starfish",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/pebbles/0",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "pebbles",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/vase/0",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down",
+      "action": "vase",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/bucket/0",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "down",
+      "action": "bucket",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/anchor_fragment/0",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "down",
+      "action": "anchor_fragment",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/iron_scrap/0",
+      "cell": [
+        0,
+        3
+      ],
+      "direction": "down",
+      "action": "iron_scrap",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/lantern_husk/0",
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "down",
+      "action": "lantern_husk",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/fish_bones/0",
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "down",
+      "action": "fish_bones",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/salt_crystal/0",
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "down",
+      "action": "salt_crystal",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/blacktide_crystal/0",
+      "cell": [
+        0,
+        4
+      ],
+      "direction": "down",
+      "action": "blacktide_crystal",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/cloth_bundle/0",
+      "cell": [
+        1,
+        4
+      ],
+      "direction": "down",
+      "action": "cloth_bundle",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/coin_pouch/0",
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "down",
+      "action": "coin_pouch",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/wooden_sign/0",
+      "cell": [
+        3,
+        4
+      ],
+      "direction": "down",
+      "action": "wooden_sign",
+      "frame": 0,
+      "anchor": [
+        16,
+        31
+      ],
+      "hand_primary": null
+    }
+  ],
+  "foot_baseline": 31
+}

@@ -796,7 +796,7 @@
       "idle",
       "walk"
     ],
-    "include_frames": true,
+    "include_frames": false,
     "normalize_source": true,
     "cache": "stream",
     "role": "hero"
@@ -890,7 +890,7 @@
     "actions": [
       "walk"
     ],
-    "include_frames": true,
+    "include_frames": false,
     "normalize_source": true,
     "cache": "stream",
     "role": "hero"
@@ -902,7 +902,7 @@
       "idle",
       "walk"
     ],
-    "include_frames": true,
+    "include_frames": false,
     "normalize_source": true,
     "cache": "stream",
     "role": "hero"
@@ -914,7 +914,7 @@
       "idle",
       "walk"
     ],
-    "include_frames": true,
+    "include_frames": false,
     "normalize_source": true,
     "cache": "stream",
     "role": "hero"
@@ -926,7 +926,7 @@
       "idle",
       "walk"
     ],
-    "include_frames": true,
+    "include_frames": false,
     "normalize_source": true,
     "cache": "stream",
     "role": "hero"
@@ -952,7 +952,7 @@
       "death",
       "interact"
     ],
-    "include_frames": true,
+    "include_frames": false,
     "normalize_source": true,
     "cache": "stream",
     "role": "hero"
@@ -1023,7 +1023,7 @@
     "actions": [
       "idle"
     ],
-    "include_frames": true,
+    "include_frames": false,
     "normalize_source": true,
     "cache": "stream",
     "role": "hero"
@@ -1037,7 +1037,7 @@
       "death",
       "interact"
     ],
-    "include_frames": true,
+    "include_frames": false,
     "normalize_source": true,
     "cache": "stream",
     "role": "hero"
@@ -1051,7 +1051,7 @@
       "death",
       "interact"
     ],
-    "include_frames": true,
+    "include_frames": false,
     "normalize_source": true,
     "cache": "stream",
     "role": "hero"
@@ -1065,7 +1065,7 @@
       "death",
       "interact"
     ],
-    "include_frames": true,
+    "include_frames": false,
     "normalize_source": true,
     "cache": "stream",
     "role": "hero"
@@ -1143,9 +1143,969 @@
       "death",
       "interact"
     ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-up_right-spell-family-06a2d-sheet.json",
+    "actions": [
+      "attack_spell",
+      "finish_staff",
+      "finish_codex"
+    ],
     "include_frames": true,
     "normalize_source": true,
     "cache": "stream",
     "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-up-spell-family-06a2d-sheet.json",
+    "actions": [
+      "attack_spell",
+      "finish_staff",
+      "finish_codex"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "tide_lord_body",
+    "metadata": "tide-lord-body-phases-06a2d-sheet.json",
+    "actions": [
+      "phase1_idle",
+      "phase2_idle",
+      "phase3_idle"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "boss"
+  },
+  {
+    "actor": "coast_terrain_masters",
+    "metadata": "coast-terrain-masters-06a2d-sheet.json",
+    "actions": [
+      "0_base",
+      "0_north",
+      "0_east",
+      "0_south",
+      "0_west",
+      "1_base",
+      "1_north",
+      "1_east",
+      "1_south",
+      "1_west",
+      "2_base",
+      "2_north",
+      "2_east",
+      "2_south",
+      "2_west",
+      "3_base",
+      "3_north",
+      "3_east",
+      "3_south",
+      "3_west",
+      "4_base",
+      "4_north",
+      "4_east",
+      "4_south",
+      "4_west"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "terrain"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-down-heavy-family-06a2d-sheet.json",
+    "actions": [
+      "attack_heavy",
+      "finish_hammer"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-down_right-heavy-family-06a2d-sheet.json",
+    "actions": [
+      "attack_heavy",
+      "finish_hammer"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-right-heavy-family-06a2d-sheet.json",
+    "actions": [
+      "attack_heavy",
+      "finish_hammer"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-up_right-heavy-family-06a2d-sheet.json",
+    "actions": [
+      "attack_heavy",
+      "finish_hammer"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "coast_terrain_variations",
+    "metadata": "coast-terrain-variations-06a2d-sheet.json",
+    "actions": [
+      "0_variation",
+      "1_variation",
+      "2_variation",
+      "3_variation",
+      "4_variation"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "terrain"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-up-heavy-family-06a2d-sheet.json",
+    "actions": [
+      "attack_heavy",
+      "finish_hammer"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-down-skills-klu-06a2d-sheet.json",
+    "actions": [
+      "skill_k",
+      "skill_l",
+      "skill_u"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-down_right-skills-klu-06a2d-sheet.json",
+    "actions": [
+      "skill_k",
+      "skill_l",
+      "skill_u"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-right-skills-klu-06a2d-sheet.json",
+    "actions": [
+      "skill_k",
+      "skill_l",
+      "skill_u"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "lighthouse_guardian_body",
+    "metadata": "lighthouse-guardian-down_right-body-base-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "lighthouse_guardian_body",
+    "metadata": "lighthouse-guardian-right-body-base-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "lighthouse_guardian_body",
+    "metadata": "lighthouse-guardian-up_right-body-base-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "lighthouse_guardian_body",
+    "metadata": "lighthouse-guardian-up-body-base-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "weapon_sword",
+    "metadata": "coast-sword-forms-06a2d-sheet.json",
+    "actions": [
+      "base",
+      "evolution_a",
+      "evolution_b"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "fixed",
+    "role": "weapon"
+  },
+  {
+    "actor": "weapon_staff",
+    "metadata": "coast-staff-forms-06a2d-sheet.json",
+    "actions": [
+      "base",
+      "evolution_a",
+      "evolution_b"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "fixed",
+    "role": "weapon"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-up_right-skills-klu-06a2d-sheet.json",
+    "actions": [
+      "skill_k",
+      "skill_l",
+      "skill_u"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-up-skills-klu-06a2d-sheet.json",
+    "actions": [
+      "skill_k",
+      "skill_l",
+      "skill_u"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "coast_shallow_masters",
+    "metadata": "coast-shallow-flat-masters-06a2d-sheet.json",
+    "actions": [
+      "base",
+      "north",
+      "east",
+      "south",
+      "west",
+      "variation0",
+      "variation1",
+      "variation2",
+      "variation3"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "terrain"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-down-slash-family-06a2d-sheet.json",
+    "actions": [
+      "attack_slash"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-down_right-slash-family-06a2d-sheet.json",
+    "actions": [
+      "attack_slash"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-right-slash-family-06a2d-sheet.json",
+    "actions": [
+      "attack_slash"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "coast_card_source",
+    "metadata": "coast-card-frames-06a2d-sheet.json",
+    "actions": [
+      "common",
+      "fine",
+      "rare",
+      "legendary"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "fixed",
+    "role": "ui_source"
+  },
+  {
+    "actor": "lighthouse_guardian_body",
+    "metadata": "lighthouse-guardian-down-body-combat-06a2d-sheet.json",
+    "actions": [
+      "attack_shield",
+      "hit",
+      "summon",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "lighthouse_guardian_body",
+    "metadata": "lighthouse-guardian-down_right-body-combat-06a2d-sheet.json",
+    "actions": [
+      "attack_shield",
+      "hit",
+      "summon",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "lighthouse_guardian_body",
+    "metadata": "lighthouse-guardian-right-body-combat-06a2d-sheet.json",
+    "actions": [
+      "attack_shield",
+      "hit",
+      "summon",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "lighthouse_guardian_body",
+    "metadata": "lighthouse-guardian-up_right-body-combat-06a2d-sheet.json",
+    "actions": [
+      "attack_shield",
+      "hit",
+      "summon",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "terrain_sand",
+    "metadata": "coast-sand-tiles-06a2d-sheet.json",
+    "actions": [
+      "autotile",
+      "variation"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "terrain"
+  },
+  {
+    "actor": "terrain_shallow",
+    "metadata": "coast-shallow-tiles-06a2d-sheet.json",
+    "actions": [
+      "autotile",
+      "variation"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "terrain"
+  },
+  {
+    "actor": "terrain_reef",
+    "metadata": "coast-reef-tiles-06a2d-sheet.json",
+    "actions": [
+      "autotile",
+      "variation"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "terrain"
+  },
+  {
+    "actor": "terrain_ruins",
+    "metadata": "coast-ruins-tiles-06a2d-sheet.json",
+    "actions": [
+      "autotile",
+      "variation"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "terrain"
+  },
+  {
+    "actor": "terrain_grass",
+    "metadata": "coast-grass-tiles-06a2d-sheet.json",
+    "actions": [
+      "autotile",
+      "variation"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "terrain"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-up_right-slash-family-06a2d-sheet.json",
+    "actions": [
+      "attack_slash"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-up-slash-family-06a2d-sheet.json",
+    "actions": [
+      "attack_slash"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "lighthouse_guardian_shield",
+    "metadata": "lighthouse-guardian-shield-five-views-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "guard",
+      "attack_shield",
+      "hit"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "lighthouse_guardian_weapon",
+    "metadata": "lighthouse-guardian-weapon-five-views-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "raise",
+      "attack_shield",
+      "hit"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "coast_card_borders",
+    "metadata": "coast-card-border-slices-06a2d-sheet.json",
+    "actions": [
+      "common",
+      "fine",
+      "rare",
+      "legendary"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "fixed",
+    "role": "ui"
+  },
+  {
+    "actor": "tide_lord_body",
+    "metadata": "tide-lord-body-phase1-combat-06a2d-sheet.json",
+    "actions": [
+      "phase1_attack",
+      "phase1_hit"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "boss"
+  },
+  {
+    "actor": "tide_lord_body",
+    "metadata": "tide-lord-body-phase2-combat-06a2d-sheet.json",
+    "actions": [
+      "phase2_attack",
+      "phase2_hit"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "boss"
+  },
+  {
+    "actor": "tide_lord_body",
+    "metadata": "tide-lord-body-phase3-combat-06a2d-sheet.json",
+    "actions": [
+      "phase3_attack",
+      "phase3_hit"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "boss"
+  },
+  {
+    "actor": "tide_lord_mouth",
+    "metadata": "tide-lord-mouth-06a2d-sheet.json",
+    "actions": [
+      "phase1_idle",
+      "phase2_idle",
+      "phase3_idle",
+      "water_column",
+      "vortex",
+      "blacktide_roar",
+      "hit"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "boss"
+  },
+  {
+    "actor": "tide_lord_tail",
+    "metadata": "tide-lord-tail-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "tail_sweep"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "boss"
+  },
+  {
+    "actor": "tide_lord_fin",
+    "metadata": "tide-lord-fin-left-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "attack",
+      "hit",
+      "phase3_idle"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "boss"
+  },
+  {
+    "actor": "fire_seed_study",
+    "metadata": "keeper-fire-seed-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "explosion"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "object"
+  },
+  {
+    "actor": "lighthouse_guardian_body",
+    "metadata": "lighthouse-guardian-up-body-combat-06a2d-sheet.json",
+    "actions": [
+      "attack_shield",
+      "hit",
+      "summon",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "coast_props",
+    "metadata": "coast-props-small-06a2d-sheet.json",
+    "actions": [
+      "barrel",
+      "crate",
+      "coral",
+      "rock",
+      "grass",
+      "seaweed",
+      "shell_cluster",
+      "starfish",
+      "pebbles",
+      "vase",
+      "bucket",
+      "anchor_fragment",
+      "iron_scrap",
+      "lantern_husk",
+      "fish_bones",
+      "salt_crystal",
+      "blacktide_crystal",
+      "cloth_bundle",
+      "coin_pouch",
+      "wooden_sign"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "prop"
+  },
+  {
+    "actor": "coast_props",
+    "metadata": "coast-props-wide-06a2d-sheet.json",
+    "actions": [
+      "driftwood",
+      "ruined_wall",
+      "broken_fence",
+      "wreck_planks",
+      "flat_slab",
+      "ship_rib",
+      "rope_coil",
+      "net_pile"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "prop"
+  },
+  {
+    "actor": "coast_props",
+    "metadata": "coast-props-tall-06a2d-sheet.json",
+    "actions": [
+      "pillar",
+      "pole",
+      "dead_tree",
+      "broken_lamp"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "prop"
+  },
+  {
+    "actor": "coast_landmarks",
+    "metadata": "coast-lamp-animation-06a2d-sheet.json",
+    "actions": [
+      "lamp_off",
+      "lamp_ignite",
+      "lamp_lit"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "prop"
+  },
+  {
+    "actor": "fire_seed",
+    "metadata": "keeper-fire-seed-idle-selected-06a2d-sheet.json",
+    "actions": [
+      "idle"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "object"
+  },
+  {
+    "actor": "coast_large_fx",
+    "metadata": "keeper-fire-seed-explosion-selected-06a2d-sheet.json",
+    "actions": [
+      "fire_seed_explosion"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "large_effect"
+  },
+  {
+    "actor": "coast_particles",
+    "metadata": "coast-particle-flash_star-06a2d-sheet.json",
+    "actions": [
+      "flash_star"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "fixed",
+    "role": "particle"
+  },
+  {
+    "actor": "coast_particles",
+    "metadata": "coast-particle-light_dot-06a2d-sheet.json",
+    "actions": [
+      "light_dot"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "fixed",
+    "role": "particle"
+  },
+  {
+    "actor": "coast_landmarks",
+    "metadata": "coast-altar-06a2d-sheet.json",
+    "actions": [
+      "altar"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "prop"
+  },
+  {
+    "actor": "coast_landmarks",
+    "metadata": "coast-merchant-06a2d-sheet.json",
+    "actions": [
+      "merchant",
+      "merchant_barter"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "prop"
+  },
+  {
+    "actor": "coast_landmarks",
+    "metadata": "coast-rift-06a2d-sheet.json",
+    "actions": [
+      "rift"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "prop"
+  },
+  {
+    "actor": "coast_landmarks",
+    "metadata": "coast-blacktide-edge-06a2d-sheet.json",
+    "actions": [
+      "blacktide_edge"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "prop"
+  },
+  {
+    "actor": "coast_ui_icons",
+    "metadata": "coast-known-icons-06a2d-sheet.json",
+    "actions": [
+      "sword_ember",
+      "staff_ember",
+      "keeper_k",
+      "keeper_l",
+      "keeper_u"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "fixed",
+    "role": "ui"
+  },
+  {
+    "actor": "coast_small_fx",
+    "metadata": "coast-small-fx-a-06a2d-sheet.json",
+    "actions": [
+      "sword_trail",
+      "staff_cast",
+      "staff_projectile",
+      "impact_ember",
+      "impact_tide",
+      "impact_iron"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "fixed",
+    "role": "effect"
+  },
+  {
+    "actor": "coast_small_fx",
+    "metadata": "coast-small-fx-b-06a2d-sheet.json",
+    "actions": [
+      "impact_shadow",
+      "critical",
+      "kill_burst"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "fixed",
+    "role": "effect"
+  },
+  {
+    "actor": "coast_large_fx",
+    "metadata": "coast-sword-whirl-fx-06a2d-sheet.json",
+    "actions": [
+      "sword_whirl_release",
+      "sword_whirl_impact"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "large_effect"
+  },
+  {
+    "actor": "coast_large_fx",
+    "metadata": "coast-sword-rift-fx-06a2d-sheet.json",
+    "actions": [
+      "sword_rift_release",
+      "sword_rift_impact"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "large_effect"
+  },
+  {
+    "actor": "coast_large_fx",
+    "metadata": "coast-staff-cluster-fx-06a2d-sheet.json",
+    "actions": [
+      "staff_cluster_cast",
+      "staff_cluster_impact"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "large_effect"
+  },
+  {
+    "actor": "coast_large_fx",
+    "metadata": "coast-staff-core-fx-06a2d-sheet.json",
+    "actions": [
+      "staff_core_charge",
+      "staff_core_blast"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "large_effect"
+  },
+  {
+    "actor": "coast_large_fx",
+    "metadata": "coast-keeper-dash-fx-06a2d-sheet.json",
+    "actions": [
+      "keeper_dash_launch",
+      "keeper_dash_trail"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "large_effect"
+  },
+  {
+    "actor": "coast_large_fx",
+    "metadata": "coast-keeper-furnace-fx-06a2d-sheet.json",
+    "actions": [
+      "keeper_furnace_eruption"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "large_effect"
+  },
+  {
+    "actor": "coast_large_fx",
+    "metadata": "coast-boss-water-fx-06a2d-sheet.json",
+    "actions": [
+      "boss_water_column",
+      "boss_vortex"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "large_effect"
+  },
+  {
+    "actor": "coast_large_fx",
+    "metadata": "coast-boss-blacktide-fx-06a2d-sheet.json",
+    "actions": [
+      "boss_blacktide_surge"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "large_effect"
+  },
+  {
+    "actor": "coast_particles",
+    "metadata": "coast-particles-hand-06a2d-sheet.json",
+    "actions": [
+      "sparkle",
+      "light_dot",
+      "ember",
+      "water",
+      "ice",
+      "stardust",
+      "shadow",
+      "iron",
+      "debris"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "fixed",
+    "role": "particle"
   }
 ]

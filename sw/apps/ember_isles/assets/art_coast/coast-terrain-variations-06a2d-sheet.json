@@ -1,0 +1,320 @@
+{
+  "name": "coast-terrain-variations-06a2d",
+  "grid": [
+    128,
+    160
+  ],
+  "cell": [
+    32,
+    32
+  ],
+  "palette_file": "coast-terrain-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "coast_terrain_variations",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/0_variation/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "0_variation",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/0_variation/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "0_variation",
+      "frame": 1,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/0_variation/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "0_variation",
+      "frame": 2,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/0_variation/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "0_variation",
+      "frame": 3,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/1_variation/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "1_variation",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/1_variation/1",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "1_variation",
+      "frame": 1,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/1_variation/2",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "1_variation",
+      "frame": 2,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/1_variation/3",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "1_variation",
+      "frame": 3,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/2_variation/0",
+      "cell": [
+        0,
+        2
+      ],
+      "direction": "down",
+      "action": "2_variation",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/2_variation/1",
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "down",
+      "action": "2_variation",
+      "frame": 1,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/2_variation/2",
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "down",
+      "action": "2_variation",
+      "frame": 2,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/2_variation/3",
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "down",
+      "action": "2_variation",
+      "frame": 3,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/3_variation/0",
+      "cell": [
+        0,
+        3
+      ],
+      "direction": "down",
+      "action": "3_variation",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/3_variation/1",
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "down",
+      "action": "3_variation",
+      "frame": 1,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/3_variation/2",
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "down",
+      "action": "3_variation",
+      "frame": 2,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/3_variation/3",
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "down",
+      "action": "3_variation",
+      "frame": 3,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/4_variation/0",
+      "cell": [
+        0,
+        4
+      ],
+      "direction": "down",
+      "action": "4_variation",
+      "frame": 0,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/4_variation/1",
+      "cell": [
+        1,
+        4
+      ],
+      "direction": "down",
+      "action": "4_variation",
+      "frame": 1,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/4_variation/2",
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "down",
+      "action": "4_variation",
+      "frame": 2,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "down/4_variation/3",
+      "cell": [
+        3,
+        4
+      ],
+      "direction": "down",
+      "action": "4_variation",
+      "frame": 3,
+      "anchor": [
+        16,
+        16
+      ],
+      "hand_primary": null
+    }
+  ]
+}

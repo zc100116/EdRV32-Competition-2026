@@ -1,0 +1,16 @@
+Use case: precise-object-edit. Production true pixel sprite atlas of approved iron smith, dark brown swept hair, broad adult shoulders, leather apron with round brass furnace buckle, navy sleeves, iron bracers and boots. Exact UP-RIGHT rear three-quarter, back of head and apron/coat, face mostly hidden in EVERY cell, preserve the referenced native44px standing body proportions: head and torso pixel dimensions NEVER grow or shrink during movement. Render ONE logical64x64cell for each pose in strict4columns x4rows, logicalcanvas256x256, solid COARSE square pixels, transparent background. Centerx32, feetbaseline58; idle headtopy15; posed bodies bend at joints without scaling. Match reference same native pixel pitch. In reading order:
+1: attack_heavy frame0 — low ready grip; primary palm at [38,39]
+2: attack_heavy frame1 — both hands raise above forehead; primary palm at [35,25]
+3: attack_heavy frame2 — high overhead backswing; primary palm at [35,17]
+4: attack_heavy frame3 — knees compress under raised grip; primary palm at [38,20]
+5: attack_heavy frame4 — start forceful downswing; primary palm at [44,27]
+6: attack_heavy frame5 — full downward hammer swing; primary palm at [45,39]
+7: attack_heavy frame6 — crouching ground impact; primary palm at [43,50]
+8: attack_heavy frame7 — ground impact follow through; primary palm at [43,48]
+9: attack_heavy frame8 — pull hands back up; primary palm at [41,42]
+10: attack_heavy frame9 — recover ready stance; primary palm at [40,39]
+11: finish_hammer frame0 — turn hips and wind up side-on; primary palm at [33,31]
+12: finish_hammer frame1 — swing grip in powerful diagonal downstroke; primary palm at [46,32]
+13: finish_hammer frame2 — hold low extended impact grip; primary palm at [47,45]
+14: finish_hammer frame3 — recover heavy stance; primary palm at [40,39]
+Empty hands and primary right hand visible for separate weapon layer. Do not bake weapons, spells, particles, glow, afterimages or shadows into bodies. Each pose distinct. Walk is alternating feet with2–3px vertical lift,3pxstride and1pxbodybob, coat/apron sway1–2px; back views show lifted soles. Copper rim only existing hair contour, no white spikes. No text, gridlines, checkerboard, antialiasing or painterly shading. Any unused final cells completely empty.

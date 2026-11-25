@@ -153,3 +153,11 @@ msg_ece1ed9fce77确认另列16KiB预留估算（含8KiB灯罩），数字/UI/字
 assets-preview-30s.mp4实测30.000秒、8fps、640×360，是阶段素材预览，不是游戏录像。
 未完成：两人余下攻击/亲和/KLU、铁卫/火种；守卫/Boss其余部件、场景/地标/黑潮、特效/粒子。
 未完成：完整包预算与全部素材检视；本批提交后继续生产，尚不发送worker_done。
+粒子修复批：msg_aac2628fcd8c授权字面像素手绘9种38帧；光点依新授权3帧，空单元试稿排除。
+粒子独立DDR2512B/5色板组；GPU3112960纹素、精确2×35280像素通过，不是整包验收。
+复现：`python3 sw/apps/ember_isles/tools/art/coast_particles_06a2d.py`；输出06a2d/particle-proof/。
+生图试稿、ASCII源、8x帧表和固定位置加色动图保留；未加空帧兜底、形状公式或缩放。
+粒子修复提交：`git log -1 --format=%h -- sw/apps/ember_isles/assets/art_coast/coast-particle-pixels-06a2d.json`。
+冻结名修复批全量导出：1425帧/16组色板/局部DDR2349936B；GPU33177600纹素RGBA逐点通过。
+当前普通波估算135536B/Boss103328B（含最多2个大特效，未入包项仍估算）；固定区待06b。
+71a4c7df4首版仅守火人/剑杖；铸铁匠停产保留，余下部件/30图标/灯光/完整检视继续。
