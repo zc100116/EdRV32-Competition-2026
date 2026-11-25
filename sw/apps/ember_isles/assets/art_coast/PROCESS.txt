@@ -131,3 +131,50 @@ The received action-family and dedicated-skill follow-up is recorded as pending
 production after this stop; old generic cast poses do not fulfill art-plan2.4.
 Preserved keeper front/back walking repairs and warm hair rim are unchanged.
 Preview: preview_compact_coast.py;06a2c/index.html embeds all images and30s video.
+
+06a-2d production decisions (coordinator2026-11-25):
+msg_517f2b727c53: redraw coast terrain at32x32, matching the sim grid; bound uses
+30 different tiles plus12 props. Compute ordinary and Boss waves separately;
+Boss wave contains the Boss's parts plus tide-biter only.
+msg_22093b18cb4c: guardian body/shield/weapon each have5 facings; Deep Throat
+is a fixed-front encounter with body, mouth, tail and mirrored fins. Each phase
+and hit animation uses front parts; no5 complete Boss facings. Coordinator
+will record this decision in art-plan3; this task does not edit art-plan.
+msg_f17579e25ae8:12 concrete props total18000B estimated, not12x largest prop.
+At most2 medium enemy kinds among the3 ordinary kinds; conservative selection
+is largest2 medium kinds plus largest swarm kind. New tide-biter is measured
+from redrawn art, never a scaled copy of the rejected06a-2c source.
+
+Coordinator follow-up: produce complete PC enemies (idle4/walk6/attack6/hit2/
+death6,5 facings); FPGA tables select walk+attack and front death0–1 without
+removing PC source art. Both profiles retain the same underlying DDR frame data.
+msg_12b770a416a4: mist-jellyfish is radially symmetric, so both profiles use one
+full facing plus2–3 drifting-lean variants, mirrored for horizontal motion.
+The first crab UP/UP_RIGHT candidates still showed frontal features and are
+retained as unused studies. New *rear-base/combat/hit-death sheets redraw a
+rear rock-shell view with the face hidden. This is orientation repair, no
+rotation or scaling of old sprite bitmaps.
+The first drowned-watcher front extras output had an opaque white backdrop;
+normalization explicitly failed. Its original is retained; the built-in
+background-extraction edit is saved separately as *extras-transparent*.
+
+msg_6b01bbe6b6b7 authorizes per-frame authored native-pixel repairs:1–2px
+cloth/leg seams and whole-head1:1 copies translated to the pose's head position.
+No head, torso or whole-frame scaling or rotation is permitted. Every edited
+frame retains source PNG, before/after native sheets and a pixel-difference map.
+Coordinates and reference origins are in each sheet's head_copies/row_edits.
+The converter only executes these literal authored coordinates; it does not
+derive a silhouette fit. Differences are written beside the review media.
+
+06a-2d batch1 native repairs: smith right idle removes two trouser seam rows;
+back idle removes one; rear diagonal adds one or two trouser seam rows. The
+redrawn front diagonal idle removes one seam row. All twenty smith idle frames
+are44px, preserving original head and torso pixels. Exact row lists are artwork.
+The first diagonal idle redraw is35–36px and rejected, not stretched. Its raw,
+native and metadata remain with include_frames=false. The second is45px before
+the one-row trouser repair. The first guardian body is86–87px and rejected;
+the newly drawn coarser80px-cell study has72px idle height and is retained.
+
+msg_ece1ed9fce77: fixed-region report separates measured weapon/FX/particle
+material from a16KiB unmeasured UI/digits/glyph/light-mask reservation, including
+8KiB light mask. Final48KiB verdict belongs to06b integrated measurement.

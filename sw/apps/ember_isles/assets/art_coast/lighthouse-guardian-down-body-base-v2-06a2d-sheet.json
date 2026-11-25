@@ -1,0 +1,197 @@
+{
+  "name": "lighthouse-guardian-down-body-base-v2-06a2d",
+  "grid": [
+    320,
+    160
+  ],
+  "cell": [
+    80,
+    80
+  ],
+  "palette_file": "lighthouse-guardian-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "lighthouse_guardian_body",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/idle/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "idle",
+      "frame": 0,
+      "anchor": [
+        40,
+        74
+      ],
+      "hand_primary": [
+        56,
+        51
+      ],
+      "hand_secondary": [
+        24,
+        51
+      ]
+    },
+    {
+      "id": "down/idle/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "idle",
+      "frame": 1,
+      "anchor": [
+        40,
+        74
+      ],
+      "hand_primary": [
+        56,
+        51
+      ],
+      "hand_secondary": [
+        24,
+        51
+      ]
+    },
+    {
+      "id": "down/idle/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "idle",
+      "frame": 2,
+      "anchor": [
+        40,
+        74
+      ],
+      "hand_primary": [
+        56,
+        51
+      ],
+      "hand_secondary": [
+        24,
+        51
+      ]
+    },
+    {
+      "id": "down/idle/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "idle",
+      "frame": 3,
+      "anchor": [
+        40,
+        74
+      ],
+      "hand_primary": [
+        56,
+        51
+      ],
+      "hand_secondary": [
+        24,
+        51
+      ]
+    },
+    {
+      "id": "down/walk/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "walk",
+      "frame": 0,
+      "anchor": [
+        40,
+        74
+      ],
+      "hand_primary": [
+        56,
+        51
+      ],
+      "hand_secondary": [
+        24,
+        51
+      ]
+    },
+    {
+      "id": "down/walk/1",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "walk",
+      "frame": 1,
+      "anchor": [
+        40,
+        74
+      ],
+      "hand_primary": [
+        56,
+        51
+      ],
+      "hand_secondary": [
+        24,
+        51
+      ]
+    },
+    {
+      "id": "down/walk/2",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "walk",
+      "frame": 2,
+      "anchor": [
+        40,
+        74
+      ],
+      "hand_primary": [
+        56,
+        51
+      ],
+      "hand_secondary": [
+        24,
+        51
+      ]
+    },
+    {
+      "id": "down/walk/3",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "walk",
+      "frame": 3,
+      "anchor": [
+        40,
+        74
+      ],
+      "hand_primary": [
+        56,
+        51
+      ],
+      "hand_secondary": [
+        24,
+        51
+      ]
+    }
+  ],
+  "foot_baseline": 74
+}

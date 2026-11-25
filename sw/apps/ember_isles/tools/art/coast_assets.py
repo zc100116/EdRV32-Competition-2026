@@ -64,6 +64,7 @@ def normalize(sheet):
                         original[(cy * ch + sy) * width + cx * cw + x]
                         if 0 <= sy < ch else (0, 0, 0, 0))
     png(ASSETS / (name + '-before-repair.png'), width, height, pixels)
+    before_repair = pixels[:]
     # Replay authored 1–2-row material-seam repairs, identically for each facing.
     # The explicit row list is artwork, never derived from silhouette size.
     for edit in sheet.get('row_edits', []):
@@ -76,7 +77,24 @@ def normalize(sheet):
     for edit in sheet.get('final_pixel_edits', []):
         x, y = edit['xy']
         pixels[y * width + x] = tuple(edit['rgba'])
+    # Coordinator msg_6b01bbe6b6b7: authored whole-head copies are 1:1 translations.
+    for edit in sheet.get('head_copies', []):
+        rw, _, raw = decode_png((ASSETS / edit['reference']).read_bytes())
+        cx, cy = edit['cell']
+        ex, ey, ew, eh = edit['erase']
+        for y in range(ey, ey + eh):
+            for x in range(ex, ex + ew):
+                pixels[(cy * ch + y) * width + cx * cw + x] = (0, 0, 0, 0)
+        dx, dy = edit['destination']
+        for y in range(edit['size'][1]):
+            for x in range(edit['size'][0]):
+                i = (y * rw + x) * 4
+                pixels[(cy * ch + dy + y) * width + cx * cw + dx + x] = tuple(raw[i:i + 4])
     png(ASSETS / (name + '-native.png'), width, height, pixels)
+    if sheet.get('head_copies') or sheet.get('row_edits') or sheet.get('final_pixel_edits'):
+        diff = [(255, 70, 150, 255) if p != q else (0, 0, 0, 0)
+                for p, q in zip(before_repair, pixels)]
+        png(OUTPUT / (name + '-repair-diff.png'), width, height, diff)
     png(OUTPUT / (name + '-8x.png'), width * 8, height * 8,
         [pixels[y // 8 * width + x // 8]
          for y in range(height * 8) for x in range(width * 8)])

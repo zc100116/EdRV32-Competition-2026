@@ -1,0 +1,1151 @@
+[
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-down-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-down-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "salt_charger",
+    "metadata": "salt-charger-down-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-down-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack",
+      "death"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "drowned_watcher",
+    "metadata": "drowned-watcher-down-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack",
+      "death"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "mist_jellyfish",
+    "metadata": "mist-jellyfish-down-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-down_right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-up_right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-up-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "salt_charger",
+    "metadata": "salt-charger-down_right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "salt_charger",
+    "metadata": "salt-charger-right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "salt_charger",
+    "metadata": "salt-charger-up_right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "salt_charger",
+    "metadata": "salt-charger-up-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "drowned_watcher",
+    "metadata": "drowned-watcher-down_right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "drowned_watcher",
+    "metadata": "drowned-watcher-right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "drowned_watcher",
+    "metadata": "drowned-watcher-up_right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "drowned_watcher",
+    "metadata": "drowned-watcher-up-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "mist_jellyfish",
+    "metadata": "mist-jellyfish-down_right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "mist_jellyfish",
+    "metadata": "mist-jellyfish-right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "mist_jellyfish",
+    "metadata": "mist-jellyfish-up_right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "mist_jellyfish",
+    "metadata": "mist-jellyfish-up-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-down_right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-up_right-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-up-production-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "drowned_watcher",
+    "metadata": "drowned-watcher-down-production-06a2dv2-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-down-production-06a2dv2-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-down-full-extras-06a2d-sheet.json",
+    "actions": [
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "salt_charger",
+    "metadata": "salt-charger-down-full-extras-06a2d-sheet.json",
+    "actions": [
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-down-full-extras-06a2d-sheet.json",
+    "actions": [
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "mist_jellyfish",
+    "metadata": "mist-jellyfish-down-full-extras-06a2d-sheet.json",
+    "actions": [
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "drowned_watcher",
+    "metadata": "drowned-watcher-down-full-extras-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": false,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-down_right-full-extras-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-right-full-extras-06a2d-sheet.json",
+    "actions": [
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-up_right-full-extras-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "drowned_watcher",
+    "metadata": "drowned-watcher-down-full-extras-transparent-06a2d-sheet.json",
+    "actions": [
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-down-06a2-sheet.json",
+    "actions": [
+      "idle"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "salt_charger",
+    "metadata": "salt-charger-down-06a2c-v2-sheet.json",
+    "actions": [
+      "idle"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "mist_jellyfish",
+    "metadata": "mist-jellyfish-down-06a2c-sheet.json",
+    "actions": [
+      "idle"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "drowned_watcher",
+    "metadata": "drowned-watcher-down-06a2c-v2-sheet.json",
+    "actions": [
+      "idle"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-down-idle-selected-06a2d-sheet.json",
+    "actions": [
+      "idle"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-down-idle-fourth-06a2d-sheet.json",
+    "actions": [
+      "idle"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-up-rear-base-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-up-full-extras-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-up_right-full-extras-06a2d-rear-v2-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-right-idle-takes-06a2d-sheet.json",
+    "actions": [
+      "idle_candidate"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-right-idle-selected-06a2d-sheet.json",
+    "actions": [
+      "idle"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "tide_biter",
+    "metadata": "tide-biter-right-idle-fourth-06a2d-sheet.json",
+    "actions": [
+      "idle"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-up_right-rear-base-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-up-rear-combat-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-up-rear-hit-death-06a2d-sheet.json",
+    "actions": [
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-up_right-rear-combat-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "attack"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-up_right-rear-hit-death-06a2d-sheet.json",
+    "actions": [
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-down_right-full-extras-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "reef_crab",
+    "metadata": "reef-crab-right-full-extras-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "salt_charger",
+    "metadata": "salt-charger-down_right-full-extras-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "salt_charger",
+    "metadata": "salt-charger-right-full-extras-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "salt_charger",
+    "metadata": "salt-charger-up_right-full-extras-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "salt_charger",
+    "metadata": "salt-charger-up-full-extras-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "drowned_watcher",
+    "metadata": "drowned-watcher-down_right-full-extras-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "drowned_watcher",
+    "metadata": "drowned-watcher-right-full-extras-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "drowned_watcher",
+    "metadata": "drowned-watcher-up_right-full-extras-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "drowned_watcher",
+    "metadata": "drowned-watcher-up-full-extras-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-down-common-a-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "dash",
+      "hit",
+      "death"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-down-base-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "mist_jellyfish",
+    "metadata": "mist-jellyfish-lean-selected-06a2d-sheet.json",
+    "actions": [
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "enemy"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-down-v3-production-selected-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-down-right-v2-production-selected-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-right-v2-production-selected-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-up-right-v2-production-selected-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-up-v3-production-selected-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": false,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-down-common-b-06a2d-sheet.json",
+    "actions": [
+      "death",
+      "interact"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-down_right-base-06a2d-sheet.json",
+    "actions": [
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-right-base-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-up_right-base-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-up-base-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-down_right-idle-44-06a2d-sheet.json",
+    "actions": [
+      "idle"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-down-common-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "dash",
+      "hit",
+      "death",
+      "interact"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-down_right-common-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "dash",
+      "hit",
+      "death",
+      "interact"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-right-common-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "dash",
+      "hit",
+      "death",
+      "interact"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-up_right-common-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "dash",
+      "hit",
+      "death",
+      "interact"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-up-common-06a2d-sheet.json",
+    "actions": [
+      "walk",
+      "dash",
+      "hit",
+      "death",
+      "interact"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-down_right-idle-redraw-v2-06a2d-sheet.json",
+    "actions": [
+      "idle"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-down_right-common-06a2d-sheet.json",
+    "actions": [
+      "dash",
+      "hit",
+      "death",
+      "interact"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-right-common-06a2d-sheet.json",
+    "actions": [
+      "dash",
+      "hit",
+      "death",
+      "interact"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-up_right-common-06a2d-sheet.json",
+    "actions": [
+      "dash",
+      "hit",
+      "death",
+      "interact"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "lighthouse_guardian_body",
+    "metadata": "lighthouse-guardian-down-body-common-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk",
+      "hit"
+    ],
+    "include_frames": false,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-down-spell-family-06a2d-sheet.json",
+    "actions": [
+      "attack_spell",
+      "finish_staff",
+      "finish_codex"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-down_right-spell-family-06a2d-sheet.json",
+    "actions": [
+      "attack_spell",
+      "finish_staff",
+      "finish_codex"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "keeper",
+    "metadata": "keeper-right-spell-family-06a2d-sheet.json",
+    "actions": [
+      "attack_spell",
+      "finish_staff",
+      "finish_codex"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  },
+  {
+    "actor": "lighthouse_guardian_body",
+    "metadata": "lighthouse-guardian-down-body-base-v2-06a2d-sheet.json",
+    "actions": [
+      "idle",
+      "walk"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "guardian"
+  },
+  {
+    "actor": "smith",
+    "metadata": "smith-up-common-06a2d-sheet.json",
+    "actions": [
+      "dash",
+      "hit",
+      "death",
+      "interact"
+    ],
+    "include_frames": true,
+    "normalize_source": true,
+    "cache": "stream",
+    "role": "hero"
+  }
+]

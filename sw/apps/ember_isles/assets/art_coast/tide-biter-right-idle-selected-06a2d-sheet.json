@@ -1,0 +1,66 @@
+{
+  "name": "tide-biter-right-idle-takes-06a2d",
+  "grid": [
+    256,
+    128
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "palette_file": "tide-biter-06a2d-palette.json",
+  "create_palette": false,
+  "format": 1,
+  "atlas_group": "tide_biter",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "right/idle/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "right",
+      "action": "idle",
+      "frame": 0,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/idle/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "right",
+      "action": "idle",
+      "frame": 1,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    },
+    {
+      "id": "right/idle/2",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "right",
+      "action": "idle",
+      "frame": 2,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": null
+    }
+  ],
+  "foot_baseline": 58
+}

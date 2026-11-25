@@ -71,3 +71,15 @@ standard-library art converter. Rejected fine-density trials and the oversized
 tide-biter draft are retained and identified in `art_coast/PROCESS.txt`.
 These are incomplete front-facing source studies, not an approved full coast pack.
 No external source pack or commercial game artwork is included.
+
+## ART-3 coast, 06a-2d continued production
+
+The PNG sources named `*06a2d*` in `art_coast/sources/` are original built-in
+imagegen outputs, using this project's accepted native sprite references.
+Prompts are stored beside the raw images. Native sheets preserve the authored
+square-pixel grid; explicit head copies are1:1 translations, and small clothing
+seam repairs have literal coordinates in sheet metadata. Original and repaired
+sheets are retained; the inspection page displays their actual pixel difference.
+Rejected size, facing or transparency trials remain identified by the production
+manifest and PROCESS notes. They are not included in the delivered frame table.
+No commercial game art, external source pack or third-party generated asset is used.

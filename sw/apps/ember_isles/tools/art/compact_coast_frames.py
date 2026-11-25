@@ -71,7 +71,7 @@ def load_frames():
     return frames
 
 
-def convert(frames):
+def convert(frames, build=BUILD):
     palette_files = list(dict.fromkeys(f['palette_file'] for f in frames))
     palettes = [json.loads((ASSETS / p).read_text()) for p in palette_files]
     palettes = [p + [0] * (256 - len(p)) for p in palettes]
@@ -99,7 +99,8 @@ def convert(frames):
                         'format': 'I8', 'storage_group_texels': [4, 2]})
         # A compact frame is never sampled as an illegal non-power-of-two texture.
         # Copy its 8-byte groups to nonzero UV in a 128x128 page, OFFSET=32.
-        page_width = page_height = 128
+        page_width = 128 if width <= 124 else 256
+        page_height = 128 if height <= 126 else 256
         u0, v0 = 4, 2
         page = bytearray(32 + page_width * page_height)
         for y in range(0, height, 2):
@@ -109,7 +110,8 @@ def convert(frames):
                                                page_width, page_height, 1, 32)
                 page[destination:destination + 8] = blob[source:source + 8]
         texture = Texture(page, palettes,
-                          {'LOG2_W': 7, 'LOG2_H': 7, 'LEVELS': 1,
+                          {'LOG2_W': page_width.bit_length() - 1,
+                           'LOG2_H': page_height.bit_length() - 1, 'LEVELS': 1,
                            'FORMAT': 1, 'OFFSET': 32, 'PAL_GROUP': bank})
         for y in range(page_height):
             for x in range(page_width):
@@ -122,8 +124,8 @@ def convert(frames):
                     raise ValueError(f'{frame["name"]}: GPU page readback {x},{y}: '
                                      f'{actual} != {expected}')
                 readback_texels += 1
-    (BUILD / 'frames.bin').write_bytes(blob)
-    (BUILD / 'palettes.bin').write_bytes(b''.join(struct.pack('<256I', *p) for p in palettes))
+    (build / 'frames.bin').write_bytes(blob)
+    (build / 'palettes.bin').write_bytes(b''.join(struct.pack('<256I', *p) for p in palettes))
     return records, len(blob), readback_texels
 
 

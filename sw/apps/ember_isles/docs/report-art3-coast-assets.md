@@ -121,3 +121,35 @@ Python3.12.3标准库；GPU唯一参照tools/gpu/model；ffmpeg7.0.2，未改sim
 同目录partial-assets-30s.mp4实测30.000秒/8fps/640×360，只是局部素材预览，不是游戏录像。
 未完成：两角色合格通用/动作族攻击/亲和收招/专属KLU及特效、铁卫/火种；五怪其余动作与朝向。
 未完成：潮啮合格体型、头/躯干复核、爆散、头目/Boss部件、地形/摆件/地标/黑潮、全包预算。
+
+## 06a-2d：完整版素材与FPGA子集（分批生产中）
+
+2026-11-25；本批技术验证通过，整个06a-2d仍在生产，不作整包/美术质量验收结论。
+提交：`git log -1 --format=%h -- sw/apps/ember_isles/assets/art_coast/production-06a2d.json`。
+工具Python3.12.3标准库、内置imagegen、ffmpeg7.0.2；未改sim/UI/gfx/Makefile/规格。
+五怪PC完整507帧：四种各120，水母径向完整24+横移倾斜3；FPGA选265帧。
+PC为待机4/移动6/攻击6/受击2/死亡6；FPGA移动+攻击，正面死亡前2，精英复用放大。
+潮啮重新绘制，全部待机24–26px、宽≤36；其他小怪待机36–43px；未缩旧图。
+两角色通用各120帧/五向齐；守火人施法族+双亲和收招已产三向48帧，其他仍续作。
+铸铁匠20待机均44px；守火人原五向44px基准、正/背步态和暖铜发缘保留。
+接缝1–2px及整头1:1平移按msg_6b01bbe6b6b7授权，原图/修前/修后/实际差分均保留。
+守卫正面身体8帧待机72px；首版86–87px不采用；其余身体/盾/武器和Boss尚未完成。
+当前包803帧，I8紧凑4×2纹素组，DDR起点32B对齐，8组色板；PC/FPGA表共用DDR偏移。
+实测DDR局部库1069592B；完整DDR总字节尚未取得，未把局部数写成全包。
+GPU唯一参照tools/gpu/model；真实DDR组拼合法128页，含空白13156352纹素回读通过。
+803帧精确2×逐像素一致4013688像素；不二次缩放像素画，未改I4。
+流式普通波估算128256B，Boss波估算90384B；预算147456B，最大估算余量19200B。
+普通波=主角1920+宠物768估算+守卫7728（身体4736实测/盾武器2992估算）+召唤物4608估算。
+再加场景48720估算（30×32×32地形+12种具体摆件18000），及12×(2184+2184+1008)。
+最坏普通三种=礁壳蟹/水母/潮啮；最多两中型，符合tech5b；精英不另占缓存。
+Boss波以Boss五部件22272B估算替代守卫，只加潮啮；全部未产项在budget-estimate.json标估算。
+固定素材：既有武器检查点4096B；本批特效/粒子尚未产；完整固定区未实测，不写≤48KiB通过。
+msg_ece1ed9fce77确认另列16KiB预留估算（含8KiB灯罩），数字/UI/字形由06b接入后实测。
+复现打包：`python3 sw/apps/ember_isles/tools/art/coast_production.py`。
+预算：`python3 sw/apps/ember_isles/tools/art/coast_budget_06a2d.py`；py_compile/git diff --check通过。
+检视：`python3 sw/apps/ember_isles/tools/art/preview_coast_production.py`。
+日志/二进制/两包表在build/ember_isles/art_coast_production/；源表production-06a2d.json。
+自包含五向动图/8x修前后差分/并排体型/截图在outputs/ember_isles/art3-coast-assets/06a2d/。
+assets-preview-30s.mp4实测30.000秒、8fps、640×360，是阶段素材预览，不是游戏录像。
+未完成：两人余下攻击/亲和/KLU、铁卫/火种；守卫/Boss其余部件、场景/地标/黑潮、特效/粒子。
+未完成：完整包预算与全部素材检视；本批提交后继续生产，尚不发送worker_done。

@@ -1,0 +1,18 @@
+Use case: precise-object-edit. Production true pixel sprite atlas of approved copper-haired keeper, warm copper1px hair rim and dark top2rows, red scarf, navy long coat brass trim, slim long legs and boots. Exact RIGHT strict side profile in EVERY cell, preserve the referenced native44px standing body proportions: head and torso pixel dimensions NEVER grow or shrink during movement. Render ONE logical64x64cell for each pose in strict4columns x4rows, logicalcanvas256x256, solid COARSE square pixels, transparent background. Centerx32, feetbaseline58; idle headtopy15; posed bodies bend at joints without scaling. Match reference same native pixel pitch. In reading order:
+1: attack_spell frame0 — gather hands at chest, feet rooted
+2: attack_spell frame1 — right elbow draws back, left palm supports invisible book
+3: attack_spell frame2 — right palm advances at shoulder height
+4: attack_spell frame3 — full forward palm thrust, knees flex
+5: attack_spell frame4 — open left palm and raised right casting hand
+6: attack_spell frame5 — both arms follow through across body
+7: attack_spell frame6 — pull hands back, coat sways
+8: attack_spell frame7 — return to ready stance
+9: finish_staff frame0 — two-handed overhead ready grip with empty hands
+10: finish_staff frame1 — sweep hands forward in broad downward arc
+11: finish_staff frame2 — point primary hand forward, secondary hand stabilizes
+12: finish_staff frame3 — settle into ready pose
+13: finish_codex frame0 — left palm presents invisible open book, right hand rises
+14: finish_codex frame1 — right fingers close then flick forward
+15: finish_codex frame2 — open both arms ceremonial finishing gesture
+16: finish_codex frame3 — close arms and settle
+Empty hands and primary right hand visible for separate weapon layer. Do not bake weapons, spells, particles, glow, afterimages or shadows into bodies. Each pose distinct. Walk is alternating feet with2–3px vertical lift,3pxstride and1pxbodybob, coat/apron sway1–2px; back views show lifted soles. Copper rim only existing hair contour, no white spikes. No text, gridlines, checkerboard, antialiasing or painterly shading. Any unused final cells completely empty.

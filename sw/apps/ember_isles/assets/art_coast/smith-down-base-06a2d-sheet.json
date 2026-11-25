@@ -1,0 +1,405 @@
+{
+  "name": "smith-down-base-06a2d",
+  "grid": [
+    256,
+    128
+  ],
+  "cell": [
+    64,
+    64
+  ],
+  "palette_file": "smith-06a2d-palette.json",
+  "create_palette": true,
+  "format": 1,
+  "atlas_group": "smith",
+  "pixel_edits": [],
+  "row_edits": [],
+  "final_pixel_edits": [],
+  "cells": [
+    {
+      "id": "down/idle/0",
+      "cell": [
+        0,
+        0
+      ],
+      "direction": "down",
+      "action": "idle",
+      "frame": 0,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        41
+      ]
+    },
+    {
+      "id": "down/idle/1",
+      "cell": [
+        1,
+        0
+      ],
+      "direction": "down",
+      "action": "idle",
+      "frame": 1,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        41
+      ]
+    },
+    {
+      "id": "down/idle/2",
+      "cell": [
+        2,
+        0
+      ],
+      "direction": "down",
+      "action": "idle",
+      "frame": 2,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        41
+      ]
+    },
+    {
+      "id": "down/idle/3",
+      "cell": [
+        3,
+        0
+      ],
+      "direction": "down",
+      "action": "idle",
+      "frame": 3,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        41
+      ]
+    },
+    {
+      "id": "down/walk/0",
+      "cell": [
+        0,
+        1
+      ],
+      "direction": "down",
+      "action": "walk",
+      "frame": 0,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        41
+      ]
+    },
+    {
+      "id": "down/walk/2",
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "down",
+      "action": "walk",
+      "frame": 2,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        41
+      ]
+    },
+    {
+      "id": "down/walk/3",
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "down",
+      "action": "walk",
+      "frame": 3,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        41
+      ]
+    },
+    {
+      "id": "down/walk/5",
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "down",
+      "action": "walk",
+      "frame": 5,
+      "anchor": [
+        32,
+        58
+      ],
+      "hand_primary": [
+        40,
+        41
+      ]
+    }
+  ],
+  "foot_baseline": 58,
+  "head_copies": [
+    {
+      "cell": [
+        0,
+        0
+      ],
+      "reference": "smith-down-head-reference-06a2d.png",
+      "size": [
+        17,
+        13
+      ],
+      "erase": [
+        24,
+        13,
+        19,
+        15
+      ],
+      "destination": [
+        25,
+        15
+      ],
+      "reference_origin": {
+        "sheet": "smith-down-base-06a2d",
+        "cell": [
+          2,
+          0
+        ],
+        "rect": [
+          25,
+          15,
+          17,
+          13
+        ]
+      }
+    },
+    {
+      "cell": [
+        1,
+        0
+      ],
+      "reference": "smith-down-head-reference-06a2d.png",
+      "size": [
+        17,
+        13
+      ],
+      "erase": [
+        24,
+        13,
+        19,
+        15
+      ],
+      "destination": [
+        25,
+        15
+      ],
+      "reference_origin": {
+        "sheet": "smith-down-base-06a2d",
+        "cell": [
+          2,
+          0
+        ],
+        "rect": [
+          25,
+          15,
+          17,
+          13
+        ]
+      }
+    },
+    {
+      "cell": [
+        3,
+        0
+      ],
+      "reference": "smith-down-head-reference-06a2d.png",
+      "size": [
+        17,
+        13
+      ],
+      "erase": [
+        24,
+        13,
+        19,
+        15
+      ],
+      "destination": [
+        25,
+        15
+      ],
+      "reference_origin": {
+        "sheet": "smith-down-base-06a2d",
+        "cell": [
+          2,
+          0
+        ],
+        "rect": [
+          25,
+          15,
+          17,
+          13
+        ]
+      }
+    },
+    {
+      "cell": [
+        0,
+        1
+      ],
+      "reference": "smith-down-head-reference-06a2d.png",
+      "size": [
+        17,
+        13
+      ],
+      "erase": [
+        24,
+        14,
+        19,
+        14
+      ],
+      "destination": [
+        25,
+        15
+      ],
+      "reference_origin": {
+        "sheet": "smith-down-base-06a2d",
+        "cell": [
+          2,
+          0
+        ],
+        "rect": [
+          25,
+          15,
+          17,
+          13
+        ]
+      }
+    },
+    {
+      "cell": [
+        1,
+        1
+      ],
+      "reference": "smith-down-head-reference-06a2d.png",
+      "size": [
+        17,
+        13
+      ],
+      "erase": [
+        24,
+        13,
+        19,
+        14
+      ],
+      "destination": [
+        25,
+        14
+      ],
+      "reference_origin": {
+        "sheet": "smith-down-base-06a2d",
+        "cell": [
+          2,
+          0
+        ],
+        "rect": [
+          25,
+          15,
+          17,
+          13
+        ]
+      }
+    },
+    {
+      "cell": [
+        2,
+        1
+      ],
+      "reference": "smith-down-head-reference-06a2d.png",
+      "size": [
+        17,
+        13
+      ],
+      "erase": [
+        24,
+        14,
+        19,
+        14
+      ],
+      "destination": [
+        25,
+        15
+      ],
+      "reference_origin": {
+        "sheet": "smith-down-base-06a2d",
+        "cell": [
+          2,
+          0
+        ],
+        "rect": [
+          25,
+          15,
+          17,
+          13
+        ]
+      }
+    },
+    {
+      "cell": [
+        3,
+        1
+      ],
+      "reference": "smith-down-head-reference-06a2d.png",
+      "size": [
+        17,
+        13
+      ],
+      "erase": [
+        24,
+        13,
+        19,
+        15
+      ],
+      "destination": [
+        25,
+        15
+      ],
+      "reference_origin": {
+        "sheet": "smith-down-base-06a2d",
+        "cell": [
+          2,
+          0
+        ],
+        "rect": [
+          25,
+          15,
+          17,
+          13
+        ]
+      }
+    }
+  ]
+}
