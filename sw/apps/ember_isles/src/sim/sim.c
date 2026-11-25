@@ -1381,7 +1381,11 @@ static void shots_step(struct ember_sim *s)
     for (unsigned i = 0; i < EMBER_SHOTS; ++i) {
         struct ember_shot *p = &s->shots[i];
         if (!p->alive || p->room != s->room_serial) continue;
-        if (p->delay) { --p->delay; continue; }
+        if (p->delay) {
+            --p->delay;
+            /* Water-column impact occurs on the end of warning tick 45. */
+            if (p->delay || p->kind != 2 || p->effect != 7) continue;
+        }
         if (!p->hostile && (p->homing ||
             (p->pet && (s->pet.category == 2 || pet_rune(s) == 8)) ||
             (p->weapon < EMBER_WEAPONS_COUNT && inscription(s, p->weapon, 7)))) {

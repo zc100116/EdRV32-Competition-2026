@@ -208,6 +208,8 @@ static int content_enemy(struct ember_sim *s, unsigned index)
                     player_hurt_typed(s, d->tail_damage, e->wave, e->x, e->y, 2, 0);
                 struct ember_shot *p = shot(s, 2, s->player.x, s->player.y, d->wave_damage, d->wave_radius, d->wave_life);
                 p->effect = 7; p->enemy_kind = e->kind; p->weapon = (uint8_t)e->wave;
+                /* AI18 uses its CSV charge_frames for the water-column warning. */
+                p->delay = (uint16_t)d->charge_frames;
             } else if (e->stage == 1) {
                 e->defense.vulnerability = d->vulnerability;
                 enemy_ground(s, e, 8, d->ground_radius);

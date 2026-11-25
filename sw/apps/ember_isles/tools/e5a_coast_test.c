@@ -195,6 +195,27 @@ static void arena_timing(void)
     assert(!first.pillars[0].lit);
     puts("PASS coast timers: 60-second overlap, head/elite/Boss roles, 12-minute shrink");
 }
+static void water_column_warning(void)
+{
+    start(&first,0,19);
+    unsigned n=ember_sim_spawn(&first,18,0,first.player.x+400*EMBER_Q,first.player.y);
+    struct ember_enemy *boss=&first.enemies[n];
+    const struct ember_enemies_row *d=&ember_enemies[18];
+    boss->ai_timer=(uint16_t)(d->attack_cooldown-1);
+    content_enemy(&first,n);
+    struct ember_shot *column=NULL;
+    for (unsigned i=0;i<EMBER_SHOTS;++i)
+        if (first.shots[i].alive && first.shots[i].effect==7) column=&first.shots[i];
+    assert(column && column->delay==45 && column->damage==d->wave_damage && column->radius==d->wave_radius);
+    int hp=first.player.hp;
+    for (unsigned tick=1;tick<45;++tick) {
+        shots_step(&first);
+        assert(first.player.hp==hp && column->delay==45-tick && column->life==d->wave_life);
+    }
+    shots_step(&first);
+    assert(!column->delay && first.player.hp<hp && column->life==d->wave_life-1);
+    puts("PASS water column: 44 harmless warning ticks, damage on tick 45, unchanged CSV damage/radius");
+}
 int main(void)
 {
     unsigned counts[18] = {0};
@@ -243,7 +264,7 @@ int main(void)
     assert(first.stage_clear && !first.shop_available);
     first.exit = (struct ember_point){first.player.x,first.player.y};
     assert(modes_interact(&first) && first.phase == EMBER_WON && !first.config.stage);
-    rune_effects(); selected_effects(); arena_timing();
+    rune_effects(); selected_effects(); arena_timing(); water_column_warning();
     puts("PASS coast: paired starts, 100 acquisition pools, no pet/rift/resonance, ten-wave exit");
     return 0;
 }
