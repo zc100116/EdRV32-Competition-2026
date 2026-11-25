@@ -155,6 +155,7 @@ static void content_skill(struct ember_sim *s, unsigned key)
         p->x + ember_system[0].shadow_default_aim_range * EMBER_Q;
     ember_fixed ty = target >= 0 ? s->enemies[target].y : p->y;
     player_action(s, EMBER_CAST, ember_system[0].cast_frames);
+    p->cast_skill = (uint8_t)key;
     if (key == 2) s->ultimate_time = (uint16_t)c->ultimate_duration;
     else if (key == 1) s->skill_time = (uint16_t)c->skill_duration;
     switch (c->mechanism) {

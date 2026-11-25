@@ -52,6 +52,7 @@ struct ember_player {
     uint8_t dash_charges;
     uint8_t facing, character, facing8, facing_frame, flip_x;
     uint8_t main_weapon, sub_weapon, pet_weapon, action, action_frame, combo;
+    uint8_t cast_skill; /* Frozen at action start: 0 K, 1 L, 2 U; presentation only. */
     uint16_t action_time, pet_timer, cooldown_k;
     /* Simulation ticks since this action began. Reset to zero on each attack,
      * cast, hurt, dash and interaction, including consecutive same-kind actions.
