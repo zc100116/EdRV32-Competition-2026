@@ -1,0 +1,36 @@
+Card 107 round 10 | upstream bfaa8a41 | local run 74c53048
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | capture 2026-11-26T22:43:14+08:00
+
+10: Process "Compile" started.
+11: Current time: Thu Nov 26 22:20:00 2026
+17107: Action compile: Real time elapsed is 0h:2m:25s
+17108: Action compile: CPU time elapsed is 0h:0m:12s
+17109: Action compile: Process CPU time elapsed is 0h:0m:12s
+17110: Current time: Thu Nov 26 22:22:24 2026
+17111: Action compile: Peak memory pool usage is 844 MB
+17115: Process "Compile" done.
+17118: Process "Synthesize" started.
+17119: Current time: Thu Nov 26 22:22:25 2026
+47842: Action synthesize: Real time elapsed is 0h:9m:57s
+47843: Action synthesize: CPU time elapsed is 0h:0m:56s
+47844: Action synthesize: Process CPU time elapsed is 0h:1m:2s
+47845: Current time: Thu Nov 26 22:32:21 2026
+47846: Action synthesize: Peak memory pool usage is 3,853 MB
+47850: Process "Synthesize" done.
+47853: Process "Device Map" started.
+47854: Current time: Thu Nov 26 22:32:36 2026
+51527: Action dev_map: Real time elapsed is 0h:2m:2s
+51528: Action dev_map: CPU time elapsed is 0h:0m:16s
+51529: Action dev_map: Process CPU time elapsed is 0h:0m:17s
+51530: Current time: Thu Nov 26 22:34:37 2026
+51531: Action dev_map: Peak memory pool usage is 2,882 MB
+51535: Process "Device Map" done.
+
+compile/run.log, all E: lines:
+(none)
+
+synthesize/run.log, all E: lines:
+(none)
+
+device_map/run.log, all E: lines:
+(none)

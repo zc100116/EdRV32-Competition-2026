@@ -1,5 +1,50 @@
 # 卡 107 结果
 
+## 第 10 轮 Device Map 结果
+
+| 项 | 内容 |
+|---|---|
+| 实测版本 | 本地 `74c53048`，RTL 与任务卡 `bfaa8a41` 一致 |
+| 环境 | Windows PDS 2022.2-SP6.1 build 138931，ADS 综合，Logos2 PG2L200H-6 FBB676 |
+| 工程 | `G:/codex_project/EdRV32-FPGA/board_gpu/board_gpu.pds` |
+| 阶段用时 | Compile 通过（2 分 25 秒），Synthesize 通过（9 分 57 秒），Device Map 通过（2 分 02 秒） |
+| 布线门槛 | `clk_gpu` 综合估算 **166.0689 MHz**，WNS **−0.466 ns**，满足本轮 150 MHz 门槛 |
+| 范围 | 北京时间 2026-11-26 22:43:14 采集。本次回传截至 Device Map。 |
+
+三个阶段的日志均无 `E:` 行。[阶段日志](artifacts/round10/flow-excerpts.log)
+
+### Device Map 资源
+
+| 资源 | 第 9 轮用量 | 第 10 轮用量 | 容量 | 第 10 轮 PDS 占用 |
+|---|---:|---:|---:|---:|
+| LUT | 116,167 | 103,239 | 159,800 | 65% |
+| FF | 174,211 | 157,260 | 319,600 | 50% |
+| DRM（36K 等效） | 254 | 250 | 415 | 61% |
+| APM | 243 | 236 | 740 | 32% |
+| 分布式 RAM | 11,974 | 12,145 | 39,500 | 31% |
+| I/O | 115 | 115 | 400 | 29% |
+| GPLL | 7 | 7 | 10 | 70% |
+| PPLL | 2 | 2 | 10 | 20% |
+
+相较第 9 轮，LUT 少 **12,928**、FF 少 **16,951**、DRM 少 **4**、APM 少 **7**。综合层次中，GPU 使用 66,944 LUT、126,731 FF，`u_mem` 使用 3,559 LUT、4,034 FF，`u_disp` 使用 1,671 LUT、2,168 FF。GPU、mem、DISP 的子模块在层次表中单列。[Device Map 资源原文](artifacts/round10/resource_summary.txt) · [完整综合层次表](artifacts/round10/resource_hier.txt)
+
+### 综合预估时序
+
+| 时钟域 | 估算 MHz | WNS（ns） | TNS（ns） | WHS（ns） | THS（ns） |
+|---|---:|---:|---:|---:|---:|
+| `clk_gpu` | 166.0689 | −0.466 | −121.927 | 0.324 | 0.000 |
+| `clk_sys` | 115.3659 | −0.668 | −79.536 | 0.324 | 0.000 |
+| `clk_mem` | 102.7644 | −1.731 | −85.775 | −0.006 | −0.942 |
+| `clk_aud` | 276.6247 | 77.765 | 0.000 | 0.619 | 0.000 |
+
+GPU 综合估算从 **153.6182 MHz** 提升至 **166.0689 MHz**。全设计汇总 WNS **−1.731 ns** 对应 `clk_mem`。综合报告包含 200 个不同端点的 GPU setup 路径，slack 从 −0.466 ns 到 −0.141 ns。最差路径为 `u_write_dma/alloc_ptr_r/CLK` 到 `u_write_dma/g_keep[1].first_keep_r[24]/D`，5 逻辑级。[所有时钟域时序](artifacts/round10/timing_summary.txt) · [GPU 最差 200 条 setup 路径](artifacts/round10/setup_top200_clk_gpu.txt) · [前 20 条逐级明细](artifacts/round10/setup_top20_detail.txt)
+
+### 高扇出
+
+综合报告记录 1,880 组控制集，`maximum fanout` 为 36,097，对应控制集表的单独时钟项 `CLK(clk_gpu_w)`。Device Map 中 `ntclkbufg_0` 为 GPU 全局时钟网，扇出 137,957。Other 表中的 GPU 非时钟网包括 `u_setup/control_enable_w[0]`（1,750）、`u_geometry/u_project/pipeline_enable_w[5]`（1,585）和 `u_texture/address_slot_0_r_d5_r[1]`（1,573）。[Clock、Reset、CE、Other 原表](artifacts/round10/high_fanout.txt)
+
+原始阶段报告和日志快照存于 `G:/codex_project/edrv32-card107/build/card107-pds-check/logbackup/round10-device-map-20261126-224314`。
+
 ## 第 9 轮资源、时序与布局快照
 
 | 项 | 内容 |
