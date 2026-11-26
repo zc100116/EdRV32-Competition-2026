@@ -55,6 +55,8 @@ module edrv32_disp_scan_gpu (
     reg group_start_r;
     reg [3:0] phase_r;
     reg [23:0] rgb_pipe_r [0:7];
+    wire [23:0] rgb_next_w [0:7];
+    genvar pixel_stage;
     wire l0_en_w;
     wire l0_x2_w;
     wire [3:0] offset_w;
@@ -160,15 +162,20 @@ module edrv32_disp_scan_gpu (
         end
     end
 
+    assign rgb_next_w[0] = background_w;
+    generate
+        for (pixel_stage = 1; pixel_stage < 8; pixel_stage = pixel_stage + 1) begin : g_rgb_next
+            assign rgb_next_w[pixel_stage] = rgb_pipe_r[pixel_stage-1];
+        end
+    endgenerate
     // S3 captures RGB565 expansion; S4-S10 retain the raster alignment contract.
     always @(posedge clk_i) begin
         raster_x_r <= x_i;
         raster_y_r <= y_i;
         phase_decode_r <= phase_w;
         phase_r <= phase_decode_r;
-        rgb_pipe_r[0] <= background_w;
-        for (stage_idx = 1; stage_idx < 8; stage_idx = stage_idx + 1) begin
-            rgb_pipe_r[stage_idx] <= rgb_pipe_r[stage_idx-1];
+        for (stage_idx = 0; stage_idx < 8; stage_idx = stage_idx + 1) begin
+            rgb_pipe_r[stage_idx] <= rgb_next_w[stage_idx];
         end
         if (group_start_r && group_good_w) pixels_r <= fifo_data_i;
     end
