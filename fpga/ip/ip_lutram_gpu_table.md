@@ -1,11 +1,11 @@
-# ip_lutram_gpu_delay
+# ip_lutram_gpu_table
 
 | 项 | 内容 |
 |---|---|
 | IP 类型 | IP Compiler → Memory → Distributed RAM → Simple Dual Port RAM |
-| 模块名 | `ip_lutram_gpu_delay` |
-| 包装模块 | `rtl/tech/edrv32_ram_gpu_delay64.v` |
-| 使用者 | GPU 内深度 ≤ 64 的延迟线、结果队列、按标签寻址的小常数表（取代这些位置原来用的 `ip_ram_gpu_delay` DRM） |
+| 模块名 | `ip_lutram_gpu_table` |
+| 包装模块 | `rtl/tech/edrv32_ram_gpu_table.v` |
+| 使用者 | GPU 内深度 ≤ 64 的延迟线、结果队列、小表（包括组合读和多读口的表：每个读口一个实例），取代原来被放进 DRM 的这些结构 |
 | 器件 | PG2L200H，速度等级以工程为准 |
 | 依据 | gpu-microarch 4.15；CLAUDE.md 8 |
 
@@ -18,8 +18,8 @@
 | 资源 / 端口 | 分布式 RAM，简单双口 |
 | 时钟 | 写读均接 clk_gpu，上升沿 |
 | 写入 | 同步写，整字写使能，不启用字节使能 |
-| 读出 | 组合读，不注册地址，输出寄存器关闭；包装模块寄存输出 |
-| 延迟 | 包装端口读延迟 1 拍，rd_en_i=0 保持输出 |
+| 读出 | 组合读，不注册地址，输出寄存器关闭；包装模块也不寄存，需要寄存读的使用者自己在外面打一拍 |
+| 延迟 | 包装端口为组合读（地址到数据 0 拍） |
 | 复位 / 初始化 | 不复位内容或数据输出，无初始化文件；上电内容未定义 |
 | 同址读写 | 业务控制不同时读写同址，不依赖碰撞结果 |
 

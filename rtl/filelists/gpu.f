@@ -1,7 +1,7 @@
 +incdir+../include
 ../common/edrv32_reset_copy.v
 ../tech/edrv32_ram_gpu_delay.v
-../tech/edrv32_ram_gpu_delay64.v
+../tech/edrv32_ram_gpu_table.v
 ../tech/edrv32_ram_gpu_palette_current.v
 ../tech/edrv32_ram_gpu_palette_segment.v
 ../tech/edrv32_ram_gpu_read_pool.v
