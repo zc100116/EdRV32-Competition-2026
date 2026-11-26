@@ -1,6 +1,6 @@
 # 云脊漫游（GPU 3D 开放世界 demo）设计
 
-日期：2026-11-26；状态：设计待协调者确认，未实现。依据：G-4 Task、
+日期：2026-11-26；状态：协调者已确认，实施中；实际取舍与用量见 README.md。依据：G-4 Task、
 `docs/spec/gpu-spec.md` v0.5 §2.1–2.10、§7；运行时复用 G-3 交付版本。
 设定图：`outputs/gpu-test-games-20261126/concept-world.png`，为 imagegen 概念图，
 不是 GPU 渲染截图。纹理、帧预算均为设计估算，等待真实构建与板端测量。

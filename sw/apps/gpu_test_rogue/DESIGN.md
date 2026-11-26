@@ -1,6 +1,6 @@
 # 棱炉地宫（GPU 2D 肉鸽 demo）设计
 
-日期：2026-11-26；状态：设计待协调者确认，未实现。依据：G-4 Task、
+日期：2026-11-26；状态：协调者已确认，实施中；实际取舍与用量见 README.md。依据：G-4 Task、
 `docs/spec/gpu-spec.md` v0.5 §2.1–2.10、§7；共享运行时以 G-3 交付版本为准。
 设定图：`outputs/gpu-test-games-20261126/concept-rogue.png`，为 imagegen 概念图，
 不是 GPU 截图，不构成已达到的性能或像素精度承诺。
