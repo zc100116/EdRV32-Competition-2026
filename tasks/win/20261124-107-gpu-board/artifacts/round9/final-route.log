@@ -1,0 +1,178 @@
+Card 107 round 9 final P&R | local run 1f540308 | task 4426bf9e
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | 2026-11-26
+
+Place & Route native log excerpts; original line numbers.
+Source: place_route/run.log
+
+9396: Phase 1 Pre global placement started.
+9400: C: Place-2039: The placement site of clk_i_ibuf/opit_1 and u_pll_sys/u_gpll/gpll_inst is incompatible.
+9412: Phase 1.1 1st GP placement started.
+9416: 1st GP placement takes 13.67 sec.
+9418: Phase 1.2 Clock placement started.
+9434: Clock placement takes 1.03 sec.
+9437: Pre global placement takes 16.33 sec.
+9439: Phase 2 Global placement started.
+9440: Phase 2.1 Fixed placement started.
+9588: Fixed placement takes 3.39 sec.
+9590: Phase 2.2 Process placement started.
+9596: Process placement takes 0.00 sec.
+9598: Phase 2.3 IO placement started.
+9599: IO placement takes 0.17 sec.
+9605: Phase 2.4 2nd GP placement started.
+9613: Worst slack after global placement is -1991
+9614: 2nd GP placement takes 202.19 sec.
+9617: Global placement takes 207.06 sec.
+9619: Phase 3 Post global placement started.
+9620: Phase 3.1 Macro cell placement started.
+9623: Macro cell placement takes 77.22 sec.
+9627: Phase 3.2 3rd GP placement started.
+9630: Worst slack after post global placement is -2105
+9631: 3rd GP placement takes 106.25 sec.
+9637: Post global placement takes 210.02 sec.
+9639: Phase 4 Legalization started.
+9644: Phase 5 Timing-driven detailed placement started.
+9645: Phase 5.1 Replication placement started.
+9646: Worst slack before Replication Place is -4549.
+9647: Replication placement takes 19.83 sec.
+9650: Phase 5.2 Swapping placement started.
+9651: Worst slack before detailed placement is -4293, TNS before detailed placement is -29409386.
+9652: Cost at Swap iteration 0 : -4293, wslk -4154, tns -31561387, takes 11.92 sec.
+9654: Cost at DP iteration 0 : -4154, wslk -3676, tns -25971813, takes 2.03 sec.
+9656: Cost at Swap iteration 1 : -3676, wslk -3438, tns -24233980, takes 17.38 sec.
+9658: Cost at Swap iteration 2 : -3438, wslk -3392, tns -22617085, takes 19.55 sec.
+9660: Cost at DP iteration 2 : -3392, wslk -3374, tns -20389202, takes 3.69 sec.
+9662: Cost at Swap iteration 3 : -3374, wslk -3245, tns -19095795, takes 9.12 sec.
+9664: Cost at Swap iteration 4 : -3245, wslk -3026, tns -15514534, takes 9.44 sec.
+9666: Cost at DP iteration 4 : -3026, wslk -2748, tns -13278898, takes 2.28 sec.
+9668: Cost at Swap iteration 5 : -2748, wslk -2684, tns -12637184, takes 28.83 sec.
+9670: Cost at Swap iteration 6 : -2684, wslk -2620, tns -11608162, takes 23.88 sec.
+9672: Cost at DP iteration 6 : -2620, wslk -2528, tns -8977109, takes 10.28 sec.
+9674: Cost at Swap iteration 7 : -2528, wslk -2464, tns -8176026, takes 31.86 sec.
+9676: Cost at Swap iteration 8 : -2464, wslk -2358, tns -7816462, takes 27.50 sec.
+9678: Cost at DP iteration 8 : -2358, wslk -2358, tns -7258641, takes 9.14 sec.
+9680: Cost at Swap iteration 9 : -2358, wslk -2358, tns -6761614, takes 38.12 sec.
+9682: Cost at Swap iteration 10 : -2358, wslk -2358, tns -6704747, takes 25.67 sec.
+9684: Cost at DP iteration 10 : -2358, wslk -2358, tns -6286885, takes 9.58 sec.
+9686: Cost at Swap iteration 11 : -2358, wslk -2358, tns -6255292, takes 24.14 sec.
+9688: Worst slack after detailed placement is -2358, TNS after detailed placement is -6255292.
+9689: Swapping placement takes 313.11 sec.
+9739: Timing-driven detailed placement takes 333.28 sec.
+9741: Worst slack is -2358, TNS after placement is -6274897.
+9742: Placement done.
+9743: Total placement takes 1363.02 sec.
+
+9746: Routing started.
+9747: Build routing arch for double attribute device.
+9748: Enter timing driven router mode.
+9749: Route thread size: 5
+9750: Building routing graph takes 24.83 sec.
+9751: Init coarse delay table.
+9752: Read place coarse delay table takes 2.42 sec.
+9753: Build SRB system takes 2.53 sec.
+9754: Setup STE netlist take 27982 msec.
+9755: Dispose control chain take 6414 msec.
+9756: Collect const net info take 3205 msec.
+9757: Worst slack is -2358, TNS before route is -6274897.
+9758: Total nets for routing: 224179.
+9759: Total loads for routing: 1027839.
+9760: Direct connect net size: 10052
+9761: Build all design net take 30080 msec.
+9762: Processing design graph takes 67.79 sec.
+9763: Delay table total memory: 72.78639603 MB
+9764: Route graph total memory: 429.22961140 MB
+9765: Route design total memory: 266.30718994 MB
+9766: Global routing takes 0.00 sec.
+9767: Total 224177 subnets.
+9768: Unrouted clock nets at iteration 0 (1.729 sec): 12
+9769: Unrouted clock nets at iteration 1 (1.243 sec): 5
+9770: Unrouted clock nets at iteration 2 (0.857 sec): 4
+9771: Unrouted clock nets at iteration 3 (0.458 sec): 3
+9772: Unrouted clock nets at iteration 4 (0.214 sec): 2
+9773: Unrouted clock nets at iteration 5 (0.219 sec): 0
+9774: Total route nets size: 224137
+9775: Pre route takes 163.566 sec
+9776: Unrouted general nets at iteration 7 (MT total route time: 207.379 sec): 200160(overused: 1537863)
+9777: Unrouted general nets at iteration 8 (MT total route time: 1004.455 sec): 186702(overused: 1347760)
+9778: Unrouted general nets at iteration 9 (MT total route time: 1571.783 sec): 175915(overused: 1173233)
+9779: Unrouted general nets at iteration 10 (MT total route time: 1460.006 sec): 167528(overused: 1049406)
+9780: Unrouted general nets at iteration 11 (MT total route time: 2016.117 sec): 161152(overused: 965636)
+9781: Sort Original Nets take 1.262 sec
+9782: Total net: 224179, route succeed net: 117774
+9783: Generate routing result take 0.830 sec
+9784: Handle PERMUX permutation take 22.495 sec
+9785: Handle const net take 0.005 msec
+9786: Handle route through take 0.479 sec
+9787: Used SRB routing arc is 633704.
+9788: E: Route-0039: Design is too congested to be routed, iteration time exceed limit 2000 sec.
+9789: Total routing takes 6838.25 sec.
+9790:
+9791:
+9792: Device Utilization Summary :
+9793: +--------------------------------------------------------------------------------------+
+9794: | Logic Utilization                 | Used       | Available     | Utilization(%)
+9795: +--------------------------------------------------------------------------------------+
+9796: | Use of ADC                        | 0          | 1             | 0
+9797: | Use of ANALOG                     | 0          | 1             | 0
+9798: | Use of APM                        | 243        | 740           | 33
+9799: | Use of BKCL                       | 6          | 10            | 60
+9800: | Use of CCS                        | 1          | 1             | 100
+9801: | Use of CLMA                       | 28900      | 30075         | 97
+9802: |   FF                              | 132761     | 240600        | 56
+9803: |   LUT                             | 86154      | 120300        | 72
+9804: |   LUT-FF pairs                    | 46435      | 120300        | 39
+9805: | Use of CLMS                       | 9630       | 9875          | 98
+9806: |   FF                              | 41457      | 79000         | 53
+9807: |   LUT                             | 29333      | 39500         | 75
+9808: |   LUT-FF pairs                    | 18990      | 39500         | 49
+9809: |   Distributed RAM                 | 11974      | 39500         | 31
+9810: | Use of DDRPHY_CPD                 | 1          | 20            | 5
+9811: | Use of DDRPHY_IOCLK_DIV           | 2          | 10            | 20
+9812: | Use of DDR_PHY                    | 7          | 40            | 18
+9813: | Use of DRM                        | 254        | 415           | 62
+9814: | Use of GCLK_INBUF_SYN             | 0          | 40            | 0
+9815: | Use of GPLL                       | 7          | 10            | 70
+9816: | Use of GSEB                       | 0          | 512           | 0
+9817: | Use of HARD0                      | 0          | 25050         | 0
+9818: | Use of HCKB                       | 38         | 120           | 32
+9819: |  HCKB dataused                    | 0          | 120           | 0
+9820: | Use of HCKMUX_TEST                | 0          | 10            | 0
+9821: | Use of HSSTLP                     | 0          | 2             | 0
+9822: | Use of IO                         | 115        | 400           | 29
+9823: |   IOBD                            | 59         | 192           | 31
+9824: |   IOBS                            | 56         | 208           | 27
+9825: | Use of IOCKB                      | 0          | 40            | 0
+9826: | Use of IOCKMUX_TEST               | 0          | 10            | 0
+9827: | Use of IOLHR                      | 114        | 500           | 23
+9828: | Use of KEYRAM                     | 0          | 1             | 0
+9829: | Use of MFG_TEST                   | 0          | 1             | 0
+9830: | Use of MRCKB                      | 1          | 20            | 5
+9831: | Use of MRCKMUX_TEST               | 0          | 10            | 0
+9832: | Use of MRPOSTMUX_TEST             | 0          | 10            | 0
+9833: | Use of PCIE                       | 0          | 1             | 0
+9834: | Use of PCKMUX_TEST                | 0          | 20            | 0
+9835: | Use of PLLMRMUX_TEST              | 0          | 10            | 0
+9836: | Use of PLLREFMUX_TEST             | 0          | 10            | 0
+9837: | Use of POSTGMUXLR_TEST            | 0          | 4             | 0
+9838: | Use of PPLL                       | 2          | 10            | 20
+9839: | Use of PREGMUXC_TEST              | 0          | 3             | 0
+9840: | Use of PREGMUXC_X16_200H_TEST     | 0          | 4             | 0
+9841: | Use of PREGMUXLR_TEST             | 0          | 10            | 0
+9842: | Use of RCKB                       | 4          | 40            | 10
+9843: |  RCKB dataused                    | 2          | 40            | 5
+9844: | Use of RCKMUX_TEST                | 0          | 10            | 0
+9845: | Use of SCANCHAIN                  | 0          | 1             | 0
+9846: | Use of SCKMUX_TEST                | 0          | 20            | 0
+9847: | Use of SFB                        | 0          | 5075          | 0
+9848: | Use of SPAD                       | 0          | 8             | 0
+9849: | Use of TSERDES                    | 14         | 80            | 18
+9850: | Use of USCM                       | 10         | 32            | 32
+9851: |  USCM dataused                    | 0          | 32            | 0
+9852: | Use of USCMMUX_TEST               | 0          | 32            | 0
+9853: +--------------------------------------------------------------------------------------+
+9854:
+9855: E: Route-0008: Design cannot be routed.
+9856: Action pnr: Real time elapsed is 2h:51m:6s
+9857: Action pnr: CPU time elapsed is 1h:0m:9s
+9858: Action pnr: Process CPU time elapsed is 1h:7m:25s
+9859: Current time: Thu Nov 26 20:18:20 2026
+9860: Action pnr: Peak memory pool usage is 7,555 MB

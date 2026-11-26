@@ -47,6 +47,23 @@
 
 原始日志和报告快照存于 `G:/codex_project/edrv32-card107/build/card107-pds-check/logbackup/round9-20261126-172905`。
 
+### 第 9 轮最终布局布线结果
+
+P&R 于 2026-11-26 20:18:20（北京时间）以 `Route-0039` 和 `Route-0008` 结束。通用布线第 11 轮耗时 **2,016.117 秒**，超过单轮 2,000 秒上限，当轮报告 **161,152 条未布网**、`overused` **965,636**。工具另有 `Total net: 224179, route succeed net: 117774` 的结束统计，其口径与迭代计数分别保留。[逐轮拥塞摘要](artifacts/round9/route-congestion.txt) · [失败日志原文](artifacts/round9/final-route.log)
+
+| 阶段 | PDS 用时 |
+|---|---:|
+| Compile | 2 分 33 秒 |
+| Synthesize | 10 分 27 秒 |
+| Device Map | 2 分 19 秒 |
+| Place | 1,363.02 秒 |
+| Route（失败） | 6,838.25 秒 |
+| P&R 阶段墙钟合计 | 2 小时 51 分 06 秒 |
+
+布局结束时，PDS 的全局 `Worst slack` 为 `-2358`、`TNS` 为 `-6274897`（路由日志原值）。布线后各时钟域 WNS/TNS/WHS/THS、clk_gpu 最差路径、比特流及上板结果未取得。可用的各时钟域数据是本轮综合估算。[综合时序](artifacts/round9/timing_summary.txt)
+
+原始最终 P&R 日志、失败资源报告和未布网清单已备份到 `G:/codex_project/edrv32-card107/build/card107-pds-check/logbackup/before-round10/place_route`。
+
 ## 第 8 轮 Device Map 结果
 
 | 项 | 内容 |
