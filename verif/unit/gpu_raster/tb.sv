@@ -14,9 +14,9 @@ module tb;
     reg sink_ready_r = 0;
     wire sink_valid_w;
     reg [1751:0] stimulus_r [0:32767];
-    reg [1854:0] expected_r [0:262143];
+    reg [986:0] expected_r [0:262143];
     reg [1751:0] source_r = 0;
-    wire [1854:0] actual_w;
+    wire [986:0] actual_w;
     integer input_total_r;
     integer output_total_r;
     integer sent_r = 0;
@@ -41,14 +41,14 @@ module tb;
     wire [69:0] triangle_setup_h_w;
     wire [15:0] fragment_x_w;
     wire [15:0] fragment_y_w;
-    wire [3:0] fragment_mask_w;
-    wire [0:0] fragment_quad_w;
-    wire [1735:0] fragment_plane_w;
+    wire [1:0] fragment_mask_w;
+    wire [0:0] fragment_quad_w = 1'b0;
+    wire [867:0] fragment_plane_w;
     wire [69:0] fragment_h_w;
     wire [3:0] fragment_palette_w;
     wire [7:0] fragment_alpha_w;
     assign {triangle_setup_h_w, triangle_setup_gradient_w, triangle_setup_start_w, triangle_setup_origin_w, triangle_setup_edge_w, triangle_setup_bounds_w} = source_r;
-    assign actual_w = {fragment_alpha_w, fragment_palette_w, fragment_h_w, fragment_plane_w, fragment_quad_w, fragment_mask_w, fragment_y_w, fragment_x_w};
+    assign actual_w = {fragment_alpha_w, fragment_palette_w, fragment_h_w, fragment_plane_w, fragment_quad_w, 2'b0, fragment_mask_w, fragment_y_w, fragment_x_w};
     reg state_valid_r = 0;
     reg [255:0] target_r = 0;
     wire state_ready_w;
@@ -81,7 +81,6 @@ module tb;
         .fragment_x_o(fragment_x_w),
         .fragment_y_o(fragment_y_w),
         .fragment_mask_o(fragment_mask_w),
-        .fragment_quad_o(fragment_quad_w),
         .fragment_plane_o(fragment_plane_w),
         .fragment_h_o(fragment_h_w),
         .fragment_palette_o(fragment_palette_w),

@@ -51,7 +51,7 @@ module edrv32_gpu_setup (
     reg [31:0] origin_r [0:15];
     reg [63:0] bounds_r [0:15];
     reg nonzero_r [0:15];
-    reg area_valid_r;
+    wire area_valid_r;
     reg signed [17:0] front_delta_x_0_r;
     reg signed [17:0] front_delta_x_1_r;
     reg signed [17:0] front_delta_x_2_r;
@@ -68,12 +68,12 @@ module edrv32_gpu_setup (
     reg signed [17:0] multiply_b_w [0:1];
     reg signed [35:0] multiply_0_r;
     reg signed [35:0] multiply_1_r;
-    reg edge_valid_r;
-    reg [1:0] edge_index_r;
+    wire edge_valid_r;
+    wire [1:0] edge_index_r;
     reg [1:0] edge_index_w;
     reg [3:0] front_tag_r;
-    reg signed [36:0] edge_result_w;
-    reg [3:0] area_tag_r;
+    wire signed [36:0] edge_result_w;
+    wire [3:0] area_tag_r;
     reg [3:0] reciprocal_tag_0_r;
     reg [3:0] reciprocal_tag_1_r;
     reg [3:0] reciprocal_tag_2_r;
@@ -84,12 +84,20 @@ module edrv32_gpu_setup (
     reg [3:0] reciprocal_tag_7_r;
     reg [3:0] reciprocal_tag_8_r;
     reg [3:0] reciprocal_tag_9_r;
+    reg [3:0] reciprocal_tag_10_r;
+    reg [3:0] reciprocal_tag_11_r;
+    reg [3:0] reciprocal_tag_12_r;
+    reg [3:0] reciprocal_tag_13_r;
+    reg [3:0] reciprocal_tag_14_r;
+    reg [3:0] reciprocal_tag_15_r;
+    reg [3:0] reciprocal_tag_16_r;
+    reg [3:0] reciprocal_tag_17_r;
+    reg [3:0] reciprocal_tag_18_r;
+    reg [3:0] reciprocal_tag_19_r;
+
     wire reciprocal_valid_w;
     wire [30:0] reciprocal_w;
     wire [5:0] reciprocal_exponent_w;
-    wire [5:0] reciprocal_exponent_wr_w;
-    wire [5:0] reciprocal_exponent_delay_w;
-    reg [5:0] reciprocal_exponent_first_r;
     reg attribute_valid_r;
     reg [2:0] attribute_index_r;
     reg [3:0] attribute_tag_r;
@@ -117,7 +125,7 @@ module edrv32_gpu_setup (
     reg signed [17:0] difference_x_w [0:2];
     reg signed [17:0] difference_y_w [0:2];
 
-    reg signed [35:0] area_w;
+    wire signed [35:0] area_w;
     reg [71:0] delta_w;
     reg [35:0] offset_w;
     reg signed [17:0] edge_offset_x_w [0:2];
@@ -145,14 +153,14 @@ module edrv32_gpu_setup (
             screen_triangle_x_i[34 +: 17]};
         y_w[2] = {screen_triangle_y_i[50],
             screen_triangle_y_i[34 +: 17]};
-        minimum_x_w = x_w[1] < x_w[0] ? x_w[1] : x_w[0];
-        minimum_x_w = x_w[2] < minimum_x_w ? x_w[2] : minimum_x_w;
-        minimum_y_w = y_w[1] < y_w[0] ? y_w[1] : y_w[0];
-        minimum_y_w = y_w[2] < minimum_y_w ? y_w[2] : minimum_y_w;
-        maximum_x_w = x_w[1] > x_w[0] ? x_w[1] : x_w[0];
-        maximum_x_w = x_w[2] > maximum_x_w ? x_w[2] : maximum_x_w;
-        maximum_y_w = y_w[1] > y_w[0] ? y_w[1] : y_w[0];
-        maximum_y_w = y_w[2] > maximum_y_w ? y_w[2] : maximum_y_w;
+        minimum_x_w = x_w[0] <= x_w[1] && x_w[0] <= x_w[2] ? x_w[0] :
+            x_w[1] <= x_w[2] ? x_w[1] : x_w[2];
+        minimum_y_w = y_w[0] <= y_w[1] && y_w[0] <= y_w[2] ? y_w[0] :
+            y_w[1] <= y_w[2] ? y_w[1] : y_w[2];
+        maximum_x_w = x_w[0] >= x_w[1] && x_w[0] >= x_w[2] ? x_w[0] :
+            x_w[1] >= x_w[2] ? x_w[1] : x_w[2];
+        maximum_y_w = y_w[0] >= y_w[1] && y_w[0] >= y_w[2] ? y_w[0] :
+            y_w[1] >= y_w[2] ? y_w[1] : y_w[2];
         origin_x_w = minimum_x_w >>> 4;
         origin_y_w = minimum_y_w >>> 4;
         bound_x0_w = ((minimum_x_w + 18'sd7) >>> 6) <<< 2;
@@ -165,7 +173,6 @@ module edrv32_gpu_setup (
         difference_y_w[1] = y_w[2] - y_w[1];
         difference_x_w[2] = x_w[0] - x_w[2];
         difference_y_w[2] = y_w[0] - y_w[2];
-        area_w = multiply_0_r - multiply_1_r;
         delta_w = {difference_x_w[0], difference_x_w[2],
             -difference_y_w[0], -difference_y_w[2]};
         offset_w = {(origin_y_w <<< 4) + 18'sd8 - y_w[0],
@@ -185,8 +192,6 @@ module edrv32_gpu_setup (
         multiply_a_w[1] = difference_y_w[0];
         multiply_b_w[1] = -difference_x_w[2];
         edge_index_w = 2'd0;
-        edge_result_w = $signed({multiply_0_r[35], multiply_0_r})
-            - $signed({multiply_1_r[35], multiply_1_r});
         if (!accept_w && interval_r >= 5) begin
             edge_index_w = 2'd3 - interval_r[1:0];
             case (interval_r[1:0])
@@ -218,12 +223,95 @@ module edrv32_gpu_setup (
         end
     end
 
+    // Two shared APMs: registered operands, three product registers and two carry slices.
+    reg signed [17:0] multiply_a_0_r;
+    reg signed [17:0] multiply_a_1_r;
+    reg signed [17:0] multiply_b_0_r;
+    reg signed [17:0] multiply_b_1_r;
+    reg signed [35:0] product_0_0_r;
+    reg signed [35:0] product_1_0_r;
+    reg signed [35:0] product_0_1_r;
+    reg signed [35:0] product_1_1_r;
+    reg [34:0] difference_low_r;
+    reg difference_carry_r;
+    reg [1:0] difference_high_a_r;
+    reg [1:0] difference_high_b_r;
+    reg [36:0] difference_r;
+    wire [35:0] difference_low_w;
+    wire [1:0] difference_high_w;
+    wire [47:0] front_metadata_w;
+    assign difference_low_w = {1'b0, multiply_0_r[34:0]}
+        + {1'b0, ~multiply_1_r[34:0]} + 36'd1;
+    assign difference_high_w = difference_high_a_r + ~difference_high_b_r
+        + {1'b0, difference_carry_r};
+    assign edge_result_w = difference_r;
+    assign area_w = difference_r[35:0];
+    assign area_valid_r = front_metadata_w[47];
+    assign edge_valid_r = front_metadata_w[46];
+    assign edge_index_r = front_metadata_w[44 +: 2];
+    assign area_tag_r = front_metadata_w[40 +: 4];
+    always @(posedge clk_i) begin
+        if (enable_w) begin
+            multiply_a_0_r <= multiply_a_w[0];
+            multiply_a_1_r <= multiply_a_w[1];
+            multiply_b_0_r <= multiply_b_w[0];
+            multiply_b_1_r <= multiply_b_w[1];
+            product_0_0_r <= multiply_a_0_r * multiply_b_0_r;
+            product_1_0_r <= multiply_a_1_r * multiply_b_1_r;
+            product_0_1_r <= product_0_0_r;
+            product_1_1_r <= product_1_0_r;
+            multiply_0_r <= product_0_1_r;
+            multiply_1_r <= product_1_1_r;
+            difference_low_r <= difference_low_w[34:0];
+            difference_carry_r <= difference_low_w[35];
+            difference_high_a_r <= {multiply_0_r[35], multiply_0_r[35]};
+            difference_high_b_r <= {multiply_1_r[35], multiply_1_r[35]};
+            difference_r <= {difference_high_w, difference_low_r};
+        end
+    end
+    genvar front_stage;
+    generate
+        for (front_stage = 0; front_stage < 6; front_stage = front_stage + 1) begin : g_front
+            reg [1:0] valid_r;
+            reg [5:0] metadata_r;
+            wire [7:0] previous_w;
+            if (front_stage == 0) begin : g_input
+                assign previous_w = {accept_w, !accept_w && interval_r >= 5,
+                    edge_index_w, accept_w ? allocate_r : front_tag_r};
+            end else begin : g_delay
+                assign previous_w = front_metadata_w[(front_stage-1)*8 +: 8];
+            end
+            assign front_metadata_w[front_stage*8 +: 8] = {valid_r, metadata_r};
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) valid_r <= 0;
+                else if (stop_i) valid_r <= 0;
+                else if (enable_w) valid_r <= previous_w[7:6];
+            end
+            always @(posedge clk_i) begin
+                if (enable_w) metadata_r <= previous_w[5:0];
+            end
+        end
+    endgenerate
+
+    (* keep = 1 *) reg [1:0] area_count_r /* synthesis syn_preserve=1 */;
+    wire area_enable_w;
+    assign area_enable_w = area_count_r != 2 && !stop_i;
+    (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) area_count_r <= 0;
+        else if (stop_i) area_count_r <= 0;
+        else begin
+            case ({push_w, pop_w})
+                2'b10: area_count_r <= area_count_r + 1'b1;
+                2'b01: area_count_r <= area_count_r - 1'b1;
+                default: area_count_r <= area_count_r;
+            endcase
+        end
+    end
+
     edrv32_gpu_project_recip u_area_reciprocal (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .enable_i(enable_w),
-        .delay_exponent_wr_data_o(reciprocal_exponent_wr_w),
-        .delay_exponent_rd_data_i(reciprocal_exponent_delay_w),
+        .enable_i(area_enable_w),
         .stop_i(stop_i),
         .value_valid_i(area_valid_r),
         .value_i({4'd0, area_w}),
@@ -232,23 +320,42 @@ module edrv32_gpu_setup (
         .exponent_o(reciprocal_exponent_w)
     );
 
-    always @(posedge clk_i) begin
-        if (enable_w) reciprocal_exponent_first_r <= reciprocal_exponent_wr_w;
+    // Read each attribute bank into a register before the seven-way attribute selector.
+    reg attribute_read_valid_r;
+    reg [6:0] attribute_read_tag_r;
+    reg [71:0] attribute_read_delta_r;
+    reg [35:0] attribute_read_offset_r;
+    reg [30:0] attribute_read_reciprocal_r;
+    reg [5:0] attribute_read_exponent_r;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) attribute_read_valid_r <= 0;
+        else if (stop_i) attribute_read_valid_r <= 0;
+        else if (enable_w) attribute_read_valid_r <= attribute_valid_r;
     end
+    always @(posedge clk_i) begin
+        if (enable_w) begin
+            attribute_read_tag_r <= {attribute_tag_r, attribute_index_r};
+            attribute_read_delta_r <= delta_r[attribute_tag_r];
+            attribute_read_offset_r <= offset_r[attribute_tag_r];
+            attribute_read_reciprocal_r <= attribute_reciprocal_r;
+            attribute_read_exponent_r <= attribute_exponent_r;
+        end
+    end
+
     edrv32_gpu_setup_plane u_plane (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .enable_i(enable_w),
         .stop_i(stop_i),
-        .recip_delay_wr_data_i(reciprocal_exponent_first_r),
-        .recip_delay_rd_data_o(reciprocal_exponent_delay_w),
-        .plane_valid_i(attribute_valid_r),
-        .plane_tag_i({attribute_tag_r, attribute_index_r}),
+        .credit_push_i(push_w),
+        .credit_pop_i(pop_w),
+        .plane_valid_i(attribute_read_valid_r),
+        .plane_tag_i(attribute_read_tag_r),
         .plane_value_i(attribute_value_w),
-        .plane_delta_i(delta_r[attribute_tag_r]),
-        .plane_offset_i(offset_r[attribute_tag_r]),
-        .plane_reciprocal_i(attribute_reciprocal_r),
-        .plane_exponent_i(attribute_exponent_r),
+        .plane_delta_i(attribute_read_delta_r),
+        .plane_offset_i(attribute_read_offset_r),
+        .plane_reciprocal_i(attribute_read_reciprocal_r),
+        .plane_exponent_i(attribute_read_exponent_r),
         .plane_valid_o(plane_valid_w),
         .plane_tag_o(plane_tag_w),
         .plane_start_o(plane_start_w),
@@ -264,8 +371,6 @@ module edrv32_gpu_setup (
             output_count_r <= 2'd0;
             output_read_r <= 1'b0;
             output_write_r <= 1'b0;
-            area_valid_r <= 1'b0;
-            edge_valid_r <= 1'b0;
             attribute_valid_r <= 1'b0;
             attribute_index_r <= 3'd0;
             complete_r <= 1'b0;
@@ -276,8 +381,6 @@ module edrv32_gpu_setup (
             output_count_r <= 2'd0;
             output_read_r <= 1'b0;
             output_write_r <= 1'b0;
-            area_valid_r <= 1'b0;
-            edge_valid_r <= 1'b0;
             attribute_valid_r <= 1'b0;
             complete_r <= 1'b0;
             unit_done_o <= finish_i;
@@ -306,8 +409,6 @@ module edrv32_gpu_setup (
                     interval_r <= 3'd7;
                     allocate_r <= allocate_r + 4'd1;
                 end
-                area_valid_r <= accept_w;
-                edge_valid_r <= interval_r >= 5;
                 complete_r <= plane_valid_w && plane_tag_w[2:0] == 6;
                 if (attribute_valid_r) begin
                     attribute_index_r <= attribute_index_r + 3'd1;
@@ -323,11 +424,7 @@ module edrv32_gpu_setup (
 
     always @(posedge clk_i) begin
         if (enable_w) begin
-            multiply_0_r <= multiply_a_w[0] * multiply_b_w[0];
-            multiply_1_r <= multiply_a_w[1] * multiply_b_w[1];
-            edge_index_r <= edge_index_w;
             if (area_valid_r) nonzero_r[area_tag_r] <= area_w != 0;
-            area_tag_r <= allocate_r;
             reciprocal_tag_0_r <= area_tag_r;
             reciprocal_tag_1_r <= reciprocal_tag_0_r;
             reciprocal_tag_2_r <= reciprocal_tag_1_r;
@@ -338,6 +435,17 @@ module edrv32_gpu_setup (
             reciprocal_tag_7_r <= reciprocal_tag_6_r;
             reciprocal_tag_8_r <= reciprocal_tag_7_r;
             reciprocal_tag_9_r <= reciprocal_tag_8_r;
+            reciprocal_tag_10_r <= reciprocal_tag_9_r;
+            reciprocal_tag_11_r <= reciprocal_tag_10_r;
+            reciprocal_tag_12_r <= reciprocal_tag_11_r;
+            reciprocal_tag_13_r <= reciprocal_tag_12_r;
+            reciprocal_tag_14_r <= reciprocal_tag_13_r;
+            reciprocal_tag_15_r <= reciprocal_tag_14_r;
+            reciprocal_tag_16_r <= reciprocal_tag_15_r;
+            reciprocal_tag_17_r <= reciprocal_tag_16_r;
+            reciprocal_tag_18_r <= reciprocal_tag_17_r;
+            reciprocal_tag_19_r <= reciprocal_tag_18_r;
+
             if (accept_w) begin
                 delta_r[allocate_r] <= delta_w;
                 offset_r[allocate_r] <= offset_w;
@@ -359,7 +467,7 @@ module edrv32_gpu_setup (
                 front_offset_y_2_r <= edge_offset_y_w[2];
             end
             if (reciprocal_valid_w) begin
-                attribute_tag_r <= reciprocal_tag_9_r;
+                attribute_tag_r <= reciprocal_tag_19_r;
                 attribute_reciprocal_r <= reciprocal_w;
                 attribute_exponent_r <= reciprocal_exponent_w;
             end
@@ -378,19 +486,19 @@ module edrv32_gpu_setup (
         if (push_w) output_origin_r[output_write_r] <= origin_r[complete_tag_r];
     end
     wire [152:0] attribute_value_w;
-    wire [152:0] attribute_value_wires [0:6];
+    wire [152:0] attribute_value_wires_w [0:6];
     reg [152:0] selected_attribute_w;
     assign attribute_value_w = selected_attribute_w;
     always @(*) begin
         selected_attribute_w = 153'd0;
-        case (attribute_index_r)
-            3'd0: selected_attribute_w = attribute_value_wires[0];
-            3'd1: selected_attribute_w = attribute_value_wires[1];
-            3'd2: selected_attribute_w = attribute_value_wires[2];
-            3'd3: selected_attribute_w = attribute_value_wires[3];
-            3'd4: selected_attribute_w = attribute_value_wires[4];
-            3'd5: selected_attribute_w = attribute_value_wires[5];
-            3'd6: selected_attribute_w = attribute_value_wires[6];
+        case (attribute_read_tag_r[2:0])
+            3'd0: selected_attribute_w = attribute_value_wires_w[0];
+            3'd1: selected_attribute_w = attribute_value_wires_w[1];
+            3'd2: selected_attribute_w = attribute_value_wires_w[2];
+            3'd3: selected_attribute_w = attribute_value_wires_w[3];
+            3'd4: selected_attribute_w = attribute_value_wires_w[4];
+            3'd5: selected_attribute_w = attribute_value_wires_w[5];
+            3'd6: selected_attribute_w = attribute_value_wires_w[6];
             default: selected_attribute_w = 153'd0;
         endcase
     end
@@ -399,7 +507,11 @@ module edrv32_gpu_setup (
         for (attribute = 0; attribute < 7; attribute = attribute + 1) begin : g_attribute
             reg [152:0] value_r [0:15];
             wire [152:0] value_w;
-            assign attribute_value_wires[attribute] = value_r[attribute_tag_r];
+            reg [152:0] value_read_r;
+            assign attribute_value_wires_w[attribute] = value_read_r;
+            always @(posedge clk_i) begin
+                if (enable_w) value_read_r <= value_r[attribute_tag_r];
+            end
             if (attribute == 0) begin : g_input_0
                 assign value_w = {
                     35'd0,
@@ -512,9 +624,9 @@ module edrv32_gpu_setup (
             wire value_write_w;
             wire [3:0] value_tag_w;
             wire [39:0] value_w;
-            assign value_write_w = accept_w || (edge_valid_r && edge_index_r == VERTEX);
-            assign value_tag_w = accept_w ? allocate_r : front_tag_r;
-            assign value_w = accept_w ? 40'd0 : {{3{edge_result_w[36]}}, edge_result_w};
+            assign value_write_w = edge_valid_r && edge_index_r == VERTEX;
+            assign value_tag_w = area_tag_r;
+            assign value_w = {{3{edge_result_w[36]}}, edge_result_w};
             always @(posedge clk_i) begin
                 if (enable_w && value_write_w) value_r[value_tag_w] <= value_w;
                 if (enable_w && accept_w) begin

@@ -122,15 +122,26 @@ module edrv32_gpu_read_dma (
     reg [2:0] choose_w;
     reg [4:0] length_w;
     reg [8:0] boundary_w;
-    integer scan_w;
-    integer client_w;
     integer idx_r;
     integer data_idx_r;
 
+    reg [1:0] prepare_state_r;
+    reg [2:0] prepare_client_r;
+    reg [31:0] prepare_addr_r;
+    reg [4:0] prepare_beats_r;
+    reg prepare_small_r;
+    reg prepare_final_r;
+    reg [31:0] prepare_head_keep_r;
+    reg [31:0] prepare_tail_keep_r;
+    wire prepare_start_w;
+    wire prepare_build_w;
     // Pool region ownership follows AR, R and consumption order independently.
     reg [3:0] occupied_r;
     reg [3:0] filled_r;
     reg [3:0] issued_r;
+    reg [31:0] prepare_total_beats_r;
+    reg [31:0] prepare_next_addr_r;
+    reg [31:0] prepare_remaining_r;
     reg [2:0] owner_r [0:3];
     reg [4:0] length_r [0:3];
     reg [31:0] head_keep_r [0:3];
@@ -266,22 +277,138 @@ module edrv32_gpu_read_dma (
         .rd_data_o(pool_data_w)
     );
 
-    always @(*) begin
-        choose_valid_w = 1'b0;
-        choose_w = 3'b0;
-        client_w = 0;
-        length_w = 5'd16;
-        boundary_w = 9'b0;
-        for (scan_w = 0; scan_w < 7; scan_w = scan_w + 1) begin
-            client_w = {29'b0, round_r} + scan_w;
-            if (client_w >= 7) client_w = client_w - 7;
-            if (!choose_valid_w && issue_r[client_w]) begin
-                choose_valid_w = 1'b1;
-                choose_w = client_w[2:0];
-            end
+    wire [6:0] small_beats_w;
+    wire [6:0] final_beats_w;
+    genvar beat_client;
+    generate
+        for (beat_client = 0; beat_client < 7; beat_client = beat_client + 1) begin : g_beats
+            assign small_beats_w[beat_client] = beats_r[beat_client] < 32'd16;
+            assign final_beats_w[beat_client] = beats_r[beat_client][31:5] == 0;
         end
-        boundary_w = 9'd128 - {2'b0, addr_r[choose_w][11:5]};
-        if (beats_r[choose_w] < 32'd16) length_w = beats_r[choose_w][4:0];
+    endgenerate
+    // Rotating priority is explicit over the fixed client set; selection is registered.
+    assign prepare_start_w = prepare_state_r == 0 && choose_valid_w &&
+        !ar_valid_r && !occupied_r[alloc_ptr_r];
+    assign prepare_build_w = prepare_state_r == 2;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) prepare_state_r <= 0;
+        else begin
+            case (prepare_state_r)
+                2'd0: if (prepare_start_w) prepare_state_r <= 1;
+                2'd1: prepare_state_r <= 2;
+                2'd2: prepare_state_r <= 0;
+                default: prepare_state_r <= prepare_state_r;
+            endcase
+        end
+    end
+    always @(posedge clk_i) begin
+        if (prepare_start_w) prepare_client_r <= choose_w;
+        if (prepare_state_r == 1) begin
+            prepare_addr_r <= addr_r[prepare_client_r];
+            prepare_total_beats_r <= beats_r[prepare_client_r];
+            prepare_beats_r <= beats_r[prepare_client_r][4:0];
+            prepare_small_r <= small_beats_w[prepare_client_r];
+            prepare_final_r <= final_beats_w[prepare_client_r];
+            prepare_head_keep_r <= first_keep_w[prepare_client_r];
+            prepare_tail_keep_r <= last_keep_r[prepare_client_r];
+        end
+    end
+
+
+    always @(*) begin
+        choose_valid_w = |issue_r;
+        choose_w = 0;
+        case (round_r)
+            3'd0: begin
+                casez (issue_r)
+                    7'b??????1: choose_w = 3'd0;
+                    7'b?????10: choose_w = 3'd1;
+                    7'b????100: choose_w = 3'd2;
+                    7'b???1000: choose_w = 3'd3;
+                    7'b??10000: choose_w = 3'd4;
+                    7'b?100000: choose_w = 3'd5;
+                    7'b1000000: choose_w = 3'd6;
+                    default: choose_w = 0;
+                endcase
+            end
+            3'd1: begin
+                casez (issue_r)
+                    7'b?????1?: choose_w = 3'd1;
+                    7'b????10?: choose_w = 3'd2;
+                    7'b???100?: choose_w = 3'd3;
+                    7'b??1000?: choose_w = 3'd4;
+                    7'b?10000?: choose_w = 3'd5;
+                    7'b100000?: choose_w = 3'd6;
+                    7'b0000001: choose_w = 3'd0;
+                    default: choose_w = 0;
+                endcase
+            end
+            3'd2: begin
+                casez (issue_r)
+                    7'b????1??: choose_w = 3'd2;
+                    7'b???10??: choose_w = 3'd3;
+                    7'b??100??: choose_w = 3'd4;
+                    7'b?1000??: choose_w = 3'd5;
+                    7'b10000??: choose_w = 3'd6;
+                    7'b00000?1: choose_w = 3'd0;
+                    7'b0000010: choose_w = 3'd1;
+                    default: choose_w = 0;
+                endcase
+            end
+            3'd3: begin
+                casez (issue_r)
+                    7'b???1???: choose_w = 3'd3;
+                    7'b??10???: choose_w = 3'd4;
+                    7'b?100???: choose_w = 3'd5;
+                    7'b1000???: choose_w = 3'd6;
+                    7'b0000??1: choose_w = 3'd0;
+                    7'b0000?10: choose_w = 3'd1;
+                    7'b0000100: choose_w = 3'd2;
+                    default: choose_w = 0;
+                endcase
+            end
+            3'd4: begin
+                casez (issue_r)
+                    7'b??1????: choose_w = 3'd4;
+                    7'b?10????: choose_w = 3'd5;
+                    7'b100????: choose_w = 3'd6;
+                    7'b000???1: choose_w = 3'd0;
+                    7'b000??10: choose_w = 3'd1;
+                    7'b000?100: choose_w = 3'd2;
+                    7'b0001000: choose_w = 3'd3;
+                    default: choose_w = 0;
+                endcase
+            end
+            3'd5: begin
+                casez (issue_r)
+                    7'b?1?????: choose_w = 3'd5;
+                    7'b10?????: choose_w = 3'd6;
+                    7'b00????1: choose_w = 3'd0;
+                    7'b00???10: choose_w = 3'd1;
+                    7'b00??100: choose_w = 3'd2;
+                    7'b00?1000: choose_w = 3'd3;
+                    7'b0010000: choose_w = 3'd4;
+                    default: choose_w = 0;
+                endcase
+            end
+            3'd6: begin
+                casez (issue_r)
+                    7'b1??????: choose_w = 3'd6;
+                    7'b0?????1: choose_w = 3'd0;
+                    7'b0????10: choose_w = 3'd1;
+                    7'b0???100: choose_w = 3'd2;
+                    7'b0??1000: choose_w = 3'd3;
+                    7'b0?10000: choose_w = 3'd4;
+                    7'b0100000: choose_w = 3'd5;
+                    default: choose_w = 0;
+                endcase
+            end
+            default: choose_w = 0;
+        endcase
+    end
+    always @(*) begin
+        length_w = prepare_small_r ? prepare_beats_r : 5'd16;
+        boundary_w = 9'd128 - {2'b0, prepare_addr_r[11:5]};
         if ({4'b0, length_w} > boundary_w) length_w = boundary_w[4:0];
     end
 
@@ -292,15 +419,17 @@ module edrv32_gpu_read_dma (
                         >> ((32'd0 - req_addr_w[data_idx_r] - req_bytes_w[data_idx_r]) & 32'd31);
             end
         end
-        if (!ar_valid_r && choose_valid_w && !occupied_r[alloc_ptr_r]) begin
-            ar_addr_r <= addr_r[choose_w];
+        if (prepare_build_w) begin
+            ar_addr_r <= prepare_addr_r;
+            prepare_next_addr_r <= prepare_addr_r + {22'b0, length_w, 5'b0};
+            prepare_remaining_r <= prepare_total_beats_r - {27'b0, length_w};
             ar_len_r <= length_w[3:0] - 4'd1;
-            owner_r[alloc_ptr_r] <= choose_w;
+            owner_r[alloc_ptr_r] <= prepare_client_r;
             length_r[alloc_ptr_r] <= length_w;
-            head_keep_r[alloc_ptr_r] <= first_keep_w[choose_w];
-            tail_keep_r[alloc_ptr_r] <= (beats_r[choose_w] == {27'b0, length_w})
-                ? last_keep_r[choose_w] : 32'hffffffff;
-            logical_last_r[alloc_ptr_r] <= (beats_r[choose_w] == {27'b0, length_w});
+            head_keep_r[alloc_ptr_r] <= prepare_head_keep_r;
+            tail_keep_r[alloc_ptr_r] <= (prepare_final_r && prepare_beats_r == length_w)
+                ? prepare_tail_keep_r : 32'hffffffff;
+            logical_last_r[alloc_ptr_r] <= (prepare_final_r && prepare_beats_r == length_w);
         end
         if (pool_read_w) begin
             pending_owner_r <= owner_r[consume_ptr_r];
@@ -361,20 +490,18 @@ module edrv32_gpu_read_dma (
 
                 end
             end
-            if (!ar_valid_r && choose_valid_w && !occupied_r[alloc_ptr_r]) begin
+            if (prepare_build_w) begin
                 ar_valid_r <= 1'b1;
                 occupied_r[alloc_ptr_r] <= 1'b1;
             end
             if (ar_fire_w) begin
                 ar_valid_r <= 1'b0;
                 issued_r[alloc_ptr_r] <= 1'b1;
-                addr_r[owner_r[alloc_ptr_r]] <= addr_r[owner_r[alloc_ptr_r]]
-                    + {22'b0, length_r[alloc_ptr_r], 5'b0};
-                beats_r[owner_r[alloc_ptr_r]] <= beats_r[owner_r[alloc_ptr_r]]
-                    - {27'b0, length_r[alloc_ptr_r]};
-                if (logical_last_r[alloc_ptr_r]) issue_r[owner_r[alloc_ptr_r]] <= 1'b0;
-                round_r <= (owner_r[alloc_ptr_r] == 3'd6)
-                    ? 3'b0 : owner_r[alloc_ptr_r] + 3'd1;
+                addr_r[prepare_client_r] <= prepare_next_addr_r;
+                beats_r[prepare_client_r] <= prepare_remaining_r;
+                if (logical_last_r[alloc_ptr_r]) issue_r[prepare_client_r] <= 1'b0;
+                round_r <= (prepare_client_r == 3'd6)
+                    ? 3'b0 : prepare_client_r + 3'd1;
                 alloc_ptr_r <= alloc_ptr_r + 2'd1;
             end
             if (r_fire_w) begin

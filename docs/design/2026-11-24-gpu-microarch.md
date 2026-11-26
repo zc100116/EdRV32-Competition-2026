@@ -392,6 +392,18 @@ FF为独立寄存配额：未替换基础55000；setup沿用8000（上下文、�
 
 接口变化（fragment 成对、去掉 gradient、plane 宽度）只在 GPU 内部，SoC 端口不变。
 
+### 4.14 三角形路径半宽与时序修订（协调者 2026-11-26，gpu-spec v0.5）
+
+背景：卡 107 第 7 轮（1ff651219）PDS 资源已经装下（LUT 74%、FF 47%、DRM 83%），但布线不通：第 12 轮迭代仍有 12 万条网未布、超用 68 万。布局后 clk_gpu WNS −13.4 ns @180 MHz，TNS −248,449 ns。综合最差路径 41 级，位于 setup：value_r DRM 读 → 属性选择 → 两次 51 位比较取最大 → 前导 1 → 移位 → APM。综合最大扇出 39,816，Yosys 估算只有 3,700，说明 PDS 合并了复制的寄存器。拥塞来源：raster→perspective 的 `fragment_plane` 为 1,736 位，quad 也有一路 1,736 位，两路再经过一个 1,736 位选择器；perspective 用了 41 块 DRM 做宽延迟线。
+
+本节在 4.13 之上修订：
+
+1. **三角形路径每拍 2 个 lane**：raster 每拍输出一个 2×2 组的一行，顺序为 (x, y)(x+1, y) → (x, y+1)(x+1, y+1) → (x+2, y)(x+3, y) → (x+2, y+1)(x+3, y+1)，即一个 4×2 块分 4 拍。`fragment_plane` 降为 2 lane × 7 属性。perspective 只有 2 个 lane：每两拍凑齐一个 2×2 组，算出该组的 LOD；4 拍凑齐 4×2 块后，重组为原来的两个 4 lane 组（先 2j 行，后 2j+1 行），按 4.13 第 4 条的顺序送 texture。texture、pixel、target 的接口和 4 lane 语义不变。两行 mask 都为 0 的 4×2 块不发。
+2. **四边形不经过 perspective**：quad 单元直接产生 `sample` 流（Q8 的 u、v，深度、颜色、palette、alpha），在 perspective 之后、texture 之前与三角形路径的 sample 流做有序选择（同一命令只有一路活动）。删除 `fragment_quad`、quad 的 `fragment_plane` 和 1,736 位选择器，perspective 内也不再有 quad 旁路。
+3. **单拍宽运算全部切拍**：按 4.13 第 2 条（每级 ≤ 3 级 LUT 加一段 ≤ 36 位进位链）处理 S-3 设计记录中保留的全部宽组合路径，以及 setup 中 DRM 读到 APM 的这条路径（DRM 输出先寄存）。所有 APM 和 DRM 的输入、输出都寄存。setup 的三角形 II = 8，可以加级数；geometry、project 的顶点 II = 2，同样可以加级数。
+4. **高扇出控制网**：单个控制或使能网扇出 ≤ 2,000。复制的寄存器加 `/* synthesis syn_preserve=1 */`，防止 PDS 合并（见 2026-11-01 扇出审计、卡 72 的教训）。
+5. 时钟目标不变：按 200 MHz 设计，180 MHz 为目标，150 MHz 保底。
+
 ## 5. 影响
 
 - 本次只修改本设计记录；不改RTL、规格、gpu.json、文件列表或测试。纯文档不运行RTL lint/仿真；`git diff --check` 通过，4.8的纹理枚举实跑结果为 `PASS 783363 192KiB bounds; palette 8-read preload`。

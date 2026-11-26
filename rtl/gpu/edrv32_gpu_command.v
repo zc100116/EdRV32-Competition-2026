@@ -163,21 +163,21 @@ module edrv32_gpu_command (
     input wire resolve_unit_done_i,
     output wire stop_o
 );
-    localparam [3:0] S_IDLE = 4'd0;
-    localparam [3:0] S_LIST = 4'd1;
-    localparam [3:0] S_NEXT = 4'd2;
-    localparam [3:0] S_DECODE = 4'd3;
-    localparam [3:0] S_CONFIG = 4'd4;
-    localparam [3:0] S_PREP = 4'd5;
-    localparam [3:0] S_DRAW = 4'd6;
-    localparam [3:0] S_REQUEST = 4'd7;
-    localparam [3:0] S_EXEC = 4'd8;
-    localparam [3:0] S_RETIRE = 4'd9;
-    localparam [3:0] S_COMPLETE = 4'd10;
-    localparam [3:0] S_DRAIN = 4'd11;
-    localparam [3:0] S_LATCH = 4'd12;
-    localparam [3:0] S_TEX_CHECK = 4'd13;
-    reg [3:0] state_r;
+    localparam [13:0] S_IDLE = 14'd1;
+    localparam [13:0] S_LIST = 14'd2;
+    localparam [13:0] S_NEXT = 14'd4;
+    localparam [13:0] S_DECODE = 14'd8;
+    localparam [13:0] S_CONFIG = 14'd16;
+    localparam [13:0] S_PREP = 14'd32;
+    localparam [13:0] S_DRAW = 14'd64;
+    localparam [13:0] S_REQUEST = 14'd128;
+    localparam [13:0] S_EXEC = 14'd256;
+    localparam [13:0] S_RETIRE = 14'd512;
+    localparam [13:0] S_COMPLETE = 14'd1024;
+    localparam [13:0] S_DRAIN = 14'd2048;
+    localparam [13:0] S_LATCH = 14'd4096;
+    localparam [13:0] S_TEX_CHECK = 14'd8192;
+    reg [13:0] state_r;
     reg wide_r;
     reg [15:0] remaining_r;
     reg [15:0] fetch_remaining_r;
@@ -211,7 +211,10 @@ module edrv32_gpu_command (
     reg read_done_r;
     wire request_ready_w;
     wire [6:0] request_ready_bus_w;
-    wire [7:0] opcode_w;
+    reg [11:0] opcode_r;
+    reg is_tri_r;
+    reg is_quad_r;
+    reg is_object_r;
     wire is_tri_w;
     wire is_quad_w;
     wire is_object_w;
@@ -219,6 +222,12 @@ module edrv32_gpu_command (
     wire draw_complete_w;
     wire all_done_w;
     reg [31:0] texture_size_r;
+    reg [2:0] texture_phase_r;
+    reg [3:0] texture_block_x_r;
+    reg [3:0] texture_block_y_r;
+    reg [31:0] texture_level_bytes_r;
+    reg [31:0] texture_accumulated_r;
+    reg [31:0] texture_total_r;
     reg [3:0] texture_mip_r;
     reg [3:0] texture_log_width_r;
     reg [3:0] texture_log_height_r;
@@ -233,105 +242,104 @@ module edrv32_gpu_command (
     wire texture_error_w;
     wire unused_command_w;
     assign unused_command_w = ^command_read_data_keep_i;
-    assign opcode_w = command_r[7:0];
-    assign is_tri_w = opcode_w == 8'h20;
-    assign is_quad_w = opcode_w == 8'h21;
-    assign is_object_w = opcode_w == 8'h22;
+    assign is_tri_w = is_tri_r;
+    assign is_quad_w = is_quad_r;
+    assign is_object_w = is_object_r;
     assign is_draw_w = is_tri_w || is_quad_w || is_object_w;
-    assign busy_o = state_r != S_IDLE;
+    assign busy_o = !state_r[0];
     assign stop_o = stop_r;
     assign push_w = command_read_data_valid_i && command_read_data_ready_o && !stop_r;
-    assign pop_w = state_r == S_NEXT && count_r != 0;
+    assign pop_w = state_r[2] && count_r != 0;
     assign command_read_data_ready_o = stop_r || count_r < 6'd32;
     // Reserve room for the entire prefetch interval. Command backpressure must
     // never occupy all DMA pool regions while the current draw needs operand reads.
     assign fetch_batch_w = fetch_remaining_r > 16'd16 ? 5'd16 : fetch_remaining_r[4:0];
-    assign command_read_req_valid_o = busy_o && state_r != S_DRAIN && !stop_r
+    assign command_read_req_valid_o = busy_o && !state_r[11] && !stop_r
         && !prefetch_busy_r && fetch_remaining_r != 0 && count_r <= 6'd16;
     assign command_read_req_addr_o = fetch_addr_r;
     assign command_read_req_bytes_o = {22'b0, fetch_batch_w, 5'b0};
     assign fetch_fire_w = command_read_req_valid_o && command_read_req_ready_i;
     assign request_ready_bus_w[0] = command_read_req_ready_i;
     assign request_ready_bus_w[1] = matrix_read_req_ready_i;
-    assign matrix_read_req_valid_o = state_r == S_REQUEST && read_client_r == 3'd1;
+    assign matrix_read_req_valid_o = state_r[7] && read_client_r == 3'd1;
     assign matrix_read_req_addr_o = read_addr_r;
     assign matrix_read_req_bytes_o = read_bytes_r;
     assign request_ready_bus_w[2] = vertex_read_req_ready_i;
-    assign vertex_read_req_valid_o = state_r == S_REQUEST && read_client_r == 3'd2;
+    assign vertex_read_req_valid_o = state_r[7] && read_client_r == 3'd2;
     assign vertex_read_req_addr_o = read_addr_r;
     assign vertex_read_req_bytes_o = read_bytes_r;
     assign request_ready_bus_w[3] = quad_read_req_ready_i;
-    assign quad_read_req_valid_o = state_r == S_REQUEST && read_client_r == 3'd3;
+    assign quad_read_req_valid_o = state_r[7] && read_client_r == 3'd3;
     assign quad_read_req_addr_o = read_addr_r;
     assign quad_read_req_bytes_o = read_bytes_r;
     assign request_ready_bus_w[4] = object_read_req_ready_i;
-    assign object_read_req_valid_o = state_r == S_REQUEST && read_client_r == 3'd4;
+    assign object_read_req_valid_o = state_r[7] && read_client_r == 3'd4;
     assign object_read_req_addr_o = read_addr_r;
     assign object_read_req_bytes_o = read_bytes_r;
     assign request_ready_bus_w[5] = texture_read_req_ready_i;
-    assign texture_read_req_valid_o = state_r == S_REQUEST && read_client_r == 3'd5;
+    assign texture_read_req_valid_o = state_r[7] && read_client_r == 3'd5;
     assign texture_read_req_addr_o = read_addr_r;
     assign texture_read_req_bytes_o = read_bytes_r;
     assign request_ready_bus_w[6] = palette_read_req_ready_i;
-    assign palette_read_req_valid_o = state_r == S_REQUEST && read_client_r == 3'd6;
+    assign palette_read_req_valid_o = state_r[7] && read_client_r == 3'd6;
     assign palette_read_req_addr_o = read_addr_r;
     assign palette_read_req_bytes_o = read_bytes_r;
     assign request_ready_w = request_ready_bus_w[read_client_r];
-    assign unpack_valid_o = state_r == S_CONFIG && config_r[0];
+    assign unpack_valid_o = state_r[4] && config_r[0];
     assign unpack_command_o = command_r;
-    assign matrix_ready_o = state_r == S_EXEC && opcode_w == 8'h01;
-    assign geometry_cfg_valid_o = state_r == S_CONFIG && config_r[1];
+    assign matrix_ready_o = state_r[8] && opcode_r[0];
+    assign geometry_cfg_valid_o = state_r[4] && config_r[1];
     assign geometry_cfg_matrix_o = matrix_r;
     assign geometry_cfg_light_o = light_r;
     assign geometry_cfg_target_o = target_r;
     assign geometry_cfg_pixel_o = pixel_r;
     assign geometry_cfg_wide_o = wide_r;
-    assign raster_render_state_valid_o = state_r == S_CONFIG && config_r[2];
+    assign raster_render_state_valid_o = state_r[4] && config_r[2];
     assign raster_render_state_tex_o = tex_r;
     assign raster_render_state_pixel_o = pixel_r;
     assign raster_render_state_target_o = target_r;
     assign raster_render_state_wide_o = wide_r;
     // microarch 4.12: only the active scan source receives the render snapshot.
-    assign quad_render_state_valid_o = state_r == S_CONFIG && config_r[6];
+    assign quad_render_state_valid_o = state_r[4] && config_r[6];
     assign quad_render_state_tex_o = tex_r;
     assign quad_render_state_pixel_o = pixel_r;
     assign quad_render_state_target_o = target_r;
     assign quad_render_state_wide_o = wide_r;
-    assign texture_render_state_valid_o = state_r == S_CONFIG && config_r[3];
+    assign texture_render_state_valid_o = state_r[4] && config_r[3];
     assign texture_render_state_tex_o = tex_r;
     assign texture_render_state_pixel_o = pixel_r;
     assign texture_render_state_target_o = target_r;
     assign texture_render_state_wide_o = wide_r;
-    assign pixel_render_state_valid_o = state_r == S_CONFIG && config_r[4];
+    assign pixel_render_state_valid_o = state_r[4] && config_r[4];
     assign pixel_render_state_tex_o = tex_r;
     assign pixel_render_state_pixel_o = pixel_r;
     assign pixel_render_state_target_o = target_r;
     assign pixel_render_state_wide_o = wide_r;
-    assign geometry_draw_valid_o = state_r == S_DRAW && draw_r[0];
+    assign geometry_draw_valid_o = state_r[6] && draw_r[0];
     assign geometry_draw_command_o = command_r;
-    assign raster_draw_valid_o = state_r == S_DRAW && draw_r[1];
+    assign raster_draw_valid_o = state_r[6] && draw_r[1];
     assign raster_draw_command_o = command_r;
-    assign quad_draw_valid_o = state_r == S_DRAW && draw_r[2];
+    assign quad_draw_valid_o = state_r[6] && draw_r[2];
     assign quad_draw_command_o = command_r;
-    assign object_draw_valid_o = state_r == S_DRAW && draw_r[3];
+    assign object_draw_valid_o = state_r[6] && draw_r[3];
     assign object_draw_command_o = command_r;
-    assign clear_valid_o = state_r == S_DRAW && draw_r[4];
+    assign clear_valid_o = state_r[6] && draw_r[4];
     assign clear_command_o = command_r;
     assign clear_target_o = target_r;
     assign clear_wide_o = wide_r;
-    assign resolve_valid_o = state_r == S_DRAW && draw_r[5];
+    assign resolve_valid_o = state_r[6] && draw_r[5];
     assign resolve_command_o = command_r;
     assign resolve_target_o = target_r;
     assign resolve_wide_o = wide_r;
-    assign palette_prepare_valid_o = state_r == S_PREP && palette_needed_r
+    assign palette_prepare_valid_o = state_r[5] && palette_needed_r
         && !palette_sent_r;
     assign palette_prepare_group_o = tex_r[81:78];
-    assign palette_prepared_ready_o = state_r == S_PREP && palette_sent_r;
-    assign pack_valid_o = state_r == S_CONFIG && config_r[5] && object_configured_r;
+    assign palette_prepared_ready_o = state_r[5] && palette_sent_r;
+    assign pack_valid_o = state_r[4] && config_r[5] && object_configured_r;
     assign pack_command_o = command_r;
     assign draw_complete_w = target_unit_done_i
         && (!is_object_w || (object_unit_done_i && pack_done_i && write_dma_idle_i));
-    assign object_publish_o = state_r == S_EXEC && is_object_w && draw_complete_w;
+    assign object_publish_o = state_r[8] && is_object_w && draw_complete_w;
     assign all_done_w = geometry_unit_done_i && setup_unit_done_i && raster_unit_done_i
         && quad_unit_done_i && perspective_unit_done_i && object_unit_done_i
         && texture_unit_done_i && pixel_unit_done_i && target_unit_done_i
@@ -356,23 +364,58 @@ module edrv32_gpu_command (
         ? texture_log_width_r - texture_x_shift_w : 4'b0;
     assign texture_block_y_w = texture_log_height_r > texture_y_shift_w
         ? texture_log_height_r - texture_y_shift_w : 4'b0;
-    assign texture_exponent_w = {1'b0, texture_block_x_w} + {1'b0, texture_block_y_w};
+    assign texture_exponent_w = {1'b0, texture_block_x_r} + {1'b0, texture_block_y_r};
     assign texture_level_bytes_w = 32'd8 << texture_exponent_w;
-    assign texture_total_w = {14'b0, command_r[49:37], 5'b0}
-        + texture_size_r + texture_level_bytes_w;
+    assign texture_total_w = texture_total_r;
     assign texture_last_w = texture_mip_r + 4'd1 == command_r[77:74];
     assign texture_error_w = texture_total_w > 32'd196608;
 
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) texture_phase_r <= 0;
+        else if (!state_r[13] || texture_phase_r == 4) texture_phase_r <= 0;
+        else texture_phase_r <= texture_phase_r + 1'b1;
+    end
     always @(posedge clk_i) begin
-        if (state_r == S_LATCH) command_r <= fifo_data_w;
+        if (state_r[13]) begin
+            if (texture_phase_r == 0) begin
+                texture_block_x_r <= texture_block_x_w;
+                texture_block_y_r <= texture_block_y_w;
+            end
+            if (texture_phase_r == 1) texture_level_bytes_r <= texture_level_bytes_w;
+            if (texture_phase_r == 2)
+                texture_accumulated_r <= texture_size_r + texture_level_bytes_r;
+            if (texture_phase_r == 3)
+                texture_total_r <= {14'b0, command_r[49:37], 5'b0} + texture_accumulated_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (state_r[12]) begin
+            command_r <= fifo_data_w;
+            opcode_r <= {fifo_data_w[7:0] == 8'h40,
+                fifo_data_w[7:0] == 8'h31,
+                fifo_data_w[7:0] == 8'h30,
+                fifo_data_w[7:0] == 8'h22,
+                fifo_data_w[7:0] == 8'h21,
+                fifo_data_w[7:0] == 8'h20,
+                fifo_data_w[7:0] == 8'h10,
+                fifo_data_w[7:0] == 8'h05,
+                fifo_data_w[7:0] == 8'h04,
+                fifo_data_w[7:0] == 8'h03,
+                fifo_data_w[7:0] == 8'h02,
+                fifo_data_w[7:0] == 8'h01};
+            is_tri_r <= fifo_data_w[7:0] == 8'h20;
+            is_quad_r <= fifo_data_w[7:0] == 8'h21;
+            is_object_r <= fifo_data_w[7:0] == 8'h22;
+        end
         if (matrix_valid_i && matrix_ready_o) matrix_r <= matrix_data_i;
-        if (state_r == S_TEX_CHECK && texture_last_w && !texture_error_w)
+        if (state_r[13] && texture_phase_r == 4 &&
+            texture_last_w && !texture_error_w)
             tex_r <= command_r;
-        if (state_r == S_DECODE) begin
-            case (opcode_w)
-                8'h02: light_r <= {command_r[151:128], command_r[119:96], command_r[79:32]};
-                8'h04: pixel_r <= command_r;
-                8'h05: target_r <= command_r;
+        if (state_r[3]) begin
+            case (opcode_r)
+                12'd2: light_r <= {command_r[151:128], command_r[119:96], command_r[79:32]};
+                12'd8: pixel_r <= command_r;
+                12'd16: target_r <= command_r;
                 default: begin end
             endcase
         end
@@ -443,9 +486,9 @@ module edrv32_gpu_command (
             end
             if (object_cfg_done_i) object_configured_r <= 1'b1;
             if (object_read_done_i && is_object_w) read_done_r <= 1'b1;
-            if (unpack_done_i && !is_object_w && state_r == S_EXEC) read_done_r <= 1'b1;
-            case (state_r)
-                S_IDLE: begin
+            if (unpack_done_i && !is_object_w && state_r[8]) read_done_r <= 1'b1;
+            (* parallel_case *) case (1'b1)
+                state_r[0]: begin
                     stop_r <= 1'b0;
                     if (start_i && enable_i) begin
                         wide_r <= wide_i;
@@ -461,10 +504,10 @@ module edrv32_gpu_command (
                         state_r <= desc_count_i == 0 ? S_COMPLETE : S_LIST;
                     end
                 end
-                S_LIST: if (fetch_fire_w) state_r <= S_NEXT;
-                S_NEXT: if (count_r != 0) state_r <= S_LATCH;
-                S_LATCH: state_r <= S_DECODE;
-                S_DECODE: begin
+                state_r[1]: if (fetch_fire_w) state_r <= S_NEXT;
+                state_r[2]: if (count_r != 0) state_r <= S_LATCH;
+                state_r[12]: state_r <= S_DECODE;
+                state_r[3]: begin
                     geometry_finish_o <= 1'b0;
                     setup_finish_o <= 1'b0;
                     raster_finish_o <= 1'b0;
@@ -485,30 +528,31 @@ module edrv32_gpu_command (
                     read_bytes_r <= 32'b0;
                     read_client_r <= 3'b0;
                     state_r <= S_CONFIG;
-                    case (opcode_w)
-                        8'h01: begin
+                    case (opcode_r)
+                        12'd1: begin
                             read_client_r <= 3'd1;
                             read_bytes_r <= 32'd64;
                             config_r[0] <= 1'b1;
                         end
-                        8'h02, 8'h04, 8'h05: state_r <= S_RETIRE;
-                        8'h03: begin
+                        12'd2, 12'd8, 12'd16: state_r <= S_RETIRE;
+                        12'd4: begin
                             texture_size_r <= 32'b0;
                             texture_mip_r <= 4'b0;
                             texture_log_width_r <= command_r[67:64];
                             texture_log_height_r <= command_r[71:68];
                             state_r <= S_TEX_CHECK;
                         end
-                        8'h10: draw_r[4] <= 1'b1;
-                        8'h20: begin
+                        12'd32: draw_r[4] <= 1'b1;
+                        12'd64: begin
                             config_r[4:1] <= 4'b1111;
                             config_r[0] <= command_r[119:96] != 0;
                             draw_r[1:0] <= 2'b11;
                             read_client_r <= 3'd2;
-                            read_bytes_r <= {8'b0, command_r[119:96]} * 32'd48;
+                            read_bytes_r <= ({8'b0, command_r[119:96]} << 5)
+                                + ({8'b0, command_r[119:96]} << 4);
                             palette_needed_r <= tex_r[73:72] != 2'd2 && tex_r[83:82] != 0;
                         end
-                        8'h21: begin
+                        12'd128: begin
                             config_r[4:3] <= 2'b11;
                             config_r[6] <= 1'b1;
                             config_r[0] <= command_r[119:96] != 0;
@@ -516,7 +560,7 @@ module edrv32_gpu_command (
                             read_client_r <= 3'd3;
                             read_bytes_r <= {4'b0, command_r[119:96], 4'b0};
                         end
-                        8'h22: begin
+                        12'd256: begin
                             config_r[4:3] <= 2'b11;
                             config_r[6] <= 1'b1;
                             config_r[5] <= 1'b1;
@@ -525,17 +569,17 @@ module edrv32_gpu_command (
                             read_client_r <= 3'd4;
                             read_bytes_r <= {3'b0, command_r[119:96], 5'b0};
                         end
-                        8'h30: begin
+                        12'd512: begin
                             read_client_r <= 3'd5;
                             read_bytes_r <= {13'b0, command_r[146:133], 5'b0};
                             config_r[0] <= command_r[146:133] != 0;
                         end
-                        8'h31: begin
+                        12'd1024: begin
                             read_client_r <= 3'd6;
                             read_bytes_r <= {21'b0, command_r[104:96], 2'b0};
                             config_r[0] <= 1'b1;
                         end
-                        8'h40: draw_r[5] <= 1'b1;
+                        12'd2048: draw_r[5] <= 1'b1;
                         default: begin
                             error_pending_r <= 1'b1;
                             error_code_r <= 32'd1;
@@ -544,7 +588,7 @@ module edrv32_gpu_command (
                         end
                     endcase
                     begin
-                        if (opcode_w == 8'h30 && {14'b0, command_r[113:101], 5'b0}
+                        if (opcode_r[9] && {14'b0, command_r[113:101], 5'b0}
                             + {13'b0, command_r[146:133], 5'b0} > 32'd196608) begin
                             error_pending_r <= 1'b1;
                             error_code_r <= 32'd4;
@@ -553,8 +597,8 @@ module edrv32_gpu_command (
                         end
                     end
                 end
-                S_TEX_CHECK: begin
-                    texture_size_r <= texture_size_r + texture_level_bytes_w;
+                state_r[13]: if (texture_phase_r == 4) begin
+                    texture_size_r <= texture_accumulated_r;
                     texture_mip_r <= texture_mip_r + 4'd1;
                     if (texture_log_width_r != 0)
                         texture_log_width_r <= texture_log_width_r - 4'd1;
@@ -569,7 +613,7 @@ module edrv32_gpu_command (
                         end else state_r <= S_RETIRE;
                     end
                 end
-                S_CONFIG: begin
+                state_r[4]: begin
                     if (unpack_valid_o && unpack_ready_i) config_r[0] <= 1'b0;
                     if (geometry_cfg_valid_o && geometry_cfg_ready_i) config_r[1] <= 1'b0;
                     if (raster_render_state_valid_o && raster_render_state_ready_i)
@@ -583,13 +627,13 @@ module edrv32_gpu_command (
                         config_r[6] <= 1'b0;
                     if (config_r == 0) state_r <= S_PREP;
                 end
-                S_PREP: begin
+                state_r[5]: begin
                     if (palette_prepare_valid_o && palette_prepare_ready_i)
                         palette_sent_r <= 1'b1;
                     if (!palette_needed_r || (palette_prepared_valid_i && palette_prepared_ready_o))
                         state_r <= S_DRAW;
                 end
-                S_DRAW: begin
+                state_r[6]: begin
                     if (geometry_draw_valid_o && geometry_draw_ready_i) draw_r[0] <= 1'b0;
                     if (raster_draw_valid_o && raster_draw_ready_i) draw_r[1] <= 1'b0;
                     if (quad_draw_valid_o && quad_draw_ready_i) draw_r[2] <= 1'b0;
@@ -601,8 +645,8 @@ module edrv32_gpu_command (
                         if (read_bytes_r == 0) read_done_r <= 1'b1;
                     end
                 end
-                S_REQUEST: if (request_ready_w) state_r <= S_EXEC;
-                S_EXEC: begin
+                state_r[7]: if (request_ready_w) state_r <= S_EXEC;
+                state_r[8]: begin
                     geometry_finish_o <= !is_tri_w || read_done_r;
                     setup_finish_o <= !is_tri_w || geometry_unit_done_i;
                     raster_finish_o <= !is_tri_w || setup_unit_done_i;
@@ -612,25 +656,25 @@ module edrv32_gpu_command (
                     perspective_finish_o <= !is_draw_w
                         || (is_tri_w ? raster_unit_done_i : quad_unit_done_i);
                     // read_done_r follows unpack's final consumer handshake for both loads.
-                    texture_finish_o <= (opcode_w == 8'h30 || opcode_w == 8'h31) ? read_done_r
+                    texture_finish_o <= (opcode_r[9] || opcode_r[10]) ? read_done_r
                         : (!is_draw_w || perspective_unit_done_i);
                     pixel_finish_o <= !is_draw_w || texture_unit_done_i;
-                    target_finish_o <= opcode_w == 8'h40 ? resolve_unit_done_i
+                    target_finish_o <= opcode_r[11] ? resolve_unit_done_i
                         : (!is_draw_w || pixel_unit_done_i);
                     resolve_finish_o <= 1'b1;
-                    case (opcode_w)
-                        8'h01: if (matrix_valid_i) state_r <= S_RETIRE;
-                        8'h10: if (target_unit_done_i) state_r <= S_RETIRE;
-                        8'h20, 8'h21: if (draw_complete_w) state_r <= S_RETIRE;
-                        8'h22: if (object_publish_o && object_published_i) state_r <= S_RETIRE;
-                        8'h30: if (read_done_r && texture_unit_done_i) state_r <= S_RETIRE;
-                        8'h31: if (read_done_r) state_r <= S_RETIRE;
-                        8'h40: if (resolve_unit_done_i && target_unit_done_i && write_dma_idle_i)
+                    case (opcode_r)
+                        12'd1: if (matrix_valid_i) state_r <= S_RETIRE;
+                        12'd32: if (target_unit_done_i) state_r <= S_RETIRE;
+                        12'd64, 12'd128: if (draw_complete_w) state_r <= S_RETIRE;
+                        12'd256: if (object_publish_o && object_published_i) state_r <= S_RETIRE;
+                        12'd512: if (read_done_r && texture_unit_done_i) state_r <= S_RETIRE;
+                        12'd1024: if (read_done_r) state_r <= S_RETIRE;
+                        12'd2048: if (resolve_unit_done_i && target_unit_done_i && write_dma_idle_i)
                             state_r <= S_RETIRE;
                         default: begin end
                     endcase
                 end
-                S_RETIRE: begin
+                state_r[9]: begin
                     geometry_finish_o <= 1'b1;
                     setup_finish_o <= 1'b1;
                     raster_finish_o <= 1'b1;
@@ -644,13 +688,13 @@ module edrv32_gpu_command (
                     remaining_r <= remaining_r - 16'd1;
                     state_r <= remaining_r == 16'd1 ? S_COMPLETE : S_NEXT;
                 end
-                S_COMPLETE: begin
+                state_r[10]: begin
                     if (read_dma_idle_i && write_dma_idle_i) begin
                         done_o <= 1'b1;
                         state_r <= S_IDLE;
                     end
                 end
-                S_DRAIN: begin
+                state_r[11]: begin
                     count_r <= 6'b0;
                     geometry_finish_o <= 1'b1;
                     setup_finish_o <= 1'b1;
@@ -673,7 +717,7 @@ module edrv32_gpu_command (
                 default: begin end
             endcase
             begin
-                if (busy_o && !dma_start_o && state_r != S_DRAIN
+                if (busy_o && !dma_start_o && !state_r[11]
                     && (abort_i || soft_rst_i || read_dma_error_i || write_dma_error_i)) begin
                     stop_r <= 1'b1;
                     state_r <= S_DRAIN;

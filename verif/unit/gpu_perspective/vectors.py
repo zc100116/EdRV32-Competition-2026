@@ -227,7 +227,7 @@ def perspective_vectors():
         ar = PixelArithmetic.__new__(PixelArithmetic)
         ar.exponents = [-8, rng.randrange(-61, -11), rng.randrange(-61, -11),
                         rng.randrange(-61, -11), -12, -12, -12]
-        quad = i >= 530 and i % 13 == 0
+        quad = False
         rows = []
         for row in range(2):
             lanes = []
@@ -318,6 +318,26 @@ def run_normal():
                         f'+COUNT={len(inputs)}', f'+STALL={stall}'], check=True)
 
 
+def half_fragments(groups):
+    result = []
+    layout = dict(FRAG, plane=868)
+    for index in range(0, len(groups), 2):
+        rows = []
+        for value in groups[index:index+2]:
+            fields = {}
+            offset = 0
+            for key, width in FRAG.items():
+                fields[key] = (value >> offset) & ((1 << width)-1)
+                offset += width
+            rows.append(fields)
+        for half in (0, 1):
+            for row in rows:
+                result.append(record(dict(row, x=row['x']+half*2,
+                    mask=(row['mask'] >> (half*2)) & 3,
+                    plane=(row['plane'] >> (half*868)) & ((1 << 868)-1)), layout))
+    return result
+
+
 def run(kind):
     unit = ROOT / 'verif/unit' / ('gpu_'+kind)
     build = ROOT / 'build/unit' / ('gpu_'+kind)
@@ -347,6 +367,31 @@ def run(kind):
         inputs, outputs = (perspective_vectors() if kind == 'perspective' else
                            quad_vectors(wide, obj, perf) if kind == 'quad' else
                            raster_vectors(wide))
+        if kind == 'perspective':
+            inputs = half_fragments(inputs)
+        if kind == 'raster':
+            outputs = half_fragments(outputs)
+        if kind == 'quad':
+            converted = []
+            for value in outputs:
+                fields = {}
+                offset = 0
+                for key, width in FRAG.items():
+                    fields[key] = (value >> offset) & ((1 << width)-1)
+                    offset += width
+                uv = [[], []]
+                depth = []
+                for lane in range(4):
+                    plane = fields['plane'] >> (lane*434)
+                    depth.append((plane >> 8) & 65535)
+                    for axis, start in enumerate((128, 194)):
+                        coord = (plane >> (start+34)) & ((1 << 32)-1)
+                        uv[axis].append((coord << 8) & ((1 << 32)-1))
+                converted.append(record(dict(x=fields['x'], y=fields['y'],
+                    mask=fields['mask'], quad=1, u=packed(uv[0], [32]*4),
+                    v=packed(uv[1], [32]*4), span=0, depth=packed(depth, [16]*4),
+                    color=(1 << 96)-1, palette=fields['palette'], alpha=fields['alpha']), SAMPLE))
+            outputs = converted
         inp, out = build/'input.hex', build/'expected.hex'
         inp.write_text(''.join(f'{x:x}\n' for x in inputs))
         out.write_text(''.join(f'{x:x}\n' for x in outputs))

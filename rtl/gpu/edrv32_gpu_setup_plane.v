@@ -8,11 +8,9 @@ module edrv32_gpu_setup_plane (
     input wire clk_i,
     input wire rst_n_i,
     input wire enable_i,
+    input wire credit_push_i,
+    input wire credit_pop_i,
     input wire stop_i,
-
-    // Reciprocal metadata shares this unit's enabled nine-cycle RAM.
-    input wire [5:0] recip_delay_wr_data_i,
-    output wire [5:0] recip_delay_rd_data_o,
 
     // Attribute and triangle context.
     input wire plane_valid_i,
@@ -30,264 +28,4581 @@ module edrv32_gpu_setup_plane (
     output wire [103:0] plane_gradient_o,
     output wire [9:0] plane_h_o
 );
-    reg signed [9:0] h_first_r;
-    reg signed [9:0] h_last_r;
-    reg [35:0] offset_first_r;
-    reg [8:0] metadata_write_r;
-    wire [8:0] metadata_read_13_w;
-    wire [8:0] metadata_read_9_w;
-    wire [71:0] unused_metadata_13_w;
-    wire [71:0] unused_metadata_9_w;
-    wire signed [9:0] normal_h_w;
-    wire [32:0] first_w;
-    wire [5:0] exponent_w;
-    wire [35:0] offset_w;
-    reg [14:0] valid_r;
-    wire [6:0] tag_w [0:14];
-    wire [30:0] reciprocal_w [0:5];
-    wire signed [33:0] difference_w [0:1];
-    reg [71:0] delta_r;
-    wire signed [51:0] product_w [0:3];
-    wire signed [73:0] origin_product_w [0:1];
-    wire [32:0] scaled_w [0:2];
-    wire [50:0] maximum_01_w;
-    wire [50:0] maximum_w;
-    wire signed [9:0] h_w;
-    assign maximum_01_w = plane_value_i[101:51] > plane_value_i[50:0]
-        ? plane_value_i[101:51] : plane_value_i[50:0];
-    assign maximum_w = plane_value_i[152:102] > maximum_01_w
-        ? plane_value_i[152:102] : maximum_01_w;
-    // Input stage: two maximum comparators, one six-level leading-one tree.
-    wire [63:0] leading_data64_w;
-    wire [5:0] leading_w;
-    wire leading_bit0_w;
-    wire leading_bit1_w;
-    wire leading_bit2_w;
-    wire leading_bit3_w;
-    wire leading_bit4_w;
-    wire leading_bit5_w;
-    assign leading_w = {leading_bit5_w, leading_bit4_w, leading_bit3_w,
-        leading_bit2_w, leading_bit1_w, leading_bit0_w};
-    assign leading_data64_w = {13'd0, maximum_w};
-    wire [31:0] leading_data32_w;
-    assign leading_bit5_w = |leading_data64_w[63:32];
-    assign leading_data32_w = leading_bit5_w
-        ? leading_data64_w[63:32] : leading_data64_w[31:0];
-    wire [15:0] leading_data16_w;
-    assign leading_bit4_w = |leading_data32_w[31:16];
-    assign leading_data16_w = leading_bit4_w
-        ? leading_data32_w[31:16] : leading_data32_w[15:0];
-    wire [7:0] leading_data8_w;
-    assign leading_bit3_w = |leading_data16_w[15:8];
-    assign leading_data8_w = leading_bit3_w
-        ? leading_data16_w[15:8] : leading_data16_w[7:0];
-    wire [3:0] leading_data4_w;
-    assign leading_bit2_w = |leading_data8_w[7:4];
-    assign leading_data4_w = leading_bit2_w
-        ? leading_data8_w[7:4] : leading_data8_w[3:0];
-    wire [1:0] unused_leading_data2_w;
-    assign leading_bit1_w = |leading_data4_w[3:2];
-    assign unused_leading_data2_w = leading_bit1_w
-        ? leading_data4_w[3:2] : leading_data4_w[1:0];
-    assign leading_bit0_w = unused_leading_data2_w[1];
-    assign h_w = plane_tag_i[2:0] == 0 ? -10'sd16 :
-        plane_tag_i[2:0] < 4 ? (maximum_w == 0 ? -10'sd32 :
-        $signed({4'd0, leading_w}) - 10'sd31) : -10'sd8;
-    assign plane_valid_o = valid_r[14];
-    assign plane_tag_o = tag_w[14];
-    assign plane_h_o = h_last_r;
+    // S-4: explicit <=35-bit carry slices and registered four-way shift stages.
+    reg [152:0] value_0_r;
+    reg [6:0] tag_0_r;
+    reg [71:0] delta_0_r;
+    reg [35:0] offset_0_r;
+    reg [30:0] reciprocal_0_r;
+    reg [5:0] exponent_0_r;
+    wire [50:0] vertex0_w;
+    wire [50:0] vertex1_w;
+    wire [50:0] vertex2_w;
+    reg [2:0] maximum01_compare_r;
+    reg [50:0] vertex0_w_d1_r;
+    reg [50:0] vertex1_w_d1_r;
+    reg [50:0] maximum01_select_r;
+    reg [50:0] vertex2_w_d1_r;
+    reg [50:0] vertex2_w_d2_r;
+    reg [2:0] maximum012_compare_r;
+    reg [50:0] maximum01_select_d3_r;
+    reg [50:0] vertex2_w_d3_r;
+    reg [50:0] maximum012_select_r;
+    reg [5:0] leading_group0_r;
+    reg [5:0] leading_group1_r;
+    reg [5:0] leading_group2_r;
+    reg [5:0] leading_group3_r;
+    reg [5:0] leading_group4_r;
+    reg [5:0] leading_group5_r;
+    reg [5:0] leading_group6_r;
+    reg [5:0] leading_group7_r;
+    reg [5:0] leading_group8_r;
+    reg [5:0] leading_group9_r;
+    reg [5:0] leading_group10_r;
+    reg [5:0] leading_group11_r;
+    reg [5:0] leading_group12_r;
+    reg [12:0] nonzero_groups_r;
+    reg [5:0] leading_partial0_r;
+    reg [5:0] leading_partial1_r;
+    reg [5:0] leading_partial2_r;
+    reg [5:0] leading_partial3_r;
+    reg [12:0] nonzero_groups_d6_r;
+    reg [5:0] leading_r;
+    reg [6:0] tag_0_r_d1_r;
+    reg [6:0] tag_0_r_d2_r;
+    reg [6:0] tag_0_r_d3_r;
+    reg [6:0] tag_0_r_d4_r;
+    reg [6:0] tag_0_r_d5_r;
+    reg [6:0] tag_0_r_d6_r;
+    reg [6:0] tag_0_r_d7_r;
+    reg [50:0] maximum012_select_d5_r;
+    reg [50:0] maximum012_select_d6_r;
+    reg [50:0] maximum012_select_d7_r;
+    reg [9:0] h_r;
+    reg [5:0] right_amount_r;
+    reg [5:0] left_amount_r;
+    wire [51:0] v52_0_w;
+    wire [1:0] scale_left0_amt0_w;
+    reg [51:0] scale_left0_0_w;
+    reg [51:0] v52_0_w_d1_r;
+    reg [51:0] v52_0_w_d2_r;
+    reg [51:0] v52_0_w_d3_r;
+    reg [51:0] v52_0_w_d4_r;
+    reg [51:0] v52_0_w_d5_r;
+    reg [51:0] v52_0_w_d6_r;
+    reg [51:0] v52_0_w_d7_r;
+    reg [51:0] v52_0_w_d8_r;
+    reg [51:0] v52_0_w_d9_r;
+    reg [51:0] scale_left0_0_r;
+    wire [1:0] scale_left0_amt1_w;
+    reg [51:0] scale_left0_1_w;
+    reg [1:0] scale_left0_amt1_w_d10_r;
+    reg [51:0] scale_left0_1_r;
+    wire [1:0] scale_left0_amt2_w;
+    reg [51:0] scale_left0_2_w;
+    reg [1:0] scale_left0_amt2_w_d10_r;
+    reg [1:0] scale_left0_amt2_w_d11_r;
+    reg [51:0] scale_left0_2_r;
+    reg [5:0] scale_bit0_r;
+    wire [51:0] scale_one0_w;
+    wire [1:0] scale_bias0_amt0_w;
+    reg [51:0] scale_bias0_0_w;
+    reg [51:0] scale_bias0_0_r;
+    wire [1:0] scale_bias0_amt1_w;
+    reg [51:0] scale_bias0_1_w;
+    reg [1:0] scale_bias0_amt1_w_d11_r;
+    reg [51:0] scale_bias0_1_r;
+    wire [1:0] scale_bias0_amt2_w;
+    reg [51:0] scale_bias0_2_w;
+    reg [1:0] scale_bias0_amt2_w_d11_r;
+    reg [1:0] scale_bias0_amt2_w_d12_r;
+    reg [51:0] scale_bias0_2_r;
+    reg [51:0] v52_0_w_d10_r;
+    reg [51:0] v52_0_w_d11_r;
+    reg [51:0] v52_0_w_d12_r;
+    reg [51:0] v52_0_w_d13_r;
+    wire [34:0] scale_add0_a0_w;
+    wire [34:0] scale_add0_b0_w;
+    reg [35:0] scale_add0_part0_r;
+    wire [34:0] scale_add0_low0_w;
+    wire [16:0] scale_add0_a1_w;
+    wire [16:0] scale_add0_b1_w;
+    reg [16:0] scale_add0_a1_w_d14_r;
+    reg [16:0] scale_add0_b1_w_d14_r;
+    reg [17:0] unused_scale_add0_part1_r;
+    wire [16:0] scale_add0_low1_w;
+    wire [51:0] scale_add0_w;
+    reg [34:0] scale_add0_low0_w_d15_r;
+    wire [1:0] scale_rounded0_amt0_w;
+    reg [51:0] scale_rounded0_0_w;
+    reg [1:0] scale_rounded0_amt0_w_d10_r;
+    reg [1:0] scale_rounded0_amt0_w_d11_r;
+    reg [1:0] scale_rounded0_amt0_w_d12_r;
+    reg [1:0] scale_rounded0_amt0_w_d13_r;
+    reg [1:0] scale_rounded0_amt0_w_d14_r;
+    reg [1:0] scale_rounded0_amt0_w_d15_r;
+    reg [51:0] scale_rounded0_0_r;
+    wire [1:0] scale_rounded0_amt1_w;
+    reg [51:0] scale_rounded0_1_w;
+    reg [1:0] scale_rounded0_amt1_w_d10_r;
+    reg [1:0] scale_rounded0_amt1_w_d11_r;
+    reg [1:0] scale_rounded0_amt1_w_d12_r;
+    reg [1:0] scale_rounded0_amt1_w_d13_r;
+    reg [1:0] scale_rounded0_amt1_w_d14_r;
+    reg [1:0] scale_rounded0_amt1_w_d15_r;
+    reg [1:0] scale_rounded0_amt1_w_d16_r;
+    reg [51:0] scale_rounded0_1_r;
+    wire [1:0] scale_rounded0_amt2_w;
+    reg [51:0] scale_rounded0_2_w;
+    reg [1:0] scale_rounded0_amt2_w_d10_r;
+    reg [1:0] scale_rounded0_amt2_w_d11_r;
+    reg [1:0] scale_rounded0_amt2_w_d12_r;
+    reg [1:0] scale_rounded0_amt2_w_d13_r;
+    reg [1:0] scale_rounded0_amt2_w_d14_r;
+    reg [1:0] scale_rounded0_amt2_w_d15_r;
+    reg [1:0] scale_rounded0_amt2_w_d16_r;
+    reg [1:0] scale_rounded0_amt2_w_d17_r;
+    reg [51:0] unused_scale_rounded0_2_r;
+    reg [9:0] h_d9_r;
+    reg [9:0] h_d10_r;
+    reg [9:0] h_d11_r;
+    reg [9:0] h_d12_r;
+    reg [9:0] h_d13_r;
+    reg [9:0] h_d14_r;
+    reg [9:0] h_d15_r;
+    reg [9:0] h_d16_r;
+    reg [9:0] h_d17_r;
+    reg [9:0] h_d18_r;
+    reg [51:0] scale_left0_2_r_d13_r;
+    reg [51:0] scale_left0_2_r_d14_r;
+    reg [51:0] scale_left0_2_r_d15_r;
+    reg [51:0] scale_left0_2_r_d16_r;
+    reg [51:0] scale_left0_2_r_d17_r;
+    reg [51:0] unused_scale_left0_2_r_d18_r;
+    reg [32:0] scaled0_r;
+    wire [51:0] v52_1_w;
+    wire [1:0] scale_left1_amt0_w;
+    reg [51:0] scale_left1_0_w;
+    reg [51:0] v52_1_w_d1_r;
+    reg [51:0] v52_1_w_d2_r;
+    reg [51:0] v52_1_w_d3_r;
+    reg [51:0] v52_1_w_d4_r;
+    reg [51:0] v52_1_w_d5_r;
+    reg [51:0] v52_1_w_d6_r;
+    reg [51:0] v52_1_w_d7_r;
+    reg [51:0] v52_1_w_d8_r;
+    reg [51:0] v52_1_w_d9_r;
+    reg [51:0] scale_left1_0_r;
+    wire [1:0] scale_left1_amt1_w;
+    reg [51:0] scale_left1_1_w;
+    reg [1:0] scale_left1_amt1_w_d10_r;
+    reg [51:0] scale_left1_1_r;
+    wire [1:0] scale_left1_amt2_w;
+    reg [51:0] scale_left1_2_w;
+    reg [1:0] scale_left1_amt2_w_d10_r;
+    reg [1:0] scale_left1_amt2_w_d11_r;
+    reg [51:0] scale_left1_2_r;
+    reg [5:0] scale_bit1_r;
+    wire [51:0] scale_one1_w;
+    wire [1:0] scale_bias1_amt0_w;
+    reg [51:0] scale_bias1_0_w;
+    reg [51:0] scale_bias1_0_r;
+    wire [1:0] scale_bias1_amt1_w;
+    reg [51:0] scale_bias1_1_w;
+    reg [1:0] scale_bias1_amt1_w_d11_r;
+    reg [51:0] scale_bias1_1_r;
+    wire [1:0] scale_bias1_amt2_w;
+    reg [51:0] scale_bias1_2_w;
+    reg [1:0] scale_bias1_amt2_w_d11_r;
+    reg [1:0] scale_bias1_amt2_w_d12_r;
+    reg [51:0] scale_bias1_2_r;
+    reg [51:0] v52_1_w_d10_r;
+    reg [51:0] v52_1_w_d11_r;
+    reg [51:0] v52_1_w_d12_r;
+    reg [51:0] v52_1_w_d13_r;
+    wire [34:0] scale_add1_a0_w;
+    wire [34:0] scale_add1_b0_w;
+    reg [35:0] scale_add1_part0_r;
+    wire [34:0] scale_add1_low0_w;
+    wire [16:0] scale_add1_a1_w;
+    wire [16:0] scale_add1_b1_w;
+    reg [16:0] scale_add1_a1_w_d14_r;
+    reg [16:0] scale_add1_b1_w_d14_r;
+    reg [17:0] unused_scale_add1_part1_r;
+    wire [16:0] scale_add1_low1_w;
+    wire [51:0] scale_add1_w;
+    reg [34:0] scale_add1_low0_w_d15_r;
+    wire [1:0] scale_rounded1_amt0_w;
+    reg [51:0] scale_rounded1_0_w;
+    reg [1:0] scale_rounded1_amt0_w_d10_r;
+    reg [1:0] scale_rounded1_amt0_w_d11_r;
+    reg [1:0] scale_rounded1_amt0_w_d12_r;
+    reg [1:0] scale_rounded1_amt0_w_d13_r;
+    reg [1:0] scale_rounded1_amt0_w_d14_r;
+    reg [1:0] scale_rounded1_amt0_w_d15_r;
+    reg [51:0] scale_rounded1_0_r;
+    wire [1:0] scale_rounded1_amt1_w;
+    reg [51:0] scale_rounded1_1_w;
+    reg [1:0] scale_rounded1_amt1_w_d10_r;
+    reg [1:0] scale_rounded1_amt1_w_d11_r;
+    reg [1:0] scale_rounded1_amt1_w_d12_r;
+    reg [1:0] scale_rounded1_amt1_w_d13_r;
+    reg [1:0] scale_rounded1_amt1_w_d14_r;
+    reg [1:0] scale_rounded1_amt1_w_d15_r;
+    reg [1:0] scale_rounded1_amt1_w_d16_r;
+    reg [51:0] scale_rounded1_1_r;
+    wire [1:0] scale_rounded1_amt2_w;
+    reg [51:0] scale_rounded1_2_w;
+    reg [1:0] scale_rounded1_amt2_w_d10_r;
+    reg [1:0] scale_rounded1_amt2_w_d11_r;
+    reg [1:0] scale_rounded1_amt2_w_d12_r;
+    reg [1:0] scale_rounded1_amt2_w_d13_r;
+    reg [1:0] scale_rounded1_amt2_w_d14_r;
+    reg [1:0] scale_rounded1_amt2_w_d15_r;
+    reg [1:0] scale_rounded1_amt2_w_d16_r;
+    reg [1:0] scale_rounded1_amt2_w_d17_r;
+    reg [51:0] unused_scale_rounded1_2_r;
+    reg [51:0] scale_left1_2_r_d13_r;
+    reg [51:0] scale_left1_2_r_d14_r;
+    reg [51:0] scale_left1_2_r_d15_r;
+    reg [51:0] scale_left1_2_r_d16_r;
+    reg [51:0] scale_left1_2_r_d17_r;
+    reg [51:0] unused_scale_left1_2_r_d18_r;
+    reg [32:0] scaled1_r;
+    wire [51:0] v52_2_w;
+    wire [1:0] scale_left2_amt0_w;
+    reg [51:0] scale_left2_0_w;
+    reg [51:0] v52_2_w_d1_r;
+    reg [51:0] v52_2_w_d2_r;
+    reg [51:0] v52_2_w_d3_r;
+    reg [51:0] v52_2_w_d4_r;
+    reg [51:0] v52_2_w_d5_r;
+    reg [51:0] v52_2_w_d6_r;
+    reg [51:0] v52_2_w_d7_r;
+    reg [51:0] v52_2_w_d8_r;
+    reg [51:0] v52_2_w_d9_r;
+    reg [51:0] scale_left2_0_r;
+    wire [1:0] scale_left2_amt1_w;
+    reg [51:0] scale_left2_1_w;
+    reg [1:0] scale_left2_amt1_w_d10_r;
+    reg [51:0] scale_left2_1_r;
+    wire [1:0] scale_left2_amt2_w;
+    reg [51:0] scale_left2_2_w;
+    reg [1:0] scale_left2_amt2_w_d10_r;
+    reg [1:0] scale_left2_amt2_w_d11_r;
+    reg [51:0] scale_left2_2_r;
+    reg [5:0] scale_bit2_r;
+    wire [51:0] scale_one2_w;
+    wire [1:0] scale_bias2_amt0_w;
+    reg [51:0] scale_bias2_0_w;
+    reg [51:0] scale_bias2_0_r;
+    wire [1:0] scale_bias2_amt1_w;
+    reg [51:0] scale_bias2_1_w;
+    reg [1:0] scale_bias2_amt1_w_d11_r;
+    reg [51:0] scale_bias2_1_r;
+    wire [1:0] scale_bias2_amt2_w;
+    reg [51:0] scale_bias2_2_w;
+    reg [1:0] scale_bias2_amt2_w_d11_r;
+    reg [1:0] scale_bias2_amt2_w_d12_r;
+    reg [51:0] scale_bias2_2_r;
+    reg [51:0] v52_2_w_d10_r;
+    reg [51:0] v52_2_w_d11_r;
+    reg [51:0] v52_2_w_d12_r;
+    reg [51:0] v52_2_w_d13_r;
+    wire [34:0] scale_add2_a0_w;
+    wire [34:0] scale_add2_b0_w;
+    reg [35:0] scale_add2_part0_r;
+    wire [34:0] scale_add2_low0_w;
+    wire [16:0] scale_add2_a1_w;
+    wire [16:0] scale_add2_b1_w;
+    reg [16:0] scale_add2_a1_w_d14_r;
+    reg [16:0] scale_add2_b1_w_d14_r;
+    reg [17:0] unused_scale_add2_part1_r;
+    wire [16:0] scale_add2_low1_w;
+    wire [51:0] scale_add2_w;
+    reg [34:0] scale_add2_low0_w_d15_r;
+    wire [1:0] scale_rounded2_amt0_w;
+    reg [51:0] scale_rounded2_0_w;
+    reg [1:0] scale_rounded2_amt0_w_d10_r;
+    reg [1:0] scale_rounded2_amt0_w_d11_r;
+    reg [1:0] scale_rounded2_amt0_w_d12_r;
+    reg [1:0] scale_rounded2_amt0_w_d13_r;
+    reg [1:0] scale_rounded2_amt0_w_d14_r;
+    reg [1:0] scale_rounded2_amt0_w_d15_r;
+    reg [51:0] scale_rounded2_0_r;
+    wire [1:0] scale_rounded2_amt1_w;
+    reg [51:0] scale_rounded2_1_w;
+    reg [1:0] scale_rounded2_amt1_w_d10_r;
+    reg [1:0] scale_rounded2_amt1_w_d11_r;
+    reg [1:0] scale_rounded2_amt1_w_d12_r;
+    reg [1:0] scale_rounded2_amt1_w_d13_r;
+    reg [1:0] scale_rounded2_amt1_w_d14_r;
+    reg [1:0] scale_rounded2_amt1_w_d15_r;
+    reg [1:0] scale_rounded2_amt1_w_d16_r;
+    reg [51:0] scale_rounded2_1_r;
+    wire [1:0] scale_rounded2_amt2_w;
+    reg [51:0] scale_rounded2_2_w;
+    reg [1:0] scale_rounded2_amt2_w_d10_r;
+    reg [1:0] scale_rounded2_amt2_w_d11_r;
+    reg [1:0] scale_rounded2_amt2_w_d12_r;
+    reg [1:0] scale_rounded2_amt2_w_d13_r;
+    reg [1:0] scale_rounded2_amt2_w_d14_r;
+    reg [1:0] scale_rounded2_amt2_w_d15_r;
+    reg [1:0] scale_rounded2_amt2_w_d16_r;
+    reg [1:0] scale_rounded2_amt2_w_d17_r;
+    reg [51:0] unused_scale_rounded2_2_r;
+    reg [51:0] scale_left2_2_r_d13_r;
+    reg [51:0] scale_left2_2_r_d14_r;
+    reg [51:0] scale_left2_2_r_d15_r;
+    reg [51:0] scale_left2_2_r_d16_r;
+    reg [51:0] scale_left2_2_r_d17_r;
+    reg [51:0] unused_scale_left2_2_r_d18_r;
+    reg [32:0] scaled2_r;
+    reg [33:0] difference0_r;
+    wire [17:0] unused_delta0_0_w;
+    wire [17:0] unused_delta0_1_w;
+    reg [33:0] difference1_r;
+    wire [17:0] unused_delta1_0_w;
+    wire [17:0] unused_delta1_1_w;
+    wire [17:0] mult_delta0_0_w;
+    reg [17:0] mult_delta0_0_w_d1_r;
+    reg [17:0] mult_delta0_0_w_d2_r;
+    reg [17:0] mult_delta0_0_w_d3_r;
+    reg [17:0] mult_delta0_0_w_d4_r;
+    reg [17:0] mult_delta0_0_w_d5_r;
+    reg [17:0] mult_delta0_0_w_d6_r;
+    reg [17:0] mult_delta0_0_w_d7_r;
+    reg [17:0] mult_delta0_0_w_d8_r;
+    reg [17:0] mult_delta0_0_w_d9_r;
+    reg [17:0] mult_delta0_0_w_d10_r;
+    reg [17:0] mult_delta0_0_w_d11_r;
+    reg [17:0] mult_delta0_0_w_d12_r;
+    reg [17:0] mult_delta0_0_w_d13_r;
+    reg [17:0] mult_delta0_0_w_d14_r;
+    reg [17:0] mult_delta0_0_w_d15_r;
+    reg [17:0] mult_delta0_0_w_d16_r;
+    reg [17:0] mult_delta0_0_w_d17_r;
+    reg [17:0] mult_delta0_0_w_d18_r;
+    reg [17:0] mult_delta0_0_w_d19_r;
+    reg [17:0] mult_delta0_0_w_d20_r;
+    reg [51:0] product0_0_r;
+    reg [51:0] product0_0_p1_r;
+    reg [51:0] product0_0_p2_r;
+    wire [17:0] mult_delta0_1_w;
+    reg [17:0] mult_delta0_1_w_d1_r;
+    reg [17:0] mult_delta0_1_w_d2_r;
+    reg [17:0] mult_delta0_1_w_d3_r;
+    reg [17:0] mult_delta0_1_w_d4_r;
+    reg [17:0] mult_delta0_1_w_d5_r;
+    reg [17:0] mult_delta0_1_w_d6_r;
+    reg [17:0] mult_delta0_1_w_d7_r;
+    reg [17:0] mult_delta0_1_w_d8_r;
+    reg [17:0] mult_delta0_1_w_d9_r;
+    reg [17:0] mult_delta0_1_w_d10_r;
+    reg [17:0] mult_delta0_1_w_d11_r;
+    reg [17:0] mult_delta0_1_w_d12_r;
+    reg [17:0] mult_delta0_1_w_d13_r;
+    reg [17:0] mult_delta0_1_w_d14_r;
+    reg [17:0] mult_delta0_1_w_d15_r;
+    reg [17:0] mult_delta0_1_w_d16_r;
+    reg [17:0] mult_delta0_1_w_d17_r;
+    reg [17:0] mult_delta0_1_w_d18_r;
+    reg [17:0] mult_delta0_1_w_d19_r;
+    reg [17:0] mult_delta0_1_w_d20_r;
+    reg [51:0] product0_1_r;
+    reg [51:0] product0_1_p1_r;
+    reg [51:0] product0_1_p2_r;
+    wire [55:0] product_ext0_0_w;
+    wire [55:0] product_ext0_1_w;
+    wire [34:0] numerator0_a0_w;
+    wire [34:0] numerator0_b0_w;
+    reg [35:0] numerator0_part0_r;
+    wire [34:0] numerator0_low0_w;
+    wire [20:0] numerator0_a1_w;
+    wire [20:0] numerator0_b1_w;
+    reg [20:0] numerator0_a1_w_d24_r;
+    reg [20:0] numerator0_b1_w_d24_r;
+    reg [21:0] unused_numerator0_part1_r;
+    wire [20:0] numerator0_low1_w;
+    wire [55:0] numerator0_w;
+    reg [34:0] numerator0_low0_w_d25_r;
+    reg [55:0] numerator_shift0_r;
+    reg [30:0] reciprocal_0_r_d1_r;
+    reg [30:0] reciprocal_0_r_d2_r;
+    reg [30:0] reciprocal_0_r_d3_r;
+    reg [30:0] reciprocal_0_r_d4_r;
+    reg [30:0] reciprocal_0_r_d5_r;
+    reg [30:0] reciprocal_0_r_d6_r;
+    reg [30:0] reciprocal_0_r_d7_r;
+    reg [30:0] reciprocal_0_r_d8_r;
+    reg [30:0] reciprocal_0_r_d9_r;
+    reg [30:0] reciprocal_0_r_d10_r;
+    reg [30:0] reciprocal_0_r_d11_r;
+    reg [30:0] reciprocal_0_r_d12_r;
+    reg [30:0] reciprocal_0_r_d13_r;
+    reg [30:0] reciprocal_0_r_d14_r;
+    reg [30:0] reciprocal_0_r_d15_r;
+    reg [30:0] reciprocal_0_r_d16_r;
+    reg [30:0] reciprocal_0_r_d17_r;
+    reg [30:0] reciprocal_0_r_d18_r;
+    reg [30:0] reciprocal_0_r_d19_r;
+    reg [30:0] reciprocal_0_r_d20_r;
+    reg [30:0] reciprocal_0_r_d21_r;
+    reg [30:0] reciprocal_0_r_d22_r;
+    reg [30:0] reciprocal_0_r_d23_r;
+    reg [30:0] reciprocal_0_r_d24_r;
+    reg [30:0] reciprocal_0_r_d25_r;
+    reg [30:0] reciprocal_0_r_d26_r;
+    reg [86:0] inverse0_r;
+    reg [86:0] inverse0_p1_r;
+    reg [86:0] inverse0_p2_r;
+    reg [0:0] inverse_abs0_sign_r;
+    reg [86:0] inverse_abs0_invert_r;
+    wire [86:0] inverse_abs0_carry_w;
+    wire [34:0] inverse_abs0_a0_w;
+    wire [34:0] inverse_abs0_b0_w;
+    reg [35:0] inverse_abs0_part0_r;
+    wire [34:0] inverse_abs0_low0_w;
+    wire [34:0] inverse_abs0_a1_w;
+    wire [34:0] inverse_abs0_b1_w;
+    reg [34:0] inverse_abs0_a1_w_d31_r;
+    reg [34:0] inverse_abs0_b1_w_d31_r;
+    reg [35:0] inverse_abs0_part1_r;
+    wire [34:0] inverse_abs0_low1_w;
+    wire [16:0] inverse_abs0_a2_w;
+    wire [16:0] inverse_abs0_b2_w;
+    reg [16:0] inverse_abs0_a2_w_d31_r;
+    reg [16:0] inverse_abs0_a2_w_d32_r;
+    reg [16:0] inverse_abs0_b2_w_d31_r;
+    reg [16:0] inverse_abs0_b2_w_d32_r;
+    reg [17:0] unused_inverse_abs0_part2_r;
+    wire [16:0] inverse_abs0_low2_w;
+    wire [86:0] inverse_abs0_w;
+    reg [34:0] inverse_abs0_low1_w_d33_r;
+    reg [34:0] inverse_abs0_low0_w_d32_r;
+    reg [34:0] inverse_abs0_low0_w_d33_r;
+    reg [6:0] rounding_bit0_r;
+    reg [6:0] rounding_shift0_r;
+    wire [87:0] gradient_one0_w;
+    wire [1:0] gradient_bias0_amt0_w;
+    reg [87:0] gradient_bias0_0_w;
+    reg [87:0] gradient_bias0_0_r;
+    wire [1:0] gradient_bias0_amt1_w;
+    reg [87:0] gradient_bias0_1_w;
+    reg [1:0] gradient_bias0_amt1_w_d2_r;
+    reg [87:0] gradient_bias0_1_r;
+    wire [1:0] gradient_bias0_amt2_w;
+    reg [87:0] gradient_bias0_2_w;
+    reg [1:0] gradient_bias0_amt2_w_d2_r;
+    reg [1:0] gradient_bias0_amt2_w_d3_r;
+    reg [87:0] gradient_bias0_2_r;
+    wire [0:0] gradient_bias0_amt3_w;
+    reg [87:0] gradient_bias0_3_w;
+    reg [0:0] gradient_bias0_amt3_w_d2_r;
+    reg [0:0] gradient_bias0_amt3_w_d3_r;
+    reg [0:0] gradient_bias0_amt3_w_d4_r;
+    reg [87:0] gradient_bias0_3_r;
+    wire [87:0] mag88_0_w;
+    reg [87:0] gradient_bias0_3_r_d6_r;
+    reg [87:0] gradient_bias0_3_r_d7_r;
+    reg [87:0] gradient_bias0_3_r_d8_r;
+    reg [87:0] gradient_bias0_3_r_d9_r;
+    reg [87:0] gradient_bias0_3_r_d10_r;
+    reg [87:0] gradient_bias0_3_r_d11_r;
+    reg [87:0] gradient_bias0_3_r_d12_r;
+    reg [87:0] gradient_bias0_3_r_d13_r;
+    reg [87:0] gradient_bias0_3_r_d14_r;
+    reg [87:0] gradient_bias0_3_r_d15_r;
+    reg [87:0] gradient_bias0_3_r_d16_r;
+    reg [87:0] gradient_bias0_3_r_d17_r;
+    reg [87:0] gradient_bias0_3_r_d18_r;
+    reg [87:0] gradient_bias0_3_r_d19_r;
+    reg [87:0] gradient_bias0_3_r_d20_r;
+    reg [87:0] gradient_bias0_3_r_d21_r;
+    reg [87:0] gradient_bias0_3_r_d22_r;
+    reg [87:0] gradient_bias0_3_r_d23_r;
+    reg [87:0] gradient_bias0_3_r_d24_r;
+    reg [87:0] gradient_bias0_3_r_d25_r;
+    reg [87:0] gradient_bias0_3_r_d26_r;
+    reg [87:0] gradient_bias0_3_r_d27_r;
+    reg [87:0] gradient_bias0_3_r_d28_r;
+    reg [87:0] gradient_bias0_3_r_d29_r;
+    reg [87:0] gradient_bias0_3_r_d30_r;
+    reg [87:0] gradient_bias0_3_r_d31_r;
+    reg [87:0] gradient_bias0_3_r_d32_r;
+    reg [87:0] gradient_bias0_3_r_d33_r;
+    wire [34:0] gradient_round0_a0_w;
+    wire [34:0] gradient_round0_b0_w;
+    reg [35:0] gradient_round0_part0_r;
+    wire [34:0] gradient_round0_low0_w;
+    wire [34:0] gradient_round0_a1_w;
+    wire [34:0] gradient_round0_b1_w;
+    reg [34:0] gradient_round0_a1_w_d34_r;
+    reg [34:0] gradient_round0_b1_w_d34_r;
+    reg [35:0] gradient_round0_part1_r;
+    wire [34:0] gradient_round0_low1_w;
+    wire [17:0] gradient_round0_a2_w;
+    wire [17:0] gradient_round0_b2_w;
+    reg [17:0] gradient_round0_a2_w_d34_r;
+    reg [17:0] gradient_round0_a2_w_d35_r;
+    reg [17:0] gradient_round0_b2_w_d34_r;
+    reg [17:0] gradient_round0_b2_w_d35_r;
+    reg [18:0] unused_gradient_round0_part2_r;
+    wire [17:0] gradient_round0_low2_w;
+    wire [87:0] gradient_round0_w;
+    reg [34:0] gradient_round0_low1_w_d36_r;
+    reg [34:0] gradient_round0_low0_w_d35_r;
+    reg [34:0] gradient_round0_low0_w_d36_r;
+    wire [1:0] gradient_shift0_amt0_w;
+    reg [87:0] gradient_shift0_0_w;
+    reg [1:0] gradient_shift0_amt0_w_d2_r;
+    reg [1:0] gradient_shift0_amt0_w_d3_r;
+    reg [1:0] gradient_shift0_amt0_w_d4_r;
+    reg [1:0] gradient_shift0_amt0_w_d5_r;
+    reg [1:0] gradient_shift0_amt0_w_d6_r;
+    reg [1:0] gradient_shift0_amt0_w_d7_r;
+    reg [1:0] gradient_shift0_amt0_w_d8_r;
+    reg [1:0] gradient_shift0_amt0_w_d9_r;
+    reg [1:0] gradient_shift0_amt0_w_d10_r;
+    reg [1:0] gradient_shift0_amt0_w_d11_r;
+    reg [1:0] gradient_shift0_amt0_w_d12_r;
+    reg [1:0] gradient_shift0_amt0_w_d13_r;
+    reg [1:0] gradient_shift0_amt0_w_d14_r;
+    reg [1:0] gradient_shift0_amt0_w_d15_r;
+    reg [1:0] gradient_shift0_amt0_w_d16_r;
+    reg [1:0] gradient_shift0_amt0_w_d17_r;
+    reg [1:0] gradient_shift0_amt0_w_d18_r;
+    reg [1:0] gradient_shift0_amt0_w_d19_r;
+    reg [1:0] gradient_shift0_amt0_w_d20_r;
+    reg [1:0] gradient_shift0_amt0_w_d21_r;
+    reg [1:0] gradient_shift0_amt0_w_d22_r;
+    reg [1:0] gradient_shift0_amt0_w_d23_r;
+    reg [1:0] gradient_shift0_amt0_w_d24_r;
+    reg [1:0] gradient_shift0_amt0_w_d25_r;
+    reg [1:0] gradient_shift0_amt0_w_d26_r;
+    reg [1:0] gradient_shift0_amt0_w_d27_r;
+    reg [1:0] gradient_shift0_amt0_w_d28_r;
+    reg [1:0] gradient_shift0_amt0_w_d29_r;
+    reg [1:0] gradient_shift0_amt0_w_d30_r;
+    reg [1:0] gradient_shift0_amt0_w_d31_r;
+    reg [1:0] gradient_shift0_amt0_w_d32_r;
+    reg [1:0] gradient_shift0_amt0_w_d33_r;
+    reg [1:0] gradient_shift0_amt0_w_d34_r;
+    reg [1:0] gradient_shift0_amt0_w_d35_r;
+    reg [1:0] gradient_shift0_amt0_w_d36_r;
+    reg [87:0] gradient_shift0_0_r;
+    wire [1:0] gradient_shift0_amt1_w;
+    reg [87:0] gradient_shift0_1_w;
+    reg [1:0] gradient_shift0_amt1_w_d2_r;
+    reg [1:0] gradient_shift0_amt1_w_d3_r;
+    reg [1:0] gradient_shift0_amt1_w_d4_r;
+    reg [1:0] gradient_shift0_amt1_w_d5_r;
+    reg [1:0] gradient_shift0_amt1_w_d6_r;
+    reg [1:0] gradient_shift0_amt1_w_d7_r;
+    reg [1:0] gradient_shift0_amt1_w_d8_r;
+    reg [1:0] gradient_shift0_amt1_w_d9_r;
+    reg [1:0] gradient_shift0_amt1_w_d10_r;
+    reg [1:0] gradient_shift0_amt1_w_d11_r;
+    reg [1:0] gradient_shift0_amt1_w_d12_r;
+    reg [1:0] gradient_shift0_amt1_w_d13_r;
+    reg [1:0] gradient_shift0_amt1_w_d14_r;
+    reg [1:0] gradient_shift0_amt1_w_d15_r;
+    reg [1:0] gradient_shift0_amt1_w_d16_r;
+    reg [1:0] gradient_shift0_amt1_w_d17_r;
+    reg [1:0] gradient_shift0_amt1_w_d18_r;
+    reg [1:0] gradient_shift0_amt1_w_d19_r;
+    reg [1:0] gradient_shift0_amt1_w_d20_r;
+    reg [1:0] gradient_shift0_amt1_w_d21_r;
+    reg [1:0] gradient_shift0_amt1_w_d22_r;
+    reg [1:0] gradient_shift0_amt1_w_d23_r;
+    reg [1:0] gradient_shift0_amt1_w_d24_r;
+    reg [1:0] gradient_shift0_amt1_w_d25_r;
+    reg [1:0] gradient_shift0_amt1_w_d26_r;
+    reg [1:0] gradient_shift0_amt1_w_d27_r;
+    reg [1:0] gradient_shift0_amt1_w_d28_r;
+    reg [1:0] gradient_shift0_amt1_w_d29_r;
+    reg [1:0] gradient_shift0_amt1_w_d30_r;
+    reg [1:0] gradient_shift0_amt1_w_d31_r;
+    reg [1:0] gradient_shift0_amt1_w_d32_r;
+    reg [1:0] gradient_shift0_amt1_w_d33_r;
+    reg [1:0] gradient_shift0_amt1_w_d34_r;
+    reg [1:0] gradient_shift0_amt1_w_d35_r;
+    reg [1:0] gradient_shift0_amt1_w_d36_r;
+    reg [1:0] gradient_shift0_amt1_w_d37_r;
+    reg [87:0] gradient_shift0_1_r;
+    wire [1:0] gradient_shift0_amt2_w;
+    reg [87:0] gradient_shift0_2_w;
+    reg [1:0] gradient_shift0_amt2_w_d2_r;
+    reg [1:0] gradient_shift0_amt2_w_d3_r;
+    reg [1:0] gradient_shift0_amt2_w_d4_r;
+    reg [1:0] gradient_shift0_amt2_w_d5_r;
+    reg [1:0] gradient_shift0_amt2_w_d6_r;
+    reg [1:0] gradient_shift0_amt2_w_d7_r;
+    reg [1:0] gradient_shift0_amt2_w_d8_r;
+    reg [1:0] gradient_shift0_amt2_w_d9_r;
+    reg [1:0] gradient_shift0_amt2_w_d10_r;
+    reg [1:0] gradient_shift0_amt2_w_d11_r;
+    reg [1:0] gradient_shift0_amt2_w_d12_r;
+    reg [1:0] gradient_shift0_amt2_w_d13_r;
+    reg [1:0] gradient_shift0_amt2_w_d14_r;
+    reg [1:0] gradient_shift0_amt2_w_d15_r;
+    reg [1:0] gradient_shift0_amt2_w_d16_r;
+    reg [1:0] gradient_shift0_amt2_w_d17_r;
+    reg [1:0] gradient_shift0_amt2_w_d18_r;
+    reg [1:0] gradient_shift0_amt2_w_d19_r;
+    reg [1:0] gradient_shift0_amt2_w_d20_r;
+    reg [1:0] gradient_shift0_amt2_w_d21_r;
+    reg [1:0] gradient_shift0_amt2_w_d22_r;
+    reg [1:0] gradient_shift0_amt2_w_d23_r;
+    reg [1:0] gradient_shift0_amt2_w_d24_r;
+    reg [1:0] gradient_shift0_amt2_w_d25_r;
+    reg [1:0] gradient_shift0_amt2_w_d26_r;
+    reg [1:0] gradient_shift0_amt2_w_d27_r;
+    reg [1:0] gradient_shift0_amt2_w_d28_r;
+    reg [1:0] gradient_shift0_amt2_w_d29_r;
+    reg [1:0] gradient_shift0_amt2_w_d30_r;
+    reg [1:0] gradient_shift0_amt2_w_d31_r;
+    reg [1:0] gradient_shift0_amt2_w_d32_r;
+    reg [1:0] gradient_shift0_amt2_w_d33_r;
+    reg [1:0] gradient_shift0_amt2_w_d34_r;
+    reg [1:0] gradient_shift0_amt2_w_d35_r;
+    reg [1:0] gradient_shift0_amt2_w_d36_r;
+    reg [1:0] gradient_shift0_amt2_w_d37_r;
+    reg [1:0] gradient_shift0_amt2_w_d38_r;
+    reg [87:0] gradient_shift0_2_r;
+    wire [0:0] gradient_shift0_amt3_w;
+    reg [87:0] gradient_shift0_3_w;
+    reg [0:0] gradient_shift0_amt3_w_d2_r;
+    reg [0:0] gradient_shift0_amt3_w_d3_r;
+    reg [0:0] gradient_shift0_amt3_w_d4_r;
+    reg [0:0] gradient_shift0_amt3_w_d5_r;
+    reg [0:0] gradient_shift0_amt3_w_d6_r;
+    reg [0:0] gradient_shift0_amt3_w_d7_r;
+    reg [0:0] gradient_shift0_amt3_w_d8_r;
+    reg [0:0] gradient_shift0_amt3_w_d9_r;
+    reg [0:0] gradient_shift0_amt3_w_d10_r;
+    reg [0:0] gradient_shift0_amt3_w_d11_r;
+    reg [0:0] gradient_shift0_amt3_w_d12_r;
+    reg [0:0] gradient_shift0_amt3_w_d13_r;
+    reg [0:0] gradient_shift0_amt3_w_d14_r;
+    reg [0:0] gradient_shift0_amt3_w_d15_r;
+    reg [0:0] gradient_shift0_amt3_w_d16_r;
+    reg [0:0] gradient_shift0_amt3_w_d17_r;
+    reg [0:0] gradient_shift0_amt3_w_d18_r;
+    reg [0:0] gradient_shift0_amt3_w_d19_r;
+    reg [0:0] gradient_shift0_amt3_w_d20_r;
+    reg [0:0] gradient_shift0_amt3_w_d21_r;
+    reg [0:0] gradient_shift0_amt3_w_d22_r;
+    reg [0:0] gradient_shift0_amt3_w_d23_r;
+    reg [0:0] gradient_shift0_amt3_w_d24_r;
+    reg [0:0] gradient_shift0_amt3_w_d25_r;
+    reg [0:0] gradient_shift0_amt3_w_d26_r;
+    reg [0:0] gradient_shift0_amt3_w_d27_r;
+    reg [0:0] gradient_shift0_amt3_w_d28_r;
+    reg [0:0] gradient_shift0_amt3_w_d29_r;
+    reg [0:0] gradient_shift0_amt3_w_d30_r;
+    reg [0:0] gradient_shift0_amt3_w_d31_r;
+    reg [0:0] gradient_shift0_amt3_w_d32_r;
+    reg [0:0] gradient_shift0_amt3_w_d33_r;
+    reg [0:0] gradient_shift0_amt3_w_d34_r;
+    reg [0:0] gradient_shift0_amt3_w_d35_r;
+    reg [0:0] gradient_shift0_amt3_w_d36_r;
+    reg [0:0] gradient_shift0_amt3_w_d37_r;
+    reg [0:0] gradient_shift0_amt3_w_d38_r;
+    reg [0:0] gradient_shift0_amt3_w_d39_r;
+    reg [87:0] unused_gradient_shift0_3_r;
+    wire [55:0] gradient56_0_w;
+    reg [0:0] inverse_abs0_sign_d31_r;
+    reg [0:0] inverse_abs0_sign_d32_r;
+    reg [0:0] inverse_abs0_sign_d33_r;
+    reg [0:0] inverse_abs0_sign_d34_r;
+    reg [0:0] inverse_abs0_sign_d35_r;
+    reg [0:0] inverse_abs0_sign_d36_r;
+    reg [0:0] inverse_abs0_sign_d37_r;
+    reg [0:0] inverse_abs0_sign_d38_r;
+    reg [0:0] inverse_abs0_sign_d39_r;
+    reg [0:0] inverse_abs0_sign_d40_r;
+    reg [55:0] gradient_signed0_invert_r;
+    reg [0:0] inverse_abs0_sign_d41_r;
+    wire [55:0] gradient_signed0_carry_w;
+    wire [34:0] gradient_signed0_a0_w;
+    wire [34:0] gradient_signed0_b0_w;
+    reg [35:0] gradient_signed0_part0_r;
+    wire [34:0] gradient_signed0_low0_w;
+    wire [20:0] gradient_signed0_a1_w;
+    wire [20:0] gradient_signed0_b1_w;
+    reg [20:0] gradient_signed0_a1_w_d42_r;
+    reg [20:0] gradient_signed0_b1_w_d42_r;
+    reg [21:0] unused_gradient_signed0_part1_r;
+    wire [20:0] gradient_signed0_low1_w;
+    wire [55:0] gradient_signed0_w;
+    reg [34:0] gradient_signed0_low0_w_d43_r;
+    wire [17:0] origin_offset0_w;
+    reg [17:0] origin_offset0_w_d1_r;
+    reg [17:0] origin_offset0_w_d2_r;
+    reg [17:0] origin_offset0_w_d3_r;
+    reg [17:0] origin_offset0_w_d4_r;
+    reg [17:0] origin_offset0_w_d5_r;
+    reg [17:0] origin_offset0_w_d6_r;
+    reg [17:0] origin_offset0_w_d7_r;
+    reg [17:0] origin_offset0_w_d8_r;
+    reg [17:0] origin_offset0_w_d9_r;
+    reg [17:0] origin_offset0_w_d10_r;
+    reg [17:0] origin_offset0_w_d11_r;
+    reg [17:0] origin_offset0_w_d12_r;
+    reg [17:0] origin_offset0_w_d13_r;
+    reg [17:0] origin_offset0_w_d14_r;
+    reg [17:0] origin_offset0_w_d15_r;
+    reg [17:0] origin_offset0_w_d16_r;
+    reg [17:0] origin_offset0_w_d17_r;
+    reg [17:0] origin_offset0_w_d18_r;
+    reg [17:0] origin_offset0_w_d19_r;
+    reg [17:0] origin_offset0_w_d20_r;
+    reg [17:0] origin_offset0_w_d21_r;
+    reg [17:0] origin_offset0_w_d22_r;
+    reg [17:0] origin_offset0_w_d23_r;
+    reg [17:0] origin_offset0_w_d24_r;
+    reg [17:0] origin_offset0_w_d25_r;
+    reg [17:0] origin_offset0_w_d26_r;
+    reg [17:0] origin_offset0_w_d27_r;
+    reg [17:0] origin_offset0_w_d28_r;
+    reg [17:0] origin_offset0_w_d29_r;
+    reg [17:0] origin_offset0_w_d30_r;
+    reg [17:0] origin_offset0_w_d31_r;
+    reg [17:0] origin_offset0_w_d32_r;
+    reg [17:0] origin_offset0_w_d33_r;
+    reg [17:0] origin_offset0_w_d34_r;
+    reg [17:0] origin_offset0_w_d35_r;
+    reg [17:0] origin_offset0_w_d36_r;
+    reg [17:0] origin_offset0_w_d37_r;
+    reg [17:0] origin_offset0_w_d38_r;
+    reg [17:0] origin_offset0_w_d39_r;
+    reg [17:0] origin_offset0_w_d40_r;
+    reg [17:0] origin_offset0_w_d41_r;
+    reg [17:0] origin_offset0_w_d42_r;
+    reg [17:0] origin_offset0_w_d43_r;
+    reg [73:0] origin_product0_r;
+    reg [73:0] origin_product0_p1_r;
+    reg [73:0] origin_product0_p2_r;
+    reg [3:0] drop_gradient0_r;
+    reg [0:0] gradient_abs0_sign_r;
+    reg [55:0] gradient_abs0_invert_r;
+    wire [55:0] gradient_abs0_carry_w;
+    wire [34:0] gradient_abs0_a0_w;
+    wire [34:0] gradient_abs0_b0_w;
+    reg [35:0] gradient_abs0_part0_r;
+    wire [34:0] gradient_abs0_low0_w;
+    wire [20:0] gradient_abs0_a1_w;
+    wire [20:0] gradient_abs0_b1_w;
+    reg [20:0] gradient_abs0_a1_w_d45_r;
+    reg [20:0] gradient_abs0_b1_w_d45_r;
+    reg [21:0] unused_gradient_abs0_part1_r;
+    wire [20:0] gradient_abs0_low1_w;
+    wire [55:0] gradient_abs0_w;
+    reg [34:0] gradient_abs0_low0_w_d46_r;
+    wire [1:0] gradient_drop0_amt0_w;
+    reg [55:0] gradient_drop0_0_w;
+    reg [1:0] gradient_drop0_amt0_w_d2_r;
+    reg [1:0] gradient_drop0_amt0_w_d3_r;
+    reg [1:0] gradient_drop0_amt0_w_d4_r;
+    reg [1:0] gradient_drop0_amt0_w_d5_r;
+    reg [1:0] gradient_drop0_amt0_w_d6_r;
+    reg [1:0] gradient_drop0_amt0_w_d7_r;
+    reg [1:0] gradient_drop0_amt0_w_d8_r;
+    reg [1:0] gradient_drop0_amt0_w_d9_r;
+    reg [1:0] gradient_drop0_amt0_w_d10_r;
+    reg [1:0] gradient_drop0_amt0_w_d11_r;
+    reg [1:0] gradient_drop0_amt0_w_d12_r;
+    reg [1:0] gradient_drop0_amt0_w_d13_r;
+    reg [1:0] gradient_drop0_amt0_w_d14_r;
+    reg [1:0] gradient_drop0_amt0_w_d15_r;
+    reg [1:0] gradient_drop0_amt0_w_d16_r;
+    reg [1:0] gradient_drop0_amt0_w_d17_r;
+    reg [1:0] gradient_drop0_amt0_w_d18_r;
+    reg [1:0] gradient_drop0_amt0_w_d19_r;
+    reg [1:0] gradient_drop0_amt0_w_d20_r;
+    reg [1:0] gradient_drop0_amt0_w_d21_r;
+    reg [1:0] gradient_drop0_amt0_w_d22_r;
+    reg [1:0] gradient_drop0_amt0_w_d23_r;
+    reg [1:0] gradient_drop0_amt0_w_d24_r;
+    reg [1:0] gradient_drop0_amt0_w_d25_r;
+    reg [1:0] gradient_drop0_amt0_w_d26_r;
+    reg [1:0] gradient_drop0_amt0_w_d27_r;
+    reg [1:0] gradient_drop0_amt0_w_d28_r;
+    reg [1:0] gradient_drop0_amt0_w_d29_r;
+    reg [1:0] gradient_drop0_amt0_w_d30_r;
+    reg [1:0] gradient_drop0_amt0_w_d31_r;
+    reg [1:0] gradient_drop0_amt0_w_d32_r;
+    reg [1:0] gradient_drop0_amt0_w_d33_r;
+    reg [1:0] gradient_drop0_amt0_w_d34_r;
+    reg [1:0] gradient_drop0_amt0_w_d35_r;
+    reg [1:0] gradient_drop0_amt0_w_d36_r;
+    reg [1:0] gradient_drop0_amt0_w_d37_r;
+    reg [1:0] gradient_drop0_amt0_w_d38_r;
+    reg [1:0] gradient_drop0_amt0_w_d39_r;
+    reg [1:0] gradient_drop0_amt0_w_d40_r;
+    reg [1:0] gradient_drop0_amt0_w_d41_r;
+    reg [1:0] gradient_drop0_amt0_w_d42_r;
+    reg [1:0] gradient_drop0_amt0_w_d43_r;
+    reg [1:0] gradient_drop0_amt0_w_d44_r;
+    reg [1:0] gradient_drop0_amt0_w_d45_r;
+    reg [1:0] gradient_drop0_amt0_w_d46_r;
+    reg [55:0] gradient_drop0_0_r;
+    wire [1:0] gradient_drop0_amt1_w;
+    reg [55:0] gradient_drop0_1_w;
+    reg [1:0] gradient_drop0_amt1_w_d2_r;
+    reg [1:0] gradient_drop0_amt1_w_d3_r;
+    reg [1:0] gradient_drop0_amt1_w_d4_r;
+    reg [1:0] gradient_drop0_amt1_w_d5_r;
+    reg [1:0] gradient_drop0_amt1_w_d6_r;
+    reg [1:0] gradient_drop0_amt1_w_d7_r;
+    reg [1:0] gradient_drop0_amt1_w_d8_r;
+    reg [1:0] gradient_drop0_amt1_w_d9_r;
+    reg [1:0] gradient_drop0_amt1_w_d10_r;
+    reg [1:0] gradient_drop0_amt1_w_d11_r;
+    reg [1:0] gradient_drop0_amt1_w_d12_r;
+    reg [1:0] gradient_drop0_amt1_w_d13_r;
+    reg [1:0] gradient_drop0_amt1_w_d14_r;
+    reg [1:0] gradient_drop0_amt1_w_d15_r;
+    reg [1:0] gradient_drop0_amt1_w_d16_r;
+    reg [1:0] gradient_drop0_amt1_w_d17_r;
+    reg [1:0] gradient_drop0_amt1_w_d18_r;
+    reg [1:0] gradient_drop0_amt1_w_d19_r;
+    reg [1:0] gradient_drop0_amt1_w_d20_r;
+    reg [1:0] gradient_drop0_amt1_w_d21_r;
+    reg [1:0] gradient_drop0_amt1_w_d22_r;
+    reg [1:0] gradient_drop0_amt1_w_d23_r;
+    reg [1:0] gradient_drop0_amt1_w_d24_r;
+    reg [1:0] gradient_drop0_amt1_w_d25_r;
+    reg [1:0] gradient_drop0_amt1_w_d26_r;
+    reg [1:0] gradient_drop0_amt1_w_d27_r;
+    reg [1:0] gradient_drop0_amt1_w_d28_r;
+    reg [1:0] gradient_drop0_amt1_w_d29_r;
+    reg [1:0] gradient_drop0_amt1_w_d30_r;
+    reg [1:0] gradient_drop0_amt1_w_d31_r;
+    reg [1:0] gradient_drop0_amt1_w_d32_r;
+    reg [1:0] gradient_drop0_amt1_w_d33_r;
+    reg [1:0] gradient_drop0_amt1_w_d34_r;
+    reg [1:0] gradient_drop0_amt1_w_d35_r;
+    reg [1:0] gradient_drop0_amt1_w_d36_r;
+    reg [1:0] gradient_drop0_amt1_w_d37_r;
+    reg [1:0] gradient_drop0_amt1_w_d38_r;
+    reg [1:0] gradient_drop0_amt1_w_d39_r;
+    reg [1:0] gradient_drop0_amt1_w_d40_r;
+    reg [1:0] gradient_drop0_amt1_w_d41_r;
+    reg [1:0] gradient_drop0_amt1_w_d42_r;
+    reg [1:0] gradient_drop0_amt1_w_d43_r;
+    reg [1:0] gradient_drop0_amt1_w_d44_r;
+    reg [1:0] gradient_drop0_amt1_w_d45_r;
+    reg [1:0] gradient_drop0_amt1_w_d46_r;
+    reg [1:0] gradient_drop0_amt1_w_d47_r;
+    reg [55:0] unused_gradient_drop0_1_r;
+    wire [51:0] stored52_0_w;
+    wire [51:0] stored_bit0_w;
+    wire [34:0] stored_round0_a0_w;
+    wire [34:0] stored_round0_b0_w;
+    reg [35:0] stored_round0_part0_r;
+    wire [34:0] stored_round0_low0_w;
+    wire [16:0] stored_round0_a1_w;
+    wire [16:0] stored_round0_b1_w;
+    reg [16:0] stored_round0_a1_w_d49_r;
+    reg [16:0] stored_round0_b1_w_d49_r;
+    reg [17:0] unused_stored_round0_part1_r;
+    wire [16:0] stored_round0_low1_w;
+    wire [51:0] stored_round0_w;
+    reg [34:0] stored_round0_low0_w_d50_r;
+    reg [0:0] gradient_abs0_sign_d45_r;
+    reg [0:0] gradient_abs0_sign_d46_r;
+    reg [0:0] gradient_abs0_sign_d47_r;
+    reg [0:0] gradient_abs0_sign_d48_r;
+    reg [0:0] gradient_abs0_sign_d49_r;
+    reg [0:0] gradient_abs0_sign_d50_r;
+    reg [51:0] stored_signed0_invert_r;
+    reg [0:0] gradient_abs0_sign_d51_r;
+    wire [51:0] stored_signed0_carry_w;
+    wire [34:0] stored_signed0_a0_w;
+    wire [34:0] stored_signed0_b0_w;
+    reg [35:0] stored_signed0_part0_r;
+    wire [34:0] stored_signed0_low0_w;
+    wire [16:0] stored_signed0_a1_w;
+    wire [16:0] stored_signed0_b1_w;
+    reg [16:0] stored_signed0_a1_w_d52_r;
+    reg [16:0] stored_signed0_b1_w_d52_r;
+    reg [17:0] unused_stored_signed0_part1_r;
+    wire [16:0] stored_signed0_low1_w;
+    wire [51:0] stored_signed0_w;
+    reg [34:0] stored_signed0_low0_w_d53_r;
+    wire [17:0] mult_delta1_0_w;
+    reg [17:0] mult_delta1_0_w_d1_r;
+    reg [17:0] mult_delta1_0_w_d2_r;
+    reg [17:0] mult_delta1_0_w_d3_r;
+    reg [17:0] mult_delta1_0_w_d4_r;
+    reg [17:0] mult_delta1_0_w_d5_r;
+    reg [17:0] mult_delta1_0_w_d6_r;
+    reg [17:0] mult_delta1_0_w_d7_r;
+    reg [17:0] mult_delta1_0_w_d8_r;
+    reg [17:0] mult_delta1_0_w_d9_r;
+    reg [17:0] mult_delta1_0_w_d10_r;
+    reg [17:0] mult_delta1_0_w_d11_r;
+    reg [17:0] mult_delta1_0_w_d12_r;
+    reg [17:0] mult_delta1_0_w_d13_r;
+    reg [17:0] mult_delta1_0_w_d14_r;
+    reg [17:0] mult_delta1_0_w_d15_r;
+    reg [17:0] mult_delta1_0_w_d16_r;
+    reg [17:0] mult_delta1_0_w_d17_r;
+    reg [17:0] mult_delta1_0_w_d18_r;
+    reg [17:0] mult_delta1_0_w_d19_r;
+    reg [17:0] mult_delta1_0_w_d20_r;
+    reg [51:0] product1_0_r;
+    reg [51:0] product1_0_p1_r;
+    reg [51:0] product1_0_p2_r;
+    wire [17:0] mult_delta1_1_w;
+    reg [17:0] mult_delta1_1_w_d1_r;
+    reg [17:0] mult_delta1_1_w_d2_r;
+    reg [17:0] mult_delta1_1_w_d3_r;
+    reg [17:0] mult_delta1_1_w_d4_r;
+    reg [17:0] mult_delta1_1_w_d5_r;
+    reg [17:0] mult_delta1_1_w_d6_r;
+    reg [17:0] mult_delta1_1_w_d7_r;
+    reg [17:0] mult_delta1_1_w_d8_r;
+    reg [17:0] mult_delta1_1_w_d9_r;
+    reg [17:0] mult_delta1_1_w_d10_r;
+    reg [17:0] mult_delta1_1_w_d11_r;
+    reg [17:0] mult_delta1_1_w_d12_r;
+    reg [17:0] mult_delta1_1_w_d13_r;
+    reg [17:0] mult_delta1_1_w_d14_r;
+    reg [17:0] mult_delta1_1_w_d15_r;
+    reg [17:0] mult_delta1_1_w_d16_r;
+    reg [17:0] mult_delta1_1_w_d17_r;
+    reg [17:0] mult_delta1_1_w_d18_r;
+    reg [17:0] mult_delta1_1_w_d19_r;
+    reg [17:0] mult_delta1_1_w_d20_r;
+    reg [51:0] product1_1_r;
+    reg [51:0] product1_1_p1_r;
+    reg [51:0] product1_1_p2_r;
+    wire [55:0] product_ext1_0_w;
+    wire [55:0] product_ext1_1_w;
+    wire [34:0] numerator1_a0_w;
+    wire [34:0] numerator1_b0_w;
+    reg [35:0] numerator1_part0_r;
+    wire [34:0] numerator1_low0_w;
+    wire [20:0] numerator1_a1_w;
+    wire [20:0] numerator1_b1_w;
+    reg [20:0] numerator1_a1_w_d24_r;
+    reg [20:0] numerator1_b1_w_d24_r;
+    reg [21:0] unused_numerator1_part1_r;
+    wire [20:0] numerator1_low1_w;
+    wire [55:0] numerator1_w;
+    reg [34:0] numerator1_low0_w_d25_r;
+    reg [55:0] numerator_shift1_r;
+    reg [86:0] inverse1_r;
+    reg [86:0] inverse1_p1_r;
+    reg [86:0] inverse1_p2_r;
+    reg [0:0] inverse_abs1_sign_r;
+    reg [86:0] inverse_abs1_invert_r;
+    wire [86:0] inverse_abs1_carry_w;
+    wire [34:0] inverse_abs1_a0_w;
+    wire [34:0] inverse_abs1_b0_w;
+    reg [35:0] inverse_abs1_part0_r;
+    wire [34:0] inverse_abs1_low0_w;
+    wire [34:0] inverse_abs1_a1_w;
+    wire [34:0] inverse_abs1_b1_w;
+    reg [34:0] inverse_abs1_a1_w_d31_r;
+    reg [34:0] inverse_abs1_b1_w_d31_r;
+    reg [35:0] inverse_abs1_part1_r;
+    wire [34:0] inverse_abs1_low1_w;
+    wire [16:0] inverse_abs1_a2_w;
+    wire [16:0] inverse_abs1_b2_w;
+    reg [16:0] inverse_abs1_a2_w_d31_r;
+    reg [16:0] inverse_abs1_a2_w_d32_r;
+    reg [16:0] inverse_abs1_b2_w_d31_r;
+    reg [16:0] inverse_abs1_b2_w_d32_r;
+    reg [17:0] unused_inverse_abs1_part2_r;
+    wire [16:0] inverse_abs1_low2_w;
+    wire [86:0] inverse_abs1_w;
+    reg [34:0] inverse_abs1_low1_w_d33_r;
+    reg [34:0] inverse_abs1_low0_w_d32_r;
+    reg [34:0] inverse_abs1_low0_w_d33_r;
+    reg [6:0] rounding_bit1_r;
+    reg [6:0] rounding_shift1_r;
+    wire [87:0] gradient_one1_w;
+    wire [1:0] gradient_bias1_amt0_w;
+    reg [87:0] gradient_bias1_0_w;
+    reg [87:0] gradient_bias1_0_r;
+    wire [1:0] gradient_bias1_amt1_w;
+    reg [87:0] gradient_bias1_1_w;
+    reg [1:0] gradient_bias1_amt1_w_d2_r;
+    reg [87:0] gradient_bias1_1_r;
+    wire [1:0] gradient_bias1_amt2_w;
+    reg [87:0] gradient_bias1_2_w;
+    reg [1:0] gradient_bias1_amt2_w_d2_r;
+    reg [1:0] gradient_bias1_amt2_w_d3_r;
+    reg [87:0] gradient_bias1_2_r;
+    wire [0:0] gradient_bias1_amt3_w;
+    reg [87:0] gradient_bias1_3_w;
+    reg [0:0] gradient_bias1_amt3_w_d2_r;
+    reg [0:0] gradient_bias1_amt3_w_d3_r;
+    reg [0:0] gradient_bias1_amt3_w_d4_r;
+    reg [87:0] gradient_bias1_3_r;
+    wire [87:0] mag88_1_w;
+    reg [87:0] gradient_bias1_3_r_d6_r;
+    reg [87:0] gradient_bias1_3_r_d7_r;
+    reg [87:0] gradient_bias1_3_r_d8_r;
+    reg [87:0] gradient_bias1_3_r_d9_r;
+    reg [87:0] gradient_bias1_3_r_d10_r;
+    reg [87:0] gradient_bias1_3_r_d11_r;
+    reg [87:0] gradient_bias1_3_r_d12_r;
+    reg [87:0] gradient_bias1_3_r_d13_r;
+    reg [87:0] gradient_bias1_3_r_d14_r;
+    reg [87:0] gradient_bias1_3_r_d15_r;
+    reg [87:0] gradient_bias1_3_r_d16_r;
+    reg [87:0] gradient_bias1_3_r_d17_r;
+    reg [87:0] gradient_bias1_3_r_d18_r;
+    reg [87:0] gradient_bias1_3_r_d19_r;
+    reg [87:0] gradient_bias1_3_r_d20_r;
+    reg [87:0] gradient_bias1_3_r_d21_r;
+    reg [87:0] gradient_bias1_3_r_d22_r;
+    reg [87:0] gradient_bias1_3_r_d23_r;
+    reg [87:0] gradient_bias1_3_r_d24_r;
+    reg [87:0] gradient_bias1_3_r_d25_r;
+    reg [87:0] gradient_bias1_3_r_d26_r;
+    reg [87:0] gradient_bias1_3_r_d27_r;
+    reg [87:0] gradient_bias1_3_r_d28_r;
+    reg [87:0] gradient_bias1_3_r_d29_r;
+    reg [87:0] gradient_bias1_3_r_d30_r;
+    reg [87:0] gradient_bias1_3_r_d31_r;
+    reg [87:0] gradient_bias1_3_r_d32_r;
+    reg [87:0] gradient_bias1_3_r_d33_r;
+    wire [34:0] gradient_round1_a0_w;
+    wire [34:0] gradient_round1_b0_w;
+    reg [35:0] gradient_round1_part0_r;
+    wire [34:0] gradient_round1_low0_w;
+    wire [34:0] gradient_round1_a1_w;
+    wire [34:0] gradient_round1_b1_w;
+    reg [34:0] gradient_round1_a1_w_d34_r;
+    reg [34:0] gradient_round1_b1_w_d34_r;
+    reg [35:0] gradient_round1_part1_r;
+    wire [34:0] gradient_round1_low1_w;
+    wire [17:0] gradient_round1_a2_w;
+    wire [17:0] gradient_round1_b2_w;
+    reg [17:0] gradient_round1_a2_w_d34_r;
+    reg [17:0] gradient_round1_a2_w_d35_r;
+    reg [17:0] gradient_round1_b2_w_d34_r;
+    reg [17:0] gradient_round1_b2_w_d35_r;
+    reg [18:0] unused_gradient_round1_part2_r;
+    wire [17:0] gradient_round1_low2_w;
+    wire [87:0] gradient_round1_w;
+    reg [34:0] gradient_round1_low1_w_d36_r;
+    reg [34:0] gradient_round1_low0_w_d35_r;
+    reg [34:0] gradient_round1_low0_w_d36_r;
+    wire [1:0] gradient_shift1_amt0_w;
+    reg [87:0] gradient_shift1_0_w;
+    reg [1:0] gradient_shift1_amt0_w_d2_r;
+    reg [1:0] gradient_shift1_amt0_w_d3_r;
+    reg [1:0] gradient_shift1_amt0_w_d4_r;
+    reg [1:0] gradient_shift1_amt0_w_d5_r;
+    reg [1:0] gradient_shift1_amt0_w_d6_r;
+    reg [1:0] gradient_shift1_amt0_w_d7_r;
+    reg [1:0] gradient_shift1_amt0_w_d8_r;
+    reg [1:0] gradient_shift1_amt0_w_d9_r;
+    reg [1:0] gradient_shift1_amt0_w_d10_r;
+    reg [1:0] gradient_shift1_amt0_w_d11_r;
+    reg [1:0] gradient_shift1_amt0_w_d12_r;
+    reg [1:0] gradient_shift1_amt0_w_d13_r;
+    reg [1:0] gradient_shift1_amt0_w_d14_r;
+    reg [1:0] gradient_shift1_amt0_w_d15_r;
+    reg [1:0] gradient_shift1_amt0_w_d16_r;
+    reg [1:0] gradient_shift1_amt0_w_d17_r;
+    reg [1:0] gradient_shift1_amt0_w_d18_r;
+    reg [1:0] gradient_shift1_amt0_w_d19_r;
+    reg [1:0] gradient_shift1_amt0_w_d20_r;
+    reg [1:0] gradient_shift1_amt0_w_d21_r;
+    reg [1:0] gradient_shift1_amt0_w_d22_r;
+    reg [1:0] gradient_shift1_amt0_w_d23_r;
+    reg [1:0] gradient_shift1_amt0_w_d24_r;
+    reg [1:0] gradient_shift1_amt0_w_d25_r;
+    reg [1:0] gradient_shift1_amt0_w_d26_r;
+    reg [1:0] gradient_shift1_amt0_w_d27_r;
+    reg [1:0] gradient_shift1_amt0_w_d28_r;
+    reg [1:0] gradient_shift1_amt0_w_d29_r;
+    reg [1:0] gradient_shift1_amt0_w_d30_r;
+    reg [1:0] gradient_shift1_amt0_w_d31_r;
+    reg [1:0] gradient_shift1_amt0_w_d32_r;
+    reg [1:0] gradient_shift1_amt0_w_d33_r;
+    reg [1:0] gradient_shift1_amt0_w_d34_r;
+    reg [1:0] gradient_shift1_amt0_w_d35_r;
+    reg [1:0] gradient_shift1_amt0_w_d36_r;
+    reg [87:0] gradient_shift1_0_r;
+    wire [1:0] gradient_shift1_amt1_w;
+    reg [87:0] gradient_shift1_1_w;
+    reg [1:0] gradient_shift1_amt1_w_d2_r;
+    reg [1:0] gradient_shift1_amt1_w_d3_r;
+    reg [1:0] gradient_shift1_amt1_w_d4_r;
+    reg [1:0] gradient_shift1_amt1_w_d5_r;
+    reg [1:0] gradient_shift1_amt1_w_d6_r;
+    reg [1:0] gradient_shift1_amt1_w_d7_r;
+    reg [1:0] gradient_shift1_amt1_w_d8_r;
+    reg [1:0] gradient_shift1_amt1_w_d9_r;
+    reg [1:0] gradient_shift1_amt1_w_d10_r;
+    reg [1:0] gradient_shift1_amt1_w_d11_r;
+    reg [1:0] gradient_shift1_amt1_w_d12_r;
+    reg [1:0] gradient_shift1_amt1_w_d13_r;
+    reg [1:0] gradient_shift1_amt1_w_d14_r;
+    reg [1:0] gradient_shift1_amt1_w_d15_r;
+    reg [1:0] gradient_shift1_amt1_w_d16_r;
+    reg [1:0] gradient_shift1_amt1_w_d17_r;
+    reg [1:0] gradient_shift1_amt1_w_d18_r;
+    reg [1:0] gradient_shift1_amt1_w_d19_r;
+    reg [1:0] gradient_shift1_amt1_w_d20_r;
+    reg [1:0] gradient_shift1_amt1_w_d21_r;
+    reg [1:0] gradient_shift1_amt1_w_d22_r;
+    reg [1:0] gradient_shift1_amt1_w_d23_r;
+    reg [1:0] gradient_shift1_amt1_w_d24_r;
+    reg [1:0] gradient_shift1_amt1_w_d25_r;
+    reg [1:0] gradient_shift1_amt1_w_d26_r;
+    reg [1:0] gradient_shift1_amt1_w_d27_r;
+    reg [1:0] gradient_shift1_amt1_w_d28_r;
+    reg [1:0] gradient_shift1_amt1_w_d29_r;
+    reg [1:0] gradient_shift1_amt1_w_d30_r;
+    reg [1:0] gradient_shift1_amt1_w_d31_r;
+    reg [1:0] gradient_shift1_amt1_w_d32_r;
+    reg [1:0] gradient_shift1_amt1_w_d33_r;
+    reg [1:0] gradient_shift1_amt1_w_d34_r;
+    reg [1:0] gradient_shift1_amt1_w_d35_r;
+    reg [1:0] gradient_shift1_amt1_w_d36_r;
+    reg [1:0] gradient_shift1_amt1_w_d37_r;
+    reg [87:0] gradient_shift1_1_r;
+    wire [1:0] gradient_shift1_amt2_w;
+    reg [87:0] gradient_shift1_2_w;
+    reg [1:0] gradient_shift1_amt2_w_d2_r;
+    reg [1:0] gradient_shift1_amt2_w_d3_r;
+    reg [1:0] gradient_shift1_amt2_w_d4_r;
+    reg [1:0] gradient_shift1_amt2_w_d5_r;
+    reg [1:0] gradient_shift1_amt2_w_d6_r;
+    reg [1:0] gradient_shift1_amt2_w_d7_r;
+    reg [1:0] gradient_shift1_amt2_w_d8_r;
+    reg [1:0] gradient_shift1_amt2_w_d9_r;
+    reg [1:0] gradient_shift1_amt2_w_d10_r;
+    reg [1:0] gradient_shift1_amt2_w_d11_r;
+    reg [1:0] gradient_shift1_amt2_w_d12_r;
+    reg [1:0] gradient_shift1_amt2_w_d13_r;
+    reg [1:0] gradient_shift1_amt2_w_d14_r;
+    reg [1:0] gradient_shift1_amt2_w_d15_r;
+    reg [1:0] gradient_shift1_amt2_w_d16_r;
+    reg [1:0] gradient_shift1_amt2_w_d17_r;
+    reg [1:0] gradient_shift1_amt2_w_d18_r;
+    reg [1:0] gradient_shift1_amt2_w_d19_r;
+    reg [1:0] gradient_shift1_amt2_w_d20_r;
+    reg [1:0] gradient_shift1_amt2_w_d21_r;
+    reg [1:0] gradient_shift1_amt2_w_d22_r;
+    reg [1:0] gradient_shift1_amt2_w_d23_r;
+    reg [1:0] gradient_shift1_amt2_w_d24_r;
+    reg [1:0] gradient_shift1_amt2_w_d25_r;
+    reg [1:0] gradient_shift1_amt2_w_d26_r;
+    reg [1:0] gradient_shift1_amt2_w_d27_r;
+    reg [1:0] gradient_shift1_amt2_w_d28_r;
+    reg [1:0] gradient_shift1_amt2_w_d29_r;
+    reg [1:0] gradient_shift1_amt2_w_d30_r;
+    reg [1:0] gradient_shift1_amt2_w_d31_r;
+    reg [1:0] gradient_shift1_amt2_w_d32_r;
+    reg [1:0] gradient_shift1_amt2_w_d33_r;
+    reg [1:0] gradient_shift1_amt2_w_d34_r;
+    reg [1:0] gradient_shift1_amt2_w_d35_r;
+    reg [1:0] gradient_shift1_amt2_w_d36_r;
+    reg [1:0] gradient_shift1_amt2_w_d37_r;
+    reg [1:0] gradient_shift1_amt2_w_d38_r;
+    reg [87:0] gradient_shift1_2_r;
+    wire [0:0] gradient_shift1_amt3_w;
+    reg [87:0] gradient_shift1_3_w;
+    reg [0:0] gradient_shift1_amt3_w_d2_r;
+    reg [0:0] gradient_shift1_amt3_w_d3_r;
+    reg [0:0] gradient_shift1_amt3_w_d4_r;
+    reg [0:0] gradient_shift1_amt3_w_d5_r;
+    reg [0:0] gradient_shift1_amt3_w_d6_r;
+    reg [0:0] gradient_shift1_amt3_w_d7_r;
+    reg [0:0] gradient_shift1_amt3_w_d8_r;
+    reg [0:0] gradient_shift1_amt3_w_d9_r;
+    reg [0:0] gradient_shift1_amt3_w_d10_r;
+    reg [0:0] gradient_shift1_amt3_w_d11_r;
+    reg [0:0] gradient_shift1_amt3_w_d12_r;
+    reg [0:0] gradient_shift1_amt3_w_d13_r;
+    reg [0:0] gradient_shift1_amt3_w_d14_r;
+    reg [0:0] gradient_shift1_amt3_w_d15_r;
+    reg [0:0] gradient_shift1_amt3_w_d16_r;
+    reg [0:0] gradient_shift1_amt3_w_d17_r;
+    reg [0:0] gradient_shift1_amt3_w_d18_r;
+    reg [0:0] gradient_shift1_amt3_w_d19_r;
+    reg [0:0] gradient_shift1_amt3_w_d20_r;
+    reg [0:0] gradient_shift1_amt3_w_d21_r;
+    reg [0:0] gradient_shift1_amt3_w_d22_r;
+    reg [0:0] gradient_shift1_amt3_w_d23_r;
+    reg [0:0] gradient_shift1_amt3_w_d24_r;
+    reg [0:0] gradient_shift1_amt3_w_d25_r;
+    reg [0:0] gradient_shift1_amt3_w_d26_r;
+    reg [0:0] gradient_shift1_amt3_w_d27_r;
+    reg [0:0] gradient_shift1_amt3_w_d28_r;
+    reg [0:0] gradient_shift1_amt3_w_d29_r;
+    reg [0:0] gradient_shift1_amt3_w_d30_r;
+    reg [0:0] gradient_shift1_amt3_w_d31_r;
+    reg [0:0] gradient_shift1_amt3_w_d32_r;
+    reg [0:0] gradient_shift1_amt3_w_d33_r;
+    reg [0:0] gradient_shift1_amt3_w_d34_r;
+    reg [0:0] gradient_shift1_amt3_w_d35_r;
+    reg [0:0] gradient_shift1_amt3_w_d36_r;
+    reg [0:0] gradient_shift1_amt3_w_d37_r;
+    reg [0:0] gradient_shift1_amt3_w_d38_r;
+    reg [0:0] gradient_shift1_amt3_w_d39_r;
+    reg [87:0] unused_gradient_shift1_3_r;
+    wire [55:0] gradient56_1_w;
+    reg [0:0] inverse_abs1_sign_d31_r;
+    reg [0:0] inverse_abs1_sign_d32_r;
+    reg [0:0] inverse_abs1_sign_d33_r;
+    reg [0:0] inverse_abs1_sign_d34_r;
+    reg [0:0] inverse_abs1_sign_d35_r;
+    reg [0:0] inverse_abs1_sign_d36_r;
+    reg [0:0] inverse_abs1_sign_d37_r;
+    reg [0:0] inverse_abs1_sign_d38_r;
+    reg [0:0] inverse_abs1_sign_d39_r;
+    reg [0:0] inverse_abs1_sign_d40_r;
+    reg [55:0] gradient_signed1_invert_r;
+    reg [0:0] inverse_abs1_sign_d41_r;
+    wire [55:0] gradient_signed1_carry_w;
+    wire [34:0] gradient_signed1_a0_w;
+    wire [34:0] gradient_signed1_b0_w;
+    reg [35:0] gradient_signed1_part0_r;
+    wire [34:0] gradient_signed1_low0_w;
+    wire [20:0] gradient_signed1_a1_w;
+    wire [20:0] gradient_signed1_b1_w;
+    reg [20:0] gradient_signed1_a1_w_d42_r;
+    reg [20:0] gradient_signed1_b1_w_d42_r;
+    reg [21:0] unused_gradient_signed1_part1_r;
+    wire [20:0] gradient_signed1_low1_w;
+    wire [55:0] gradient_signed1_w;
+    reg [34:0] gradient_signed1_low0_w_d43_r;
+    wire [17:0] origin_offset1_w;
+    reg [17:0] origin_offset1_w_d1_r;
+    reg [17:0] origin_offset1_w_d2_r;
+    reg [17:0] origin_offset1_w_d3_r;
+    reg [17:0] origin_offset1_w_d4_r;
+    reg [17:0] origin_offset1_w_d5_r;
+    reg [17:0] origin_offset1_w_d6_r;
+    reg [17:0] origin_offset1_w_d7_r;
+    reg [17:0] origin_offset1_w_d8_r;
+    reg [17:0] origin_offset1_w_d9_r;
+    reg [17:0] origin_offset1_w_d10_r;
+    reg [17:0] origin_offset1_w_d11_r;
+    reg [17:0] origin_offset1_w_d12_r;
+    reg [17:0] origin_offset1_w_d13_r;
+    reg [17:0] origin_offset1_w_d14_r;
+    reg [17:0] origin_offset1_w_d15_r;
+    reg [17:0] origin_offset1_w_d16_r;
+    reg [17:0] origin_offset1_w_d17_r;
+    reg [17:0] origin_offset1_w_d18_r;
+    reg [17:0] origin_offset1_w_d19_r;
+    reg [17:0] origin_offset1_w_d20_r;
+    reg [17:0] origin_offset1_w_d21_r;
+    reg [17:0] origin_offset1_w_d22_r;
+    reg [17:0] origin_offset1_w_d23_r;
+    reg [17:0] origin_offset1_w_d24_r;
+    reg [17:0] origin_offset1_w_d25_r;
+    reg [17:0] origin_offset1_w_d26_r;
+    reg [17:0] origin_offset1_w_d27_r;
+    reg [17:0] origin_offset1_w_d28_r;
+    reg [17:0] origin_offset1_w_d29_r;
+    reg [17:0] origin_offset1_w_d30_r;
+    reg [17:0] origin_offset1_w_d31_r;
+    reg [17:0] origin_offset1_w_d32_r;
+    reg [17:0] origin_offset1_w_d33_r;
+    reg [17:0] origin_offset1_w_d34_r;
+    reg [17:0] origin_offset1_w_d35_r;
+    reg [17:0] origin_offset1_w_d36_r;
+    reg [17:0] origin_offset1_w_d37_r;
+    reg [17:0] origin_offset1_w_d38_r;
+    reg [17:0] origin_offset1_w_d39_r;
+    reg [17:0] origin_offset1_w_d40_r;
+    reg [17:0] origin_offset1_w_d41_r;
+    reg [17:0] origin_offset1_w_d42_r;
+    reg [17:0] origin_offset1_w_d43_r;
+    reg [73:0] origin_product1_r;
+    reg [73:0] origin_product1_p1_r;
+    reg [73:0] origin_product1_p2_r;
+    reg [3:0] drop_gradient1_r;
+    reg [0:0] gradient_abs1_sign_r;
+    reg [55:0] gradient_abs1_invert_r;
+    wire [55:0] gradient_abs1_carry_w;
+    wire [34:0] gradient_abs1_a0_w;
+    wire [34:0] gradient_abs1_b0_w;
+    reg [35:0] gradient_abs1_part0_r;
+    wire [34:0] gradient_abs1_low0_w;
+    wire [20:0] gradient_abs1_a1_w;
+    wire [20:0] gradient_abs1_b1_w;
+    reg [20:0] gradient_abs1_a1_w_d45_r;
+    reg [20:0] gradient_abs1_b1_w_d45_r;
+    reg [21:0] unused_gradient_abs1_part1_r;
+    wire [20:0] gradient_abs1_low1_w;
+    wire [55:0] gradient_abs1_w;
+    reg [34:0] gradient_abs1_low0_w_d46_r;
+    wire [1:0] gradient_drop1_amt0_w;
+    reg [55:0] gradient_drop1_0_w;
+    reg [1:0] gradient_drop1_amt0_w_d2_r;
+    reg [1:0] gradient_drop1_amt0_w_d3_r;
+    reg [1:0] gradient_drop1_amt0_w_d4_r;
+    reg [1:0] gradient_drop1_amt0_w_d5_r;
+    reg [1:0] gradient_drop1_amt0_w_d6_r;
+    reg [1:0] gradient_drop1_amt0_w_d7_r;
+    reg [1:0] gradient_drop1_amt0_w_d8_r;
+    reg [1:0] gradient_drop1_amt0_w_d9_r;
+    reg [1:0] gradient_drop1_amt0_w_d10_r;
+    reg [1:0] gradient_drop1_amt0_w_d11_r;
+    reg [1:0] gradient_drop1_amt0_w_d12_r;
+    reg [1:0] gradient_drop1_amt0_w_d13_r;
+    reg [1:0] gradient_drop1_amt0_w_d14_r;
+    reg [1:0] gradient_drop1_amt0_w_d15_r;
+    reg [1:0] gradient_drop1_amt0_w_d16_r;
+    reg [1:0] gradient_drop1_amt0_w_d17_r;
+    reg [1:0] gradient_drop1_amt0_w_d18_r;
+    reg [1:0] gradient_drop1_amt0_w_d19_r;
+    reg [1:0] gradient_drop1_amt0_w_d20_r;
+    reg [1:0] gradient_drop1_amt0_w_d21_r;
+    reg [1:0] gradient_drop1_amt0_w_d22_r;
+    reg [1:0] gradient_drop1_amt0_w_d23_r;
+    reg [1:0] gradient_drop1_amt0_w_d24_r;
+    reg [1:0] gradient_drop1_amt0_w_d25_r;
+    reg [1:0] gradient_drop1_amt0_w_d26_r;
+    reg [1:0] gradient_drop1_amt0_w_d27_r;
+    reg [1:0] gradient_drop1_amt0_w_d28_r;
+    reg [1:0] gradient_drop1_amt0_w_d29_r;
+    reg [1:0] gradient_drop1_amt0_w_d30_r;
+    reg [1:0] gradient_drop1_amt0_w_d31_r;
+    reg [1:0] gradient_drop1_amt0_w_d32_r;
+    reg [1:0] gradient_drop1_amt0_w_d33_r;
+    reg [1:0] gradient_drop1_amt0_w_d34_r;
+    reg [1:0] gradient_drop1_amt0_w_d35_r;
+    reg [1:0] gradient_drop1_amt0_w_d36_r;
+    reg [1:0] gradient_drop1_amt0_w_d37_r;
+    reg [1:0] gradient_drop1_amt0_w_d38_r;
+    reg [1:0] gradient_drop1_amt0_w_d39_r;
+    reg [1:0] gradient_drop1_amt0_w_d40_r;
+    reg [1:0] gradient_drop1_amt0_w_d41_r;
+    reg [1:0] gradient_drop1_amt0_w_d42_r;
+    reg [1:0] gradient_drop1_amt0_w_d43_r;
+    reg [1:0] gradient_drop1_amt0_w_d44_r;
+    reg [1:0] gradient_drop1_amt0_w_d45_r;
+    reg [1:0] gradient_drop1_amt0_w_d46_r;
+    reg [55:0] gradient_drop1_0_r;
+    wire [1:0] gradient_drop1_amt1_w;
+    reg [55:0] gradient_drop1_1_w;
+    reg [1:0] gradient_drop1_amt1_w_d2_r;
+    reg [1:0] gradient_drop1_amt1_w_d3_r;
+    reg [1:0] gradient_drop1_amt1_w_d4_r;
+    reg [1:0] gradient_drop1_amt1_w_d5_r;
+    reg [1:0] gradient_drop1_amt1_w_d6_r;
+    reg [1:0] gradient_drop1_amt1_w_d7_r;
+    reg [1:0] gradient_drop1_amt1_w_d8_r;
+    reg [1:0] gradient_drop1_amt1_w_d9_r;
+    reg [1:0] gradient_drop1_amt1_w_d10_r;
+    reg [1:0] gradient_drop1_amt1_w_d11_r;
+    reg [1:0] gradient_drop1_amt1_w_d12_r;
+    reg [1:0] gradient_drop1_amt1_w_d13_r;
+    reg [1:0] gradient_drop1_amt1_w_d14_r;
+    reg [1:0] gradient_drop1_amt1_w_d15_r;
+    reg [1:0] gradient_drop1_amt1_w_d16_r;
+    reg [1:0] gradient_drop1_amt1_w_d17_r;
+    reg [1:0] gradient_drop1_amt1_w_d18_r;
+    reg [1:0] gradient_drop1_amt1_w_d19_r;
+    reg [1:0] gradient_drop1_amt1_w_d20_r;
+    reg [1:0] gradient_drop1_amt1_w_d21_r;
+    reg [1:0] gradient_drop1_amt1_w_d22_r;
+    reg [1:0] gradient_drop1_amt1_w_d23_r;
+    reg [1:0] gradient_drop1_amt1_w_d24_r;
+    reg [1:0] gradient_drop1_amt1_w_d25_r;
+    reg [1:0] gradient_drop1_amt1_w_d26_r;
+    reg [1:0] gradient_drop1_amt1_w_d27_r;
+    reg [1:0] gradient_drop1_amt1_w_d28_r;
+    reg [1:0] gradient_drop1_amt1_w_d29_r;
+    reg [1:0] gradient_drop1_amt1_w_d30_r;
+    reg [1:0] gradient_drop1_amt1_w_d31_r;
+    reg [1:0] gradient_drop1_amt1_w_d32_r;
+    reg [1:0] gradient_drop1_amt1_w_d33_r;
+    reg [1:0] gradient_drop1_amt1_w_d34_r;
+    reg [1:0] gradient_drop1_amt1_w_d35_r;
+    reg [1:0] gradient_drop1_amt1_w_d36_r;
+    reg [1:0] gradient_drop1_amt1_w_d37_r;
+    reg [1:0] gradient_drop1_amt1_w_d38_r;
+    reg [1:0] gradient_drop1_amt1_w_d39_r;
+    reg [1:0] gradient_drop1_amt1_w_d40_r;
+    reg [1:0] gradient_drop1_amt1_w_d41_r;
+    reg [1:0] gradient_drop1_amt1_w_d42_r;
+    reg [1:0] gradient_drop1_amt1_w_d43_r;
+    reg [1:0] gradient_drop1_amt1_w_d44_r;
+    reg [1:0] gradient_drop1_amt1_w_d45_r;
+    reg [1:0] gradient_drop1_amt1_w_d46_r;
+    reg [1:0] gradient_drop1_amt1_w_d47_r;
+    reg [55:0] unused_gradient_drop1_1_r;
+    wire [51:0] stored52_1_w;
+    wire [51:0] stored_bit1_w;
+    wire [34:0] stored_round1_a0_w;
+    wire [34:0] stored_round1_b0_w;
+    reg [35:0] stored_round1_part0_r;
+    wire [34:0] stored_round1_low0_w;
+    wire [16:0] stored_round1_a1_w;
+    wire [16:0] stored_round1_b1_w;
+    reg [16:0] stored_round1_a1_w_d49_r;
+    reg [16:0] stored_round1_b1_w_d49_r;
+    reg [17:0] unused_stored_round1_part1_r;
+    wire [16:0] stored_round1_low1_w;
+    wire [51:0] stored_round1_w;
+    reg [34:0] stored_round1_low0_w_d50_r;
+    reg [0:0] gradient_abs1_sign_d45_r;
+    reg [0:0] gradient_abs1_sign_d46_r;
+    reg [0:0] gradient_abs1_sign_d47_r;
+    reg [0:0] gradient_abs1_sign_d48_r;
+    reg [0:0] gradient_abs1_sign_d49_r;
+    reg [0:0] gradient_abs1_sign_d50_r;
+    reg [51:0] stored_signed1_invert_r;
+    reg [0:0] gradient_abs1_sign_d51_r;
+    wire [51:0] stored_signed1_carry_w;
+    wire [34:0] stored_signed1_a0_w;
+    wire [34:0] stored_signed1_b0_w;
+    reg [35:0] stored_signed1_part0_r;
+    wire [34:0] stored_signed1_low0_w;
+    wire [16:0] stored_signed1_a1_w;
+    wire [16:0] stored_signed1_b1_w;
+    reg [16:0] stored_signed1_a1_w_d52_r;
+    reg [16:0] stored_signed1_b1_w_d52_r;
+    reg [17:0] unused_stored_signed1_part1_r;
+    wire [16:0] stored_signed1_low1_w;
+    wire [51:0] stored_signed1_w;
+    reg [34:0] stored_signed1_low0_w_d53_r;
+    wire [74:0] origin_ext0_w;
+    wire [74:0] origin_ext1_w;
+    wire [34:0] origin_sum_a0_w;
+    wire [34:0] origin_sum_b0_w;
+    reg [35:0] origin_sum_part0_r;
+    wire [34:0] origin_sum_low0_w;
+    wire [34:0] origin_sum_a1_w;
+    wire [34:0] origin_sum_b1_w;
+    reg [34:0] origin_sum_a1_w_d47_r;
+    reg [34:0] origin_sum_b1_w_d47_r;
+    reg [35:0] origin_sum_part1_r;
+    wire [34:0] origin_sum_low1_w;
+    wire [4:0] origin_sum_a2_w;
+    wire [4:0] origin_sum_b2_w;
+    reg [4:0] origin_sum_a2_w_d47_r;
+    reg [4:0] origin_sum_a2_w_d48_r;
+    reg [4:0] origin_sum_b2_w_d47_r;
+    reg [4:0] origin_sum_b2_w_d48_r;
+    reg [5:0] unused_origin_sum_part2_r;
+    wire [4:0] origin_sum_low2_w;
+    wire [74:0] origin_sum_w;
+    reg [34:0] origin_sum_low1_w_d49_r;
+    reg [34:0] origin_sum_low0_w_d48_r;
+    reg [34:0] origin_sum_low0_w_d49_r;
+    reg [0:0] origin_absolute_sign_r;
+    reg [74:0] origin_absolute_invert_r;
+    wire [74:0] origin_absolute_carry_w;
+    wire [34:0] origin_absolute_a0_w;
+    wire [34:0] origin_absolute_b0_w;
+    reg [35:0] origin_absolute_part0_r;
+    wire [34:0] origin_absolute_low0_w;
+    wire [34:0] origin_absolute_a1_w;
+    wire [34:0] origin_absolute_b1_w;
+    reg [34:0] origin_absolute_a1_w_d51_r;
+    reg [34:0] origin_absolute_b1_w_d51_r;
+    reg [35:0] origin_absolute_part1_r;
+    wire [34:0] origin_absolute_low1_w;
+    wire [4:0] origin_absolute_a2_w;
+    wire [4:0] origin_absolute_b2_w;
+    reg [4:0] origin_absolute_a2_w_d51_r;
+    reg [4:0] origin_absolute_a2_w_d52_r;
+    reg [4:0] origin_absolute_b2_w_d51_r;
+    reg [4:0] origin_absolute_b2_w_d52_r;
+    reg [5:0] unused_origin_absolute_part2_r;
+    wire [4:0] origin_absolute_low2_w;
+    wire [74:0] origin_absolute_w;
+    reg [34:0] origin_absolute_low1_w_d53_r;
+    reg [34:0] origin_absolute_low0_w_d52_r;
+    reg [34:0] origin_absolute_low0_w_d53_r;
+    wire [74:0] origin_eight_w;
+    wire [34:0] origin_round_a0_w;
+    wire [34:0] origin_round_b0_w;
+    reg [35:0] origin_round_part0_r;
+    wire [34:0] origin_round_low0_w;
+    wire [34:0] origin_round_a1_w;
+    wire [34:0] origin_round_b1_w;
+    reg [34:0] origin_round_a1_w_d54_r;
+    reg [34:0] origin_round_b1_w_d54_r;
+    reg [35:0] origin_round_part1_r;
+    wire [34:0] origin_round_low1_w;
+    wire [4:0] origin_round_a2_w;
+    wire [4:0] origin_round_b2_w;
+    reg [4:0] origin_round_a2_w_d54_r;
+    reg [4:0] origin_round_a2_w_d55_r;
+    reg [4:0] origin_round_b2_w_d54_r;
+    reg [4:0] origin_round_b2_w_d55_r;
+    reg [5:0] unused_origin_round_part2_r;
+    wire [4:0] origin_round_low2_w;
+    wire [74:0] origin_round_w;
+    reg [34:0] origin_round_low1_w_d56_r;
+    reg [34:0] origin_round_low0_w_d55_r;
+    reg [34:0] origin_round_low0_w_d56_r;
+    reg [74:0] origin_shift_r;
+    reg [0:0] origin_absolute_sign_d51_r;
+    reg [0:0] origin_absolute_sign_d52_r;
+    reg [0:0] origin_absolute_sign_d53_r;
+    reg [0:0] origin_absolute_sign_d54_r;
+    reg [0:0] origin_absolute_sign_d55_r;
+    reg [0:0] origin_absolute_sign_d56_r;
+    reg [0:0] origin_absolute_sign_d57_r;
+    reg [74:0] origin_signed_invert_r;
+    reg [0:0] origin_absolute_sign_d58_r;
+    wire [74:0] origin_signed_carry_w;
+    wire [34:0] origin_signed_a0_w;
+    wire [34:0] origin_signed_b0_w;
+    reg [35:0] origin_signed_part0_r;
+    wire [34:0] origin_signed_low0_w;
+    wire [34:0] origin_signed_a1_w;
+    wire [34:0] origin_signed_b1_w;
+    reg [34:0] origin_signed_a1_w_d59_r;
+    reg [34:0] origin_signed_b1_w_d59_r;
+    reg [35:0] origin_signed_part1_r;
+    wire [34:0] origin_signed_low1_w;
+    wire [4:0] origin_signed_a2_w;
+    wire [4:0] origin_signed_b2_w;
+    reg [4:0] origin_signed_a2_w_d59_r;
+    reg [4:0] origin_signed_a2_w_d60_r;
+    reg [4:0] origin_signed_b2_w_d59_r;
+    reg [4:0] origin_signed_b2_w_d60_r;
+    reg [5:0] unused_origin_signed_part2_r;
+    wire [4:0] origin_signed_low2_w;
+    wire [74:0] unused_origin_signed_w;
+    reg [34:0] origin_signed_low1_w_d61_r;
+    reg [34:0] origin_signed_low0_w_d60_r;
+    reg [34:0] origin_signed_low0_w_d61_r;
+    wire [69:0] start_base_w;
+    wire [69:0] origin70_w;
+    reg [69:0] start_base_w_d20_r;
+    reg [69:0] start_base_w_d21_r;
+    reg [69:0] start_base_w_d22_r;
+    reg [69:0] start_base_w_d23_r;
+    reg [69:0] start_base_w_d24_r;
+    reg [69:0] start_base_w_d25_r;
+    reg [69:0] start_base_w_d26_r;
+    reg [69:0] start_base_w_d27_r;
+    reg [69:0] start_base_w_d28_r;
+    reg [69:0] start_base_w_d29_r;
+    reg [69:0] start_base_w_d30_r;
+    reg [69:0] start_base_w_d31_r;
+    reg [69:0] start_base_w_d32_r;
+    reg [69:0] start_base_w_d33_r;
+    reg [69:0] start_base_w_d34_r;
+    reg [69:0] start_base_w_d35_r;
+    reg [69:0] start_base_w_d36_r;
+    reg [69:0] start_base_w_d37_r;
+    reg [69:0] start_base_w_d38_r;
+    reg [69:0] start_base_w_d39_r;
+    reg [69:0] start_base_w_d40_r;
+    reg [69:0] start_base_w_d41_r;
+    reg [69:0] start_base_w_d42_r;
+    reg [69:0] start_base_w_d43_r;
+    reg [69:0] start_base_w_d44_r;
+    reg [69:0] start_base_w_d45_r;
+    reg [69:0] start_base_w_d46_r;
+    reg [69:0] start_base_w_d47_r;
+    reg [69:0] start_base_w_d48_r;
+    reg [69:0] start_base_w_d49_r;
+    reg [69:0] start_base_w_d50_r;
+    reg [69:0] start_base_w_d51_r;
+    reg [69:0] start_base_w_d52_r;
+    reg [69:0] start_base_w_d53_r;
+    reg [69:0] start_base_w_d54_r;
+    reg [69:0] start_base_w_d55_r;
+    reg [69:0] start_base_w_d56_r;
+    reg [69:0] start_base_w_d57_r;
+    reg [69:0] start_base_w_d58_r;
+    reg [69:0] start_base_w_d59_r;
+    reg [69:0] start_base_w_d60_r;
+    reg [69:0] start_base_w_d61_r;
+    wire [34:0] start_sum_a0_w;
+    wire [34:0] start_sum_b0_w;
+    reg [35:0] start_sum_part0_r;
+    wire [34:0] start_sum_low0_w;
+    wire [34:0] start_sum_a1_w;
+    wire [34:0] start_sum_b1_w;
+    reg [34:0] start_sum_a1_w_d62_r;
+    reg [34:0] start_sum_b1_w_d62_r;
+    reg [35:0] unused_start_sum_part1_r;
+    wire [34:0] start_sum_low1_w;
+    wire [69:0] start_sum_w;
+    reg [34:0] start_sum_low0_w_d63_r;
+    reg [0:0] start_absolute_sign_r;
+    reg [69:0] start_absolute_invert_r;
+    wire [69:0] start_absolute_carry_w;
+    wire [34:0] start_absolute_a0_w;
+    wire [34:0] start_absolute_b0_w;
+    reg [35:0] start_absolute_part0_r;
+    wire [34:0] start_absolute_low0_w;
+    wire [34:0] start_absolute_a1_w;
+    wire [34:0] start_absolute_b1_w;
+    reg [34:0] start_absolute_a1_w_d65_r;
+    reg [34:0] start_absolute_b1_w_d65_r;
+    reg [35:0] unused_start_absolute_part1_r;
+    wire [34:0] start_absolute_low1_w;
+    wire [69:0] start_absolute_w;
+    reg [34:0] start_absolute_low0_w_d66_r;
+    reg [3:0] drop_start_r;
+    wire [1:0] start_drop_amt0_w;
+    reg [69:0] start_drop_0_w;
+    reg [1:0] start_drop_amt0_w_d2_r;
+    reg [1:0] start_drop_amt0_w_d3_r;
+    reg [1:0] start_drop_amt0_w_d4_r;
+    reg [1:0] start_drop_amt0_w_d5_r;
+    reg [1:0] start_drop_amt0_w_d6_r;
+    reg [1:0] start_drop_amt0_w_d7_r;
+    reg [1:0] start_drop_amt0_w_d8_r;
+    reg [1:0] start_drop_amt0_w_d9_r;
+    reg [1:0] start_drop_amt0_w_d10_r;
+    reg [1:0] start_drop_amt0_w_d11_r;
+    reg [1:0] start_drop_amt0_w_d12_r;
+    reg [1:0] start_drop_amt0_w_d13_r;
+    reg [1:0] start_drop_amt0_w_d14_r;
+    reg [1:0] start_drop_amt0_w_d15_r;
+    reg [1:0] start_drop_amt0_w_d16_r;
+    reg [1:0] start_drop_amt0_w_d17_r;
+    reg [1:0] start_drop_amt0_w_d18_r;
+    reg [1:0] start_drop_amt0_w_d19_r;
+    reg [1:0] start_drop_amt0_w_d20_r;
+    reg [1:0] start_drop_amt0_w_d21_r;
+    reg [1:0] start_drop_amt0_w_d22_r;
+    reg [1:0] start_drop_amt0_w_d23_r;
+    reg [1:0] start_drop_amt0_w_d24_r;
+    reg [1:0] start_drop_amt0_w_d25_r;
+    reg [1:0] start_drop_amt0_w_d26_r;
+    reg [1:0] start_drop_amt0_w_d27_r;
+    reg [1:0] start_drop_amt0_w_d28_r;
+    reg [1:0] start_drop_amt0_w_d29_r;
+    reg [1:0] start_drop_amt0_w_d30_r;
+    reg [1:0] start_drop_amt0_w_d31_r;
+    reg [1:0] start_drop_amt0_w_d32_r;
+    reg [1:0] start_drop_amt0_w_d33_r;
+    reg [1:0] start_drop_amt0_w_d34_r;
+    reg [1:0] start_drop_amt0_w_d35_r;
+    reg [1:0] start_drop_amt0_w_d36_r;
+    reg [1:0] start_drop_amt0_w_d37_r;
+    reg [1:0] start_drop_amt0_w_d38_r;
+    reg [1:0] start_drop_amt0_w_d39_r;
+    reg [1:0] start_drop_amt0_w_d40_r;
+    reg [1:0] start_drop_amt0_w_d41_r;
+    reg [1:0] start_drop_amt0_w_d42_r;
+    reg [1:0] start_drop_amt0_w_d43_r;
+    reg [1:0] start_drop_amt0_w_d44_r;
+    reg [1:0] start_drop_amt0_w_d45_r;
+    reg [1:0] start_drop_amt0_w_d46_r;
+    reg [1:0] start_drop_amt0_w_d47_r;
+    reg [1:0] start_drop_amt0_w_d48_r;
+    reg [1:0] start_drop_amt0_w_d49_r;
+    reg [1:0] start_drop_amt0_w_d50_r;
+    reg [1:0] start_drop_amt0_w_d51_r;
+    reg [1:0] start_drop_amt0_w_d52_r;
+    reg [1:0] start_drop_amt0_w_d53_r;
+    reg [1:0] start_drop_amt0_w_d54_r;
+    reg [1:0] start_drop_amt0_w_d55_r;
+    reg [1:0] start_drop_amt0_w_d56_r;
+    reg [1:0] start_drop_amt0_w_d57_r;
+    reg [1:0] start_drop_amt0_w_d58_r;
+    reg [1:0] start_drop_amt0_w_d59_r;
+    reg [1:0] start_drop_amt0_w_d60_r;
+    reg [1:0] start_drop_amt0_w_d61_r;
+    reg [1:0] start_drop_amt0_w_d62_r;
+    reg [1:0] start_drop_amt0_w_d63_r;
+    reg [1:0] start_drop_amt0_w_d64_r;
+    reg [1:0] start_drop_amt0_w_d65_r;
+    reg [1:0] start_drop_amt0_w_d66_r;
+    reg [69:0] start_drop_0_r;
+    wire [1:0] start_drop_amt1_w;
+    reg [69:0] start_drop_1_w;
+    reg [1:0] start_drop_amt1_w_d2_r;
+    reg [1:0] start_drop_amt1_w_d3_r;
+    reg [1:0] start_drop_amt1_w_d4_r;
+    reg [1:0] start_drop_amt1_w_d5_r;
+    reg [1:0] start_drop_amt1_w_d6_r;
+    reg [1:0] start_drop_amt1_w_d7_r;
+    reg [1:0] start_drop_amt1_w_d8_r;
+    reg [1:0] start_drop_amt1_w_d9_r;
+    reg [1:0] start_drop_amt1_w_d10_r;
+    reg [1:0] start_drop_amt1_w_d11_r;
+    reg [1:0] start_drop_amt1_w_d12_r;
+    reg [1:0] start_drop_amt1_w_d13_r;
+    reg [1:0] start_drop_amt1_w_d14_r;
+    reg [1:0] start_drop_amt1_w_d15_r;
+    reg [1:0] start_drop_amt1_w_d16_r;
+    reg [1:0] start_drop_amt1_w_d17_r;
+    reg [1:0] start_drop_amt1_w_d18_r;
+    reg [1:0] start_drop_amt1_w_d19_r;
+    reg [1:0] start_drop_amt1_w_d20_r;
+    reg [1:0] start_drop_amt1_w_d21_r;
+    reg [1:0] start_drop_amt1_w_d22_r;
+    reg [1:0] start_drop_amt1_w_d23_r;
+    reg [1:0] start_drop_amt1_w_d24_r;
+    reg [1:0] start_drop_amt1_w_d25_r;
+    reg [1:0] start_drop_amt1_w_d26_r;
+    reg [1:0] start_drop_amt1_w_d27_r;
+    reg [1:0] start_drop_amt1_w_d28_r;
+    reg [1:0] start_drop_amt1_w_d29_r;
+    reg [1:0] start_drop_amt1_w_d30_r;
+    reg [1:0] start_drop_amt1_w_d31_r;
+    reg [1:0] start_drop_amt1_w_d32_r;
+    reg [1:0] start_drop_amt1_w_d33_r;
+    reg [1:0] start_drop_amt1_w_d34_r;
+    reg [1:0] start_drop_amt1_w_d35_r;
+    reg [1:0] start_drop_amt1_w_d36_r;
+    reg [1:0] start_drop_amt1_w_d37_r;
+    reg [1:0] start_drop_amt1_w_d38_r;
+    reg [1:0] start_drop_amt1_w_d39_r;
+    reg [1:0] start_drop_amt1_w_d40_r;
+    reg [1:0] start_drop_amt1_w_d41_r;
+    reg [1:0] start_drop_amt1_w_d42_r;
+    reg [1:0] start_drop_amt1_w_d43_r;
+    reg [1:0] start_drop_amt1_w_d44_r;
+    reg [1:0] start_drop_amt1_w_d45_r;
+    reg [1:0] start_drop_amt1_w_d46_r;
+    reg [1:0] start_drop_amt1_w_d47_r;
+    reg [1:0] start_drop_amt1_w_d48_r;
+    reg [1:0] start_drop_amt1_w_d49_r;
+    reg [1:0] start_drop_amt1_w_d50_r;
+    reg [1:0] start_drop_amt1_w_d51_r;
+    reg [1:0] start_drop_amt1_w_d52_r;
+    reg [1:0] start_drop_amt1_w_d53_r;
+    reg [1:0] start_drop_amt1_w_d54_r;
+    reg [1:0] start_drop_amt1_w_d55_r;
+    reg [1:0] start_drop_amt1_w_d56_r;
+    reg [1:0] start_drop_amt1_w_d57_r;
+    reg [1:0] start_drop_amt1_w_d58_r;
+    reg [1:0] start_drop_amt1_w_d59_r;
+    reg [1:0] start_drop_amt1_w_d60_r;
+    reg [1:0] start_drop_amt1_w_d61_r;
+    reg [1:0] start_drop_amt1_w_d62_r;
+    reg [1:0] start_drop_amt1_w_d63_r;
+    reg [1:0] start_drop_amt1_w_d64_r;
+    reg [1:0] start_drop_amt1_w_d65_r;
+    reg [1:0] start_drop_amt1_w_d66_r;
+    reg [1:0] start_drop_amt1_w_d67_r;
+    reg [69:0] unused_start_drop_1_r;
+    wire [65:0] start66_w;
+    wire [65:0] start_bit_w;
+    wire [34:0] start_round_a0_w;
+    wire [34:0] start_round_b0_w;
+    reg [35:0] start_round_part0_r;
+    wire [34:0] start_round_low0_w;
+    wire [30:0] start_round_a1_w;
+    wire [30:0] start_round_b1_w;
+    reg [30:0] start_round_a1_w_d69_r;
+    reg [30:0] start_round_b1_w_d69_r;
+    reg [31:0] unused_start_round_part1_r;
+    wire [30:0] start_round_low1_w;
+    wire [65:0] start_round_w;
+    reg [34:0] start_round_low0_w_d70_r;
+    reg [0:0] start_absolute_sign_d65_r;
+    reg [0:0] start_absolute_sign_d66_r;
+    reg [0:0] start_absolute_sign_d67_r;
+    reg [0:0] start_absolute_sign_d68_r;
+    reg [0:0] start_absolute_sign_d69_r;
+    reg [0:0] start_absolute_sign_d70_r;
+    reg [65:0] start_signed_invert_r;
+    reg [0:0] start_absolute_sign_d71_r;
+    wire [65:0] start_signed_carry_w;
+    wire [34:0] start_signed_a0_w;
+    wire [34:0] start_signed_b0_w;
+    reg [35:0] start_signed_part0_r;
+    wire [34:0] start_signed_low0_w;
+    wire [30:0] start_signed_a1_w;
+    wire [30:0] start_signed_b1_w;
+    reg [30:0] start_signed_a1_w_d72_r;
+    reg [30:0] start_signed_b1_w_d72_r;
+    reg [31:0] unused_start_signed_part1_r;
+    wire [30:0] start_signed_low1_w;
+    wire [65:0] start_signed_w;
+    reg [34:0] start_signed_low0_w_d73_r;
+    reg [51:0] stored_signed1_w_d54_r;
+    reg [51:0] stored_signed1_w_d55_r;
+    reg [51:0] stored_signed1_w_d56_r;
+    reg [51:0] stored_signed1_w_d57_r;
+    reg [51:0] stored_signed1_w_d58_r;
+    reg [51:0] stored_signed1_w_d59_r;
+    reg [51:0] stored_signed1_w_d60_r;
+    reg [51:0] stored_signed1_w_d61_r;
+    reg [51:0] stored_signed1_w_d62_r;
+    reg [51:0] stored_signed1_w_d63_r;
+    reg [51:0] stored_signed1_w_d64_r;
+    reg [51:0] stored_signed1_w_d65_r;
+    reg [51:0] stored_signed1_w_d66_r;
+    reg [51:0] stored_signed1_w_d67_r;
+    reg [51:0] stored_signed1_w_d68_r;
+    reg [51:0] stored_signed1_w_d69_r;
+    reg [51:0] stored_signed1_w_d70_r;
+    reg [51:0] stored_signed1_w_d71_r;
+    reg [51:0] stored_signed1_w_d72_r;
+    reg [51:0] stored_signed1_w_d73_r;
+    reg [51:0] stored_signed0_w_d54_r;
+    reg [51:0] stored_signed0_w_d55_r;
+    reg [51:0] stored_signed0_w_d56_r;
+    reg [51:0] stored_signed0_w_d57_r;
+    reg [51:0] stored_signed0_w_d58_r;
+    reg [51:0] stored_signed0_w_d59_r;
+    reg [51:0] stored_signed0_w_d60_r;
+    reg [51:0] stored_signed0_w_d61_r;
+    reg [51:0] stored_signed0_w_d62_r;
+    reg [51:0] stored_signed0_w_d63_r;
+    reg [51:0] stored_signed0_w_d64_r;
+    reg [51:0] stored_signed0_w_d65_r;
+    reg [51:0] stored_signed0_w_d66_r;
+    reg [51:0] stored_signed0_w_d67_r;
+    reg [51:0] stored_signed0_w_d68_r;
+    reg [51:0] stored_signed0_w_d69_r;
+    reg [51:0] stored_signed0_w_d70_r;
+    reg [51:0] stored_signed0_w_d71_r;
+    reg [51:0] stored_signed0_w_d72_r;
+    reg [51:0] stored_signed0_w_d73_r;
+    reg [9:0] h_d19_r;
+    reg [9:0] h_d20_r;
+    reg [9:0] h_d21_r;
+    reg [9:0] h_d22_r;
+    reg [9:0] h_d23_r;
+    reg [9:0] h_d24_r;
+    reg [9:0] h_d25_r;
+    reg [9:0] h_d26_r;
+    reg [9:0] h_d27_r;
+    reg [9:0] h_d28_r;
+    reg [9:0] h_d29_r;
+    reg [9:0] h_d30_r;
+    reg [9:0] h_d31_r;
+    reg [9:0] h_d32_r;
+    reg [9:0] h_d33_r;
+    reg [9:0] h_d34_r;
+    reg [9:0] h_d35_r;
+    reg [9:0] h_d36_r;
+    reg [9:0] h_d37_r;
+    reg [9:0] h_d38_r;
+    reg [9:0] h_d39_r;
+    reg [9:0] h_d40_r;
+    reg [9:0] h_d41_r;
+    reg [9:0] h_d42_r;
+    reg [9:0] h_d43_r;
+    reg [9:0] h_d44_r;
+    reg [9:0] h_d45_r;
+    reg [9:0] h_d46_r;
+    reg [9:0] h_d47_r;
+    reg [9:0] h_d48_r;
+    reg [9:0] h_d49_r;
+    reg [9:0] h_d50_r;
+    reg [9:0] h_d51_r;
+    reg [9:0] h_d52_r;
+    reg [9:0] h_d53_r;
+    reg [9:0] h_d54_r;
+    reg [9:0] h_d55_r;
+    reg [9:0] h_d56_r;
+    reg [9:0] h_d57_r;
+    reg [9:0] h_d58_r;
+    reg [9:0] h_d59_r;
+    reg [9:0] h_d60_r;
+    reg [9:0] h_d61_r;
+    reg [9:0] h_d62_r;
+    reg [9:0] h_d63_r;
+    reg [9:0] h_d64_r;
+    reg [9:0] h_d65_r;
+    reg [9:0] h_d66_r;
+    reg [9:0] h_d67_r;
+    reg [9:0] h_d68_r;
+    reg [9:0] h_d69_r;
+    reg [9:0] h_d70_r;
+    reg [9:0] h_d71_r;
+    reg [9:0] h_d72_r;
+    reg [9:0] h_d73_r;
+    reg [6:0] tag_0_r_d8_r;
+    reg [6:0] tag_0_r_d9_r;
+    reg [6:0] tag_0_r_d10_r;
+    reg [6:0] tag_0_r_d11_r;
+    reg [6:0] tag_0_r_d12_r;
+    reg [6:0] tag_0_r_d13_r;
+    reg [6:0] tag_0_r_d14_r;
+    reg [6:0] tag_0_r_d15_r;
+    reg [6:0] tag_0_r_d16_r;
+    reg [6:0] tag_0_r_d17_r;
+    reg [6:0] tag_0_r_d18_r;
+    reg [6:0] tag_0_r_d19_r;
+    reg [6:0] tag_0_r_d20_r;
+    reg [6:0] tag_0_r_d21_r;
+    reg [6:0] tag_0_r_d22_r;
+    reg [6:0] tag_0_r_d23_r;
+    reg [6:0] tag_0_r_d24_r;
+    reg [6:0] tag_0_r_d25_r;
+    reg [6:0] tag_0_r_d26_r;
+    reg [6:0] tag_0_r_d27_r;
+    reg [6:0] tag_0_r_d28_r;
+    reg [6:0] tag_0_r_d29_r;
+    reg [6:0] tag_0_r_d30_r;
+    reg [6:0] tag_0_r_d31_r;
+    reg [6:0] tag_0_r_d32_r;
+    reg [6:0] tag_0_r_d33_r;
+    reg [6:0] tag_0_r_d34_r;
+    reg [6:0] tag_0_r_d35_r;
+    reg [6:0] tag_0_r_d36_r;
+    reg [6:0] tag_0_r_d37_r;
+    reg [6:0] tag_0_r_d38_r;
+    reg [6:0] tag_0_r_d39_r;
+    reg [6:0] tag_0_r_d40_r;
+    reg [6:0] tag_0_r_d41_r;
+    reg [6:0] tag_0_r_d42_r;
+    reg [6:0] tag_0_r_d43_r;
+    reg [6:0] tag_0_r_d44_r;
+    reg [6:0] tag_0_r_d45_r;
+    reg [6:0] tag_0_r_d46_r;
+    reg [6:0] tag_0_r_d47_r;
+    reg [6:0] tag_0_r_d48_r;
+    reg [6:0] tag_0_r_d49_r;
+    reg [6:0] tag_0_r_d50_r;
+    reg [6:0] tag_0_r_d51_r;
+    reg [6:0] tag_0_r_d52_r;
+    reg [6:0] tag_0_r_d53_r;
+    reg [6:0] tag_0_r_d54_r;
+    reg [6:0] tag_0_r_d55_r;
+    reg [6:0] tag_0_r_d56_r;
+    reg [6:0] tag_0_r_d57_r;
+    reg [6:0] tag_0_r_d58_r;
+    reg [6:0] tag_0_r_d59_r;
+    reg [6:0] tag_0_r_d60_r;
+    reg [6:0] tag_0_r_d61_r;
+    reg [6:0] tag_0_r_d62_r;
+    reg [6:0] tag_0_r_d63_r;
+    reg [6:0] tag_0_r_d64_r;
+    reg [6:0] tag_0_r_d65_r;
+    reg [6:0] tag_0_r_d66_r;
+    reg [6:0] tag_0_r_d67_r;
+    reg [6:0] tag_0_r_d68_r;
+    reg [6:0] tag_0_r_d69_r;
+    reg [6:0] tag_0_r_d70_r;
+    reg [6:0] tag_0_r_d71_r;
+    reg [6:0] tag_0_r_d72_r;
+    reg [6:0] tag_0_r_d73_r;
+    reg [73:0] valid_r;
+    assign plane_valid_o = valid_r[73];
     always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) valid_r <= 15'd0;
-        else if (stop_i) valid_r <= 15'd0;
-        else if (enable_i) valid_r <= {valid_r[13:0], plane_valid_i};
+        if (!rst_n_i) valid_r <= 0;
+        else if (stop_i) valid_r <= 0;
+        else if (enable_i) valid_r <= {valid_r[72:0], plane_valid_i};
+    end
+    assign vertex0_w = value_0_r[0 +: 51];
+    assign vertex1_w = value_0_r[51 +: 51];
+    assign vertex2_w = value_0_r[102 +: 51];
+    assign v52_0_w = {1'b0, vertex0_w};
+    assign scale_left0_amt0_w = left_amount_r[0 +: 2];
+    always @(*) begin
+        scale_left0_0_w = v52_0_w_d9_r;
+        case (scale_left0_amt0_w)
+            2'd0: scale_left0_0_w = v52_0_w_d9_r << 0;
+            2'd1: scale_left0_0_w = v52_0_w_d9_r << 1;
+            2'd2: scale_left0_0_w = v52_0_w_d9_r << 2;
+            2'd3: scale_left0_0_w = v52_0_w_d9_r << 3;
+            default: scale_left0_0_w = v52_0_w_d9_r;
+        endcase
+    end
+    assign scale_left0_amt1_w = left_amount_r[2 +: 2];
+    always @(*) begin
+        scale_left0_1_w = scale_left0_0_r;
+        case (scale_left0_amt1_w_d10_r)
+            2'd0: scale_left0_1_w = scale_left0_0_r << 0;
+            2'd1: scale_left0_1_w = scale_left0_0_r << 4;
+            2'd2: scale_left0_1_w = scale_left0_0_r << 8;
+            2'd3: scale_left0_1_w = scale_left0_0_r << 12;
+            default: scale_left0_1_w = scale_left0_0_r;
+        endcase
+    end
+    assign scale_left0_amt2_w = left_amount_r[4 +: 2];
+    always @(*) begin
+        scale_left0_2_w = scale_left0_1_r;
+        case (scale_left0_amt2_w_d11_r)
+            2'd0: scale_left0_2_w = scale_left0_1_r << 0;
+            2'd1: scale_left0_2_w = scale_left0_1_r << 16;
+            2'd2: scale_left0_2_w = scale_left0_1_r << 32;
+            2'd3: scale_left0_2_w = scale_left0_1_r << 48;
+            default: scale_left0_2_w = scale_left0_1_r;
+        endcase
+    end
+    assign scale_one0_w = 52'd1;
+    assign scale_bias0_amt0_w = scale_bit0_r[0 +: 2];
+    always @(*) begin
+        scale_bias0_0_w = scale_one0_w;
+        case (scale_bias0_amt0_w)
+            2'd0: scale_bias0_0_w = scale_one0_w << 0;
+            2'd1: scale_bias0_0_w = scale_one0_w << 1;
+            2'd2: scale_bias0_0_w = scale_one0_w << 2;
+            2'd3: scale_bias0_0_w = scale_one0_w << 3;
+            default: scale_bias0_0_w = scale_one0_w;
+        endcase
+    end
+    assign scale_bias0_amt1_w = scale_bit0_r[2 +: 2];
+    always @(*) begin
+        scale_bias0_1_w = scale_bias0_0_r;
+        case (scale_bias0_amt1_w_d11_r)
+            2'd0: scale_bias0_1_w = scale_bias0_0_r << 0;
+            2'd1: scale_bias0_1_w = scale_bias0_0_r << 4;
+            2'd2: scale_bias0_1_w = scale_bias0_0_r << 8;
+            2'd3: scale_bias0_1_w = scale_bias0_0_r << 12;
+            default: scale_bias0_1_w = scale_bias0_0_r;
+        endcase
+    end
+    assign scale_bias0_amt2_w = scale_bit0_r[4 +: 2];
+    always @(*) begin
+        scale_bias0_2_w = scale_bias0_1_r;
+        case (scale_bias0_amt2_w_d12_r)
+            2'd0: scale_bias0_2_w = scale_bias0_1_r << 0;
+            2'd1: scale_bias0_2_w = scale_bias0_1_r << 16;
+            2'd2: scale_bias0_2_w = scale_bias0_1_r << 32;
+            2'd3: scale_bias0_2_w = scale_bias0_1_r << 48;
+            default: scale_bias0_2_w = scale_bias0_1_r;
+        endcase
+    end
+    assign scale_add0_a0_w = v52_0_w_d13_r[0 +: 35];
+    assign scale_add0_b0_w = scale_bias0_2_r[0 +: 35];
+    assign scale_add0_low0_w = scale_add0_part0_r[34:0];
+    assign scale_add0_a1_w = v52_0_w_d13_r[35 +: 17];
+    assign scale_add0_b1_w = scale_bias0_2_r[35 +: 17];
+    assign scale_add0_low1_w = unused_scale_add0_part1_r[16:0];
+    assign scale_add0_w = {scale_add0_low1_w, scale_add0_low0_w_d15_r};
+    assign scale_rounded0_amt0_w = right_amount_r[0 +: 2];
+    always @(*) begin
+        scale_rounded0_0_w = scale_add0_w;
+        case (scale_rounded0_amt0_w_d15_r)
+            2'd0: scale_rounded0_0_w = scale_add0_w >> 0;
+            2'd1: scale_rounded0_0_w = scale_add0_w >> 1;
+            2'd2: scale_rounded0_0_w = scale_add0_w >> 2;
+            2'd3: scale_rounded0_0_w = scale_add0_w >> 3;
+            default: scale_rounded0_0_w = scale_add0_w;
+        endcase
+    end
+    assign scale_rounded0_amt1_w = right_amount_r[2 +: 2];
+    always @(*) begin
+        scale_rounded0_1_w = scale_rounded0_0_r;
+        case (scale_rounded0_amt1_w_d16_r)
+            2'd0: scale_rounded0_1_w = scale_rounded0_0_r >> 0;
+            2'd1: scale_rounded0_1_w = scale_rounded0_0_r >> 4;
+            2'd2: scale_rounded0_1_w = scale_rounded0_0_r >> 8;
+            2'd3: scale_rounded0_1_w = scale_rounded0_0_r >> 12;
+            default: scale_rounded0_1_w = scale_rounded0_0_r;
+        endcase
+    end
+    assign scale_rounded0_amt2_w = right_amount_r[4 +: 2];
+    always @(*) begin
+        scale_rounded0_2_w = scale_rounded0_1_r;
+        case (scale_rounded0_amt2_w_d17_r)
+            2'd0: scale_rounded0_2_w = scale_rounded0_1_r >> 0;
+            2'd1: scale_rounded0_2_w = scale_rounded0_1_r >> 16;
+            2'd2: scale_rounded0_2_w = scale_rounded0_1_r >> 32;
+            2'd3: scale_rounded0_2_w = scale_rounded0_1_r >> 48;
+            default: scale_rounded0_2_w = scale_rounded0_1_r;
+        endcase
+    end
+    assign v52_1_w = {1'b0, vertex1_w};
+    assign scale_left1_amt0_w = left_amount_r[0 +: 2];
+    always @(*) begin
+        scale_left1_0_w = v52_1_w_d9_r;
+        case (scale_left1_amt0_w)
+            2'd0: scale_left1_0_w = v52_1_w_d9_r << 0;
+            2'd1: scale_left1_0_w = v52_1_w_d9_r << 1;
+            2'd2: scale_left1_0_w = v52_1_w_d9_r << 2;
+            2'd3: scale_left1_0_w = v52_1_w_d9_r << 3;
+            default: scale_left1_0_w = v52_1_w_d9_r;
+        endcase
+    end
+    assign scale_left1_amt1_w = left_amount_r[2 +: 2];
+    always @(*) begin
+        scale_left1_1_w = scale_left1_0_r;
+        case (scale_left1_amt1_w_d10_r)
+            2'd0: scale_left1_1_w = scale_left1_0_r << 0;
+            2'd1: scale_left1_1_w = scale_left1_0_r << 4;
+            2'd2: scale_left1_1_w = scale_left1_0_r << 8;
+            2'd3: scale_left1_1_w = scale_left1_0_r << 12;
+            default: scale_left1_1_w = scale_left1_0_r;
+        endcase
+    end
+    assign scale_left1_amt2_w = left_amount_r[4 +: 2];
+    always @(*) begin
+        scale_left1_2_w = scale_left1_1_r;
+        case (scale_left1_amt2_w_d11_r)
+            2'd0: scale_left1_2_w = scale_left1_1_r << 0;
+            2'd1: scale_left1_2_w = scale_left1_1_r << 16;
+            2'd2: scale_left1_2_w = scale_left1_1_r << 32;
+            2'd3: scale_left1_2_w = scale_left1_1_r << 48;
+            default: scale_left1_2_w = scale_left1_1_r;
+        endcase
+    end
+    assign scale_one1_w = 52'd1;
+    assign scale_bias1_amt0_w = scale_bit1_r[0 +: 2];
+    always @(*) begin
+        scale_bias1_0_w = scale_one1_w;
+        case (scale_bias1_amt0_w)
+            2'd0: scale_bias1_0_w = scale_one1_w << 0;
+            2'd1: scale_bias1_0_w = scale_one1_w << 1;
+            2'd2: scale_bias1_0_w = scale_one1_w << 2;
+            2'd3: scale_bias1_0_w = scale_one1_w << 3;
+            default: scale_bias1_0_w = scale_one1_w;
+        endcase
+    end
+    assign scale_bias1_amt1_w = scale_bit1_r[2 +: 2];
+    always @(*) begin
+        scale_bias1_1_w = scale_bias1_0_r;
+        case (scale_bias1_amt1_w_d11_r)
+            2'd0: scale_bias1_1_w = scale_bias1_0_r << 0;
+            2'd1: scale_bias1_1_w = scale_bias1_0_r << 4;
+            2'd2: scale_bias1_1_w = scale_bias1_0_r << 8;
+            2'd3: scale_bias1_1_w = scale_bias1_0_r << 12;
+            default: scale_bias1_1_w = scale_bias1_0_r;
+        endcase
+    end
+    assign scale_bias1_amt2_w = scale_bit1_r[4 +: 2];
+    always @(*) begin
+        scale_bias1_2_w = scale_bias1_1_r;
+        case (scale_bias1_amt2_w_d12_r)
+            2'd0: scale_bias1_2_w = scale_bias1_1_r << 0;
+            2'd1: scale_bias1_2_w = scale_bias1_1_r << 16;
+            2'd2: scale_bias1_2_w = scale_bias1_1_r << 32;
+            2'd3: scale_bias1_2_w = scale_bias1_1_r << 48;
+            default: scale_bias1_2_w = scale_bias1_1_r;
+        endcase
+    end
+    assign scale_add1_a0_w = v52_1_w_d13_r[0 +: 35];
+    assign scale_add1_b0_w = scale_bias1_2_r[0 +: 35];
+    assign scale_add1_low0_w = scale_add1_part0_r[34:0];
+    assign scale_add1_a1_w = v52_1_w_d13_r[35 +: 17];
+    assign scale_add1_b1_w = scale_bias1_2_r[35 +: 17];
+    assign scale_add1_low1_w = unused_scale_add1_part1_r[16:0];
+    assign scale_add1_w = {scale_add1_low1_w, scale_add1_low0_w_d15_r};
+    assign scale_rounded1_amt0_w = right_amount_r[0 +: 2];
+    always @(*) begin
+        scale_rounded1_0_w = scale_add1_w;
+        case (scale_rounded1_amt0_w_d15_r)
+            2'd0: scale_rounded1_0_w = scale_add1_w >> 0;
+            2'd1: scale_rounded1_0_w = scale_add1_w >> 1;
+            2'd2: scale_rounded1_0_w = scale_add1_w >> 2;
+            2'd3: scale_rounded1_0_w = scale_add1_w >> 3;
+            default: scale_rounded1_0_w = scale_add1_w;
+        endcase
+    end
+    assign scale_rounded1_amt1_w = right_amount_r[2 +: 2];
+    always @(*) begin
+        scale_rounded1_1_w = scale_rounded1_0_r;
+        case (scale_rounded1_amt1_w_d16_r)
+            2'd0: scale_rounded1_1_w = scale_rounded1_0_r >> 0;
+            2'd1: scale_rounded1_1_w = scale_rounded1_0_r >> 4;
+            2'd2: scale_rounded1_1_w = scale_rounded1_0_r >> 8;
+            2'd3: scale_rounded1_1_w = scale_rounded1_0_r >> 12;
+            default: scale_rounded1_1_w = scale_rounded1_0_r;
+        endcase
+    end
+    assign scale_rounded1_amt2_w = right_amount_r[4 +: 2];
+    always @(*) begin
+        scale_rounded1_2_w = scale_rounded1_1_r;
+        case (scale_rounded1_amt2_w_d17_r)
+            2'd0: scale_rounded1_2_w = scale_rounded1_1_r >> 0;
+            2'd1: scale_rounded1_2_w = scale_rounded1_1_r >> 16;
+            2'd2: scale_rounded1_2_w = scale_rounded1_1_r >> 32;
+            2'd3: scale_rounded1_2_w = scale_rounded1_1_r >> 48;
+            default: scale_rounded1_2_w = scale_rounded1_1_r;
+        endcase
+    end
+    assign v52_2_w = {1'b0, vertex2_w};
+    assign scale_left2_amt0_w = left_amount_r[0 +: 2];
+    always @(*) begin
+        scale_left2_0_w = v52_2_w_d9_r;
+        case (scale_left2_amt0_w)
+            2'd0: scale_left2_0_w = v52_2_w_d9_r << 0;
+            2'd1: scale_left2_0_w = v52_2_w_d9_r << 1;
+            2'd2: scale_left2_0_w = v52_2_w_d9_r << 2;
+            2'd3: scale_left2_0_w = v52_2_w_d9_r << 3;
+            default: scale_left2_0_w = v52_2_w_d9_r;
+        endcase
+    end
+    assign scale_left2_amt1_w = left_amount_r[2 +: 2];
+    always @(*) begin
+        scale_left2_1_w = scale_left2_0_r;
+        case (scale_left2_amt1_w_d10_r)
+            2'd0: scale_left2_1_w = scale_left2_0_r << 0;
+            2'd1: scale_left2_1_w = scale_left2_0_r << 4;
+            2'd2: scale_left2_1_w = scale_left2_0_r << 8;
+            2'd3: scale_left2_1_w = scale_left2_0_r << 12;
+            default: scale_left2_1_w = scale_left2_0_r;
+        endcase
+    end
+    assign scale_left2_amt2_w = left_amount_r[4 +: 2];
+    always @(*) begin
+        scale_left2_2_w = scale_left2_1_r;
+        case (scale_left2_amt2_w_d11_r)
+            2'd0: scale_left2_2_w = scale_left2_1_r << 0;
+            2'd1: scale_left2_2_w = scale_left2_1_r << 16;
+            2'd2: scale_left2_2_w = scale_left2_1_r << 32;
+            2'd3: scale_left2_2_w = scale_left2_1_r << 48;
+            default: scale_left2_2_w = scale_left2_1_r;
+        endcase
+    end
+    assign scale_one2_w = 52'd1;
+    assign scale_bias2_amt0_w = scale_bit2_r[0 +: 2];
+    always @(*) begin
+        scale_bias2_0_w = scale_one2_w;
+        case (scale_bias2_amt0_w)
+            2'd0: scale_bias2_0_w = scale_one2_w << 0;
+            2'd1: scale_bias2_0_w = scale_one2_w << 1;
+            2'd2: scale_bias2_0_w = scale_one2_w << 2;
+            2'd3: scale_bias2_0_w = scale_one2_w << 3;
+            default: scale_bias2_0_w = scale_one2_w;
+        endcase
+    end
+    assign scale_bias2_amt1_w = scale_bit2_r[2 +: 2];
+    always @(*) begin
+        scale_bias2_1_w = scale_bias2_0_r;
+        case (scale_bias2_amt1_w_d11_r)
+            2'd0: scale_bias2_1_w = scale_bias2_0_r << 0;
+            2'd1: scale_bias2_1_w = scale_bias2_0_r << 4;
+            2'd2: scale_bias2_1_w = scale_bias2_0_r << 8;
+            2'd3: scale_bias2_1_w = scale_bias2_0_r << 12;
+            default: scale_bias2_1_w = scale_bias2_0_r;
+        endcase
+    end
+    assign scale_bias2_amt2_w = scale_bit2_r[4 +: 2];
+    always @(*) begin
+        scale_bias2_2_w = scale_bias2_1_r;
+        case (scale_bias2_amt2_w_d12_r)
+            2'd0: scale_bias2_2_w = scale_bias2_1_r << 0;
+            2'd1: scale_bias2_2_w = scale_bias2_1_r << 16;
+            2'd2: scale_bias2_2_w = scale_bias2_1_r << 32;
+            2'd3: scale_bias2_2_w = scale_bias2_1_r << 48;
+            default: scale_bias2_2_w = scale_bias2_1_r;
+        endcase
+    end
+    assign scale_add2_a0_w = v52_2_w_d13_r[0 +: 35];
+    assign scale_add2_b0_w = scale_bias2_2_r[0 +: 35];
+    assign scale_add2_low0_w = scale_add2_part0_r[34:0];
+    assign scale_add2_a1_w = v52_2_w_d13_r[35 +: 17];
+    assign scale_add2_b1_w = scale_bias2_2_r[35 +: 17];
+    assign scale_add2_low1_w = unused_scale_add2_part1_r[16:0];
+    assign scale_add2_w = {scale_add2_low1_w, scale_add2_low0_w_d15_r};
+    assign scale_rounded2_amt0_w = right_amount_r[0 +: 2];
+    always @(*) begin
+        scale_rounded2_0_w = scale_add2_w;
+        case (scale_rounded2_amt0_w_d15_r)
+            2'd0: scale_rounded2_0_w = scale_add2_w >> 0;
+            2'd1: scale_rounded2_0_w = scale_add2_w >> 1;
+            2'd2: scale_rounded2_0_w = scale_add2_w >> 2;
+            2'd3: scale_rounded2_0_w = scale_add2_w >> 3;
+            default: scale_rounded2_0_w = scale_add2_w;
+        endcase
+    end
+    assign scale_rounded2_amt1_w = right_amount_r[2 +: 2];
+    always @(*) begin
+        scale_rounded2_1_w = scale_rounded2_0_r;
+        case (scale_rounded2_amt1_w_d16_r)
+            2'd0: scale_rounded2_1_w = scale_rounded2_0_r >> 0;
+            2'd1: scale_rounded2_1_w = scale_rounded2_0_r >> 4;
+            2'd2: scale_rounded2_1_w = scale_rounded2_0_r >> 8;
+            2'd3: scale_rounded2_1_w = scale_rounded2_0_r >> 12;
+            default: scale_rounded2_1_w = scale_rounded2_0_r;
+        endcase
+    end
+    assign scale_rounded2_amt2_w = right_amount_r[4 +: 2];
+    always @(*) begin
+        scale_rounded2_2_w = scale_rounded2_1_r;
+        case (scale_rounded2_amt2_w_d17_r)
+            2'd0: scale_rounded2_2_w = scale_rounded2_1_r >> 0;
+            2'd1: scale_rounded2_2_w = scale_rounded2_1_r >> 16;
+            2'd2: scale_rounded2_2_w = scale_rounded2_1_r >> 32;
+            2'd3: scale_rounded2_2_w = scale_rounded2_1_r >> 48;
+            default: scale_rounded2_2_w = scale_rounded2_1_r;
+        endcase
+    end
+    assign unused_delta0_0_w = delta_0_r[0 +: 18];
+    assign unused_delta0_1_w = delta_0_r[18 +: 18];
+    assign unused_delta1_0_w = delta_0_r[36 +: 18];
+    assign unused_delta1_1_w = delta_0_r[54 +: 18];
+    assign mult_delta0_0_w = delta_0_r[0 +: 18];
+    assign mult_delta0_1_w = delta_0_r[18 +: 18];
+    assign product_ext0_0_w = {{4{product0_0_p2_r[51]}}, product0_0_p2_r};
+    assign product_ext0_1_w = {{4{product0_1_p2_r[51]}}, product0_1_p2_r};
+    assign numerator0_a0_w = product_ext0_0_w[0 +: 35];
+    assign numerator0_b0_w = product_ext0_1_w[0 +: 35];
+    assign numerator0_low0_w = numerator0_part0_r[34:0];
+    assign numerator0_a1_w = product_ext0_0_w[35 +: 21];
+    assign numerator0_b1_w = product_ext0_1_w[35 +: 21];
+    assign numerator0_low1_w = unused_numerator0_part1_r[20:0];
+    assign numerator0_w = {numerator0_low1_w, numerator0_low0_w_d25_r};
+    assign inverse_abs0_carry_w = {86'b0, inverse_abs0_sign_r};
+    assign inverse_abs0_a0_w = inverse_abs0_invert_r[0 +: 35];
+    assign inverse_abs0_b0_w = inverse_abs0_carry_w[0 +: 35];
+    assign inverse_abs0_low0_w = inverse_abs0_part0_r[34:0];
+    assign inverse_abs0_a1_w = inverse_abs0_invert_r[35 +: 35];
+    assign inverse_abs0_b1_w = inverse_abs0_carry_w[35 +: 35];
+    assign inverse_abs0_low1_w = inverse_abs0_part1_r[34:0];
+    assign inverse_abs0_a2_w = inverse_abs0_invert_r[70 +: 17];
+    assign inverse_abs0_b2_w = inverse_abs0_carry_w[70 +: 17];
+    assign inverse_abs0_low2_w = unused_inverse_abs0_part2_r[16:0];
+    assign inverse_abs0_w = {inverse_abs0_low2_w, inverse_abs0_low1_w_d33_r,
+        inverse_abs0_low0_w_d33_r};
+    assign gradient_one0_w = 88'd1;
+    assign gradient_bias0_amt0_w = rounding_bit0_r[0 +: 2];
+    always @(*) begin
+        gradient_bias0_0_w = gradient_one0_w;
+        case (gradient_bias0_amt0_w)
+            2'd0: gradient_bias0_0_w = gradient_one0_w << 0;
+            2'd1: gradient_bias0_0_w = gradient_one0_w << 1;
+            2'd2: gradient_bias0_0_w = gradient_one0_w << 2;
+            2'd3: gradient_bias0_0_w = gradient_one0_w << 3;
+            default: gradient_bias0_0_w = gradient_one0_w;
+        endcase
+    end
+    assign gradient_bias0_amt1_w = rounding_bit0_r[2 +: 2];
+    always @(*) begin
+        gradient_bias0_1_w = gradient_bias0_0_r;
+        case (gradient_bias0_amt1_w_d2_r)
+            2'd0: gradient_bias0_1_w = gradient_bias0_0_r << 0;
+            2'd1: gradient_bias0_1_w = gradient_bias0_0_r << 4;
+            2'd2: gradient_bias0_1_w = gradient_bias0_0_r << 8;
+            2'd3: gradient_bias0_1_w = gradient_bias0_0_r << 12;
+            default: gradient_bias0_1_w = gradient_bias0_0_r;
+        endcase
+    end
+    assign gradient_bias0_amt2_w = rounding_bit0_r[4 +: 2];
+    always @(*) begin
+        gradient_bias0_2_w = gradient_bias0_1_r;
+        case (gradient_bias0_amt2_w_d3_r)
+            2'd0: gradient_bias0_2_w = gradient_bias0_1_r << 0;
+            2'd1: gradient_bias0_2_w = gradient_bias0_1_r << 16;
+            2'd2: gradient_bias0_2_w = gradient_bias0_1_r << 32;
+            2'd3: gradient_bias0_2_w = gradient_bias0_1_r << 48;
+            default: gradient_bias0_2_w = gradient_bias0_1_r;
+        endcase
+    end
+    assign gradient_bias0_amt3_w = rounding_bit0_r[6 +: 1];
+    always @(*) begin
+        gradient_bias0_3_w = gradient_bias0_2_r;
+        case (gradient_bias0_amt3_w_d4_r)
+            1'd0: gradient_bias0_3_w = gradient_bias0_2_r << 0;
+            1'd1: gradient_bias0_3_w = gradient_bias0_2_r << 64;
+            default: gradient_bias0_3_w = gradient_bias0_2_r;
+        endcase
+    end
+    assign mag88_0_w = {1'b0, inverse_abs0_w};
+    assign gradient_round0_a0_w = mag88_0_w[0 +: 35];
+    assign gradient_round0_b0_w = gradient_bias0_3_r_d33_r[0 +: 35];
+    assign gradient_round0_low0_w = gradient_round0_part0_r[34:0];
+    assign gradient_round0_a1_w = mag88_0_w[35 +: 35];
+    assign gradient_round0_b1_w = gradient_bias0_3_r_d33_r[35 +: 35];
+    assign gradient_round0_low1_w = gradient_round0_part1_r[34:0];
+    assign gradient_round0_a2_w = mag88_0_w[70 +: 18];
+    assign gradient_round0_b2_w = gradient_bias0_3_r_d33_r[70 +: 18];
+    assign gradient_round0_low2_w = unused_gradient_round0_part2_r[17:0];
+    assign gradient_round0_w = {gradient_round0_low2_w, gradient_round0_low1_w_d36_r,
+            gradient_round0_low0_w_d36_r};
+    assign gradient_shift0_amt0_w = rounding_shift0_r[0 +: 2];
+    always @(*) begin
+        gradient_shift0_0_w = gradient_round0_w;
+        case (gradient_shift0_amt0_w_d36_r)
+            2'd0: gradient_shift0_0_w = gradient_round0_w >> 0;
+            2'd1: gradient_shift0_0_w = gradient_round0_w >> 1;
+            2'd2: gradient_shift0_0_w = gradient_round0_w >> 2;
+            2'd3: gradient_shift0_0_w = gradient_round0_w >> 3;
+            default: gradient_shift0_0_w = gradient_round0_w;
+        endcase
+    end
+    assign gradient_shift0_amt1_w = rounding_shift0_r[2 +: 2];
+    always @(*) begin
+        gradient_shift0_1_w = gradient_shift0_0_r;
+        case (gradient_shift0_amt1_w_d37_r)
+            2'd0: gradient_shift0_1_w = gradient_shift0_0_r >> 0;
+            2'd1: gradient_shift0_1_w = gradient_shift0_0_r >> 4;
+            2'd2: gradient_shift0_1_w = gradient_shift0_0_r >> 8;
+            2'd3: gradient_shift0_1_w = gradient_shift0_0_r >> 12;
+            default: gradient_shift0_1_w = gradient_shift0_0_r;
+        endcase
+    end
+    assign gradient_shift0_amt2_w = rounding_shift0_r[4 +: 2];
+    always @(*) begin
+        gradient_shift0_2_w = gradient_shift0_1_r;
+        case (gradient_shift0_amt2_w_d38_r)
+            2'd0: gradient_shift0_2_w = gradient_shift0_1_r >> 0;
+            2'd1: gradient_shift0_2_w = gradient_shift0_1_r >> 16;
+            2'd2: gradient_shift0_2_w = gradient_shift0_1_r >> 32;
+            2'd3: gradient_shift0_2_w = gradient_shift0_1_r >> 48;
+            default: gradient_shift0_2_w = gradient_shift0_1_r;
+        endcase
+    end
+    assign gradient_shift0_amt3_w = rounding_shift0_r[6 +: 1];
+    always @(*) begin
+        gradient_shift0_3_w = gradient_shift0_2_r;
+        case (gradient_shift0_amt3_w_d39_r)
+            1'd0: gradient_shift0_3_w = gradient_shift0_2_r >> 0;
+            1'd1: gradient_shift0_3_w = gradient_shift0_2_r >> 64;
+            default: gradient_shift0_3_w = gradient_shift0_2_r;
+        endcase
+    end
+    assign gradient56_0_w = unused_gradient_shift0_3_r[55:0];
+    assign gradient_signed0_carry_w = {55'b0, inverse_abs0_sign_d41_r};
+    assign gradient_signed0_a0_w = gradient_signed0_invert_r[0 +: 35];
+    assign gradient_signed0_b0_w = gradient_signed0_carry_w[0 +: 35];
+    assign gradient_signed0_low0_w = gradient_signed0_part0_r[34:0];
+    assign gradient_signed0_a1_w = gradient_signed0_invert_r[35 +: 21];
+    assign gradient_signed0_b1_w = gradient_signed0_carry_w[35 +: 21];
+    assign gradient_signed0_low1_w = unused_gradient_signed0_part1_r[20:0];
+    assign gradient_signed0_w = {gradient_signed0_low1_w, gradient_signed0_low0_w_d43_r};
+    assign origin_offset0_w = offset_0_r[0 +: 18];
+    assign gradient_abs0_carry_w = {55'b0, gradient_abs0_sign_r};
+    assign gradient_abs0_a0_w = gradient_abs0_invert_r[0 +: 35];
+    assign gradient_abs0_b0_w = gradient_abs0_carry_w[0 +: 35];
+    assign gradient_abs0_low0_w = gradient_abs0_part0_r[34:0];
+    assign gradient_abs0_a1_w = gradient_abs0_invert_r[35 +: 21];
+    assign gradient_abs0_b1_w = gradient_abs0_carry_w[35 +: 21];
+    assign gradient_abs0_low1_w = unused_gradient_abs0_part1_r[20:0];
+    assign gradient_abs0_w = {gradient_abs0_low1_w, gradient_abs0_low0_w_d46_r};
+    assign gradient_drop0_amt0_w = drop_gradient0_r[0 +: 2];
+    always @(*) begin
+        gradient_drop0_0_w = gradient_abs0_w;
+        case (gradient_drop0_amt0_w_d46_r)
+            2'd0: gradient_drop0_0_w = gradient_abs0_w >> 0;
+            2'd1: gradient_drop0_0_w = gradient_abs0_w >> 1;
+            2'd2: gradient_drop0_0_w = gradient_abs0_w >> 2;
+            2'd3: gradient_drop0_0_w = gradient_abs0_w >> 3;
+            default: gradient_drop0_0_w = gradient_abs0_w;
+        endcase
+    end
+    assign gradient_drop0_amt1_w = drop_gradient0_r[2 +: 2];
+    always @(*) begin
+        gradient_drop0_1_w = gradient_drop0_0_r;
+        case (gradient_drop0_amt1_w_d47_r)
+            2'd0: gradient_drop0_1_w = gradient_drop0_0_r >> 0;
+            2'd1: gradient_drop0_1_w = gradient_drop0_0_r >> 4;
+            2'd2: gradient_drop0_1_w = gradient_drop0_0_r >> 8;
+            2'd3: gradient_drop0_1_w = gradient_drop0_0_r >> 12;
+            default: gradient_drop0_1_w = gradient_drop0_0_r;
+        endcase
+    end
+    assign stored52_0_w = unused_gradient_drop0_1_r[52:1];
+    assign stored_bit0_w = {51'b0, unused_gradient_drop0_1_r[0]};
+    assign stored_round0_a0_w = stored52_0_w[0 +: 35];
+    assign stored_round0_b0_w = stored_bit0_w[0 +: 35];
+    assign stored_round0_low0_w = stored_round0_part0_r[34:0];
+    assign stored_round0_a1_w = stored52_0_w[35 +: 17];
+    assign stored_round0_b1_w = stored_bit0_w[35 +: 17];
+    assign stored_round0_low1_w = unused_stored_round0_part1_r[16:0];
+    assign stored_round0_w = {stored_round0_low1_w, stored_round0_low0_w_d50_r};
+    assign stored_signed0_carry_w = {51'b0, gradient_abs0_sign_d51_r};
+    assign stored_signed0_a0_w = stored_signed0_invert_r[0 +: 35];
+    assign stored_signed0_b0_w = stored_signed0_carry_w[0 +: 35];
+    assign stored_signed0_low0_w = stored_signed0_part0_r[34:0];
+    assign stored_signed0_a1_w = stored_signed0_invert_r[35 +: 17];
+    assign stored_signed0_b1_w = stored_signed0_carry_w[35 +: 17];
+    assign stored_signed0_low1_w = unused_stored_signed0_part1_r[16:0];
+    assign stored_signed0_w = {stored_signed0_low1_w, stored_signed0_low0_w_d53_r};
+    assign mult_delta1_0_w = delta_0_r[36 +: 18];
+    assign mult_delta1_1_w = delta_0_r[54 +: 18];
+    assign product_ext1_0_w = {{4{product1_0_p2_r[51]}}, product1_0_p2_r};
+    assign product_ext1_1_w = {{4{product1_1_p2_r[51]}}, product1_1_p2_r};
+    assign numerator1_a0_w = product_ext1_0_w[0 +: 35];
+    assign numerator1_b0_w = product_ext1_1_w[0 +: 35];
+    assign numerator1_low0_w = numerator1_part0_r[34:0];
+    assign numerator1_a1_w = product_ext1_0_w[35 +: 21];
+    assign numerator1_b1_w = product_ext1_1_w[35 +: 21];
+    assign numerator1_low1_w = unused_numerator1_part1_r[20:0];
+    assign numerator1_w = {numerator1_low1_w, numerator1_low0_w_d25_r};
+    assign inverse_abs1_carry_w = {86'b0, inverse_abs1_sign_r};
+    assign inverse_abs1_a0_w = inverse_abs1_invert_r[0 +: 35];
+    assign inverse_abs1_b0_w = inverse_abs1_carry_w[0 +: 35];
+    assign inverse_abs1_low0_w = inverse_abs1_part0_r[34:0];
+    assign inverse_abs1_a1_w = inverse_abs1_invert_r[35 +: 35];
+    assign inverse_abs1_b1_w = inverse_abs1_carry_w[35 +: 35];
+    assign inverse_abs1_low1_w = inverse_abs1_part1_r[34:0];
+    assign inverse_abs1_a2_w = inverse_abs1_invert_r[70 +: 17];
+    assign inverse_abs1_b2_w = inverse_abs1_carry_w[70 +: 17];
+    assign inverse_abs1_low2_w = unused_inverse_abs1_part2_r[16:0];
+    assign inverse_abs1_w = {inverse_abs1_low2_w, inverse_abs1_low1_w_d33_r,
+        inverse_abs1_low0_w_d33_r};
+    assign gradient_one1_w = 88'd1;
+    assign gradient_bias1_amt0_w = rounding_bit1_r[0 +: 2];
+    always @(*) begin
+        gradient_bias1_0_w = gradient_one1_w;
+        case (gradient_bias1_amt0_w)
+            2'd0: gradient_bias1_0_w = gradient_one1_w << 0;
+            2'd1: gradient_bias1_0_w = gradient_one1_w << 1;
+            2'd2: gradient_bias1_0_w = gradient_one1_w << 2;
+            2'd3: gradient_bias1_0_w = gradient_one1_w << 3;
+            default: gradient_bias1_0_w = gradient_one1_w;
+        endcase
+    end
+    assign gradient_bias1_amt1_w = rounding_bit1_r[2 +: 2];
+    always @(*) begin
+        gradient_bias1_1_w = gradient_bias1_0_r;
+        case (gradient_bias1_amt1_w_d2_r)
+            2'd0: gradient_bias1_1_w = gradient_bias1_0_r << 0;
+            2'd1: gradient_bias1_1_w = gradient_bias1_0_r << 4;
+            2'd2: gradient_bias1_1_w = gradient_bias1_0_r << 8;
+            2'd3: gradient_bias1_1_w = gradient_bias1_0_r << 12;
+            default: gradient_bias1_1_w = gradient_bias1_0_r;
+        endcase
+    end
+    assign gradient_bias1_amt2_w = rounding_bit1_r[4 +: 2];
+    always @(*) begin
+        gradient_bias1_2_w = gradient_bias1_1_r;
+        case (gradient_bias1_amt2_w_d3_r)
+            2'd0: gradient_bias1_2_w = gradient_bias1_1_r << 0;
+            2'd1: gradient_bias1_2_w = gradient_bias1_1_r << 16;
+            2'd2: gradient_bias1_2_w = gradient_bias1_1_r << 32;
+            2'd3: gradient_bias1_2_w = gradient_bias1_1_r << 48;
+            default: gradient_bias1_2_w = gradient_bias1_1_r;
+        endcase
+    end
+    assign gradient_bias1_amt3_w = rounding_bit1_r[6 +: 1];
+    always @(*) begin
+        gradient_bias1_3_w = gradient_bias1_2_r;
+        case (gradient_bias1_amt3_w_d4_r)
+            1'd0: gradient_bias1_3_w = gradient_bias1_2_r << 0;
+            1'd1: gradient_bias1_3_w = gradient_bias1_2_r << 64;
+            default: gradient_bias1_3_w = gradient_bias1_2_r;
+        endcase
+    end
+    assign mag88_1_w = {1'b0, inverse_abs1_w};
+    assign gradient_round1_a0_w = mag88_1_w[0 +: 35];
+    assign gradient_round1_b0_w = gradient_bias1_3_r_d33_r[0 +: 35];
+    assign gradient_round1_low0_w = gradient_round1_part0_r[34:0];
+    assign gradient_round1_a1_w = mag88_1_w[35 +: 35];
+    assign gradient_round1_b1_w = gradient_bias1_3_r_d33_r[35 +: 35];
+    assign gradient_round1_low1_w = gradient_round1_part1_r[34:0];
+    assign gradient_round1_a2_w = mag88_1_w[70 +: 18];
+    assign gradient_round1_b2_w = gradient_bias1_3_r_d33_r[70 +: 18];
+    assign gradient_round1_low2_w = unused_gradient_round1_part2_r[17:0];
+    assign gradient_round1_w = {gradient_round1_low2_w, gradient_round1_low1_w_d36_r,
+            gradient_round1_low0_w_d36_r};
+    assign gradient_shift1_amt0_w = rounding_shift1_r[0 +: 2];
+    always @(*) begin
+        gradient_shift1_0_w = gradient_round1_w;
+        case (gradient_shift1_amt0_w_d36_r)
+            2'd0: gradient_shift1_0_w = gradient_round1_w >> 0;
+            2'd1: gradient_shift1_0_w = gradient_round1_w >> 1;
+            2'd2: gradient_shift1_0_w = gradient_round1_w >> 2;
+            2'd3: gradient_shift1_0_w = gradient_round1_w >> 3;
+            default: gradient_shift1_0_w = gradient_round1_w;
+        endcase
+    end
+    assign gradient_shift1_amt1_w = rounding_shift1_r[2 +: 2];
+    always @(*) begin
+        gradient_shift1_1_w = gradient_shift1_0_r;
+        case (gradient_shift1_amt1_w_d37_r)
+            2'd0: gradient_shift1_1_w = gradient_shift1_0_r >> 0;
+            2'd1: gradient_shift1_1_w = gradient_shift1_0_r >> 4;
+            2'd2: gradient_shift1_1_w = gradient_shift1_0_r >> 8;
+            2'd3: gradient_shift1_1_w = gradient_shift1_0_r >> 12;
+            default: gradient_shift1_1_w = gradient_shift1_0_r;
+        endcase
+    end
+    assign gradient_shift1_amt2_w = rounding_shift1_r[4 +: 2];
+    always @(*) begin
+        gradient_shift1_2_w = gradient_shift1_1_r;
+        case (gradient_shift1_amt2_w_d38_r)
+            2'd0: gradient_shift1_2_w = gradient_shift1_1_r >> 0;
+            2'd1: gradient_shift1_2_w = gradient_shift1_1_r >> 16;
+            2'd2: gradient_shift1_2_w = gradient_shift1_1_r >> 32;
+            2'd3: gradient_shift1_2_w = gradient_shift1_1_r >> 48;
+            default: gradient_shift1_2_w = gradient_shift1_1_r;
+        endcase
+    end
+    assign gradient_shift1_amt3_w = rounding_shift1_r[6 +: 1];
+    always @(*) begin
+        gradient_shift1_3_w = gradient_shift1_2_r;
+        case (gradient_shift1_amt3_w_d39_r)
+            1'd0: gradient_shift1_3_w = gradient_shift1_2_r >> 0;
+            1'd1: gradient_shift1_3_w = gradient_shift1_2_r >> 64;
+            default: gradient_shift1_3_w = gradient_shift1_2_r;
+        endcase
+    end
+    assign gradient56_1_w = unused_gradient_shift1_3_r[55:0];
+    assign gradient_signed1_carry_w = {55'b0, inverse_abs1_sign_d41_r};
+    assign gradient_signed1_a0_w = gradient_signed1_invert_r[0 +: 35];
+    assign gradient_signed1_b0_w = gradient_signed1_carry_w[0 +: 35];
+    assign gradient_signed1_low0_w = gradient_signed1_part0_r[34:0];
+    assign gradient_signed1_a1_w = gradient_signed1_invert_r[35 +: 21];
+    assign gradient_signed1_b1_w = gradient_signed1_carry_w[35 +: 21];
+    assign gradient_signed1_low1_w = unused_gradient_signed1_part1_r[20:0];
+    assign gradient_signed1_w = {gradient_signed1_low1_w, gradient_signed1_low0_w_d43_r};
+    assign origin_offset1_w = offset_0_r[18 +: 18];
+    assign gradient_abs1_carry_w = {55'b0, gradient_abs1_sign_r};
+    assign gradient_abs1_a0_w = gradient_abs1_invert_r[0 +: 35];
+    assign gradient_abs1_b0_w = gradient_abs1_carry_w[0 +: 35];
+    assign gradient_abs1_low0_w = gradient_abs1_part0_r[34:0];
+    assign gradient_abs1_a1_w = gradient_abs1_invert_r[35 +: 21];
+    assign gradient_abs1_b1_w = gradient_abs1_carry_w[35 +: 21];
+    assign gradient_abs1_low1_w = unused_gradient_abs1_part1_r[20:0];
+    assign gradient_abs1_w = {gradient_abs1_low1_w, gradient_abs1_low0_w_d46_r};
+    assign gradient_drop1_amt0_w = drop_gradient1_r[0 +: 2];
+    always @(*) begin
+        gradient_drop1_0_w = gradient_abs1_w;
+        case (gradient_drop1_amt0_w_d46_r)
+            2'd0: gradient_drop1_0_w = gradient_abs1_w >> 0;
+            2'd1: gradient_drop1_0_w = gradient_abs1_w >> 1;
+            2'd2: gradient_drop1_0_w = gradient_abs1_w >> 2;
+            2'd3: gradient_drop1_0_w = gradient_abs1_w >> 3;
+            default: gradient_drop1_0_w = gradient_abs1_w;
+        endcase
+    end
+    assign gradient_drop1_amt1_w = drop_gradient1_r[2 +: 2];
+    always @(*) begin
+        gradient_drop1_1_w = gradient_drop1_0_r;
+        case (gradient_drop1_amt1_w_d47_r)
+            2'd0: gradient_drop1_1_w = gradient_drop1_0_r >> 0;
+            2'd1: gradient_drop1_1_w = gradient_drop1_0_r >> 4;
+            2'd2: gradient_drop1_1_w = gradient_drop1_0_r >> 8;
+            2'd3: gradient_drop1_1_w = gradient_drop1_0_r >> 12;
+            default: gradient_drop1_1_w = gradient_drop1_0_r;
+        endcase
+    end
+    assign stored52_1_w = unused_gradient_drop1_1_r[52:1];
+    assign stored_bit1_w = {51'b0, unused_gradient_drop1_1_r[0]};
+    assign stored_round1_a0_w = stored52_1_w[0 +: 35];
+    assign stored_round1_b0_w = stored_bit1_w[0 +: 35];
+    assign stored_round1_low0_w = stored_round1_part0_r[34:0];
+    assign stored_round1_a1_w = stored52_1_w[35 +: 17];
+    assign stored_round1_b1_w = stored_bit1_w[35 +: 17];
+    assign stored_round1_low1_w = unused_stored_round1_part1_r[16:0];
+    assign stored_round1_w = {stored_round1_low1_w, stored_round1_low0_w_d50_r};
+    assign stored_signed1_carry_w = {51'b0, gradient_abs1_sign_d51_r};
+    assign stored_signed1_a0_w = stored_signed1_invert_r[0 +: 35];
+    assign stored_signed1_b0_w = stored_signed1_carry_w[0 +: 35];
+    assign stored_signed1_low0_w = stored_signed1_part0_r[34:0];
+    assign stored_signed1_a1_w = stored_signed1_invert_r[35 +: 17];
+    assign stored_signed1_b1_w = stored_signed1_carry_w[35 +: 17];
+    assign stored_signed1_low1_w = unused_stored_signed1_part1_r[16:0];
+    assign stored_signed1_w = {stored_signed1_low1_w, stored_signed1_low0_w_d53_r};
+    assign origin_ext0_w = {origin_product0_p2_r[73], origin_product0_p2_r};
+    assign origin_ext1_w = {origin_product1_p2_r[73], origin_product1_p2_r};
+    assign origin_sum_a0_w = origin_ext0_w[0 +: 35];
+    assign origin_sum_b0_w = origin_ext1_w[0 +: 35];
+    assign origin_sum_low0_w = origin_sum_part0_r[34:0];
+    assign origin_sum_a1_w = origin_ext0_w[35 +: 35];
+    assign origin_sum_b1_w = origin_ext1_w[35 +: 35];
+    assign origin_sum_low1_w = origin_sum_part1_r[34:0];
+    assign origin_sum_a2_w = origin_ext0_w[70 +: 5];
+    assign origin_sum_b2_w = origin_ext1_w[70 +: 5];
+    assign origin_sum_low2_w = unused_origin_sum_part2_r[4:0];
+    assign origin_sum_w = {origin_sum_low2_w, origin_sum_low1_w_d49_r, origin_sum_low0_w_d49_r};
+    assign origin_absolute_carry_w = {74'b0, origin_absolute_sign_r};
+    assign origin_absolute_a0_w = origin_absolute_invert_r[0 +: 35];
+    assign origin_absolute_b0_w = origin_absolute_carry_w[0 +: 35];
+    assign origin_absolute_low0_w = origin_absolute_part0_r[34:0];
+    assign origin_absolute_a1_w = origin_absolute_invert_r[35 +: 35];
+    assign origin_absolute_b1_w = origin_absolute_carry_w[35 +: 35];
+    assign origin_absolute_low1_w = origin_absolute_part1_r[34:0];
+    assign origin_absolute_a2_w = origin_absolute_invert_r[70 +: 5];
+    assign origin_absolute_b2_w = origin_absolute_carry_w[70 +: 5];
+    assign origin_absolute_low2_w = unused_origin_absolute_part2_r[4:0];
+    assign origin_absolute_w = {origin_absolute_low2_w, origin_absolute_low1_w_d53_r,
+            origin_absolute_low0_w_d53_r};
+    assign origin_eight_w = 75'd8;
+    assign origin_round_a0_w = origin_absolute_w[0 +: 35];
+    assign origin_round_b0_w = origin_eight_w[0 +: 35];
+    assign origin_round_low0_w = origin_round_part0_r[34:0];
+    assign origin_round_a1_w = origin_absolute_w[35 +: 35];
+    assign origin_round_b1_w = origin_eight_w[35 +: 35];
+    assign origin_round_low1_w = origin_round_part1_r[34:0];
+    assign origin_round_a2_w = origin_absolute_w[70 +: 5];
+    assign origin_round_b2_w = origin_eight_w[70 +: 5];
+    assign origin_round_low2_w = unused_origin_round_part2_r[4:0];
+    assign origin_round_w = {origin_round_low2_w, origin_round_low1_w_d56_r,
+        origin_round_low0_w_d56_r};
+    assign origin_signed_carry_w = {74'b0, origin_absolute_sign_d58_r};
+    assign origin_signed_a0_w = origin_signed_invert_r[0 +: 35];
+    assign origin_signed_b0_w = origin_signed_carry_w[0 +: 35];
+    assign origin_signed_low0_w = origin_signed_part0_r[34:0];
+    assign origin_signed_a1_w = origin_signed_invert_r[35 +: 35];
+    assign origin_signed_b1_w = origin_signed_carry_w[35 +: 35];
+    assign origin_signed_low1_w = origin_signed_part1_r[34:0];
+    assign origin_signed_a2_w = origin_signed_invert_r[70 +: 5];
+    assign origin_signed_b2_w = origin_signed_carry_w[70 +: 5];
+    assign origin_signed_low2_w = unused_origin_signed_part2_r[4:0];
+    assign unused_origin_signed_w = {origin_signed_low2_w, origin_signed_low1_w_d61_r,
+            origin_signed_low0_w_d61_r};
+    assign start_base_w = {37'b0, scaled0_r};
+    assign origin70_w = unused_origin_signed_w[69:0];
+    assign start_sum_a0_w = start_base_w_d61_r[0 +: 35];
+    assign start_sum_b0_w = origin70_w[0 +: 35];
+    assign start_sum_low0_w = start_sum_part0_r[34:0];
+    assign start_sum_a1_w = start_base_w_d61_r[35 +: 35];
+    assign start_sum_b1_w = origin70_w[35 +: 35];
+    assign start_sum_low1_w = unused_start_sum_part1_r[34:0];
+    assign start_sum_w = {start_sum_low1_w, start_sum_low0_w_d63_r};
+    assign start_absolute_carry_w = {69'b0, start_absolute_sign_r};
+    assign start_absolute_a0_w = start_absolute_invert_r[0 +: 35];
+    assign start_absolute_b0_w = start_absolute_carry_w[0 +: 35];
+    assign start_absolute_low0_w = start_absolute_part0_r[34:0];
+    assign start_absolute_a1_w = start_absolute_invert_r[35 +: 35];
+    assign start_absolute_b1_w = start_absolute_carry_w[35 +: 35];
+    assign start_absolute_low1_w = unused_start_absolute_part1_r[34:0];
+    assign start_absolute_w = {start_absolute_low1_w, start_absolute_low0_w_d66_r};
+    assign start_drop_amt0_w = drop_start_r[0 +: 2];
+    always @(*) begin
+        start_drop_0_w = start_absolute_w;
+        case (start_drop_amt0_w_d66_r)
+            2'd0: start_drop_0_w = start_absolute_w >> 0;
+            2'd1: start_drop_0_w = start_absolute_w >> 1;
+            2'd2: start_drop_0_w = start_absolute_w >> 2;
+            2'd3: start_drop_0_w = start_absolute_w >> 3;
+            default: start_drop_0_w = start_absolute_w;
+        endcase
+    end
+    assign start_drop_amt1_w = drop_start_r[2 +: 2];
+    always @(*) begin
+        start_drop_1_w = start_drop_0_r;
+        case (start_drop_amt1_w_d67_r)
+            2'd0: start_drop_1_w = start_drop_0_r >> 0;
+            2'd1: start_drop_1_w = start_drop_0_r >> 4;
+            2'd2: start_drop_1_w = start_drop_0_r >> 8;
+            2'd3: start_drop_1_w = start_drop_0_r >> 12;
+            default: start_drop_1_w = start_drop_0_r;
+        endcase
+    end
+    assign start66_w = unused_start_drop_1_r[66:1];
+    assign start_bit_w = {65'b0, unused_start_drop_1_r[0]};
+    assign start_round_a0_w = start66_w[0 +: 35];
+    assign start_round_b0_w = start_bit_w[0 +: 35];
+    assign start_round_low0_w = start_round_part0_r[34:0];
+    assign start_round_a1_w = start66_w[35 +: 31];
+    assign start_round_b1_w = start_bit_w[35 +: 31];
+    assign start_round_low1_w = unused_start_round_part1_r[30:0];
+    assign start_round_w = {start_round_low1_w, start_round_low0_w_d70_r};
+    assign start_signed_carry_w = {65'b0, start_absolute_sign_d71_r};
+    assign start_signed_a0_w = start_signed_invert_r[0 +: 35];
+    assign start_signed_b0_w = start_signed_carry_w[0 +: 35];
+    assign start_signed_low0_w = start_signed_part0_r[34:0];
+    assign start_signed_a1_w = start_signed_invert_r[35 +: 31];
+    assign start_signed_b1_w = start_signed_carry_w[35 +: 31];
+    assign start_signed_low1_w = unused_start_signed_part1_r[30:0];
+    assign start_signed_w = {start_signed_low1_w, start_signed_low0_w_d73_r};
+    assign plane_start_o = start_signed_w;
+    assign plane_gradient_o = {stored_signed1_w_d73_r, stored_signed0_w_d73_r};
+    assign plane_h_o = h_d73_r;
+    assign plane_tag_o = tag_0_r_d73_r;
+    // Each region owns the output-credit count used by its local clock enable.
+    wire [26:0] pipeline_enable_w;
+    genvar enable_region;
+    generate
+        for (enable_region = 0; enable_region < 27;
+            enable_region = enable_region + 1) begin : g_enable_region
+            (* keep = 1 *) reg [1:0] region_count_r /* synthesis syn_preserve=1 */;
+            assign pipeline_enable_w[enable_region] = region_count_r != 2 && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) region_count_r <= 0;
+                else if (stop_i) region_count_r <= 0;
+                else begin
+                    case ({credit_push_i, credit_pop_i})
+                        2'b10: region_count_r <= region_count_r + 1'b1;
+                        2'b01: region_count_r <= region_count_r - 1'b1;
+                        default: region_count_r <= region_count_r;
+                    endcase
+                end
+            end
+        end
+    endgenerate
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[0]) begin
+            value_0_r <= plane_value_i;
+            tag_0_r <= plane_tag_i;
+            delta_0_r <= plane_delta_i;
+            offset_0_r <= plane_offset_i;
+            reciprocal_0_r <= plane_reciprocal_i;
+            exponent_0_r <= plane_exponent_i;
+            maximum01_compare_r <= {vertex0_w[50:26] > vertex1_w[50:26], vertex0_w[50:26] ==
+                        vertex1_w[50:26], vertex0_w[25:0] > vertex1_w[25:0]};
+            vertex0_w_d1_r <= vertex0_w;
+            vertex1_w_d1_r <= vertex1_w;
+            maximum01_select_r <= (maximum01_compare_r[2] || (maximum01_compare_r[1] &&
+                        maximum01_compare_r[0])) ? vertex0_w_d1_r : vertex1_w_d1_r;
+            vertex2_w_d1_r <= vertex2_w;
+            vertex2_w_d2_r <= vertex2_w_d1_r;
+            maximum012_compare_r <= {maximum01_select_r[50:26] > vertex2_w_d2_r[50:26],
+                        maximum01_select_r[50:26] == vertex2_w_d2_r[50:26],
+                            maximum01_select_r[25:0] >
+                        vertex2_w_d2_r[25:0]};
+            maximum01_select_d3_r <= maximum01_select_r;
+            vertex2_w_d3_r <= vertex2_w_d2_r;
+            maximum012_select_r <= (maximum012_compare_r[2] || (maximum012_compare_r[1] &&
+                        maximum012_compare_r[0])) ? maximum01_select_d3_r : vertex2_w_d3_r;
+            leading_group0_r <= maximum012_select_r[3] ? 6'd3 : maximum012_select_r[2] ? 6'd2 :
+                        maximum012_select_r[1] ? 6'd1 : maximum012_select_r[0] ? 6'd0 : 6'd0;
+            leading_group1_r <= maximum012_select_r[7] ? 6'd7 : maximum012_select_r[6] ? 6'd6 :
+                        maximum012_select_r[5] ? 6'd5 : maximum012_select_r[4] ? 6'd4 : 6'd0;
+            leading_group2_r <= maximum012_select_r[11] ? 6'd11 : maximum012_select_r[10] ? 6'd10 :
+                        maximum012_select_r[9] ? 6'd9 : maximum012_select_r[8] ? 6'd8 : 6'd0;
+            leading_group3_r <= maximum012_select_r[15] ? 6'd15 : maximum012_select_r[14] ? 6'd14 :
+                        maximum012_select_r[13] ? 6'd13 : maximum012_select_r[12] ? 6'd12 : 6'd0;
+            leading_group4_r <= maximum012_select_r[19] ? 6'd19 : maximum012_select_r[18] ? 6'd18 :
+                        maximum012_select_r[17] ? 6'd17 : maximum012_select_r[16] ? 6'd16 : 6'd0;
+            leading_group5_r <= maximum012_select_r[23] ? 6'd23 : maximum012_select_r[22] ? 6'd22 :
+                        maximum012_select_r[21] ? 6'd21 : maximum012_select_r[20] ? 6'd20 : 6'd0;
+            leading_group6_r <= maximum012_select_r[27] ? 6'd27 : maximum012_select_r[26] ? 6'd26 :
+                        maximum012_select_r[25] ? 6'd25 : maximum012_select_r[24] ? 6'd24 : 6'd0;
+            leading_group7_r <= maximum012_select_r[31] ? 6'd31 : maximum012_select_r[30] ? 6'd30 :
+                        maximum012_select_r[29] ? 6'd29 : maximum012_select_r[28] ? 6'd28 : 6'd0;
+            leading_group8_r <= maximum012_select_r[35] ? 6'd35 : maximum012_select_r[34] ? 6'd34 :
+                        maximum012_select_r[33] ? 6'd33 : maximum012_select_r[32] ? 6'd32 : 6'd0;
+            leading_group9_r <= maximum012_select_r[39] ? 6'd39 : maximum012_select_r[38] ? 6'd38 :
+                        maximum012_select_r[37] ? 6'd37 : maximum012_select_r[36] ? 6'd36 : 6'd0;
+            leading_group10_r <= maximum012_select_r[43] ? 6'd43 : maximum012_select_r[42] ? 6'd42 :
+                        maximum012_select_r[41] ? 6'd41 : maximum012_select_r[40] ? 6'd40 : 6'd0;
+            leading_group11_r <= maximum012_select_r[47] ? 6'd47 : maximum012_select_r[46] ? 6'd46 :
+                        maximum012_select_r[45] ? 6'd45 : maximum012_select_r[44] ? 6'd44 : 6'd0;
+            leading_group12_r <= maximum012_select_r[50] ? 6'd50 : maximum012_select_r[49] ? 6'd49 :
+                        maximum012_select_r[48] ? 6'd48 : 6'd0;
+            nonzero_groups_r <= {(|maximum012_select_r[48 +: 3]), (|maximum012_select_r[44 +: 4]),
+                        (|maximum012_select_r[40 +: 4]), (|maximum012_select_r[36 +: 4]),
+                        (|maximum012_select_r[32 +: 4]), (|maximum012_select_r[28 +: 4]),
+                        (|maximum012_select_r[24 +: 4]), (|maximum012_select_r[20 +: 4]),
+                        (|maximum012_select_r[16 +: 4]), (|maximum012_select_r[12 +: 4]),
+            (|maximum012_select_r[8
+                        +: 4]), (|maximum012_select_r[4 +: 4]), (|maximum012_select_r[0 +: 4])};
+            leading_partial0_r <= nonzero_groups_r[3] ? leading_group3_r : nonzero_groups_r[2] ?
+                        leading_group2_r : nonzero_groups_r[1] ? leading_group1_r :
+                            nonzero_groups_r[0] ?
+                        leading_group0_r : 6'd0;
+            leading_partial1_r <= nonzero_groups_r[7] ? leading_group7_r : nonzero_groups_r[6] ?
+                        leading_group6_r : nonzero_groups_r[5] ? leading_group5_r :
+                            nonzero_groups_r[4] ?
+                        leading_group4_r : 6'd0;
+            leading_partial2_r <= nonzero_groups_r[11] ? leading_group11_r : nonzero_groups_r[10] ?
+                        leading_group10_r : nonzero_groups_r[9] ? leading_group9_r :
+                            nonzero_groups_r[8] ?
+                        leading_group8_r : 6'd0;
+            leading_partial3_r <= nonzero_groups_r[12] ? leading_group12_r : 6'd0;
+            nonzero_groups_d6_r <= nonzero_groups_r;
+            leading_r <= (|nonzero_groups_d6_r[12 +: 1]) ? leading_partial3_r :
+                (|nonzero_groups_d6_r[8
+                        +: 4]) ? leading_partial2_r : (|nonzero_groups_d6_r[4 +: 4]) ?
+            leading_partial1_r :
+                        (|nonzero_groups_d6_r[0 +: 4]) ? leading_partial0_r : 6'd0;
+            tag_0_r_d1_r <= tag_0_r;
+            tag_0_r_d2_r <= tag_0_r_d1_r;
+            tag_0_r_d3_r <= tag_0_r_d2_r;
+            tag_0_r_d4_r <= tag_0_r_d3_r;
+            tag_0_r_d5_r <= tag_0_r_d4_r;
+            tag_0_r_d6_r <= tag_0_r_d5_r;
+            tag_0_r_d7_r <= tag_0_r_d6_r;
+            maximum012_select_d5_r <= maximum012_select_r;
+            maximum012_select_d6_r <= maximum012_select_d5_r;
+            maximum012_select_d7_r <= maximum012_select_d6_r;
+            h_r <= tag_0_r_d7_r[2:0] == 0 ? -10'sd16 : tag_0_r_d7_r[2:0] < 4 ?
+                (maximum012_select_d7_r
+                        == 0 ? -10'sd32 : {4'b0, leading_r} - 10'd31) : -10'sd8;
+            right_amount_r <= $signed(h_r) > 0 ? h_r[5:0] : 6'b0;
+            left_amount_r <= $signed(h_r) < 0 ? -h_r[5:0] : 6'b0;
+            v52_0_w_d1_r <= v52_0_w;
+            v52_0_w_d2_r <= v52_0_w_d1_r;
+        end
     end
     always @(posedge clk_i) begin
-        if (enable_i) delta_r <= plane_delta_i;
-    end
-    assign metadata_read_13_w = metadata_write_r - 9'd12;
-    assign metadata_read_9_w = metadata_write_r - 9'd8;
-    assign first_w = unused_metadata_13_w[32:0];
-    assign normal_h_w = unused_metadata_13_w[42:33];
-    assign exponent_w = unused_metadata_9_w[5:0];
-    assign offset_w = unused_metadata_9_w[41:6];
-    assign recip_delay_rd_data_o = unused_metadata_9_w[47:42];
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) metadata_write_r <= 0;
-        else if (enable_i) metadata_write_r <= metadata_write_r + 1'b1;
+        if (pipeline_enable_w[1]) begin
+            v52_0_w_d3_r <= v52_0_w_d2_r;
+            v52_0_w_d4_r <= v52_0_w_d3_r;
+            v52_0_w_d5_r <= v52_0_w_d4_r;
+            v52_0_w_d6_r <= v52_0_w_d5_r;
+            v52_0_w_d7_r <= v52_0_w_d6_r;
+            v52_0_w_d8_r <= v52_0_w_d7_r;
+            v52_0_w_d9_r <= v52_0_w_d8_r;
+            scale_left0_0_r <= scale_left0_0_w;
+            scale_left0_amt1_w_d10_r <= scale_left0_amt1_w;
+            scale_left0_1_r <= scale_left0_1_w;
+            scale_left0_amt2_w_d10_r <= scale_left0_amt2_w;
+            scale_left0_amt2_w_d11_r <= scale_left0_amt2_w_d10_r;
+            scale_left0_2_r <= scale_left0_2_w;
+            scale_bit0_r <= right_amount_r - 6'd1;
+            scale_bias0_0_r <= scale_bias0_0_w;
+            scale_bias0_amt1_w_d11_r <= scale_bias0_amt1_w;
+            scale_bias0_1_r <= scale_bias0_1_w;
+            scale_bias0_amt2_w_d11_r <= scale_bias0_amt2_w;
+            scale_bias0_amt2_w_d12_r <= scale_bias0_amt2_w_d11_r;
+            scale_bias0_2_r <= scale_bias0_2_w;
+            v52_0_w_d10_r <= v52_0_w_d9_r;
+            v52_0_w_d11_r <= v52_0_w_d10_r;
+            v52_0_w_d12_r <= v52_0_w_d11_r;
+            v52_0_w_d13_r <= v52_0_w_d12_r;
+            scale_add0_part0_r <= {1'b0, scale_add0_a0_w} + {1'b0, scale_add0_b0_w};
+            scale_add0_a1_w_d14_r <= scale_add0_a1_w;
+            scale_add0_b1_w_d14_r <= scale_add0_b1_w;
+            unused_scale_add0_part1_r <= {1'b0, scale_add0_a1_w_d14_r} + {1'b0,
+                        scale_add0_b1_w_d14_r} + {17'b0, scale_add0_part0_r[35]};
+            scale_add0_low0_w_d15_r <= scale_add0_low0_w;
+            scale_rounded0_amt0_w_d10_r <= scale_rounded0_amt0_w;
+            scale_rounded0_amt0_w_d11_r <= scale_rounded0_amt0_w_d10_r;
+            scale_rounded0_amt0_w_d12_r <= scale_rounded0_amt0_w_d11_r;
+            scale_rounded0_amt0_w_d13_r <= scale_rounded0_amt0_w_d12_r;
+            scale_rounded0_amt0_w_d14_r <= scale_rounded0_amt0_w_d13_r;
+            scale_rounded0_amt0_w_d15_r <= scale_rounded0_amt0_w_d14_r;
+            scale_rounded0_0_r <= scale_rounded0_0_w;
+            scale_rounded0_amt1_w_d10_r <= scale_rounded0_amt1_w;
+            scale_rounded0_amt1_w_d11_r <= scale_rounded0_amt1_w_d10_r;
+            scale_rounded0_amt1_w_d12_r <= scale_rounded0_amt1_w_d11_r;
+            scale_rounded0_amt1_w_d13_r <= scale_rounded0_amt1_w_d12_r;
+            scale_rounded0_amt1_w_d14_r <= scale_rounded0_amt1_w_d13_r;
+            scale_rounded0_amt1_w_d15_r <= scale_rounded0_amt1_w_d14_r;
+            scale_rounded0_amt1_w_d16_r <= scale_rounded0_amt1_w_d15_r;
+            scale_rounded0_1_r <= scale_rounded0_1_w;
+            scale_rounded0_amt2_w_d10_r <= scale_rounded0_amt2_w;
+            scale_rounded0_amt2_w_d11_r <= scale_rounded0_amt2_w_d10_r;
+            scale_rounded0_amt2_w_d12_r <= scale_rounded0_amt2_w_d11_r;
+            scale_rounded0_amt2_w_d13_r <= scale_rounded0_amt2_w_d12_r;
+            scale_rounded0_amt2_w_d14_r <= scale_rounded0_amt2_w_d13_r;
+            scale_rounded0_amt2_w_d15_r <= scale_rounded0_amt2_w_d14_r;
+            scale_rounded0_amt2_w_d16_r <= scale_rounded0_amt2_w_d15_r;
+            scale_rounded0_amt2_w_d17_r <= scale_rounded0_amt2_w_d16_r;
+        end
     end
     always @(posedge clk_i) begin
-        if (enable_i) begin
-            h_first_r <= h_w;
-            h_last_r <= normal_h_w;
-            offset_first_r <= plane_offset_i;
+        if (pipeline_enable_w[2]) begin
+            unused_scale_rounded0_2_r <= scale_rounded0_2_w;
+            h_d9_r <= h_r;
+            h_d10_r <= h_d9_r;
+            h_d11_r <= h_d10_r;
+            h_d12_r <= h_d11_r;
+            h_d13_r <= h_d12_r;
+            h_d14_r <= h_d13_r;
+            h_d15_r <= h_d14_r;
+            h_d16_r <= h_d15_r;
+            h_d17_r <= h_d16_r;
+            h_d18_r <= h_d17_r;
+            scale_left0_2_r_d13_r <= scale_left0_2_r;
+            scale_left0_2_r_d14_r <= scale_left0_2_r_d13_r;
+            scale_left0_2_r_d15_r <= scale_left0_2_r_d14_r;
+            scale_left0_2_r_d16_r <= scale_left0_2_r_d15_r;
+            scale_left0_2_r_d17_r <= scale_left0_2_r_d16_r;
+            unused_scale_left0_2_r_d18_r <= scale_left0_2_r_d17_r;
+            scaled0_r <= $signed(h_d18_r) > 0 ? unused_scale_rounded0_2_r[32:0] :
+                        unused_scale_left0_2_r_d18_r[32:0];
+            v52_1_w_d1_r <= v52_1_w;
+            v52_1_w_d2_r <= v52_1_w_d1_r;
+            v52_1_w_d3_r <= v52_1_w_d2_r;
+            v52_1_w_d4_r <= v52_1_w_d3_r;
+            v52_1_w_d5_r <= v52_1_w_d4_r;
+            v52_1_w_d6_r <= v52_1_w_d5_r;
+            v52_1_w_d7_r <= v52_1_w_d6_r;
+            v52_1_w_d8_r <= v52_1_w_d7_r;
+            v52_1_w_d9_r <= v52_1_w_d8_r;
+            scale_left1_0_r <= scale_left1_0_w;
+            scale_left1_amt1_w_d10_r <= scale_left1_amt1_w;
+            scale_left1_1_r <= scale_left1_1_w;
+            scale_left1_amt2_w_d10_r <= scale_left1_amt2_w;
+            scale_left1_amt2_w_d11_r <= scale_left1_amt2_w_d10_r;
+            scale_left1_2_r <= scale_left1_2_w;
+            scale_bit1_r <= right_amount_r - 6'd1;
+            scale_bias1_0_r <= scale_bias1_0_w;
+            scale_bias1_amt1_w_d11_r <= scale_bias1_amt1_w;
         end
     end
-    edrv32_ram_gpu_delay u_metadata_13 (
-        .clk_i(clk_i),
-        .wr_en_i(enable_i),
-        .wr_addr_i(metadata_write_r),
-        .wr_data_i({29'b0, h_first_r, scaled_w[0]}),
-        .rd_en_i(enable_i),
-        .rd_addr_i(metadata_read_13_w),
-        .rd_data_o(unused_metadata_13_w)
-    );
-    edrv32_ram_gpu_delay u_metadata_9 (
-        .clk_i(clk_i),
-        .wr_en_i(enable_i),
-        .wr_addr_i(metadata_write_r),
-        .wr_data_i({24'b0, recip_delay_wr_data_i, offset_first_r, plane_exponent_i}),
-        .rd_en_i(enable_i),
-        .rd_addr_i(metadata_read_9_w),
-        .rd_data_o(unused_metadata_9_w)
-    );
-    genvar vertex;
-    generate
-        // Three independent 52-bit rounding adders and shifters before stage 0.
-        for (vertex = 0; vertex < 3; vertex = vertex + 1) begin : g_scale
-            wire [50:0] value_w;
-            wire [51:0] unused_shifted_w;
-            assign value_w = plane_value_i[vertex*51 +: 51];
-            assign unused_shifted_w = h_w > 0
-                ? ({1'b0, value_w} + (52'd1 << (h_w - 10'sd1))) >> h_w
-                : {1'b0, value_w} << -h_w;
-            assign scaled_w[vertex] = unused_shifted_w[32:0];
-        end
-    endgenerate
-    genvar stage;
-    generate
-        // Metadata delay: each stage owns its scalar registers and one write per register.
-        for (stage = 0; stage < 15; stage = stage + 1) begin : g_metadata
-            reg [6:0] tag_r;
-            assign tag_w[stage] = tag_r;
-            always @(posedge clk_i) begin
-                if (enable_i) begin
-                    tag_r <= stage == 0 ? plane_tag_i : tag_w[stage == 0 ? 0 : stage-1];
-                end
-            end
-            if (stage < 6) begin : g_reciprocal
-                reg [30:0] value_r;
-                assign reciprocal_w[stage] = value_r;
-                always @(posedge clk_i) begin
-                    if (enable_i) value_r <= stage == 0 ? plane_reciprocal_i
-                        : reciprocal_w[stage == 0 ? 0 : stage-1];
-                end
-            end
-        end
-    endgenerate
-    genvar product;
-    generate
-        // Four 34x18 multipliers, registered at stages 1, 2 and 3.
-        for (product = 0; product < 4; product = product + 1) begin : g_product
-            reg signed [51:0] product_1_r;
-            reg signed [51:0] product_2_r;
-            reg signed [51:0] product_3_r;
-            assign product_w[product] = product_3_r;
-            always @(posedge clk_i) begin
-                if (enable_i) begin
-                    product_1_r <= difference_w[product % 2]
-                        * $signed(delta_r[product*18 +: 18]);
-                    product_2_r <= product_1_r;
-                    product_3_r <= product_2_r;
-                end
-            end
-        end
-    endgenerate
-    genvar axis;
-    generate
-        // Two channels: stage 0 difference, stage 4 numerator, stages 6-8 56x31 product,
-        // stage 9 rounded gradient, stages 10-12 56x18 origin product, stage 14 normal.
-        for (axis = 0; axis < 2; axis = axis + 1) begin : g_axis
-            reg signed [33:0] difference_r;
-            reg signed [55:0] numerator_4_r;
-            reg signed [55:0] numerator_5_r;
-            reg signed [86:0] inverse_6_r;
-            reg signed [86:0] inverse_7_r;
-            reg signed [86:0] inverse_8_r;
-            wire [86:0] magnitude_w;
-            wire [87:0] unused_rounded_w;
-            wire signed [55:0] rounded_w;
-            wire [6:0] rounding_bit_w;
-            wire [6:0] rounding_shift_w;
-            wire [56*6-1:0] gradient_pipe_w;
-            reg signed [73:0] origin_10_r;
-            reg signed [73:0] origin_11_r;
-            reg signed [73:0] origin_12_r;
-            assign difference_w[axis] = difference_r;
-            assign magnitude_w = inverse_8_r[86] ? -inverse_8_r : inverse_8_r;
-            assign rounding_bit_w = 7'd29 + {1'b0, exponent_w};
-            assign rounding_shift_w = 7'd30 + {1'b0, exponent_w};
-            assign unused_rounded_w = ({1'b0, magnitude_w} + (88'd1 << rounding_bit_w))
-                >> rounding_shift_w;
-            assign rounded_w = inverse_8_r[86]
-                ? -unused_rounded_w[55:0] : unused_rounded_w[55:0];
-            assign origin_product_w[axis] = origin_12_r;
-            wire [55:0] stored_raw_w;
-            wire [55:0] stored_magnitude_w;
-            wire [55:0] unused_stored_shift_w;
-            wire [51:0] stored_rounded_w;
-            wire [3:0] drop_w;
-            assign drop_w = tag_w[14][2:0] == 0 ? 4'd8 :
-                tag_w[14][2:0] < 4 ? 4'd4 : 4'd12;
-            assign stored_raw_w = gradient_pipe_w[280 +: 56];
-            assign stored_magnitude_w = stored_raw_w[55] ? -stored_raw_w : stored_raw_w;
-            assign unused_stored_shift_w = stored_magnitude_w >> (drop_w - 1'b1);
-            assign stored_rounded_w = unused_stored_shift_w[52:1]
-                + {51'b0, unused_stored_shift_w[0]};
-            assign plane_gradient_o[axis*52 +: 52] = stored_raw_w[55] ?
-                -stored_rounded_w : stored_rounded_w;
-            always @(posedge clk_i) begin
-                if (enable_i) begin
-                    difference_r <= $signed({1'b0, scaled_w[axis+1]})
-                        - $signed({1'b0, scaled_w[0]});
-                    numerator_4_r <=
-                        ($signed({{4{product_w[axis*2][51]}}, product_w[axis*2]})
-                        + $signed({{4{product_w[axis*2+1][51]}}, product_w[axis*2+1]})) <<< 4;
-                    numerator_5_r <= numerator_4_r;
-                    inverse_6_r <= numerator_5_r * $signed({1'b0, reciprocal_w[5]});
-                    inverse_7_r <= inverse_6_r;
-                    inverse_8_r <= inverse_7_r;
-                    origin_10_r <= $signed(gradient_pipe_w[0 +: 56])
-                        * $signed(offset_w[axis*18 +: 18]);
-                    origin_11_r <= origin_10_r;
-                    origin_12_r <= origin_11_r;
-                end
-            end
-            for (stage = 9; stage < 15; stage = stage + 1) begin : g_gradient
-                reg signed [55:0] value_r;
-                assign gradient_pipe_w[56*(stage-9) +: 56] = value_r;
-                always @(posedge clk_i) begin
-                    if (enable_i) value_r <= stage == 9 ? rounded_w
-                        : $signed(gradient_pipe_w[56*((stage == 9 ? 9 : stage-1)-9) +: 56]);
-                end
-            end
-        end
-    endgenerate
-    // Stage 13: one 75-bit origin sum and rounding adder; stage 14 delays the start.
-    wire signed [74:0] origin_sum_w;
-    wire signed [74:0] origin_magnitude_w;
-    wire signed [74:0] origin_rounded_w;
-    wire signed [74:0] unused_origin_signed_w;
-    reg [69:0] start_13_r;
-    reg [65:0] start_14_r;
-    wire [69:0] start_magnitude_w;
-    wire [69:0] unused_start_shift_w;
-    wire [65:0] start_rounded_w;
-    wire [3:0] drop_start_w;
-    assign drop_start_w = tag_w[13][2:0] == 0 ? 4'd8 :
-        tag_w[13][2:0] < 4 ? 4'd4 : 4'd12;
-    assign start_magnitude_w = start_13_r[69] ? -start_13_r : start_13_r;
-    assign unused_start_shift_w = start_magnitude_w >> (drop_start_w - 1'b1);
-    assign start_rounded_w = unused_start_shift_w[66:1] + {65'b0, unused_start_shift_w[0]};
-    assign origin_sum_w = {origin_product_w[0][73], origin_product_w[0]}
-        + {origin_product_w[1][73], origin_product_w[1]};
-    assign origin_magnitude_w = origin_sum_w[74] ? -origin_sum_w : origin_sum_w;
-    assign origin_rounded_w = (origin_magnitude_w + 75'sd8) >>> 4;
-    assign unused_origin_signed_w = origin_sum_w[74] ? -origin_rounded_w : origin_rounded_w;
-    assign plane_start_o = start_14_r;
     always @(posedge clk_i) begin
-        if (enable_i) begin
-            start_13_r <= {37'd0, first_w} + unused_origin_signed_w[69:0];
-            start_14_r <= start_13_r[69] ? -start_rounded_w : start_rounded_w;
+        if (pipeline_enable_w[3]) begin
+            scale_bias1_1_r <= scale_bias1_1_w;
+            scale_bias1_amt2_w_d11_r <= scale_bias1_amt2_w;
+            scale_bias1_amt2_w_d12_r <= scale_bias1_amt2_w_d11_r;
+            scale_bias1_2_r <= scale_bias1_2_w;
+            v52_1_w_d10_r <= v52_1_w_d9_r;
+            v52_1_w_d11_r <= v52_1_w_d10_r;
+            v52_1_w_d12_r <= v52_1_w_d11_r;
+            v52_1_w_d13_r <= v52_1_w_d12_r;
+            scale_add1_part0_r <= {1'b0, scale_add1_a0_w} + {1'b0, scale_add1_b0_w};
+            scale_add1_a1_w_d14_r <= scale_add1_a1_w;
+            scale_add1_b1_w_d14_r <= scale_add1_b1_w;
+            unused_scale_add1_part1_r <= {1'b0, scale_add1_a1_w_d14_r} + {1'b0,
+                        scale_add1_b1_w_d14_r} + {17'b0, scale_add1_part0_r[35]};
+            scale_add1_low0_w_d15_r <= scale_add1_low0_w;
+            scale_rounded1_amt0_w_d10_r <= scale_rounded1_amt0_w;
+            scale_rounded1_amt0_w_d11_r <= scale_rounded1_amt0_w_d10_r;
+            scale_rounded1_amt0_w_d12_r <= scale_rounded1_amt0_w_d11_r;
+            scale_rounded1_amt0_w_d13_r <= scale_rounded1_amt0_w_d12_r;
+            scale_rounded1_amt0_w_d14_r <= scale_rounded1_amt0_w_d13_r;
+            scale_rounded1_amt0_w_d15_r <= scale_rounded1_amt0_w_d14_r;
+            scale_rounded1_0_r <= scale_rounded1_0_w;
+            scale_rounded1_amt1_w_d10_r <= scale_rounded1_amt1_w;
+            scale_rounded1_amt1_w_d11_r <= scale_rounded1_amt1_w_d10_r;
+            scale_rounded1_amt1_w_d12_r <= scale_rounded1_amt1_w_d11_r;
+            scale_rounded1_amt1_w_d13_r <= scale_rounded1_amt1_w_d12_r;
+            scale_rounded1_amt1_w_d14_r <= scale_rounded1_amt1_w_d13_r;
+            scale_rounded1_amt1_w_d15_r <= scale_rounded1_amt1_w_d14_r;
+            scale_rounded1_amt1_w_d16_r <= scale_rounded1_amt1_w_d15_r;
+            scale_rounded1_1_r <= scale_rounded1_1_w;
+            scale_rounded1_amt2_w_d10_r <= scale_rounded1_amt2_w;
+            scale_rounded1_amt2_w_d11_r <= scale_rounded1_amt2_w_d10_r;
+            scale_rounded1_amt2_w_d12_r <= scale_rounded1_amt2_w_d11_r;
+            scale_rounded1_amt2_w_d13_r <= scale_rounded1_amt2_w_d12_r;
+            scale_rounded1_amt2_w_d14_r <= scale_rounded1_amt2_w_d13_r;
+            scale_rounded1_amt2_w_d15_r <= scale_rounded1_amt2_w_d14_r;
+            scale_rounded1_amt2_w_d16_r <= scale_rounded1_amt2_w_d15_r;
+            scale_rounded1_amt2_w_d17_r <= scale_rounded1_amt2_w_d16_r;
+            unused_scale_rounded1_2_r <= scale_rounded1_2_w;
+            scale_left1_2_r_d13_r <= scale_left1_2_r;
+            scale_left1_2_r_d14_r <= scale_left1_2_r_d13_r;
+            scale_left1_2_r_d15_r <= scale_left1_2_r_d14_r;
+            scale_left1_2_r_d16_r <= scale_left1_2_r_d15_r;
+            scale_left1_2_r_d17_r <= scale_left1_2_r_d16_r;
+            unused_scale_left1_2_r_d18_r <= scale_left1_2_r_d17_r;
+            scaled1_r <= $signed(h_d18_r) > 0 ? unused_scale_rounded1_2_r[32:0] :
+                        unused_scale_left1_2_r_d18_r[32:0];
+            v52_2_w_d1_r <= v52_2_w;
+            v52_2_w_d2_r <= v52_2_w_d1_r;
+            v52_2_w_d3_r <= v52_2_w_d2_r;
+            v52_2_w_d4_r <= v52_2_w_d3_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[4]) begin
+            v52_2_w_d5_r <= v52_2_w_d4_r;
+            v52_2_w_d6_r <= v52_2_w_d5_r;
+            v52_2_w_d7_r <= v52_2_w_d6_r;
+            v52_2_w_d8_r <= v52_2_w_d7_r;
+            v52_2_w_d9_r <= v52_2_w_d8_r;
+            scale_left2_0_r <= scale_left2_0_w;
+            scale_left2_amt1_w_d10_r <= scale_left2_amt1_w;
+            scale_left2_1_r <= scale_left2_1_w;
+            scale_left2_amt2_w_d10_r <= scale_left2_amt2_w;
+            scale_left2_amt2_w_d11_r <= scale_left2_amt2_w_d10_r;
+            scale_left2_2_r <= scale_left2_2_w;
+            scale_bit2_r <= right_amount_r - 6'd1;
+            scale_bias2_0_r <= scale_bias2_0_w;
+            scale_bias2_amt1_w_d11_r <= scale_bias2_amt1_w;
+            scale_bias2_1_r <= scale_bias2_1_w;
+            scale_bias2_amt2_w_d11_r <= scale_bias2_amt2_w;
+            scale_bias2_amt2_w_d12_r <= scale_bias2_amt2_w_d11_r;
+            scale_bias2_2_r <= scale_bias2_2_w;
+            v52_2_w_d10_r <= v52_2_w_d9_r;
+            v52_2_w_d11_r <= v52_2_w_d10_r;
+            v52_2_w_d12_r <= v52_2_w_d11_r;
+            v52_2_w_d13_r <= v52_2_w_d12_r;
+            scale_add2_part0_r <= {1'b0, scale_add2_a0_w} + {1'b0, scale_add2_b0_w};
+            scale_add2_a1_w_d14_r <= scale_add2_a1_w;
+            scale_add2_b1_w_d14_r <= scale_add2_b1_w;
+            unused_scale_add2_part1_r <= {1'b0, scale_add2_a1_w_d14_r} + {1'b0,
+                        scale_add2_b1_w_d14_r} + {17'b0, scale_add2_part0_r[35]};
+            scale_add2_low0_w_d15_r <= scale_add2_low0_w;
+            scale_rounded2_amt0_w_d10_r <= scale_rounded2_amt0_w;
+            scale_rounded2_amt0_w_d11_r <= scale_rounded2_amt0_w_d10_r;
+            scale_rounded2_amt0_w_d12_r <= scale_rounded2_amt0_w_d11_r;
+            scale_rounded2_amt0_w_d13_r <= scale_rounded2_amt0_w_d12_r;
+            scale_rounded2_amt0_w_d14_r <= scale_rounded2_amt0_w_d13_r;
+            scale_rounded2_amt0_w_d15_r <= scale_rounded2_amt0_w_d14_r;
+            scale_rounded2_0_r <= scale_rounded2_0_w;
+            scale_rounded2_amt1_w_d10_r <= scale_rounded2_amt1_w;
+            scale_rounded2_amt1_w_d11_r <= scale_rounded2_amt1_w_d10_r;
+            scale_rounded2_amt1_w_d12_r <= scale_rounded2_amt1_w_d11_r;
+            scale_rounded2_amt1_w_d13_r <= scale_rounded2_amt1_w_d12_r;
+            scale_rounded2_amt1_w_d14_r <= scale_rounded2_amt1_w_d13_r;
+            scale_rounded2_amt1_w_d15_r <= scale_rounded2_amt1_w_d14_r;
+            scale_rounded2_amt1_w_d16_r <= scale_rounded2_amt1_w_d15_r;
+            scale_rounded2_1_r <= scale_rounded2_1_w;
+            scale_rounded2_amt2_w_d10_r <= scale_rounded2_amt2_w;
+            scale_rounded2_amt2_w_d11_r <= scale_rounded2_amt2_w_d10_r;
+            scale_rounded2_amt2_w_d12_r <= scale_rounded2_amt2_w_d11_r;
+            scale_rounded2_amt2_w_d13_r <= scale_rounded2_amt2_w_d12_r;
+            scale_rounded2_amt2_w_d14_r <= scale_rounded2_amt2_w_d13_r;
+            scale_rounded2_amt2_w_d15_r <= scale_rounded2_amt2_w_d14_r;
+            scale_rounded2_amt2_w_d16_r <= scale_rounded2_amt2_w_d15_r;
+            scale_rounded2_amt2_w_d17_r <= scale_rounded2_amt2_w_d16_r;
+            unused_scale_rounded2_2_r <= scale_rounded2_2_w;
+            scale_left2_2_r_d13_r <= scale_left2_2_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[5]) begin
+            scale_left2_2_r_d14_r <= scale_left2_2_r_d13_r;
+            scale_left2_2_r_d15_r <= scale_left2_2_r_d14_r;
+            scale_left2_2_r_d16_r <= scale_left2_2_r_d15_r;
+            scale_left2_2_r_d17_r <= scale_left2_2_r_d16_r;
+            unused_scale_left2_2_r_d18_r <= scale_left2_2_r_d17_r;
+            scaled2_r <= $signed(h_d18_r) > 0 ? unused_scale_rounded2_2_r[32:0] :
+                        unused_scale_left2_2_r_d18_r[32:0];
+            difference0_r <= $signed({1'b0, scaled1_r}) - $signed({1'b0, scaled0_r});
+            difference1_r <= $signed({1'b0, scaled2_r}) - $signed({1'b0, scaled0_r});
+            mult_delta0_0_w_d1_r <= mult_delta0_0_w;
+            mult_delta0_0_w_d2_r <= mult_delta0_0_w_d1_r;
+            mult_delta0_0_w_d3_r <= mult_delta0_0_w_d2_r;
+            mult_delta0_0_w_d4_r <= mult_delta0_0_w_d3_r;
+            mult_delta0_0_w_d5_r <= mult_delta0_0_w_d4_r;
+            mult_delta0_0_w_d6_r <= mult_delta0_0_w_d5_r;
+            mult_delta0_0_w_d7_r <= mult_delta0_0_w_d6_r;
+            mult_delta0_0_w_d8_r <= mult_delta0_0_w_d7_r;
+            mult_delta0_0_w_d9_r <= mult_delta0_0_w_d8_r;
+            mult_delta0_0_w_d10_r <= mult_delta0_0_w_d9_r;
+            mult_delta0_0_w_d11_r <= mult_delta0_0_w_d10_r;
+            mult_delta0_0_w_d12_r <= mult_delta0_0_w_d11_r;
+            mult_delta0_0_w_d13_r <= mult_delta0_0_w_d12_r;
+            mult_delta0_0_w_d14_r <= mult_delta0_0_w_d13_r;
+            mult_delta0_0_w_d15_r <= mult_delta0_0_w_d14_r;
+            mult_delta0_0_w_d16_r <= mult_delta0_0_w_d15_r;
+            mult_delta0_0_w_d17_r <= mult_delta0_0_w_d16_r;
+            mult_delta0_0_w_d18_r <= mult_delta0_0_w_d17_r;
+            mult_delta0_0_w_d19_r <= mult_delta0_0_w_d18_r;
+            mult_delta0_0_w_d20_r <= mult_delta0_0_w_d19_r;
+            product0_0_r <= $signed(difference0_r) * $signed(mult_delta0_0_w_d20_r);
+            product0_0_p1_r <= product0_0_r;
+            product0_0_p2_r <= product0_0_p1_r;
+            mult_delta0_1_w_d1_r <= mult_delta0_1_w;
+            mult_delta0_1_w_d2_r <= mult_delta0_1_w_d1_r;
+            mult_delta0_1_w_d3_r <= mult_delta0_1_w_d2_r;
+            mult_delta0_1_w_d4_r <= mult_delta0_1_w_d3_r;
+            mult_delta0_1_w_d5_r <= mult_delta0_1_w_d4_r;
+            mult_delta0_1_w_d6_r <= mult_delta0_1_w_d5_r;
+            mult_delta0_1_w_d7_r <= mult_delta0_1_w_d6_r;
+            mult_delta0_1_w_d8_r <= mult_delta0_1_w_d7_r;
+            mult_delta0_1_w_d9_r <= mult_delta0_1_w_d8_r;
+            mult_delta0_1_w_d10_r <= mult_delta0_1_w_d9_r;
+            mult_delta0_1_w_d11_r <= mult_delta0_1_w_d10_r;
+            mult_delta0_1_w_d12_r <= mult_delta0_1_w_d11_r;
+            mult_delta0_1_w_d13_r <= mult_delta0_1_w_d12_r;
+            mult_delta0_1_w_d14_r <= mult_delta0_1_w_d13_r;
+            mult_delta0_1_w_d15_r <= mult_delta0_1_w_d14_r;
+            mult_delta0_1_w_d16_r <= mult_delta0_1_w_d15_r;
+            mult_delta0_1_w_d17_r <= mult_delta0_1_w_d16_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[6]) begin
+            mult_delta0_1_w_d18_r <= mult_delta0_1_w_d17_r;
+            mult_delta0_1_w_d19_r <= mult_delta0_1_w_d18_r;
+            mult_delta0_1_w_d20_r <= mult_delta0_1_w_d19_r;
+            product0_1_r <= $signed(difference1_r) * $signed(mult_delta0_1_w_d20_r);
+            product0_1_p1_r <= product0_1_r;
+            product0_1_p2_r <= product0_1_p1_r;
+            numerator0_part0_r <= {1'b0, numerator0_a0_w} + {1'b0, numerator0_b0_w};
+            numerator0_a1_w_d24_r <= numerator0_a1_w;
+            numerator0_b1_w_d24_r <= numerator0_b1_w;
+            unused_numerator0_part1_r <= {1'b0, numerator0_a1_w_d24_r} + {1'b0,
+                        numerator0_b1_w_d24_r} + {21'b0, numerator0_part0_r[35]};
+            numerator0_low0_w_d25_r <= numerator0_low0_w;
+            numerator_shift0_r <= numerator0_w << 4;
+            reciprocal_0_r_d1_r <= reciprocal_0_r;
+            reciprocal_0_r_d2_r <= reciprocal_0_r_d1_r;
+            reciprocal_0_r_d3_r <= reciprocal_0_r_d2_r;
+            reciprocal_0_r_d4_r <= reciprocal_0_r_d3_r;
+            reciprocal_0_r_d5_r <= reciprocal_0_r_d4_r;
+            reciprocal_0_r_d6_r <= reciprocal_0_r_d5_r;
+            reciprocal_0_r_d7_r <= reciprocal_0_r_d6_r;
+            reciprocal_0_r_d8_r <= reciprocal_0_r_d7_r;
+            reciprocal_0_r_d9_r <= reciprocal_0_r_d8_r;
+            reciprocal_0_r_d10_r <= reciprocal_0_r_d9_r;
+            reciprocal_0_r_d11_r <= reciprocal_0_r_d10_r;
+            reciprocal_0_r_d12_r <= reciprocal_0_r_d11_r;
+            reciprocal_0_r_d13_r <= reciprocal_0_r_d12_r;
+            reciprocal_0_r_d14_r <= reciprocal_0_r_d13_r;
+            reciprocal_0_r_d15_r <= reciprocal_0_r_d14_r;
+            reciprocal_0_r_d16_r <= reciprocal_0_r_d15_r;
+            reciprocal_0_r_d17_r <= reciprocal_0_r_d16_r;
+            reciprocal_0_r_d18_r <= reciprocal_0_r_d17_r;
+            reciprocal_0_r_d19_r <= reciprocal_0_r_d18_r;
+            reciprocal_0_r_d20_r <= reciprocal_0_r_d19_r;
+            reciprocal_0_r_d21_r <= reciprocal_0_r_d20_r;
+            reciprocal_0_r_d22_r <= reciprocal_0_r_d21_r;
+            reciprocal_0_r_d23_r <= reciprocal_0_r_d22_r;
+            reciprocal_0_r_d24_r <= reciprocal_0_r_d23_r;
+            reciprocal_0_r_d25_r <= reciprocal_0_r_d24_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[7]) begin
+            reciprocal_0_r_d26_r <= reciprocal_0_r_d25_r;
+            inverse0_r <= $signed(numerator_shift0_r) * $signed({1'b0, reciprocal_0_r_d26_r});
+            inverse0_p1_r <= inverse0_r;
+            inverse0_p2_r <= inverse0_p1_r;
+            inverse_abs0_sign_r <= inverse0_p2_r[86];
+            inverse_abs0_invert_r <= inverse0_p2_r[86] ? ~inverse0_p2_r : inverse0_p2_r;
+            inverse_abs0_part0_r <= {1'b0, inverse_abs0_a0_w} + {1'b0, inverse_abs0_b0_w};
+            inverse_abs0_a1_w_d31_r <= inverse_abs0_a1_w;
+            inverse_abs0_b1_w_d31_r <= inverse_abs0_b1_w;
+            inverse_abs0_part1_r <= {1'b0, inverse_abs0_a1_w_d31_r} + {1'b0,
+                inverse_abs0_b1_w_d31_r}
+                        + {35'b0, inverse_abs0_part0_r[35]};
+            inverse_abs0_a2_w_d31_r <= inverse_abs0_a2_w;
+            inverse_abs0_a2_w_d32_r <= inverse_abs0_a2_w_d31_r;
+            inverse_abs0_b2_w_d31_r <= inverse_abs0_b2_w;
+            inverse_abs0_b2_w_d32_r <= inverse_abs0_b2_w_d31_r;
+            unused_inverse_abs0_part2_r <= {1'b0, inverse_abs0_a2_w_d32_r} + {1'b0,
+                        inverse_abs0_b2_w_d32_r} + {17'b0, inverse_abs0_part1_r[35]};
+            inverse_abs0_low1_w_d33_r <= inverse_abs0_low1_w;
+            inverse_abs0_low0_w_d32_r <= inverse_abs0_low0_w;
+            inverse_abs0_low0_w_d33_r <= inverse_abs0_low0_w_d32_r;
+            rounding_bit0_r <= 7'd29 + {1'b0, exponent_0_r};
+            rounding_shift0_r <= 7'd30 + {1'b0, exponent_0_r};
+            gradient_bias0_0_r <= gradient_bias0_0_w;
+            gradient_bias0_amt1_w_d2_r <= gradient_bias0_amt1_w;
+            gradient_bias0_1_r <= gradient_bias0_1_w;
+            gradient_bias0_amt2_w_d2_r <= gradient_bias0_amt2_w;
+            gradient_bias0_amt2_w_d3_r <= gradient_bias0_amt2_w_d2_r;
+            gradient_bias0_2_r <= gradient_bias0_2_w;
+            gradient_bias0_amt3_w_d2_r <= gradient_bias0_amt3_w;
+            gradient_bias0_amt3_w_d3_r <= gradient_bias0_amt3_w_d2_r;
+            gradient_bias0_amt3_w_d4_r <= gradient_bias0_amt3_w_d3_r;
+            gradient_bias0_3_r <= gradient_bias0_3_w;
+            gradient_bias0_3_r_d6_r <= gradient_bias0_3_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[8]) begin
+            gradient_bias0_3_r_d7_r <= gradient_bias0_3_r_d6_r;
+            gradient_bias0_3_r_d8_r <= gradient_bias0_3_r_d7_r;
+            gradient_bias0_3_r_d9_r <= gradient_bias0_3_r_d8_r;
+            gradient_bias0_3_r_d10_r <= gradient_bias0_3_r_d9_r;
+            gradient_bias0_3_r_d11_r <= gradient_bias0_3_r_d10_r;
+            gradient_bias0_3_r_d12_r <= gradient_bias0_3_r_d11_r;
+            gradient_bias0_3_r_d13_r <= gradient_bias0_3_r_d12_r;
+            gradient_bias0_3_r_d14_r <= gradient_bias0_3_r_d13_r;
+            gradient_bias0_3_r_d15_r <= gradient_bias0_3_r_d14_r;
+            gradient_bias0_3_r_d16_r <= gradient_bias0_3_r_d15_r;
+            gradient_bias0_3_r_d17_r <= gradient_bias0_3_r_d16_r;
+            gradient_bias0_3_r_d18_r <= gradient_bias0_3_r_d17_r;
+            gradient_bias0_3_r_d19_r <= gradient_bias0_3_r_d18_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[9]) begin
+            gradient_bias0_3_r_d20_r <= gradient_bias0_3_r_d19_r;
+            gradient_bias0_3_r_d21_r <= gradient_bias0_3_r_d20_r;
+            gradient_bias0_3_r_d22_r <= gradient_bias0_3_r_d21_r;
+            gradient_bias0_3_r_d23_r <= gradient_bias0_3_r_d22_r;
+            gradient_bias0_3_r_d24_r <= gradient_bias0_3_r_d23_r;
+            gradient_bias0_3_r_d25_r <= gradient_bias0_3_r_d24_r;
+            gradient_bias0_3_r_d26_r <= gradient_bias0_3_r_d25_r;
+            gradient_bias0_3_r_d27_r <= gradient_bias0_3_r_d26_r;
+            gradient_bias0_3_r_d28_r <= gradient_bias0_3_r_d27_r;
+            gradient_bias0_3_r_d29_r <= gradient_bias0_3_r_d28_r;
+            gradient_bias0_3_r_d30_r <= gradient_bias0_3_r_d29_r;
+            gradient_bias0_3_r_d31_r <= gradient_bias0_3_r_d30_r;
+            gradient_bias0_3_r_d32_r <= gradient_bias0_3_r_d31_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[10]) begin
+            gradient_bias0_3_r_d33_r <= gradient_bias0_3_r_d32_r;
+            gradient_round0_part0_r <= {1'b0, gradient_round0_a0_w} + {1'b0, gradient_round0_b0_w};
+            gradient_round0_a1_w_d34_r <= gradient_round0_a1_w;
+            gradient_round0_b1_w_d34_r <= gradient_round0_b1_w;
+            gradient_round0_part1_r <= {1'b0, gradient_round0_a1_w_d34_r} + {1'b0,
+                        gradient_round0_b1_w_d34_r} + {35'b0, gradient_round0_part0_r[35]};
+            gradient_round0_a2_w_d34_r <= gradient_round0_a2_w;
+            gradient_round0_a2_w_d35_r <= gradient_round0_a2_w_d34_r;
+            gradient_round0_b2_w_d34_r <= gradient_round0_b2_w;
+            gradient_round0_b2_w_d35_r <= gradient_round0_b2_w_d34_r;
+            unused_gradient_round0_part2_r <= {1'b0, gradient_round0_a2_w_d35_r} + {1'b0,
+                        gradient_round0_b2_w_d35_r} + {18'b0, gradient_round0_part1_r[35]};
+            gradient_round0_low1_w_d36_r <= gradient_round0_low1_w;
+            gradient_round0_low0_w_d35_r <= gradient_round0_low0_w;
+            gradient_round0_low0_w_d36_r <= gradient_round0_low0_w_d35_r;
+            gradient_shift0_amt0_w_d2_r <= gradient_shift0_amt0_w;
+            gradient_shift0_amt0_w_d3_r <= gradient_shift0_amt0_w_d2_r;
+            gradient_shift0_amt0_w_d4_r <= gradient_shift0_amt0_w_d3_r;
+            gradient_shift0_amt0_w_d5_r <= gradient_shift0_amt0_w_d4_r;
+            gradient_shift0_amt0_w_d6_r <= gradient_shift0_amt0_w_d5_r;
+            gradient_shift0_amt0_w_d7_r <= gradient_shift0_amt0_w_d6_r;
+            gradient_shift0_amt0_w_d8_r <= gradient_shift0_amt0_w_d7_r;
+            gradient_shift0_amt0_w_d9_r <= gradient_shift0_amt0_w_d8_r;
+            gradient_shift0_amt0_w_d10_r <= gradient_shift0_amt0_w_d9_r;
+            gradient_shift0_amt0_w_d11_r <= gradient_shift0_amt0_w_d10_r;
+            gradient_shift0_amt0_w_d12_r <= gradient_shift0_amt0_w_d11_r;
+            gradient_shift0_amt0_w_d13_r <= gradient_shift0_amt0_w_d12_r;
+            gradient_shift0_amt0_w_d14_r <= gradient_shift0_amt0_w_d13_r;
+            gradient_shift0_amt0_w_d15_r <= gradient_shift0_amt0_w_d14_r;
+            gradient_shift0_amt0_w_d16_r <= gradient_shift0_amt0_w_d15_r;
+            gradient_shift0_amt0_w_d17_r <= gradient_shift0_amt0_w_d16_r;
+            gradient_shift0_amt0_w_d18_r <= gradient_shift0_amt0_w_d17_r;
+            gradient_shift0_amt0_w_d19_r <= gradient_shift0_amt0_w_d18_r;
+            gradient_shift0_amt0_w_d20_r <= gradient_shift0_amt0_w_d19_r;
+            gradient_shift0_amt0_w_d21_r <= gradient_shift0_amt0_w_d20_r;
+            gradient_shift0_amt0_w_d22_r <= gradient_shift0_amt0_w_d21_r;
+            gradient_shift0_amt0_w_d23_r <= gradient_shift0_amt0_w_d22_r;
+            gradient_shift0_amt0_w_d24_r <= gradient_shift0_amt0_w_d23_r;
+            gradient_shift0_amt0_w_d25_r <= gradient_shift0_amt0_w_d24_r;
+            gradient_shift0_amt0_w_d26_r <= gradient_shift0_amt0_w_d25_r;
+            gradient_shift0_amt0_w_d27_r <= gradient_shift0_amt0_w_d26_r;
+            gradient_shift0_amt0_w_d28_r <= gradient_shift0_amt0_w_d27_r;
+            gradient_shift0_amt0_w_d29_r <= gradient_shift0_amt0_w_d28_r;
+            gradient_shift0_amt0_w_d30_r <= gradient_shift0_amt0_w_d29_r;
+            gradient_shift0_amt0_w_d31_r <= gradient_shift0_amt0_w_d30_r;
+            gradient_shift0_amt0_w_d32_r <= gradient_shift0_amt0_w_d31_r;
+            gradient_shift0_amt0_w_d33_r <= gradient_shift0_amt0_w_d32_r;
+            gradient_shift0_amt0_w_d34_r <= gradient_shift0_amt0_w_d33_r;
+            gradient_shift0_amt0_w_d35_r <= gradient_shift0_amt0_w_d34_r;
+            gradient_shift0_amt0_w_d36_r <= gradient_shift0_amt0_w_d35_r;
+            gradient_shift0_0_r <= gradient_shift0_0_w;
+            gradient_shift0_amt1_w_d2_r <= gradient_shift0_amt1_w;
+            gradient_shift0_amt1_w_d3_r <= gradient_shift0_amt1_w_d2_r;
+            gradient_shift0_amt1_w_d4_r <= gradient_shift0_amt1_w_d3_r;
+            gradient_shift0_amt1_w_d5_r <= gradient_shift0_amt1_w_d4_r;
+            gradient_shift0_amt1_w_d6_r <= gradient_shift0_amt1_w_d5_r;
+            gradient_shift0_amt1_w_d7_r <= gradient_shift0_amt1_w_d6_r;
+            gradient_shift0_amt1_w_d8_r <= gradient_shift0_amt1_w_d7_r;
+            gradient_shift0_amt1_w_d9_r <= gradient_shift0_amt1_w_d8_r;
+            gradient_shift0_amt1_w_d10_r <= gradient_shift0_amt1_w_d9_r;
+            gradient_shift0_amt1_w_d11_r <= gradient_shift0_amt1_w_d10_r;
+            gradient_shift0_amt1_w_d12_r <= gradient_shift0_amt1_w_d11_r;
+            gradient_shift0_amt1_w_d13_r <= gradient_shift0_amt1_w_d12_r;
+            gradient_shift0_amt1_w_d14_r <= gradient_shift0_amt1_w_d13_r;
+            gradient_shift0_amt1_w_d15_r <= gradient_shift0_amt1_w_d14_r;
+            gradient_shift0_amt1_w_d16_r <= gradient_shift0_amt1_w_d15_r;
+            gradient_shift0_amt1_w_d17_r <= gradient_shift0_amt1_w_d16_r;
+            gradient_shift0_amt1_w_d18_r <= gradient_shift0_amt1_w_d17_r;
+            gradient_shift0_amt1_w_d19_r <= gradient_shift0_amt1_w_d18_r;
+            gradient_shift0_amt1_w_d20_r <= gradient_shift0_amt1_w_d19_r;
+            gradient_shift0_amt1_w_d21_r <= gradient_shift0_amt1_w_d20_r;
+            gradient_shift0_amt1_w_d22_r <= gradient_shift0_amt1_w_d21_r;
+            gradient_shift0_amt1_w_d23_r <= gradient_shift0_amt1_w_d22_r;
+            gradient_shift0_amt1_w_d24_r <= gradient_shift0_amt1_w_d23_r;
+            gradient_shift0_amt1_w_d25_r <= gradient_shift0_amt1_w_d24_r;
+            gradient_shift0_amt1_w_d26_r <= gradient_shift0_amt1_w_d25_r;
+            gradient_shift0_amt1_w_d27_r <= gradient_shift0_amt1_w_d26_r;
+            gradient_shift0_amt1_w_d28_r <= gradient_shift0_amt1_w_d27_r;
+            gradient_shift0_amt1_w_d29_r <= gradient_shift0_amt1_w_d28_r;
+            gradient_shift0_amt1_w_d30_r <= gradient_shift0_amt1_w_d29_r;
+            gradient_shift0_amt1_w_d31_r <= gradient_shift0_amt1_w_d30_r;
+            gradient_shift0_amt1_w_d32_r <= gradient_shift0_amt1_w_d31_r;
+            gradient_shift0_amt1_w_d33_r <= gradient_shift0_amt1_w_d32_r;
+            gradient_shift0_amt1_w_d34_r <= gradient_shift0_amt1_w_d33_r;
+            gradient_shift0_amt1_w_d35_r <= gradient_shift0_amt1_w_d34_r;
+            gradient_shift0_amt1_w_d36_r <= gradient_shift0_amt1_w_d35_r;
+            gradient_shift0_amt1_w_d37_r <= gradient_shift0_amt1_w_d36_r;
+            gradient_shift0_1_r <= gradient_shift0_1_w;
+            gradient_shift0_amt2_w_d2_r <= gradient_shift0_amt2_w;
+            gradient_shift0_amt2_w_d3_r <= gradient_shift0_amt2_w_d2_r;
+            gradient_shift0_amt2_w_d4_r <= gradient_shift0_amt2_w_d3_r;
+            gradient_shift0_amt2_w_d5_r <= gradient_shift0_amt2_w_d4_r;
+            gradient_shift0_amt2_w_d6_r <= gradient_shift0_amt2_w_d5_r;
+            gradient_shift0_amt2_w_d7_r <= gradient_shift0_amt2_w_d6_r;
+            gradient_shift0_amt2_w_d8_r <= gradient_shift0_amt2_w_d7_r;
+            gradient_shift0_amt2_w_d9_r <= gradient_shift0_amt2_w_d8_r;
+            gradient_shift0_amt2_w_d10_r <= gradient_shift0_amt2_w_d9_r;
+            gradient_shift0_amt2_w_d11_r <= gradient_shift0_amt2_w_d10_r;
+            gradient_shift0_amt2_w_d12_r <= gradient_shift0_amt2_w_d11_r;
+            gradient_shift0_amt2_w_d13_r <= gradient_shift0_amt2_w_d12_r;
+            gradient_shift0_amt2_w_d14_r <= gradient_shift0_amt2_w_d13_r;
+            gradient_shift0_amt2_w_d15_r <= gradient_shift0_amt2_w_d14_r;
+            gradient_shift0_amt2_w_d16_r <= gradient_shift0_amt2_w_d15_r;
+            gradient_shift0_amt2_w_d17_r <= gradient_shift0_amt2_w_d16_r;
+            gradient_shift0_amt2_w_d18_r <= gradient_shift0_amt2_w_d17_r;
+            gradient_shift0_amt2_w_d19_r <= gradient_shift0_amt2_w_d18_r;
+            gradient_shift0_amt2_w_d20_r <= gradient_shift0_amt2_w_d19_r;
+            gradient_shift0_amt2_w_d21_r <= gradient_shift0_amt2_w_d20_r;
+            gradient_shift0_amt2_w_d22_r <= gradient_shift0_amt2_w_d21_r;
+            gradient_shift0_amt2_w_d23_r <= gradient_shift0_amt2_w_d22_r;
+            gradient_shift0_amt2_w_d24_r <= gradient_shift0_amt2_w_d23_r;
+            gradient_shift0_amt2_w_d25_r <= gradient_shift0_amt2_w_d24_r;
+            gradient_shift0_amt2_w_d26_r <= gradient_shift0_amt2_w_d25_r;
+            gradient_shift0_amt2_w_d27_r <= gradient_shift0_amt2_w_d26_r;
+            gradient_shift0_amt2_w_d28_r <= gradient_shift0_amt2_w_d27_r;
+            gradient_shift0_amt2_w_d29_r <= gradient_shift0_amt2_w_d28_r;
+            gradient_shift0_amt2_w_d30_r <= gradient_shift0_amt2_w_d29_r;
+            gradient_shift0_amt2_w_d31_r <= gradient_shift0_amt2_w_d30_r;
+            gradient_shift0_amt2_w_d32_r <= gradient_shift0_amt2_w_d31_r;
+            gradient_shift0_amt2_w_d33_r <= gradient_shift0_amt2_w_d32_r;
+            gradient_shift0_amt2_w_d34_r <= gradient_shift0_amt2_w_d33_r;
+            gradient_shift0_amt2_w_d35_r <= gradient_shift0_amt2_w_d34_r;
+            gradient_shift0_amt2_w_d36_r <= gradient_shift0_amt2_w_d35_r;
+            gradient_shift0_amt2_w_d37_r <= gradient_shift0_amt2_w_d36_r;
+            gradient_shift0_amt2_w_d38_r <= gradient_shift0_amt2_w_d37_r;
+            gradient_shift0_2_r <= gradient_shift0_2_w;
+            gradient_shift0_amt3_w_d2_r <= gradient_shift0_amt3_w;
+            gradient_shift0_amt3_w_d3_r <= gradient_shift0_amt3_w_d2_r;
+            gradient_shift0_amt3_w_d4_r <= gradient_shift0_amt3_w_d3_r;
+            gradient_shift0_amt3_w_d5_r <= gradient_shift0_amt3_w_d4_r;
+            gradient_shift0_amt3_w_d6_r <= gradient_shift0_amt3_w_d5_r;
+            gradient_shift0_amt3_w_d7_r <= gradient_shift0_amt3_w_d6_r;
+            gradient_shift0_amt3_w_d8_r <= gradient_shift0_amt3_w_d7_r;
+            gradient_shift0_amt3_w_d9_r <= gradient_shift0_amt3_w_d8_r;
+            gradient_shift0_amt3_w_d10_r <= gradient_shift0_amt3_w_d9_r;
+            gradient_shift0_amt3_w_d11_r <= gradient_shift0_amt3_w_d10_r;
+            gradient_shift0_amt3_w_d12_r <= gradient_shift0_amt3_w_d11_r;
+            gradient_shift0_amt3_w_d13_r <= gradient_shift0_amt3_w_d12_r;
+            gradient_shift0_amt3_w_d14_r <= gradient_shift0_amt3_w_d13_r;
+            gradient_shift0_amt3_w_d15_r <= gradient_shift0_amt3_w_d14_r;
+            gradient_shift0_amt3_w_d16_r <= gradient_shift0_amt3_w_d15_r;
+            gradient_shift0_amt3_w_d17_r <= gradient_shift0_amt3_w_d16_r;
+            gradient_shift0_amt3_w_d18_r <= gradient_shift0_amt3_w_d17_r;
+            gradient_shift0_amt3_w_d19_r <= gradient_shift0_amt3_w_d18_r;
+            gradient_shift0_amt3_w_d20_r <= gradient_shift0_amt3_w_d19_r;
+            gradient_shift0_amt3_w_d21_r <= gradient_shift0_amt3_w_d20_r;
+            gradient_shift0_amt3_w_d22_r <= gradient_shift0_amt3_w_d21_r;
+            gradient_shift0_amt3_w_d23_r <= gradient_shift0_amt3_w_d22_r;
+            gradient_shift0_amt3_w_d24_r <= gradient_shift0_amt3_w_d23_r;
+            gradient_shift0_amt3_w_d25_r <= gradient_shift0_amt3_w_d24_r;
+            gradient_shift0_amt3_w_d26_r <= gradient_shift0_amt3_w_d25_r;
+            gradient_shift0_amt3_w_d27_r <= gradient_shift0_amt3_w_d26_r;
+            gradient_shift0_amt3_w_d28_r <= gradient_shift0_amt3_w_d27_r;
+            gradient_shift0_amt3_w_d29_r <= gradient_shift0_amt3_w_d28_r;
+            gradient_shift0_amt3_w_d30_r <= gradient_shift0_amt3_w_d29_r;
+            gradient_shift0_amt3_w_d31_r <= gradient_shift0_amt3_w_d30_r;
+            gradient_shift0_amt3_w_d32_r <= gradient_shift0_amt3_w_d31_r;
+            gradient_shift0_amt3_w_d33_r <= gradient_shift0_amt3_w_d32_r;
+            gradient_shift0_amt3_w_d34_r <= gradient_shift0_amt3_w_d33_r;
+            gradient_shift0_amt3_w_d35_r <= gradient_shift0_amt3_w_d34_r;
+            gradient_shift0_amt3_w_d36_r <= gradient_shift0_amt3_w_d35_r;
+            gradient_shift0_amt3_w_d37_r <= gradient_shift0_amt3_w_d36_r;
+            gradient_shift0_amt3_w_d38_r <= gradient_shift0_amt3_w_d37_r;
+            gradient_shift0_amt3_w_d39_r <= gradient_shift0_amt3_w_d38_r;
+            unused_gradient_shift0_3_r <= gradient_shift0_3_w;
+            inverse_abs0_sign_d31_r <= inverse_abs0_sign_r;
+            inverse_abs0_sign_d32_r <= inverse_abs0_sign_d31_r;
+            inverse_abs0_sign_d33_r <= inverse_abs0_sign_d32_r;
+            inverse_abs0_sign_d34_r <= inverse_abs0_sign_d33_r;
+            inverse_abs0_sign_d35_r <= inverse_abs0_sign_d34_r;
+            inverse_abs0_sign_d36_r <= inverse_abs0_sign_d35_r;
+            inverse_abs0_sign_d37_r <= inverse_abs0_sign_d36_r;
+            inverse_abs0_sign_d38_r <= inverse_abs0_sign_d37_r;
+            inverse_abs0_sign_d39_r <= inverse_abs0_sign_d38_r;
+            inverse_abs0_sign_d40_r <= inverse_abs0_sign_d39_r;
+            gradient_signed0_invert_r <= inverse_abs0_sign_d40_r ? ~gradient56_0_w : gradient56_0_w;
+            inverse_abs0_sign_d41_r <= inverse_abs0_sign_d40_r;
+            gradient_signed0_part0_r <= {1'b0, gradient_signed0_a0_w} + {1'b0,
+                gradient_signed0_b0_w};
+            gradient_signed0_a1_w_d42_r <= gradient_signed0_a1_w;
+            gradient_signed0_b1_w_d42_r <= gradient_signed0_b1_w;
+            unused_gradient_signed0_part1_r <= {1'b0, gradient_signed0_a1_w_d42_r} + {1'b0,
+                        gradient_signed0_b1_w_d42_r} + {21'b0, gradient_signed0_part0_r[35]};
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[11]) begin
+            gradient_signed0_low0_w_d43_r <= gradient_signed0_low0_w;
+            origin_offset0_w_d1_r <= origin_offset0_w;
+            origin_offset0_w_d2_r <= origin_offset0_w_d1_r;
+            origin_offset0_w_d3_r <= origin_offset0_w_d2_r;
+            origin_offset0_w_d4_r <= origin_offset0_w_d3_r;
+            origin_offset0_w_d5_r <= origin_offset0_w_d4_r;
+            origin_offset0_w_d6_r <= origin_offset0_w_d5_r;
+            origin_offset0_w_d7_r <= origin_offset0_w_d6_r;
+            origin_offset0_w_d8_r <= origin_offset0_w_d7_r;
+            origin_offset0_w_d9_r <= origin_offset0_w_d8_r;
+            origin_offset0_w_d10_r <= origin_offset0_w_d9_r;
+            origin_offset0_w_d11_r <= origin_offset0_w_d10_r;
+            origin_offset0_w_d12_r <= origin_offset0_w_d11_r;
+            origin_offset0_w_d13_r <= origin_offset0_w_d12_r;
+            origin_offset0_w_d14_r <= origin_offset0_w_d13_r;
+            origin_offset0_w_d15_r <= origin_offset0_w_d14_r;
+            origin_offset0_w_d16_r <= origin_offset0_w_d15_r;
+            origin_offset0_w_d17_r <= origin_offset0_w_d16_r;
+            origin_offset0_w_d18_r <= origin_offset0_w_d17_r;
+            origin_offset0_w_d19_r <= origin_offset0_w_d18_r;
+            origin_offset0_w_d20_r <= origin_offset0_w_d19_r;
+            origin_offset0_w_d21_r <= origin_offset0_w_d20_r;
+            origin_offset0_w_d22_r <= origin_offset0_w_d21_r;
+            origin_offset0_w_d23_r <= origin_offset0_w_d22_r;
+            origin_offset0_w_d24_r <= origin_offset0_w_d23_r;
+            origin_offset0_w_d25_r <= origin_offset0_w_d24_r;
+            origin_offset0_w_d26_r <= origin_offset0_w_d25_r;
+            origin_offset0_w_d27_r <= origin_offset0_w_d26_r;
+            origin_offset0_w_d28_r <= origin_offset0_w_d27_r;
+            origin_offset0_w_d29_r <= origin_offset0_w_d28_r;
+            origin_offset0_w_d30_r <= origin_offset0_w_d29_r;
+            origin_offset0_w_d31_r <= origin_offset0_w_d30_r;
+            origin_offset0_w_d32_r <= origin_offset0_w_d31_r;
+            origin_offset0_w_d33_r <= origin_offset0_w_d32_r;
+            origin_offset0_w_d34_r <= origin_offset0_w_d33_r;
+            origin_offset0_w_d35_r <= origin_offset0_w_d34_r;
+            origin_offset0_w_d36_r <= origin_offset0_w_d35_r;
+            origin_offset0_w_d37_r <= origin_offset0_w_d36_r;
+            origin_offset0_w_d38_r <= origin_offset0_w_d37_r;
+            origin_offset0_w_d39_r <= origin_offset0_w_d38_r;
+            origin_offset0_w_d40_r <= origin_offset0_w_d39_r;
+            origin_offset0_w_d41_r <= origin_offset0_w_d40_r;
+            origin_offset0_w_d42_r <= origin_offset0_w_d41_r;
+            origin_offset0_w_d43_r <= origin_offset0_w_d42_r;
+            origin_product0_r <= $signed(gradient_signed0_w) * $signed(origin_offset0_w_d43_r);
+            origin_product0_p1_r <= origin_product0_r;
+            origin_product0_p2_r <= origin_product0_p1_r;
+            drop_gradient0_r <= tag_0_r[2:0] == 0 ? 4'd7 : tag_0_r[2:0] < 4 ? 4'd3 : 4'd11;
+            gradient_abs0_sign_r <= gradient_signed0_w[55];
+            gradient_abs0_invert_r <= gradient_signed0_w[55] ? ~gradient_signed0_w :
+                        gradient_signed0_w;
+            gradient_abs0_part0_r <= {1'b0, gradient_abs0_a0_w} + {1'b0, gradient_abs0_b0_w};
+            gradient_abs0_a1_w_d45_r <= gradient_abs0_a1_w;
+            gradient_abs0_b1_w_d45_r <= gradient_abs0_b1_w;
+            unused_gradient_abs0_part1_r <= {1'b0, gradient_abs0_a1_w_d45_r} + {1'b0,
+                        gradient_abs0_b1_w_d45_r} + {21'b0, gradient_abs0_part0_r[35]};
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[12]) begin
+            gradient_abs0_low0_w_d46_r <= gradient_abs0_low0_w;
+            gradient_drop0_amt0_w_d2_r <= gradient_drop0_amt0_w;
+            gradient_drop0_amt0_w_d3_r <= gradient_drop0_amt0_w_d2_r;
+            gradient_drop0_amt0_w_d4_r <= gradient_drop0_amt0_w_d3_r;
+            gradient_drop0_amt0_w_d5_r <= gradient_drop0_amt0_w_d4_r;
+            gradient_drop0_amt0_w_d6_r <= gradient_drop0_amt0_w_d5_r;
+            gradient_drop0_amt0_w_d7_r <= gradient_drop0_amt0_w_d6_r;
+            gradient_drop0_amt0_w_d8_r <= gradient_drop0_amt0_w_d7_r;
+            gradient_drop0_amt0_w_d9_r <= gradient_drop0_amt0_w_d8_r;
+            gradient_drop0_amt0_w_d10_r <= gradient_drop0_amt0_w_d9_r;
+            gradient_drop0_amt0_w_d11_r <= gradient_drop0_amt0_w_d10_r;
+            gradient_drop0_amt0_w_d12_r <= gradient_drop0_amt0_w_d11_r;
+            gradient_drop0_amt0_w_d13_r <= gradient_drop0_amt0_w_d12_r;
+            gradient_drop0_amt0_w_d14_r <= gradient_drop0_amt0_w_d13_r;
+            gradient_drop0_amt0_w_d15_r <= gradient_drop0_amt0_w_d14_r;
+            gradient_drop0_amt0_w_d16_r <= gradient_drop0_amt0_w_d15_r;
+            gradient_drop0_amt0_w_d17_r <= gradient_drop0_amt0_w_d16_r;
+            gradient_drop0_amt0_w_d18_r <= gradient_drop0_amt0_w_d17_r;
+            gradient_drop0_amt0_w_d19_r <= gradient_drop0_amt0_w_d18_r;
+            gradient_drop0_amt0_w_d20_r <= gradient_drop0_amt0_w_d19_r;
+            gradient_drop0_amt0_w_d21_r <= gradient_drop0_amt0_w_d20_r;
+            gradient_drop0_amt0_w_d22_r <= gradient_drop0_amt0_w_d21_r;
+            gradient_drop0_amt0_w_d23_r <= gradient_drop0_amt0_w_d22_r;
+            gradient_drop0_amt0_w_d24_r <= gradient_drop0_amt0_w_d23_r;
+            gradient_drop0_amt0_w_d25_r <= gradient_drop0_amt0_w_d24_r;
+            gradient_drop0_amt0_w_d26_r <= gradient_drop0_amt0_w_d25_r;
+            gradient_drop0_amt0_w_d27_r <= gradient_drop0_amt0_w_d26_r;
+            gradient_drop0_amt0_w_d28_r <= gradient_drop0_amt0_w_d27_r;
+            gradient_drop0_amt0_w_d29_r <= gradient_drop0_amt0_w_d28_r;
+            gradient_drop0_amt0_w_d30_r <= gradient_drop0_amt0_w_d29_r;
+            gradient_drop0_amt0_w_d31_r <= gradient_drop0_amt0_w_d30_r;
+            gradient_drop0_amt0_w_d32_r <= gradient_drop0_amt0_w_d31_r;
+            gradient_drop0_amt0_w_d33_r <= gradient_drop0_amt0_w_d32_r;
+            gradient_drop0_amt0_w_d34_r <= gradient_drop0_amt0_w_d33_r;
+            gradient_drop0_amt0_w_d35_r <= gradient_drop0_amt0_w_d34_r;
+            gradient_drop0_amt0_w_d36_r <= gradient_drop0_amt0_w_d35_r;
+            gradient_drop0_amt0_w_d37_r <= gradient_drop0_amt0_w_d36_r;
+            gradient_drop0_amt0_w_d38_r <= gradient_drop0_amt0_w_d37_r;
+            gradient_drop0_amt0_w_d39_r <= gradient_drop0_amt0_w_d38_r;
+            gradient_drop0_amt0_w_d40_r <= gradient_drop0_amt0_w_d39_r;
+            gradient_drop0_amt0_w_d41_r <= gradient_drop0_amt0_w_d40_r;
+            gradient_drop0_amt0_w_d42_r <= gradient_drop0_amt0_w_d41_r;
+            gradient_drop0_amt0_w_d43_r <= gradient_drop0_amt0_w_d42_r;
+            gradient_drop0_amt0_w_d44_r <= gradient_drop0_amt0_w_d43_r;
+            gradient_drop0_amt0_w_d45_r <= gradient_drop0_amt0_w_d44_r;
+            gradient_drop0_amt0_w_d46_r <= gradient_drop0_amt0_w_d45_r;
+            gradient_drop0_0_r <= gradient_drop0_0_w;
+            gradient_drop0_amt1_w_d2_r <= gradient_drop0_amt1_w;
+            gradient_drop0_amt1_w_d3_r <= gradient_drop0_amt1_w_d2_r;
+            gradient_drop0_amt1_w_d4_r <= gradient_drop0_amt1_w_d3_r;
+            gradient_drop0_amt1_w_d5_r <= gradient_drop0_amt1_w_d4_r;
+            gradient_drop0_amt1_w_d6_r <= gradient_drop0_amt1_w_d5_r;
+            gradient_drop0_amt1_w_d7_r <= gradient_drop0_amt1_w_d6_r;
+            gradient_drop0_amt1_w_d8_r <= gradient_drop0_amt1_w_d7_r;
+            gradient_drop0_amt1_w_d9_r <= gradient_drop0_amt1_w_d8_r;
+            gradient_drop0_amt1_w_d10_r <= gradient_drop0_amt1_w_d9_r;
+            gradient_drop0_amt1_w_d11_r <= gradient_drop0_amt1_w_d10_r;
+            gradient_drop0_amt1_w_d12_r <= gradient_drop0_amt1_w_d11_r;
+            gradient_drop0_amt1_w_d13_r <= gradient_drop0_amt1_w_d12_r;
+            gradient_drop0_amt1_w_d14_r <= gradient_drop0_amt1_w_d13_r;
+            gradient_drop0_amt1_w_d15_r <= gradient_drop0_amt1_w_d14_r;
+            gradient_drop0_amt1_w_d16_r <= gradient_drop0_amt1_w_d15_r;
+            gradient_drop0_amt1_w_d17_r <= gradient_drop0_amt1_w_d16_r;
+            gradient_drop0_amt1_w_d18_r <= gradient_drop0_amt1_w_d17_r;
+            gradient_drop0_amt1_w_d19_r <= gradient_drop0_amt1_w_d18_r;
+            gradient_drop0_amt1_w_d20_r <= gradient_drop0_amt1_w_d19_r;
+            gradient_drop0_amt1_w_d21_r <= gradient_drop0_amt1_w_d20_r;
+            gradient_drop0_amt1_w_d22_r <= gradient_drop0_amt1_w_d21_r;
+            gradient_drop0_amt1_w_d23_r <= gradient_drop0_amt1_w_d22_r;
+            gradient_drop0_amt1_w_d24_r <= gradient_drop0_amt1_w_d23_r;
+            gradient_drop0_amt1_w_d25_r <= gradient_drop0_amt1_w_d24_r;
+            gradient_drop0_amt1_w_d26_r <= gradient_drop0_amt1_w_d25_r;
+            gradient_drop0_amt1_w_d27_r <= gradient_drop0_amt1_w_d26_r;
+            gradient_drop0_amt1_w_d28_r <= gradient_drop0_amt1_w_d27_r;
+            gradient_drop0_amt1_w_d29_r <= gradient_drop0_amt1_w_d28_r;
+            gradient_drop0_amt1_w_d30_r <= gradient_drop0_amt1_w_d29_r;
+            gradient_drop0_amt1_w_d31_r <= gradient_drop0_amt1_w_d30_r;
+            gradient_drop0_amt1_w_d32_r <= gradient_drop0_amt1_w_d31_r;
+            gradient_drop0_amt1_w_d33_r <= gradient_drop0_amt1_w_d32_r;
+            gradient_drop0_amt1_w_d34_r <= gradient_drop0_amt1_w_d33_r;
+            gradient_drop0_amt1_w_d35_r <= gradient_drop0_amt1_w_d34_r;
+            gradient_drop0_amt1_w_d36_r <= gradient_drop0_amt1_w_d35_r;
+            gradient_drop0_amt1_w_d37_r <= gradient_drop0_amt1_w_d36_r;
+            gradient_drop0_amt1_w_d38_r <= gradient_drop0_amt1_w_d37_r;
+            gradient_drop0_amt1_w_d39_r <= gradient_drop0_amt1_w_d38_r;
+            gradient_drop0_amt1_w_d40_r <= gradient_drop0_amt1_w_d39_r;
+            gradient_drop0_amt1_w_d41_r <= gradient_drop0_amt1_w_d40_r;
+            gradient_drop0_amt1_w_d42_r <= gradient_drop0_amt1_w_d41_r;
+            gradient_drop0_amt1_w_d43_r <= gradient_drop0_amt1_w_d42_r;
+            gradient_drop0_amt1_w_d44_r <= gradient_drop0_amt1_w_d43_r;
+            gradient_drop0_amt1_w_d45_r <= gradient_drop0_amt1_w_d44_r;
+            gradient_drop0_amt1_w_d46_r <= gradient_drop0_amt1_w_d45_r;
+            gradient_drop0_amt1_w_d47_r <= gradient_drop0_amt1_w_d46_r;
+            unused_gradient_drop0_1_r <= gradient_drop0_1_w;
+            stored_round0_part0_r <= {1'b0, stored_round0_a0_w} + {1'b0, stored_round0_b0_w};
+            stored_round0_a1_w_d49_r <= stored_round0_a1_w;
+            stored_round0_b1_w_d49_r <= stored_round0_b1_w;
+            unused_stored_round0_part1_r <= {1'b0, stored_round0_a1_w_d49_r} + {1'b0,
+                        stored_round0_b1_w_d49_r} + {17'b0, stored_round0_part0_r[35]};
+            stored_round0_low0_w_d50_r <= stored_round0_low0_w;
+            gradient_abs0_sign_d45_r <= gradient_abs0_sign_r;
+            gradient_abs0_sign_d46_r <= gradient_abs0_sign_d45_r;
+            gradient_abs0_sign_d47_r <= gradient_abs0_sign_d46_r;
+            gradient_abs0_sign_d48_r <= gradient_abs0_sign_d47_r;
+            gradient_abs0_sign_d49_r <= gradient_abs0_sign_d48_r;
+            gradient_abs0_sign_d50_r <= gradient_abs0_sign_d49_r;
+            stored_signed0_invert_r <= gradient_abs0_sign_d50_r ? ~stored_round0_w :
+                stored_round0_w;
+            gradient_abs0_sign_d51_r <= gradient_abs0_sign_d50_r;
+            stored_signed0_part0_r <= {1'b0, stored_signed0_a0_w} + {1'b0, stored_signed0_b0_w};
+            stored_signed0_a1_w_d52_r <= stored_signed0_a1_w;
+            stored_signed0_b1_w_d52_r <= stored_signed0_b1_w;
+            unused_stored_signed0_part1_r <= {1'b0, stored_signed0_a1_w_d52_r} + {1'b0,
+                        stored_signed0_b1_w_d52_r} + {17'b0, stored_signed0_part0_r[35]};
+            stored_signed0_low0_w_d53_r <= stored_signed0_low0_w;
+            mult_delta1_0_w_d1_r <= mult_delta1_0_w;
+            mult_delta1_0_w_d2_r <= mult_delta1_0_w_d1_r;
+            mult_delta1_0_w_d3_r <= mult_delta1_0_w_d2_r;
+            mult_delta1_0_w_d4_r <= mult_delta1_0_w_d3_r;
+            mult_delta1_0_w_d5_r <= mult_delta1_0_w_d4_r;
+            mult_delta1_0_w_d6_r <= mult_delta1_0_w_d5_r;
+            mult_delta1_0_w_d7_r <= mult_delta1_0_w_d6_r;
+            mult_delta1_0_w_d8_r <= mult_delta1_0_w_d7_r;
+            mult_delta1_0_w_d9_r <= mult_delta1_0_w_d8_r;
+            mult_delta1_0_w_d10_r <= mult_delta1_0_w_d9_r;
+            mult_delta1_0_w_d11_r <= mult_delta1_0_w_d10_r;
+            mult_delta1_0_w_d12_r <= mult_delta1_0_w_d11_r;
+            mult_delta1_0_w_d13_r <= mult_delta1_0_w_d12_r;
+            mult_delta1_0_w_d14_r <= mult_delta1_0_w_d13_r;
+            mult_delta1_0_w_d15_r <= mult_delta1_0_w_d14_r;
+            mult_delta1_0_w_d16_r <= mult_delta1_0_w_d15_r;
+            mult_delta1_0_w_d17_r <= mult_delta1_0_w_d16_r;
+            mult_delta1_0_w_d18_r <= mult_delta1_0_w_d17_r;
+            mult_delta1_0_w_d19_r <= mult_delta1_0_w_d18_r;
+            mult_delta1_0_w_d20_r <= mult_delta1_0_w_d19_r;
+            product1_0_r <= $signed(difference0_r) * $signed(mult_delta1_0_w_d20_r);
+            product1_0_p1_r <= product1_0_r;
+            product1_0_p2_r <= product1_0_p1_r;
+            mult_delta1_1_w_d1_r <= mult_delta1_1_w;
+            mult_delta1_1_w_d2_r <= mult_delta1_1_w_d1_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[13]) begin
+            mult_delta1_1_w_d3_r <= mult_delta1_1_w_d2_r;
+            mult_delta1_1_w_d4_r <= mult_delta1_1_w_d3_r;
+            mult_delta1_1_w_d5_r <= mult_delta1_1_w_d4_r;
+            mult_delta1_1_w_d6_r <= mult_delta1_1_w_d5_r;
+            mult_delta1_1_w_d7_r <= mult_delta1_1_w_d6_r;
+            mult_delta1_1_w_d8_r <= mult_delta1_1_w_d7_r;
+            mult_delta1_1_w_d9_r <= mult_delta1_1_w_d8_r;
+            mult_delta1_1_w_d10_r <= mult_delta1_1_w_d9_r;
+            mult_delta1_1_w_d11_r <= mult_delta1_1_w_d10_r;
+            mult_delta1_1_w_d12_r <= mult_delta1_1_w_d11_r;
+            mult_delta1_1_w_d13_r <= mult_delta1_1_w_d12_r;
+            mult_delta1_1_w_d14_r <= mult_delta1_1_w_d13_r;
+            mult_delta1_1_w_d15_r <= mult_delta1_1_w_d14_r;
+            mult_delta1_1_w_d16_r <= mult_delta1_1_w_d15_r;
+            mult_delta1_1_w_d17_r <= mult_delta1_1_w_d16_r;
+            mult_delta1_1_w_d18_r <= mult_delta1_1_w_d17_r;
+            mult_delta1_1_w_d19_r <= mult_delta1_1_w_d18_r;
+            mult_delta1_1_w_d20_r <= mult_delta1_1_w_d19_r;
+            product1_1_r <= $signed(difference1_r) * $signed(mult_delta1_1_w_d20_r);
+            product1_1_p1_r <= product1_1_r;
+            product1_1_p2_r <= product1_1_p1_r;
+            numerator1_part0_r <= {1'b0, numerator1_a0_w} + {1'b0, numerator1_b0_w};
+            numerator1_a1_w_d24_r <= numerator1_a1_w;
+            numerator1_b1_w_d24_r <= numerator1_b1_w;
+            unused_numerator1_part1_r <= {1'b0, numerator1_a1_w_d24_r} + {1'b0,
+                        numerator1_b1_w_d24_r} + {21'b0, numerator1_part0_r[35]};
+            numerator1_low0_w_d25_r <= numerator1_low0_w;
+            numerator_shift1_r <= numerator1_w << 4;
+            inverse1_r <= $signed(numerator_shift1_r) * $signed({1'b0, reciprocal_0_r_d26_r});
+            inverse1_p1_r <= inverse1_r;
+            inverse1_p2_r <= inverse1_p1_r;
+            inverse_abs1_sign_r <= inverse1_p2_r[86];
+            inverse_abs1_invert_r <= inverse1_p2_r[86] ? ~inverse1_p2_r : inverse1_p2_r;
+            inverse_abs1_part0_r <= {1'b0, inverse_abs1_a0_w} + {1'b0, inverse_abs1_b0_w};
+            inverse_abs1_a1_w_d31_r <= inverse_abs1_a1_w;
+            inverse_abs1_b1_w_d31_r <= inverse_abs1_b1_w;
+            inverse_abs1_part1_r <= {1'b0, inverse_abs1_a1_w_d31_r} + {1'b0,
+                inverse_abs1_b1_w_d31_r}
+                        + {35'b0, inverse_abs1_part0_r[35]};
+            inverse_abs1_a2_w_d31_r <= inverse_abs1_a2_w;
+            inverse_abs1_a2_w_d32_r <= inverse_abs1_a2_w_d31_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[14]) begin
+            inverse_abs1_b2_w_d31_r <= inverse_abs1_b2_w;
+            inverse_abs1_b2_w_d32_r <= inverse_abs1_b2_w_d31_r;
+            unused_inverse_abs1_part2_r <= {1'b0, inverse_abs1_a2_w_d32_r} + {1'b0,
+                        inverse_abs1_b2_w_d32_r} + {17'b0, inverse_abs1_part1_r[35]};
+            inverse_abs1_low1_w_d33_r <= inverse_abs1_low1_w;
+            inverse_abs1_low0_w_d32_r <= inverse_abs1_low0_w;
+            inverse_abs1_low0_w_d33_r <= inverse_abs1_low0_w_d32_r;
+            rounding_bit1_r <= 7'd29 + {1'b0, exponent_0_r};
+            rounding_shift1_r <= 7'd30 + {1'b0, exponent_0_r};
+            gradient_bias1_0_r <= gradient_bias1_0_w;
+            gradient_bias1_amt1_w_d2_r <= gradient_bias1_amt1_w;
+            gradient_bias1_1_r <= gradient_bias1_1_w;
+            gradient_bias1_amt2_w_d2_r <= gradient_bias1_amt2_w;
+            gradient_bias1_amt2_w_d3_r <= gradient_bias1_amt2_w_d2_r;
+            gradient_bias1_2_r <= gradient_bias1_2_w;
+            gradient_bias1_amt3_w_d2_r <= gradient_bias1_amt3_w;
+            gradient_bias1_amt3_w_d3_r <= gradient_bias1_amt3_w_d2_r;
+            gradient_bias1_amt3_w_d4_r <= gradient_bias1_amt3_w_d3_r;
+            gradient_bias1_3_r <= gradient_bias1_3_w;
+            gradient_bias1_3_r_d6_r <= gradient_bias1_3_r;
+            gradient_bias1_3_r_d7_r <= gradient_bias1_3_r_d6_r;
+            gradient_bias1_3_r_d8_r <= gradient_bias1_3_r_d7_r;
+            gradient_bias1_3_r_d9_r <= gradient_bias1_3_r_d8_r;
+            gradient_bias1_3_r_d10_r <= gradient_bias1_3_r_d9_r;
+            gradient_bias1_3_r_d11_r <= gradient_bias1_3_r_d10_r;
+            gradient_bias1_3_r_d12_r <= gradient_bias1_3_r_d11_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[15]) begin
+            gradient_bias1_3_r_d13_r <= gradient_bias1_3_r_d12_r;
+            gradient_bias1_3_r_d14_r <= gradient_bias1_3_r_d13_r;
+            gradient_bias1_3_r_d15_r <= gradient_bias1_3_r_d14_r;
+            gradient_bias1_3_r_d16_r <= gradient_bias1_3_r_d15_r;
+            gradient_bias1_3_r_d17_r <= gradient_bias1_3_r_d16_r;
+            gradient_bias1_3_r_d18_r <= gradient_bias1_3_r_d17_r;
+            gradient_bias1_3_r_d19_r <= gradient_bias1_3_r_d18_r;
+            gradient_bias1_3_r_d20_r <= gradient_bias1_3_r_d19_r;
+            gradient_bias1_3_r_d21_r <= gradient_bias1_3_r_d20_r;
+            gradient_bias1_3_r_d22_r <= gradient_bias1_3_r_d21_r;
+            gradient_bias1_3_r_d23_r <= gradient_bias1_3_r_d22_r;
+            gradient_bias1_3_r_d24_r <= gradient_bias1_3_r_d23_r;
+            gradient_bias1_3_r_d25_r <= gradient_bias1_3_r_d24_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[16]) begin
+            gradient_bias1_3_r_d26_r <= gradient_bias1_3_r_d25_r;
+            gradient_bias1_3_r_d27_r <= gradient_bias1_3_r_d26_r;
+            gradient_bias1_3_r_d28_r <= gradient_bias1_3_r_d27_r;
+            gradient_bias1_3_r_d29_r <= gradient_bias1_3_r_d28_r;
+            gradient_bias1_3_r_d30_r <= gradient_bias1_3_r_d29_r;
+            gradient_bias1_3_r_d31_r <= gradient_bias1_3_r_d30_r;
+            gradient_bias1_3_r_d32_r <= gradient_bias1_3_r_d31_r;
+            gradient_bias1_3_r_d33_r <= gradient_bias1_3_r_d32_r;
+            gradient_round1_part0_r <= {1'b0, gradient_round1_a0_w} + {1'b0, gradient_round1_b0_w};
+            gradient_round1_a1_w_d34_r <= gradient_round1_a1_w;
+            gradient_round1_b1_w_d34_r <= gradient_round1_b1_w;
+            gradient_round1_part1_r <= {1'b0, gradient_round1_a1_w_d34_r} + {1'b0,
+                        gradient_round1_b1_w_d34_r} + {35'b0, gradient_round1_part0_r[35]};
+            gradient_round1_a2_w_d34_r <= gradient_round1_a2_w;
+            gradient_round1_a2_w_d35_r <= gradient_round1_a2_w_d34_r;
+            gradient_round1_b2_w_d34_r <= gradient_round1_b2_w;
+            gradient_round1_b2_w_d35_r <= gradient_round1_b2_w_d34_r;
+            unused_gradient_round1_part2_r <= {1'b0, gradient_round1_a2_w_d35_r} + {1'b0,
+                        gradient_round1_b2_w_d35_r} + {18'b0, gradient_round1_part1_r[35]};
+            gradient_round1_low1_w_d36_r <= gradient_round1_low1_w;
+            gradient_round1_low0_w_d35_r <= gradient_round1_low0_w;
+            gradient_round1_low0_w_d36_r <= gradient_round1_low0_w_d35_r;
+            gradient_shift1_amt0_w_d2_r <= gradient_shift1_amt0_w;
+            gradient_shift1_amt0_w_d3_r <= gradient_shift1_amt0_w_d2_r;
+            gradient_shift1_amt0_w_d4_r <= gradient_shift1_amt0_w_d3_r;
+            gradient_shift1_amt0_w_d5_r <= gradient_shift1_amt0_w_d4_r;
+            gradient_shift1_amt0_w_d6_r <= gradient_shift1_amt0_w_d5_r;
+            gradient_shift1_amt0_w_d7_r <= gradient_shift1_amt0_w_d6_r;
+            gradient_shift1_amt0_w_d8_r <= gradient_shift1_amt0_w_d7_r;
+            gradient_shift1_amt0_w_d9_r <= gradient_shift1_amt0_w_d8_r;
+            gradient_shift1_amt0_w_d10_r <= gradient_shift1_amt0_w_d9_r;
+            gradient_shift1_amt0_w_d11_r <= gradient_shift1_amt0_w_d10_r;
+            gradient_shift1_amt0_w_d12_r <= gradient_shift1_amt0_w_d11_r;
+            gradient_shift1_amt0_w_d13_r <= gradient_shift1_amt0_w_d12_r;
+            gradient_shift1_amt0_w_d14_r <= gradient_shift1_amt0_w_d13_r;
+            gradient_shift1_amt0_w_d15_r <= gradient_shift1_amt0_w_d14_r;
+            gradient_shift1_amt0_w_d16_r <= gradient_shift1_amt0_w_d15_r;
+            gradient_shift1_amt0_w_d17_r <= gradient_shift1_amt0_w_d16_r;
+            gradient_shift1_amt0_w_d18_r <= gradient_shift1_amt0_w_d17_r;
+            gradient_shift1_amt0_w_d19_r <= gradient_shift1_amt0_w_d18_r;
+            gradient_shift1_amt0_w_d20_r <= gradient_shift1_amt0_w_d19_r;
+            gradient_shift1_amt0_w_d21_r <= gradient_shift1_amt0_w_d20_r;
+            gradient_shift1_amt0_w_d22_r <= gradient_shift1_amt0_w_d21_r;
+            gradient_shift1_amt0_w_d23_r <= gradient_shift1_amt0_w_d22_r;
+            gradient_shift1_amt0_w_d24_r <= gradient_shift1_amt0_w_d23_r;
+            gradient_shift1_amt0_w_d25_r <= gradient_shift1_amt0_w_d24_r;
+            gradient_shift1_amt0_w_d26_r <= gradient_shift1_amt0_w_d25_r;
+            gradient_shift1_amt0_w_d27_r <= gradient_shift1_amt0_w_d26_r;
+            gradient_shift1_amt0_w_d28_r <= gradient_shift1_amt0_w_d27_r;
+            gradient_shift1_amt0_w_d29_r <= gradient_shift1_amt0_w_d28_r;
+            gradient_shift1_amt0_w_d30_r <= gradient_shift1_amt0_w_d29_r;
+            gradient_shift1_amt0_w_d31_r <= gradient_shift1_amt0_w_d30_r;
+            gradient_shift1_amt0_w_d32_r <= gradient_shift1_amt0_w_d31_r;
+            gradient_shift1_amt0_w_d33_r <= gradient_shift1_amt0_w_d32_r;
+            gradient_shift1_amt0_w_d34_r <= gradient_shift1_amt0_w_d33_r;
+            gradient_shift1_amt0_w_d35_r <= gradient_shift1_amt0_w_d34_r;
+            gradient_shift1_amt0_w_d36_r <= gradient_shift1_amt0_w_d35_r;
+            gradient_shift1_0_r <= gradient_shift1_0_w;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[17]) begin
+            gradient_shift1_amt1_w_d2_r <= gradient_shift1_amt1_w;
+            gradient_shift1_amt1_w_d3_r <= gradient_shift1_amt1_w_d2_r;
+            gradient_shift1_amt1_w_d4_r <= gradient_shift1_amt1_w_d3_r;
+            gradient_shift1_amt1_w_d5_r <= gradient_shift1_amt1_w_d4_r;
+            gradient_shift1_amt1_w_d6_r <= gradient_shift1_amt1_w_d5_r;
+            gradient_shift1_amt1_w_d7_r <= gradient_shift1_amt1_w_d6_r;
+            gradient_shift1_amt1_w_d8_r <= gradient_shift1_amt1_w_d7_r;
+            gradient_shift1_amt1_w_d9_r <= gradient_shift1_amt1_w_d8_r;
+            gradient_shift1_amt1_w_d10_r <= gradient_shift1_amt1_w_d9_r;
+            gradient_shift1_amt1_w_d11_r <= gradient_shift1_amt1_w_d10_r;
+            gradient_shift1_amt1_w_d12_r <= gradient_shift1_amt1_w_d11_r;
+            gradient_shift1_amt1_w_d13_r <= gradient_shift1_amt1_w_d12_r;
+            gradient_shift1_amt1_w_d14_r <= gradient_shift1_amt1_w_d13_r;
+            gradient_shift1_amt1_w_d15_r <= gradient_shift1_amt1_w_d14_r;
+            gradient_shift1_amt1_w_d16_r <= gradient_shift1_amt1_w_d15_r;
+            gradient_shift1_amt1_w_d17_r <= gradient_shift1_amt1_w_d16_r;
+            gradient_shift1_amt1_w_d18_r <= gradient_shift1_amt1_w_d17_r;
+            gradient_shift1_amt1_w_d19_r <= gradient_shift1_amt1_w_d18_r;
+            gradient_shift1_amt1_w_d20_r <= gradient_shift1_amt1_w_d19_r;
+            gradient_shift1_amt1_w_d21_r <= gradient_shift1_amt1_w_d20_r;
+            gradient_shift1_amt1_w_d22_r <= gradient_shift1_amt1_w_d21_r;
+            gradient_shift1_amt1_w_d23_r <= gradient_shift1_amt1_w_d22_r;
+            gradient_shift1_amt1_w_d24_r <= gradient_shift1_amt1_w_d23_r;
+            gradient_shift1_amt1_w_d25_r <= gradient_shift1_amt1_w_d24_r;
+            gradient_shift1_amt1_w_d26_r <= gradient_shift1_amt1_w_d25_r;
+            gradient_shift1_amt1_w_d27_r <= gradient_shift1_amt1_w_d26_r;
+            gradient_shift1_amt1_w_d28_r <= gradient_shift1_amt1_w_d27_r;
+            gradient_shift1_amt1_w_d29_r <= gradient_shift1_amt1_w_d28_r;
+            gradient_shift1_amt1_w_d30_r <= gradient_shift1_amt1_w_d29_r;
+            gradient_shift1_amt1_w_d31_r <= gradient_shift1_amt1_w_d30_r;
+            gradient_shift1_amt1_w_d32_r <= gradient_shift1_amt1_w_d31_r;
+            gradient_shift1_amt1_w_d33_r <= gradient_shift1_amt1_w_d32_r;
+            gradient_shift1_amt1_w_d34_r <= gradient_shift1_amt1_w_d33_r;
+            gradient_shift1_amt1_w_d35_r <= gradient_shift1_amt1_w_d34_r;
+            gradient_shift1_amt1_w_d36_r <= gradient_shift1_amt1_w_d35_r;
+            gradient_shift1_amt1_w_d37_r <= gradient_shift1_amt1_w_d36_r;
+            gradient_shift1_1_r <= gradient_shift1_1_w;
+            gradient_shift1_amt2_w_d2_r <= gradient_shift1_amt2_w;
+            gradient_shift1_amt2_w_d3_r <= gradient_shift1_amt2_w_d2_r;
+            gradient_shift1_amt2_w_d4_r <= gradient_shift1_amt2_w_d3_r;
+            gradient_shift1_amt2_w_d5_r <= gradient_shift1_amt2_w_d4_r;
+            gradient_shift1_amt2_w_d6_r <= gradient_shift1_amt2_w_d5_r;
+            gradient_shift1_amt2_w_d7_r <= gradient_shift1_amt2_w_d6_r;
+            gradient_shift1_amt2_w_d8_r <= gradient_shift1_amt2_w_d7_r;
+            gradient_shift1_amt2_w_d9_r <= gradient_shift1_amt2_w_d8_r;
+            gradient_shift1_amt2_w_d10_r <= gradient_shift1_amt2_w_d9_r;
+            gradient_shift1_amt2_w_d11_r <= gradient_shift1_amt2_w_d10_r;
+            gradient_shift1_amt2_w_d12_r <= gradient_shift1_amt2_w_d11_r;
+            gradient_shift1_amt2_w_d13_r <= gradient_shift1_amt2_w_d12_r;
+            gradient_shift1_amt2_w_d14_r <= gradient_shift1_amt2_w_d13_r;
+            gradient_shift1_amt2_w_d15_r <= gradient_shift1_amt2_w_d14_r;
+            gradient_shift1_amt2_w_d16_r <= gradient_shift1_amt2_w_d15_r;
+            gradient_shift1_amt2_w_d17_r <= gradient_shift1_amt2_w_d16_r;
+            gradient_shift1_amt2_w_d18_r <= gradient_shift1_amt2_w_d17_r;
+            gradient_shift1_amt2_w_d19_r <= gradient_shift1_amt2_w_d18_r;
+            gradient_shift1_amt2_w_d20_r <= gradient_shift1_amt2_w_d19_r;
+            gradient_shift1_amt2_w_d21_r <= gradient_shift1_amt2_w_d20_r;
+            gradient_shift1_amt2_w_d22_r <= gradient_shift1_amt2_w_d21_r;
+            gradient_shift1_amt2_w_d23_r <= gradient_shift1_amt2_w_d22_r;
+            gradient_shift1_amt2_w_d24_r <= gradient_shift1_amt2_w_d23_r;
+            gradient_shift1_amt2_w_d25_r <= gradient_shift1_amt2_w_d24_r;
+            gradient_shift1_amt2_w_d26_r <= gradient_shift1_amt2_w_d25_r;
+            gradient_shift1_amt2_w_d27_r <= gradient_shift1_amt2_w_d26_r;
+            gradient_shift1_amt2_w_d28_r <= gradient_shift1_amt2_w_d27_r;
+            gradient_shift1_amt2_w_d29_r <= gradient_shift1_amt2_w_d28_r;
+            gradient_shift1_amt2_w_d30_r <= gradient_shift1_amt2_w_d29_r;
+            gradient_shift1_amt2_w_d31_r <= gradient_shift1_amt2_w_d30_r;
+            gradient_shift1_amt2_w_d32_r <= gradient_shift1_amt2_w_d31_r;
+            gradient_shift1_amt2_w_d33_r <= gradient_shift1_amt2_w_d32_r;
+            gradient_shift1_amt2_w_d34_r <= gradient_shift1_amt2_w_d33_r;
+            gradient_shift1_amt2_w_d35_r <= gradient_shift1_amt2_w_d34_r;
+            gradient_shift1_amt2_w_d36_r <= gradient_shift1_amt2_w_d35_r;
+            gradient_shift1_amt2_w_d37_r <= gradient_shift1_amt2_w_d36_r;
+            gradient_shift1_amt2_w_d38_r <= gradient_shift1_amt2_w_d37_r;
+            gradient_shift1_2_r <= gradient_shift1_2_w;
+            gradient_shift1_amt3_w_d2_r <= gradient_shift1_amt3_w;
+            gradient_shift1_amt3_w_d3_r <= gradient_shift1_amt3_w_d2_r;
+            gradient_shift1_amt3_w_d4_r <= gradient_shift1_amt3_w_d3_r;
+            gradient_shift1_amt3_w_d5_r <= gradient_shift1_amt3_w_d4_r;
+            gradient_shift1_amt3_w_d6_r <= gradient_shift1_amt3_w_d5_r;
+            gradient_shift1_amt3_w_d7_r <= gradient_shift1_amt3_w_d6_r;
+            gradient_shift1_amt3_w_d8_r <= gradient_shift1_amt3_w_d7_r;
+            gradient_shift1_amt3_w_d9_r <= gradient_shift1_amt3_w_d8_r;
+            gradient_shift1_amt3_w_d10_r <= gradient_shift1_amt3_w_d9_r;
+            gradient_shift1_amt3_w_d11_r <= gradient_shift1_amt3_w_d10_r;
+            gradient_shift1_amt3_w_d12_r <= gradient_shift1_amt3_w_d11_r;
+            gradient_shift1_amt3_w_d13_r <= gradient_shift1_amt3_w_d12_r;
+            gradient_shift1_amt3_w_d14_r <= gradient_shift1_amt3_w_d13_r;
+            gradient_shift1_amt3_w_d15_r <= gradient_shift1_amt3_w_d14_r;
+            gradient_shift1_amt3_w_d16_r <= gradient_shift1_amt3_w_d15_r;
+            gradient_shift1_amt3_w_d17_r <= gradient_shift1_amt3_w_d16_r;
+            gradient_shift1_amt3_w_d18_r <= gradient_shift1_amt3_w_d17_r;
+            gradient_shift1_amt3_w_d19_r <= gradient_shift1_amt3_w_d18_r;
+            gradient_shift1_amt3_w_d20_r <= gradient_shift1_amt3_w_d19_r;
+            gradient_shift1_amt3_w_d21_r <= gradient_shift1_amt3_w_d20_r;
+            gradient_shift1_amt3_w_d22_r <= gradient_shift1_amt3_w_d21_r;
+            gradient_shift1_amt3_w_d23_r <= gradient_shift1_amt3_w_d22_r;
+            gradient_shift1_amt3_w_d24_r <= gradient_shift1_amt3_w_d23_r;
+            gradient_shift1_amt3_w_d25_r <= gradient_shift1_amt3_w_d24_r;
+            gradient_shift1_amt3_w_d26_r <= gradient_shift1_amt3_w_d25_r;
+            gradient_shift1_amt3_w_d27_r <= gradient_shift1_amt3_w_d26_r;
+            gradient_shift1_amt3_w_d28_r <= gradient_shift1_amt3_w_d27_r;
+            gradient_shift1_amt3_w_d29_r <= gradient_shift1_amt3_w_d28_r;
+            gradient_shift1_amt3_w_d30_r <= gradient_shift1_amt3_w_d29_r;
+            gradient_shift1_amt3_w_d31_r <= gradient_shift1_amt3_w_d30_r;
+            gradient_shift1_amt3_w_d32_r <= gradient_shift1_amt3_w_d31_r;
+            gradient_shift1_amt3_w_d33_r <= gradient_shift1_amt3_w_d32_r;
+            gradient_shift1_amt3_w_d34_r <= gradient_shift1_amt3_w_d33_r;
+            gradient_shift1_amt3_w_d35_r <= gradient_shift1_amt3_w_d34_r;
+            gradient_shift1_amt3_w_d36_r <= gradient_shift1_amt3_w_d35_r;
+            gradient_shift1_amt3_w_d37_r <= gradient_shift1_amt3_w_d36_r;
+            gradient_shift1_amt3_w_d38_r <= gradient_shift1_amt3_w_d37_r;
+            gradient_shift1_amt3_w_d39_r <= gradient_shift1_amt3_w_d38_r;
+            unused_gradient_shift1_3_r <= gradient_shift1_3_w;
+            inverse_abs1_sign_d31_r <= inverse_abs1_sign_r;
+            inverse_abs1_sign_d32_r <= inverse_abs1_sign_d31_r;
+            inverse_abs1_sign_d33_r <= inverse_abs1_sign_d32_r;
+            inverse_abs1_sign_d34_r <= inverse_abs1_sign_d33_r;
+            inverse_abs1_sign_d35_r <= inverse_abs1_sign_d34_r;
+            inverse_abs1_sign_d36_r <= inverse_abs1_sign_d35_r;
+            inverse_abs1_sign_d37_r <= inverse_abs1_sign_d36_r;
+            inverse_abs1_sign_d38_r <= inverse_abs1_sign_d37_r;
+            inverse_abs1_sign_d39_r <= inverse_abs1_sign_d38_r;
+            inverse_abs1_sign_d40_r <= inverse_abs1_sign_d39_r;
+            gradient_signed1_invert_r <= inverse_abs1_sign_d40_r ? ~gradient56_1_w : gradient56_1_w;
+            inverse_abs1_sign_d41_r <= inverse_abs1_sign_d40_r;
+            gradient_signed1_part0_r <= {1'b0, gradient_signed1_a0_w} + {1'b0,
+                gradient_signed1_b0_w};
+            gradient_signed1_a1_w_d42_r <= gradient_signed1_a1_w;
+            gradient_signed1_b1_w_d42_r <= gradient_signed1_b1_w;
+            unused_gradient_signed1_part1_r <= {1'b0, gradient_signed1_a1_w_d42_r} + {1'b0,
+                        gradient_signed1_b1_w_d42_r} + {21'b0, gradient_signed1_part0_r[35]};
+            gradient_signed1_low0_w_d43_r <= gradient_signed1_low0_w;
+            origin_offset1_w_d1_r <= origin_offset1_w;
+            origin_offset1_w_d2_r <= origin_offset1_w_d1_r;
+            origin_offset1_w_d3_r <= origin_offset1_w_d2_r;
+            origin_offset1_w_d4_r <= origin_offset1_w_d3_r;
+            origin_offset1_w_d5_r <= origin_offset1_w_d4_r;
+            origin_offset1_w_d6_r <= origin_offset1_w_d5_r;
+            origin_offset1_w_d7_r <= origin_offset1_w_d6_r;
+            origin_offset1_w_d8_r <= origin_offset1_w_d7_r;
+            origin_offset1_w_d9_r <= origin_offset1_w_d8_r;
+            origin_offset1_w_d10_r <= origin_offset1_w_d9_r;
+            origin_offset1_w_d11_r <= origin_offset1_w_d10_r;
+            origin_offset1_w_d12_r <= origin_offset1_w_d11_r;
+            origin_offset1_w_d13_r <= origin_offset1_w_d12_r;
+            origin_offset1_w_d14_r <= origin_offset1_w_d13_r;
+            origin_offset1_w_d15_r <= origin_offset1_w_d14_r;
+            origin_offset1_w_d16_r <= origin_offset1_w_d15_r;
+            origin_offset1_w_d17_r <= origin_offset1_w_d16_r;
+            origin_offset1_w_d18_r <= origin_offset1_w_d17_r;
+            origin_offset1_w_d19_r <= origin_offset1_w_d18_r;
+            origin_offset1_w_d20_r <= origin_offset1_w_d19_r;
+            origin_offset1_w_d21_r <= origin_offset1_w_d20_r;
+            origin_offset1_w_d22_r <= origin_offset1_w_d21_r;
+            origin_offset1_w_d23_r <= origin_offset1_w_d22_r;
+            origin_offset1_w_d24_r <= origin_offset1_w_d23_r;
+            origin_offset1_w_d25_r <= origin_offset1_w_d24_r;
+            origin_offset1_w_d26_r <= origin_offset1_w_d25_r;
+            origin_offset1_w_d27_r <= origin_offset1_w_d26_r;
+            origin_offset1_w_d28_r <= origin_offset1_w_d27_r;
+            origin_offset1_w_d29_r <= origin_offset1_w_d28_r;
+            origin_offset1_w_d30_r <= origin_offset1_w_d29_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[18]) begin
+            origin_offset1_w_d31_r <= origin_offset1_w_d30_r;
+            origin_offset1_w_d32_r <= origin_offset1_w_d31_r;
+            origin_offset1_w_d33_r <= origin_offset1_w_d32_r;
+            origin_offset1_w_d34_r <= origin_offset1_w_d33_r;
+            origin_offset1_w_d35_r <= origin_offset1_w_d34_r;
+            origin_offset1_w_d36_r <= origin_offset1_w_d35_r;
+            origin_offset1_w_d37_r <= origin_offset1_w_d36_r;
+            origin_offset1_w_d38_r <= origin_offset1_w_d37_r;
+            origin_offset1_w_d39_r <= origin_offset1_w_d38_r;
+            origin_offset1_w_d40_r <= origin_offset1_w_d39_r;
+            origin_offset1_w_d41_r <= origin_offset1_w_d40_r;
+            origin_offset1_w_d42_r <= origin_offset1_w_d41_r;
+            origin_offset1_w_d43_r <= origin_offset1_w_d42_r;
+            origin_product1_r <= $signed(gradient_signed1_w) * $signed(origin_offset1_w_d43_r);
+            origin_product1_p1_r <= origin_product1_r;
+            origin_product1_p2_r <= origin_product1_p1_r;
+            drop_gradient1_r <= tag_0_r[2:0] == 0 ? 4'd7 : tag_0_r[2:0] < 4 ? 4'd3 : 4'd11;
+            gradient_abs1_sign_r <= gradient_signed1_w[55];
+            gradient_abs1_invert_r <= gradient_signed1_w[55] ? ~gradient_signed1_w :
+                        gradient_signed1_w;
+            gradient_abs1_part0_r <= {1'b0, gradient_abs1_a0_w} + {1'b0, gradient_abs1_b0_w};
+            gradient_abs1_a1_w_d45_r <= gradient_abs1_a1_w;
+            gradient_abs1_b1_w_d45_r <= gradient_abs1_b1_w;
+            unused_gradient_abs1_part1_r <= {1'b0, gradient_abs1_a1_w_d45_r} + {1'b0,
+                        gradient_abs1_b1_w_d45_r} + {21'b0, gradient_abs1_part0_r[35]};
+            gradient_abs1_low0_w_d46_r <= gradient_abs1_low0_w;
+            gradient_drop1_amt0_w_d2_r <= gradient_drop1_amt0_w;
+            gradient_drop1_amt0_w_d3_r <= gradient_drop1_amt0_w_d2_r;
+            gradient_drop1_amt0_w_d4_r <= gradient_drop1_amt0_w_d3_r;
+            gradient_drop1_amt0_w_d5_r <= gradient_drop1_amt0_w_d4_r;
+            gradient_drop1_amt0_w_d6_r <= gradient_drop1_amt0_w_d5_r;
+            gradient_drop1_amt0_w_d7_r <= gradient_drop1_amt0_w_d6_r;
+            gradient_drop1_amt0_w_d8_r <= gradient_drop1_amt0_w_d7_r;
+            gradient_drop1_amt0_w_d9_r <= gradient_drop1_amt0_w_d8_r;
+            gradient_drop1_amt0_w_d10_r <= gradient_drop1_amt0_w_d9_r;
+            gradient_drop1_amt0_w_d11_r <= gradient_drop1_amt0_w_d10_r;
+            gradient_drop1_amt0_w_d12_r <= gradient_drop1_amt0_w_d11_r;
+            gradient_drop1_amt0_w_d13_r <= gradient_drop1_amt0_w_d12_r;
+            gradient_drop1_amt0_w_d14_r <= gradient_drop1_amt0_w_d13_r;
+            gradient_drop1_amt0_w_d15_r <= gradient_drop1_amt0_w_d14_r;
+            gradient_drop1_amt0_w_d16_r <= gradient_drop1_amt0_w_d15_r;
+            gradient_drop1_amt0_w_d17_r <= gradient_drop1_amt0_w_d16_r;
+            gradient_drop1_amt0_w_d18_r <= gradient_drop1_amt0_w_d17_r;
+            gradient_drop1_amt0_w_d19_r <= gradient_drop1_amt0_w_d18_r;
+            gradient_drop1_amt0_w_d20_r <= gradient_drop1_amt0_w_d19_r;
+            gradient_drop1_amt0_w_d21_r <= gradient_drop1_amt0_w_d20_r;
+            gradient_drop1_amt0_w_d22_r <= gradient_drop1_amt0_w_d21_r;
+            gradient_drop1_amt0_w_d23_r <= gradient_drop1_amt0_w_d22_r;
+            gradient_drop1_amt0_w_d24_r <= gradient_drop1_amt0_w_d23_r;
+            gradient_drop1_amt0_w_d25_r <= gradient_drop1_amt0_w_d24_r;
+            gradient_drop1_amt0_w_d26_r <= gradient_drop1_amt0_w_d25_r;
+            gradient_drop1_amt0_w_d27_r <= gradient_drop1_amt0_w_d26_r;
+            gradient_drop1_amt0_w_d28_r <= gradient_drop1_amt0_w_d27_r;
+            gradient_drop1_amt0_w_d29_r <= gradient_drop1_amt0_w_d28_r;
+            gradient_drop1_amt0_w_d30_r <= gradient_drop1_amt0_w_d29_r;
+            gradient_drop1_amt0_w_d31_r <= gradient_drop1_amt0_w_d30_r;
+            gradient_drop1_amt0_w_d32_r <= gradient_drop1_amt0_w_d31_r;
+            gradient_drop1_amt0_w_d33_r <= gradient_drop1_amt0_w_d32_r;
+            gradient_drop1_amt0_w_d34_r <= gradient_drop1_amt0_w_d33_r;
+            gradient_drop1_amt0_w_d35_r <= gradient_drop1_amt0_w_d34_r;
+            gradient_drop1_amt0_w_d36_r <= gradient_drop1_amt0_w_d35_r;
+            gradient_drop1_amt0_w_d37_r <= gradient_drop1_amt0_w_d36_r;
+            gradient_drop1_amt0_w_d38_r <= gradient_drop1_amt0_w_d37_r;
+            gradient_drop1_amt0_w_d39_r <= gradient_drop1_amt0_w_d38_r;
+            gradient_drop1_amt0_w_d40_r <= gradient_drop1_amt0_w_d39_r;
+            gradient_drop1_amt0_w_d41_r <= gradient_drop1_amt0_w_d40_r;
+            gradient_drop1_amt0_w_d42_r <= gradient_drop1_amt0_w_d41_r;
+            gradient_drop1_amt0_w_d43_r <= gradient_drop1_amt0_w_d42_r;
+            gradient_drop1_amt0_w_d44_r <= gradient_drop1_amt0_w_d43_r;
+            gradient_drop1_amt0_w_d45_r <= gradient_drop1_amt0_w_d44_r;
+            gradient_drop1_amt0_w_d46_r <= gradient_drop1_amt0_w_d45_r;
+            gradient_drop1_0_r <= gradient_drop1_0_w;
+            gradient_drop1_amt1_w_d2_r <= gradient_drop1_amt1_w;
+            gradient_drop1_amt1_w_d3_r <= gradient_drop1_amt1_w_d2_r;
+            gradient_drop1_amt1_w_d4_r <= gradient_drop1_amt1_w_d3_r;
+            gradient_drop1_amt1_w_d5_r <= gradient_drop1_amt1_w_d4_r;
+            gradient_drop1_amt1_w_d6_r <= gradient_drop1_amt1_w_d5_r;
+            gradient_drop1_amt1_w_d7_r <= gradient_drop1_amt1_w_d6_r;
+            gradient_drop1_amt1_w_d8_r <= gradient_drop1_amt1_w_d7_r;
+            gradient_drop1_amt1_w_d9_r <= gradient_drop1_amt1_w_d8_r;
+            gradient_drop1_amt1_w_d10_r <= gradient_drop1_amt1_w_d9_r;
+            gradient_drop1_amt1_w_d11_r <= gradient_drop1_amt1_w_d10_r;
+            gradient_drop1_amt1_w_d12_r <= gradient_drop1_amt1_w_d11_r;
+            gradient_drop1_amt1_w_d13_r <= gradient_drop1_amt1_w_d12_r;
+            gradient_drop1_amt1_w_d14_r <= gradient_drop1_amt1_w_d13_r;
+            gradient_drop1_amt1_w_d15_r <= gradient_drop1_amt1_w_d14_r;
+            gradient_drop1_amt1_w_d16_r <= gradient_drop1_amt1_w_d15_r;
+            gradient_drop1_amt1_w_d17_r <= gradient_drop1_amt1_w_d16_r;
+            gradient_drop1_amt1_w_d18_r <= gradient_drop1_amt1_w_d17_r;
+            gradient_drop1_amt1_w_d19_r <= gradient_drop1_amt1_w_d18_r;
+            gradient_drop1_amt1_w_d20_r <= gradient_drop1_amt1_w_d19_r;
+            gradient_drop1_amt1_w_d21_r <= gradient_drop1_amt1_w_d20_r;
+            gradient_drop1_amt1_w_d22_r <= gradient_drop1_amt1_w_d21_r;
+            gradient_drop1_amt1_w_d23_r <= gradient_drop1_amt1_w_d22_r;
+            gradient_drop1_amt1_w_d24_r <= gradient_drop1_amt1_w_d23_r;
+            gradient_drop1_amt1_w_d25_r <= gradient_drop1_amt1_w_d24_r;
+            gradient_drop1_amt1_w_d26_r <= gradient_drop1_amt1_w_d25_r;
+            gradient_drop1_amt1_w_d27_r <= gradient_drop1_amt1_w_d26_r;
+            gradient_drop1_amt1_w_d28_r <= gradient_drop1_amt1_w_d27_r;
+            gradient_drop1_amt1_w_d29_r <= gradient_drop1_amt1_w_d28_r;
+            gradient_drop1_amt1_w_d30_r <= gradient_drop1_amt1_w_d29_r;
+            gradient_drop1_amt1_w_d31_r <= gradient_drop1_amt1_w_d30_r;
+            gradient_drop1_amt1_w_d32_r <= gradient_drop1_amt1_w_d31_r;
+            gradient_drop1_amt1_w_d33_r <= gradient_drop1_amt1_w_d32_r;
+            gradient_drop1_amt1_w_d34_r <= gradient_drop1_amt1_w_d33_r;
+            gradient_drop1_amt1_w_d35_r <= gradient_drop1_amt1_w_d34_r;
+            gradient_drop1_amt1_w_d36_r <= gradient_drop1_amt1_w_d35_r;
+            gradient_drop1_amt1_w_d37_r <= gradient_drop1_amt1_w_d36_r;
+            gradient_drop1_amt1_w_d38_r <= gradient_drop1_amt1_w_d37_r;
+            gradient_drop1_amt1_w_d39_r <= gradient_drop1_amt1_w_d38_r;
+            gradient_drop1_amt1_w_d40_r <= gradient_drop1_amt1_w_d39_r;
+            gradient_drop1_amt1_w_d41_r <= gradient_drop1_amt1_w_d40_r;
+            gradient_drop1_amt1_w_d42_r <= gradient_drop1_amt1_w_d41_r;
+            gradient_drop1_amt1_w_d43_r <= gradient_drop1_amt1_w_d42_r;
+            gradient_drop1_amt1_w_d44_r <= gradient_drop1_amt1_w_d43_r;
+            gradient_drop1_amt1_w_d45_r <= gradient_drop1_amt1_w_d44_r;
+            gradient_drop1_amt1_w_d46_r <= gradient_drop1_amt1_w_d45_r;
+            gradient_drop1_amt1_w_d47_r <= gradient_drop1_amt1_w_d46_r;
+            unused_gradient_drop1_1_r <= gradient_drop1_1_w;
+            stored_round1_part0_r <= {1'b0, stored_round1_a0_w} + {1'b0, stored_round1_b0_w};
+            stored_round1_a1_w_d49_r <= stored_round1_a1_w;
+            stored_round1_b1_w_d49_r <= stored_round1_b1_w;
+            unused_stored_round1_part1_r <= {1'b0, stored_round1_a1_w_d49_r} + {1'b0,
+                        stored_round1_b1_w_d49_r} + {17'b0, stored_round1_part0_r[35]};
+            stored_round1_low0_w_d50_r <= stored_round1_low0_w;
+            gradient_abs1_sign_d45_r <= gradient_abs1_sign_r;
+            gradient_abs1_sign_d46_r <= gradient_abs1_sign_d45_r;
+            gradient_abs1_sign_d47_r <= gradient_abs1_sign_d46_r;
+            gradient_abs1_sign_d48_r <= gradient_abs1_sign_d47_r;
+            gradient_abs1_sign_d49_r <= gradient_abs1_sign_d48_r;
+            gradient_abs1_sign_d50_r <= gradient_abs1_sign_d49_r;
+            stored_signed1_invert_r <= gradient_abs1_sign_d50_r ? ~stored_round1_w :
+                stored_round1_w;
+            gradient_abs1_sign_d51_r <= gradient_abs1_sign_d50_r;
+            stored_signed1_part0_r <= {1'b0, stored_signed1_a0_w} + {1'b0, stored_signed1_b0_w};
+            stored_signed1_a1_w_d52_r <= stored_signed1_a1_w;
+            stored_signed1_b1_w_d52_r <= stored_signed1_b1_w;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[19]) begin
+            unused_stored_signed1_part1_r <= {1'b0, stored_signed1_a1_w_d52_r} + {1'b0,
+                        stored_signed1_b1_w_d52_r} + {17'b0, stored_signed1_part0_r[35]};
+            stored_signed1_low0_w_d53_r <= stored_signed1_low0_w;
+            origin_sum_part0_r <= {1'b0, origin_sum_a0_w} + {1'b0, origin_sum_b0_w};
+            origin_sum_a1_w_d47_r <= origin_sum_a1_w;
+            origin_sum_b1_w_d47_r <= origin_sum_b1_w;
+            origin_sum_part1_r <= {1'b0, origin_sum_a1_w_d47_r} + {1'b0, origin_sum_b1_w_d47_r} +
+                        {35'b0, origin_sum_part0_r[35]};
+            origin_sum_a2_w_d47_r <= origin_sum_a2_w;
+            origin_sum_a2_w_d48_r <= origin_sum_a2_w_d47_r;
+            origin_sum_b2_w_d47_r <= origin_sum_b2_w;
+            origin_sum_b2_w_d48_r <= origin_sum_b2_w_d47_r;
+            unused_origin_sum_part2_r <= {1'b0, origin_sum_a2_w_d48_r} + {1'b0,
+                        origin_sum_b2_w_d48_r} + {5'b0, origin_sum_part1_r[35]};
+            origin_sum_low1_w_d49_r <= origin_sum_low1_w;
+            origin_sum_low0_w_d48_r <= origin_sum_low0_w;
+            origin_sum_low0_w_d49_r <= origin_sum_low0_w_d48_r;
+            origin_absolute_sign_r <= origin_sum_w[74];
+            origin_absolute_invert_r <= origin_sum_w[74] ? ~origin_sum_w : origin_sum_w;
+            origin_absolute_part0_r <= {1'b0, origin_absolute_a0_w} + {1'b0, origin_absolute_b0_w};
+            origin_absolute_a1_w_d51_r <= origin_absolute_a1_w;
+            origin_absolute_b1_w_d51_r <= origin_absolute_b1_w;
+            origin_absolute_part1_r <= {1'b0, origin_absolute_a1_w_d51_r} + {1'b0,
+                        origin_absolute_b1_w_d51_r} + {35'b0, origin_absolute_part0_r[35]};
+            origin_absolute_a2_w_d51_r <= origin_absolute_a2_w;
+            origin_absolute_a2_w_d52_r <= origin_absolute_a2_w_d51_r;
+            origin_absolute_b2_w_d51_r <= origin_absolute_b2_w;
+            origin_absolute_b2_w_d52_r <= origin_absolute_b2_w_d51_r;
+            unused_origin_absolute_part2_r <= {1'b0, origin_absolute_a2_w_d52_r} + {1'b0,
+                        origin_absolute_b2_w_d52_r} + {5'b0, origin_absolute_part1_r[35]};
+            origin_absolute_low1_w_d53_r <= origin_absolute_low1_w;
+            origin_absolute_low0_w_d52_r <= origin_absolute_low0_w;
+            origin_absolute_low0_w_d53_r <= origin_absolute_low0_w_d52_r;
+            origin_round_part0_r <= {1'b0, origin_round_a0_w} + {1'b0, origin_round_b0_w};
+            origin_round_a1_w_d54_r <= origin_round_a1_w;
+            origin_round_b1_w_d54_r <= origin_round_b1_w;
+            origin_round_part1_r <= {1'b0, origin_round_a1_w_d54_r} + {1'b0,
+                origin_round_b1_w_d54_r}
+                        + {35'b0, origin_round_part0_r[35]};
+            origin_round_a2_w_d54_r <= origin_round_a2_w;
+            origin_round_a2_w_d55_r <= origin_round_a2_w_d54_r;
+            origin_round_b2_w_d54_r <= origin_round_b2_w;
+            origin_round_b2_w_d55_r <= origin_round_b2_w_d54_r;
+            unused_origin_round_part2_r <= {1'b0, origin_round_a2_w_d55_r} + {1'b0,
+                        origin_round_b2_w_d55_r} + {5'b0, origin_round_part1_r[35]};
+            origin_round_low1_w_d56_r <= origin_round_low1_w;
+            origin_round_low0_w_d55_r <= origin_round_low0_w;
+            origin_round_low0_w_d56_r <= origin_round_low0_w_d55_r;
+            origin_shift_r <= origin_round_w >> 4;
+            origin_absolute_sign_d51_r <= origin_absolute_sign_r;
+            origin_absolute_sign_d52_r <= origin_absolute_sign_d51_r;
+            origin_absolute_sign_d53_r <= origin_absolute_sign_d52_r;
+            origin_absolute_sign_d54_r <= origin_absolute_sign_d53_r;
+            origin_absolute_sign_d55_r <= origin_absolute_sign_d54_r;
+            origin_absolute_sign_d56_r <= origin_absolute_sign_d55_r;
+            origin_absolute_sign_d57_r <= origin_absolute_sign_d56_r;
+            origin_signed_invert_r <= origin_absolute_sign_d57_r ? ~origin_shift_r : origin_shift_r;
+            origin_absolute_sign_d58_r <= origin_absolute_sign_d57_r;
+            origin_signed_part0_r <= {1'b0, origin_signed_a0_w} + {1'b0, origin_signed_b0_w};
+            origin_signed_a1_w_d59_r <= origin_signed_a1_w;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[20]) begin
+            origin_signed_b1_w_d59_r <= origin_signed_b1_w;
+            origin_signed_part1_r <= {1'b0, origin_signed_a1_w_d59_r} + {1'b0,
+                        origin_signed_b1_w_d59_r} + {35'b0, origin_signed_part0_r[35]};
+            origin_signed_a2_w_d59_r <= origin_signed_a2_w;
+            origin_signed_a2_w_d60_r <= origin_signed_a2_w_d59_r;
+            origin_signed_b2_w_d59_r <= origin_signed_b2_w;
+            origin_signed_b2_w_d60_r <= origin_signed_b2_w_d59_r;
+            unused_origin_signed_part2_r <= {1'b0, origin_signed_a2_w_d60_r} + {1'b0,
+                        origin_signed_b2_w_d60_r} + {5'b0, origin_signed_part1_r[35]};
+            origin_signed_low1_w_d61_r <= origin_signed_low1_w;
+            origin_signed_low0_w_d60_r <= origin_signed_low0_w;
+            origin_signed_low0_w_d61_r <= origin_signed_low0_w_d60_r;
+            start_base_w_d20_r <= start_base_w;
+            start_base_w_d21_r <= start_base_w_d20_r;
+            start_base_w_d22_r <= start_base_w_d21_r;
+            start_base_w_d23_r <= start_base_w_d22_r;
+            start_base_w_d24_r <= start_base_w_d23_r;
+            start_base_w_d25_r <= start_base_w_d24_r;
+            start_base_w_d26_r <= start_base_w_d25_r;
+            start_base_w_d27_r <= start_base_w_d26_r;
+            start_base_w_d28_r <= start_base_w_d27_r;
+            start_base_w_d29_r <= start_base_w_d28_r;
+            start_base_w_d30_r <= start_base_w_d29_r;
+            start_base_w_d31_r <= start_base_w_d30_r;
+            start_base_w_d32_r <= start_base_w_d31_r;
+            start_base_w_d33_r <= start_base_w_d32_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[21]) begin
+            start_base_w_d34_r <= start_base_w_d33_r;
+            start_base_w_d35_r <= start_base_w_d34_r;
+            start_base_w_d36_r <= start_base_w_d35_r;
+            start_base_w_d37_r <= start_base_w_d36_r;
+            start_base_w_d38_r <= start_base_w_d37_r;
+            start_base_w_d39_r <= start_base_w_d38_r;
+            start_base_w_d40_r <= start_base_w_d39_r;
+            start_base_w_d41_r <= start_base_w_d40_r;
+            start_base_w_d42_r <= start_base_w_d41_r;
+            start_base_w_d43_r <= start_base_w_d42_r;
+            start_base_w_d44_r <= start_base_w_d43_r;
+            start_base_w_d45_r <= start_base_w_d44_r;
+            start_base_w_d46_r <= start_base_w_d45_r;
+            start_base_w_d47_r <= start_base_w_d46_r;
+            start_base_w_d48_r <= start_base_w_d47_r;
+            start_base_w_d49_r <= start_base_w_d48_r;
+            start_base_w_d50_r <= start_base_w_d49_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[22]) begin
+            start_base_w_d51_r <= start_base_w_d50_r;
+            start_base_w_d52_r <= start_base_w_d51_r;
+            start_base_w_d53_r <= start_base_w_d52_r;
+            start_base_w_d54_r <= start_base_w_d53_r;
+            start_base_w_d55_r <= start_base_w_d54_r;
+            start_base_w_d56_r <= start_base_w_d55_r;
+            start_base_w_d57_r <= start_base_w_d56_r;
+            start_base_w_d58_r <= start_base_w_d57_r;
+            start_base_w_d59_r <= start_base_w_d58_r;
+            start_base_w_d60_r <= start_base_w_d59_r;
+            start_base_w_d61_r <= start_base_w_d60_r;
+            start_sum_part0_r <= {1'b0, start_sum_a0_w} + {1'b0, start_sum_b0_w};
+            start_sum_a1_w_d62_r <= start_sum_a1_w;
+            start_sum_b1_w_d62_r <= start_sum_b1_w;
+            unused_start_sum_part1_r <= {1'b0, start_sum_a1_w_d62_r} + {1'b0,
+                start_sum_b1_w_d62_r} +
+                        {35'b0, start_sum_part0_r[35]};
+            start_sum_low0_w_d63_r <= start_sum_low0_w;
+            start_absolute_sign_r <= start_sum_w[69];
+            start_absolute_invert_r <= start_sum_w[69] ? ~start_sum_w : start_sum_w;
+            start_absolute_part0_r <= {1'b0, start_absolute_a0_w} + {1'b0, start_absolute_b0_w};
+            start_absolute_a1_w_d65_r <= start_absolute_a1_w;
+            start_absolute_b1_w_d65_r <= start_absolute_b1_w;
+            unused_start_absolute_part1_r <= {1'b0, start_absolute_a1_w_d65_r} + {1'b0,
+                        start_absolute_b1_w_d65_r} + {35'b0, start_absolute_part0_r[35]};
+            start_absolute_low0_w_d66_r <= start_absolute_low0_w;
+            drop_start_r <= tag_0_r[2:0] == 0 ? 4'd7 : tag_0_r[2:0] < 4 ? 4'd3 : 4'd11;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[23]) begin
+            start_drop_amt0_w_d2_r <= start_drop_amt0_w;
+            start_drop_amt0_w_d3_r <= start_drop_amt0_w_d2_r;
+            start_drop_amt0_w_d4_r <= start_drop_amt0_w_d3_r;
+            start_drop_amt0_w_d5_r <= start_drop_amt0_w_d4_r;
+            start_drop_amt0_w_d6_r <= start_drop_amt0_w_d5_r;
+            start_drop_amt0_w_d7_r <= start_drop_amt0_w_d6_r;
+            start_drop_amt0_w_d8_r <= start_drop_amt0_w_d7_r;
+            start_drop_amt0_w_d9_r <= start_drop_amt0_w_d8_r;
+            start_drop_amt0_w_d10_r <= start_drop_amt0_w_d9_r;
+            start_drop_amt0_w_d11_r <= start_drop_amt0_w_d10_r;
+            start_drop_amt0_w_d12_r <= start_drop_amt0_w_d11_r;
+            start_drop_amt0_w_d13_r <= start_drop_amt0_w_d12_r;
+            start_drop_amt0_w_d14_r <= start_drop_amt0_w_d13_r;
+            start_drop_amt0_w_d15_r <= start_drop_amt0_w_d14_r;
+            start_drop_amt0_w_d16_r <= start_drop_amt0_w_d15_r;
+            start_drop_amt0_w_d17_r <= start_drop_amt0_w_d16_r;
+            start_drop_amt0_w_d18_r <= start_drop_amt0_w_d17_r;
+            start_drop_amt0_w_d19_r <= start_drop_amt0_w_d18_r;
+            start_drop_amt0_w_d20_r <= start_drop_amt0_w_d19_r;
+            start_drop_amt0_w_d21_r <= start_drop_amt0_w_d20_r;
+            start_drop_amt0_w_d22_r <= start_drop_amt0_w_d21_r;
+            start_drop_amt0_w_d23_r <= start_drop_amt0_w_d22_r;
+            start_drop_amt0_w_d24_r <= start_drop_amt0_w_d23_r;
+            start_drop_amt0_w_d25_r <= start_drop_amt0_w_d24_r;
+            start_drop_amt0_w_d26_r <= start_drop_amt0_w_d25_r;
+            start_drop_amt0_w_d27_r <= start_drop_amt0_w_d26_r;
+            start_drop_amt0_w_d28_r <= start_drop_amt0_w_d27_r;
+            start_drop_amt0_w_d29_r <= start_drop_amt0_w_d28_r;
+            start_drop_amt0_w_d30_r <= start_drop_amt0_w_d29_r;
+            start_drop_amt0_w_d31_r <= start_drop_amt0_w_d30_r;
+            start_drop_amt0_w_d32_r <= start_drop_amt0_w_d31_r;
+            start_drop_amt0_w_d33_r <= start_drop_amt0_w_d32_r;
+            start_drop_amt0_w_d34_r <= start_drop_amt0_w_d33_r;
+            start_drop_amt0_w_d35_r <= start_drop_amt0_w_d34_r;
+            start_drop_amt0_w_d36_r <= start_drop_amt0_w_d35_r;
+            start_drop_amt0_w_d37_r <= start_drop_amt0_w_d36_r;
+            start_drop_amt0_w_d38_r <= start_drop_amt0_w_d37_r;
+            start_drop_amt0_w_d39_r <= start_drop_amt0_w_d38_r;
+            start_drop_amt0_w_d40_r <= start_drop_amt0_w_d39_r;
+            start_drop_amt0_w_d41_r <= start_drop_amt0_w_d40_r;
+            start_drop_amt0_w_d42_r <= start_drop_amt0_w_d41_r;
+            start_drop_amt0_w_d43_r <= start_drop_amt0_w_d42_r;
+            start_drop_amt0_w_d44_r <= start_drop_amt0_w_d43_r;
+            start_drop_amt0_w_d45_r <= start_drop_amt0_w_d44_r;
+            start_drop_amt0_w_d46_r <= start_drop_amt0_w_d45_r;
+            start_drop_amt0_w_d47_r <= start_drop_amt0_w_d46_r;
+            start_drop_amt0_w_d48_r <= start_drop_amt0_w_d47_r;
+            start_drop_amt0_w_d49_r <= start_drop_amt0_w_d48_r;
+            start_drop_amt0_w_d50_r <= start_drop_amt0_w_d49_r;
+            start_drop_amt0_w_d51_r <= start_drop_amt0_w_d50_r;
+            start_drop_amt0_w_d52_r <= start_drop_amt0_w_d51_r;
+            start_drop_amt0_w_d53_r <= start_drop_amt0_w_d52_r;
+            start_drop_amt0_w_d54_r <= start_drop_amt0_w_d53_r;
+            start_drop_amt0_w_d55_r <= start_drop_amt0_w_d54_r;
+            start_drop_amt0_w_d56_r <= start_drop_amt0_w_d55_r;
+            start_drop_amt0_w_d57_r <= start_drop_amt0_w_d56_r;
+            start_drop_amt0_w_d58_r <= start_drop_amt0_w_d57_r;
+            start_drop_amt0_w_d59_r <= start_drop_amt0_w_d58_r;
+            start_drop_amt0_w_d60_r <= start_drop_amt0_w_d59_r;
+            start_drop_amt0_w_d61_r <= start_drop_amt0_w_d60_r;
+            start_drop_amt0_w_d62_r <= start_drop_amt0_w_d61_r;
+            start_drop_amt0_w_d63_r <= start_drop_amt0_w_d62_r;
+            start_drop_amt0_w_d64_r <= start_drop_amt0_w_d63_r;
+            start_drop_amt0_w_d65_r <= start_drop_amt0_w_d64_r;
+            start_drop_amt0_w_d66_r <= start_drop_amt0_w_d65_r;
+            start_drop_0_r <= start_drop_0_w;
+            start_drop_amt1_w_d2_r <= start_drop_amt1_w;
+            start_drop_amt1_w_d3_r <= start_drop_amt1_w_d2_r;
+            start_drop_amt1_w_d4_r <= start_drop_amt1_w_d3_r;
+            start_drop_amt1_w_d5_r <= start_drop_amt1_w_d4_r;
+            start_drop_amt1_w_d6_r <= start_drop_amt1_w_d5_r;
+            start_drop_amt1_w_d7_r <= start_drop_amt1_w_d6_r;
+            start_drop_amt1_w_d8_r <= start_drop_amt1_w_d7_r;
+            start_drop_amt1_w_d9_r <= start_drop_amt1_w_d8_r;
+            start_drop_amt1_w_d10_r <= start_drop_amt1_w_d9_r;
+            start_drop_amt1_w_d11_r <= start_drop_amt1_w_d10_r;
+            start_drop_amt1_w_d12_r <= start_drop_amt1_w_d11_r;
+            start_drop_amt1_w_d13_r <= start_drop_amt1_w_d12_r;
+            start_drop_amt1_w_d14_r <= start_drop_amt1_w_d13_r;
+            start_drop_amt1_w_d15_r <= start_drop_amt1_w_d14_r;
+            start_drop_amt1_w_d16_r <= start_drop_amt1_w_d15_r;
+            start_drop_amt1_w_d17_r <= start_drop_amt1_w_d16_r;
+            start_drop_amt1_w_d18_r <= start_drop_amt1_w_d17_r;
+            start_drop_amt1_w_d19_r <= start_drop_amt1_w_d18_r;
+            start_drop_amt1_w_d20_r <= start_drop_amt1_w_d19_r;
+            start_drop_amt1_w_d21_r <= start_drop_amt1_w_d20_r;
+            start_drop_amt1_w_d22_r <= start_drop_amt1_w_d21_r;
+            start_drop_amt1_w_d23_r <= start_drop_amt1_w_d22_r;
+            start_drop_amt1_w_d24_r <= start_drop_amt1_w_d23_r;
+            start_drop_amt1_w_d25_r <= start_drop_amt1_w_d24_r;
+            start_drop_amt1_w_d26_r <= start_drop_amt1_w_d25_r;
+            start_drop_amt1_w_d27_r <= start_drop_amt1_w_d26_r;
+            start_drop_amt1_w_d28_r <= start_drop_amt1_w_d27_r;
+            start_drop_amt1_w_d29_r <= start_drop_amt1_w_d28_r;
+            start_drop_amt1_w_d30_r <= start_drop_amt1_w_d29_r;
+            start_drop_amt1_w_d31_r <= start_drop_amt1_w_d30_r;
+            start_drop_amt1_w_d32_r <= start_drop_amt1_w_d31_r;
+            start_drop_amt1_w_d33_r <= start_drop_amt1_w_d32_r;
+            start_drop_amt1_w_d34_r <= start_drop_amt1_w_d33_r;
+            start_drop_amt1_w_d35_r <= start_drop_amt1_w_d34_r;
+            start_drop_amt1_w_d36_r <= start_drop_amt1_w_d35_r;
+            start_drop_amt1_w_d37_r <= start_drop_amt1_w_d36_r;
+            start_drop_amt1_w_d38_r <= start_drop_amt1_w_d37_r;
+            start_drop_amt1_w_d39_r <= start_drop_amt1_w_d38_r;
+            start_drop_amt1_w_d40_r <= start_drop_amt1_w_d39_r;
+            start_drop_amt1_w_d41_r <= start_drop_amt1_w_d40_r;
+            start_drop_amt1_w_d42_r <= start_drop_amt1_w_d41_r;
+            start_drop_amt1_w_d43_r <= start_drop_amt1_w_d42_r;
+            start_drop_amt1_w_d44_r <= start_drop_amt1_w_d43_r;
+            start_drop_amt1_w_d45_r <= start_drop_amt1_w_d44_r;
+            start_drop_amt1_w_d46_r <= start_drop_amt1_w_d45_r;
+            start_drop_amt1_w_d47_r <= start_drop_amt1_w_d46_r;
+            start_drop_amt1_w_d48_r <= start_drop_amt1_w_d47_r;
+            start_drop_amt1_w_d49_r <= start_drop_amt1_w_d48_r;
+            start_drop_amt1_w_d50_r <= start_drop_amt1_w_d49_r;
+            start_drop_amt1_w_d51_r <= start_drop_amt1_w_d50_r;
+            start_drop_amt1_w_d52_r <= start_drop_amt1_w_d51_r;
+            start_drop_amt1_w_d53_r <= start_drop_amt1_w_d52_r;
+            start_drop_amt1_w_d54_r <= start_drop_amt1_w_d53_r;
+            start_drop_amt1_w_d55_r <= start_drop_amt1_w_d54_r;
+            start_drop_amt1_w_d56_r <= start_drop_amt1_w_d55_r;
+            start_drop_amt1_w_d57_r <= start_drop_amt1_w_d56_r;
+            start_drop_amt1_w_d58_r <= start_drop_amt1_w_d57_r;
+            start_drop_amt1_w_d59_r <= start_drop_amt1_w_d58_r;
+            start_drop_amt1_w_d60_r <= start_drop_amt1_w_d59_r;
+            start_drop_amt1_w_d61_r <= start_drop_amt1_w_d60_r;
+            start_drop_amt1_w_d62_r <= start_drop_amt1_w_d61_r;
+            start_drop_amt1_w_d63_r <= start_drop_amt1_w_d62_r;
+            start_drop_amt1_w_d64_r <= start_drop_amt1_w_d63_r;
+            start_drop_amt1_w_d65_r <= start_drop_amt1_w_d64_r;
+            start_drop_amt1_w_d66_r <= start_drop_amt1_w_d65_r;
+            start_drop_amt1_w_d67_r <= start_drop_amt1_w_d66_r;
+            unused_start_drop_1_r <= start_drop_1_w;
+            start_round_part0_r <= {1'b0, start_round_a0_w} + {1'b0, start_round_b0_w};
+            start_round_a1_w_d69_r <= start_round_a1_w;
+            start_round_b1_w_d69_r <= start_round_b1_w;
+            unused_start_round_part1_r <= {1'b0, start_round_a1_w_d69_r} + {1'b0,
+                        start_round_b1_w_d69_r} + {31'b0, start_round_part0_r[35]};
+            start_round_low0_w_d70_r <= start_round_low0_w;
+            start_absolute_sign_d65_r <= start_absolute_sign_r;
+            start_absolute_sign_d66_r <= start_absolute_sign_d65_r;
+            start_absolute_sign_d67_r <= start_absolute_sign_d66_r;
+            start_absolute_sign_d68_r <= start_absolute_sign_d67_r;
+            start_absolute_sign_d69_r <= start_absolute_sign_d68_r;
+            start_absolute_sign_d70_r <= start_absolute_sign_d69_r;
+            start_signed_invert_r <= start_absolute_sign_d70_r ? ~start_round_w : start_round_w;
+            start_absolute_sign_d71_r <= start_absolute_sign_d70_r;
+            start_signed_part0_r <= {1'b0, start_signed_a0_w} + {1'b0, start_signed_b0_w};
+            start_signed_a1_w_d72_r <= start_signed_a1_w;
+            start_signed_b1_w_d72_r <= start_signed_b1_w;
+            unused_start_signed_part1_r <= {1'b0, start_signed_a1_w_d72_r} + {1'b0,
+                        start_signed_b1_w_d72_r} + {31'b0, start_signed_part0_r[35]};
+            start_signed_low0_w_d73_r <= start_signed_low0_w;
+            stored_signed1_w_d54_r <= stored_signed1_w;
+            stored_signed1_w_d55_r <= stored_signed1_w_d54_r;
+            stored_signed1_w_d56_r <= stored_signed1_w_d55_r;
+            stored_signed1_w_d57_r <= stored_signed1_w_d56_r;
+            stored_signed1_w_d58_r <= stored_signed1_w_d57_r;
+            stored_signed1_w_d59_r <= stored_signed1_w_d58_r;
+            stored_signed1_w_d60_r <= stored_signed1_w_d59_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[24]) begin
+            stored_signed1_w_d61_r <= stored_signed1_w_d60_r;
+            stored_signed1_w_d62_r <= stored_signed1_w_d61_r;
+            stored_signed1_w_d63_r <= stored_signed1_w_d62_r;
+            stored_signed1_w_d64_r <= stored_signed1_w_d63_r;
+            stored_signed1_w_d65_r <= stored_signed1_w_d64_r;
+            stored_signed1_w_d66_r <= stored_signed1_w_d65_r;
+            stored_signed1_w_d67_r <= stored_signed1_w_d66_r;
+            stored_signed1_w_d68_r <= stored_signed1_w_d67_r;
+            stored_signed1_w_d69_r <= stored_signed1_w_d68_r;
+            stored_signed1_w_d70_r <= stored_signed1_w_d69_r;
+            stored_signed1_w_d71_r <= stored_signed1_w_d70_r;
+            stored_signed1_w_d72_r <= stored_signed1_w_d71_r;
+            stored_signed1_w_d73_r <= stored_signed1_w_d72_r;
+            stored_signed0_w_d54_r <= stored_signed0_w;
+            stored_signed0_w_d55_r <= stored_signed0_w_d54_r;
+            stored_signed0_w_d56_r <= stored_signed0_w_d55_r;
+            stored_signed0_w_d57_r <= stored_signed0_w_d56_r;
+            stored_signed0_w_d58_r <= stored_signed0_w_d57_r;
+            stored_signed0_w_d59_r <= stored_signed0_w_d58_r;
+            stored_signed0_w_d60_r <= stored_signed0_w_d59_r;
+            stored_signed0_w_d61_r <= stored_signed0_w_d60_r;
+            stored_signed0_w_d62_r <= stored_signed0_w_d61_r;
+            stored_signed0_w_d63_r <= stored_signed0_w_d62_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[25]) begin
+            stored_signed0_w_d64_r <= stored_signed0_w_d63_r;
+            stored_signed0_w_d65_r <= stored_signed0_w_d64_r;
+            stored_signed0_w_d66_r <= stored_signed0_w_d65_r;
+            stored_signed0_w_d67_r <= stored_signed0_w_d66_r;
+            stored_signed0_w_d68_r <= stored_signed0_w_d67_r;
+            stored_signed0_w_d69_r <= stored_signed0_w_d68_r;
+            stored_signed0_w_d70_r <= stored_signed0_w_d69_r;
+            stored_signed0_w_d71_r <= stored_signed0_w_d70_r;
+            stored_signed0_w_d72_r <= stored_signed0_w_d71_r;
+            stored_signed0_w_d73_r <= stored_signed0_w_d72_r;
+            h_d19_r <= h_d18_r;
+            h_d20_r <= h_d19_r;
+            h_d21_r <= h_d20_r;
+            h_d22_r <= h_d21_r;
+            h_d23_r <= h_d22_r;
+            h_d24_r <= h_d23_r;
+            h_d25_r <= h_d24_r;
+            h_d26_r <= h_d25_r;
+            h_d27_r <= h_d26_r;
+            h_d28_r <= h_d27_r;
+            h_d29_r <= h_d28_r;
+            h_d30_r <= h_d29_r;
+            h_d31_r <= h_d30_r;
+            h_d32_r <= h_d31_r;
+            h_d33_r <= h_d32_r;
+            h_d34_r <= h_d33_r;
+            h_d35_r <= h_d34_r;
+            h_d36_r <= h_d35_r;
+            h_d37_r <= h_d36_r;
+            h_d38_r <= h_d37_r;
+            h_d39_r <= h_d38_r;
+            h_d40_r <= h_d39_r;
+            h_d41_r <= h_d40_r;
+            h_d42_r <= h_d41_r;
+            h_d43_r <= h_d42_r;
+            h_d44_r <= h_d43_r;
+            h_d45_r <= h_d44_r;
+            h_d46_r <= h_d45_r;
+            h_d47_r <= h_d46_r;
+            h_d48_r <= h_d47_r;
+            h_d49_r <= h_d48_r;
+            h_d50_r <= h_d49_r;
+            h_d51_r <= h_d50_r;
+            h_d52_r <= h_d51_r;
+            h_d53_r <= h_d52_r;
+            h_d54_r <= h_d53_r;
+            h_d55_r <= h_d54_r;
+            h_d56_r <= h_d55_r;
+            h_d57_r <= h_d56_r;
+            h_d58_r <= h_d57_r;
+            h_d59_r <= h_d58_r;
+            h_d60_r <= h_d59_r;
+            h_d61_r <= h_d60_r;
+            h_d62_r <= h_d61_r;
+            h_d63_r <= h_d62_r;
+            h_d64_r <= h_d63_r;
+            h_d65_r <= h_d64_r;
+            h_d66_r <= h_d65_r;
+            h_d67_r <= h_d66_r;
+            h_d68_r <= h_d67_r;
+            h_d69_r <= h_d68_r;
+            h_d70_r <= h_d69_r;
+            h_d71_r <= h_d70_r;
+            h_d72_r <= h_d71_r;
+            h_d73_r <= h_d72_r;
+            tag_0_r_d8_r <= tag_0_r_d7_r;
+            tag_0_r_d9_r <= tag_0_r_d8_r;
+            tag_0_r_d10_r <= tag_0_r_d9_r;
+            tag_0_r_d11_r <= tag_0_r_d10_r;
+            tag_0_r_d12_r <= tag_0_r_d11_r;
+            tag_0_r_d13_r <= tag_0_r_d12_r;
+            tag_0_r_d14_r <= tag_0_r_d13_r;
+            tag_0_r_d15_r <= tag_0_r_d14_r;
+            tag_0_r_d16_r <= tag_0_r_d15_r;
+            tag_0_r_d17_r <= tag_0_r_d16_r;
+            tag_0_r_d18_r <= tag_0_r_d17_r;
+            tag_0_r_d19_r <= tag_0_r_d18_r;
+            tag_0_r_d20_r <= tag_0_r_d19_r;
+            tag_0_r_d21_r <= tag_0_r_d20_r;
+            tag_0_r_d22_r <= tag_0_r_d21_r;
+            tag_0_r_d23_r <= tag_0_r_d22_r;
+            tag_0_r_d24_r <= tag_0_r_d23_r;
+            tag_0_r_d25_r <= tag_0_r_d24_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[26]) begin
+            tag_0_r_d26_r <= tag_0_r_d25_r;
+            tag_0_r_d27_r <= tag_0_r_d26_r;
+            tag_0_r_d28_r <= tag_0_r_d27_r;
+            tag_0_r_d29_r <= tag_0_r_d28_r;
+            tag_0_r_d30_r <= tag_0_r_d29_r;
+            tag_0_r_d31_r <= tag_0_r_d30_r;
+            tag_0_r_d32_r <= tag_0_r_d31_r;
+            tag_0_r_d33_r <= tag_0_r_d32_r;
+            tag_0_r_d34_r <= tag_0_r_d33_r;
+            tag_0_r_d35_r <= tag_0_r_d34_r;
+            tag_0_r_d36_r <= tag_0_r_d35_r;
+            tag_0_r_d37_r <= tag_0_r_d36_r;
+            tag_0_r_d38_r <= tag_0_r_d37_r;
+            tag_0_r_d39_r <= tag_0_r_d38_r;
+            tag_0_r_d40_r <= tag_0_r_d39_r;
+            tag_0_r_d41_r <= tag_0_r_d40_r;
+            tag_0_r_d42_r <= tag_0_r_d41_r;
+            tag_0_r_d43_r <= tag_0_r_d42_r;
+            tag_0_r_d44_r <= tag_0_r_d43_r;
+            tag_0_r_d45_r <= tag_0_r_d44_r;
+            tag_0_r_d46_r <= tag_0_r_d45_r;
+            tag_0_r_d47_r <= tag_0_r_d46_r;
+            tag_0_r_d48_r <= tag_0_r_d47_r;
+            tag_0_r_d49_r <= tag_0_r_d48_r;
+            tag_0_r_d50_r <= tag_0_r_d49_r;
+            tag_0_r_d51_r <= tag_0_r_d50_r;
+            tag_0_r_d52_r <= tag_0_r_d51_r;
+            tag_0_r_d53_r <= tag_0_r_d52_r;
+            tag_0_r_d54_r <= tag_0_r_d53_r;
+            tag_0_r_d55_r <= tag_0_r_d54_r;
+            tag_0_r_d56_r <= tag_0_r_d55_r;
+            tag_0_r_d57_r <= tag_0_r_d56_r;
+            tag_0_r_d58_r <= tag_0_r_d57_r;
+            tag_0_r_d59_r <= tag_0_r_d58_r;
+            tag_0_r_d60_r <= tag_0_r_d59_r;
+            tag_0_r_d61_r <= tag_0_r_d60_r;
+            tag_0_r_d62_r <= tag_0_r_d61_r;
+            tag_0_r_d63_r <= tag_0_r_d62_r;
+            tag_0_r_d64_r <= tag_0_r_d63_r;
+            tag_0_r_d65_r <= tag_0_r_d64_r;
+            tag_0_r_d66_r <= tag_0_r_d65_r;
+            tag_0_r_d67_r <= tag_0_r_d66_r;
+            tag_0_r_d68_r <= tag_0_r_d67_r;
+            tag_0_r_d69_r <= tag_0_r_d68_r;
+            tag_0_r_d70_r <= tag_0_r_d69_r;
+            tag_0_r_d71_r <= tag_0_r_d70_r;
+            tag_0_r_d72_r <= tag_0_r_d71_r;
+            tag_0_r_d73_r <= tag_0_r_d72_r;
         end
     end
 endmodule

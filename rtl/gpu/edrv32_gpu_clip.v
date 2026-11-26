@@ -1,7 +1,8 @@
 // File: edrv32_gpu_clip.v
 // Spec: gpu-spec 2.4; GPU microarchitecture 4.3.
 // Description: Five ordered Sutherland-Hodgman passes with two eight-vertex worksets.
-//              Crossing edges use the symmetric exact quotient; all-inside triangles bypass worksets.
+//              Crossing edges use the symmetric exact quotient; all-inside triangles bypass
+//              worksets.
 // Clock domain: clk_gpu.
 module edrv32_gpu_clip (
     // Clock and reset.
@@ -23,6 +24,16 @@ module edrv32_gpu_clip (
     input wire stop_i,
     output wire idle_o
 );
+    wire [791:0] triangle_saved_w;
+    wire source_accept_w;
+    reg [3:0] wait_r;
+    wire [85:0] distance_left_w;
+    wire [85:0] distance_right_w;
+    wire [1:0] distance_subtract_w;
+    wire [83:0] numerator_magnitude_w;
+    wire [43:0] denominator_magnitude_w;
+    wire quotient_negative_w;
+    localparam S_CHECK = 4'd11;
     localparam S_IDLE = 4'd0;
     localparam S_BEGIN = 4'd1;
     localparam S_EDGE = 4'd2;
@@ -44,10 +55,6 @@ module edrv32_gpu_clip (
     reg signed [42:0] previous_distance_r;
     wire signed [42:0] current_distance_w;
     wire signed [42:0] last_distance_w;
-    wire signed [43:0] denominator_w;
-    reg signed [82:0] previous_product_r;
-    reg signed [82:0] current_product_r;
-    wire signed [83:0] numerator_w;
     reg [43:0] divisor_r;
     reg negative_r;
     reg [83:0] quotient_r;
@@ -56,11 +63,9 @@ module edrv32_gpu_clip (
     wire [44:0] remainder_shift_w;
     wire [44:0] remainder_next_w;
     wire [83:0] quotient_next_w;
-    wire [84:0] unused_rounded_w;
     wire [39:0] intersection_value_w;
     wire all_inside_w;
     wire [14:0] outside_w;
-    wire [2:0] last_index_w;
     wire signed [39:0] previous_component_w [0:8];
     wire signed [39:0] current_component_w [0:8];
     reg signed [39:0] previous_selected_w;
@@ -77,55 +82,738 @@ module edrv32_gpu_clip (
     reg [3:0] output_count_r [0:1];
 
     assign triangle_ready_o = state_r == S_IDLE && count_r != 2 && !stop_i;
-    assign accept_w = triangle_valid_i && triangle_ready_o;
+    assign source_accept_w = triangle_valid_i && triangle_ready_o;
+    assign accept_w = state_r == S_CHECK && wait_r == 0;
     assign push_w = !stop_i && ((accept_w && all_inside_w)
         || (state_r == S_OUTPUT && count_r != 2));
     assign polygon_valid_o = count_r != 0;
     assign polygon_count_o = output_count_r[read_r];
     assign pop_w = polygon_valid_o && polygon_ready_i;
     assign idle_o = state_r == S_IDLE && count_r == 0;
-    assign last_index_w = input_count_r[2:0] - 3'd1;
+    assign remainder_shift_w = {remainder_r[43:0], quotient_r[83]};
     assign last_distance_w = edge_distance_w[0];
     assign current_distance_w = edge_distance_w[1];
     assign all_inside_w = ~|outside_w;
-    assign denominator_w = $signed({current_distance_w[42], current_distance_w})
-        - $signed({previous_distance_r[42], previous_distance_r});
-    assign numerator_w = $signed({previous_product_r[82], previous_product_r})
-        - $signed({current_product_r[82], current_product_r});
-    assign remainder_shift_w = {remainder_r[43:0], quotient_r[83]};
-    assign remainder_next_w = remainder_shift_w >= {1'b0, divisor_r}
-        ? remainder_shift_w - {1'b0, divisor_r} : remainder_shift_w;
-    assign quotient_next_w = {quotient_r[82:0], remainder_shift_w >= {1'b0, divisor_r}};
-    assign unused_rounded_w = {1'b0, quotient_r}
-        + {84'd0, ({remainder_r, 1'b0} >= {2'd0, divisor_r})};
-    assign intersection_value_w = negative_r
-        ? -unused_rounded_w[39:0] : unused_rounded_w[39:0];
 
     // Acceptance stage: three copies of five s43 plane add/subtract units.
     // Edge stage: two paths, each one s43 adder and one s43 subtractor, selected by plane_r.
+    wire [42:0] inside_0_x_w;
+    wire [42:0] inside_0_y_w;
+    wire [42:0] inside_0_w_w;
+    wire [42:0] inside_w4_0_w;
+    wire [42:0] inside_near0_w;
+    wire [34:0] inside_0_near_a0_w;
+    wire [34:0] inside_0_near_b0_w;
+    reg [35:0] inside_0_near_part0_r;
+    wire [34:0] inside_0_near_low0_w;
+    wire [7:0] inside_0_near_a1_w;
+    reg [7:0] inside_0_near_a1_w_d1_r;
+    wire [7:0] inside_0_near_b1_w;
+    reg [7:0] inside_0_near_b1_w_d1_r;
+    reg [8:0] unused_inside_0_near_part1_r;
+    wire [7:0] inside_0_near_low1_w;
+    wire [42:0] unused_inside_0_near_w;
+    reg [34:0] inside_0_near_low0_w_d2_r;
+    wire [34:0] inside_0_xplus_a0_w;
+    wire [34:0] inside_0_xplus_b0_w;
+    reg [35:0] inside_0_xplus_part0_r;
+    wire [34:0] inside_0_xplus_low0_w;
+    wire [7:0] inside_0_xplus_a1_w;
+    wire [7:0] inside_0_xplus_b1_w;
+    reg [7:0] inside_0_xplus_a1_w_d1_r;
+    reg [7:0] inside_0_xplus_b1_w_d1_r;
+    reg [8:0] unused_inside_0_xplus_part1_r;
+    wire [7:0] inside_0_xplus_low1_w;
+    wire [42:0] unused_inside_0_xplus_w;
+    reg [34:0] inside_0_xplus_low0_w_d2_r;
+    wire [34:0] inside_0_xminus_a0_w;
+    wire [34:0] inside_0_xminus_b0_w;
+    reg [35:0] inside_0_xminus_part0_r;
+    wire [34:0] inside_0_xminus_low0_w;
+    wire [7:0] inside_0_xminus_a1_w;
+    reg [7:0] inside_0_xminus_a1_w_d1_r;
+    wire [7:0] inside_0_xminus_b1_w;
+    reg [7:0] inside_0_xminus_b1_w_d1_r;
+    reg [8:0] unused_inside_0_xminus_part1_r;
+    wire [7:0] inside_0_xminus_low1_w;
+    wire [42:0] unused_inside_0_xminus_w;
+    reg [34:0] inside_0_xminus_low0_w_d2_r;
+    wire [34:0] inside_0_yplus_a0_w;
+    wire [34:0] inside_0_yplus_b0_w;
+    reg [35:0] inside_0_yplus_part0_r;
+    wire [34:0] inside_0_yplus_low0_w;
+    wire [7:0] inside_0_yplus_a1_w;
+    wire [7:0] inside_0_yplus_b1_w;
+    reg [7:0] inside_0_yplus_a1_w_d1_r;
+    reg [7:0] inside_0_yplus_b1_w_d1_r;
+    reg [8:0] unused_inside_0_yplus_part1_r;
+    wire [7:0] inside_0_yplus_low1_w;
+    wire [42:0] unused_inside_0_yplus_w;
+    reg [34:0] inside_0_yplus_low0_w_d2_r;
+    wire [34:0] inside_0_yminus_a0_w;
+    wire [34:0] inside_0_yminus_b0_w;
+    reg [35:0] inside_0_yminus_part0_r;
+    wire [34:0] inside_0_yminus_low0_w;
+    wire [7:0] inside_0_yminus_a1_w;
+    reg [7:0] inside_0_yminus_a1_w_d1_r;
+    wire [7:0] inside_0_yminus_b1_w;
+    reg [7:0] inside_0_yminus_b1_w_d1_r;
+    reg [8:0] unused_inside_0_yminus_part1_r;
+    wire [7:0] inside_0_yminus_low1_w;
+    wire [42:0] unused_inside_0_yminus_w;
+    reg [34:0] inside_0_yminus_low0_w_d2_r;
+    wire [42:0] inside_1_x_w;
+    wire [42:0] inside_1_y_w;
+    wire [42:0] inside_1_w_w;
+    wire [42:0] inside_w4_1_w;
+    wire [42:0] inside_near1_w;
+    wire [34:0] inside_1_near_a0_w;
+    wire [34:0] inside_1_near_b0_w;
+    reg [35:0] inside_1_near_part0_r;
+    wire [34:0] inside_1_near_low0_w;
+    wire [7:0] inside_1_near_a1_w;
+    reg [7:0] inside_1_near_a1_w_d1_r;
+    wire [7:0] inside_1_near_b1_w;
+    reg [7:0] inside_1_near_b1_w_d1_r;
+    reg [8:0] unused_inside_1_near_part1_r;
+    wire [7:0] inside_1_near_low1_w;
+    wire [42:0] unused_inside_1_near_w;
+    reg [34:0] inside_1_near_low0_w_d2_r;
+    wire [34:0] inside_1_xplus_a0_w;
+    wire [34:0] inside_1_xplus_b0_w;
+    reg [35:0] inside_1_xplus_part0_r;
+    wire [34:0] inside_1_xplus_low0_w;
+    wire [7:0] inside_1_xplus_a1_w;
+    wire [7:0] inside_1_xplus_b1_w;
+    reg [7:0] inside_1_xplus_a1_w_d1_r;
+    reg [7:0] inside_1_xplus_b1_w_d1_r;
+    reg [8:0] unused_inside_1_xplus_part1_r;
+    wire [7:0] inside_1_xplus_low1_w;
+    wire [42:0] unused_inside_1_xplus_w;
+    reg [34:0] inside_1_xplus_low0_w_d2_r;
+    wire [34:0] inside_1_xminus_a0_w;
+    wire [34:0] inside_1_xminus_b0_w;
+    reg [35:0] inside_1_xminus_part0_r;
+    wire [34:0] inside_1_xminus_low0_w;
+    wire [7:0] inside_1_xminus_a1_w;
+    reg [7:0] inside_1_xminus_a1_w_d1_r;
+    wire [7:0] inside_1_xminus_b1_w;
+    reg [7:0] inside_1_xminus_b1_w_d1_r;
+    reg [8:0] unused_inside_1_xminus_part1_r;
+    wire [7:0] inside_1_xminus_low1_w;
+    wire [42:0] unused_inside_1_xminus_w;
+    reg [34:0] inside_1_xminus_low0_w_d2_r;
+    wire [34:0] inside_1_yplus_a0_w;
+    wire [34:0] inside_1_yplus_b0_w;
+    reg [35:0] inside_1_yplus_part0_r;
+    wire [34:0] inside_1_yplus_low0_w;
+    wire [7:0] inside_1_yplus_a1_w;
+    wire [7:0] inside_1_yplus_b1_w;
+    reg [7:0] inside_1_yplus_a1_w_d1_r;
+    reg [7:0] inside_1_yplus_b1_w_d1_r;
+    reg [8:0] unused_inside_1_yplus_part1_r;
+    wire [7:0] inside_1_yplus_low1_w;
+    wire [42:0] unused_inside_1_yplus_w;
+    reg [34:0] inside_1_yplus_low0_w_d2_r;
+    wire [34:0] inside_1_yminus_a0_w;
+    wire [34:0] inside_1_yminus_b0_w;
+    reg [35:0] inside_1_yminus_part0_r;
+    wire [34:0] inside_1_yminus_low0_w;
+    wire [7:0] inside_1_yminus_a1_w;
+    reg [7:0] inside_1_yminus_a1_w_d1_r;
+    wire [7:0] inside_1_yminus_b1_w;
+    reg [7:0] inside_1_yminus_b1_w_d1_r;
+    reg [8:0] unused_inside_1_yminus_part1_r;
+    wire [7:0] inside_1_yminus_low1_w;
+    wire [42:0] unused_inside_1_yminus_w;
+    reg [34:0] inside_1_yminus_low0_w_d2_r;
+    wire [42:0] inside_2_x_w;
+    wire [42:0] inside_2_y_w;
+    wire [42:0] inside_2_w_w;
+    wire [42:0] inside_w4_2_w;
+    wire [42:0] inside_near2_w;
+    wire [34:0] inside_2_near_a0_w;
+    wire [34:0] inside_2_near_b0_w;
+    reg [35:0] inside_2_near_part0_r;
+    wire [34:0] inside_2_near_low0_w;
+    wire [7:0] inside_2_near_a1_w;
+    reg [7:0] inside_2_near_a1_w_d1_r;
+    wire [7:0] inside_2_near_b1_w;
+    reg [7:0] inside_2_near_b1_w_d1_r;
+    reg [8:0] unused_inside_2_near_part1_r;
+    wire [7:0] inside_2_near_low1_w;
+    wire [42:0] unused_inside_2_near_w;
+    reg [34:0] inside_2_near_low0_w_d2_r;
+    wire [34:0] inside_2_xplus_a0_w;
+    wire [34:0] inside_2_xplus_b0_w;
+    reg [35:0] inside_2_xplus_part0_r;
+    wire [34:0] inside_2_xplus_low0_w;
+    wire [7:0] inside_2_xplus_a1_w;
+    wire [7:0] inside_2_xplus_b1_w;
+    reg [7:0] inside_2_xplus_a1_w_d1_r;
+    reg [7:0] inside_2_xplus_b1_w_d1_r;
+    reg [8:0] unused_inside_2_xplus_part1_r;
+    wire [7:0] inside_2_xplus_low1_w;
+    wire [42:0] unused_inside_2_xplus_w;
+    reg [34:0] inside_2_xplus_low0_w_d2_r;
+    wire [34:0] inside_2_xminus_a0_w;
+    wire [34:0] inside_2_xminus_b0_w;
+    reg [35:0] inside_2_xminus_part0_r;
+    wire [34:0] inside_2_xminus_low0_w;
+    wire [7:0] inside_2_xminus_a1_w;
+    reg [7:0] inside_2_xminus_a1_w_d1_r;
+    wire [7:0] inside_2_xminus_b1_w;
+    reg [7:0] inside_2_xminus_b1_w_d1_r;
+    reg [8:0] unused_inside_2_xminus_part1_r;
+    wire [7:0] inside_2_xminus_low1_w;
+    wire [42:0] unused_inside_2_xminus_w;
+    reg [34:0] inside_2_xminus_low0_w_d2_r;
+    wire [34:0] inside_2_yplus_a0_w;
+    wire [34:0] inside_2_yplus_b0_w;
+    reg [35:0] inside_2_yplus_part0_r;
+    wire [34:0] inside_2_yplus_low0_w;
+    wire [7:0] inside_2_yplus_a1_w;
+    wire [7:0] inside_2_yplus_b1_w;
+    reg [7:0] inside_2_yplus_a1_w_d1_r;
+    reg [7:0] inside_2_yplus_b1_w_d1_r;
+    reg [8:0] unused_inside_2_yplus_part1_r;
+    wire [7:0] inside_2_yplus_low1_w;
+    wire [42:0] unused_inside_2_yplus_w;
+    reg [34:0] inside_2_yplus_low0_w_d2_r;
+    wire [34:0] inside_2_yminus_a0_w;
+    wire [34:0] inside_2_yminus_b0_w;
+    reg [35:0] inside_2_yminus_part0_r;
+    wire [34:0] inside_2_yminus_low0_w;
+    wire [7:0] inside_2_yminus_a1_w;
+    reg [7:0] inside_2_yminus_a1_w_d1_r;
+    wire [7:0] inside_2_yminus_b1_w;
+    reg [7:0] inside_2_yminus_b1_w_d1_r;
+    reg [8:0] unused_inside_2_yminus_part1_r;
+    wire [7:0] inside_2_yminus_low1_w;
+    wire [42:0] unused_inside_2_yminus_w;
+    reg [34:0] inside_2_yminus_low0_w_d2_r;
+    reg [42:0] edge_left0_r;
+    reg [42:0] edge_right0_r;
+    reg [0:0] edge_subtract0_r;
+    wire [34:0] edge_add0_a0_w;
+    wire [34:0] edge_add0_b0_w;
+    reg [35:0] edge_add0_part0_r;
+    wire [34:0] edge_add0_low0_w;
+    wire [7:0] edge_add0_a1_w;
+    wire [7:0] edge_add0_b1_w;
+    reg [7:0] edge_add0_a1_w_d1_r;
+    reg [7:0] edge_add0_b1_w_d1_r;
+    reg [8:0] unused_edge_add0_part1_r;
+    wire [7:0] edge_add0_low1_w;
+    wire [42:0] edge_add0_w;
+    reg [34:0] edge_add0_low0_w_d2_r;
+    wire [34:0] edge_sub0_a0_w;
+    wire [34:0] edge_sub0_b0_w;
+    reg [35:0] edge_sub0_part0_r;
+    wire [34:0] edge_sub0_low0_w;
+    wire [7:0] edge_sub0_a1_w;
+    reg [7:0] edge_sub0_a1_w_d1_r;
+    wire [7:0] edge_sub0_b1_w;
+    reg [7:0] edge_sub0_b1_w_d1_r;
+    reg [8:0] unused_edge_sub0_part1_r;
+    wire [7:0] edge_sub0_low1_w;
+    wire [42:0] edge_sub0_w;
+    reg [34:0] edge_sub0_low0_w_d2_r;
+    reg [0:0] edge_subtract0_r_d1_r;
+    reg [0:0] edge_subtract0_r_d2_r;
+    reg [42:0] edge_left1_r;
+    reg [42:0] edge_right1_r;
+    reg [0:0] edge_subtract1_r;
+    wire [34:0] edge_add1_a0_w;
+    wire [34:0] edge_add1_b0_w;
+    reg [35:0] edge_add1_part0_r;
+    wire [34:0] edge_add1_low0_w;
+    wire [7:0] edge_add1_a1_w;
+    wire [7:0] edge_add1_b1_w;
+    reg [7:0] edge_add1_a1_w_d1_r;
+    reg [7:0] edge_add1_b1_w_d1_r;
+    reg [8:0] unused_edge_add1_part1_r;
+    wire [7:0] edge_add1_low1_w;
+    wire [42:0] edge_add1_w;
+    reg [34:0] edge_add1_low0_w_d2_r;
+    wire [34:0] edge_sub1_a0_w;
+    wire [34:0] edge_sub1_b0_w;
+    reg [35:0] edge_sub1_part0_r;
+    wire [34:0] edge_sub1_low0_w;
+    wire [7:0] edge_sub1_a1_w;
+    reg [7:0] edge_sub1_a1_w_d1_r;
+    wire [7:0] edge_sub1_b1_w;
+    reg [7:0] edge_sub1_b1_w_d1_r;
+    reg [8:0] unused_edge_sub1_part1_r;
+    wire [7:0] edge_sub1_low1_w;
+    wire [42:0] edge_sub1_w;
+    reg [34:0] edge_sub1_low0_w_d2_r;
+    reg [0:0] edge_subtract1_r_d1_r;
+    reg [0:0] edge_subtract1_r_d2_r;
+    reg [39:0] previous_component_r;
+    reg [39:0] current_component_r;
+    reg [42:0] current_distance_r;
+    reg [42:0] previous_distance_input_r;
+    reg [82:0] previous_product_r;
+    reg [82:0] previous_product_p1_r;
+    reg [82:0] previous_product_p2_r;
+    reg [82:0] current_product_r;
+    reg [82:0] current_product_p1_r;
+    reg [82:0] current_product_p2_r;
+    wire [83:0] previous_product_ext_w;
+    wire [83:0] current_product_ext_w;
+    wire [34:0] numerator_a0_w;
+    wire [34:0] numerator_b0_w;
+    reg [35:0] numerator_part0_r;
+    wire [34:0] numerator_low0_w;
+    wire [34:0] numerator_a1_w;
+    reg [34:0] numerator_a1_w_d4_r;
+    wire [34:0] numerator_b1_w;
+    reg [34:0] numerator_b1_w_d4_r;
+    reg [35:0] numerator_part1_r;
+    wire [34:0] numerator_low1_w;
+    wire [13:0] numerator_a2_w;
+    reg [13:0] numerator_a2_w_d4_r;
+    reg [13:0] numerator_a2_w_d5_r;
+    wire [13:0] numerator_b2_w;
+    reg [13:0] numerator_b2_w_d4_r;
+    reg [13:0] numerator_b2_w_d5_r;
+    reg [14:0] unused_numerator_part2_r;
+    wire [13:0] numerator_low2_w;
+    wire [83:0] numerator_w;
+    reg [34:0] numerator_low1_w_d6_r;
+    reg [34:0] numerator_low0_w_d5_r;
+    reg [34:0] numerator_low0_w_d6_r;
+    reg [0:0] numerator_abs_sign_r;
+    reg [83:0] numerator_abs_invert_r;
+    wire [83:0] numerator_abs_carry_w;
+    wire [34:0] numerator_abs_a0_w;
+    wire [34:0] numerator_abs_b0_w;
+    reg [35:0] numerator_abs_part0_r;
+    wire [34:0] numerator_abs_low0_w;
+    wire [34:0] numerator_abs_a1_w;
+    wire [34:0] numerator_abs_b1_w;
+    reg [34:0] numerator_abs_a1_w_d8_r;
+    reg [34:0] numerator_abs_b1_w_d8_r;
+    reg [35:0] numerator_abs_part1_r;
+    wire [34:0] numerator_abs_low1_w;
+    wire [13:0] numerator_abs_a2_w;
+    wire [13:0] numerator_abs_b2_w;
+    reg [13:0] numerator_abs_a2_w_d8_r;
+    reg [13:0] numerator_abs_a2_w_d9_r;
+    reg [13:0] numerator_abs_b2_w_d8_r;
+    reg [13:0] numerator_abs_b2_w_d9_r;
+    reg [14:0] unused_numerator_abs_part2_r;
+    wire [13:0] numerator_abs_low2_w;
+    wire [83:0] numerator_abs_w;
+    reg [34:0] numerator_abs_low1_w_d10_r;
+    reg [34:0] numerator_abs_low0_w_d9_r;
+    reg [34:0] numerator_abs_low0_w_d10_r;
+    wire [43:0] current_distance_ext_w;
+    wire [43:0] previous_distance_ext_w;
+    wire [34:0] denominator_a0_w;
+    wire [34:0] denominator_b0_w;
+    reg [35:0] denominator_part0_r;
+    wire [34:0] denominator_low0_w;
+    wire [8:0] denominator_a1_w;
+    reg [8:0] denominator_a1_w_d1_r;
+    wire [8:0] denominator_b1_w;
+    reg [8:0] denominator_b1_w_d1_r;
+    reg [9:0] unused_denominator_part1_r;
+    wire [8:0] denominator_low1_w;
+    wire [43:0] denominator_w;
+    reg [34:0] denominator_low0_w_d2_r;
+    reg [0:0] denominator_abs_sign_r;
+    reg [43:0] denominator_abs_invert_r;
+    wire [43:0] denominator_abs_carry_w;
+    wire [34:0] denominator_abs_a0_w;
+    wire [34:0] denominator_abs_b0_w;
+    reg [35:0] denominator_abs_part0_r;
+    wire [34:0] denominator_abs_low0_w;
+    wire [8:0] denominator_abs_a1_w;
+    wire [8:0] denominator_abs_b1_w;
+    reg [8:0] denominator_abs_a1_w_d4_r;
+    reg [8:0] denominator_abs_b1_w_d4_r;
+    reg [9:0] unused_denominator_abs_part1_r;
+    wire [8:0] denominator_abs_low1_w;
+    wire [43:0] denominator_abs_w;
+    reg [34:0] denominator_abs_low0_w_d5_r;
+    reg [0:0] numerator_abs_sign_d8_r;
+    reg [0:0] numerator_abs_sign_d9_r;
+    reg [0:0] numerator_abs_sign_d10_r;
+    reg [0:0] denominator_abs_sign_d4_r;
+    reg [0:0] denominator_abs_sign_d5_r;
+    reg [0:0] denominator_abs_sign_d6_r;
+    reg [0:0] denominator_abs_sign_d7_r;
+    reg [0:0] denominator_abs_sign_d8_r;
+    reg [0:0] denominator_abs_sign_d9_r;
+    reg [0:0] denominator_abs_sign_d10_r;
+    wire [45:0] division_shift_w;
+    wire [45:0] division_divisor_w;
+    wire [34:0] division_trial_a0_w;
+    wire [34:0] division_trial_b0_w;
+    reg [35:0] division_trial_part0_r;
+    wire [34:0] division_trial_low0_w;
+    wire [10:0] division_trial_a1_w;
+    reg [10:0] division_trial_a1_w_d0_r;
+    wire [10:0] division_trial_b1_w;
+    reg [10:0] division_trial_b1_w_d0_r;
+    reg [11:0] unused_division_trial_part1_r;
+    wire [10:0] division_trial_low1_w;
+    wire [45:0] division_trial_w;
+    reg [34:0] division_trial_low0_w_d1_r;
+    reg [45:0] round_remainder_r;
+    reg [45:0] round_divisor_r;
+    wire [46:0] round_rem47_w;
+    wire [46:0] round_div47_w;
+    wire [34:0] round_compare_a0_w;
+    wire [34:0] round_compare_b0_w;
+    reg [35:0] round_compare_part0_r;
+    wire [34:0] round_compare_low0_w;
+    wire [11:0] round_compare_a1_w;
+    reg [11:0] round_compare_a1_w_d1_r;
+    wire [11:0] round_compare_b1_w;
+    reg [11:0] round_compare_b1_w_d1_r;
+    reg [12:0] unused_round_compare_part1_r;
+    wire [11:0] round_compare_low1_w;
+    wire [46:0] unused_round_compare_w;
+    reg [34:0] round_compare_low0_w_d2_r;
+    wire [39:0] round_carry_w;
+    wire [39:0] round_quotient_w;
+    reg [39:0] round_quotient_w_d1_r;
+    reg [39:0] round_quotient_w_d2_r;
+    wire [34:0] intersection_round_a0_w;
+    wire [34:0] intersection_round_b0_w;
+    reg [35:0] intersection_round_part0_r;
+    wire [34:0] intersection_round_low0_w;
+    wire [4:0] intersection_round_a1_w;
+    wire [4:0] intersection_round_b1_w;
+    reg [4:0] intersection_round_a1_w_d3_r;
+    reg [4:0] intersection_round_b1_w_d3_r;
+    reg [5:0] unused_intersection_round_part1_r;
+    wire [4:0] intersection_round_low1_w;
+    wire [39:0] intersection_round_w;
+    reg [34:0] intersection_round_low0_w_d4_r;
+    wire [0:0] intersection_negative_w;
+    reg [0:0] intersection_negative_w_d1_r;
+    reg [0:0] intersection_negative_w_d2_r;
+    reg [0:0] intersection_negative_w_d3_r;
+    reg [0:0] intersection_negative_w_d4_r;
+    reg [39:0] intersection_signed_invert_r;
+    reg [0:0] intersection_negative_w_d5_r;
+    wire [39:0] intersection_signed_carry_w;
+    wire [34:0] intersection_signed_a0_w;
+    wire [34:0] intersection_signed_b0_w;
+    reg [35:0] intersection_signed_part0_r;
+    wire [34:0] intersection_signed_low0_w;
+    wire [4:0] intersection_signed_a1_w;
+    wire [4:0] intersection_signed_b1_w;
+    reg [4:0] intersection_signed_a1_w_d6_r;
+    reg [4:0] intersection_signed_b1_w_d6_r;
+    reg [5:0] unused_intersection_signed_part1_r;
+    wire [4:0] intersection_signed_low1_w;
+    wire [39:0] intersection_signed_w;
+    reg [34:0] intersection_signed_low0_w_d7_r;
+
+    assign inside_0_x_w = {{3{triangle_saved_w[39]}}, triangle_saved_w[0 +: 40]};
+    assign inside_0_y_w = {{3{triangle_saved_w[79]}}, triangle_saved_w[40 +: 40]};
+    assign inside_0_w_w = {{3{triangle_saved_w[159]}}, triangle_saved_w[120 +: 40]};
+    assign inside_w4_0_w = inside_0_w_w << 2;
+    assign inside_near0_w = 43'd4096;
+    assign inside_0_near_a0_w = inside_0_w_w[0 +: 35];
+    assign inside_0_near_b0_w = inside_near0_w[0 +: 35];
+    assign inside_0_near_low0_w = inside_0_near_part0_r[34:0];
+    assign inside_0_near_a1_w = inside_0_w_w[35 +: 8];
+    assign inside_0_near_b1_w = inside_near0_w[35 +: 8];
+    assign inside_0_near_low1_w = unused_inside_0_near_part1_r[7:0];
+    assign unused_inside_0_near_w = {inside_0_near_low1_w, inside_0_near_low0_w_d2_r};
+    assign inside_0_xplus_a0_w = inside_w4_0_w[0 +: 35];
+    assign inside_0_xplus_b0_w = inside_0_x_w[0 +: 35];
+    assign inside_0_xplus_low0_w = inside_0_xplus_part0_r[34:0];
+    assign inside_0_xplus_a1_w = inside_w4_0_w[35 +: 8];
+    assign inside_0_xplus_b1_w = inside_0_x_w[35 +: 8];
+    assign inside_0_xplus_low1_w = unused_inside_0_xplus_part1_r[7:0];
+    assign unused_inside_0_xplus_w = {inside_0_xplus_low1_w, inside_0_xplus_low0_w_d2_r};
+    assign inside_0_xminus_a0_w = inside_w4_0_w[0 +: 35];
+    assign inside_0_xminus_b0_w = inside_0_x_w[0 +: 35];
+    assign inside_0_xminus_low0_w = inside_0_xminus_part0_r[34:0];
+    assign inside_0_xminus_a1_w = inside_w4_0_w[35 +: 8];
+    assign inside_0_xminus_b1_w = inside_0_x_w[35 +: 8];
+    assign inside_0_xminus_low1_w = unused_inside_0_xminus_part1_r[7:0];
+    assign unused_inside_0_xminus_w = {inside_0_xminus_low1_w, inside_0_xminus_low0_w_d2_r};
+    assign inside_0_yplus_a0_w = inside_w4_0_w[0 +: 35];
+    assign inside_0_yplus_b0_w = inside_0_y_w[0 +: 35];
+    assign inside_0_yplus_low0_w = inside_0_yplus_part0_r[34:0];
+    assign inside_0_yplus_a1_w = inside_w4_0_w[35 +: 8];
+    assign inside_0_yplus_b1_w = inside_0_y_w[35 +: 8];
+    assign inside_0_yplus_low1_w = unused_inside_0_yplus_part1_r[7:0];
+    assign unused_inside_0_yplus_w = {inside_0_yplus_low1_w, inside_0_yplus_low0_w_d2_r};
+    assign inside_0_yminus_a0_w = inside_w4_0_w[0 +: 35];
+    assign inside_0_yminus_b0_w = inside_0_y_w[0 +: 35];
+    assign inside_0_yminus_low0_w = inside_0_yminus_part0_r[34:0];
+    assign inside_0_yminus_a1_w = inside_w4_0_w[35 +: 8];
+    assign inside_0_yminus_b1_w = inside_0_y_w[35 +: 8];
+    assign inside_0_yminus_low1_w = unused_inside_0_yminus_part1_r[7:0];
+    assign unused_inside_0_yminus_w = {inside_0_yminus_low1_w, inside_0_yminus_low0_w_d2_r};
+    assign outside_w[0] = unused_inside_0_near_w[42];
+    assign outside_w[1] = unused_inside_0_xplus_w[42];
+    assign outside_w[2] = unused_inside_0_xminus_w[42];
+    assign outside_w[3] = unused_inside_0_yplus_w[42];
+    assign outside_w[4] = unused_inside_0_yminus_w[42];
+    assign inside_1_x_w = {{3{triangle_saved_w[303]}}, triangle_saved_w[264 +: 40]};
+    assign inside_1_y_w = {{3{triangle_saved_w[343]}}, triangle_saved_w[304 +: 40]};
+    assign inside_1_w_w = {{3{triangle_saved_w[423]}}, triangle_saved_w[384 +: 40]};
+    assign inside_w4_1_w = inside_1_w_w << 2;
+    assign inside_near1_w = 43'd4096;
+    assign inside_1_near_a0_w = inside_1_w_w[0 +: 35];
+    assign inside_1_near_b0_w = inside_near1_w[0 +: 35];
+    assign inside_1_near_low0_w = inside_1_near_part0_r[34:0];
+    assign inside_1_near_a1_w = inside_1_w_w[35 +: 8];
+    assign inside_1_near_b1_w = inside_near1_w[35 +: 8];
+    assign inside_1_near_low1_w = unused_inside_1_near_part1_r[7:0];
+    assign unused_inside_1_near_w = {inside_1_near_low1_w, inside_1_near_low0_w_d2_r};
+    assign inside_1_xplus_a0_w = inside_w4_1_w[0 +: 35];
+    assign inside_1_xplus_b0_w = inside_1_x_w[0 +: 35];
+    assign inside_1_xplus_low0_w = inside_1_xplus_part0_r[34:0];
+    assign inside_1_xplus_a1_w = inside_w4_1_w[35 +: 8];
+    assign inside_1_xplus_b1_w = inside_1_x_w[35 +: 8];
+    assign inside_1_xplus_low1_w = unused_inside_1_xplus_part1_r[7:0];
+    assign unused_inside_1_xplus_w = {inside_1_xplus_low1_w, inside_1_xplus_low0_w_d2_r};
+    assign inside_1_xminus_a0_w = inside_w4_1_w[0 +: 35];
+    assign inside_1_xminus_b0_w = inside_1_x_w[0 +: 35];
+    assign inside_1_xminus_low0_w = inside_1_xminus_part0_r[34:0];
+    assign inside_1_xminus_a1_w = inside_w4_1_w[35 +: 8];
+    assign inside_1_xminus_b1_w = inside_1_x_w[35 +: 8];
+    assign inside_1_xminus_low1_w = unused_inside_1_xminus_part1_r[7:0];
+    assign unused_inside_1_xminus_w = {inside_1_xminus_low1_w, inside_1_xminus_low0_w_d2_r};
+    assign inside_1_yplus_a0_w = inside_w4_1_w[0 +: 35];
+    assign inside_1_yplus_b0_w = inside_1_y_w[0 +: 35];
+    assign inside_1_yplus_low0_w = inside_1_yplus_part0_r[34:0];
+    assign inside_1_yplus_a1_w = inside_w4_1_w[35 +: 8];
+    assign inside_1_yplus_b1_w = inside_1_y_w[35 +: 8];
+    assign inside_1_yplus_low1_w = unused_inside_1_yplus_part1_r[7:0];
+    assign unused_inside_1_yplus_w = {inside_1_yplus_low1_w, inside_1_yplus_low0_w_d2_r};
+    assign inside_1_yminus_a0_w = inside_w4_1_w[0 +: 35];
+    assign inside_1_yminus_b0_w = inside_1_y_w[0 +: 35];
+    assign inside_1_yminus_low0_w = inside_1_yminus_part0_r[34:0];
+    assign inside_1_yminus_a1_w = inside_w4_1_w[35 +: 8];
+    assign inside_1_yminus_b1_w = inside_1_y_w[35 +: 8];
+    assign inside_1_yminus_low1_w = unused_inside_1_yminus_part1_r[7:0];
+    assign unused_inside_1_yminus_w = {inside_1_yminus_low1_w, inside_1_yminus_low0_w_d2_r};
+    assign outside_w[5] = unused_inside_1_near_w[42];
+    assign outside_w[6] = unused_inside_1_xplus_w[42];
+    assign outside_w[7] = unused_inside_1_xminus_w[42];
+    assign outside_w[8] = unused_inside_1_yplus_w[42];
+    assign outside_w[9] = unused_inside_1_yminus_w[42];
+    assign inside_2_x_w = {{3{triangle_saved_w[567]}}, triangle_saved_w[528 +: 40]};
+    assign inside_2_y_w = {{3{triangle_saved_w[607]}}, triangle_saved_w[568 +: 40]};
+    assign inside_2_w_w = {{3{triangle_saved_w[687]}}, triangle_saved_w[648 +: 40]};
+    assign inside_w4_2_w = inside_2_w_w << 2;
+    assign inside_near2_w = 43'd4096;
+    assign inside_2_near_a0_w = inside_2_w_w[0 +: 35];
+    assign inside_2_near_b0_w = inside_near2_w[0 +: 35];
+    assign inside_2_near_low0_w = inside_2_near_part0_r[34:0];
+    assign inside_2_near_a1_w = inside_2_w_w[35 +: 8];
+    assign inside_2_near_b1_w = inside_near2_w[35 +: 8];
+    assign inside_2_near_low1_w = unused_inside_2_near_part1_r[7:0];
+    assign unused_inside_2_near_w = {inside_2_near_low1_w, inside_2_near_low0_w_d2_r};
+    assign inside_2_xplus_a0_w = inside_w4_2_w[0 +: 35];
+    assign inside_2_xplus_b0_w = inside_2_x_w[0 +: 35];
+    assign inside_2_xplus_low0_w = inside_2_xplus_part0_r[34:0];
+    assign inside_2_xplus_a1_w = inside_w4_2_w[35 +: 8];
+    assign inside_2_xplus_b1_w = inside_2_x_w[35 +: 8];
+    assign inside_2_xplus_low1_w = unused_inside_2_xplus_part1_r[7:0];
+    assign unused_inside_2_xplus_w = {inside_2_xplus_low1_w, inside_2_xplus_low0_w_d2_r};
+    assign inside_2_xminus_a0_w = inside_w4_2_w[0 +: 35];
+    assign inside_2_xminus_b0_w = inside_2_x_w[0 +: 35];
+    assign inside_2_xminus_low0_w = inside_2_xminus_part0_r[34:0];
+    assign inside_2_xminus_a1_w = inside_w4_2_w[35 +: 8];
+    assign inside_2_xminus_b1_w = inside_2_x_w[35 +: 8];
+    assign inside_2_xminus_low1_w = unused_inside_2_xminus_part1_r[7:0];
+    assign unused_inside_2_xminus_w = {inside_2_xminus_low1_w, inside_2_xminus_low0_w_d2_r};
+    assign inside_2_yplus_a0_w = inside_w4_2_w[0 +: 35];
+    assign inside_2_yplus_b0_w = inside_2_y_w[0 +: 35];
+    assign inside_2_yplus_low0_w = inside_2_yplus_part0_r[34:0];
+    assign inside_2_yplus_a1_w = inside_w4_2_w[35 +: 8];
+    assign inside_2_yplus_b1_w = inside_2_y_w[35 +: 8];
+    assign inside_2_yplus_low1_w = unused_inside_2_yplus_part1_r[7:0];
+    assign unused_inside_2_yplus_w = {inside_2_yplus_low1_w, inside_2_yplus_low0_w_d2_r};
+    assign inside_2_yminus_a0_w = inside_w4_2_w[0 +: 35];
+    assign inside_2_yminus_b0_w = inside_2_y_w[0 +: 35];
+    assign inside_2_yminus_low0_w = inside_2_yminus_part0_r[34:0];
+    assign inside_2_yminus_a1_w = inside_w4_2_w[35 +: 8];
+    assign inside_2_yminus_b1_w = inside_2_y_w[35 +: 8];
+    assign inside_2_yminus_low1_w = unused_inside_2_yminus_part1_r[7:0];
+    assign unused_inside_2_yminus_w = {inside_2_yminus_low1_w, inside_2_yminus_low0_w_d2_r};
+    assign outside_w[10] = unused_inside_2_near_w[42];
+    assign outside_w[11] = unused_inside_2_xplus_w[42];
+    assign outside_w[12] = unused_inside_2_xminus_w[42];
+    assign outside_w[13] = unused_inside_2_yplus_w[42];
+    assign outside_w[14] = unused_inside_2_yminus_w[42];
+    assign edge_add0_a0_w = edge_left0_r[0 +: 35];
+    assign edge_add0_b0_w = edge_right0_r[0 +: 35];
+    assign edge_add0_low0_w = edge_add0_part0_r[34:0];
+    assign edge_add0_a1_w = edge_left0_r[35 +: 8];
+    assign edge_add0_b1_w = edge_right0_r[35 +: 8];
+    assign edge_add0_low1_w = unused_edge_add0_part1_r[7:0];
+    assign edge_add0_w = {edge_add0_low1_w, edge_add0_low0_w_d2_r};
+    assign edge_sub0_a0_w = edge_left0_r[0 +: 35];
+    assign edge_sub0_b0_w = edge_right0_r[0 +: 35];
+    assign edge_sub0_low0_w = edge_sub0_part0_r[34:0];
+    assign edge_sub0_a1_w = edge_left0_r[35 +: 8];
+    assign edge_sub0_b1_w = edge_right0_r[35 +: 8];
+    assign edge_sub0_low1_w = unused_edge_sub0_part1_r[7:0];
+    assign edge_sub0_w = {edge_sub0_low1_w, edge_sub0_low0_w_d2_r};
+    assign edge_distance_w[0] = edge_subtract0_r_d2_r ? edge_sub0_w : edge_add0_w;
+    assign edge_add1_a0_w = edge_left1_r[0 +: 35];
+    assign edge_add1_b0_w = edge_right1_r[0 +: 35];
+    assign edge_add1_low0_w = edge_add1_part0_r[34:0];
+    assign edge_add1_a1_w = edge_left1_r[35 +: 8];
+    assign edge_add1_b1_w = edge_right1_r[35 +: 8];
+    assign edge_add1_low1_w = unused_edge_add1_part1_r[7:0];
+    assign edge_add1_w = {edge_add1_low1_w, edge_add1_low0_w_d2_r};
+    assign edge_sub1_a0_w = edge_left1_r[0 +: 35];
+    assign edge_sub1_b0_w = edge_right1_r[0 +: 35];
+    assign edge_sub1_low0_w = edge_sub1_part0_r[34:0];
+    assign edge_sub1_a1_w = edge_left1_r[35 +: 8];
+    assign edge_sub1_b1_w = edge_right1_r[35 +: 8];
+    assign edge_sub1_low1_w = unused_edge_sub1_part1_r[7:0];
+    assign edge_sub1_w = {edge_sub1_low1_w, edge_sub1_low0_w_d2_r};
+    assign edge_distance_w[1] = edge_subtract1_r_d2_r ? edge_sub1_w : edge_add1_w;
+    assign previous_product_ext_w = {previous_product_p2_r[82], previous_product_p2_r};
+    assign current_product_ext_w = {current_product_p2_r[82], current_product_p2_r};
+    assign numerator_a0_w = previous_product_ext_w[0 +: 35];
+    assign numerator_b0_w = current_product_ext_w[0 +: 35];
+    assign numerator_low0_w = numerator_part0_r[34:0];
+    assign numerator_a1_w = previous_product_ext_w[35 +: 35];
+    assign numerator_b1_w = current_product_ext_w[35 +: 35];
+    assign numerator_low1_w = numerator_part1_r[34:0];
+    assign numerator_a2_w = previous_product_ext_w[70 +: 14];
+    assign numerator_b2_w = current_product_ext_w[70 +: 14];
+    assign numerator_low2_w = unused_numerator_part2_r[13:0];
+    assign numerator_w = {numerator_low2_w, numerator_low1_w_d6_r, numerator_low0_w_d6_r};
+    assign numerator_abs_carry_w = {83'b0, numerator_abs_sign_r};
+    assign numerator_abs_a0_w = numerator_abs_invert_r[0 +: 35];
+    assign numerator_abs_b0_w = numerator_abs_carry_w[0 +: 35];
+    assign numerator_abs_low0_w = numerator_abs_part0_r[34:0];
+    assign numerator_abs_a1_w = numerator_abs_invert_r[35 +: 35];
+    assign numerator_abs_b1_w = numerator_abs_carry_w[35 +: 35];
+    assign numerator_abs_low1_w = numerator_abs_part1_r[34:0];
+    assign numerator_abs_a2_w = numerator_abs_invert_r[70 +: 14];
+    assign numerator_abs_b2_w = numerator_abs_carry_w[70 +: 14];
+    assign numerator_abs_low2_w = unused_numerator_abs_part2_r[13:0];
+    assign numerator_abs_w = {numerator_abs_low2_w, numerator_abs_low1_w_d10_r,
+            numerator_abs_low0_w_d10_r};
+    assign current_distance_ext_w = {current_distance_r[42], current_distance_r};
+    assign previous_distance_ext_w = {previous_distance_input_r[42], previous_distance_input_r};
+    assign denominator_a0_w = current_distance_ext_w[0 +: 35];
+    assign denominator_b0_w = previous_distance_ext_w[0 +: 35];
+    assign denominator_low0_w = denominator_part0_r[34:0];
+    assign denominator_a1_w = current_distance_ext_w[35 +: 9];
+    assign denominator_b1_w = previous_distance_ext_w[35 +: 9];
+    assign denominator_low1_w = unused_denominator_part1_r[8:0];
+    assign denominator_w = {denominator_low1_w, denominator_low0_w_d2_r};
+    assign denominator_abs_carry_w = {43'b0, denominator_abs_sign_r};
+    assign denominator_abs_a0_w = denominator_abs_invert_r[0 +: 35];
+    assign denominator_abs_b0_w = denominator_abs_carry_w[0 +: 35];
+    assign denominator_abs_low0_w = denominator_abs_part0_r[34:0];
+    assign denominator_abs_a1_w = denominator_abs_invert_r[35 +: 9];
+    assign denominator_abs_b1_w = denominator_abs_carry_w[35 +: 9];
+    assign denominator_abs_low1_w = unused_denominator_abs_part1_r[8:0];
+    assign denominator_abs_w = {denominator_abs_low1_w, denominator_abs_low0_w_d5_r};
+    assign numerator_magnitude_w = numerator_abs_w;
+    assign denominator_magnitude_w = denominator_abs_w;
+    assign quotient_negative_w = numerator_abs_sign_d10_r ^ denominator_abs_sign_d10_r;
+    assign division_shift_w = {1'b0, remainder_shift_w};
+    assign division_divisor_w = {2'b0, divisor_r};
+    assign division_trial_a0_w = division_shift_w[0 +: 35];
+    assign division_trial_b0_w = division_divisor_w[0 +: 35];
+    assign division_trial_low0_w = division_trial_part0_r[34:0];
+    assign division_trial_a1_w = division_shift_w[35 +: 11];
+    assign division_trial_b1_w = division_divisor_w[35 +: 11];
+    assign division_trial_low1_w = unused_division_trial_part1_r[10:0];
+    assign division_trial_w = {division_trial_low1_w, division_trial_low0_w_d1_r};
+    assign remainder_next_w = division_trial_w[45] ? remainder_shift_w : division_trial_w[44:0];
+    assign quotient_next_w = {quotient_r[82:0], !division_trial_w[45]};
+    assign round_rem47_w = {1'b0, round_remainder_r};
+    assign round_div47_w = {1'b0, round_divisor_r};
+    assign round_compare_a0_w = round_rem47_w[0 +: 35];
+    assign round_compare_b0_w = round_div47_w[0 +: 35];
+    assign round_compare_low0_w = round_compare_part0_r[34:0];
+    assign round_compare_a1_w = round_rem47_w[35 +: 12];
+    assign round_compare_b1_w = round_div47_w[35 +: 12];
+    assign round_compare_low1_w = unused_round_compare_part1_r[11:0];
+    assign unused_round_compare_w = {round_compare_low1_w, round_compare_low0_w_d2_r};
+    assign round_carry_w = {39'b0, !unused_round_compare_w[46]};
+    assign round_quotient_w = quotient_r[39:0];
+    assign intersection_round_a0_w = round_quotient_w_d2_r[0 +: 35];
+    assign intersection_round_b0_w = round_carry_w[0 +: 35];
+    assign intersection_round_low0_w = intersection_round_part0_r[34:0];
+    assign intersection_round_a1_w = round_quotient_w_d2_r[35 +: 5];
+    assign intersection_round_b1_w = round_carry_w[35 +: 5];
+    assign intersection_round_low1_w = unused_intersection_round_part1_r[4:0];
+    assign intersection_round_w = {intersection_round_low1_w, intersection_round_low0_w_d4_r};
+    assign intersection_negative_w = negative_r;
+    assign intersection_signed_carry_w = {39'b0, intersection_negative_w_d5_r};
+    assign intersection_signed_a0_w = intersection_signed_invert_r[0 +: 35];
+    assign intersection_signed_b0_w = intersection_signed_carry_w[0 +: 35];
+    assign intersection_signed_low0_w = intersection_signed_part0_r[34:0];
+    assign intersection_signed_a1_w = intersection_signed_invert_r[35 +: 5];
+    assign intersection_signed_b1_w = intersection_signed_carry_w[35 +: 5];
+    assign intersection_signed_low1_w = unused_intersection_signed_part1_r[4:0];
+    assign intersection_signed_w = {intersection_signed_low1_w, intersection_signed_low0_w_d7_r};
+    assign intersection_value_w = intersection_signed_w;
+
+    reg [3:0] state_next_w;
+    always @(*) begin
+        state_next_w = state_r;
+        case (state_r)
+            S_IDLE: if (source_accept_w) state_next_w = S_CHECK;
+            S_CHECK: if (wait_r == 0)
+                state_next_w = all_inside_w ? S_IDLE : S_BEGIN;
+            S_BEGIN: if (wait_r == 0) state_next_w = S_EDGE;
+            S_EDGE: if (wait_r == 0) begin
+                if (previous_distance_r[42] != current_distance_w[42])
+                    state_next_w = S_MULTIPLY;
+                else state_next_w = current_distance_w[42] ? S_ADVANCE : S_APPEND_CURRENT;
+            end
+            S_MULTIPLY: if (wait_r == 0) state_next_w = S_DIVIDE_LOAD;
+            S_DIVIDE_LOAD: state_next_w = S_DIVIDE;
+            S_DIVIDE: if (wait_r == 0 && divide_count_r == 1) state_next_w = S_ROUND;
+            S_ROUND: if (wait_r == 0)
+                state_next_w = component_r == 8 ? S_APPEND_INTERSECTION : S_MULTIPLY;
+            S_APPEND_INTERSECTION:
+                state_next_w = current_distance_w[42] ? S_ADVANCE : S_APPEND_CURRENT;
+            S_APPEND_CURRENT: state_next_w = S_ADVANCE;
+            S_ADVANCE: begin
+                if ({1'b0, vertex_index_r} + 4'd1 == input_count_r)
+                    state_next_w = result_count_r < 3 ? S_IDLE :
+                        plane_r == 4 ? S_OUTPUT : S_BEGIN;
+                else state_next_w = S_EDGE;
+            end
+            S_OUTPUT: if (count_r != 2) state_next_w = S_IDLE;
+            default: state_next_w = state_r;
+        endcase
+    end
+
     genvar vertex_g;
     genvar distance_g;
     genvar field_g;
     genvar slot_g;
     generate
-        for (vertex_g = 0; vertex_g < 3; vertex_g = vertex_g + 1) begin : g_inside
-            wire signed [42:0] x_w;
-            wire signed [42:0] y_w;
-            wire signed [42:0] w_w;
-            wire [43*5-1:0] unused_distance_w;
-            assign x_w = {{3{triangle_data_i[vertex_g * 264 + 39]}},
-                triangle_data_i[vertex_g * 264 +: 40]};
-            assign y_w = {{3{triangle_data_i[vertex_g * 264 + 79]}},
-                triangle_data_i[vertex_g * 264 + 40 +: 40]};
-            assign w_w = {{3{triangle_data_i[vertex_g * 264 + 159]}},
-                triangle_data_i[vertex_g * 264 + 120 +: 40]};
-            assign unused_distance_w[0 +: 43] = w_w - 43'sd4096;
-            assign unused_distance_w[43 +: 43] = (w_w <<< 2) + x_w;
-            assign unused_distance_w[86 +: 43] = (w_w <<< 2) - x_w;
-            assign unused_distance_w[129 +: 43] = (w_w <<< 2) + y_w;
-            assign unused_distance_w[172 +: 43] = (w_w <<< 2) - y_w;
-            for (distance_g = 0; distance_g < 5; distance_g = distance_g + 1) begin : g_sign
-                assign outside_w[vertex_g * 5 + distance_g] = unused_distance_w[43*distance_g+42];
+        for (vertex_g = 0; vertex_g < 3; vertex_g = vertex_g + 1) begin : g_capture
+            genvar capture_field;
+            for (capture_field = 0; capture_field < 9; capture_field = capture_field + 1) begin
+            : g_field
+                localparam WIDTH = capture_field < 4 ? 40 : (capture_field < 6 ? 16 : 24);
+                localparam OFFSET = capture_field < 4 ? capture_field*40 :
+                    capture_field < 6 ? 160+(capture_field-4)*16 : 192+(capture_field-6)*24;
+                reg [WIDTH-1:0] data_r;
+                assign triangle_saved_w[vertex_g*264+OFFSET +: WIDTH] = data_r;
+                always @(posedge clk_i) begin
+                    if (source_accept_w)
+                        data_r <= triangle_data_i[vertex_g*264+OFFSET +: WIDTH];
+                end
             end
         end
         for (distance_g = 0; distance_g < 2; distance_g = distance_g + 1) begin : g_distance
@@ -135,8 +823,6 @@ module edrv32_gpu_clip (
             reg signed [42:0] left_w;
             reg signed [42:0] right_w;
             reg subtract_w;
-            wire signed [42:0] sum_w;
-            wire signed [42:0] difference_w;
             assign x_w = distance_g == 0
                 ? {{3{last_position_w[0][39]}}, last_position_w[0]}
                 : {{3{current_position_w[0][39]}}, current_position_w[0]};
@@ -159,13 +845,47 @@ module edrv32_gpu_clip (
                     default: begin end
                 endcase
             end
-            assign sum_w = left_w + right_w;
-            assign difference_w = left_w - right_w;
-            assign edge_distance_w[distance_g] = subtract_w ? difference_w : sum_w;
+            assign distance_left_w[distance_g*43 +: 43] = left_w;
+            assign distance_right_w[distance_g*43 +: 43] = right_w;
+            assign distance_subtract_w[distance_g] = subtract_w;
         end
         // Nine independent fields: 16 workset registers and two output slots each.
         // Each workset register has one full-field write point, including initial load.
         for (field_g = 0; field_g < 9; field_g = field_g + 1) begin : g_field
+            (* keep = 1 *) reg [3:0] region_state_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_bank_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg [2:0] region_vertex_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg [3:0] region_input_count_r /* synthesis syn_preserve=1 */;
+            wire [2:0] region_last_index_w;
+            assign region_last_index_w = region_input_count_r[2:0] - 3'd1;
+            wire region_push_w;
+            assign region_push_w = !stop_i && ((region_state_r == S_CHECK && wait_r == 0 &&
+            all_inside_w)
+                || (region_state_r == S_OUTPUT && count_r != 2));
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_state_r <= S_IDLE;
+                    region_bank_r <= 0;
+                    region_vertex_r <= 0;
+                    region_input_count_r <= 0;
+                end else if (stop_i) region_state_r <= S_IDLE;
+                else begin
+                    region_state_r <= state_next_w;
+                    if (accept_w && !all_inside_w) begin
+                        region_bank_r <= 0;
+                        region_input_count_r <= 3;
+                    end
+                    if (region_state_r == S_BEGIN && wait_r == 0) region_vertex_r <= 0;
+                    if (region_state_r == S_ADVANCE) begin
+                        if ({1'b0, region_vertex_r} + 4'd1 == region_input_count_r) begin
+                            if (result_count_r >= 3) region_input_count_r <= result_count_r;
+                        end else region_vertex_r <= region_vertex_r + 3'd1;
+                    end
+                    if (region_state_r == S_ADVANCE &&
+                        {1'b0, vertex_index_r} + 4'd1 == input_count_r && result_count_r >= 3)
+                        region_bank_r <= !region_bank_r;
+                end
+            end
             localparam WIDTH = field_g < 4 ? 40 : (field_g < 6 ? 16 : 24);
             localparam OFFSET = field_g < 4 ? field_g * 40
                 : (field_g < 6 ? 160 + (field_g - 4) * 16 : 192 + (field_g - 6) * 24);
@@ -174,49 +894,36 @@ module edrv32_gpu_clip (
             reg [WIDTH-1:0] last_w;
             reg [WIDTH-1:0] previous_r;
             reg [WIDTH-1:0] intersection_r;
-            always @(*) begin
-                current_w = 0;
-                case ({bank_r, vertex_index_r})
-                    4'd0: current_w = workset_w[WIDTH*0 +: WIDTH];
-                    4'd1: current_w = workset_w[WIDTH*1 +: WIDTH];
-                    4'd2: current_w = workset_w[WIDTH*2 +: WIDTH];
-                    4'd3: current_w = workset_w[WIDTH*3 +: WIDTH];
-                    4'd4: current_w = workset_w[WIDTH*4 +: WIDTH];
-                    4'd5: current_w = workset_w[WIDTH*5 +: WIDTH];
-                    4'd6: current_w = workset_w[WIDTH*6 +: WIDTH];
-                    4'd7: current_w = workset_w[WIDTH*7 +: WIDTH];
-                    4'd8: current_w = workset_w[WIDTH*8 +: WIDTH];
-                    4'd9: current_w = workset_w[WIDTH*9 +: WIDTH];
-                    4'd10: current_w = workset_w[WIDTH*10 +: WIDTH];
-                    4'd11: current_w = workset_w[WIDTH*11 +: WIDTH];
-                    4'd12: current_w = workset_w[WIDTH*12 +: WIDTH];
-                    4'd13: current_w = workset_w[WIDTH*13 +: WIDTH];
-                    4'd14: current_w = workset_w[WIDTH*14 +: WIDTH];
-                    4'd15: current_w = workset_w[WIDTH*15 +: WIDTH];
-                    default: current_w = 0;
-                endcase
+            wire [3:0] current_select_w;
+            wire [3:0] last_select_w;
+            wire [WIDTH*4-1:0] current_quarter_w;
+            wire [WIDTH*4-1:0] last_quarter_w;
+            assign current_select_w = {region_bank_r, region_vertex_r};
+            assign last_select_w = {region_bank_r, region_last_index_w};
+            genvar quarter;
+            for (quarter = 0; quarter < 4; quarter = quarter + 1) begin : g_select
+                wire [WIDTH*4-1:0] values_w;
+                assign values_w = workset_w[quarter*WIDTH*4 +: WIDTH*4];
+                assign current_quarter_w[quarter*WIDTH +: WIDTH] = current_select_w[1] ?
+                    (current_select_w[0] ? values_w[3*WIDTH +: WIDTH] :
+                    values_w[2*WIDTH +: WIDTH]) :
+                    (current_select_w[0] ? values_w[WIDTH +: WIDTH] : values_w[0 +: WIDTH]);
+                assign last_quarter_w[quarter*WIDTH +: WIDTH] = last_select_w[1] ?
+                    (last_select_w[0] ? values_w[3*WIDTH +: WIDTH] :
+                    values_w[2*WIDTH +: WIDTH]) :
+                    (last_select_w[0] ? values_w[WIDTH +: WIDTH] : values_w[0 +: WIDTH]);
             end
             always @(*) begin
-                last_w = 0;
-                case ({bank_r, last_index_w})
-                    4'd0: last_w = workset_w[WIDTH*0 +: WIDTH];
-                    4'd1: last_w = workset_w[WIDTH*1 +: WIDTH];
-                    4'd2: last_w = workset_w[WIDTH*2 +: WIDTH];
-                    4'd3: last_w = workset_w[WIDTH*3 +: WIDTH];
-                    4'd4: last_w = workset_w[WIDTH*4 +: WIDTH];
-                    4'd5: last_w = workset_w[WIDTH*5 +: WIDTH];
-                    4'd6: last_w = workset_w[WIDTH*6 +: WIDTH];
-                    4'd7: last_w = workset_w[WIDTH*7 +: WIDTH];
-                    4'd8: last_w = workset_w[WIDTH*8 +: WIDTH];
-                    4'd9: last_w = workset_w[WIDTH*9 +: WIDTH];
-                    4'd10: last_w = workset_w[WIDTH*10 +: WIDTH];
-                    4'd11: last_w = workset_w[WIDTH*11 +: WIDTH];
-                    4'd12: last_w = workset_w[WIDTH*12 +: WIDTH];
-                    4'd13: last_w = workset_w[WIDTH*13 +: WIDTH];
-                    4'd14: last_w = workset_w[WIDTH*14 +: WIDTH];
-                    4'd15: last_w = workset_w[WIDTH*15 +: WIDTH];
-                    default: last_w = 0;
-                endcase
+                current_w = current_select_w[3] ?
+                    (current_select_w[2] ? current_quarter_w[3*WIDTH +: WIDTH] :
+                    current_quarter_w[2*WIDTH +: WIDTH]) :
+                    (current_select_w[2] ? current_quarter_w[WIDTH +: WIDTH] :
+                    current_quarter_w[0 +: WIDTH]);
+                last_w = last_select_w[3] ?
+                    (last_select_w[2] ? last_quarter_w[3*WIDTH +: WIDTH] :
+                    last_quarter_w[2*WIDTH +: WIDTH]) :
+                    (last_select_w[2] ? last_quarter_w[WIDTH +: WIDTH] :
+                    last_quarter_w[0 +: WIDTH]);
             end
             if (field_g < 4) begin : g_signed
                 assign previous_component_w[field_g] = previous_r;
@@ -231,9 +938,9 @@ module edrv32_gpu_clip (
                 assign last_position_w[AXIS] = last_w;
             end
             always @(posedge clk_i) begin
-                if (state_r == S_BEGIN) previous_r <= last_w;
-                if (state_r == S_ADVANCE) previous_r <= current_w;
-                if (state_r == S_ROUND && component_r == field_g)
+                if (region_state_r == S_BEGIN) previous_r <= last_w;
+                if (region_state_r == S_ADVANCE) previous_r <= current_w;
+                if (region_state_r == S_ROUND && wait_r == 0 && component_r == field_g)
                     intersection_r <= intersection_value_w[WIDTH-1:0];
             end
             for (slot_g = 0; slot_g < 16; slot_g = slot_g + 1) begin : g_workset
@@ -246,13 +953,14 @@ module edrv32_gpu_clip (
                 assign workset_w[WIDTH*slot_g +: WIDTH] = data_r;
                 assign load_w = slot_g < 3 && accept_w && !all_inside_w;
                 if (slot_g < 3) begin : g_input
-                    assign load_data_w = triangle_data_i[slot_g * 264 + OFFSET +: WIDTH];
+                    assign load_data_w = triangle_saved_w[slot_g * 264 + OFFSET +: WIDTH];
                 end else begin : g_no_input
                     assign load_data_w = {WIDTH{1'b0}};
                 end
-                assign append_w = bank_r == (slot_g < 8) && result_count_r[2:0] == INDEX
-                    && (state_r == S_APPEND_INTERSECTION || state_r == S_APPEND_CURRENT);
-                assign append_data_w = state_r == S_APPEND_INTERSECTION
+                assign append_w = region_bank_r == (slot_g < 8) && result_count_r[2:0] == INDEX
+                    && (region_state_r == S_APPEND_INTERSECTION || region_state_r ==
+            S_APPEND_CURRENT);
+                assign append_data_w = region_state_r == S_APPEND_INTERSECTION
                     ? intersection_r : current_w;
                 always @(posedge clk_i) begin
                     if (load_w || append_w) data_r <= load_w ? load_data_w : append_data_w;
@@ -263,16 +971,16 @@ module edrv32_gpu_clip (
                 wire [WIDTH-1:0] bypass_w;
                 wire [WIDTH-1:0] push_wide_w;
                 if (slot_g < 3) begin : g_bypass
-                    assign bypass_w = triangle_data_i[slot_g * 264 + OFFSET +: WIDTH];
+                    assign bypass_w = triangle_saved_w[slot_g * 264 + OFFSET +: WIDTH];
                 end else begin : g_padding
                     assign bypass_w = {WIDTH{1'b0}};
                 end
-                assign push_wide_w = state_r == S_IDLE ? bypass_w
-                    : (bank_r ? workset_w[WIDTH*(8 + slot_g) +: WIDTH]
+                assign push_wide_w = region_state_r == S_CHECK ? bypass_w
+                    : (region_bank_r ? workset_w[WIDTH*(8 + slot_g) +: WIDTH]
                         : workset_w[WIDTH*slot_g +: WIDTH]);
                 assign polygon_data_o[slot_g * 264 + OFFSET +: WIDTH] = data_r[read_r];
                 always @(posedge clk_i) begin
-                    if (push_w) data_r[write_r] <= push_wide_w;
+                    if (region_push_w) data_r[write_r] <= push_wide_w;
                 end
             end
         end
@@ -326,6 +1034,7 @@ module edrv32_gpu_clip (
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             state_r <= S_IDLE;
+            wait_r <= 0;
             count_r <= 2'd0;
             read_r <= 1'b0;
             write_r <= 1'b0;
@@ -338,10 +1047,12 @@ module edrv32_gpu_clip (
             divide_count_r <= 7'd0;
         end else if (stop_i) begin
             state_r <= S_IDLE;
+            wait_r <= 0;
             count_r <= 2'd0;
             read_r <= 1'b0;
             write_r <= 1'b0;
         end else begin
+            state_r <= state_next_w;
             if (push_w) write_r <= !write_r;
             if (pop_w) read_r <= !read_r;
             begin
@@ -351,85 +1062,100 @@ module edrv32_gpu_clip (
                     default: count_r <= count_r;
                 endcase
             end
+            if (wait_r != 0) wait_r <= wait_r - 1'b1;
             case (state_r)
                 S_IDLE: begin
+                    if (source_accept_w) begin
+                        begin end
+                        wait_r <= 2;
+                    end
+                end
+                S_CHECK: begin
+                    if (wait_r == 0 && all_inside_w) begin end
                     if (accept_w && !all_inside_w) begin
+                        wait_r <= 3;
                         bank_r <= 1'b0;
                         plane_r <= 3'd0;
                         input_count_r <= 4'd3;
-                        state_r <= S_BEGIN;
+                        begin end
                     end
                 end
-                S_BEGIN: begin
+                S_BEGIN: if (wait_r == 0) begin
+                    wait_r <= 3;
                     vertex_index_r <= 3'd0;
                     result_count_r <= 4'd0;
-                    state_r <= S_EDGE;
+                    begin end
                 end
-                S_EDGE: begin
+                S_EDGE: if (wait_r == 0) begin
                     if (previous_distance_r[42] != current_distance_w[42]) begin
                         component_r <= 4'd0;
-                        state_r <= S_MULTIPLY;
+                        begin end
+                        wait_r <= 12;
                     end else begin
-                        state_r <= current_distance_w[42] ? S_ADVANCE : S_APPEND_CURRENT;
+                        begin end
                     end
                 end
-                S_MULTIPLY: state_r <= S_DIVIDE_LOAD;
+                S_MULTIPLY: if (wait_r == 0) begin end
                 S_DIVIDE_LOAD: begin
                     divide_count_r <= 7'd84;
-                    state_r <= S_DIVIDE;
+                    wait_r <= 2;
+                    begin end
                 end
-                S_DIVIDE: begin
+                S_DIVIDE: if (wait_r == 0) begin
+                    wait_r <= 2;
                     divide_count_r <= divide_count_r - 7'd1;
-                    if (divide_count_r == 1) state_r <= S_ROUND;
+                    if (divide_count_r == 1) begin
+                        begin end
+                        wait_r <= 8;
+                    end
                 end
-                S_ROUND: begin
-                    if (component_r == 8) state_r <= S_APPEND_INTERSECTION;
+                S_ROUND: if (wait_r == 0) begin
+                    if (component_r == 8) begin end
                     else begin
                         component_r <= component_r + 4'd1;
-                        state_r <= S_MULTIPLY;
+                        begin end
+                        wait_r <= 12;
                     end
                 end
                 S_APPEND_INTERSECTION: begin
                     result_count_r <= result_count_r + 4'd1;
-                    state_r <= current_distance_w[42] ? S_ADVANCE : S_APPEND_CURRENT;
+                    begin end
                 end
                 S_APPEND_CURRENT: begin
                     result_count_r <= result_count_r + 4'd1;
-                    state_r <= S_ADVANCE;
+                    begin end
                 end
                 S_ADVANCE: begin
                     if ({1'b0, vertex_index_r} + 4'd1 == input_count_r) begin
-                        if (result_count_r < 3) state_r <= S_IDLE;
+                        if (result_count_r < 3) begin end
                         else begin
                             bank_r <= !bank_r;
                             input_count_r <= result_count_r;
                             plane_r <= plane_r + 3'd1;
-                            state_r <= plane_r == 4 ? S_OUTPUT : S_BEGIN;
+                            begin end
+                            wait_r <= 3;
                         end
                     end else begin
                         vertex_index_r <= vertex_index_r + 3'd1;
-                        state_r <= S_EDGE;
+                        begin end
+                        wait_r <= 3;
                     end
                 end
-                S_OUTPUT: if (count_r != 2) state_r <= S_IDLE;
-                default: state_r <= state_r;
+                S_OUTPUT: if (count_r != 2) begin end
+                default: begin end
             endcase
         end
     end
 
     always @(posedge clk_i) begin
         if (state_r == S_BEGIN) previous_distance_r <= last_distance_w;
-        if (state_r == S_MULTIPLY) begin
-            previous_product_r <= previous_selected_w * current_distance_w;
-            current_product_r <= current_selected_w * previous_distance_r;
-        end
         if (state_r == S_DIVIDE_LOAD) begin
-            quotient_r <= numerator_w[83] ? -numerator_w : numerator_w;
+            quotient_r <= numerator_magnitude_w;
             remainder_r <= 45'd0;
-            divisor_r <= denominator_w[43] ? -denominator_w : denominator_w;
-            negative_r <= numerator_w[83] ^ denominator_w[43];
+            divisor_r <= denominator_magnitude_w;
+            negative_r <= quotient_negative_w;
         end
-        if (state_r == S_DIVIDE) begin
+        if (state_r == S_DIVIDE && wait_r == 0) begin
             quotient_r <= quotient_next_w;
             remainder_r <= remainder_next_w;
         end
@@ -437,7 +1163,234 @@ module edrv32_gpu_clip (
             previous_distance_r <= current_distance_w;
         end
         if (push_w) begin
-            output_count_r[write_r] <= state_r == S_IDLE ? 4'd3 : input_count_r;
+            output_count_r[write_r] <= state_r == S_CHECK ? 4'd3 : input_count_r;
         end
+    end
+    always @(posedge clk_i) begin
+    inside_0_near_part0_r <= {1'b0, inside_0_near_a0_w} + {1'b0, ~inside_0_near_b0_w} + 36'd1;
+    inside_0_near_a1_w_d1_r <= inside_0_near_a1_w;
+    inside_0_near_b1_w_d1_r <= inside_0_near_b1_w;
+    unused_inside_0_near_part1_r <= {1'b0, inside_0_near_a1_w_d1_r} + {1'b0,
+            ~inside_0_near_b1_w_d1_r} + {8'b0, inside_0_near_part0_r[35]};
+    inside_0_near_low0_w_d2_r <= inside_0_near_low0_w;
+    inside_0_xplus_part0_r <= {1'b0, inside_0_xplus_a0_w} + {1'b0, inside_0_xplus_b0_w};
+    inside_0_xplus_a1_w_d1_r <= inside_0_xplus_a1_w;
+    inside_0_xplus_b1_w_d1_r <= inside_0_xplus_b1_w;
+    unused_inside_0_xplus_part1_r <= {1'b0, inside_0_xplus_a1_w_d1_r} + {1'b0,
+            inside_0_xplus_b1_w_d1_r} + {8'b0, inside_0_xplus_part0_r[35]};
+    inside_0_xplus_low0_w_d2_r <= inside_0_xplus_low0_w;
+    inside_0_xminus_part0_r <= {1'b0, inside_0_xminus_a0_w} + {1'b0, ~inside_0_xminus_b0_w} + 36'd1;
+    inside_0_xminus_a1_w_d1_r <= inside_0_xminus_a1_w;
+    inside_0_xminus_b1_w_d1_r <= inside_0_xminus_b1_w;
+    unused_inside_0_xminus_part1_r <= {1'b0, inside_0_xminus_a1_w_d1_r} + {1'b0,
+            ~inside_0_xminus_b1_w_d1_r} + {8'b0, inside_0_xminus_part0_r[35]};
+    inside_0_xminus_low0_w_d2_r <= inside_0_xminus_low0_w;
+    inside_0_yplus_part0_r <= {1'b0, inside_0_yplus_a0_w} + {1'b0, inside_0_yplus_b0_w};
+    inside_0_yplus_a1_w_d1_r <= inside_0_yplus_a1_w;
+    inside_0_yplus_b1_w_d1_r <= inside_0_yplus_b1_w;
+    unused_inside_0_yplus_part1_r <= {1'b0, inside_0_yplus_a1_w_d1_r} + {1'b0,
+            inside_0_yplus_b1_w_d1_r} + {8'b0, inside_0_yplus_part0_r[35]};
+    inside_0_yplus_low0_w_d2_r <= inside_0_yplus_low0_w;
+    inside_0_yminus_part0_r <= {1'b0, inside_0_yminus_a0_w} + {1'b0, ~inside_0_yminus_b0_w} + 36'd1;
+    inside_0_yminus_a1_w_d1_r <= inside_0_yminus_a1_w;
+    inside_0_yminus_b1_w_d1_r <= inside_0_yminus_b1_w;
+    unused_inside_0_yminus_part1_r <= {1'b0, inside_0_yminus_a1_w_d1_r} + {1'b0,
+            ~inside_0_yminus_b1_w_d1_r} + {8'b0, inside_0_yminus_part0_r[35]};
+    inside_0_yminus_low0_w_d2_r <= inside_0_yminus_low0_w;
+    inside_1_near_part0_r <= {1'b0, inside_1_near_a0_w} + {1'b0, ~inside_1_near_b0_w} + 36'd1;
+    inside_1_near_a1_w_d1_r <= inside_1_near_a1_w;
+    inside_1_near_b1_w_d1_r <= inside_1_near_b1_w;
+    unused_inside_1_near_part1_r <= {1'b0, inside_1_near_a1_w_d1_r} + {1'b0,
+            ~inside_1_near_b1_w_d1_r} + {8'b0, inside_1_near_part0_r[35]};
+    inside_1_near_low0_w_d2_r <= inside_1_near_low0_w;
+    inside_1_xplus_part0_r <= {1'b0, inside_1_xplus_a0_w} + {1'b0, inside_1_xplus_b0_w};
+    inside_1_xplus_a1_w_d1_r <= inside_1_xplus_a1_w;
+    inside_1_xplus_b1_w_d1_r <= inside_1_xplus_b1_w;
+    unused_inside_1_xplus_part1_r <= {1'b0, inside_1_xplus_a1_w_d1_r} + {1'b0,
+            inside_1_xplus_b1_w_d1_r} + {8'b0, inside_1_xplus_part0_r[35]};
+    inside_1_xplus_low0_w_d2_r <= inside_1_xplus_low0_w;
+    inside_1_xminus_part0_r <= {1'b0, inside_1_xminus_a0_w} + {1'b0, ~inside_1_xminus_b0_w} + 36'd1;
+    inside_1_xminus_a1_w_d1_r <= inside_1_xminus_a1_w;
+    inside_1_xminus_b1_w_d1_r <= inside_1_xminus_b1_w;
+    unused_inside_1_xminus_part1_r <= {1'b0, inside_1_xminus_a1_w_d1_r} + {1'b0,
+            ~inside_1_xminus_b1_w_d1_r} + {8'b0, inside_1_xminus_part0_r[35]};
+    inside_1_xminus_low0_w_d2_r <= inside_1_xminus_low0_w;
+    inside_1_yplus_part0_r <= {1'b0, inside_1_yplus_a0_w} + {1'b0, inside_1_yplus_b0_w};
+    inside_1_yplus_a1_w_d1_r <= inside_1_yplus_a1_w;
+    inside_1_yplus_b1_w_d1_r <= inside_1_yplus_b1_w;
+    unused_inside_1_yplus_part1_r <= {1'b0, inside_1_yplus_a1_w_d1_r} + {1'b0,
+            inside_1_yplus_b1_w_d1_r} + {8'b0, inside_1_yplus_part0_r[35]};
+    inside_1_yplus_low0_w_d2_r <= inside_1_yplus_low0_w;
+    inside_1_yminus_part0_r <= {1'b0, inside_1_yminus_a0_w} + {1'b0, ~inside_1_yminus_b0_w} + 36'd1;
+    inside_1_yminus_a1_w_d1_r <= inside_1_yminus_a1_w;
+    inside_1_yminus_b1_w_d1_r <= inside_1_yminus_b1_w;
+    unused_inside_1_yminus_part1_r <= {1'b0, inside_1_yminus_a1_w_d1_r} + {1'b0,
+            ~inside_1_yminus_b1_w_d1_r} + {8'b0, inside_1_yminus_part0_r[35]};
+    inside_1_yminus_low0_w_d2_r <= inside_1_yminus_low0_w;
+    inside_2_near_part0_r <= {1'b0, inside_2_near_a0_w} + {1'b0, ~inside_2_near_b0_w} + 36'd1;
+    inside_2_near_a1_w_d1_r <= inside_2_near_a1_w;
+    inside_2_near_b1_w_d1_r <= inside_2_near_b1_w;
+    unused_inside_2_near_part1_r <= {1'b0, inside_2_near_a1_w_d1_r} + {1'b0,
+            ~inside_2_near_b1_w_d1_r} + {8'b0, inside_2_near_part0_r[35]};
+    inside_2_near_low0_w_d2_r <= inside_2_near_low0_w;
+    inside_2_xplus_part0_r <= {1'b0, inside_2_xplus_a0_w} + {1'b0, inside_2_xplus_b0_w};
+    inside_2_xplus_a1_w_d1_r <= inside_2_xplus_a1_w;
+    inside_2_xplus_b1_w_d1_r <= inside_2_xplus_b1_w;
+    unused_inside_2_xplus_part1_r <= {1'b0, inside_2_xplus_a1_w_d1_r} + {1'b0,
+            inside_2_xplus_b1_w_d1_r} + {8'b0, inside_2_xplus_part0_r[35]};
+    inside_2_xplus_low0_w_d2_r <= inside_2_xplus_low0_w;
+    inside_2_xminus_part0_r <= {1'b0, inside_2_xminus_a0_w} + {1'b0, ~inside_2_xminus_b0_w} + 36'd1;
+    inside_2_xminus_a1_w_d1_r <= inside_2_xminus_a1_w;
+    inside_2_xminus_b1_w_d1_r <= inside_2_xminus_b1_w;
+    unused_inside_2_xminus_part1_r <= {1'b0, inside_2_xminus_a1_w_d1_r} + {1'b0,
+            ~inside_2_xminus_b1_w_d1_r} + {8'b0, inside_2_xminus_part0_r[35]};
+    inside_2_xminus_low0_w_d2_r <= inside_2_xminus_low0_w;
+    inside_2_yplus_part0_r <= {1'b0, inside_2_yplus_a0_w} + {1'b0, inside_2_yplus_b0_w};
+    inside_2_yplus_a1_w_d1_r <= inside_2_yplus_a1_w;
+    inside_2_yplus_b1_w_d1_r <= inside_2_yplus_b1_w;
+    unused_inside_2_yplus_part1_r <= {1'b0, inside_2_yplus_a1_w_d1_r} + {1'b0,
+            inside_2_yplus_b1_w_d1_r} + {8'b0, inside_2_yplus_part0_r[35]};
+    inside_2_yplus_low0_w_d2_r <= inside_2_yplus_low0_w;
+    inside_2_yminus_part0_r <= {1'b0, inside_2_yminus_a0_w} + {1'b0, ~inside_2_yminus_b0_w} + 36'd1;
+    inside_2_yminus_a1_w_d1_r <= inside_2_yminus_a1_w;
+    inside_2_yminus_b1_w_d1_r <= inside_2_yminus_b1_w;
+    unused_inside_2_yminus_part1_r <= {1'b0, inside_2_yminus_a1_w_d1_r} + {1'b0,
+            ~inside_2_yminus_b1_w_d1_r} + {8'b0, inside_2_yminus_part0_r[35]};
+    inside_2_yminus_low0_w_d2_r <= inside_2_yminus_low0_w;
+    edge_left0_r <= distance_left_w[0 +: 43];
+    edge_right0_r <= distance_right_w[0 +: 43];
+    edge_subtract0_r <= distance_subtract_w[0];
+    edge_add0_part0_r <= {1'b0, edge_add0_a0_w} + {1'b0, edge_add0_b0_w};
+    edge_add0_a1_w_d1_r <= edge_add0_a1_w;
+    edge_add0_b1_w_d1_r <= edge_add0_b1_w;
+    unused_edge_add0_part1_r <= {1'b0, edge_add0_a1_w_d1_r} + {1'b0, edge_add0_b1_w_d1_r} + {8'b0,
+            edge_add0_part0_r[35]};
+    edge_add0_low0_w_d2_r <= edge_add0_low0_w;
+    edge_sub0_part0_r <= {1'b0, edge_sub0_a0_w} + {1'b0, ~edge_sub0_b0_w} + 36'd1;
+    edge_sub0_a1_w_d1_r <= edge_sub0_a1_w;
+    edge_sub0_b1_w_d1_r <= edge_sub0_b1_w;
+    unused_edge_sub0_part1_r <= {1'b0, edge_sub0_a1_w_d1_r} + {1'b0, ~edge_sub0_b1_w_d1_r} + {8'b0,
+            edge_sub0_part0_r[35]};
+    edge_sub0_low0_w_d2_r <= edge_sub0_low0_w;
+    edge_subtract0_r_d1_r <= edge_subtract0_r;
+    edge_subtract0_r_d2_r <= edge_subtract0_r_d1_r;
+    edge_left1_r <= distance_left_w[43 +: 43];
+    edge_right1_r <= distance_right_w[43 +: 43];
+    edge_subtract1_r <= distance_subtract_w[1];
+    edge_add1_part0_r <= {1'b0, edge_add1_a0_w} + {1'b0, edge_add1_b0_w};
+    edge_add1_a1_w_d1_r <= edge_add1_a1_w;
+    edge_add1_b1_w_d1_r <= edge_add1_b1_w;
+    unused_edge_add1_part1_r <= {1'b0, edge_add1_a1_w_d1_r} + {1'b0, edge_add1_b1_w_d1_r} + {8'b0,
+            edge_add1_part0_r[35]};
+    edge_add1_low0_w_d2_r <= edge_add1_low0_w;
+    edge_sub1_part0_r <= {1'b0, edge_sub1_a0_w} + {1'b0, ~edge_sub1_b0_w} + 36'd1;
+    edge_sub1_a1_w_d1_r <= edge_sub1_a1_w;
+    edge_sub1_b1_w_d1_r <= edge_sub1_b1_w;
+    unused_edge_sub1_part1_r <= {1'b0, edge_sub1_a1_w_d1_r} + {1'b0, ~edge_sub1_b1_w_d1_r} + {8'b0,
+            edge_sub1_part0_r[35]};
+    edge_sub1_low0_w_d2_r <= edge_sub1_low0_w;
+    edge_subtract1_r_d1_r <= edge_subtract1_r;
+    edge_subtract1_r_d2_r <= edge_subtract1_r_d1_r;
+    previous_component_r <= previous_selected_w;
+    current_component_r <= current_selected_w;
+    current_distance_r <= current_distance_w;
+    previous_distance_input_r <= previous_distance_r;
+    previous_product_r <= $signed(previous_component_r) * $signed(current_distance_r);
+    previous_product_p1_r <= previous_product_r;
+    previous_product_p2_r <= previous_product_p1_r;
+    current_product_r <= $signed(current_component_r) * $signed(previous_distance_input_r);
+    current_product_p1_r <= current_product_r;
+    current_product_p2_r <= current_product_p1_r;
+    numerator_part0_r <= {1'b0, numerator_a0_w} + {1'b0, ~numerator_b0_w} + 36'd1;
+    numerator_a1_w_d4_r <= numerator_a1_w;
+    numerator_b1_w_d4_r <= numerator_b1_w;
+    numerator_part1_r <= {1'b0, numerator_a1_w_d4_r} + {1'b0, ~numerator_b1_w_d4_r} + {35'b0,
+            numerator_part0_r[35]};
+    numerator_a2_w_d4_r <= numerator_a2_w;
+    numerator_a2_w_d5_r <= numerator_a2_w_d4_r;
+    numerator_b2_w_d4_r <= numerator_b2_w;
+    numerator_b2_w_d5_r <= numerator_b2_w_d4_r;
+    unused_numerator_part2_r <= {1'b0, numerator_a2_w_d5_r} + {1'b0, ~numerator_b2_w_d5_r} + {14'b0,
+            numerator_part1_r[35]};
+    numerator_low1_w_d6_r <= numerator_low1_w;
+    numerator_low0_w_d5_r <= numerator_low0_w;
+    numerator_low0_w_d6_r <= numerator_low0_w_d5_r;
+    numerator_abs_sign_r <= numerator_w[83];
+    numerator_abs_invert_r <= numerator_w[83] ? ~numerator_w : numerator_w;
+    numerator_abs_part0_r <= {1'b0, numerator_abs_a0_w} + {1'b0, numerator_abs_b0_w};
+    numerator_abs_a1_w_d8_r <= numerator_abs_a1_w;
+    numerator_abs_b1_w_d8_r <= numerator_abs_b1_w;
+    numerator_abs_part1_r <= {1'b0, numerator_abs_a1_w_d8_r} + {1'b0, numerator_abs_b1_w_d8_r} +
+            {35'b0, numerator_abs_part0_r[35]};
+    numerator_abs_a2_w_d8_r <= numerator_abs_a2_w;
+    numerator_abs_a2_w_d9_r <= numerator_abs_a2_w_d8_r;
+    numerator_abs_b2_w_d8_r <= numerator_abs_b2_w;
+    numerator_abs_b2_w_d9_r <= numerator_abs_b2_w_d8_r;
+    unused_numerator_abs_part2_r <= {1'b0, numerator_abs_a2_w_d9_r} + {1'b0,
+        numerator_abs_b2_w_d9_r}
+            + {14'b0, numerator_abs_part1_r[35]};
+    numerator_abs_low1_w_d10_r <= numerator_abs_low1_w;
+    numerator_abs_low0_w_d9_r <= numerator_abs_low0_w;
+    numerator_abs_low0_w_d10_r <= numerator_abs_low0_w_d9_r;
+    denominator_part0_r <= {1'b0, denominator_a0_w} + {1'b0, ~denominator_b0_w} + 36'd1;
+    denominator_a1_w_d1_r <= denominator_a1_w;
+    denominator_b1_w_d1_r <= denominator_b1_w;
+    unused_denominator_part1_r <= {1'b0, denominator_a1_w_d1_r} + {1'b0, ~denominator_b1_w_d1_r} +
+            {9'b0, denominator_part0_r[35]};
+    denominator_low0_w_d2_r <= denominator_low0_w;
+    denominator_abs_sign_r <= denominator_w[43];
+    denominator_abs_invert_r <= denominator_w[43] ? ~denominator_w : denominator_w;
+    denominator_abs_part0_r <= {1'b0, denominator_abs_a0_w} + {1'b0, denominator_abs_b0_w};
+    denominator_abs_a1_w_d4_r <= denominator_abs_a1_w;
+    denominator_abs_b1_w_d4_r <= denominator_abs_b1_w;
+    unused_denominator_abs_part1_r <= {1'b0, denominator_abs_a1_w_d4_r} + {1'b0,
+            denominator_abs_b1_w_d4_r} + {9'b0, denominator_abs_part0_r[35]};
+    denominator_abs_low0_w_d5_r <= denominator_abs_low0_w;
+    numerator_abs_sign_d8_r <= numerator_abs_sign_r;
+    numerator_abs_sign_d9_r <= numerator_abs_sign_d8_r;
+    numerator_abs_sign_d10_r <= numerator_abs_sign_d9_r;
+    denominator_abs_sign_d4_r <= denominator_abs_sign_r;
+    denominator_abs_sign_d5_r <= denominator_abs_sign_d4_r;
+    denominator_abs_sign_d6_r <= denominator_abs_sign_d5_r;
+    denominator_abs_sign_d7_r <= denominator_abs_sign_d6_r;
+    denominator_abs_sign_d8_r <= denominator_abs_sign_d7_r;
+    denominator_abs_sign_d9_r <= denominator_abs_sign_d8_r;
+    denominator_abs_sign_d10_r <= denominator_abs_sign_d9_r;
+    division_trial_part0_r <= {1'b0, division_trial_a0_w} + {1'b0, ~division_trial_b0_w} + 36'd1;
+    division_trial_a1_w_d0_r <= division_trial_a1_w;
+    division_trial_b1_w_d0_r <= division_trial_b1_w;
+    unused_division_trial_part1_r <= {1'b0, division_trial_a1_w_d0_r} + {1'b0,
+            ~division_trial_b1_w_d0_r} + {11'b0, division_trial_part0_r[35]};
+    division_trial_low0_w_d1_r <= division_trial_low0_w;
+    round_remainder_r <= {remainder_r, 1'b0};
+    round_divisor_r <= {2'b0, divisor_r};
+    round_compare_part0_r <= {1'b0, round_compare_a0_w} + {1'b0, ~round_compare_b0_w} + 36'd1;
+    round_compare_a1_w_d1_r <= round_compare_a1_w;
+    round_compare_b1_w_d1_r <= round_compare_b1_w;
+    unused_round_compare_part1_r <= {1'b0, round_compare_a1_w_d1_r} + {1'b0,
+            ~round_compare_b1_w_d1_r} + {12'b0, round_compare_part0_r[35]};
+    round_compare_low0_w_d2_r <= round_compare_low0_w;
+    round_quotient_w_d1_r <= round_quotient_w;
+    round_quotient_w_d2_r <= round_quotient_w_d1_r;
+    intersection_round_part0_r <= {1'b0, intersection_round_a0_w} + {1'b0, intersection_round_b0_w};
+    intersection_round_a1_w_d3_r <= intersection_round_a1_w;
+    intersection_round_b1_w_d3_r <= intersection_round_b1_w;
+    unused_intersection_round_part1_r <= {1'b0, intersection_round_a1_w_d3_r} + {1'b0,
+            intersection_round_b1_w_d3_r} + {5'b0, intersection_round_part0_r[35]};
+    intersection_round_low0_w_d4_r <= intersection_round_low0_w;
+    intersection_negative_w_d1_r <= intersection_negative_w;
+    intersection_negative_w_d2_r <= intersection_negative_w_d1_r;
+    intersection_negative_w_d3_r <= intersection_negative_w_d2_r;
+    intersection_negative_w_d4_r <= intersection_negative_w_d3_r;
+    intersection_signed_invert_r <= intersection_negative_w_d4_r ? ~intersection_round_w :
+            intersection_round_w;
+    intersection_negative_w_d5_r <= intersection_negative_w_d4_r;
+    intersection_signed_part0_r <= {1'b0, intersection_signed_a0_w} + {1'b0,
+            intersection_signed_b0_w};
+    intersection_signed_a1_w_d6_r <= intersection_signed_a1_w;
+    intersection_signed_b1_w_d6_r <= intersection_signed_b1_w;
+    unused_intersection_signed_part1_r <= {1'b0, intersection_signed_a1_w_d6_r} + {1'b0,
+            intersection_signed_b1_w_d6_r} + {5'b0, intersection_signed_part0_r[35]};
+    intersection_signed_low0_w_d7_r <= intersection_signed_low0_w;
     end
 endmodule

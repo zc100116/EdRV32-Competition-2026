@@ -34,9 +34,8 @@ module edrv32_gpu_raster (
     input wire fragment_ready_i,
     output wire [15:0] fragment_x_o,
     output wire [15:0] fragment_y_o,
-    output wire [3:0] fragment_mask_o,
-    output wire fragment_quad_o,
-    output wire [1735:0] fragment_plane_o,
+    output wire [1:0] fragment_mask_o,
+    output wire [867:0] fragment_plane_o,
     output wire [69:0] fragment_h_o,
     output wire [3:0] fragment_palette_o,
     output wire [7:0] fragment_alpha_o,
@@ -47,14 +46,14 @@ module edrv32_gpu_raster (
     output reg unit_done_o
 );
 
-    wire [1854:0] output_input_w;
-    wire [2047:0] unused_output_data_w;
+    wire [986:0] output_input_w;
+    wire [1023:0] unused_output_data_w;
     reg signed [17:0] clip_x0_r;
     reg signed [17:0] clip_y0_r;
     reg signed [17:0] clip_x1_r;
     reg signed [17:0] clip_y1_r;
     reg [3:0] palette_r;
-    wire [479:0] edge_w;
+    wire [239:0] edge_w;
     wire unused_state_w;
     wire signed [17:0] target_x0_w;
     wire signed [17:0] target_y0_w;
@@ -102,12 +101,11 @@ module edrv32_gpu_raster (
     reg signed [17:0] x0_r;
     reg signed [17:0] x1_r;
     reg signed [17:0] unused_last_x_r;
-    reg signed [17:0] last_y_r;
-    reg signed [15:0] reuse_limit_r;
+    reg signed [16:0] reuse_limit_r;
     reg [69:0] h_r;
     reg [2:0] inclusive_r;
     reg [5:0] valid_r;
-    wire [3:0] mask_w;
+    wire [1:0] mask_w;
     wire advance_w;
     wire input_push_w;
     wire input_pop_w;
@@ -120,6 +118,10 @@ module edrv32_gpu_raster (
     wire scan_w;
     wire last_w;
     wire row_end_w;
+    reg row_end_r;
+    reg next_row_r;
+    reg last_r;
+    reg signed [17:0] last_even_y_r;
     wire seed_load_w;
     wire load_w;
     wire signed [16:0] offset_x_w;
@@ -129,16 +131,16 @@ module edrv32_gpu_raster (
     reg [63:0] input_bounds_r [0:1];
     reg [31:0] input_origin_r [0:1];
     reg [69:0] input_h_r [0:1];
-    wire [11:0] edge_nonzero_w;
-    wire [11:0] edge_negative_w;
+    wire [5:0] edge_nonzero_w;
+    wire [5:0] edge_negative_w;
     wire [2:0] edge_inclusive_w;
-    wire [3:0] clip_w;
+    wire [1:0] clip_w;
     reg [8:0] delay_write_r;
-    wire [6:0] metadata_9_input_w;
+    wire [4:0] metadata_9_input_w;
     wire [71:0] unused_metadata_9_data_w;
     wire [8:0] metadata_9_read_w;
     wire [2:0] pipe_inclusive_w;
-    wire [3:0] pipe_clip_w;
+    wire [1:0] pipe_clip_w;
     wire [105:0] metadata_10_input_w;
     wire [143:0] unused_metadata_10_data_w;
     wire [8:0] metadata_10_read_w;
@@ -205,21 +207,22 @@ module edrv32_gpu_raster (
     assign output_pop_w = fragment_valid_o && fragment_ready_i;
     assign triangle_setup_ready_o = input_count_r < 2 && cfg_valid_r;
     assign input_push_w = triangle_setup_valid_i && triangle_setup_ready_o && !stop_i;
-    assign row_end_w = x_r[17:2] == unused_last_x_r[17:2] && y_r[0];
-    assign last_w = row_end_w && y_r == last_y_r;
+    assign row_end_w = row_end_r;
+    assign last_w = last_r;
     assign scan_w = active_r && credit_used_r < 16 && !stop_i &&
-        (!row_end_w || last_w || next_row_ready_r);
+        (!next_row_r || next_row_ready_r);
     assign input_pop_w = input_count_r != 0 && state_r == S_IDLE &&
-        (!active_r || (scan_w && last_w)) && advance_w && !stop_i;
+        (!active_r || (last_w && credit_used_r < 16)) && advance_w && !stop_i;
     assign seed_load_w = state_r == S_LOAD && advance_w;
-    assign load_w = seed_load_w || (scan_w && row_end_w && !last_w);
+    assign load_w = seed_load_w || (active_r && credit_used_r < 16 && !stop_i &&
+        next_row_r && next_row_ready_r);
     assign output_push_w = valid_r[5] && advance_w && !stop_i;
     // Speculatively store the first row; publish both rows only after the second mask.
-    assign output_commit_w = output_push_w && pipe_y_w[0] &&
+    assign output_commit_w = output_push_w && pipe_x_w[1] && pipe_y_w[0] &&
         (first_covered_r || (|mask_w));
-    assign output_drop_w = output_push_w && pipe_y_w[0] &&
+    assign output_drop_w = output_push_w && pipe_x_w[1] && pipe_y_w[0] &&
         !first_covered_r && !(|mask_w);
-    assign credit_return_w = {4'b0, output_pop_w} + (output_drop_w ? 5'd2 : 5'd0);
+    assign credit_return_w = {4'b0, output_pop_w} + (output_drop_w ? 5'd4 : 5'd0);
     assign output_read_w = !stop_i && ((output_count_r != 0 && !output_valid_r) ||
         (output_pop_w && output_count_r > 1));
     assign output_addr_w = output_read_r + {5'b0, output_pop_w};
@@ -231,6 +234,25 @@ module edrv32_gpu_raster (
         $signed({input_origin_r[input_read_r][31], input_origin_r[input_read_r][16 +: 16]});
     assign unused_last_x_w = input_bounds_r[input_read_r][32 +: 16] - 16'd1;
     assign unused_last_y_w = input_bounds_r[input_read_r][48 +: 16] - 16'd1;
+    // Predict the odd-row boundary while issuing the preceding even row.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            row_end_r <= 0;
+            next_row_r <= 0;
+            last_r <= 0;
+        end else if (stop_i || input_pop_w) begin
+            row_end_r <= 0;
+            next_row_r <= 0;
+            last_r <= 0;
+        end else if (scan_w) begin
+            row_end_r <= !y_r[0] && x_r[1] &&
+                x_r[17:2] == unused_last_x_r[17:2];
+            next_row_r <= !y_r[0] && x_r[1] &&
+                x_r[17:2] == unused_last_x_r[17:2] && y_r != last_even_y_r;
+            last_r <= !y_r[0] && x_r[1] &&
+                x_r[17:2] == unused_last_x_r[17:2] && y_r == last_even_y_r;
+        end
+    end
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) delay_write_r <= 0;
         else delay_write_r <= delay_write_r + 1'b1;
@@ -238,13 +260,13 @@ module edrv32_gpu_raster (
     assign metadata_9_read_w = delay_write_r - 9'd4;
     assign metadata_9_input_w[0 +: 3] = inclusive_r;
     assign pipe_inclusive_w = unused_metadata_9_data_w[0 +: 3];
-    assign metadata_9_input_w[3 +: 4] = clip_w;
-    assign pipe_clip_w = unused_metadata_9_data_w[3 +: 4];
+    assign metadata_9_input_w[3 +: 2] = clip_w;
+    assign pipe_clip_w = unused_metadata_9_data_w[3 +: 2];
     edrv32_ram_gpu_delay u_metadata_9_0 (
         .clk_i(clk_i),
         .wr_en_i(1'b1),
         .wr_addr_i(delay_write_r),
-        .wr_data_i({65'b0, metadata_9_input_w[0 +: 7]}),
+        .wr_data_i({67'b0, metadata_9_input_w[0 +: 5]}),
         .rd_en_i(1'b1),
         .rd_addr_i(metadata_9_read_w),
         .rd_data_o(unused_metadata_9_data_w[0 +: 72])
@@ -293,7 +315,6 @@ module edrv32_gpu_raster (
             reg [WIDTH-1:0] gx_r;
             reg [WIDTH-1:0] gy_r;
             reg [WIDTH-1:0] base_r;
-            reg [WIDTH-1:0] gx3_r;
             reg [WIDTH-1:0] seed_accumulator_r;
             reg [WIDTH-1:0] row_accumulator_r;
             wire [2*WIDTH-1:0] next_seed_w;
@@ -414,28 +435,21 @@ module edrv32_gpu_raster (
                 .en_i(advance_w),
                 .load_i(load_w),
                 .issue_i(scan_w),
-                .reuse_i($signed(x_r[17:2]) < reuse_limit_r),
+                .reuse_i($signed(x_r[17:1]) < reuse_limit_r),
                 .seed_i(next_seed_w),
-                .delta_i(gx_r << 2),
+                .delta_i(gx_r << 1),
                 .plane_o(base_w)
             );
             reg [WIDTH-1:0] gx_pipe_0_r;
             reg [WIDTH-1:0] gx_pipe_1_r;
-            reg [WIDTH-1:0] gx3_pipe_0_r;
-            reg [WIDTH-1:0] gx3_pipe_1_r;
             reg [WIDTH-1:0] base_pipe_0_r;
             reg [WIDTH-1:0] base_pipe_1_r;
             always @(posedge clk_i) begin
                 if (advance_w) begin
                     gx_pipe_0_r <= gx_r;
                     gx_pipe_1_r <= gx_pipe_0_r;
-                    gx3_pipe_0_r <= gx3_r;
-                    gx3_pipe_1_r <= gx3_pipe_0_r;
                     base_pipe_0_r <= base_w;
                     base_pipe_1_r <= base_pipe_0_r;
-                    if (state_r == S_SIGN && wait_r == 2) begin
-                        gx3_r <= seed_result_w;
-                    end
                     if (state_r == S_SEED && wait_r == 2)
                         seed_accumulator_r <= seed_result_w;
                     if (active_r && !next_row_ready_r && row_wait_r == 2)
@@ -461,7 +475,7 @@ module edrv32_gpu_raster (
                 end
                 assign next_seed_w[lane*WIDTH +: WIDTH] = value_r;
             end
-            for (lane = 0; lane < 4; lane = lane + 1) begin : g_lane
+            for (lane = 0; lane < 2; lane = lane + 1) begin : g_lane
                 wire [WIDTH-1:0] attribute_w;
                 if (lane == 0) begin : g_base
                     assign attribute_w = base_pipe_1_r;
@@ -472,7 +486,7 @@ module edrv32_gpu_raster (
                         .clk_i(clk_i),
                         .en_i(advance_w),
                         .a_i(base_w),
-                        .b_i(lane == 3 ? gx3_pipe_1_r : gx_pipe_1_r << (lane-1)),
+                        .b_i(gx_pipe_1_r),
                         .sum_o(attribute_w)
                     );
                 end
@@ -532,7 +546,7 @@ module edrv32_gpu_raster (
             if (output_read_w) output_valid_r <= 1;
             else if (output_pop_w) output_valid_r <= 0;
             if (output_commit_w || output_pop_w) begin
-                output_count_r <= output_count_r + (output_commit_w ? 5'd2 : 5'd0)
+                output_count_r <= output_count_r + (output_commit_w ? 5'd4 : 5'd0)
                     - {4'b0, output_pop_w};
             end
             if (input_push_w) begin
@@ -542,7 +556,7 @@ module edrv32_gpu_raster (
                 input_read_r <= !input_read_r;
             end
             if (output_push_w) begin
-                output_write_r <= output_drop_w ? output_write_r - 1'b1 : output_write_r + 1'b1;
+                output_write_r <= output_drop_w ? output_write_r - 6'd3 : output_write_r + 1'b1;
             end
             if (output_pop_w) begin
                 output_read_r <= output_read_r + 1'b1;
@@ -618,7 +632,8 @@ module edrv32_gpu_raster (
         end
     end
     always @(posedge clk_i) begin
-        if (output_push_w && !pipe_y_w[0]) first_covered_r <= |mask_w;
+        if (output_push_w) first_covered_r <= (pipe_x_w[1] || pipe_y_w[0]) ?
+            first_covered_r || (|mask_w) : (|mask_w);
         if (input_push_w) begin
             input_bounds_r[input_write_r] <= triangle_setup_bounds_i;
             input_origin_r[input_write_r] <= triangle_setup_origin_i;
@@ -637,12 +652,12 @@ module edrv32_gpu_raster (
                 x_r <= x0_r;
                 y_r <= y_r + 1'b1;
             end else begin
-                x_r <= x_r + 18'sd4;
+                x_r <= x_r + 18'sd2;
                 y_r <= y_r - 1'b1;
             end
         end
         if (advance_w && state_r == S_SIGN && wait_r == 0) begin
-            reuse_limit_r <= $signed(unused_last_x_r[17:2]);
+            reuse_limit_r <= $signed(unused_last_x_r[17:1]) + 17'sd1;
         end
         if (input_pop_w) begin
             negative_x_r <= offset_x_w[16];
@@ -658,7 +673,7 @@ module edrv32_gpu_raster (
             x1_r <= {{2{input_bounds_r[input_read_r][47]}},
                 input_bounds_r[input_read_r][32 +: 16]};
             unused_last_x_r <= {{2{unused_last_x_w[15]}}, unused_last_x_w[15:2], 2'b0};
-            last_y_r <= {{2{unused_last_y_w[15]}}, unused_last_y_w[15:1], 1'b1};
+            last_even_y_r <= {{2{unused_last_y_w[15]}}, unused_last_y_w[15:1], 1'b0};
             h_r <= input_h_r[input_read_r];
             inclusive_r <= edge_inclusive_w;
         end
@@ -667,10 +682,9 @@ module edrv32_gpu_raster (
     assign fragment_x_o = unused_output_data_w[0 +: 16];
     assign output_input_w[16 +: 16] = pipe_y_w;
     assign fragment_y_o = unused_output_data_w[16 +: 16];
-    assign output_input_w[32 +: 4] = mask_w;
-    assign fragment_mask_o = unused_output_data_w[32 +: 4];
+    assign output_input_w[32 +: 4] = {2'b0, mask_w};
+    assign fragment_mask_o = unused_output_data_w[32 +: 2];
     assign output_input_w[36 +: 1] = 1'b0;
-    assign fragment_quad_o = unused_output_data_w[36 +: 1];
     assign output_input_w[37 +: 70] = pipe_h_w;
     assign fragment_h_o = unused_output_data_w[37 +: 70];
     assign output_input_w[107 +: 4] = pipe_palette_w;
@@ -708,60 +722,24 @@ module edrv32_gpu_raster (
         .clk_i(clk_i),
         .wr_en_i(output_push_w),
         .wr_addr_i(output_write_r),
-        .wr_data_i(output_input_w[768 +: 256]),
+        .wr_data_i({37'b0, output_input_w[768 +: 219]}),
         .rd_en_i(output_read_w),
         .rd_addr_i(output_addr_w),
         .rd_data_o(unused_output_data_w[768 +: 256])
-    );
-    edrv32_ram_gpu_read_pool u_output_4 (
-        .clk_i(clk_i),
-        .wr_en_i(output_push_w),
-        .wr_addr_i(output_write_r),
-        .wr_data_i(output_input_w[1024 +: 256]),
-        .rd_en_i(output_read_w),
-        .rd_addr_i(output_addr_w),
-        .rd_data_o(unused_output_data_w[1024 +: 256])
-    );
-    edrv32_ram_gpu_read_pool u_output_5 (
-        .clk_i(clk_i),
-        .wr_en_i(output_push_w),
-        .wr_addr_i(output_write_r),
-        .wr_data_i(output_input_w[1280 +: 256]),
-        .rd_en_i(output_read_w),
-        .rd_addr_i(output_addr_w),
-        .rd_data_o(unused_output_data_w[1280 +: 256])
-    );
-    edrv32_ram_gpu_read_pool u_output_6 (
-        .clk_i(clk_i),
-        .wr_en_i(output_push_w),
-        .wr_addr_i(output_write_r),
-        .wr_data_i(output_input_w[1536 +: 256]),
-        .rd_en_i(output_read_w),
-        .rd_addr_i(output_addr_w),
-        .rd_data_o(unused_output_data_w[1536 +: 256])
-    );
-    edrv32_ram_gpu_read_pool u_output_7 (
-        .clk_i(clk_i),
-        .wr_en_i(output_push_w),
-        .wr_addr_i(output_write_r),
-        .wr_data_i({193'b0, output_input_w[1792 +: 63]}),
-        .rd_en_i(output_read_w),
-        .rd_addr_i(output_addr_w),
-        .rd_data_o(unused_output_data_w[1792 +: 256])
     );
 
     genvar coverage_lane;
     genvar coverage_edge;
     generate
         // Four coverage lanes: three x bounds, two y bounds and three edge tests each.
-        for (coverage_lane = 0; coverage_lane < 4; coverage_lane = coverage_lane + 1) begin : g_mask
-            localparam [1:0] LANE = coverage_lane;
+        for (coverage_lane = 0; coverage_lane < 2; coverage_lane = coverage_lane + 1) begin : g_mask
+            localparam LANE = coverage_lane;
             reg covered_r;
             assign mask_w[coverage_lane] = covered_r;
             assign clip_w[coverage_lane] =
-                $signed({x_r[17:2], LANE}) >= clip_x0_r &&
-                $signed({x_r[17:2], LANE}) < clip_x1_r &&
-                $signed({x_r[17:2], LANE}) < x1_r && y_r >= clip_y0_r && y_r < clip_y1_r;
+                $signed({x_r[17:1], LANE[0]}) >= clip_x0_r &&
+                $signed({x_r[17:1], LANE[0]}) < clip_x1_r &&
+                $signed({x_r[17:1], LANE[0]}) < x1_r && y_r >= clip_y0_r && y_r < clip_y1_r;
             always @(posedge clk_i) begin
                 if (advance_w) covered_r <= pipe_clip_w[coverage_lane] &&
                     !edge_negative_w[coverage_lane*3] &&

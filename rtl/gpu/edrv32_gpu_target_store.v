@@ -59,7 +59,20 @@ module edrv32_gpu_target_store (
     assign old_valid_o = count_r != 0;
     assign old_data_o = fifo_data_r[rd_ptr_r];
     assign old_addr_o = fifo_addr_r[rd_ptr_r];
-    assign old_meta_o = fifo_meta_r[rd_ptr_r];
+    wire [23:0] meta_quarters_w;
+    genvar meta_quarter;
+    generate
+        for (meta_quarter = 0; meta_quarter < 4; meta_quarter = meta_quarter + 1)
+        begin : g_meta_select
+            assign meta_quarters_w[meta_quarter*6 +: 6] = rd_ptr_r[1] ?
+                (rd_ptr_r[0] ? fifo_meta_r[meta_quarter*4+3] :
+                fifo_meta_r[meta_quarter*4+2]) :
+                (rd_ptr_r[0] ? fifo_meta_r[meta_quarter*4+1] : fifo_meta_r[meta_quarter*4]);
+        end
+    endgenerate
+    assign old_meta_o = rd_ptr_r[3] ?
+        (rd_ptr_r[2] ? meta_quarters_w[18 +: 6] : meta_quarters_w[12 +: 6]) :
+        (rd_ptr_r[2] ? meta_quarters_w[6 +: 6] : meta_quarters_w[0 +: 6]);
     assign idle_o = reserved_r == 0 && !write_valid_r;
     assign selected_w = group_data_r[addr_r[3][14:13]];
 

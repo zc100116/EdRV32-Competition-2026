@@ -71,7 +71,7 @@ module edrv32_gpu_unpack (
     wire [4:0] push_w;
     wire [4:0] pop_w;
     wire [255:0] head_data_w [0:4];
-    wire [31:0] head_keep_w [1:4];
+    wire [31:0] head_keep_w [1:3];
     wire [4:1] head_last_w;
     wire [255:0] matrix_second_w;
     wire unused_matrix_w;
@@ -88,6 +88,7 @@ module edrv32_gpu_unpack (
     wire texture_fire_w;
     wire palette_fire_w;
     wire palette_end_w;
+    wire [7:0] palette_end_flags_w;
     wire unused_command_w;
     assign unused_command_w = ^{unpack_command_i[255:114], unpack_command_i[100:36],
         unpack_command_i[31:0]};
@@ -138,10 +139,24 @@ module edrv32_gpu_unpack (
     assign texture_fire_w = texture_load_valid_o && texture_load_ready_i;
     assign palette_load_valid_o = busy_r && count_r[4] != 0 && !stop_i;
     assign palette_load_idx_o = palette_idx_r;
-    assign palette_load_data_o = head_data_w[4][palette_word_r*32 +: 20];
+    reg [19:0] palette_data_w;
+    assign palette_load_data_o = palette_data_w;
+    always @(*) begin
+        palette_data_w = 0;
+        case (palette_word_r)
+            3'd0: palette_data_w = head_data_w[4][0 +: 20];
+            3'd1: palette_data_w = head_data_w[4][32 +: 20];
+            3'd2: palette_data_w = head_data_w[4][64 +: 20];
+            3'd3: palette_data_w = head_data_w[4][96 +: 20];
+            3'd4: palette_data_w = head_data_w[4][128 +: 20];
+            3'd5: palette_data_w = head_data_w[4][160 +: 20];
+            3'd6: palette_data_w = head_data_w[4][192 +: 20];
+            3'd7: palette_data_w = head_data_w[4][224 +: 20];
+            default: palette_data_w = 0;
+        endcase
+    end
     assign palette_fire_w = palette_load_valid_o && palette_load_ready_i;
-    assign palette_end_w = palette_word_r == 3'd7
-        || (32'b0 == (head_keep_w[4] >> (({3'b0, palette_word_r}+6'd1)*6'd4)));
+    assign palette_end_w = palette_end_flags_w[palette_word_r];
     assign pop_w[0] = matrix_valid_o && matrix_ready_i;
     assign pop_w[1] = vertex_fire_w && (vertex_half_r
         || !head_keep_w[1][16]);
@@ -167,21 +182,46 @@ module edrv32_gpu_unpack (
                 assign matrix_second_w = head_r[c] ? slot0_data_r : slot1_data_r;
                 assign unused_matrix_w = ^{keep_w[c], last_w[c]};
             end else begin : g_tag
-                reg [31:0] slot0_keep_r;
-                reg [31:0] slot1_keep_r;
+                localparam PALETTE_CLIENT = 4;
+                if (c == PALETTE_CLIENT)
+                begin : g_palette_keep
+                    reg [7:0] slot0_end_r;
+                    reg [7:0] slot1_end_r;
+                    wire [7:0] end_flags_w;
+                    wire [31:0] unused_palette_keep_w;
+                    assign unused_palette_keep_w = keep_w[c];
+                    assign palette_end_flags_w = head_r[c] ? slot1_end_r : slot0_end_r;
+                    assign end_flags_w[0] = !(|unused_palette_keep_w[31:4]);
+                    assign end_flags_w[1] = !(|unused_palette_keep_w[31:8]);
+                    assign end_flags_w[2] = !(|unused_palette_keep_w[31:12]);
+                    assign end_flags_w[3] = !(|unused_palette_keep_w[31:16]);
+                    assign end_flags_w[4] = !(|unused_palette_keep_w[31:20]);
+                    assign end_flags_w[5] = !(|unused_palette_keep_w[31:24]);
+                    assign end_flags_w[6] = !(|unused_palette_keep_w[31:28]);
+                    assign end_flags_w[7] = 1'b1;
+                    always @(posedge clk_i) begin
+                        if (push_w[c] && !tail_r[c]) slot0_end_r <= end_flags_w;
+                        if (push_w[c] && tail_r[c]) slot1_end_r <= end_flags_w;
+                    end
+                end else begin : g_other_keep
+                    reg [31:0] slot0_keep_r;
+                    reg [31:0] slot1_keep_r;
+                    assign head_keep_w[c] = head_r[c] ? slot1_keep_r : slot0_keep_r;
+                    always @(posedge clk_i) begin
+                        if (push_w[c] && !tail_r[c]) slot0_keep_r <= keep_w[c];
+                        if (push_w[c] && tail_r[c]) slot1_keep_r <= keep_w[c];
+                    end
+                end
                 reg slot0_last_r;
                 reg slot1_last_r;
                 always @(posedge clk_i) begin
                     if (push_w[c] && !tail_r[c]) begin
-                        slot0_keep_r <= keep_w[c];
                         slot0_last_r <= last_w[c];
                     end
                     if (push_w[c] && tail_r[c]) begin
-                        slot1_keep_r <= keep_w[c];
                         slot1_last_r <= last_w[c];
                     end
                 end
-                assign head_keep_w[c] = head_r[c] ? slot1_keep_r : slot0_keep_r;
                 assign head_last_w[c] = head_r[c] ? slot1_last_r : slot0_last_r;
             end
             always @(posedge clk_i or negedge rst_n_i) begin

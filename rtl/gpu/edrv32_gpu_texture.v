@@ -58,6 +58,606 @@ module edrv32_gpu_texture (
     input wire [159:0] current_read_data_i,
     output wire perf_texture_stall_o
 );
+    wire [31:0] unused_address_scaled_u0_0_wide_w;
+    wire [31:0] unused_address_scaled_v0_0_wide_w;
+    wire [31:0] unused_address_scaled_u0_1_wide_w;
+    wire [31:0] unused_address_scaled_v0_1_wide_w;
+    wire [31:0] unused_address_scaled_u1_0_wide_w;
+    wire [31:0] unused_address_scaled_v1_0_wide_w;
+    wire [31:0] unused_address_scaled_u1_1_wide_w;
+    wire [31:0] unused_address_scaled_v1_1_wide_w;
+    wire [31:0] unused_address_scaled_u2_0_wide_w;
+    wire [31:0] unused_address_scaled_v2_0_wide_w;
+    wire [31:0] unused_address_scaled_u2_1_wide_w;
+    wire [31:0] unused_address_scaled_v2_1_wide_w;
+    wire [31:0] unused_address_scaled_u3_0_wide_w;
+    wire [31:0] unused_address_scaled_v3_0_wide_w;
+    wire [31:0] unused_address_scaled_u3_1_wide_w;
+    wire [31:0] unused_address_scaled_v3_1_wide_w;
+    reg [4:0] address_slot_0_r;
+    reg [31:0] address_u0_r;
+    reg [31:0] address_v0_r;
+    reg [3:0] address_level0_r;
+    reg [3:0] address_next_level0_r;
+    reg [16:0] address_scaled_u0_0_r;
+    reg [16:0] address_scaled_v0_0_r;
+    reg [8:0] address_mask_x0_0_r;
+    reg [8:0] address_mask_y0_0_r;
+    reg [16:0] address_offset0_0_r;
+    reg [3:0] address_row_shift0_0_r;
+    reg [15:0] address_fraction0_0_r;
+    reg [8:0] address_x0_0_0_r;
+    reg [8:0] address_y0_0_0_r;
+    wire [8:0] address_block_x0_0_0_w;
+    wire [8:0] address_block_y0_0_0_w;
+    reg [3:0] address_row_shift0_0_d2_r;
+    reg [16:0] unused_address_row0_0_0_r;
+    wire [7:0] address_column0_0_0_w;
+    reg [1:0] address_bank0_0_0_r;
+    reg [3:0] address_subword0_0_0_r;
+    reg [16:0] address_offset0_0_d2_r;
+    reg [16:0] unused_address_offset0_0_d3_r;
+    reg [7:0] address_column0_0_0_w_d3_r;
+    reg [16:0] address_halfword0_0_0_r;
+    reg [3:0] address_subword0_0_0_d4_r;
+    wire [20:0] address_record0_0_0_w;
+    reg [8:0] address_x0_0_1_r;
+    reg [8:0] address_y0_0_1_r;
+    wire [8:0] address_block_x0_0_1_w;
+    wire [8:0] address_block_y0_0_1_w;
+    reg [16:0] unused_address_row0_0_1_r;
+    wire [7:0] address_column0_0_1_w;
+    reg [1:0] address_bank0_0_1_r;
+    reg [3:0] address_subword0_0_1_r;
+    reg [7:0] address_column0_0_1_w_d3_r;
+    reg [16:0] address_halfword0_0_1_r;
+    reg [3:0] address_subword0_0_1_d4_r;
+    wire [20:0] address_record0_0_1_w;
+    reg [8:0] address_x0_0_2_r;
+    reg [8:0] address_y0_0_2_r;
+    wire [8:0] address_block_x0_0_2_w;
+    wire [8:0] address_block_y0_0_2_w;
+    reg [16:0] unused_address_row0_0_2_r;
+    wire [7:0] address_column0_0_2_w;
+    reg [1:0] address_bank0_0_2_r;
+    reg [3:0] address_subword0_0_2_r;
+    reg [7:0] address_column0_0_2_w_d3_r;
+    reg [16:0] address_halfword0_0_2_r;
+    reg [3:0] address_subword0_0_2_d4_r;
+    wire [20:0] address_record0_0_2_w;
+    reg [8:0] address_x0_0_3_r;
+    reg [8:0] address_y0_0_3_r;
+    wire [8:0] address_block_x0_0_3_w;
+    wire [8:0] address_block_y0_0_3_w;
+    reg [16:0] unused_address_row0_0_3_r;
+    wire [7:0] address_column0_0_3_w;
+    reg [1:0] address_bank0_0_3_r;
+    reg [3:0] address_subword0_0_3_r;
+    reg [7:0] address_column0_0_3_w_d3_r;
+    reg [16:0] address_halfword0_0_3_r;
+    reg [3:0] address_subword0_0_3_d4_r;
+    wire [20:0] address_record0_0_3_w;
+    reg [8:0] address_x0_0_4_r;
+    reg [8:0] address_y0_0_4_r;
+    wire [8:0] address_block_x0_0_4_w;
+    wire [8:0] address_block_y0_0_4_w;
+    reg [16:0] unused_address_row0_0_4_r;
+    wire [7:0] address_column0_0_4_w;
+    reg [1:0] address_bank0_0_4_r;
+    reg [3:0] address_subword0_0_4_r;
+    reg [7:0] address_column0_0_4_w_d3_r;
+    reg [16:0] address_halfword0_0_4_r;
+    reg [3:0] address_subword0_0_4_d4_r;
+    wire [20:0] address_record0_0_4_w;
+    reg [31:0] address_u0_r_d1_r;
+    reg [16:0] address_scaled_u0_1_r;
+    reg [31:0] address_v0_r_d1_r;
+    reg [16:0] address_scaled_v0_1_r;
+    reg [8:0] address_mask_x0_1_r;
+    reg [8:0] address_mask_y0_1_r;
+    reg [16:0] address_offset0_1_r;
+    reg [3:0] address_row_shift0_1_r;
+    reg [15:0] address_fraction0_1_r;
+    reg [8:0] address_x0_1_0_r;
+    reg [8:0] address_y0_1_0_r;
+    wire [8:0] address_block_x0_1_0_w;
+    wire [8:0] address_block_y0_1_0_w;
+    reg [3:0] address_row_shift0_1_d3_r;
+    reg [16:0] unused_address_row0_1_0_r;
+    wire [7:0] address_column0_1_0_w;
+    reg [1:0] address_bank0_1_0_r;
+    reg [3:0] address_subword0_1_0_r;
+    reg [16:0] address_offset0_1_d3_r;
+    reg [16:0] unused_address_offset0_1_d4_r;
+    reg [7:0] address_column0_1_0_w_d4_r;
+    reg [16:0] address_halfword0_1_0_r;
+    reg [3:0] address_subword0_1_0_d5_r;
+    wire [20:0] address_record0_1_0_w;
+    reg [8:0] address_x0_1_1_r;
+    reg [8:0] address_y0_1_1_r;
+    wire [8:0] address_block_x0_1_1_w;
+    wire [8:0] address_block_y0_1_1_w;
+    reg [16:0] unused_address_row0_1_1_r;
+    wire [7:0] address_column0_1_1_w;
+    reg [1:0] address_bank0_1_1_r;
+    reg [3:0] address_subword0_1_1_r;
+    reg [7:0] address_column0_1_1_w_d4_r;
+    reg [16:0] address_halfword0_1_1_r;
+    reg [3:0] address_subword0_1_1_d5_r;
+    wire [20:0] address_record0_1_1_w;
+    reg [8:0] address_x0_1_2_r;
+    reg [8:0] address_y0_1_2_r;
+    wire [8:0] address_block_x0_1_2_w;
+    wire [8:0] address_block_y0_1_2_w;
+    reg [16:0] unused_address_row0_1_2_r;
+    wire [7:0] address_column0_1_2_w;
+    reg [1:0] address_bank0_1_2_r;
+    reg [3:0] address_subword0_1_2_r;
+    reg [7:0] address_column0_1_2_w_d4_r;
+    reg [16:0] address_halfword0_1_2_r;
+    reg [3:0] address_subword0_1_2_d5_r;
+    wire [20:0] address_record0_1_2_w;
+    reg [8:0] address_x0_1_3_r;
+    reg [8:0] address_y0_1_3_r;
+    wire [8:0] address_block_x0_1_3_w;
+    wire [8:0] address_block_y0_1_3_w;
+    reg [16:0] unused_address_row0_1_3_r;
+    wire [7:0] address_column0_1_3_w;
+    reg [1:0] address_bank0_1_3_r;
+    reg [3:0] address_subword0_1_3_r;
+    reg [7:0] address_column0_1_3_w_d4_r;
+    reg [16:0] address_halfword0_1_3_r;
+    reg [3:0] address_subword0_1_3_d5_r;
+    wire [20:0] address_record0_1_3_w;
+    reg [31:0] address_u1_r;
+    reg [31:0] address_v1_r;
+    reg [3:0] address_level1_r;
+    reg [3:0] address_next_level1_r;
+    reg [16:0] address_scaled_u1_0_r;
+    reg [16:0] address_scaled_v1_0_r;
+    reg [8:0] address_mask_x1_0_r;
+    reg [8:0] address_mask_y1_0_r;
+    reg [16:0] address_offset1_0_r;
+    reg [3:0] address_row_shift1_0_r;
+    reg [15:0] address_fraction1_0_r;
+    reg [8:0] address_x1_0_0_r;
+    reg [8:0] address_y1_0_0_r;
+    wire [8:0] address_block_x1_0_0_w;
+    wire [8:0] address_block_y1_0_0_w;
+    reg [3:0] address_row_shift1_0_d2_r;
+    reg [16:0] unused_address_row1_0_0_r;
+    wire [7:0] address_column1_0_0_w;
+    reg [1:0] address_bank1_0_0_r;
+    reg [3:0] address_subword1_0_0_r;
+    reg [16:0] address_offset1_0_d2_r;
+    reg [16:0] unused_address_offset1_0_d3_r;
+    reg [7:0] address_column1_0_0_w_d3_r;
+    reg [16:0] address_halfword1_0_0_r;
+    reg [3:0] address_subword1_0_0_d4_r;
+    wire [20:0] address_record1_0_0_w;
+    reg [8:0] address_x1_0_1_r;
+    reg [8:0] address_y1_0_1_r;
+    wire [8:0] address_block_x1_0_1_w;
+    wire [8:0] address_block_y1_0_1_w;
+    reg [16:0] unused_address_row1_0_1_r;
+    wire [7:0] address_column1_0_1_w;
+    reg [1:0] address_bank1_0_1_r;
+    reg [3:0] address_subword1_0_1_r;
+    reg [7:0] address_column1_0_1_w_d3_r;
+    reg [16:0] address_halfword1_0_1_r;
+    reg [3:0] address_subword1_0_1_d4_r;
+    wire [20:0] address_record1_0_1_w;
+    reg [8:0] address_x1_0_2_r;
+    reg [8:0] address_y1_0_2_r;
+    wire [8:0] address_block_x1_0_2_w;
+    wire [8:0] address_block_y1_0_2_w;
+    reg [16:0] unused_address_row1_0_2_r;
+    wire [7:0] address_column1_0_2_w;
+    reg [1:0] address_bank1_0_2_r;
+    reg [3:0] address_subword1_0_2_r;
+    reg [7:0] address_column1_0_2_w_d3_r;
+    reg [16:0] address_halfword1_0_2_r;
+    reg [3:0] address_subword1_0_2_d4_r;
+    wire [20:0] address_record1_0_2_w;
+    reg [8:0] address_x1_0_3_r;
+    reg [8:0] address_y1_0_3_r;
+    wire [8:0] address_block_x1_0_3_w;
+    wire [8:0] address_block_y1_0_3_w;
+    reg [16:0] unused_address_row1_0_3_r;
+    wire [7:0] address_column1_0_3_w;
+    reg [1:0] address_bank1_0_3_r;
+    reg [3:0] address_subword1_0_3_r;
+    reg [7:0] address_column1_0_3_w_d3_r;
+    reg [16:0] address_halfword1_0_3_r;
+    reg [3:0] address_subword1_0_3_d4_r;
+    wire [20:0] address_record1_0_3_w;
+    reg [8:0] address_x1_0_4_r;
+    reg [8:0] address_y1_0_4_r;
+    wire [8:0] address_block_x1_0_4_w;
+    wire [8:0] address_block_y1_0_4_w;
+    reg [16:0] unused_address_row1_0_4_r;
+    wire [7:0] address_column1_0_4_w;
+    reg [1:0] address_bank1_0_4_r;
+    reg [3:0] address_subword1_0_4_r;
+    reg [7:0] address_column1_0_4_w_d3_r;
+    reg [16:0] address_halfword1_0_4_r;
+    reg [3:0] address_subword1_0_4_d4_r;
+    wire [20:0] address_record1_0_4_w;
+    reg [31:0] address_u1_r_d1_r;
+    reg [16:0] address_scaled_u1_1_r;
+    reg [31:0] address_v1_r_d1_r;
+    reg [16:0] address_scaled_v1_1_r;
+    reg [8:0] address_mask_x1_1_r;
+    reg [8:0] address_mask_y1_1_r;
+    reg [16:0] address_offset1_1_r;
+    reg [3:0] address_row_shift1_1_r;
+    reg [15:0] address_fraction1_1_r;
+    reg [8:0] address_x1_1_0_r;
+    reg [8:0] address_y1_1_0_r;
+    wire [8:0] address_block_x1_1_0_w;
+    wire [8:0] address_block_y1_1_0_w;
+    reg [3:0] address_row_shift1_1_d3_r;
+    reg [16:0] unused_address_row1_1_0_r;
+    wire [7:0] address_column1_1_0_w;
+    reg [1:0] address_bank1_1_0_r;
+    reg [3:0] address_subword1_1_0_r;
+    reg [16:0] address_offset1_1_d3_r;
+    reg [16:0] unused_address_offset1_1_d4_r;
+    reg [7:0] address_column1_1_0_w_d4_r;
+    reg [16:0] address_halfword1_1_0_r;
+    reg [3:0] address_subword1_1_0_d5_r;
+    wire [20:0] address_record1_1_0_w;
+    reg [8:0] address_x1_1_1_r;
+    reg [8:0] address_y1_1_1_r;
+    wire [8:0] address_block_x1_1_1_w;
+    wire [8:0] address_block_y1_1_1_w;
+    reg [16:0] unused_address_row1_1_1_r;
+    wire [7:0] address_column1_1_1_w;
+    reg [1:0] address_bank1_1_1_r;
+    reg [3:0] address_subword1_1_1_r;
+    reg [7:0] address_column1_1_1_w_d4_r;
+    reg [16:0] address_halfword1_1_1_r;
+    reg [3:0] address_subword1_1_1_d5_r;
+    wire [20:0] address_record1_1_1_w;
+    reg [8:0] address_x1_1_2_r;
+    reg [8:0] address_y1_1_2_r;
+    wire [8:0] address_block_x1_1_2_w;
+    wire [8:0] address_block_y1_1_2_w;
+    reg [16:0] unused_address_row1_1_2_r;
+    wire [7:0] address_column1_1_2_w;
+    reg [1:0] address_bank1_1_2_r;
+    reg [3:0] address_subword1_1_2_r;
+    reg [7:0] address_column1_1_2_w_d4_r;
+    reg [16:0] address_halfword1_1_2_r;
+    reg [3:0] address_subword1_1_2_d5_r;
+    wire [20:0] address_record1_1_2_w;
+    reg [8:0] address_x1_1_3_r;
+    reg [8:0] address_y1_1_3_r;
+    wire [8:0] address_block_x1_1_3_w;
+    wire [8:0] address_block_y1_1_3_w;
+    reg [16:0] unused_address_row1_1_3_r;
+    wire [7:0] address_column1_1_3_w;
+    reg [1:0] address_bank1_1_3_r;
+    reg [3:0] address_subword1_1_3_r;
+    reg [7:0] address_column1_1_3_w_d4_r;
+    reg [16:0] address_halfword1_1_3_r;
+    reg [3:0] address_subword1_1_3_d5_r;
+    wire [20:0] address_record1_1_3_w;
+    reg [31:0] address_u2_r;
+    reg [31:0] address_v2_r;
+    reg [3:0] address_level2_r;
+    reg [3:0] address_next_level2_r;
+    reg [16:0] address_scaled_u2_0_r;
+    reg [16:0] address_scaled_v2_0_r;
+    reg [8:0] address_mask_x2_0_r;
+    reg [8:0] address_mask_y2_0_r;
+    reg [16:0] address_offset2_0_r;
+    reg [3:0] address_row_shift2_0_r;
+    reg [15:0] address_fraction2_0_r;
+    reg [8:0] address_x2_0_0_r;
+    reg [8:0] address_y2_0_0_r;
+    wire [8:0] address_block_x2_0_0_w;
+    wire [8:0] address_block_y2_0_0_w;
+    reg [3:0] address_row_shift2_0_d2_r;
+    reg [16:0] unused_address_row2_0_0_r;
+    wire [7:0] address_column2_0_0_w;
+    reg [1:0] address_bank2_0_0_r;
+    reg [3:0] address_subword2_0_0_r;
+    reg [16:0] address_offset2_0_d2_r;
+    reg [16:0] unused_address_offset2_0_d3_r;
+    reg [7:0] address_column2_0_0_w_d3_r;
+    reg [16:0] address_halfword2_0_0_r;
+    reg [3:0] address_subword2_0_0_d4_r;
+    wire [20:0] address_record2_0_0_w;
+    reg [8:0] address_x2_0_1_r;
+    reg [8:0] address_y2_0_1_r;
+    wire [8:0] address_block_x2_0_1_w;
+    wire [8:0] address_block_y2_0_1_w;
+    reg [16:0] unused_address_row2_0_1_r;
+    wire [7:0] address_column2_0_1_w;
+    reg [1:0] address_bank2_0_1_r;
+    reg [3:0] address_subword2_0_1_r;
+    reg [7:0] address_column2_0_1_w_d3_r;
+    reg [16:0] address_halfword2_0_1_r;
+    reg [3:0] address_subword2_0_1_d4_r;
+    wire [20:0] address_record2_0_1_w;
+    reg [8:0] address_x2_0_2_r;
+    reg [8:0] address_y2_0_2_r;
+    wire [8:0] address_block_x2_0_2_w;
+    wire [8:0] address_block_y2_0_2_w;
+    reg [16:0] unused_address_row2_0_2_r;
+    wire [7:0] address_column2_0_2_w;
+    reg [1:0] address_bank2_0_2_r;
+    reg [3:0] address_subword2_0_2_r;
+    reg [7:0] address_column2_0_2_w_d3_r;
+    reg [16:0] address_halfword2_0_2_r;
+    reg [3:0] address_subword2_0_2_d4_r;
+    wire [20:0] address_record2_0_2_w;
+    reg [8:0] address_x2_0_3_r;
+    reg [8:0] address_y2_0_3_r;
+    wire [8:0] address_block_x2_0_3_w;
+    wire [8:0] address_block_y2_0_3_w;
+    reg [16:0] unused_address_row2_0_3_r;
+    wire [7:0] address_column2_0_3_w;
+    reg [1:0] address_bank2_0_3_r;
+    reg [3:0] address_subword2_0_3_r;
+    reg [7:0] address_column2_0_3_w_d3_r;
+    reg [16:0] address_halfword2_0_3_r;
+    reg [3:0] address_subword2_0_3_d4_r;
+    wire [20:0] address_record2_0_3_w;
+    reg [8:0] address_x2_0_4_r;
+    reg [8:0] address_y2_0_4_r;
+    wire [8:0] address_block_x2_0_4_w;
+    wire [8:0] address_block_y2_0_4_w;
+    reg [16:0] unused_address_row2_0_4_r;
+    wire [7:0] address_column2_0_4_w;
+    reg [1:0] address_bank2_0_4_r;
+    reg [3:0] address_subword2_0_4_r;
+    reg [7:0] address_column2_0_4_w_d3_r;
+    reg [16:0] address_halfword2_0_4_r;
+    reg [3:0] address_subword2_0_4_d4_r;
+    wire [20:0] address_record2_0_4_w;
+    reg [31:0] address_u2_r_d1_r;
+    reg [16:0] address_scaled_u2_1_r;
+    reg [31:0] address_v2_r_d1_r;
+    reg [16:0] address_scaled_v2_1_r;
+    reg [8:0] address_mask_x2_1_r;
+    reg [8:0] address_mask_y2_1_r;
+    reg [16:0] address_offset2_1_r;
+    reg [3:0] address_row_shift2_1_r;
+    reg [15:0] address_fraction2_1_r;
+    reg [8:0] address_x2_1_0_r;
+    reg [8:0] address_y2_1_0_r;
+    wire [8:0] address_block_x2_1_0_w;
+    wire [8:0] address_block_y2_1_0_w;
+    reg [3:0] address_row_shift2_1_d3_r;
+    reg [16:0] unused_address_row2_1_0_r;
+    wire [7:0] address_column2_1_0_w;
+    reg [1:0] address_bank2_1_0_r;
+    reg [3:0] address_subword2_1_0_r;
+    reg [16:0] address_offset2_1_d3_r;
+    reg [16:0] unused_address_offset2_1_d4_r;
+    reg [7:0] address_column2_1_0_w_d4_r;
+    reg [16:0] address_halfword2_1_0_r;
+    reg [3:0] address_subword2_1_0_d5_r;
+    wire [20:0] address_record2_1_0_w;
+    reg [8:0] address_x2_1_1_r;
+    reg [8:0] address_y2_1_1_r;
+    wire [8:0] address_block_x2_1_1_w;
+    wire [8:0] address_block_y2_1_1_w;
+    reg [16:0] unused_address_row2_1_1_r;
+    wire [7:0] address_column2_1_1_w;
+    reg [1:0] address_bank2_1_1_r;
+    reg [3:0] address_subword2_1_1_r;
+    reg [7:0] address_column2_1_1_w_d4_r;
+    reg [16:0] address_halfword2_1_1_r;
+    reg [3:0] address_subword2_1_1_d5_r;
+    wire [20:0] address_record2_1_1_w;
+    reg [8:0] address_x2_1_2_r;
+    reg [8:0] address_y2_1_2_r;
+    wire [8:0] address_block_x2_1_2_w;
+    wire [8:0] address_block_y2_1_2_w;
+    reg [16:0] unused_address_row2_1_2_r;
+    wire [7:0] address_column2_1_2_w;
+    reg [1:0] address_bank2_1_2_r;
+    reg [3:0] address_subword2_1_2_r;
+    reg [7:0] address_column2_1_2_w_d4_r;
+    reg [16:0] address_halfword2_1_2_r;
+    reg [3:0] address_subword2_1_2_d5_r;
+    wire [20:0] address_record2_1_2_w;
+    reg [8:0] address_x2_1_3_r;
+    reg [8:0] address_y2_1_3_r;
+    wire [8:0] address_block_x2_1_3_w;
+    wire [8:0] address_block_y2_1_3_w;
+    reg [16:0] unused_address_row2_1_3_r;
+    wire [7:0] address_column2_1_3_w;
+    reg [1:0] address_bank2_1_3_r;
+    reg [3:0] address_subword2_1_3_r;
+    reg [7:0] address_column2_1_3_w_d4_r;
+    reg [16:0] address_halfword2_1_3_r;
+    reg [3:0] address_subword2_1_3_d5_r;
+    wire [20:0] address_record2_1_3_w;
+    reg [31:0] address_u3_r;
+    reg [31:0] address_v3_r;
+    reg [3:0] address_level3_r;
+    reg [3:0] address_next_level3_r;
+    reg [16:0] address_scaled_u3_0_r;
+    reg [16:0] address_scaled_v3_0_r;
+    reg [8:0] address_mask_x3_0_r;
+    reg [8:0] address_mask_y3_0_r;
+    reg [16:0] address_offset3_0_r;
+    reg [3:0] address_row_shift3_0_r;
+    reg [15:0] address_fraction3_0_r;
+    reg [8:0] address_x3_0_0_r;
+    reg [8:0] address_y3_0_0_r;
+    wire [8:0] address_block_x3_0_0_w;
+    wire [8:0] address_block_y3_0_0_w;
+    reg [3:0] address_row_shift3_0_d2_r;
+    reg [16:0] unused_address_row3_0_0_r;
+    wire [7:0] address_column3_0_0_w;
+    reg [1:0] address_bank3_0_0_r;
+    reg [3:0] address_subword3_0_0_r;
+    reg [16:0] address_offset3_0_d2_r;
+    reg [16:0] unused_address_offset3_0_d3_r;
+    reg [7:0] address_column3_0_0_w_d3_r;
+    reg [16:0] address_halfword3_0_0_r;
+    reg [3:0] address_subword3_0_0_d4_r;
+    wire [20:0] address_record3_0_0_w;
+    reg [8:0] address_x3_0_1_r;
+    reg [8:0] address_y3_0_1_r;
+    wire [8:0] address_block_x3_0_1_w;
+    wire [8:0] address_block_y3_0_1_w;
+    reg [16:0] unused_address_row3_0_1_r;
+    wire [7:0] address_column3_0_1_w;
+    reg [1:0] address_bank3_0_1_r;
+    reg [3:0] address_subword3_0_1_r;
+    reg [7:0] address_column3_0_1_w_d3_r;
+    reg [16:0] address_halfword3_0_1_r;
+    reg [3:0] address_subword3_0_1_d4_r;
+    wire [20:0] address_record3_0_1_w;
+    reg [8:0] address_x3_0_2_r;
+    reg [8:0] address_y3_0_2_r;
+    wire [8:0] address_block_x3_0_2_w;
+    wire [8:0] address_block_y3_0_2_w;
+    reg [16:0] unused_address_row3_0_2_r;
+    wire [7:0] address_column3_0_2_w;
+    reg [1:0] address_bank3_0_2_r;
+    reg [3:0] address_subword3_0_2_r;
+    reg [7:0] address_column3_0_2_w_d3_r;
+    reg [16:0] address_halfword3_0_2_r;
+    reg [3:0] address_subword3_0_2_d4_r;
+    wire [20:0] address_record3_0_2_w;
+    reg [8:0] address_x3_0_3_r;
+    reg [8:0] address_y3_0_3_r;
+    wire [8:0] address_block_x3_0_3_w;
+    wire [8:0] address_block_y3_0_3_w;
+    reg [16:0] unused_address_row3_0_3_r;
+    wire [7:0] address_column3_0_3_w;
+    reg [1:0] address_bank3_0_3_r;
+    reg [3:0] address_subword3_0_3_r;
+    reg [7:0] address_column3_0_3_w_d3_r;
+    reg [16:0] address_halfword3_0_3_r;
+    reg [3:0] address_subword3_0_3_d4_r;
+    wire [20:0] address_record3_0_3_w;
+    reg [8:0] address_x3_0_4_r;
+    reg [8:0] address_y3_0_4_r;
+    wire [8:0] address_block_x3_0_4_w;
+    wire [8:0] address_block_y3_0_4_w;
+    reg [16:0] unused_address_row3_0_4_r;
+    wire [7:0] address_column3_0_4_w;
+    reg [1:0] address_bank3_0_4_r;
+    reg [3:0] address_subword3_0_4_r;
+    reg [7:0] address_column3_0_4_w_d3_r;
+    reg [16:0] address_halfword3_0_4_r;
+    reg [3:0] address_subword3_0_4_d4_r;
+    wire [20:0] address_record3_0_4_w;
+    reg [31:0] address_u3_r_d1_r;
+    reg [16:0] address_scaled_u3_1_r;
+    reg [31:0] address_v3_r_d1_r;
+    reg [16:0] address_scaled_v3_1_r;
+    reg [8:0] address_mask_x3_1_r;
+    reg [8:0] address_mask_y3_1_r;
+    reg [16:0] address_offset3_1_r;
+    reg [3:0] address_row_shift3_1_r;
+    reg [15:0] address_fraction3_1_r;
+    reg [8:0] address_x3_1_0_r;
+    reg [8:0] address_y3_1_0_r;
+    wire [8:0] address_block_x3_1_0_w;
+    wire [8:0] address_block_y3_1_0_w;
+    reg [3:0] address_row_shift3_1_d3_r;
+    reg [16:0] unused_address_row3_1_0_r;
+    wire [7:0] address_column3_1_0_w;
+    reg [1:0] address_bank3_1_0_r;
+    reg [3:0] address_subword3_1_0_r;
+    reg [16:0] address_offset3_1_d3_r;
+    reg [16:0] unused_address_offset3_1_d4_r;
+    reg [7:0] address_column3_1_0_w_d4_r;
+    reg [16:0] address_halfword3_1_0_r;
+    reg [3:0] address_subword3_1_0_d5_r;
+    wire [20:0] address_record3_1_0_w;
+    reg [8:0] address_x3_1_1_r;
+    reg [8:0] address_y3_1_1_r;
+    wire [8:0] address_block_x3_1_1_w;
+    wire [8:0] address_block_y3_1_1_w;
+    reg [16:0] unused_address_row3_1_1_r;
+    wire [7:0] address_column3_1_1_w;
+    reg [1:0] address_bank3_1_1_r;
+    reg [3:0] address_subword3_1_1_r;
+    reg [7:0] address_column3_1_1_w_d4_r;
+    reg [16:0] address_halfword3_1_1_r;
+    reg [3:0] address_subword3_1_1_d5_r;
+    wire [20:0] address_record3_1_1_w;
+    reg [8:0] address_x3_1_2_r;
+    reg [8:0] address_y3_1_2_r;
+    wire [8:0] address_block_x3_1_2_w;
+    wire [8:0] address_block_y3_1_2_w;
+    reg [16:0] unused_address_row3_1_2_r;
+    wire [7:0] address_column3_1_2_w;
+    reg [1:0] address_bank3_1_2_r;
+    reg [3:0] address_subword3_1_2_r;
+    reg [7:0] address_column3_1_2_w_d4_r;
+    reg [16:0] address_halfword3_1_2_r;
+    reg [3:0] address_subword3_1_2_d5_r;
+    wire [20:0] address_record3_1_2_w;
+    reg [8:0] address_x3_1_3_r;
+    reg [8:0] address_y3_1_3_r;
+    wire [8:0] address_block_x3_1_3_w;
+    wire [8:0] address_block_y3_1_3_w;
+    reg [16:0] unused_address_row3_1_3_r;
+    wire [7:0] address_column3_1_3_w;
+    reg [1:0] address_bank3_1_3_r;
+    reg [3:0] address_subword3_1_3_r;
+    reg [7:0] address_column3_1_3_w_d4_r;
+    reg [16:0] address_halfword3_1_3_r;
+    reg [3:0] address_subword3_1_3_d5_r;
+    wire [20:0] address_record3_1_3_w;
+    reg [4:0] address_slot_0_r_d1_r;
+    reg [4:0] address_slot_0_r_d2_r;
+    reg [4:0] address_slot_0_r_d3_r;
+    reg [4:0] address_slot_0_r_d4_r;
+    reg [4:0] address_slot_0_r_d5_r;
+    reg [4:0] address_slot_0_r_d6_r;
+    reg [20:0] address_record0_0_0_w_d5_r;
+    reg [20:0] address_record0_0_1_w_d5_r;
+    reg [20:0] address_record0_0_2_w_d5_r;
+    reg [20:0] address_record0_0_3_w_d5_r;
+    reg [20:0] address_record0_0_4_w_d5_r;
+    reg [15:0] address_fraction0_0_d3_r;
+    reg [15:0] address_fraction0_0_d4_r;
+    reg [15:0] address_fraction0_0_d5_r;
+    reg [15:0] address_fraction0_1_d4_r;
+    reg [15:0] address_fraction0_1_d5_r;
+    reg [20:0] address_record1_0_0_w_d5_r;
+    reg [20:0] address_record1_0_1_w_d5_r;
+    reg [20:0] address_record1_0_2_w_d5_r;
+    reg [20:0] address_record1_0_3_w_d5_r;
+    reg [20:0] address_record1_0_4_w_d5_r;
+    reg [15:0] address_fraction1_0_d3_r;
+    reg [15:0] address_fraction1_0_d4_r;
+    reg [15:0] address_fraction1_0_d5_r;
+    reg [15:0] address_fraction1_1_d4_r;
+    reg [15:0] address_fraction1_1_d5_r;
+    reg [20:0] address_record2_0_0_w_d5_r;
+    reg [20:0] address_record2_0_1_w_d5_r;
+    reg [20:0] address_record2_0_2_w_d5_r;
+    reg [20:0] address_record2_0_3_w_d5_r;
+    reg [20:0] address_record2_0_4_w_d5_r;
+    reg [15:0] address_fraction2_0_d3_r;
+    reg [15:0] address_fraction2_0_d4_r;
+    reg [15:0] address_fraction2_0_d5_r;
+    reg [15:0] address_fraction2_1_d4_r;
+    reg [15:0] address_fraction2_1_d5_r;
+    reg [20:0] address_record3_0_0_w_d5_r;
+    reg [20:0] address_record3_0_1_w_d5_r;
+    reg [20:0] address_record3_0_2_w_d5_r;
+    reg [20:0] address_record3_0_3_w_d5_r;
+    reg [20:0] address_record3_0_4_w_d5_r;
+    reg [15:0] address_fraction3_0_d3_r;
+    reg [15:0] address_fraction3_0_d4_r;
+    reg [15:0] address_fraction3_0_d5_r;
+    reg [15:0] address_fraction3_1_d4_r;
+    reg [15:0] address_fraction3_1_d5_r;
+    reg [6:0] address_valid_r;
     // The snapshot fields used by this unit are SET_TEX bits [91:64], [49:37].
     // The other frozen fields belong to raster/pixel and are deliberately unused.
     wire unused_state_w;
@@ -78,9 +678,10 @@ module edrv32_gpu_texture (
     wire [5:0] occupancy_w;
     wire accept_w;
     wire retire_w;
+    wire schedule_ready_w;
     wire schedule_valid_w;
     wire [4:0] schedule_slot_w;
-    wire [3:0] lod_ready_w [0:31];
+    wire [31:0] lod_ready_w;
     wire [3:0] completed_w [0:31];
     reg [15:0] x_r [0:31];
     reg [15:0] y_r [0:31];
@@ -105,7 +706,7 @@ module edrv32_gpu_texture (
     assign shaded_depth_o = depth_r[retire_r[4:0]];
     assign schedule_slot_w = schedule_r[4:0];
     assign schedule_valid_w = schedule_r != allocate_r
-                                && lod_ready_w[schedule_slot_w] == 4'hf && !stop_i;
+                                && schedule_ready_w && !stop_i;
 
     function [8:0] log_fraction;
         input [7:0] index_i;
@@ -375,14 +976,69 @@ module edrv32_gpu_texture (
     // Four-stage LOD path; only the eight fraction bits cross the shift boundary.
     reg [3:0] lod_valid_r;
     wire [4:0] lod_slot_r [0:3];
-    reg [6:0] filter_valid_r;
-    wire [4:0] filter_slot_r [0:6];
-    wire [3:0] filter_done_r [0:6];
+    reg [7:0] filter_valid_r;
+    wire [4:0] filter_slot_r [0:7];
+    wire [3:0] filter_done_r [0:7];
     wire [95:0] modulated_color_w;
     wire [31:0] modulated_alpha_w;
     reg [3:0] shade_mask_r;
-    wire [31:0] lane_u_w [0:3];
-    wire [31:0] lane_v_w [0:3];
+    wire [127:0] address_input_u_w;
+    wire [127:0] address_input_v_w;
+    wire [15:0] unused_address_input_lod_w;
+    wire [20:0] address_cache_w [0:35];
+    wire [15:0] fraction_cache_w [0:7];
+    wire [3:0] schedule_even_index_w;
+    wire [3:0] schedule_odd_index_w;
+    reg quad_even_r;
+    reg quad_odd_r;
+    wire launch_quad_w;
+    wire [3:0] ready_quarter_w;
+    assign ready_quarter_w[0] = (schedule_slot_w[2] ? (schedule_slot_w[1] ? (schedule_slot_w[0]
+        ? lod_ready_w[7] :
+        lod_ready_w[6]) :
+        (schedule_slot_w[0] ? lod_ready_w[5] :
+        lod_ready_w[4])) :
+        (schedule_slot_w[1] ? (schedule_slot_w[0] ? lod_ready_w[3] :
+        lod_ready_w[2]) :
+        (schedule_slot_w[0] ? lod_ready_w[1] :
+        lod_ready_w[0])));
+    assign ready_quarter_w[1] = (schedule_slot_w[2] ? (schedule_slot_w[1] ? (schedule_slot_w[0]
+        ? lod_ready_w[15] :
+        lod_ready_w[14]) :
+        (schedule_slot_w[0] ? lod_ready_w[13] :
+        lod_ready_w[12])) :
+        (schedule_slot_w[1] ? (schedule_slot_w[0] ? lod_ready_w[11] :
+        lod_ready_w[10]) :
+        (schedule_slot_w[0] ? lod_ready_w[9] :
+        lod_ready_w[8])));
+    assign ready_quarter_w[2] = (schedule_slot_w[2] ? (schedule_slot_w[1] ? (schedule_slot_w[0]
+        ? lod_ready_w[23] :
+        lod_ready_w[22]) :
+        (schedule_slot_w[0] ? lod_ready_w[21] :
+        lod_ready_w[20])) :
+        (schedule_slot_w[1] ? (schedule_slot_w[0] ? lod_ready_w[19] :
+        lod_ready_w[18]) :
+        (schedule_slot_w[0] ? lod_ready_w[17] :
+        lod_ready_w[16])));
+    assign ready_quarter_w[3] = (schedule_slot_w[2] ? (schedule_slot_w[1] ? (schedule_slot_w[0]
+        ? lod_ready_w[31] :
+        lod_ready_w[30]) :
+        (schedule_slot_w[0] ? lod_ready_w[29] :
+        lod_ready_w[28])) :
+        (schedule_slot_w[1] ? (schedule_slot_w[0] ? lod_ready_w[27] :
+        lod_ready_w[26]) :
+        (schedule_slot_w[0] ? lod_ready_w[25] :
+        lod_ready_w[24])));
+    assign schedule_ready_w = schedule_slot_w[4] ?
+        (schedule_slot_w[3] ? ready_quarter_w[3] : ready_quarter_w[2]) :
+        (schedule_slot_w[3] ? ready_quarter_w[1] : ready_quarter_w[0]);
+    assign schedule_even_index_w = schedule_slot_w[4:1] + {3'b0, schedule_slot_w[0]};
+    assign schedule_odd_index_w = schedule_slot_w[4:1];
+    assign launch_quad_w = schedule_slot_w[0] ? quad_odd_r : quad_even_r;
+    always @(posedge clk_i) begin
+        quad_even_r <= quad_r[{schedule_even_index_w, 1'b0}];
+        quad_odd_r <= quad_r[{schedule_odd_index_w, 1'b1}];
+    end
     wire [11:0] lane_lod_w [0:3];
     genvar lane;
     generate
@@ -393,9 +1049,15 @@ module edrv32_gpu_texture (
             reg [23:0] result_color_r [0:31];
             reg [7:0] result_alpha_r [0:31];
             reg result_mask_r [0:31];
-            assign lane_u_w[lane] = u_r[schedule_slot_w];
-            assign lane_v_w[lane] = v_r[schedule_slot_w];
-            assign lane_lod_w[lane] = lod_r[schedule_slot_w];
+            reg [11:0] lod_even_r;
+            reg [11:0] lod_odd_r;
+            assign lane_lod_w[lane] = schedule_slot_w[0] ? lod_odd_r : lod_even_r;
+            assign address_input_u_w[lane*32 +: 32] = u_r[lod_slot_r[2]];
+            assign address_input_v_w[lane*32 +: 32] = v_r[lod_slot_r[2]];
+            always @(posedge clk_i) begin
+                lod_even_r <= lod_r[{schedule_even_index_w, 1'b0}];
+                lod_odd_r <= lod_r[{schedule_odd_index_w, 1'b1}];
+            end
             assign shaded_color_o[lane*24 +: 24] = result_color_r[retire_r[4:0]];
             assign shaded_alpha_o[lane*8 +: 8] = result_alpha_r[retire_r[4:0]];
             assign shaded_mask_o[lane] = result_mask_r[retire_r[4:0]];
@@ -404,10 +1066,10 @@ module edrv32_gpu_texture (
                     u_r[allocate_r[4:0]] <= sample_u_i[lane*32 +: 32];
                     v_r[allocate_r[4:0]] <= sample_v_i[lane*32 +: 32];
                 end
-                if (filter_valid_r[6] && filter_done_r[6][lane]) begin
-                    result_color_r[filter_slot_r[6]] <= modulated_color_w[lane*24 +: 24];
-                    result_alpha_r[filter_slot_r[6]] <= modulated_alpha_w[lane*8 +: 8];
-                    result_mask_r[filter_slot_r[6]] <= shade_mask_r[lane];
+                if (filter_valid_r[7] && filter_done_r[7][lane]) begin
+                    result_color_r[filter_slot_r[7]] <= modulated_color_w[lane*24 +: 24];
+                    result_alpha_r[filter_slot_r[7]] <= modulated_alpha_w[lane*8 +: 8];
+                    result_mask_r[filter_slot_r[7]] <= shade_mask_r[lane];
                 end
             end
             wire high_w;
@@ -469,6 +1131,7 @@ module edrv32_gpu_texture (
             assign maximum_w = $signed({4'b0, levels_r - 4'd1, 8'b0});
             assign clamped_w = biased_w < 0 ? 12'd0 :
                                 biased_w > maximum_w ? maximum_w[11:0] : biased_w[11:0];
+            assign unused_address_input_lod_w[lane*4 +: 4] = clamped_w[11:8];
             always @(posedge clk_i) begin
                 count_value_r <= count_value_w;
                 amount_r <= 6'd63 - leading_w;
@@ -577,7 +1240,179 @@ module edrv32_gpu_texture (
     wire [31:0] tap_subword_w;
     wire [135:0] tap_weight_w;
     wire [20:0] tap_address_w [0:7];
-    wire [2:0] bank_port_w [0:31];
+    wire [20:0] nearest_address_w [0:3];
+    wire [20:0] filtered_tap_address_w [0:7];
+    assign nearest_address_w[0] = address_cache_w[8];
+    assign nearest_address_w[1] = address_cache_w[17];
+    assign nearest_address_w[2] = address_cache_w[26];
+    assign nearest_address_w[3] = address_cache_w[35];
+    (* keep = 1 *) reg [4:0] address_read_slot0_r /* synthesis syn_preserve=1 */;
+    wire [3:0] address_even_index0_w;
+    wire [3:0] address_odd_index0_w;
+    wire [5:0] nearest_same_w;
+    wire [15:0] nearest_triple_w;
+    wire [21:0] nearest_compare_w;
+    wire [21:0] nearest_compare_input_w;
+    assign nearest_compare_input_w[0] = address_record0_0_4_w_d5_r[16:2]
+        == address_record1_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[1] = address_record0_0_4_w_d5_r[16:2]
+        == address_record2_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[2] = address_record0_0_4_w_d5_r[16:2]
+        == address_record3_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[3] = address_record1_0_4_w_d5_r[16:2]
+        == address_record2_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[4] = address_record1_0_4_w_d5_r[16:2]
+        == address_record3_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[5] = address_record2_0_4_w_d5_r[16:2]
+        == address_record3_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[6] =
+        address_record0_0_4_w_d5_r[1:0] == 2'd0 &&
+        address_record1_0_4_w_d5_r[1:0] == 2'd0 &&
+        address_record2_0_4_w_d5_r[1:0] == 2'd0 &&
+        address_record0_0_4_w_d5_r[16:2] != address_record1_0_4_w_d5_r[16:2] &&
+        address_record0_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2] &&
+        address_record1_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[7] =
+        address_record0_0_4_w_d5_r[1:0] == 2'd0 &&
+        address_record1_0_4_w_d5_r[1:0] == 2'd0 &&
+        address_record3_0_4_w_d5_r[1:0] == 2'd0 &&
+        address_record0_0_4_w_d5_r[16:2] != address_record1_0_4_w_d5_r[16:2] &&
+        address_record0_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2] &&
+        address_record1_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[8] =
+        address_record0_0_4_w_d5_r[1:0] == 2'd0 &&
+        address_record2_0_4_w_d5_r[1:0] == 2'd0 &&
+        address_record3_0_4_w_d5_r[1:0] == 2'd0 &&
+        address_record0_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2] &&
+        address_record0_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2] &&
+        address_record2_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[9] =
+        address_record1_0_4_w_d5_r[1:0] == 2'd0 &&
+        address_record2_0_4_w_d5_r[1:0] == 2'd0 &&
+        address_record3_0_4_w_d5_r[1:0] == 2'd0 &&
+        address_record1_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2] &&
+        address_record1_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2] &&
+        address_record2_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[10] =
+        address_record0_0_4_w_d5_r[1:0] == 2'd1 &&
+        address_record1_0_4_w_d5_r[1:0] == 2'd1 &&
+        address_record2_0_4_w_d5_r[1:0] == 2'd1 &&
+        address_record0_0_4_w_d5_r[16:2] != address_record1_0_4_w_d5_r[16:2] &&
+        address_record0_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2] &&
+        address_record1_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[11] =
+        address_record0_0_4_w_d5_r[1:0] == 2'd1 &&
+        address_record1_0_4_w_d5_r[1:0] == 2'd1 &&
+        address_record3_0_4_w_d5_r[1:0] == 2'd1 &&
+        address_record0_0_4_w_d5_r[16:2] != address_record1_0_4_w_d5_r[16:2] &&
+        address_record0_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2] &&
+        address_record1_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[12] =
+        address_record0_0_4_w_d5_r[1:0] == 2'd1 &&
+        address_record2_0_4_w_d5_r[1:0] == 2'd1 &&
+        address_record3_0_4_w_d5_r[1:0] == 2'd1 &&
+        address_record0_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2] &&
+        address_record0_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2] &&
+        address_record2_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[13] =
+        address_record1_0_4_w_d5_r[1:0] == 2'd1 &&
+        address_record2_0_4_w_d5_r[1:0] == 2'd1 &&
+        address_record3_0_4_w_d5_r[1:0] == 2'd1 &&
+        address_record1_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2] &&
+        address_record1_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2] &&
+        address_record2_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[14] =
+        address_record0_0_4_w_d5_r[1:0] == 2'd2 &&
+        address_record1_0_4_w_d5_r[1:0] == 2'd2 &&
+        address_record2_0_4_w_d5_r[1:0] == 2'd2 &&
+        address_record0_0_4_w_d5_r[16:2] != address_record1_0_4_w_d5_r[16:2] &&
+        address_record0_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2] &&
+        address_record1_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[15] =
+        address_record0_0_4_w_d5_r[1:0] == 2'd2 &&
+        address_record1_0_4_w_d5_r[1:0] == 2'd2 &&
+        address_record3_0_4_w_d5_r[1:0] == 2'd2 &&
+        address_record0_0_4_w_d5_r[16:2] != address_record1_0_4_w_d5_r[16:2] &&
+        address_record0_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2] &&
+        address_record1_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[16] =
+        address_record0_0_4_w_d5_r[1:0] == 2'd2 &&
+        address_record2_0_4_w_d5_r[1:0] == 2'd2 &&
+        address_record3_0_4_w_d5_r[1:0] == 2'd2 &&
+        address_record0_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2] &&
+        address_record0_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2] &&
+        address_record2_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[17] =
+        address_record1_0_4_w_d5_r[1:0] == 2'd2 &&
+        address_record2_0_4_w_d5_r[1:0] == 2'd2 &&
+        address_record3_0_4_w_d5_r[1:0] == 2'd2 &&
+        address_record1_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2] &&
+        address_record1_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2] &&
+        address_record2_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[18] =
+        address_record0_0_4_w_d5_r[1:0] == 2'd3 &&
+        address_record1_0_4_w_d5_r[1:0] == 2'd3 &&
+        address_record2_0_4_w_d5_r[1:0] == 2'd3 &&
+        address_record0_0_4_w_d5_r[16:2] != address_record1_0_4_w_d5_r[16:2] &&
+        address_record0_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2] &&
+        address_record1_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[19] =
+        address_record0_0_4_w_d5_r[1:0] == 2'd3 &&
+        address_record1_0_4_w_d5_r[1:0] == 2'd3 &&
+        address_record3_0_4_w_d5_r[1:0] == 2'd3 &&
+        address_record0_0_4_w_d5_r[16:2] != address_record1_0_4_w_d5_r[16:2] &&
+        address_record0_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2] &&
+        address_record1_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[20] =
+        address_record0_0_4_w_d5_r[1:0] == 2'd3 &&
+        address_record2_0_4_w_d5_r[1:0] == 2'd3 &&
+        address_record3_0_4_w_d5_r[1:0] == 2'd3 &&
+        address_record0_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2] &&
+        address_record0_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2] &&
+        address_record2_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2];
+    assign nearest_compare_input_w[21] =
+        address_record1_0_4_w_d5_r[1:0] == 2'd3 &&
+        address_record2_0_4_w_d5_r[1:0] == 2'd3 &&
+        address_record3_0_4_w_d5_r[1:0] == 2'd3 &&
+        address_record1_0_4_w_d5_r[16:2] != address_record2_0_4_w_d5_r[16:2] &&
+        address_record1_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2] &&
+        address_record2_0_4_w_d5_r[16:2] != address_record3_0_4_w_d5_r[16:2];
+    assign nearest_same_w = nearest_compare_w[5:0];
+    assign nearest_triple_w = nearest_compare_w[21:6];
+    generate
+        begin : g_nearest_compare
+            reg [21:0] even_r [0:15];
+            reg [21:0] odd_r [0:15];
+            reg [21:0] even_cache_r;
+            reg [21:0] odd_cache_r;
+            assign nearest_compare_w = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= nearest_compare_input_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= nearest_compare_input_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index0_w];
+                odd_cache_r <= odd_r[address_odd_index0_w];
+            end
+        end
+    endgenerate
+    wire [15:0] nearest_port_b_w;
+    wire [3:0] bank_overflow_w;
+    reg [1:0] request_valid_r;
+    reg [4:0] request_slot_0_r;
+    reg [4:0] request_slot_1_r;
+    reg [1:0] request_mode_0_r;
+    reg [1:0] request_mode_1_r;
+    reg [1:0] request_lane_0_r;
+    reg [1:0] request_lane_1_r;
+    reg [3:0] request_done_0_r;
+    reg [3:0] request_done_1_r;
+    reg [31:0] request_subword_0_r;
+    reg [31:0] request_subword_1_r;
     wire [7:0] unused_tap_accepted_w;
     wire [7:0] bank_accepted_w [0:3];
     wire [3:0] lane_done_w;
@@ -586,134 +1421,258 @@ module edrv32_gpu_texture (
     wire [1:0] launch_lane_w;
     wire [7:0] launch_fraction_w;
     wire group_issued_w;
-    assign launch_mode_w = quad_r[schedule_slot_w] ? 2'b0 : mode_r;
+    reg [7:0] weight_mode_pipe_r;
+    reg [31:0] weight_fraction_pipe_r;
+    always @(posedge clk_i) begin
+        weight_mode_pipe_r <= {weight_mode_pipe_r[5:0], launch_mode_w};
+        weight_fraction_pipe_r <= {weight_fraction_pipe_r[23:0], launch_fraction_w};
+    end
+    assign launch_mode_w = launch_quad_w ? 2'b0 : mode_r;
     assign launch_lane_w = launch_mode_w == 1 ? {batch_r[0], 1'b0} : batch_r;
     assign launch_fraction_w = lane_lod_w[launch_lane_w][7:0];
     assign lane_done_w = launch_mode_w == 0 ? unused_tap_accepted_w[3:0] :
         launch_mode_w == 1 ? 4'b0011 << launch_lane_w : 4'b0001 << launch_lane_w;
     assign pending_w = nearest_pending_r & ~lane_done_w;
-    assign group_issued_w = launch_mode_w == 0 ? pending_w == 0 :
+    assign group_issued_w = launch_mode_w == 0 ? !(|bank_overflow_w) :
         launch_mode_w == 1 ? batch_r[0] : batch_r == 3;
     always @(*) begin
         texture_read_addr_o = port_row_w;
     end
-    assign texture_read_en_o = port_en_w;
-    assign perf_texture_stall_o = schedule_valid_w && launch_mode_w == 0 && pending_w != 0;
+    assign texture_read_en_o = port_en_w & {8{request_valid_r[1] && !stop_i}};
+    assign perf_texture_stall_o = schedule_valid_w && launch_mode_w == 0 &&
+        (|bank_overflow_w);
     genvar tap;
     genvar bank;
     generate
         for (tap = 0; tap < 8; tap = tap + 1) begin : g_tap
             localparam [1:0] NEAREST_PIXEL = tap[1:0];
-            localparam [1:0] PAIR_PIXEL = {1'b0, tap[2]};
             wire [1:0] pixel_w;
-            wire [11:0] unused_lod_w;
-            wire [3:0] level_w;
-            wire signed [31:0] scaled_u_w;
-            wire signed [31:0] scaled_v_w;
-            wire signed [31:0] centered_u_w;
-            wire signed [31:0] centered_v_w;
-            wire [8:0] x_w;
-            wire [8:0] y_w;
-            wire [8:0] wrapped_x_w;
-            wire [8:0] wrapped_y_w;
-            wire [8:0] block_x_w;
-            wire [8:0] block_y_w;
-            wire [16:0] unused_row_product_w;
-            wire [16:0] halfword_w;
+            wire [20:0] primary_w [0:3];
+            reg [20:0] filtered_address_w;
+            wire [15:0] fraction_w [0:3];
+            reg [15:0] selected_fraction_w;
+            genvar cache_lane;
+            for (cache_lane = 0; cache_lane < 4; cache_lane = cache_lane + 1) begin : g_cache
+                assign primary_w[cache_lane] = mode_r == 2 && tap >= 4 ?
+                    address_cache_w[cache_lane*9+4+(tap%4)] :
+                    address_cache_w[cache_lane*9+(tap%4)];
+                assign fraction_w[cache_lane] = mode_r == 2 && tap >= 4 ?
+                    fraction_cache_w[cache_lane*2+1] : fraction_cache_w[cache_lane*2];
+            end
+            assign pixel_w = mode_r == 2 ? batch_r : {batch_r[0], tap[2]};
+            always @(*) begin
+                filtered_address_w = primary_w[0];
+                selected_fraction_w = fraction_w[0];
+                case (pixel_w)
+                    2'd0: begin
+                        filtered_address_w = primary_w[0];
+                        selected_fraction_w = fraction_w[0];
+                    end
+                    2'd1: begin
+                        filtered_address_w = primary_w[1];
+                        selected_fraction_w = fraction_w[1];
+                    end
+                    2'd2: begin
+                        filtered_address_w = primary_w[2];
+                        selected_fraction_w = fraction_w[2];
+                    end
+                    2'd3: begin
+                        filtered_address_w = primary_w[3];
+                        selected_fraction_w = fraction_w[3];
+                    end
+                    default: begin end
+                endcase
+            end
+            assign filtered_tap_address_w[tap] = filtered_address_w;
+            assign tap_address_w[tap] = launch_mode_w == 0 ?
+                address_cache_w[NEAREST_PIXEL*9+8] : filtered_address_w;
+            assign tap_subword_w[tap*4 +: 4] = tap_address_w[tap][20:17];
             wire [8:0] weight_x_w;
             wire [8:0] weight_y_w;
-            wire [17:0] weight_w;
-            wire unused_weight_w;
-            assign pixel_w = launch_mode_w == 0 ? NEAREST_PIXEL :
-                launch_mode_w == 1 ? launch_lane_w + PAIR_PIXEL : launch_lane_w;
-            assign unused_lod_w = quad_r[schedule_slot_w] ? 12'd0 : lane_lod_w[pixel_w];
-            assign level_w = unused_lod_w[11:8] +
-                ((launch_mode_w == 2 && tap >= 4 && unused_lod_w[11:8] < levels_r - 4'd1)
-                    ? 4'd1 : 4'd0);
-            assign scaled_u_w = $signed(lane_u_w[pixel_w]) >>> level_w;
-            assign scaled_v_w = $signed(lane_v_w[pixel_w]) >>> level_w;
-            assign centered_u_w = scaled_u_w - (launch_mode_w != 0 ? 32'sd128 : 32'sd0);
-            assign centered_v_w = scaled_v_w - (launch_mode_w != 0 ? 32'sd128 : 32'sd0);
-            assign x_w = centered_u_w[16:8] +
-                ((launch_mode_w != 0 && (tap % 2) != 0) ? 9'd1 : 9'd0);
-            assign y_w = centered_v_w[16:8] +
-                ((launch_mode_w != 0 && ((tap/2) % 2) != 0) ? 9'd1 : 9'd0);
-            assign wrapped_x_w = x_w & mip_mask_x_w[level_w];
-            assign wrapped_y_w = y_w & mip_mask_y_w[level_w];
-            assign block_x_w = format_r == 2 ? wrapped_x_w : wrapped_x_w >> 1;
-            assign block_y_w = format_r == 0 ? wrapped_y_w >> 1 : wrapped_y_w;
-            // Power-of-two rows make multiplication a shift. The column occupies
-            // only the zero low bits of the row; the bank bits never carry into it.
-            assign unused_row_product_w = {9'b0, block_y_w[8:1]} << mip_row_shift_w[level_w];
-            assign halfword_w = {mip_offset_w[level_w][16:2] +
-                (unused_row_product_w[14:0] | {7'b0, block_x_w[8:1]}),
-                block_y_w[0], block_x_w[0]};
-            assign tap_address_w[tap] = {format_r == 0 ?
-                {wrapped_y_w[0], wrapped_x_w[0], 2'b0} : format_r == 1 ?
-                {wrapped_x_w[0], 3'b0} : 4'd0, halfword_w};
-            assign tap_subword_w[tap*4 +: 4] = tap_address_w[tap][20:17];
+            wire [17:0] unused_weight_w;
             assign weight_x_w = (tap % 2) == 0 ?
-                9'd256 - {1'b0, centered_u_w[7:0]} : {1'b0, centered_u_w[7:0]};
+                9'd256 - {1'b0, selected_fraction_w[7:0]} :
+                {1'b0, selected_fraction_w[7:0]};
             assign weight_y_w = ((tap/2) % 2) == 0 ?
-                9'd256 - {1'b0, centered_v_w[7:0]} : {1'b0, centered_v_w[7:0]};
-            assign weight_w = weight_x_w * weight_y_w;
-            assign unused_weight_w = ^{weight_w[17], centered_u_w[31:17], centered_v_w[31:17]};
-            assign tap_weight_w[tap*17 +: 17] = launch_mode_w == 0 ?
-                17'd65536 : weight_w[16:0];
-            assign tap_port_w[tap*3 +: 3] = bank_port_w[tap*4] |
-                bank_port_w[tap*4+1] | bank_port_w[tap*4+2] | bank_port_w[tap*4+3];
+                9'd256 - {1'b0, selected_fraction_w[15:8]} :
+                {1'b0, selected_fraction_w[15:8]};
+            reg [8:0] weight_x_r;
+            reg [8:0] weight_y_r;
+            reg [17:0] weight_product_0_r;
+            reg [17:0] weight_product_1_r;
+            reg [17:0] weight_product_2_r;
+            always @(posedge clk_i) begin
+                weight_x_r <= weight_x_w;
+                weight_y_r <= weight_y_w;
+                weight_product_0_r <= weight_x_r * weight_y_r;
+                weight_product_1_r <= weight_product_0_r;
+                weight_product_2_r <= weight_product_1_r;
+            end
+            assign unused_weight_w = weight_product_2_r;
+            assign tap_weight_w[tap*17 +: 17] = weight_mode_pipe_r[6 +: 2] == 0 ?
+                17'd65536 : unused_weight_w[16:0];
         end
-        // Four banks, each an eight-step ordered two-port allocator; no dynamic bus writes.
+        // Nearest uses the first two distinct rows in tap order; all comparisons are parallel.
+        // A bilinear footprint contains only one row per bank, so each footprint owns a port.
         for (bank = 0; bank < 4; bank = bank + 1) begin : g_bank
-            wire [17:0] en_chain_w /* verilator split_var */;
-            wire [134:0] row_a_chain_w /* verilator split_var */;
-            wire [134:0] row_b_chain_w /* verilator split_var */;
-            assign en_chain_w[0 +: 2] = 0;
-            assign row_a_chain_w[0 +: 15] = 0;
-            assign row_b_chain_w[0 +: 15] = 0;
-            assign port_en_w[bank*2 +: 2] = en_chain_w[16 +: 2];
-            assign port_row_w[bank*30 +: 30] = {row_b_chain_w[120 +: 15],
-                row_a_chain_w[120 +: 15]};
-            for (tap = 0; tap < 8; tap = tap + 1) begin : g_allocate
-                wire [1:0] previous_en_w;
-                wire [14:0] previous_a_w;
-                wire [14:0] previous_b_w;
-                wire [1:0] en_w;
-                wire [14:0] row_a_w;
-                wire [14:0] row_b_w;
-                assign previous_en_w = en_chain_w[tap*2 +: 2];
-                assign previous_a_w = row_a_chain_w[tap*15 +: 15];
-                assign previous_b_w = row_b_chain_w[tap*15 +: 15];
-                assign en_chain_w[(tap+1)*2 +: 2] = en_w;
-                assign row_a_chain_w[(tap+1)*15 +: 15] = row_a_w;
-                assign row_b_chain_w[(tap+1)*15 +: 15] = row_b_w;
-                wire request_w;
-                wire match_a_w;
-                wire match_b_w;
-                wire select_b_w;
-                wire accepted_tap_w;
-                assign request_w = schedule_valid_w && tap_address_w[tap][1:0] == bank &&
-                    (launch_mode_w != 0 || (tap < 4 && nearest_pending_r[tap%4]));
-                assign match_a_w = previous_en_w[0] && previous_a_w == tap_address_w[tap][16:2];
-                assign match_b_w = previous_en_w[1] && previous_b_w == tap_address_w[tap][16:2];
-                assign select_b_w = match_b_w || (!match_a_w && previous_en_w[0]);
-                assign accepted_tap_w = request_w &&
-                    (match_a_w || match_b_w || previous_en_w != 2'b11);
-                assign bank_accepted_w[bank][tap] = accepted_tap_w;
-                assign en_w = previous_en_w |
-                    (accepted_tap_w ? (select_b_w ? 2'b10 : 2'b01) : 2'b00);
-                assign row_a_w = accepted_tap_w && !select_b_w ?
-                    tap_address_w[tap][16:2] : previous_a_w;
-                assign row_b_w = accepted_tap_w && select_b_w ?
-                    tap_address_w[tap][16:2] : previous_b_w;
-                assign bank_port_w[tap*4+bank] = accepted_tap_w ?
-                    {bank[1:0], select_b_w} : 3'd0;
+            wire [3:0] request_w;
+            wire [3:0] first_w;
+            wire [3:0] second_w;
+            wire [3:0] accepted_w;
+            wire [3:0] overflow_w;
+            wire [5:0] same_w;
+            reg [3:0] first_r;
+            reg [3:0] second_r;
+            wire [7:0] filter_request_r;
+            reg [1:0] bank_mode_r;
+            reg [14:0] row_0_r;
+            reg [14:0] row_1_r;
+            wire [119:0] saved_row_w;
+            reg [14:0] nearest_a_w;
+            reg [14:0] nearest_b_w;
+            reg [14:0] filter_a_w;
+            reg [14:0] filter_b_w;
+            reg [1:0] en_r;
+            assign port_row_w[bank*30 +: 30] = {row_1_r, row_0_r};
+            assign port_en_w[bank*2 +: 2] = en_r;
+            assign request_w[0] = nearest_address_w[0][1:0] == bank && nearest_pending_r[0];
+            assign request_w[1] = nearest_address_w[1][1:0] == bank && nearest_pending_r[1];
+            assign request_w[2] = nearest_address_w[2][1:0] == bank && nearest_pending_r[2];
+            assign request_w[3] = nearest_address_w[3][1:0] == bank && nearest_pending_r[3];
+            assign same_w[0] = nearest_same_w[0];
+            assign same_w[1] = nearest_same_w[1];
+            assign same_w[2] = nearest_same_w[2];
+            assign same_w[3] = nearest_same_w[3];
+            assign same_w[4] = nearest_same_w[4];
+            assign same_w[5] = nearest_same_w[5];
+            assign first_w[0] = request_w[0];
+            assign first_w[1] = request_w[1] && !request_w[0];
+            assign first_w[2] = request_w[2] && !(|request_w[1:0]);
+            assign first_w[3] = request_w[3] && !(|request_w[2:0]);
+            assign second_w[0] = 0;
+            assign second_w[1] = request_w[1] && first_w[0] && !same_w[0];
+            assign second_w[2] = request_w[2] &&
+                ((first_w[0] && !same_w[1] && (!request_w[1] || same_w[0])) ||
+                    (first_w[1] && !same_w[3]));
+            assign second_w[3] = request_w[3] &&
+                ((first_w[0] && !same_w[2] && (!request_w[1] || same_w[0]) &&
+                    (!request_w[2] || same_w[1])) ||
+                (first_w[1] && !same_w[4] && (!request_w[2] || same_w[3])) ||
+                (first_w[2] && !same_w[5]));
+            assign overflow_w[0] = nearest_pending_r[0] && nearest_pending_r[1] &&
+                nearest_pending_r[2] && nearest_triple_w[bank*4+0];
+            assign overflow_w[1] = nearest_pending_r[0] && nearest_pending_r[1] &&
+                nearest_pending_r[3] && nearest_triple_w[bank*4+1];
+            assign overflow_w[2] = nearest_pending_r[0] && nearest_pending_r[2] &&
+                nearest_pending_r[3] && nearest_triple_w[bank*4+2];
+            assign overflow_w[3] = nearest_pending_r[1] && nearest_pending_r[2] &&
+                nearest_pending_r[3] && nearest_triple_w[bank*4+3];
+            assign bank_overflow_w[bank] = |overflow_w;
+            assign accepted_w[0] = request_w[0];
+            assign accepted_w[1] = request_w[1];
+            assign accepted_w[2] = request_w[2] && !overflow_w[0];
+            assign accepted_w[3] = request_w[3] && !(overflow_w[1] ||
+                (overflow_w[2] && (!request_w[1] || same_w[0] || same_w[3])) ||
+                (overflow_w[3] && (!request_w[0] || same_w[0] || same_w[1])));
+            assign bank_accepted_w[bank] = {4'b0, accepted_w};
+            assign nearest_port_b_w[bank*4+0] = request_w[0] &&
+                !((first_w[0] && 1'b1) || (first_w[1] && same_w[0]) || (first_w[2] &&
+            same_w[1]) || (first_w[3] && same_w[2]));
+            assign nearest_port_b_w[bank*4+1] = request_w[1] &&
+                !((first_w[0] && same_w[0]) || (first_w[1] && 1'b1) || (first_w[2] &&
+            same_w[3]) || (first_w[3] && same_w[4]));
+            assign nearest_port_b_w[bank*4+2] = request_w[2] &&
+                !((first_w[0] && same_w[1]) || (first_w[1] && same_w[3]) || (first_w[2] &&
+            1'b1) || (first_w[3] && same_w[5]));
+            assign nearest_port_b_w[bank*4+3] = request_w[3] &&
+                !((first_w[0] && same_w[2]) || (first_w[1] && same_w[4]) || (first_w[2] &&
+            same_w[5]) || (first_w[3] && 1'b1));
+            always @(posedge clk_i) begin
+                first_r <= first_w;
+                second_r <= second_w;
+                bank_mode_r <= launch_mode_w;
+            end
+            genvar saved_tap;
+            for (saved_tap = 0; saved_tap < 8; saved_tap = saved_tap + 1) begin : g_saved
+                reg [14:0] row_r;
+                reg request_r;
+                assign saved_row_w[saved_tap*15 +: 15] = row_r;
+                always @(posedge clk_i) begin
+                    row_r <= tap_address_w[saved_tap][16:2];
+                    request_r <= filtered_tap_address_w[saved_tap][1:0] == bank;
+                end
+                assign filter_request_r[saved_tap] = request_r;
+            end
+            always @(*) begin
+                nearest_a_w = 0;
+                nearest_b_w = 0;
+                filter_a_w = 0;
+                filter_b_w = 0;
+                nearest_a_w = nearest_a_w | ({15{first_r[0]}} & saved_row_w[0 +: 15]);
+                nearest_b_w = nearest_b_w | ({15{second_r[0]}} & saved_row_w[0 +: 15]);
+                filter_a_w = filter_a_w | ({15{filter_request_r[0]}} & saved_row_w[0 +: 15]);
+                filter_b_w = filter_b_w | ({15{filter_request_r[4]}} & saved_row_w[60 +: 15]);
+                nearest_a_w = nearest_a_w | ({15{first_r[1]}} & saved_row_w[15 +: 15]);
+                nearest_b_w = nearest_b_w | ({15{second_r[1]}} & saved_row_w[15 +: 15]);
+                filter_a_w = filter_a_w | ({15{filter_request_r[1]}} & saved_row_w[15 +: 15]);
+                filter_b_w = filter_b_w | ({15{filter_request_r[5]}} & saved_row_w[75 +: 15]);
+                nearest_a_w = nearest_a_w | ({15{first_r[2]}} & saved_row_w[30 +: 15]);
+                nearest_b_w = nearest_b_w | ({15{second_r[2]}} & saved_row_w[30 +: 15]);
+                filter_a_w = filter_a_w | ({15{filter_request_r[2]}} & saved_row_w[30 +: 15]);
+                filter_b_w = filter_b_w | ({15{filter_request_r[6]}} & saved_row_w[90 +: 15]);
+                nearest_a_w = nearest_a_w | ({15{first_r[3]}} & saved_row_w[45 +: 15]);
+                nearest_b_w = nearest_b_w | ({15{second_r[3]}} & saved_row_w[45 +: 15]);
+                filter_a_w = filter_a_w | ({15{filter_request_r[3]}} & saved_row_w[45 +: 15]);
+                filter_b_w = filter_b_w | ({15{filter_request_r[7]}} & saved_row_w[105 +: 15]);
+            end
+            always @(posedge clk_i) begin
+                row_0_r <= bank_mode_r == 0 ? nearest_a_w : filter_a_w;
+                row_1_r <= bank_mode_r == 0 ? nearest_b_w : filter_b_w;
+                en_r <= bank_mode_r == 0 ? {|second_r, |first_r} :
+                    {|filter_request_r[7:4], |filter_request_r[3:0]};
             end
         end
         for (tap = 0; tap < 8; tap = tap + 1) begin : g_accepted
-            assign unused_tap_accepted_w[tap] = bank_accepted_w[0][tap] |
+            assign unused_tap_accepted_w[tap] = launch_mode_w != 0 ? 1'b1 :
+                bank_accepted_w[0][tap] |
                 bank_accepted_w[1][tap] | bank_accepted_w[2][tap] |
                 bank_accepted_w[3][tap];
+        end
+    endgenerate
+
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) request_valid_r <= 0;
+        else if (stop_i) request_valid_r <= 0;
+        else request_valid_r <= {request_valid_r[0], schedule_valid_w};
+    end
+    always @(posedge clk_i) begin
+        request_slot_0_r <= schedule_slot_w;
+        request_slot_1_r <= request_slot_0_r;
+        request_mode_0_r <= launch_mode_w;
+        request_mode_1_r <= request_mode_0_r;
+        request_lane_0_r <= launch_lane_w;
+        request_lane_1_r <= request_lane_0_r;
+        request_done_0_r <= lane_done_w;
+        request_done_1_r <= request_done_0_r;
+        request_subword_0_r <= tap_subword_w;
+        request_subword_1_r <= request_subword_0_r;
+    end
+    genvar request_tap;
+    generate
+        for (request_tap = 0; request_tap < 8;
+            request_tap = request_tap + 1) begin : g_request_port
+            reg [1:0] bank_r;
+            reg nearest_b_r;
+            reg [2:0] port_r;
+            assign tap_port_w[request_tap*3 +: 3] = port_r;
+            always @(posedge clk_i) begin
+                bank_r <= tap_address_w[request_tap][1:0];
+                nearest_b_r <= nearest_port_b_w[0+(request_tap%4)] |
+                    nearest_port_b_w[4+(request_tap%4)] |
+                    nearest_port_b_w[8+(request_tap%4)] |
+                    nearest_port_b_w[12+(request_tap%4)];
+                port_r <= {bank_r, request_mode_0_r == 0 ? nearest_b_r : request_tap[2]};
+            end
         end
     endgenerate
 
@@ -732,8 +1691,12 @@ module edrv32_gpu_texture (
     wire [8:0] metadata_read_w;
     wire [143:0] metadata_input_w;
     wire [143:0] metadata_data_w;
-    assign metadata_read_w = metadata_write_r - 9'd8;
-    assign metadata_input_w = {launch_fraction_w, tap_weight_w};
+    assign metadata_read_w = metadata_write_r - 9'd5;
+    assign metadata_input_w = {weight_fraction_pipe_r[24 +: 8], tap_weight_w};
+    reg [143:0] metadata_input_r;
+    always @(posedge clk_i) begin
+        metadata_input_r <= metadata_input_w;
+    end
     assign return_weight_w = metadata_data_w[135:0];
     assign return_fraction_w = metadata_data_w[143:136];
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -748,7 +1711,7 @@ module edrv32_gpu_texture (
                 .clk_i(clk_i),
                 .wr_en_i(1'b1),
                 .wr_addr_i(metadata_write_r),
-                .wr_data_i(metadata_input_w[metadata_bank*72 +: 72]),
+                .wr_data_i(metadata_input_r[metadata_bank*72 +: 72]),
                 .rd_en_i(1'b1),
                 .rd_addr_i(metadata_read_w),
                 .rd_data_o(metadata_data_w[metadata_bank*72 +: 72])
@@ -797,8 +1760,8 @@ module edrv32_gpu_texture (
     // Palette expansion, tap products, pair sums, 2-D rounding, LOD products,
     // LOD rounding and shading are distinct stages. Horizontal sums never round.
     wire [31:0] expanded_w [0:7];
-    wire [1:0] filter_mode_r [0:6];
-    wire [1:0] filter_lane_r [0:6];
+    wire [1:0] filter_mode_r [0:7];
+    wire [1:0] filter_lane_r [0:7];
     wire [7:0] filter_fraction_r [0:3];
     reg [135:0] filter_weight_r;
     reg [255:0] expanded_r;
@@ -813,6 +1776,12 @@ module edrv32_gpu_texture (
     reg [63:0] alpha_products_r;
     reg [31:0] unmodulated_alpha_r;
     reg shade_quad_r;
+    reg shade_quad_input_r;
+    reg [7:0] global_alpha_input_r;
+    reg [31:0] unmodulated_alpha_input_r;
+    reg [3:0] shade_mask_input_r;
+    wire [3:0] shade_enabled_input_w;
+    reg [3:0] shade_enabled_r;
     wire [127:0] bilinear_w;
     wire [127:0] filtered_w;
     wire [191:0] shade_products_w;
@@ -884,7 +1853,11 @@ module edrv32_gpu_texture (
             wire [8:0] inverse_fraction_w;
             wire [17:0] rounded_w;
             wire unused_rounded_w;
-            assign inverse_fraction_w = 9'd256 - {1'b0, filter_fraction_r[3]};
+            reg [8:0] inverse_fraction_r;
+            always @(posedge clk_i) begin
+                inverse_fraction_r <= 9'd256 - {1'b0, filter_fraction_r[2]};
+            end
+            assign inverse_fraction_w = inverse_fraction_r;
             assign rounded_w = {1'b0, lod_products_r[channel*34 +: 17]} +
                 {1'b0, lod_products_r[channel*34+17 +: 17]} + 18'd128;
             assign unused_rounded_w = ^{rounded_w[17:16], rounded_w[7:0]};
@@ -904,6 +1877,10 @@ module edrv32_gpu_texture (
         // Registered filter lane selects a source word before the sixteen 8x8 multipliers.
         for (filter_pixel = 0; filter_pixel < 4; filter_pixel = filter_pixel + 1) begin : g_shade
             reg [31:0] source_w;
+            reg [31:0] selected_input_r;
+            reg [23:0] color_input_r;
+            reg enabled_input_r;
+            assign shade_enabled_input_w[filter_pixel] = enabled_input_r;
             wire enabled_w;
             wire [31:0] selected_w;
             wire [7:0] alpha_w;
@@ -931,13 +1908,19 @@ module edrv32_gpu_texture (
             assign selected_w = filter_mode_r[5] == 0 ?
                 filtered_r[filter_pixel*32 +: 32] : source_w;
             assign alpha_w = selected_w[31:24];
-            assign alpha_products_w[filter_pixel*16 +: 16] = enabled_w ?
-                alpha_w * alpha_r[filter_slot_r[5]] : 16'd0;
+            always @(posedge clk_i) begin
+                selected_input_r <= selected_w;
+                color_input_r <= color_r[filter_slot_r[5]][filter_pixel*24 +: 24];
+                enabled_input_r <= enabled_w;
+            end
+            assign alpha_products_w[filter_pixel*16 +: 16] =
+                selected_input_r[31:24] * global_alpha_input_r;
             assign unmodulated_alpha_w[filter_pixel*8 +: 8] = enabled_w ? alpha_w : 8'd0;
             assign shade_mask_w[filter_pixel] = enabled_w &&
                 mask_r[filter_slot_r[5]][filter_pixel] && alpha_w != 0;
             // Shade rounding stage: sixteen explicit 17/18-bit divide-by-255 networks.
-            assign alpha_temp_w = {1'b0, alpha_products_r[filter_pixel*16 +: 16]} + 17'd128;
+            assign alpha_temp_w = {1'b0, (shade_enabled_r[filter_pixel] ?
+                alpha_products_r[filter_pixel*16 +: 16] : 16'b0)} + 17'd128;
             assign alpha_total_w = {1'b0, alpha_temp_w} + {9'b0, alpha_temp_w[16:8]};
             assign unused_alpha_w = ^{alpha_total_w[17:16], alpha_total_w[7:0]};
             assign modulated_alpha_w[filter_pixel*8 +: 8] = shade_quad_r ?
@@ -946,11 +1929,11 @@ module edrv32_gpu_texture (
                 wire [16:0] temp_w;
                 wire [17:0] total_w;
                 wire unused_total_w;
-                assign shade_products_w[filter_pixel*48+channel*16 +: 16] = enabled_w ?
-                    selected_w[channel*8 +: 8] *
-                    color_r[filter_slot_r[5]][filter_pixel*24+channel*8 +: 8] : 16'd0;
+                assign shade_products_w[filter_pixel*48+channel*16 +: 16] =
+                    selected_input_r[channel*8 +: 8] * color_input_r[channel*8 +: 8];
                 assign temp_w =
-                    {1'b0, shade_products_r[filter_pixel*48+channel*16 +: 16]} + 17'd128;
+                    {1'b0, (shade_enabled_r[filter_pixel] ?
+                    shade_products_r[filter_pixel*48+channel*16 +: 16] : 16'b0)} + 17'd128;
                 assign total_w = {1'b0, temp_w} + {9'b0, temp_w[16:8]};
                 assign unused_total_w = ^{total_w[17:16], total_w[7:0]};
                 assign modulated_color_w[filter_pixel*24+channel*8 +: 8] = total_w[15:8];
@@ -966,9 +1949,14 @@ module edrv32_gpu_texture (
         filtered_r <= filtered_w;
         shade_products_r <= shade_products_w;
         alpha_products_r <= alpha_products_w;
-        unmodulated_alpha_r <= unmodulated_alpha_w;
-        shade_mask_r <= shade_mask_w;
-        shade_quad_r <= quad_r[filter_slot_r[5]];
+        global_alpha_input_r <= alpha_r[filter_slot_r[5]];
+        shade_enabled_r <= shade_enabled_input_w;
+        unmodulated_alpha_input_r <= unmodulated_alpha_w;
+        unmodulated_alpha_r <= unmodulated_alpha_input_r;
+        shade_mask_input_r <= shade_mask_w;
+        shade_mask_r <= shade_mask_input_r;
+        shade_quad_input_r <= quad_r[filter_slot_r[5]];
+        shade_quad_r <= shade_quad_input_r;
     end
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
@@ -983,8 +1971,8 @@ module edrv32_gpu_texture (
             unit_done_o <= 1'b0;
         end else begin
             lod_valid_r <= {lod_valid_r[2:0], accept_w};
-            return_valid_r <= {return_valid_r[7:0], schedule_valid_w};
-            filter_valid_r <= {filter_valid_r[5:0], return_valid_r[8]};
+            return_valid_r <= {return_valid_r[7:0], request_valid_r[1]};
+            filter_valid_r <= {filter_valid_r[6:0], return_valid_r[8]};
             if (accept_w) begin
                 allocate_r <= allocate_r + 1'b1;
             end
@@ -1047,22 +2035,21 @@ module edrv32_gpu_texture (
     generate
         for (context_idx = 0; context_idx < 32; context_idx = context_idx + 1) begin : g_context
             reg [3:0] completed_r;
-            reg [3:0] lod_ready_r;
+            reg lod_ready_r;
             wire [3:0] completed_next_w;
             assign completed_next_w =
-                filter_valid_r[6] && filter_slot_r[6] == context_idx ?
-                    completed_r | filter_done_r[6] : 4'd0;
+                filter_valid_r[7] && filter_slot_r[7] == context_idx ?
+                    completed_r | filter_done_r[7] : 4'd0;
             // Reset holds the uninitialized context data, matching the command-control process.
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i) begin
                 end else begin
                     if ((accept_w && allocate_r[4:0] == context_idx) ||
-                            (filter_valid_r[6] && filter_slot_r[6] == context_idx))
+                            (filter_valid_r[7] && filter_slot_r[7] == context_idx))
                         completed_r <= completed_next_w;
                     if ((accept_w && allocate_r[4:0] == context_idx) ||
-                            (lod_valid_r[3] && lod_slot_r[3] == context_idx))
-                        lod_ready_r <= lod_valid_r[3] && lod_slot_r[3] == context_idx ?
-                            4'hf : 4'd0;
+                            (address_valid_r[6] && address_slot_0_r_d6_r == context_idx))
+                        lod_ready_r <= address_valid_r[6] && address_slot_0_r_d6_r == context_idx;
                 end
             end
             assign completed_w[context_idx] = completed_r;
@@ -1090,7 +2077,7 @@ module edrv32_gpu_texture (
             wire [4:0] data_w;
             assign return_slot_r[pipe_stage] = data_r;
             if (pipe_stage == 0) begin : g_first
-                assign data_w = schedule_slot_w;
+                assign data_w = request_slot_1_r;
             end else begin : g_previous
                 assign data_w = return_slot_r[pipe_stage-1];
             end
@@ -1103,7 +2090,7 @@ module edrv32_gpu_texture (
             wire [1:0] data_w;
             assign return_mode_r[pipe_stage] = data_r;
             if (pipe_stage == 0) begin : g_first
-                assign data_w = launch_mode_w;
+                assign data_w = request_mode_1_r;
             end else begin : g_previous
                 assign data_w = return_mode_r[pipe_stage-1];
             end
@@ -1116,7 +2103,7 @@ module edrv32_gpu_texture (
             wire [1:0] data_w;
             assign return_lane_r[pipe_stage] = data_r;
             if (pipe_stage == 0) begin : g_first
-                assign data_w = launch_lane_w;
+                assign data_w = request_lane_1_r;
             end else begin : g_previous
                 assign data_w = return_lane_r[pipe_stage-1];
             end
@@ -1129,7 +2116,7 @@ module edrv32_gpu_texture (
             wire [3:0] data_w;
             assign return_done_r[pipe_stage] = data_r;
             if (pipe_stage == 0) begin : g_first
-                assign data_w = lane_done_w;
+                assign data_w = request_done_1_r;
             end else begin : g_previous
                 assign data_w = return_done_r[pipe_stage-1];
             end
@@ -1155,7 +2142,7 @@ module edrv32_gpu_texture (
             wire [31:0] data_w;
             assign return_subword_r[pipe_stage] = data_r;
             if (pipe_stage == 0) begin : g_first
-                assign data_w = tap_subword_w;
+                assign data_w = request_subword_1_r;
             end else begin : g_previous
                 assign data_w = return_subword_r[pipe_stage-1];
             end
@@ -1176,7 +2163,7 @@ module edrv32_gpu_texture (
                 data_r <= data_w;
             end
         end
-        for (pipe_stage = 0; pipe_stage < 7; pipe_stage = pipe_stage + 1) begin : g_filter_slot
+        for (pipe_stage = 0; pipe_stage < 8; pipe_stage = pipe_stage + 1) begin : g_filter_slot
             reg [4:0] data_r;
             wire [4:0] data_w;
             assign filter_slot_r[pipe_stage] = data_r;
@@ -1189,7 +2176,7 @@ module edrv32_gpu_texture (
                 data_r <= data_w;
             end
         end
-        for (pipe_stage = 0; pipe_stage < 7; pipe_stage = pipe_stage + 1) begin : g_filter_mode
+        for (pipe_stage = 0; pipe_stage < 8; pipe_stage = pipe_stage + 1) begin : g_filter_mode
             reg [1:0] data_r;
             wire [1:0] data_w;
             assign filter_mode_r[pipe_stage] = data_r;
@@ -1202,7 +2189,7 @@ module edrv32_gpu_texture (
                 data_r <= data_w;
             end
         end
-        for (pipe_stage = 0; pipe_stage < 7; pipe_stage = pipe_stage + 1) begin : g_filter_lane
+        for (pipe_stage = 0; pipe_stage < 8; pipe_stage = pipe_stage + 1) begin : g_filter_lane
             reg [1:0] data_r;
             wire [1:0] data_w;
             assign filter_lane_r[pipe_stage] = data_r;
@@ -1215,7 +2202,7 @@ module edrv32_gpu_texture (
                 data_r <= data_w;
             end
         end
-        for (pipe_stage = 0; pipe_stage < 7; pipe_stage = pipe_stage + 1) begin : g_filter_done
+        for (pipe_stage = 0; pipe_stage < 8; pipe_stage = pipe_stage + 1) begin : g_filter_done
             reg [3:0] data_r;
             wire [3:0] data_w;
             assign filter_done_r[pipe_stage] = data_r;
@@ -1255,4 +2242,1763 @@ module edrv32_gpu_texture (
             end
         end
     endgenerate
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) address_valid_r <= 0;
+        else if (stop_i) address_valid_r <= 0;
+        else address_valid_r <= {address_valid_r[5:0], lod_valid_r[2]};
+    end
+    assign address_block_x0_0_0_w = format_r == 2 ? address_x0_0_0_r : address_x0_0_0_r >> 1;
+    assign address_block_y0_0_0_w = format_r == 0 ? address_y0_0_0_r >> 1 : address_y0_0_0_r;
+    assign address_column0_0_0_w = address_block_x0_0_0_w[8:1];
+    assign address_record0_0_0_w = {address_subword0_0_0_d4_r, address_halfword0_0_0_r};
+    assign address_block_x0_0_1_w = format_r == 2 ? address_x0_0_1_r : address_x0_0_1_r >> 1;
+    assign address_block_y0_0_1_w = format_r == 0 ? address_y0_0_1_r >> 1 : address_y0_0_1_r;
+    assign address_column0_0_1_w = address_block_x0_0_1_w[8:1];
+    assign address_record0_0_1_w = {address_subword0_0_1_d4_r, address_halfword0_0_1_r};
+    assign address_block_x0_0_2_w = format_r == 2 ? address_x0_0_2_r : address_x0_0_2_r >> 1;
+    assign address_block_y0_0_2_w = format_r == 0 ? address_y0_0_2_r >> 1 : address_y0_0_2_r;
+    assign address_column0_0_2_w = address_block_x0_0_2_w[8:1];
+    assign address_record0_0_2_w = {address_subword0_0_2_d4_r, address_halfword0_0_2_r};
+    assign address_block_x0_0_3_w = format_r == 2 ? address_x0_0_3_r : address_x0_0_3_r >> 1;
+    assign address_block_y0_0_3_w = format_r == 0 ? address_y0_0_3_r >> 1 : address_y0_0_3_r;
+    assign address_column0_0_3_w = address_block_x0_0_3_w[8:1];
+    assign address_record0_0_3_w = {address_subword0_0_3_d4_r, address_halfword0_0_3_r};
+    assign address_block_x0_0_4_w = format_r == 2 ? address_x0_0_4_r : address_x0_0_4_r >> 1;
+    assign address_block_y0_0_4_w = format_r == 0 ? address_y0_0_4_r >> 1 : address_y0_0_4_r;
+    assign address_column0_0_4_w = address_block_x0_0_4_w[8:1];
+    assign address_record0_0_4_w = {address_subword0_0_4_d4_r, address_halfword0_0_4_r};
+    assign address_block_x0_1_0_w = format_r == 2 ? address_x0_1_0_r : address_x0_1_0_r >> 1;
+    assign address_block_y0_1_0_w = format_r == 0 ? address_y0_1_0_r >> 1 : address_y0_1_0_r;
+    assign address_column0_1_0_w = address_block_x0_1_0_w[8:1];
+    assign address_record0_1_0_w = {address_subword0_1_0_d5_r, address_halfword0_1_0_r};
+    assign address_block_x0_1_1_w = format_r == 2 ? address_x0_1_1_r : address_x0_1_1_r >> 1;
+    assign address_block_y0_1_1_w = format_r == 0 ? address_y0_1_1_r >> 1 : address_y0_1_1_r;
+    assign address_column0_1_1_w = address_block_x0_1_1_w[8:1];
+    assign address_record0_1_1_w = {address_subword0_1_1_d5_r, address_halfword0_1_1_r};
+    assign address_block_x0_1_2_w = format_r == 2 ? address_x0_1_2_r : address_x0_1_2_r >> 1;
+    assign address_block_y0_1_2_w = format_r == 0 ? address_y0_1_2_r >> 1 : address_y0_1_2_r;
+    assign address_column0_1_2_w = address_block_x0_1_2_w[8:1];
+    assign address_record0_1_2_w = {address_subword0_1_2_d5_r, address_halfword0_1_2_r};
+    assign address_block_x0_1_3_w = format_r == 2 ? address_x0_1_3_r : address_x0_1_3_r >> 1;
+    assign address_block_y0_1_3_w = format_r == 0 ? address_y0_1_3_r >> 1 : address_y0_1_3_r;
+    assign address_column0_1_3_w = address_block_x0_1_3_w[8:1];
+    assign address_record0_1_3_w = {address_subword0_1_3_d5_r, address_halfword0_1_3_r};
+    assign address_block_x1_0_0_w = format_r == 2 ? address_x1_0_0_r : address_x1_0_0_r >> 1;
+    assign address_block_y1_0_0_w = format_r == 0 ? address_y1_0_0_r >> 1 : address_y1_0_0_r;
+    assign address_column1_0_0_w = address_block_x1_0_0_w[8:1];
+    assign address_record1_0_0_w = {address_subword1_0_0_d4_r, address_halfword1_0_0_r};
+    assign address_block_x1_0_1_w = format_r == 2 ? address_x1_0_1_r : address_x1_0_1_r >> 1;
+    assign address_block_y1_0_1_w = format_r == 0 ? address_y1_0_1_r >> 1 : address_y1_0_1_r;
+    assign address_column1_0_1_w = address_block_x1_0_1_w[8:1];
+    assign address_record1_0_1_w = {address_subword1_0_1_d4_r, address_halfword1_0_1_r};
+    assign address_block_x1_0_2_w = format_r == 2 ? address_x1_0_2_r : address_x1_0_2_r >> 1;
+    assign address_block_y1_0_2_w = format_r == 0 ? address_y1_0_2_r >> 1 : address_y1_0_2_r;
+    assign address_column1_0_2_w = address_block_x1_0_2_w[8:1];
+    assign address_record1_0_2_w = {address_subword1_0_2_d4_r, address_halfword1_0_2_r};
+    assign address_block_x1_0_3_w = format_r == 2 ? address_x1_0_3_r : address_x1_0_3_r >> 1;
+    assign address_block_y1_0_3_w = format_r == 0 ? address_y1_0_3_r >> 1 : address_y1_0_3_r;
+    assign address_column1_0_3_w = address_block_x1_0_3_w[8:1];
+    assign address_record1_0_3_w = {address_subword1_0_3_d4_r, address_halfword1_0_3_r};
+    assign address_block_x1_0_4_w = format_r == 2 ? address_x1_0_4_r : address_x1_0_4_r >> 1;
+    assign address_block_y1_0_4_w = format_r == 0 ? address_y1_0_4_r >> 1 : address_y1_0_4_r;
+    assign address_column1_0_4_w = address_block_x1_0_4_w[8:1];
+    assign address_record1_0_4_w = {address_subword1_0_4_d4_r, address_halfword1_0_4_r};
+    assign address_block_x1_1_0_w = format_r == 2 ? address_x1_1_0_r : address_x1_1_0_r >> 1;
+    assign address_block_y1_1_0_w = format_r == 0 ? address_y1_1_0_r >> 1 : address_y1_1_0_r;
+    assign address_column1_1_0_w = address_block_x1_1_0_w[8:1];
+    assign address_record1_1_0_w = {address_subword1_1_0_d5_r, address_halfword1_1_0_r};
+    assign address_block_x1_1_1_w = format_r == 2 ? address_x1_1_1_r : address_x1_1_1_r >> 1;
+    assign address_block_y1_1_1_w = format_r == 0 ? address_y1_1_1_r >> 1 : address_y1_1_1_r;
+    assign address_column1_1_1_w = address_block_x1_1_1_w[8:1];
+    assign address_record1_1_1_w = {address_subword1_1_1_d5_r, address_halfword1_1_1_r};
+    assign address_block_x1_1_2_w = format_r == 2 ? address_x1_1_2_r : address_x1_1_2_r >> 1;
+    assign address_block_y1_1_2_w = format_r == 0 ? address_y1_1_2_r >> 1 : address_y1_1_2_r;
+    assign address_column1_1_2_w = address_block_x1_1_2_w[8:1];
+    assign address_record1_1_2_w = {address_subword1_1_2_d5_r, address_halfword1_1_2_r};
+    assign address_block_x1_1_3_w = format_r == 2 ? address_x1_1_3_r : address_x1_1_3_r >> 1;
+    assign address_block_y1_1_3_w = format_r == 0 ? address_y1_1_3_r >> 1 : address_y1_1_3_r;
+    assign address_column1_1_3_w = address_block_x1_1_3_w[8:1];
+    assign address_record1_1_3_w = {address_subword1_1_3_d5_r, address_halfword1_1_3_r};
+    assign address_block_x2_0_0_w = format_r == 2 ? address_x2_0_0_r : address_x2_0_0_r >> 1;
+    assign address_block_y2_0_0_w = format_r == 0 ? address_y2_0_0_r >> 1 : address_y2_0_0_r;
+    assign address_column2_0_0_w = address_block_x2_0_0_w[8:1];
+    assign address_record2_0_0_w = {address_subword2_0_0_d4_r, address_halfword2_0_0_r};
+    assign address_block_x2_0_1_w = format_r == 2 ? address_x2_0_1_r : address_x2_0_1_r >> 1;
+    assign address_block_y2_0_1_w = format_r == 0 ? address_y2_0_1_r >> 1 : address_y2_0_1_r;
+    assign address_column2_0_1_w = address_block_x2_0_1_w[8:1];
+    assign address_record2_0_1_w = {address_subword2_0_1_d4_r, address_halfword2_0_1_r};
+    assign address_block_x2_0_2_w = format_r == 2 ? address_x2_0_2_r : address_x2_0_2_r >> 1;
+    assign address_block_y2_0_2_w = format_r == 0 ? address_y2_0_2_r >> 1 : address_y2_0_2_r;
+    assign address_column2_0_2_w = address_block_x2_0_2_w[8:1];
+    assign address_record2_0_2_w = {address_subword2_0_2_d4_r, address_halfword2_0_2_r};
+    assign address_block_x2_0_3_w = format_r == 2 ? address_x2_0_3_r : address_x2_0_3_r >> 1;
+    assign address_block_y2_0_3_w = format_r == 0 ? address_y2_0_3_r >> 1 : address_y2_0_3_r;
+    assign address_column2_0_3_w = address_block_x2_0_3_w[8:1];
+    assign address_record2_0_3_w = {address_subword2_0_3_d4_r, address_halfword2_0_3_r};
+    assign address_block_x2_0_4_w = format_r == 2 ? address_x2_0_4_r : address_x2_0_4_r >> 1;
+    assign address_block_y2_0_4_w = format_r == 0 ? address_y2_0_4_r >> 1 : address_y2_0_4_r;
+    assign address_column2_0_4_w = address_block_x2_0_4_w[8:1];
+    assign address_record2_0_4_w = {address_subword2_0_4_d4_r, address_halfword2_0_4_r};
+    assign address_block_x2_1_0_w = format_r == 2 ? address_x2_1_0_r : address_x2_1_0_r >> 1;
+    assign address_block_y2_1_0_w = format_r == 0 ? address_y2_1_0_r >> 1 : address_y2_1_0_r;
+    assign address_column2_1_0_w = address_block_x2_1_0_w[8:1];
+    assign address_record2_1_0_w = {address_subword2_1_0_d5_r, address_halfword2_1_0_r};
+    assign address_block_x2_1_1_w = format_r == 2 ? address_x2_1_1_r : address_x2_1_1_r >> 1;
+    assign address_block_y2_1_1_w = format_r == 0 ? address_y2_1_1_r >> 1 : address_y2_1_1_r;
+    assign address_column2_1_1_w = address_block_x2_1_1_w[8:1];
+    assign address_record2_1_1_w = {address_subword2_1_1_d5_r, address_halfword2_1_1_r};
+    assign address_block_x2_1_2_w = format_r == 2 ? address_x2_1_2_r : address_x2_1_2_r >> 1;
+    assign address_block_y2_1_2_w = format_r == 0 ? address_y2_1_2_r >> 1 : address_y2_1_2_r;
+    assign address_column2_1_2_w = address_block_x2_1_2_w[8:1];
+    assign address_record2_1_2_w = {address_subword2_1_2_d5_r, address_halfword2_1_2_r};
+    assign address_block_x2_1_3_w = format_r == 2 ? address_x2_1_3_r : address_x2_1_3_r >> 1;
+    assign address_block_y2_1_3_w = format_r == 0 ? address_y2_1_3_r >> 1 : address_y2_1_3_r;
+    assign address_column2_1_3_w = address_block_x2_1_3_w[8:1];
+    assign address_record2_1_3_w = {address_subword2_1_3_d5_r, address_halfword2_1_3_r};
+    assign address_block_x3_0_0_w = format_r == 2 ? address_x3_0_0_r : address_x3_0_0_r >> 1;
+    assign address_block_y3_0_0_w = format_r == 0 ? address_y3_0_0_r >> 1 : address_y3_0_0_r;
+    assign address_column3_0_0_w = address_block_x3_0_0_w[8:1];
+    assign address_record3_0_0_w = {address_subword3_0_0_d4_r, address_halfword3_0_0_r};
+    assign address_block_x3_0_1_w = format_r == 2 ? address_x3_0_1_r : address_x3_0_1_r >> 1;
+    assign address_block_y3_0_1_w = format_r == 0 ? address_y3_0_1_r >> 1 : address_y3_0_1_r;
+    assign address_column3_0_1_w = address_block_x3_0_1_w[8:1];
+    assign address_record3_0_1_w = {address_subword3_0_1_d4_r, address_halfword3_0_1_r};
+    assign address_block_x3_0_2_w = format_r == 2 ? address_x3_0_2_r : address_x3_0_2_r >> 1;
+    assign address_block_y3_0_2_w = format_r == 0 ? address_y3_0_2_r >> 1 : address_y3_0_2_r;
+    assign address_column3_0_2_w = address_block_x3_0_2_w[8:1];
+    assign address_record3_0_2_w = {address_subword3_0_2_d4_r, address_halfword3_0_2_r};
+    assign address_block_x3_0_3_w = format_r == 2 ? address_x3_0_3_r : address_x3_0_3_r >> 1;
+    assign address_block_y3_0_3_w = format_r == 0 ? address_y3_0_3_r >> 1 : address_y3_0_3_r;
+    assign address_column3_0_3_w = address_block_x3_0_3_w[8:1];
+    assign address_record3_0_3_w = {address_subword3_0_3_d4_r, address_halfword3_0_3_r};
+    assign address_block_x3_0_4_w = format_r == 2 ? address_x3_0_4_r : address_x3_0_4_r >> 1;
+    assign address_block_y3_0_4_w = format_r == 0 ? address_y3_0_4_r >> 1 : address_y3_0_4_r;
+    assign address_column3_0_4_w = address_block_x3_0_4_w[8:1];
+    assign address_record3_0_4_w = {address_subword3_0_4_d4_r, address_halfword3_0_4_r};
+    assign address_block_x3_1_0_w = format_r == 2 ? address_x3_1_0_r : address_x3_1_0_r >> 1;
+    assign address_block_y3_1_0_w = format_r == 0 ? address_y3_1_0_r >> 1 : address_y3_1_0_r;
+    assign address_column3_1_0_w = address_block_x3_1_0_w[8:1];
+    assign address_record3_1_0_w = {address_subword3_1_0_d5_r, address_halfword3_1_0_r};
+    assign address_block_x3_1_1_w = format_r == 2 ? address_x3_1_1_r : address_x3_1_1_r >> 1;
+    assign address_block_y3_1_1_w = format_r == 0 ? address_y3_1_1_r >> 1 : address_y3_1_1_r;
+    assign address_column3_1_1_w = address_block_x3_1_1_w[8:1];
+    assign address_record3_1_1_w = {address_subword3_1_1_d5_r, address_halfword3_1_1_r};
+    assign address_block_x3_1_2_w = format_r == 2 ? address_x3_1_2_r : address_x3_1_2_r >> 1;
+    assign address_block_y3_1_2_w = format_r == 0 ? address_y3_1_2_r >> 1 : address_y3_1_2_r;
+    assign address_column3_1_2_w = address_block_x3_1_2_w[8:1];
+    assign address_record3_1_2_w = {address_subword3_1_2_d5_r, address_halfword3_1_2_r};
+    assign address_block_x3_1_3_w = format_r == 2 ? address_x3_1_3_r : address_x3_1_3_r >> 1;
+    assign address_block_y3_1_3_w = format_r == 0 ? address_y3_1_3_r >> 1 : address_y3_1_3_r;
+    assign address_column3_1_3_w = address_block_x3_1_3_w[8:1];
+    assign address_record3_1_3_w = {address_subword3_1_3_d5_r, address_halfword3_1_3_r};
+    assign address_even_index0_w = address_read_slot0_r[4:1] +
+        {3'b0, address_read_slot0_r[0]};
+    assign address_odd_index0_w = address_read_slot0_r[4:1];
+    (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) address_read_slot0_r <= 0;
+        else if (stop_i) address_read_slot0_r <= 0;
+        else if (schedule_valid_w && group_issued_w)
+            address_read_slot0_r <= address_read_slot0_r + 1'b1;
+    end
+    generate
+        begin : g_address_pool_tap_0_0
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[0] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_0_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_0_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index0_w];
+                odd_cache_r <= odd_r[address_odd_index0_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_0_1
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[1] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_1_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_1_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index0_w];
+                odd_cache_r <= odd_r[address_odd_index0_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_0_2
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[2] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_2_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_2_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index0_w];
+                odd_cache_r <= odd_r[address_odd_index0_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_0_3
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[3] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_3_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_3_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index0_w];
+                odd_cache_r <= odd_r[address_odd_index0_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_0_4
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[4] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_0_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_0_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index0_w];
+                odd_cache_r <= odd_r[address_odd_index0_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_0_5
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[5] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_1_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_1_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index0_w];
+                odd_cache_r <= odd_r[address_odd_index0_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_0_6
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[6] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_2_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_2_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index0_w];
+                odd_cache_r <= odd_r[address_odd_index0_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_0_7
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[7] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_3_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_3_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index0_w];
+                odd_cache_r <= odd_r[address_odd_index0_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_0_8
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[8] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_4_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_4_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index0_w];
+                odd_cache_r <= odd_r[address_odd_index0_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_fraction_0_0
+            reg [15:0] even_r [0:15];
+            reg [15:0] odd_r [0:15];
+            reg [15:0] even_cache_r;
+            reg [15:0] odd_cache_r;
+            assign fraction_cache_w[0] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction0_0_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction0_0_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index0_w];
+                odd_cache_r <= odd_r[address_odd_index0_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_fraction_0_1
+            reg [15:0] even_r [0:15];
+            reg [15:0] odd_r [0:15];
+            reg [15:0] even_cache_r;
+            reg [15:0] odd_cache_r;
+            assign fraction_cache_w[1] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction0_1_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction0_1_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index0_w];
+                odd_cache_r <= odd_r[address_odd_index0_w];
+            end
+        end
+    endgenerate
+    (* keep = 1 *) reg [4:0] address_read_slot1_r /* synthesis syn_preserve=1 */;
+    wire [3:0] address_even_index1_w;
+    wire [3:0] address_odd_index1_w;
+    assign address_even_index1_w = address_read_slot1_r[4:1] +
+        {3'b0, address_read_slot1_r[0]};
+    assign address_odd_index1_w = address_read_slot1_r[4:1];
+    (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) address_read_slot1_r <= 0;
+        else if (stop_i) address_read_slot1_r <= 0;
+        else if (schedule_valid_w && group_issued_w)
+            address_read_slot1_r <= address_read_slot1_r + 1'b1;
+    end
+    generate
+        begin : g_address_pool_tap_1_0
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[9] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_0_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_0_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index1_w];
+                odd_cache_r <= odd_r[address_odd_index1_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_1_1
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[10] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_1_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_1_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index1_w];
+                odd_cache_r <= odd_r[address_odd_index1_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_1_2
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[11] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_2_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_2_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index1_w];
+                odd_cache_r <= odd_r[address_odd_index1_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_1_3
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[12] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_3_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_3_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index1_w];
+                odd_cache_r <= odd_r[address_odd_index1_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_1_4
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[13] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_0_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_0_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index1_w];
+                odd_cache_r <= odd_r[address_odd_index1_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_1_5
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[14] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_1_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_1_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index1_w];
+                odd_cache_r <= odd_r[address_odd_index1_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_1_6
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[15] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_2_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_2_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index1_w];
+                odd_cache_r <= odd_r[address_odd_index1_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_1_7
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[16] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_3_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_3_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index1_w];
+                odd_cache_r <= odd_r[address_odd_index1_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_1_8
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[17] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_4_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_4_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index1_w];
+                odd_cache_r <= odd_r[address_odd_index1_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_fraction_1_0
+            reg [15:0] even_r [0:15];
+            reg [15:0] odd_r [0:15];
+            reg [15:0] even_cache_r;
+            reg [15:0] odd_cache_r;
+            assign fraction_cache_w[2] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction1_0_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction1_0_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index1_w];
+                odd_cache_r <= odd_r[address_odd_index1_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_fraction_1_1
+            reg [15:0] even_r [0:15];
+            reg [15:0] odd_r [0:15];
+            reg [15:0] even_cache_r;
+            reg [15:0] odd_cache_r;
+            assign fraction_cache_w[3] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction1_1_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction1_1_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index1_w];
+                odd_cache_r <= odd_r[address_odd_index1_w];
+            end
+        end
+    endgenerate
+    (* keep = 1 *) reg [4:0] address_read_slot2_r /* synthesis syn_preserve=1 */;
+    wire [3:0] address_even_index2_w;
+    wire [3:0] address_odd_index2_w;
+    assign address_even_index2_w = address_read_slot2_r[4:1] +
+        {3'b0, address_read_slot2_r[0]};
+    assign address_odd_index2_w = address_read_slot2_r[4:1];
+    (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) address_read_slot2_r <= 0;
+        else if (stop_i) address_read_slot2_r <= 0;
+        else if (schedule_valid_w && group_issued_w)
+            address_read_slot2_r <= address_read_slot2_r + 1'b1;
+    end
+    generate
+        begin : g_address_pool_tap_2_0
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[18] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_0_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_0_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index2_w];
+                odd_cache_r <= odd_r[address_odd_index2_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_2_1
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[19] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_1_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_1_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index2_w];
+                odd_cache_r <= odd_r[address_odd_index2_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_2_2
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[20] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_2_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_2_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index2_w];
+                odd_cache_r <= odd_r[address_odd_index2_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_2_3
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[21] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_3_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_3_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index2_w];
+                odd_cache_r <= odd_r[address_odd_index2_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_2_4
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[22] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_0_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_0_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index2_w];
+                odd_cache_r <= odd_r[address_odd_index2_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_2_5
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[23] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_1_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_1_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index2_w];
+                odd_cache_r <= odd_r[address_odd_index2_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_2_6
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[24] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_2_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_2_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index2_w];
+                odd_cache_r <= odd_r[address_odd_index2_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_2_7
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[25] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_3_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_3_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index2_w];
+                odd_cache_r <= odd_r[address_odd_index2_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_2_8
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[26] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_4_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_4_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index2_w];
+                odd_cache_r <= odd_r[address_odd_index2_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_fraction_2_0
+            reg [15:0] even_r [0:15];
+            reg [15:0] odd_r [0:15];
+            reg [15:0] even_cache_r;
+            reg [15:0] odd_cache_r;
+            assign fraction_cache_w[4] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction2_0_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction2_0_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index2_w];
+                odd_cache_r <= odd_r[address_odd_index2_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_fraction_2_1
+            reg [15:0] even_r [0:15];
+            reg [15:0] odd_r [0:15];
+            reg [15:0] even_cache_r;
+            reg [15:0] odd_cache_r;
+            assign fraction_cache_w[5] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction2_1_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction2_1_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index2_w];
+                odd_cache_r <= odd_r[address_odd_index2_w];
+            end
+        end
+    endgenerate
+    (* keep = 1 *) reg [4:0] address_read_slot3_r /* synthesis syn_preserve=1 */;
+    wire [3:0] address_even_index3_w;
+    wire [3:0] address_odd_index3_w;
+    assign address_even_index3_w = address_read_slot3_r[4:1] +
+        {3'b0, address_read_slot3_r[0]};
+    assign address_odd_index3_w = address_read_slot3_r[4:1];
+    (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) address_read_slot3_r <= 0;
+        else if (stop_i) address_read_slot3_r <= 0;
+        else if (schedule_valid_w && group_issued_w)
+            address_read_slot3_r <= address_read_slot3_r + 1'b1;
+    end
+    generate
+        begin : g_address_pool_tap_3_0
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[27] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_0_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_0_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index3_w];
+                odd_cache_r <= odd_r[address_odd_index3_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_3_1
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[28] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_1_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_1_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index3_w];
+                odd_cache_r <= odd_r[address_odd_index3_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_3_2
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[29] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_2_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_2_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index3_w];
+                odd_cache_r <= odd_r[address_odd_index3_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_3_3
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[30] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_3_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_3_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index3_w];
+                odd_cache_r <= odd_r[address_odd_index3_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_3_4
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[31] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_0_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_0_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index3_w];
+                odd_cache_r <= odd_r[address_odd_index3_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_3_5
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[32] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_1_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_1_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index3_w];
+                odd_cache_r <= odd_r[address_odd_index3_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_3_6
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[33] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_2_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_2_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index3_w];
+                odd_cache_r <= odd_r[address_odd_index3_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_3_7
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[34] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_3_w;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_3_w;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index3_w];
+                odd_cache_r <= odd_r[address_odd_index3_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_tap_3_8
+            reg [20:0] even_r [0:15];
+            reg [20:0] odd_r [0:15];
+            reg [20:0] even_cache_r;
+            reg [20:0] odd_cache_r;
+            assign address_cache_w[35] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_4_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_4_w_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index3_w];
+                odd_cache_r <= odd_r[address_odd_index3_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_fraction_3_0
+            reg [15:0] even_r [0:15];
+            reg [15:0] odd_r [0:15];
+            reg [15:0] even_cache_r;
+            reg [15:0] odd_cache_r;
+            assign fraction_cache_w[6] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction3_0_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction3_0_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index3_w];
+                odd_cache_r <= odd_r[address_odd_index3_w];
+            end
+        end
+    endgenerate
+    generate
+        begin : g_address_pool_fraction_3_1
+            reg [15:0] even_r [0:15];
+            reg [15:0] odd_r [0:15];
+            reg [15:0] even_cache_r;
+            reg [15:0] odd_cache_r;
+            assign fraction_cache_w[7] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
+                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction3_1_d5_r;
+            end
+            always @(posedge clk_i) begin
+                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
+                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction3_1_d5_r;
+            end
+            always @(posedge clk_i) begin
+                even_cache_r <= even_r[address_even_index3_w];
+                odd_cache_r <= odd_r[address_odd_index3_w];
+            end
+        end
+    endgenerate
+    always @(posedge clk_i) begin
+    address_slot_0_r <= lod_slot_r[2];
+    address_u0_r <= address_input_u_w[0 +: 32];
+    address_v0_r <= address_input_v_w[0 +: 32];
+    address_level0_r <= quad_r[lod_slot_r[2]] ? 4'b0 : unused_address_input_lod_w[0 +: 4];
+    address_next_level0_r <= address_level0_r < levels_r - 4'd1 ? address_level0_r + 4'd1 :
+            address_level0_r;
+    address_scaled_u0_0_r <= unused_address_scaled_u0_0_wide_w[16:0];
+    address_scaled_v0_0_r <= unused_address_scaled_v0_0_wide_w[16:0];
+    address_mask_x0_0_r <= mip_mask_x_w[address_level0_r];
+    address_mask_y0_0_r <= mip_mask_y_w[address_level0_r];
+    address_offset0_0_r <= mip_offset_w[address_level0_r];
+    address_row_shift0_0_r <= mip_row_shift_w[address_level0_r];
+    address_fraction0_0_r <= {address_scaled_v0_0_r[7:0] ^ 8'h80, address_scaled_u0_0_r[7:0] ^
+        8'h80};
+    address_x0_0_0_r <= (address_scaled_u0_0_r[16:8] - {8'b0, !address_scaled_u0_0_r[7]}) &
+            address_mask_x0_0_r;
+    address_y0_0_0_r <= (address_scaled_v0_0_r[16:8] - {8'b0, !address_scaled_v0_0_r[7]}) &
+            address_mask_y0_0_r;
+    address_row_shift0_0_d2_r <= address_row_shift0_0_r;
+    unused_address_row0_0_0_r <= {9'b0, address_block_y0_0_0_w[8:1]} << address_row_shift0_0_d2_r;
+    address_bank0_0_0_r <= {address_block_y0_0_0_w[0], address_block_x0_0_0_w[0]};
+    address_subword0_0_0_r <= format_r == 0 ? {address_y0_0_0_r[0], address_x0_0_0_r[0], 2'b0} :
+            format_r == 1 ? {address_x0_0_0_r[0], 3'b0} : 4'b0;
+    address_offset0_0_d2_r <= address_offset0_0_r;
+    unused_address_offset0_0_d3_r <= address_offset0_0_d2_r;
+    address_column0_0_0_w_d3_r <= address_column0_0_0_w;
+    address_halfword0_0_0_r <= {unused_address_offset0_0_d3_r[16:2] +
+            (unused_address_row0_0_0_r[14:0] | {7'b0, address_column0_0_0_w_d3_r}),
+                address_bank0_0_0_r};
+    address_subword0_0_0_d4_r <= address_subword0_0_0_r;
+    address_x0_0_1_r <= (address_scaled_u0_0_r[16:8] + {8'b0, address_scaled_u0_0_r[7]}) &
+            address_mask_x0_0_r;
+    address_y0_0_1_r <= (address_scaled_v0_0_r[16:8] - {8'b0, !address_scaled_v0_0_r[7]}) &
+            address_mask_y0_0_r;
+    unused_address_row0_0_1_r <= {9'b0, address_block_y0_0_1_w[8:1]} << address_row_shift0_0_d2_r;
+    address_bank0_0_1_r <= {address_block_y0_0_1_w[0], address_block_x0_0_1_w[0]};
+    address_subword0_0_1_r <= format_r == 0 ? {address_y0_0_1_r[0], address_x0_0_1_r[0], 2'b0} :
+            format_r == 1 ? {address_x0_0_1_r[0], 3'b0} : 4'b0;
+    address_column0_0_1_w_d3_r <= address_column0_0_1_w;
+    address_halfword0_0_1_r <= {unused_address_offset0_0_d3_r[16:2] +
+            (unused_address_row0_0_1_r[14:0] | {7'b0, address_column0_0_1_w_d3_r}),
+                address_bank0_0_1_r};
+    address_subword0_0_1_d4_r <= address_subword0_0_1_r;
+    address_x0_0_2_r <= (address_scaled_u0_0_r[16:8] - {8'b0, !address_scaled_u0_0_r[7]}) &
+            address_mask_x0_0_r;
+    address_y0_0_2_r <= (address_scaled_v0_0_r[16:8] + {8'b0, address_scaled_v0_0_r[7]}) &
+            address_mask_y0_0_r;
+    unused_address_row0_0_2_r <= {9'b0, address_block_y0_0_2_w[8:1]} << address_row_shift0_0_d2_r;
+    address_bank0_0_2_r <= {address_block_y0_0_2_w[0], address_block_x0_0_2_w[0]};
+    address_subword0_0_2_r <= format_r == 0 ? {address_y0_0_2_r[0], address_x0_0_2_r[0], 2'b0} :
+            format_r == 1 ? {address_x0_0_2_r[0], 3'b0} : 4'b0;
+    address_column0_0_2_w_d3_r <= address_column0_0_2_w;
+    address_halfword0_0_2_r <= {unused_address_offset0_0_d3_r[16:2] +
+            (unused_address_row0_0_2_r[14:0] | {7'b0, address_column0_0_2_w_d3_r}),
+                address_bank0_0_2_r};
+    address_subword0_0_2_d4_r <= address_subword0_0_2_r;
+    address_x0_0_3_r <= (address_scaled_u0_0_r[16:8] + {8'b0, address_scaled_u0_0_r[7]}) &
+            address_mask_x0_0_r;
+    address_y0_0_3_r <= (address_scaled_v0_0_r[16:8] + {8'b0, address_scaled_v0_0_r[7]}) &
+            address_mask_y0_0_r;
+    unused_address_row0_0_3_r <= {9'b0, address_block_y0_0_3_w[8:1]} << address_row_shift0_0_d2_r;
+    address_bank0_0_3_r <= {address_block_y0_0_3_w[0], address_block_x0_0_3_w[0]};
+    address_subword0_0_3_r <= format_r == 0 ? {address_y0_0_3_r[0], address_x0_0_3_r[0], 2'b0} :
+            format_r == 1 ? {address_x0_0_3_r[0], 3'b0} : 4'b0;
+    address_column0_0_3_w_d3_r <= address_column0_0_3_w;
+    address_halfword0_0_3_r <= {unused_address_offset0_0_d3_r[16:2] +
+            (unused_address_row0_0_3_r[14:0] | {7'b0, address_column0_0_3_w_d3_r}),
+                address_bank0_0_3_r};
+    address_subword0_0_3_d4_r <= address_subword0_0_3_r;
+    address_x0_0_4_r <= address_scaled_u0_0_r[16:8] & address_mask_x0_0_r;
+    address_y0_0_4_r <= address_scaled_v0_0_r[16:8] & address_mask_y0_0_r;
+    unused_address_row0_0_4_r <= {9'b0, address_block_y0_0_4_w[8:1]} << address_row_shift0_0_d2_r;
+    address_bank0_0_4_r <= {address_block_y0_0_4_w[0], address_block_x0_0_4_w[0]};
+    address_subword0_0_4_r <= format_r == 0 ? {address_y0_0_4_r[0], address_x0_0_4_r[0], 2'b0} :
+            format_r == 1 ? {address_x0_0_4_r[0], 3'b0} : 4'b0;
+    address_column0_0_4_w_d3_r <= address_column0_0_4_w;
+    address_halfword0_0_4_r <= {unused_address_offset0_0_d3_r[16:2] +
+            (unused_address_row0_0_4_r[14:0] | {7'b0, address_column0_0_4_w_d3_r}),
+                address_bank0_0_4_r};
+    address_subword0_0_4_d4_r <= address_subword0_0_4_r;
+    address_u0_r_d1_r <= address_u0_r;
+    address_scaled_u0_1_r <= unused_address_scaled_u0_1_wide_w[16:0];
+    address_v0_r_d1_r <= address_v0_r;
+    address_scaled_v0_1_r <= unused_address_scaled_v0_1_wide_w[16:0];
+    address_mask_x0_1_r <= mip_mask_x_w[address_next_level0_r];
+    address_mask_y0_1_r <= mip_mask_y_w[address_next_level0_r];
+    address_offset0_1_r <= mip_offset_w[address_next_level0_r];
+    address_row_shift0_1_r <= mip_row_shift_w[address_next_level0_r];
+    address_fraction0_1_r <= {address_scaled_v0_1_r[7:0] ^ 8'h80, address_scaled_u0_1_r[7:0] ^
+        8'h80};
+    address_x0_1_0_r <= (address_scaled_u0_1_r[16:8] - {8'b0, !address_scaled_u0_1_r[7]}) &
+            address_mask_x0_1_r;
+    address_y0_1_0_r <= (address_scaled_v0_1_r[16:8] - {8'b0, !address_scaled_v0_1_r[7]}) &
+            address_mask_y0_1_r;
+    address_row_shift0_1_d3_r <= address_row_shift0_1_r;
+    unused_address_row0_1_0_r <= {9'b0, address_block_y0_1_0_w[8:1]} << address_row_shift0_1_d3_r;
+    address_bank0_1_0_r <= {address_block_y0_1_0_w[0], address_block_x0_1_0_w[0]};
+    address_subword0_1_0_r <= format_r == 0 ? {address_y0_1_0_r[0], address_x0_1_0_r[0], 2'b0} :
+            format_r == 1 ? {address_x0_1_0_r[0], 3'b0} : 4'b0;
+    address_offset0_1_d3_r <= address_offset0_1_r;
+    unused_address_offset0_1_d4_r <= address_offset0_1_d3_r;
+    address_column0_1_0_w_d4_r <= address_column0_1_0_w;
+    address_halfword0_1_0_r <= {unused_address_offset0_1_d4_r[16:2] +
+            (unused_address_row0_1_0_r[14:0] | {7'b0, address_column0_1_0_w_d4_r}),
+                address_bank0_1_0_r};
+    address_subword0_1_0_d5_r <= address_subword0_1_0_r;
+    address_x0_1_1_r <= (address_scaled_u0_1_r[16:8] + {8'b0, address_scaled_u0_1_r[7]}) &
+            address_mask_x0_1_r;
+    address_y0_1_1_r <= (address_scaled_v0_1_r[16:8] - {8'b0, !address_scaled_v0_1_r[7]}) &
+            address_mask_y0_1_r;
+    unused_address_row0_1_1_r <= {9'b0, address_block_y0_1_1_w[8:1]} << address_row_shift0_1_d3_r;
+    address_bank0_1_1_r <= {address_block_y0_1_1_w[0], address_block_x0_1_1_w[0]};
+    address_subword0_1_1_r <= format_r == 0 ? {address_y0_1_1_r[0], address_x0_1_1_r[0], 2'b0} :
+            format_r == 1 ? {address_x0_1_1_r[0], 3'b0} : 4'b0;
+    address_column0_1_1_w_d4_r <= address_column0_1_1_w;
+    address_halfword0_1_1_r <= {unused_address_offset0_1_d4_r[16:2] +
+            (unused_address_row0_1_1_r[14:0] | {7'b0, address_column0_1_1_w_d4_r}),
+                address_bank0_1_1_r};
+    address_subword0_1_1_d5_r <= address_subword0_1_1_r;
+    address_x0_1_2_r <= (address_scaled_u0_1_r[16:8] - {8'b0, !address_scaled_u0_1_r[7]}) &
+            address_mask_x0_1_r;
+    address_y0_1_2_r <= (address_scaled_v0_1_r[16:8] + {8'b0, address_scaled_v0_1_r[7]}) &
+            address_mask_y0_1_r;
+    unused_address_row0_1_2_r <= {9'b0, address_block_y0_1_2_w[8:1]} << address_row_shift0_1_d3_r;
+    address_bank0_1_2_r <= {address_block_y0_1_2_w[0], address_block_x0_1_2_w[0]};
+    address_subword0_1_2_r <= format_r == 0 ? {address_y0_1_2_r[0], address_x0_1_2_r[0], 2'b0} :
+            format_r == 1 ? {address_x0_1_2_r[0], 3'b0} : 4'b0;
+    address_column0_1_2_w_d4_r <= address_column0_1_2_w;
+    address_halfword0_1_2_r <= {unused_address_offset0_1_d4_r[16:2] +
+            (unused_address_row0_1_2_r[14:0] | {7'b0, address_column0_1_2_w_d4_r}),
+                address_bank0_1_2_r};
+    address_subword0_1_2_d5_r <= address_subword0_1_2_r;
+    address_x0_1_3_r <= (address_scaled_u0_1_r[16:8] + {8'b0, address_scaled_u0_1_r[7]}) &
+            address_mask_x0_1_r;
+    address_y0_1_3_r <= (address_scaled_v0_1_r[16:8] + {8'b0, address_scaled_v0_1_r[7]}) &
+            address_mask_y0_1_r;
+    unused_address_row0_1_3_r <= {9'b0, address_block_y0_1_3_w[8:1]} << address_row_shift0_1_d3_r;
+    address_bank0_1_3_r <= {address_block_y0_1_3_w[0], address_block_x0_1_3_w[0]};
+    address_subword0_1_3_r <= format_r == 0 ? {address_y0_1_3_r[0], address_x0_1_3_r[0], 2'b0} :
+            format_r == 1 ? {address_x0_1_3_r[0], 3'b0} : 4'b0;
+    address_column0_1_3_w_d4_r <= address_column0_1_3_w;
+    address_halfword0_1_3_r <= {unused_address_offset0_1_d4_r[16:2] +
+            (unused_address_row0_1_3_r[14:0] | {7'b0, address_column0_1_3_w_d4_r}),
+                address_bank0_1_3_r};
+    address_subword0_1_3_d5_r <= address_subword0_1_3_r;
+    address_u1_r <= address_input_u_w[32 +: 32];
+    address_v1_r <= address_input_v_w[32 +: 32];
+    address_level1_r <= quad_r[lod_slot_r[2]] ? 4'b0 : unused_address_input_lod_w[4 +: 4];
+    address_next_level1_r <= address_level1_r < levels_r - 4'd1 ? address_level1_r + 4'd1 :
+            address_level1_r;
+    address_scaled_u1_0_r <= unused_address_scaled_u1_0_wide_w[16:0];
+    address_scaled_v1_0_r <= unused_address_scaled_v1_0_wide_w[16:0];
+    address_mask_x1_0_r <= mip_mask_x_w[address_level1_r];
+    address_mask_y1_0_r <= mip_mask_y_w[address_level1_r];
+    address_offset1_0_r <= mip_offset_w[address_level1_r];
+    address_row_shift1_0_r <= mip_row_shift_w[address_level1_r];
+    address_fraction1_0_r <= {address_scaled_v1_0_r[7:0] ^ 8'h80, address_scaled_u1_0_r[7:0] ^
+        8'h80};
+    address_x1_0_0_r <= (address_scaled_u1_0_r[16:8] - {8'b0, !address_scaled_u1_0_r[7]}) &
+            address_mask_x1_0_r;
+    address_y1_0_0_r <= (address_scaled_v1_0_r[16:8] - {8'b0, !address_scaled_v1_0_r[7]}) &
+            address_mask_y1_0_r;
+    address_row_shift1_0_d2_r <= address_row_shift1_0_r;
+    unused_address_row1_0_0_r <= {9'b0, address_block_y1_0_0_w[8:1]} << address_row_shift1_0_d2_r;
+    address_bank1_0_0_r <= {address_block_y1_0_0_w[0], address_block_x1_0_0_w[0]};
+    address_subword1_0_0_r <= format_r == 0 ? {address_y1_0_0_r[0], address_x1_0_0_r[0], 2'b0} :
+            format_r == 1 ? {address_x1_0_0_r[0], 3'b0} : 4'b0;
+    address_offset1_0_d2_r <= address_offset1_0_r;
+    unused_address_offset1_0_d3_r <= address_offset1_0_d2_r;
+    address_column1_0_0_w_d3_r <= address_column1_0_0_w;
+    address_halfword1_0_0_r <= {unused_address_offset1_0_d3_r[16:2] +
+            (unused_address_row1_0_0_r[14:0] | {7'b0, address_column1_0_0_w_d3_r}),
+                address_bank1_0_0_r};
+    address_subword1_0_0_d4_r <= address_subword1_0_0_r;
+    address_x1_0_1_r <= (address_scaled_u1_0_r[16:8] + {8'b0, address_scaled_u1_0_r[7]}) &
+            address_mask_x1_0_r;
+    address_y1_0_1_r <= (address_scaled_v1_0_r[16:8] - {8'b0, !address_scaled_v1_0_r[7]}) &
+            address_mask_y1_0_r;
+    unused_address_row1_0_1_r <= {9'b0, address_block_y1_0_1_w[8:1]} << address_row_shift1_0_d2_r;
+    address_bank1_0_1_r <= {address_block_y1_0_1_w[0], address_block_x1_0_1_w[0]};
+    address_subword1_0_1_r <= format_r == 0 ? {address_y1_0_1_r[0], address_x1_0_1_r[0], 2'b0} :
+            format_r == 1 ? {address_x1_0_1_r[0], 3'b0} : 4'b0;
+    address_column1_0_1_w_d3_r <= address_column1_0_1_w;
+    address_halfword1_0_1_r <= {unused_address_offset1_0_d3_r[16:2] +
+            (unused_address_row1_0_1_r[14:0] | {7'b0, address_column1_0_1_w_d3_r}),
+                address_bank1_0_1_r};
+    address_subword1_0_1_d4_r <= address_subword1_0_1_r;
+    address_x1_0_2_r <= (address_scaled_u1_0_r[16:8] - {8'b0, !address_scaled_u1_0_r[7]}) &
+            address_mask_x1_0_r;
+    address_y1_0_2_r <= (address_scaled_v1_0_r[16:8] + {8'b0, address_scaled_v1_0_r[7]}) &
+            address_mask_y1_0_r;
+    unused_address_row1_0_2_r <= {9'b0, address_block_y1_0_2_w[8:1]} << address_row_shift1_0_d2_r;
+    address_bank1_0_2_r <= {address_block_y1_0_2_w[0], address_block_x1_0_2_w[0]};
+    address_subword1_0_2_r <= format_r == 0 ? {address_y1_0_2_r[0], address_x1_0_2_r[0], 2'b0} :
+            format_r == 1 ? {address_x1_0_2_r[0], 3'b0} : 4'b0;
+    address_column1_0_2_w_d3_r <= address_column1_0_2_w;
+    address_halfword1_0_2_r <= {unused_address_offset1_0_d3_r[16:2] +
+            (unused_address_row1_0_2_r[14:0] | {7'b0, address_column1_0_2_w_d3_r}),
+                address_bank1_0_2_r};
+    address_subword1_0_2_d4_r <= address_subword1_0_2_r;
+    address_x1_0_3_r <= (address_scaled_u1_0_r[16:8] + {8'b0, address_scaled_u1_0_r[7]}) &
+            address_mask_x1_0_r;
+    address_y1_0_3_r <= (address_scaled_v1_0_r[16:8] + {8'b0, address_scaled_v1_0_r[7]}) &
+            address_mask_y1_0_r;
+    unused_address_row1_0_3_r <= {9'b0, address_block_y1_0_3_w[8:1]} << address_row_shift1_0_d2_r;
+    address_bank1_0_3_r <= {address_block_y1_0_3_w[0], address_block_x1_0_3_w[0]};
+    address_subword1_0_3_r <= format_r == 0 ? {address_y1_0_3_r[0], address_x1_0_3_r[0], 2'b0} :
+            format_r == 1 ? {address_x1_0_3_r[0], 3'b0} : 4'b0;
+    address_column1_0_3_w_d3_r <= address_column1_0_3_w;
+    address_halfword1_0_3_r <= {unused_address_offset1_0_d3_r[16:2] +
+            (unused_address_row1_0_3_r[14:0] | {7'b0, address_column1_0_3_w_d3_r}),
+                address_bank1_0_3_r};
+    address_subword1_0_3_d4_r <= address_subword1_0_3_r;
+    address_x1_0_4_r <= address_scaled_u1_0_r[16:8] & address_mask_x1_0_r;
+    address_y1_0_4_r <= address_scaled_v1_0_r[16:8] & address_mask_y1_0_r;
+    unused_address_row1_0_4_r <= {9'b0, address_block_y1_0_4_w[8:1]} << address_row_shift1_0_d2_r;
+    address_bank1_0_4_r <= {address_block_y1_0_4_w[0], address_block_x1_0_4_w[0]};
+    address_subword1_0_4_r <= format_r == 0 ? {address_y1_0_4_r[0], address_x1_0_4_r[0], 2'b0} :
+            format_r == 1 ? {address_x1_0_4_r[0], 3'b0} : 4'b0;
+    address_column1_0_4_w_d3_r <= address_column1_0_4_w;
+    address_halfword1_0_4_r <= {unused_address_offset1_0_d3_r[16:2] +
+            (unused_address_row1_0_4_r[14:0] | {7'b0, address_column1_0_4_w_d3_r}),
+                address_bank1_0_4_r};
+    address_subword1_0_4_d4_r <= address_subword1_0_4_r;
+    address_u1_r_d1_r <= address_u1_r;
+    address_scaled_u1_1_r <= unused_address_scaled_u1_1_wide_w[16:0];
+    address_v1_r_d1_r <= address_v1_r;
+    address_scaled_v1_1_r <= unused_address_scaled_v1_1_wide_w[16:0];
+    address_mask_x1_1_r <= mip_mask_x_w[address_next_level1_r];
+    address_mask_y1_1_r <= mip_mask_y_w[address_next_level1_r];
+    address_offset1_1_r <= mip_offset_w[address_next_level1_r];
+    address_row_shift1_1_r <= mip_row_shift_w[address_next_level1_r];
+    address_fraction1_1_r <= {address_scaled_v1_1_r[7:0] ^ 8'h80, address_scaled_u1_1_r[7:0] ^
+        8'h80};
+    address_x1_1_0_r <= (address_scaled_u1_1_r[16:8] - {8'b0, !address_scaled_u1_1_r[7]}) &
+            address_mask_x1_1_r;
+    address_y1_1_0_r <= (address_scaled_v1_1_r[16:8] - {8'b0, !address_scaled_v1_1_r[7]}) &
+            address_mask_y1_1_r;
+    address_row_shift1_1_d3_r <= address_row_shift1_1_r;
+    unused_address_row1_1_0_r <= {9'b0, address_block_y1_1_0_w[8:1]} << address_row_shift1_1_d3_r;
+    address_bank1_1_0_r <= {address_block_y1_1_0_w[0], address_block_x1_1_0_w[0]};
+    address_subword1_1_0_r <= format_r == 0 ? {address_y1_1_0_r[0], address_x1_1_0_r[0], 2'b0} :
+            format_r == 1 ? {address_x1_1_0_r[0], 3'b0} : 4'b0;
+    address_offset1_1_d3_r <= address_offset1_1_r;
+    unused_address_offset1_1_d4_r <= address_offset1_1_d3_r;
+    address_column1_1_0_w_d4_r <= address_column1_1_0_w;
+    address_halfword1_1_0_r <= {unused_address_offset1_1_d4_r[16:2] +
+            (unused_address_row1_1_0_r[14:0] | {7'b0, address_column1_1_0_w_d4_r}),
+                address_bank1_1_0_r};
+    address_subword1_1_0_d5_r <= address_subword1_1_0_r;
+    address_x1_1_1_r <= (address_scaled_u1_1_r[16:8] + {8'b0, address_scaled_u1_1_r[7]}) &
+            address_mask_x1_1_r;
+    address_y1_1_1_r <= (address_scaled_v1_1_r[16:8] - {8'b0, !address_scaled_v1_1_r[7]}) &
+            address_mask_y1_1_r;
+    unused_address_row1_1_1_r <= {9'b0, address_block_y1_1_1_w[8:1]} << address_row_shift1_1_d3_r;
+    address_bank1_1_1_r <= {address_block_y1_1_1_w[0], address_block_x1_1_1_w[0]};
+    address_subword1_1_1_r <= format_r == 0 ? {address_y1_1_1_r[0], address_x1_1_1_r[0], 2'b0} :
+            format_r == 1 ? {address_x1_1_1_r[0], 3'b0} : 4'b0;
+    address_column1_1_1_w_d4_r <= address_column1_1_1_w;
+    address_halfword1_1_1_r <= {unused_address_offset1_1_d4_r[16:2] +
+            (unused_address_row1_1_1_r[14:0] | {7'b0, address_column1_1_1_w_d4_r}),
+                address_bank1_1_1_r};
+    address_subword1_1_1_d5_r <= address_subword1_1_1_r;
+    address_x1_1_2_r <= (address_scaled_u1_1_r[16:8] - {8'b0, !address_scaled_u1_1_r[7]}) &
+            address_mask_x1_1_r;
+    address_y1_1_2_r <= (address_scaled_v1_1_r[16:8] + {8'b0, address_scaled_v1_1_r[7]}) &
+            address_mask_y1_1_r;
+    unused_address_row1_1_2_r <= {9'b0, address_block_y1_1_2_w[8:1]} << address_row_shift1_1_d3_r;
+    address_bank1_1_2_r <= {address_block_y1_1_2_w[0], address_block_x1_1_2_w[0]};
+    address_subword1_1_2_r <= format_r == 0 ? {address_y1_1_2_r[0], address_x1_1_2_r[0], 2'b0} :
+            format_r == 1 ? {address_x1_1_2_r[0], 3'b0} : 4'b0;
+    address_column1_1_2_w_d4_r <= address_column1_1_2_w;
+    address_halfword1_1_2_r <= {unused_address_offset1_1_d4_r[16:2] +
+            (unused_address_row1_1_2_r[14:0] | {7'b0, address_column1_1_2_w_d4_r}),
+                address_bank1_1_2_r};
+    address_subword1_1_2_d5_r <= address_subword1_1_2_r;
+    address_x1_1_3_r <= (address_scaled_u1_1_r[16:8] + {8'b0, address_scaled_u1_1_r[7]}) &
+            address_mask_x1_1_r;
+    address_y1_1_3_r <= (address_scaled_v1_1_r[16:8] + {8'b0, address_scaled_v1_1_r[7]}) &
+            address_mask_y1_1_r;
+    unused_address_row1_1_3_r <= {9'b0, address_block_y1_1_3_w[8:1]} << address_row_shift1_1_d3_r;
+    address_bank1_1_3_r <= {address_block_y1_1_3_w[0], address_block_x1_1_3_w[0]};
+    address_subword1_1_3_r <= format_r == 0 ? {address_y1_1_3_r[0], address_x1_1_3_r[0], 2'b0} :
+            format_r == 1 ? {address_x1_1_3_r[0], 3'b0} : 4'b0;
+    address_column1_1_3_w_d4_r <= address_column1_1_3_w;
+    address_halfword1_1_3_r <= {unused_address_offset1_1_d4_r[16:2] +
+            (unused_address_row1_1_3_r[14:0] | {7'b0, address_column1_1_3_w_d4_r}),
+                address_bank1_1_3_r};
+    address_subword1_1_3_d5_r <= address_subword1_1_3_r;
+    address_u2_r <= address_input_u_w[64 +: 32];
+    address_v2_r <= address_input_v_w[64 +: 32];
+    address_level2_r <= quad_r[lod_slot_r[2]] ? 4'b0 : unused_address_input_lod_w[8 +: 4];
+    address_next_level2_r <= address_level2_r < levels_r - 4'd1 ? address_level2_r + 4'd1 :
+            address_level2_r;
+    address_scaled_u2_0_r <= unused_address_scaled_u2_0_wide_w[16:0];
+    address_scaled_v2_0_r <= unused_address_scaled_v2_0_wide_w[16:0];
+    address_mask_x2_0_r <= mip_mask_x_w[address_level2_r];
+    address_mask_y2_0_r <= mip_mask_y_w[address_level2_r];
+    address_offset2_0_r <= mip_offset_w[address_level2_r];
+    address_row_shift2_0_r <= mip_row_shift_w[address_level2_r];
+    address_fraction2_0_r <= {address_scaled_v2_0_r[7:0] ^ 8'h80, address_scaled_u2_0_r[7:0] ^
+        8'h80};
+    address_x2_0_0_r <= (address_scaled_u2_0_r[16:8] - {8'b0, !address_scaled_u2_0_r[7]}) &
+            address_mask_x2_0_r;
+    address_y2_0_0_r <= (address_scaled_v2_0_r[16:8] - {8'b0, !address_scaled_v2_0_r[7]}) &
+            address_mask_y2_0_r;
+    address_row_shift2_0_d2_r <= address_row_shift2_0_r;
+    unused_address_row2_0_0_r <= {9'b0, address_block_y2_0_0_w[8:1]} << address_row_shift2_0_d2_r;
+    address_bank2_0_0_r <= {address_block_y2_0_0_w[0], address_block_x2_0_0_w[0]};
+    address_subword2_0_0_r <= format_r == 0 ? {address_y2_0_0_r[0], address_x2_0_0_r[0], 2'b0} :
+            format_r == 1 ? {address_x2_0_0_r[0], 3'b0} : 4'b0;
+    address_offset2_0_d2_r <= address_offset2_0_r;
+    unused_address_offset2_0_d3_r <= address_offset2_0_d2_r;
+    address_column2_0_0_w_d3_r <= address_column2_0_0_w;
+    address_halfword2_0_0_r <= {unused_address_offset2_0_d3_r[16:2] +
+            (unused_address_row2_0_0_r[14:0] | {7'b0, address_column2_0_0_w_d3_r}),
+                address_bank2_0_0_r};
+    address_subword2_0_0_d4_r <= address_subword2_0_0_r;
+    address_x2_0_1_r <= (address_scaled_u2_0_r[16:8] + {8'b0, address_scaled_u2_0_r[7]}) &
+            address_mask_x2_0_r;
+    address_y2_0_1_r <= (address_scaled_v2_0_r[16:8] - {8'b0, !address_scaled_v2_0_r[7]}) &
+            address_mask_y2_0_r;
+    unused_address_row2_0_1_r <= {9'b0, address_block_y2_0_1_w[8:1]} << address_row_shift2_0_d2_r;
+    address_bank2_0_1_r <= {address_block_y2_0_1_w[0], address_block_x2_0_1_w[0]};
+    address_subword2_0_1_r <= format_r == 0 ? {address_y2_0_1_r[0], address_x2_0_1_r[0], 2'b0} :
+            format_r == 1 ? {address_x2_0_1_r[0], 3'b0} : 4'b0;
+    address_column2_0_1_w_d3_r <= address_column2_0_1_w;
+    address_halfword2_0_1_r <= {unused_address_offset2_0_d3_r[16:2] +
+            (unused_address_row2_0_1_r[14:0] | {7'b0, address_column2_0_1_w_d3_r}),
+                address_bank2_0_1_r};
+    address_subword2_0_1_d4_r <= address_subword2_0_1_r;
+    address_x2_0_2_r <= (address_scaled_u2_0_r[16:8] - {8'b0, !address_scaled_u2_0_r[7]}) &
+            address_mask_x2_0_r;
+    address_y2_0_2_r <= (address_scaled_v2_0_r[16:8] + {8'b0, address_scaled_v2_0_r[7]}) &
+            address_mask_y2_0_r;
+    unused_address_row2_0_2_r <= {9'b0, address_block_y2_0_2_w[8:1]} << address_row_shift2_0_d2_r;
+    address_bank2_0_2_r <= {address_block_y2_0_2_w[0], address_block_x2_0_2_w[0]};
+    address_subword2_0_2_r <= format_r == 0 ? {address_y2_0_2_r[0], address_x2_0_2_r[0], 2'b0} :
+            format_r == 1 ? {address_x2_0_2_r[0], 3'b0} : 4'b0;
+    address_column2_0_2_w_d3_r <= address_column2_0_2_w;
+    address_halfword2_0_2_r <= {unused_address_offset2_0_d3_r[16:2] +
+            (unused_address_row2_0_2_r[14:0] | {7'b0, address_column2_0_2_w_d3_r}),
+                address_bank2_0_2_r};
+    address_subword2_0_2_d4_r <= address_subword2_0_2_r;
+    address_x2_0_3_r <= (address_scaled_u2_0_r[16:8] + {8'b0, address_scaled_u2_0_r[7]}) &
+            address_mask_x2_0_r;
+    address_y2_0_3_r <= (address_scaled_v2_0_r[16:8] + {8'b0, address_scaled_v2_0_r[7]}) &
+            address_mask_y2_0_r;
+    unused_address_row2_0_3_r <= {9'b0, address_block_y2_0_3_w[8:1]} << address_row_shift2_0_d2_r;
+    address_bank2_0_3_r <= {address_block_y2_0_3_w[0], address_block_x2_0_3_w[0]};
+    address_subword2_0_3_r <= format_r == 0 ? {address_y2_0_3_r[0], address_x2_0_3_r[0], 2'b0} :
+            format_r == 1 ? {address_x2_0_3_r[0], 3'b0} : 4'b0;
+    address_column2_0_3_w_d3_r <= address_column2_0_3_w;
+    address_halfword2_0_3_r <= {unused_address_offset2_0_d3_r[16:2] +
+            (unused_address_row2_0_3_r[14:0] | {7'b0, address_column2_0_3_w_d3_r}),
+                address_bank2_0_3_r};
+    address_subword2_0_3_d4_r <= address_subword2_0_3_r;
+    address_x2_0_4_r <= address_scaled_u2_0_r[16:8] & address_mask_x2_0_r;
+    address_y2_0_4_r <= address_scaled_v2_0_r[16:8] & address_mask_y2_0_r;
+    unused_address_row2_0_4_r <= {9'b0, address_block_y2_0_4_w[8:1]} << address_row_shift2_0_d2_r;
+    address_bank2_0_4_r <= {address_block_y2_0_4_w[0], address_block_x2_0_4_w[0]};
+    address_subword2_0_4_r <= format_r == 0 ? {address_y2_0_4_r[0], address_x2_0_4_r[0], 2'b0} :
+            format_r == 1 ? {address_x2_0_4_r[0], 3'b0} : 4'b0;
+    address_column2_0_4_w_d3_r <= address_column2_0_4_w;
+    address_halfword2_0_4_r <= {unused_address_offset2_0_d3_r[16:2] +
+            (unused_address_row2_0_4_r[14:0] | {7'b0, address_column2_0_4_w_d3_r}),
+                address_bank2_0_4_r};
+    address_subword2_0_4_d4_r <= address_subword2_0_4_r;
+    address_u2_r_d1_r <= address_u2_r;
+    address_scaled_u2_1_r <= unused_address_scaled_u2_1_wide_w[16:0];
+    address_v2_r_d1_r <= address_v2_r;
+    address_scaled_v2_1_r <= unused_address_scaled_v2_1_wide_w[16:0];
+    address_mask_x2_1_r <= mip_mask_x_w[address_next_level2_r];
+    address_mask_y2_1_r <= mip_mask_y_w[address_next_level2_r];
+    address_offset2_1_r <= mip_offset_w[address_next_level2_r];
+    address_row_shift2_1_r <= mip_row_shift_w[address_next_level2_r];
+    address_fraction2_1_r <= {address_scaled_v2_1_r[7:0] ^ 8'h80, address_scaled_u2_1_r[7:0] ^
+        8'h80};
+    address_x2_1_0_r <= (address_scaled_u2_1_r[16:8] - {8'b0, !address_scaled_u2_1_r[7]}) &
+            address_mask_x2_1_r;
+    address_y2_1_0_r <= (address_scaled_v2_1_r[16:8] - {8'b0, !address_scaled_v2_1_r[7]}) &
+            address_mask_y2_1_r;
+    address_row_shift2_1_d3_r <= address_row_shift2_1_r;
+    unused_address_row2_1_0_r <= {9'b0, address_block_y2_1_0_w[8:1]} << address_row_shift2_1_d3_r;
+    address_bank2_1_0_r <= {address_block_y2_1_0_w[0], address_block_x2_1_0_w[0]};
+    address_subword2_1_0_r <= format_r == 0 ? {address_y2_1_0_r[0], address_x2_1_0_r[0], 2'b0} :
+            format_r == 1 ? {address_x2_1_0_r[0], 3'b0} : 4'b0;
+    address_offset2_1_d3_r <= address_offset2_1_r;
+    unused_address_offset2_1_d4_r <= address_offset2_1_d3_r;
+    address_column2_1_0_w_d4_r <= address_column2_1_0_w;
+    address_halfword2_1_0_r <= {unused_address_offset2_1_d4_r[16:2] +
+            (unused_address_row2_1_0_r[14:0] | {7'b0, address_column2_1_0_w_d4_r}),
+                address_bank2_1_0_r};
+    address_subword2_1_0_d5_r <= address_subword2_1_0_r;
+    address_x2_1_1_r <= (address_scaled_u2_1_r[16:8] + {8'b0, address_scaled_u2_1_r[7]}) &
+            address_mask_x2_1_r;
+    address_y2_1_1_r <= (address_scaled_v2_1_r[16:8] - {8'b0, !address_scaled_v2_1_r[7]}) &
+            address_mask_y2_1_r;
+    unused_address_row2_1_1_r <= {9'b0, address_block_y2_1_1_w[8:1]} << address_row_shift2_1_d3_r;
+    address_bank2_1_1_r <= {address_block_y2_1_1_w[0], address_block_x2_1_1_w[0]};
+    address_subword2_1_1_r <= format_r == 0 ? {address_y2_1_1_r[0], address_x2_1_1_r[0], 2'b0} :
+            format_r == 1 ? {address_x2_1_1_r[0], 3'b0} : 4'b0;
+    address_column2_1_1_w_d4_r <= address_column2_1_1_w;
+    address_halfword2_1_1_r <= {unused_address_offset2_1_d4_r[16:2] +
+            (unused_address_row2_1_1_r[14:0] | {7'b0, address_column2_1_1_w_d4_r}),
+                address_bank2_1_1_r};
+    address_subword2_1_1_d5_r <= address_subword2_1_1_r;
+    address_x2_1_2_r <= (address_scaled_u2_1_r[16:8] - {8'b0, !address_scaled_u2_1_r[7]}) &
+            address_mask_x2_1_r;
+    address_y2_1_2_r <= (address_scaled_v2_1_r[16:8] + {8'b0, address_scaled_v2_1_r[7]}) &
+            address_mask_y2_1_r;
+    unused_address_row2_1_2_r <= {9'b0, address_block_y2_1_2_w[8:1]} << address_row_shift2_1_d3_r;
+    address_bank2_1_2_r <= {address_block_y2_1_2_w[0], address_block_x2_1_2_w[0]};
+    address_subword2_1_2_r <= format_r == 0 ? {address_y2_1_2_r[0], address_x2_1_2_r[0], 2'b0} :
+            format_r == 1 ? {address_x2_1_2_r[0], 3'b0} : 4'b0;
+    address_column2_1_2_w_d4_r <= address_column2_1_2_w;
+    address_halfword2_1_2_r <= {unused_address_offset2_1_d4_r[16:2] +
+            (unused_address_row2_1_2_r[14:0] | {7'b0, address_column2_1_2_w_d4_r}),
+                address_bank2_1_2_r};
+    address_subword2_1_2_d5_r <= address_subword2_1_2_r;
+    address_x2_1_3_r <= (address_scaled_u2_1_r[16:8] + {8'b0, address_scaled_u2_1_r[7]}) &
+            address_mask_x2_1_r;
+    address_y2_1_3_r <= (address_scaled_v2_1_r[16:8] + {8'b0, address_scaled_v2_1_r[7]}) &
+            address_mask_y2_1_r;
+    unused_address_row2_1_3_r <= {9'b0, address_block_y2_1_3_w[8:1]} << address_row_shift2_1_d3_r;
+    address_bank2_1_3_r <= {address_block_y2_1_3_w[0], address_block_x2_1_3_w[0]};
+    address_subword2_1_3_r <= format_r == 0 ? {address_y2_1_3_r[0], address_x2_1_3_r[0], 2'b0} :
+            format_r == 1 ? {address_x2_1_3_r[0], 3'b0} : 4'b0;
+    address_column2_1_3_w_d4_r <= address_column2_1_3_w;
+    address_halfword2_1_3_r <= {unused_address_offset2_1_d4_r[16:2] +
+            (unused_address_row2_1_3_r[14:0] | {7'b0, address_column2_1_3_w_d4_r}),
+                address_bank2_1_3_r};
+    address_subword2_1_3_d5_r <= address_subword2_1_3_r;
+    address_u3_r <= address_input_u_w[96 +: 32];
+    address_v3_r <= address_input_v_w[96 +: 32];
+    address_level3_r <= quad_r[lod_slot_r[2]] ? 4'b0 : unused_address_input_lod_w[12 +: 4];
+    address_next_level3_r <= address_level3_r < levels_r - 4'd1 ? address_level3_r + 4'd1 :
+            address_level3_r;
+    address_scaled_u3_0_r <= unused_address_scaled_u3_0_wide_w[16:0];
+    address_scaled_v3_0_r <= unused_address_scaled_v3_0_wide_w[16:0];
+    address_mask_x3_0_r <= mip_mask_x_w[address_level3_r];
+    address_mask_y3_0_r <= mip_mask_y_w[address_level3_r];
+    address_offset3_0_r <= mip_offset_w[address_level3_r];
+    address_row_shift3_0_r <= mip_row_shift_w[address_level3_r];
+    address_fraction3_0_r <= {address_scaled_v3_0_r[7:0] ^ 8'h80, address_scaled_u3_0_r[7:0] ^
+        8'h80};
+    address_x3_0_0_r <= (address_scaled_u3_0_r[16:8] - {8'b0, !address_scaled_u3_0_r[7]}) &
+            address_mask_x3_0_r;
+    address_y3_0_0_r <= (address_scaled_v3_0_r[16:8] - {8'b0, !address_scaled_v3_0_r[7]}) &
+            address_mask_y3_0_r;
+    address_row_shift3_0_d2_r <= address_row_shift3_0_r;
+    unused_address_row3_0_0_r <= {9'b0, address_block_y3_0_0_w[8:1]} << address_row_shift3_0_d2_r;
+    address_bank3_0_0_r <= {address_block_y3_0_0_w[0], address_block_x3_0_0_w[0]};
+    address_subword3_0_0_r <= format_r == 0 ? {address_y3_0_0_r[0], address_x3_0_0_r[0], 2'b0} :
+            format_r == 1 ? {address_x3_0_0_r[0], 3'b0} : 4'b0;
+    address_offset3_0_d2_r <= address_offset3_0_r;
+    unused_address_offset3_0_d3_r <= address_offset3_0_d2_r;
+    address_column3_0_0_w_d3_r <= address_column3_0_0_w;
+    address_halfword3_0_0_r <= {unused_address_offset3_0_d3_r[16:2] +
+            (unused_address_row3_0_0_r[14:0] | {7'b0, address_column3_0_0_w_d3_r}),
+                address_bank3_0_0_r};
+    address_subword3_0_0_d4_r <= address_subword3_0_0_r;
+    address_x3_0_1_r <= (address_scaled_u3_0_r[16:8] + {8'b0, address_scaled_u3_0_r[7]}) &
+            address_mask_x3_0_r;
+    address_y3_0_1_r <= (address_scaled_v3_0_r[16:8] - {8'b0, !address_scaled_v3_0_r[7]}) &
+            address_mask_y3_0_r;
+    unused_address_row3_0_1_r <= {9'b0, address_block_y3_0_1_w[8:1]} << address_row_shift3_0_d2_r;
+    address_bank3_0_1_r <= {address_block_y3_0_1_w[0], address_block_x3_0_1_w[0]};
+    address_subword3_0_1_r <= format_r == 0 ? {address_y3_0_1_r[0], address_x3_0_1_r[0], 2'b0} :
+            format_r == 1 ? {address_x3_0_1_r[0], 3'b0} : 4'b0;
+    address_column3_0_1_w_d3_r <= address_column3_0_1_w;
+    address_halfword3_0_1_r <= {unused_address_offset3_0_d3_r[16:2] +
+            (unused_address_row3_0_1_r[14:0] | {7'b0, address_column3_0_1_w_d3_r}),
+                address_bank3_0_1_r};
+    address_subword3_0_1_d4_r <= address_subword3_0_1_r;
+    address_x3_0_2_r <= (address_scaled_u3_0_r[16:8] - {8'b0, !address_scaled_u3_0_r[7]}) &
+            address_mask_x3_0_r;
+    address_y3_0_2_r <= (address_scaled_v3_0_r[16:8] + {8'b0, address_scaled_v3_0_r[7]}) &
+            address_mask_y3_0_r;
+    unused_address_row3_0_2_r <= {9'b0, address_block_y3_0_2_w[8:1]} << address_row_shift3_0_d2_r;
+    address_bank3_0_2_r <= {address_block_y3_0_2_w[0], address_block_x3_0_2_w[0]};
+    address_subword3_0_2_r <= format_r == 0 ? {address_y3_0_2_r[0], address_x3_0_2_r[0], 2'b0} :
+            format_r == 1 ? {address_x3_0_2_r[0], 3'b0} : 4'b0;
+    address_column3_0_2_w_d3_r <= address_column3_0_2_w;
+    address_halfword3_0_2_r <= {unused_address_offset3_0_d3_r[16:2] +
+            (unused_address_row3_0_2_r[14:0] | {7'b0, address_column3_0_2_w_d3_r}),
+                address_bank3_0_2_r};
+    address_subword3_0_2_d4_r <= address_subword3_0_2_r;
+    address_x3_0_3_r <= (address_scaled_u3_0_r[16:8] + {8'b0, address_scaled_u3_0_r[7]}) &
+            address_mask_x3_0_r;
+    address_y3_0_3_r <= (address_scaled_v3_0_r[16:8] + {8'b0, address_scaled_v3_0_r[7]}) &
+            address_mask_y3_0_r;
+    unused_address_row3_0_3_r <= {9'b0, address_block_y3_0_3_w[8:1]} << address_row_shift3_0_d2_r;
+    address_bank3_0_3_r <= {address_block_y3_0_3_w[0], address_block_x3_0_3_w[0]};
+    address_subword3_0_3_r <= format_r == 0 ? {address_y3_0_3_r[0], address_x3_0_3_r[0], 2'b0} :
+            format_r == 1 ? {address_x3_0_3_r[0], 3'b0} : 4'b0;
+    address_column3_0_3_w_d3_r <= address_column3_0_3_w;
+    address_halfword3_0_3_r <= {unused_address_offset3_0_d3_r[16:2] +
+            (unused_address_row3_0_3_r[14:0] | {7'b0, address_column3_0_3_w_d3_r}),
+                address_bank3_0_3_r};
+    address_subword3_0_3_d4_r <= address_subword3_0_3_r;
+    address_x3_0_4_r <= address_scaled_u3_0_r[16:8] & address_mask_x3_0_r;
+    address_y3_0_4_r <= address_scaled_v3_0_r[16:8] & address_mask_y3_0_r;
+    unused_address_row3_0_4_r <= {9'b0, address_block_y3_0_4_w[8:1]} << address_row_shift3_0_d2_r;
+    address_bank3_0_4_r <= {address_block_y3_0_4_w[0], address_block_x3_0_4_w[0]};
+    address_subword3_0_4_r <= format_r == 0 ? {address_y3_0_4_r[0], address_x3_0_4_r[0], 2'b0} :
+            format_r == 1 ? {address_x3_0_4_r[0], 3'b0} : 4'b0;
+    address_column3_0_4_w_d3_r <= address_column3_0_4_w;
+    address_halfword3_0_4_r <= {unused_address_offset3_0_d3_r[16:2] +
+            (unused_address_row3_0_4_r[14:0] | {7'b0, address_column3_0_4_w_d3_r}),
+                address_bank3_0_4_r};
+    address_subword3_0_4_d4_r <= address_subword3_0_4_r;
+    address_u3_r_d1_r <= address_u3_r;
+    address_scaled_u3_1_r <= unused_address_scaled_u3_1_wide_w[16:0];
+    address_v3_r_d1_r <= address_v3_r;
+    address_scaled_v3_1_r <= unused_address_scaled_v3_1_wide_w[16:0];
+    address_mask_x3_1_r <= mip_mask_x_w[address_next_level3_r];
+    address_mask_y3_1_r <= mip_mask_y_w[address_next_level3_r];
+    address_offset3_1_r <= mip_offset_w[address_next_level3_r];
+    address_row_shift3_1_r <= mip_row_shift_w[address_next_level3_r];
+    address_fraction3_1_r <= {address_scaled_v3_1_r[7:0] ^ 8'h80, address_scaled_u3_1_r[7:0] ^
+        8'h80};
+    address_x3_1_0_r <= (address_scaled_u3_1_r[16:8] - {8'b0, !address_scaled_u3_1_r[7]}) &
+            address_mask_x3_1_r;
+    address_y3_1_0_r <= (address_scaled_v3_1_r[16:8] - {8'b0, !address_scaled_v3_1_r[7]}) &
+            address_mask_y3_1_r;
+    address_row_shift3_1_d3_r <= address_row_shift3_1_r;
+    unused_address_row3_1_0_r <= {9'b0, address_block_y3_1_0_w[8:1]} << address_row_shift3_1_d3_r;
+    address_bank3_1_0_r <= {address_block_y3_1_0_w[0], address_block_x3_1_0_w[0]};
+    address_subword3_1_0_r <= format_r == 0 ? {address_y3_1_0_r[0], address_x3_1_0_r[0], 2'b0} :
+            format_r == 1 ? {address_x3_1_0_r[0], 3'b0} : 4'b0;
+    address_offset3_1_d3_r <= address_offset3_1_r;
+    unused_address_offset3_1_d4_r <= address_offset3_1_d3_r;
+    address_column3_1_0_w_d4_r <= address_column3_1_0_w;
+    address_halfword3_1_0_r <= {unused_address_offset3_1_d4_r[16:2] +
+            (unused_address_row3_1_0_r[14:0] | {7'b0, address_column3_1_0_w_d4_r}),
+                address_bank3_1_0_r};
+    address_subword3_1_0_d5_r <= address_subword3_1_0_r;
+    address_x3_1_1_r <= (address_scaled_u3_1_r[16:8] + {8'b0, address_scaled_u3_1_r[7]}) &
+            address_mask_x3_1_r;
+    address_y3_1_1_r <= (address_scaled_v3_1_r[16:8] - {8'b0, !address_scaled_v3_1_r[7]}) &
+            address_mask_y3_1_r;
+    unused_address_row3_1_1_r <= {9'b0, address_block_y3_1_1_w[8:1]} << address_row_shift3_1_d3_r;
+    address_bank3_1_1_r <= {address_block_y3_1_1_w[0], address_block_x3_1_1_w[0]};
+    address_subword3_1_1_r <= format_r == 0 ? {address_y3_1_1_r[0], address_x3_1_1_r[0], 2'b0} :
+            format_r == 1 ? {address_x3_1_1_r[0], 3'b0} : 4'b0;
+    address_column3_1_1_w_d4_r <= address_column3_1_1_w;
+    address_halfword3_1_1_r <= {unused_address_offset3_1_d4_r[16:2] +
+            (unused_address_row3_1_1_r[14:0] | {7'b0, address_column3_1_1_w_d4_r}),
+                address_bank3_1_1_r};
+    address_subword3_1_1_d5_r <= address_subword3_1_1_r;
+    address_x3_1_2_r <= (address_scaled_u3_1_r[16:8] - {8'b0, !address_scaled_u3_1_r[7]}) &
+            address_mask_x3_1_r;
+    address_y3_1_2_r <= (address_scaled_v3_1_r[16:8] + {8'b0, address_scaled_v3_1_r[7]}) &
+            address_mask_y3_1_r;
+    unused_address_row3_1_2_r <= {9'b0, address_block_y3_1_2_w[8:1]} << address_row_shift3_1_d3_r;
+    address_bank3_1_2_r <= {address_block_y3_1_2_w[0], address_block_x3_1_2_w[0]};
+    address_subword3_1_2_r <= format_r == 0 ? {address_y3_1_2_r[0], address_x3_1_2_r[0], 2'b0} :
+            format_r == 1 ? {address_x3_1_2_r[0], 3'b0} : 4'b0;
+    address_column3_1_2_w_d4_r <= address_column3_1_2_w;
+    address_halfword3_1_2_r <= {unused_address_offset3_1_d4_r[16:2] +
+            (unused_address_row3_1_2_r[14:0] | {7'b0, address_column3_1_2_w_d4_r}),
+                address_bank3_1_2_r};
+    address_subword3_1_2_d5_r <= address_subword3_1_2_r;
+    address_x3_1_3_r <= (address_scaled_u3_1_r[16:8] + {8'b0, address_scaled_u3_1_r[7]}) &
+            address_mask_x3_1_r;
+    address_y3_1_3_r <= (address_scaled_v3_1_r[16:8] + {8'b0, address_scaled_v3_1_r[7]}) &
+            address_mask_y3_1_r;
+    unused_address_row3_1_3_r <= {9'b0, address_block_y3_1_3_w[8:1]} << address_row_shift3_1_d3_r;
+    address_bank3_1_3_r <= {address_block_y3_1_3_w[0], address_block_x3_1_3_w[0]};
+    address_subword3_1_3_r <= format_r == 0 ? {address_y3_1_3_r[0], address_x3_1_3_r[0], 2'b0} :
+            format_r == 1 ? {address_x3_1_3_r[0], 3'b0} : 4'b0;
+    address_column3_1_3_w_d4_r <= address_column3_1_3_w;
+    address_halfword3_1_3_r <= {unused_address_offset3_1_d4_r[16:2] +
+            (unused_address_row3_1_3_r[14:0] | {7'b0, address_column3_1_3_w_d4_r}),
+                address_bank3_1_3_r};
+    address_subword3_1_3_d5_r <= address_subword3_1_3_r;
+    address_slot_0_r_d1_r <= address_slot_0_r;
+    address_slot_0_r_d2_r <= address_slot_0_r_d1_r;
+    address_slot_0_r_d3_r <= address_slot_0_r_d2_r;
+    address_slot_0_r_d4_r <= address_slot_0_r_d3_r;
+    address_slot_0_r_d5_r <= address_slot_0_r_d4_r;
+    address_slot_0_r_d6_r <= address_slot_0_r_d5_r;
+    address_record0_0_0_w_d5_r <= address_record0_0_0_w;
+    address_record0_0_1_w_d5_r <= address_record0_0_1_w;
+    address_record0_0_2_w_d5_r <= address_record0_0_2_w;
+    address_record0_0_3_w_d5_r <= address_record0_0_3_w;
+    address_record0_0_4_w_d5_r <= address_record0_0_4_w;
+    address_fraction0_0_d3_r <= address_fraction0_0_r;
+    address_fraction0_0_d4_r <= address_fraction0_0_d3_r;
+    address_fraction0_0_d5_r <= address_fraction0_0_d4_r;
+    address_fraction0_1_d4_r <= address_fraction0_1_r;
+    address_fraction0_1_d5_r <= address_fraction0_1_d4_r;
+    address_record1_0_0_w_d5_r <= address_record1_0_0_w;
+    address_record1_0_1_w_d5_r <= address_record1_0_1_w;
+    address_record1_0_2_w_d5_r <= address_record1_0_2_w;
+    address_record1_0_3_w_d5_r <= address_record1_0_3_w;
+    address_record1_0_4_w_d5_r <= address_record1_0_4_w;
+    address_fraction1_0_d3_r <= address_fraction1_0_r;
+    address_fraction1_0_d4_r <= address_fraction1_0_d3_r;
+    address_fraction1_0_d5_r <= address_fraction1_0_d4_r;
+    address_fraction1_1_d4_r <= address_fraction1_1_r;
+    address_fraction1_1_d5_r <= address_fraction1_1_d4_r;
+    address_record2_0_0_w_d5_r <= address_record2_0_0_w;
+    address_record2_0_1_w_d5_r <= address_record2_0_1_w;
+    address_record2_0_2_w_d5_r <= address_record2_0_2_w;
+    address_record2_0_3_w_d5_r <= address_record2_0_3_w;
+    address_record2_0_4_w_d5_r <= address_record2_0_4_w;
+    address_fraction2_0_d3_r <= address_fraction2_0_r;
+    address_fraction2_0_d4_r <= address_fraction2_0_d3_r;
+    address_fraction2_0_d5_r <= address_fraction2_0_d4_r;
+    address_fraction2_1_d4_r <= address_fraction2_1_r;
+    address_fraction2_1_d5_r <= address_fraction2_1_d4_r;
+    address_record3_0_0_w_d5_r <= address_record3_0_0_w;
+    address_record3_0_1_w_d5_r <= address_record3_0_1_w;
+    address_record3_0_2_w_d5_r <= address_record3_0_2_w;
+    address_record3_0_3_w_d5_r <= address_record3_0_3_w;
+    address_record3_0_4_w_d5_r <= address_record3_0_4_w;
+    address_fraction3_0_d3_r <= address_fraction3_0_r;
+    address_fraction3_0_d4_r <= address_fraction3_0_d3_r;
+    address_fraction3_0_d5_r <= address_fraction3_0_d4_r;
+    address_fraction3_1_d4_r <= address_fraction3_1_r;
+    address_fraction3_1_d5_r <= address_fraction3_1_d4_r;
+    end
+    assign unused_address_scaled_u0_0_wide_w = $signed(address_u0_r) >>> address_level0_r;
+    assign unused_address_scaled_v0_0_wide_w = $signed(address_v0_r) >>> address_level0_r;
+    assign unused_address_scaled_u0_1_wide_w = $signed(address_u0_r_d1_r) >>> address_next_level0_r;
+    assign unused_address_scaled_v0_1_wide_w = $signed(address_v0_r_d1_r) >>> address_next_level0_r;
+    assign unused_address_scaled_u1_0_wide_w = $signed(address_u1_r) >>> address_level1_r;
+    assign unused_address_scaled_v1_0_wide_w = $signed(address_v1_r) >>> address_level1_r;
+    assign unused_address_scaled_u1_1_wide_w = $signed(address_u1_r_d1_r) >>> address_next_level1_r;
+    assign unused_address_scaled_v1_1_wide_w = $signed(address_v1_r_d1_r) >>> address_next_level1_r;
+    assign unused_address_scaled_u2_0_wide_w = $signed(address_u2_r) >>> address_level2_r;
+    assign unused_address_scaled_v2_0_wide_w = $signed(address_v2_r) >>> address_level2_r;
+    assign unused_address_scaled_u2_1_wide_w = $signed(address_u2_r_d1_r) >>> address_next_level2_r;
+    assign unused_address_scaled_v2_1_wide_w = $signed(address_v2_r_d1_r) >>> address_next_level2_r;
+    assign unused_address_scaled_u3_0_wide_w = $signed(address_u3_r) >>> address_level3_r;
+    assign unused_address_scaled_v3_0_wide_w = $signed(address_v3_r) >>> address_level3_r;
+    assign unused_address_scaled_u3_1_wide_w = $signed(address_u3_r_d1_r) >>> address_next_level3_r;
+    assign unused_address_scaled_v3_1_wide_w = $signed(address_v3_r_d1_r) >>> address_next_level3_r;
 endmodule

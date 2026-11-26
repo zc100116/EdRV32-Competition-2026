@@ -13,9 +13,9 @@ module tb;
     wire source_ready_w;
     reg sink_ready_r = 0;
     wire sink_valid_w;
-    reg [1854:0] stimulus_r [0:32767];
+    reg [986:0] stimulus_r [0:32767];
     reg [848:0] expected_r [0:262143];
-    reg [1854:0] source_r = 0;
+    reg [986:0] source_r = 0;
     wire [848:0] actual_w;
     integer input_total_r;
     integer output_total_r;
@@ -36,8 +36,8 @@ module tb;
     wire [15:0] fragment_x_w;
     wire [15:0] fragment_y_w;
     wire [3:0] fragment_mask_w;
-    wire [0:0] fragment_quad_w;
-    wire [1735:0] fragment_plane_w;
+    wire [0:0] unused_fragment_quad_w;
+    wire [867:0] fragment_plane_w;
     wire [69:0] fragment_h_w;
     wire [3:0] fragment_palette_w;
     wire [7:0] fragment_alpha_w;
@@ -52,7 +52,7 @@ module tb;
     wire [95:0] sample_color_w;
     wire [3:0] sample_palette_w;
     wire [7:0] sample_alpha_w;
-    assign {fragment_alpha_w, fragment_palette_w, fragment_h_w, fragment_plane_w, fragment_quad_w, fragment_mask_w, fragment_y_w, fragment_x_w} = source_r;
+    assign {fragment_alpha_w, fragment_palette_w, fragment_h_w, fragment_plane_w, unused_fragment_quad_w, fragment_mask_w, fragment_y_w, fragment_x_w} = source_r;
     assign actual_w = {sample_alpha_w, sample_palette_w, sample_color_w, sample_depth_w, sample_span_w, sample_v_w, sample_u_w, sample_quad_w, sample_mask_w, sample_y_w, sample_x_w};
     edrv32_gpu_perspective u_dut (
         .clk_i(clk_i),
@@ -64,8 +64,7 @@ module tb;
         .fragment_ready_o(source_ready_w),
         .fragment_x_i(fragment_x_w),
         .fragment_y_i(fragment_y_w),
-        .fragment_mask_i(fragment_mask_w),
-        .fragment_quad_i(fragment_quad_w),
+        .fragment_mask_i(fragment_mask_w[1:0]),
         .fragment_plane_i(fragment_plane_w),
         .fragment_h_i(fragment_h_w),
         .fragment_palette_i(fragment_palette_w),
@@ -120,9 +119,9 @@ module tb;
         end
         if (received_r != output_total_r) $fatal(1, "count expected=%0d actual=%0d",
             output_total_r, received_r);
-        if (perf_r != 0 && last_r-first_r+1 != output_total_r)
+        if (perf_r != 0 && last_r-first_r+1 != output_total_r*2-2)
             $fatal(1, "quad group throughput mismatch");
-        if (stall_r == 0 && last_r-first_r+1 != output_total_r)
+        if (stall_r == 0 && last_r-first_r+1 != output_total_r*2-2)
             $fatal(1, "perspective throughput mismatch");
         $display("PASS inputs=%0d groups=%0d first=%0d last=%0d cycles=%0d streak=%0d",
             sent_r, received_r, first_r, last_r, cycle_r, max_streak_r);

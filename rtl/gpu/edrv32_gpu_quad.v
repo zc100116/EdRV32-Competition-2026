@@ -30,16 +30,19 @@ module edrv32_gpu_quad (
     input wire [127:0] quad_record_data_i,
 
     // Ordered fragment stream.,
-    output wire fragment_valid_o,
-    input wire fragment_ready_i,
-    output wire [15:0] fragment_x_o,
-    output wire [15:0] fragment_y_o,
-    output wire [3:0] fragment_mask_o,
-    output wire fragment_quad_o,
-    output wire [1735:0] fragment_plane_o,
-    output wire [69:0] fragment_h_o,
-    output wire [3:0] fragment_palette_o,
-    output wire [7:0] fragment_alpha_o,
+    output wire sample_valid_o,
+    input wire sample_ready_i,
+    output wire [15:0] sample_x_o,
+    output wire [15:0] sample_y_o,
+    output wire [3:0] sample_mask_o,
+    output wire sample_quad_o,
+    output wire [127:0] sample_u_o,
+    output wire [127:0] sample_v_o,
+    output wire [383:0] sample_span_o,
+    output wire [63:0] sample_depth_o,
+    output wire [95:0] sample_color_o,
+    output wire [3:0] sample_palette_o,
+    output wire [7:0] sample_alpha_o,
 
     // Command lifecycle.,
     input wire finish_i,
@@ -76,6 +79,10 @@ module edrv32_gpu_quad (
     assign scissor_y0_w = {{2{render_state_target_i[95]}}, render_state_target_i[80 +: 16]};
     assign scissor_x1_w = {{2{render_state_target_i[111]}}, render_state_target_i[96 +: 16]};
     assign scissor_y1_w = {{2{render_state_target_i[127]}}, render_state_target_i[112 +: 16]};
+    reg [1:0] input_last_r;
+    reg [1:0] input_singleton_r;
+    wire signed [17:0] unused_prepare_last_x_w;
+    wire signed [17:0] prepare_last_y_w;
     reg cfg_pending_r;
     reg cfg_valid_r;
     reg signed [17:0] target_x0_r;
@@ -138,23 +145,31 @@ module edrv32_gpu_quad (
     wire output_pop_w;
     wire scan_w;
     wire last_w;
+    wire x_end_w;
+    reg last_r;
+    reg singleton_x_r;
+    reg signed [15:0] penultimate_x_r;
+    reg signed [17:0] penultimate_y_r;
+    wire signed [17:0] unused_end_x_minus_one_w;
+    wire signed [17:0] end_y_minus_one_w;
     reg [127:0] input_data_r [0:1];
     reg [16:0] input_x_r [0:1];
     reg [16:0] input_y_r [0:1];
     reg [15:0] output_x_r [0:1];
-    assign fragment_x_o = output_x_r[output_read_r];
+    assign sample_x_o = output_x_r[output_read_r];
     reg [15:0] output_y_r [0:1];
-    assign fragment_y_o = output_y_r[output_read_r];
+    assign sample_y_o = output_y_r[output_read_r];
     reg [3:0] output_mask_r [0:1];
-    assign fragment_mask_o = output_mask_r[output_read_r];
-    reg [0:0] output_quad_r [0:1];
-    assign fragment_quad_o = output_quad_r[output_read_r];
-    reg [69:0] output_h_r [0:1];
-    assign fragment_h_o = output_h_r[output_read_r];
+    assign sample_mask_o = output_mask_r[output_read_r];
+    assign sample_quad_o = 1'b1;
+    assign sample_span_o = 384'b0;
+    assign sample_color_o = {12{8'hff}};
+    reg [15:0] output_depth_r [0:1];
+    assign sample_depth_o = {4{output_depth_r[output_read_r]}};
     reg [3:0] output_unused_palette_r [0:1];
-    assign fragment_palette_o = output_unused_palette_r[output_read_r];
+    assign sample_palette_o = output_unused_palette_r[output_read_r];
     reg [7:0] output_alpha_r [0:1];
-    assign fragment_alpha_o = output_alpha_r[output_read_r];
+    assign sample_alpha_o = output_alpha_r[output_read_r];
     reg [2:0] valid_r;
     reg [1:0] prepared_r;
     reg [1:0] preparing_r;
@@ -208,12 +223,25 @@ module edrv32_gpu_quad (
     wire [3:0] pipe_mask_w [0:2];
     wire advance_w;
     assign advance_w = output_count_r < 2;
-    assign fragment_valid_o = (output_count_r != 0) && !stop_i;
-    assign output_pop_w = fragment_valid_o && fragment_ready_i;
+    assign sample_valid_o = (output_count_r != 0) && !stop_i;
+    assign output_pop_w = sample_valid_o && sample_ready_i;
     assign scan_w = active_r && advance_w && !stop_i;
-    assign last_w = x_r[17:2] == unused_last_x_r[17:2] && y_r == last_y_r;
+    assign unused_end_x_minus_one_w = end_x_w - 18'sd1;
+    assign end_y_minus_one_w = end_y_w - 18'sd1;
+    assign x_end_w = x_r[17:2] == unused_last_x_r[17:2];
+    assign last_w = last_r;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) last_r <= 0;
+        else if (stop_i) last_r <= 0;
+        else if (input_pop_w) last_r <= input_last_r[input_read_r];
+        else if (scan_w) last_r <=
+            (!x_end_w && $signed(x_r[17:2]) == penultimate_x_r && y_r == last_y_r) ||
+            (x_end_w && singleton_x_r && y_r == penultimate_y_r);
+    end
+    assign unused_prepare_last_x_w = prepare_end_x_1_r - 18'sd1;
+    assign prepare_last_y_w = prepare_end_y_1_r - 18'sd1;
     assign input_pop_w = prepared_r[input_read_r] &&
-        (!active_r || (scan_w && last_w)) && !stop_i;
+        (!active_r || (advance_w && last_w)) && !stop_i;
     assign output_push_w = valid_r[2] && pipe_mask_w[2] != 0 && advance_w && !stop_i;
     assign object_quad_ready_o = input_count_r < 2 && cfg_valid_r;
     assign quad_record_ready_o = input_count_r < 2 && cfg_valid_r;
@@ -321,6 +349,11 @@ module edrv32_gpu_quad (
         prepare_height_1_r <= prepare_height_0_r;
         if (preparing_r[1]) begin
             input_data_r[prepare_index_r[1]] <= prepare_data_1_r;
+            input_singleton_r[prepare_index_r[1]] <=
+                prepare_begin_x_1_r[17:2] == unused_prepare_last_x_w[17:2];
+            input_last_r[prepare_index_r[1]] <=
+                prepare_begin_x_1_r[17:2] == unused_prepare_last_x_w[17:2] &&
+                prepare_begin_y_1_r == prepare_last_y_w;
             input_x_r[prepare_index_r[1]] <= unused_prepare_x_1_r[16:0];
             input_y_r[prepare_index_r[1]] <= unused_prepare_y_1_r[16:0];
             input_begin_x_r[prepare_index_r[1]] <= prepare_begin_x_1_r;
@@ -355,7 +388,10 @@ module edrv32_gpu_quad (
             y_r <= begin_y_w;
             x1_r <= end_x_w;
             unused_last_x_r <= end_x_w - 18'sd1;
-            last_y_r <= end_y_w - 18'sd1;
+            last_y_r <= end_y_minus_one_w;
+            singleton_x_r <= input_singleton_r[input_read_r];
+            penultimate_x_r <= $signed(unused_end_x_minus_one_w[17:2]) - 16'sd1;
+            penultimate_y_r <= end_y_w - 18'sd2;
             width_r <= input_width_r[input_read_r];
             height_r <= input_height_r[input_read_r];
             position_x_r <= {input_x_r[input_read_r][16], input_x_r[input_read_r]};
@@ -366,9 +402,7 @@ module edrv32_gpu_quad (
             output_x_r[output_write_r] <= pipe_x_2_r;
             output_y_r[output_write_r] <= pipe_y_2_r;
             output_mask_r[output_write_r] <= pipe_mask_w[2];
-            output_quad_r[output_write_r] <= 1'b1;
-            output_h_r[output_write_r] <= {-10'sd8, -10'sd8, -10'sd8,
-                10'sd0, 10'sd0, 10'sd0, -10'sd16};
+            output_depth_r[output_write_r] <= unused_pipe_record_2_r[80 +: 16];
             output_unused_palette_r[output_write_r] <= unused_pipe_record_2_r[24 +: 4];
             output_alpha_r[output_write_r] <= unused_pipe_record_2_r[50 +: 8];
         end
@@ -392,42 +426,16 @@ module edrv32_gpu_quad (
             assign pipe_mask_w[1][lane] = mask_r[1];
             assign pipe_mask_w[2][lane] = mask_r[2];
             assign pixel_x_w = {x_r[17:2], lane[1:0]};
-            // Output stage: seven independent two-slot 70-bit field queues per lane.
-            reg [61:0] plane_0_r [0:1];
-            assign fragment_plane_o[lane*434+0 +: 62] = plane_0_r[output_read_r];
+            // Two output slots store the direct Q8 coordinates for this lane.
+            reg [31:0] output_u_r [0:1];
+            reg [31:0] output_v_r [0:1];
+            assign sample_u_o[lane*32 +: 32] = output_u_r[output_read_r];
+            assign sample_v_o[lane*32 +: 32] = output_v_r[output_read_r];
             always @(posedge clk_i) begin
-                if (output_push_w)
-                    plane_0_r[output_write_r] <= {38'b0, unused_pipe_record_2_r[80 +: 16], 8'b0};
-            end
-            reg [65:0] plane_1_r [0:1];
-            assign fragment_plane_o[lane*434+62 +: 66] = plane_1_r[output_read_r];
-            always @(posedge clk_i) begin
-                if (output_push_w) plane_1_r[output_write_r] <= 66'd67108864;
-            end
-            reg [65:0] plane_2_r [0:1];
-            assign fragment_plane_o[lane*434+128 +: 66] = plane_2_r[output_read_r];
-            always @(posedge clk_i) begin
-                if (output_push_w) plane_2_r[output_write_r] <= {{13{u_r[18]}}, u_r, 34'b0};
-            end
-            reg [65:0] plane_3_r [0:1];
-            assign fragment_plane_o[lane*434+194 +: 66] = plane_3_r[output_read_r];
-            always @(posedge clk_i) begin
-                if (output_push_w) plane_3_r[output_write_r] <= {{13{v_r[18]}}, v_r, 34'b0};
-            end
-            reg [57:0] plane_4_r [0:1];
-            assign fragment_plane_o[lane*434+260 +: 58] = plane_4_r[output_read_r];
-            always @(posedge clk_i) begin
-                if (output_push_w) plane_4_r[output_write_r] <= 58'd1044480;
-            end
-            reg [57:0] plane_5_r [0:1];
-            assign fragment_plane_o[lane*434+318 +: 58] = plane_5_r[output_read_r];
-            always @(posedge clk_i) begin
-                if (output_push_w) plane_5_r[output_write_r] <= 58'd1044480;
-            end
-            reg [57:0] plane_6_r [0:1];
-            assign fragment_plane_o[lane*434+376 +: 58] = plane_6_r[output_read_r];
-            always @(posedge clk_i) begin
-                if (output_push_w) plane_6_r[output_write_r] <= 58'd1044480;
+                if (output_push_w) begin
+                    output_u_r[output_write_r] <= {{5{u_r[18]}}, u_r, 8'b0};
+                    output_v_r[output_write_r] <= {{5{v_r[18]}}, v_r, 8'b0};
+                end
             end
             always @(posedge clk_i) begin
                 if (advance_w) begin

@@ -77,16 +77,6 @@ module edrv32_gpu (
     wire enable_w;
     wire [31:0] err_code_w;
     wire error_w;
-    wire [7:0] fragment_alpha_w;
-    wire [69:0] fragment_h_w;
-    wire [3:0] fragment_mask_w;
-    wire [3:0] fragment_palette_w;
-    wire [1735:0] fragment_plane_w;
-    wire fragment_quad_w;
-    wire fragment_ready_w;
-    wire fragment_valid_w;
-    wire [15:0] fragment_x_w;
-    wire [15:0] fragment_y_w;
     wire [255:0] free_write_data_data_w;
     wire [31:0] free_write_data_keep_w;
     wire free_write_data_last_w;
@@ -238,16 +228,32 @@ module edrv32_gpu (
     wire quad_draw_ready_w;
     wire quad_draw_valid_w;
     wire quad_finish_w;
-    wire [7:0] quad_fragment_alpha_w;
-    wire [69:0] quad_fragment_h_w;
-    wire [3:0] quad_fragment_mask_w;
-    wire [3:0] quad_fragment_palette_w;
-    wire [1735:0] quad_fragment_plane_w;
-    wire quad_fragment_quad_w;
-    wire quad_fragment_ready_w;
-    wire quad_fragment_valid_w;
-    wire [15:0] quad_fragment_x_w;
-    wire [15:0] quad_fragment_y_w;
+    wire [7:0] quad_sample_alpha_w;
+    wire [95:0] quad_sample_color_w;
+    wire [63:0] quad_sample_depth_w;
+    wire [3:0] quad_sample_mask_w;
+    wire [3:0] quad_sample_palette_w;
+    wire quad_sample_quad_w;
+    wire [383:0] quad_sample_span_w;
+    wire [127:0] quad_sample_u_w;
+    wire [127:0] quad_sample_v_w;
+    wire [15:0] quad_sample_x_w;
+    wire [15:0] quad_sample_y_w;
+    wire quad_sample_ready_w;
+    wire quad_sample_valid_w;
+    wire [7:0] perspective_sample_alpha_w;
+    wire [95:0] perspective_sample_color_w;
+    wire [63:0] perspective_sample_depth_w;
+    wire [3:0] perspective_sample_mask_w;
+    wire [3:0] perspective_sample_palette_w;
+    wire perspective_sample_quad_w;
+    wire [383:0] perspective_sample_span_w;
+    wire [127:0] perspective_sample_u_w;
+    wire [127:0] perspective_sample_v_w;
+    wire [15:0] perspective_sample_x_w;
+    wire [15:0] perspective_sample_y_w;
+    wire perspective_sample_ready_w;
+    wire perspective_sample_valid_w;
     wire [255:0] quad_read_data_data_w;
     wire [31:0] quad_read_data_keep_w;
     wire quad_read_data_last_w;
@@ -273,10 +279,9 @@ module edrv32_gpu (
     wire raster_finish_w;
     wire [7:0] raster_fragment_alpha_w;
     wire [69:0] raster_fragment_h_w;
-    wire [3:0] raster_fragment_mask_w;
+    wire [1:0] raster_fragment_mask_w;
     wire [3:0] raster_fragment_palette_w;
-    wire [1735:0] raster_fragment_plane_w;
-    wire raster_fragment_quad_w;
+    wire [867:0] raster_fragment_plane_w;
     wire raster_fragment_ready_w;
     wire raster_fragment_valid_w;
     wire [15:0] raster_fragment_x_w;
@@ -423,7 +428,7 @@ module edrv32_gpu (
     wire write_dma_error_w;
     wire write_dma_idle_w;
     reg [23:0] object_record_idx_r;
-    reg fragment_quad_select_r;
+    reg sample_quad_select_r;
 
     // One regional reset copy per independently placed unit.
     wire regs_rst_n_w;
@@ -576,51 +581,40 @@ module edrv32_gpu (
     // The command remains the sole owner of the scan-source selection (4.12).
     always @(posedge clk_gpu_i or negedge command_rst_n_w) begin
         if (!command_rst_n_w) begin
-            fragment_quad_select_r <= 1'b0;
+            sample_quad_select_r <= 1'b0;
         end else if (raster_draw_valid_w && raster_draw_ready_w) begin
-            fragment_quad_select_r <= 1'b0;
+            sample_quad_select_r <= 1'b0;
         end else if (quad_draw_valid_w && quad_draw_ready_w) begin
-            fragment_quad_select_r <= 1'b1;
+            sample_quad_select_r <= 1'b1;
         end
     end
 
-    assign raster_fragment_ready_w = !fragment_quad_select_r && fragment_ready_w;
-    assign quad_fragment_ready_w = fragment_quad_select_r && fragment_ready_w;
-    assign fragment_valid_w = fragment_quad_select_r
-        ? quad_fragment_valid_w : raster_fragment_valid_w;
-    assign fragment_x_w = fragment_quad_select_r
-        ? quad_fragment_x_w : raster_fragment_x_w;
-    assign fragment_y_w = fragment_quad_select_r
-        ? quad_fragment_y_w : raster_fragment_y_w;
-    assign fragment_mask_w = fragment_quad_select_r
-        ? quad_fragment_mask_w : raster_fragment_mask_w;
-    assign fragment_quad_w = fragment_quad_select_r
-        ? quad_fragment_quad_w : raster_fragment_quad_w;
-    // Select each fixed-width field independently (CLAUDE.md 5.5).
-    genvar fragment_lane;
-    genvar fragment_attribute;
-    generate
-        for (fragment_lane = 0; fragment_lane < 4;
-            fragment_lane = fragment_lane + 1) begin : g_fragment_lane
-            localparam LANE_OFFSET = fragment_lane*434;
-            for (fragment_attribute = 0; fragment_attribute < 7;
-                fragment_attribute = fragment_attribute + 1) begin : g_fragment_attribute
-                localparam WIDTH = fragment_attribute == 0 ? 62 :
-                    fragment_attribute < 4 ? 66 : 58;
-                localparam OFFSET = fragment_attribute == 0 ? 0 : fragment_attribute < 4 ?
-                    62 + (fragment_attribute-1)*66 : 260 + (fragment_attribute-4)*58;
-                assign fragment_plane_w[LANE_OFFSET+OFFSET +: WIDTH] = fragment_quad_select_r
-                    ? quad_fragment_plane_w[LANE_OFFSET+OFFSET +: WIDTH]
-                    : raster_fragment_plane_w[LANE_OFFSET+OFFSET +: WIDTH];
-            end
-        end
-    endgenerate
-    assign fragment_h_w = fragment_quad_select_r
-        ? quad_fragment_h_w : raster_fragment_h_w;
-    assign fragment_palette_w = fragment_quad_select_r
-        ? quad_fragment_palette_w : raster_fragment_palette_w;
-    assign fragment_alpha_w = fragment_quad_select_r
-        ? quad_fragment_alpha_w : raster_fragment_alpha_w;
+    assign perspective_sample_ready_w = !sample_quad_select_r && sample_ready_w;
+    assign quad_sample_ready_w = sample_quad_select_r && sample_ready_w;
+    assign sample_alpha_w = sample_quad_select_r
+        ? quad_sample_alpha_w : perspective_sample_alpha_w;
+    assign sample_color_w = sample_quad_select_r
+        ? quad_sample_color_w : perspective_sample_color_w;
+    assign sample_depth_w = sample_quad_select_r
+        ? quad_sample_depth_w : perspective_sample_depth_w;
+    assign sample_mask_w = sample_quad_select_r
+        ? quad_sample_mask_w : perspective_sample_mask_w;
+    assign sample_palette_w = sample_quad_select_r
+        ? quad_sample_palette_w : perspective_sample_palette_w;
+    assign sample_quad_w = sample_quad_select_r
+        ? quad_sample_quad_w : perspective_sample_quad_w;
+    assign sample_span_w = sample_quad_select_r
+        ? quad_sample_span_w : perspective_sample_span_w;
+    assign sample_u_w = sample_quad_select_r
+        ? quad_sample_u_w : perspective_sample_u_w;
+    assign sample_v_w = sample_quad_select_r
+        ? quad_sample_v_w : perspective_sample_v_w;
+    assign sample_x_w = sample_quad_select_r
+        ? quad_sample_x_w : perspective_sample_x_w;
+    assign sample_y_w = sample_quad_select_r
+        ? quad_sample_y_w : perspective_sample_y_w;
+    assign sample_valid_w = sample_quad_select_r
+        ? quad_sample_valid_w : perspective_sample_valid_w;
 
     // regs interface.
     edrv32_gpu_regs u_regs (
@@ -1475,7 +1469,6 @@ module edrv32_gpu (
         .fragment_x_o(raster_fragment_x_w),
         .fragment_y_o(raster_fragment_y_w),
         .fragment_mask_o(raster_fragment_mask_w),
-        .fragment_quad_o(raster_fragment_quad_w),
         .fragment_plane_o(raster_fragment_plane_w),
         .fragment_h_o(raster_fragment_h_w),
         .fragment_palette_o(raster_fragment_palette_w),
@@ -1515,16 +1508,19 @@ module edrv32_gpu (
         .quad_record_data_i(quad_record_data_w),
 
         // Ordered fragment stream.
-        .fragment_valid_o(quad_fragment_valid_w),
-        .fragment_ready_i(quad_fragment_ready_w),
-        .fragment_x_o(quad_fragment_x_w),
-        .fragment_y_o(quad_fragment_y_w),
-        .fragment_mask_o(quad_fragment_mask_w),
-        .fragment_quad_o(quad_fragment_quad_w),
-        .fragment_plane_o(quad_fragment_plane_w),
-        .fragment_h_o(quad_fragment_h_w),
-        .fragment_palette_o(quad_fragment_palette_w),
-        .fragment_alpha_o(quad_fragment_alpha_w),
+        .sample_valid_o(quad_sample_valid_w),
+        .sample_ready_i(quad_sample_ready_w),
+        .sample_x_o(quad_sample_x_w),
+        .sample_y_o(quad_sample_y_w),
+        .sample_mask_o(quad_sample_mask_w),
+        .sample_quad_o(quad_sample_quad_w),
+        .sample_u_o(quad_sample_u_w),
+        .sample_v_o(quad_sample_v_w),
+        .sample_span_o(quad_sample_span_w),
+        .sample_depth_o(quad_sample_depth_w),
+        .sample_color_o(quad_sample_color_w),
+        .sample_palette_o(quad_sample_palette_w),
+        .sample_alpha_o(quad_sample_alpha_w),
 
         // Command lifecycle.
         .finish_i(quad_finish_w),
@@ -1540,31 +1536,30 @@ module edrv32_gpu (
         .rst_n_i(perspective_rst_n_w),
 
         // Input fragment stream.
-        .fragment_valid_i(fragment_valid_w),
-        .fragment_ready_o(fragment_ready_w),
-        .fragment_x_i(fragment_x_w),
-        .fragment_y_i(fragment_y_w),
-        .fragment_mask_i(fragment_mask_w),
-        .fragment_quad_i(fragment_quad_w),
-        .fragment_plane_i(fragment_plane_w),
-        .fragment_h_i(fragment_h_w),
-        .fragment_palette_i(fragment_palette_w),
-        .fragment_alpha_i(fragment_alpha_w),
+        .fragment_valid_i(raster_fragment_valid_w),
+        .fragment_ready_o(raster_fragment_ready_w),
+        .fragment_x_i(raster_fragment_x_w),
+        .fragment_y_i(raster_fragment_y_w),
+        .fragment_mask_i(raster_fragment_mask_w),
+        .fragment_plane_i(raster_fragment_plane_w),
+        .fragment_h_i(raster_fragment_h_w),
+        .fragment_palette_i(raster_fragment_palette_w),
+        .fragment_alpha_i(raster_fragment_alpha_w),
 
         // Output sample stream.
-        .sample_valid_o(sample_valid_w),
-        .sample_ready_i(sample_ready_w),
-        .sample_x_o(sample_x_w),
-        .sample_y_o(sample_y_w),
-        .sample_mask_o(sample_mask_w),
-        .sample_quad_o(sample_quad_w),
-        .sample_u_o(sample_u_w),
-        .sample_v_o(sample_v_w),
-        .sample_span_o(sample_span_w),
-        .sample_depth_o(sample_depth_w),
-        .sample_color_o(sample_color_w),
-        .sample_palette_o(sample_palette_w),
-        .sample_alpha_o(sample_alpha_w),
+        .sample_valid_o(perspective_sample_valid_w),
+        .sample_ready_i(perspective_sample_ready_w),
+        .sample_x_o(perspective_sample_x_w),
+        .sample_y_o(perspective_sample_y_w),
+        .sample_mask_o(perspective_sample_mask_w),
+        .sample_quad_o(perspective_sample_quad_w),
+        .sample_u_o(perspective_sample_u_w),
+        .sample_v_o(perspective_sample_v_w),
+        .sample_span_o(perspective_sample_span_w),
+        .sample_depth_o(perspective_sample_depth_w),
+        .sample_color_o(perspective_sample_color_w),
+        .sample_palette_o(perspective_sample_palette_w),
+        .sample_alpha_o(perspective_sample_alpha_w),
 
         // Command lifecycle.
         .finish_i(perspective_finish_w),
