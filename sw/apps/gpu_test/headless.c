@@ -28,7 +28,8 @@ void pc_frontend_audio(const int16_t *samples, uint32_t frames)
 static _Noreturn void usage(void)
 {
     fputs("gpu_test --scene 0|1|2 --mode 0|1|2 --level 0..6 --filter 0|1|2 "
-          "--frames N --out existing-dir [--sequence 0|1] [--input script]\n", stderr);
+          "--frames N --out existing-dir [--sequence 0|1] [--input script] "
+          "[--tick N] [--weapon 0|1|2] [--shot boss|explosion|ring|hit|drone]\n", stderr);
     exit(1);
 }
 int main(int argc, char **argv)
@@ -36,12 +37,15 @@ int main(int argc, char **argv)
     unsigned scene = 1, mode = 0, level = 0, filter = 2, frames = 3, sequence = 0;
     const char *out = NULL;
     const char *input = NULL;
+    const char *shot = NULL;
+    unsigned tick = 0, weapon = 0;
     for (int i = 1; i < argc; ++i) {
         if (i+1 == argc) usage();
         const char *key = argv[i++];
         const char *value = argv[i];
         if (!strcmp(key, "--out")) out = value;
         else if (!strcmp(key, "--input")) input = value;
+        else if (!strcmp(key, "--shot")) shot = value;
         else {
             char *end;
             unsigned n = (unsigned)strtoul(value, &end, 10);
@@ -52,10 +56,22 @@ int main(int argc, char **argv)
             else if (!strcmp(key, "--filter")) filter = n;
             else if (!strcmp(key, "--frames")) frames = n;
             else if (!strcmp(key, "--sequence")) sequence = n;
+            else if (!strcmp(key, "--tick")) tick = n;
+            else if (!strcmp(key, "--weapon")) weapon = n;
             else usage();
         }
     }
-    if (scene > 2 || mode > 2 || level > 6 || filter > 2 || !frames || !out) usage();
+    if (scene > 2 || mode > 2 || level > 6 || filter > 2 || weapon > 2 || !frames || !out)
+        usage();
+    unsigned capture = 0;
+    if (shot) {
+        if (!strcmp(shot, "boss") && scene == 1) capture = 1;
+        else if (!strcmp(shot, "explosion") && scene == 1) capture = 2;
+        else if (!strcmp(shot, "ring") && scene == 2) capture = 3;
+        else if (!strcmp(shot, "hit") && scene == 2) capture = 4;
+        else if (!strcmp(shot, "drone") && scene == 2) capture = 5;
+        else usage();
+    }
     FILE *script = NULL;
     unsigned next_frame = 0;
     unsigned next_keys = 0;
@@ -67,6 +83,9 @@ int main(int argc, char **argv)
     }
     test_init();
     test_select(scene, mode, level, filter);
+    test.weapon = weapon;
+    test.tick = tick;
+    if (scene == 1) test2d_init();
     puts("frame,objects,triangles,commands,passed_pixels,cpu_us,gpu_us,fps10,texture_bytes,"
          "game,mode,level,filter,cpu,aa,score,health,weapon,checker");
     for (frame = 1; frame <= frames; ++frame) {
@@ -77,6 +96,12 @@ int main(int argc, char **argv)
         if (script && event != EOF && event != 2) {
             fputs("Malformed headless input event\n", stderr);
             return 1;
+        }
+        /* Named shots trigger the same scene effects used during normal play.
+         * Frame 20 gives the screenshot six ticks of visible effect development. */
+        if (frame == 20 && capture) {
+            if (scene == 1) test2d_capture(capture);
+            else test3d_capture(capture);
         }
         test_frame();
         plat_wait_vsync();

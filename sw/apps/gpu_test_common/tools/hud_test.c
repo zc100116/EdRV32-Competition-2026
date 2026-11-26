@@ -13,7 +13,7 @@ static void text_pixels(int x, int y, const char *text, uint16_t color)
         unsigned glyph = (unsigned char)*text - 32;
         for (unsigned row = 0; row < 16; ++row)
             for (unsigned col = 0; col < 8; ++col) {
-                uint16_t expected = font8x16[glyph][row] & (128u >> col) ? color : 0x0865;
+                uint16_t expected = font8x16[glyph][row] & (128u >> col) ? color : 0x1085;
                 uint16_t actual = surface[(y + row) * 640 + x + col];
                 if (actual != expected) {
                     fprintf(stderr, "HUD '%c' (%u,%u): expected %04x, actual %04x\n",
@@ -54,7 +54,9 @@ int main(void)
                             return 1;
                         }
                     }
-                    text_pixels(8, 340, "NEXT/PREV MOVE  ENTER: CONTROLS  ESC: MENU", 0xffff);
+                    char score[16];
+                    snprintf(score, sizeof(score), "%07u", test.score);
+                    text_pixels(50, 26, score, 0xffff);
                     if (test.quads_count > TEST_QUAD_MAX ||
                         test.triangles > TEST_TRI_MAX*3 || test.draws_count > 128) {
                         fprintf(stderr, "Scene list exceeds allocated buffers\n");
@@ -62,7 +64,7 @@ int main(void)
                     }
                     if (scene == 2 && mode == 2) {
                         static const char *filters[] = {"NEAREST", "BILINEAR", "TRILINEAR"};
-                        text_pixels(444, 56, filters[filter], 0xffff);
+                        text_pixels(444, 12, filters[filter], 0xffff);
                     }
                 }
             }

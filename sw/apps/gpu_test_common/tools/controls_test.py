@@ -3,6 +3,7 @@
 import csv
 import pathlib
 import subprocess
+from art import png
 
 root = pathlib.Path(__file__).resolve().parents[4]
 out = root / 'build/gpu_test/controls'
@@ -49,3 +50,15 @@ script.write_text('1 128\n2 0\n3 8\n4 0\n5 16\n6 0\n')
 row=run('--scene','1','--frames','6','--input',str(script))[-1]
 assert row['game']=='2',row
 print('PASS Esc -> boot menu -> 3D selection')
+# Full-screen nebula triangles have large barycentric products. Sample quiet
+# background pixels to catch overflow in CPU UV interpolation independently of HUD.
+samples=[]
+points=[(16,104),(400,120),(840,120),(1260,220),(1200,640),(40,640)]
+for mode in (0,2):
+    run('--scene','1','--mode',str(mode),'--frames','2')
+    image=png(out/'frame0002.png')
+    samples.append([image[y][x] for x,y in points])
+for point,a,b in zip(points,*samples):
+    # GPU texture modulation and the CPU RGB565 path differ by one quantization unit.
+    assert all(abs(a[c]-b[c]) <= limit for c,limit in enumerate((9,5,9))), (point,a,b)
+print('PASS CPU/GPU full-screen nebula UV samples')

@@ -69,6 +69,7 @@ void test_draw(unsigned kind, unsigned first, unsigned count, unsigned texture,
 void test_quad(int x, int y, unsigned w, unsigned h, unsigned u, unsigned v,
                unsigned palette, unsigned alpha);
 void test_rect(int x, int y, unsigned w, unsigned h, unsigned palette);
+void test_panel(int x, int y, unsigned w, unsigned h, unsigned accent);
 void test_text(int x, int y, const char *text, unsigned palette);
 void test_sprite(int x, int y, int w, int h, unsigned u, unsigned v,
                  unsigned tw, unsigned th);
@@ -79,11 +80,14 @@ void test_sound(unsigned effect);
 void test2d_init(void);
 void test2d_update(uint32_t keys);
 void test2d_scene(void);
+void test2d_hud(void);
 void test2d_results(void);
+void test2d_capture(unsigned event);
 void test3d_init(void);
 void test3d_update(uint32_t keys);
 void test3d_scene(void);
 void test3d_hud(void);
+void test3d_capture(unsigned event);
 uint64_t test_clock_us(void);
 uint32_t test_input_keys(void);
 #endif

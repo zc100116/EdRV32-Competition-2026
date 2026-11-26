@@ -1,11 +1,12 @@
-# 3D 素材来源
+# Candy Canyon 素材来源
 
-作者均为 Kenney，来自 [Retro Textures Fantasy](https://kenney.nl/assets/retro-textures-fantasy)，CC0 1.0；LICENSE.txt 随包保存。
+| 文件 / 模型 | 来源 / 许可 | 实际用途 |
+|---|---|---|
+| imagegen/materials.png | Codex imagegen 生成，项目自有 | 沙地、暖橙岩层、紫色矿岩、白青飞船和珊瑚无人机表面；64×64 RGB565 七级 mip |
+| ../../gpu_test2d/assets/imagegen/ships-effects.png | Codex imagegen 生成，项目自有 | 共用发光贴图用于尾焰、晶体闪光、弹光和穿环粒子 |
+| ../../gpu_test2d/assets/imagegen/environment-ui.png | Codex imagegen 生成，项目自有 | 云层、UI 面板边框及图标 |
+| canyon.c 飞船 / 无人机 / 岩石 / 水晶 / 环 | 项目自建模型，项目自有 | 玩家飞船 176 三角形；无人机 48 三角形；岩石不规则多面体、水晶五棱柱、光环实体网格 |
 
-| 文件 | 作者 | 原始文件网址 | 许可 | 用途 |
-|---|---|---|---|---|
-| kenney/floor_ground_grass.png | Kenney | [原始 PNG](https://github.com/shorepine/kenney/blob/main/2d/Retro%20Textures%20Fantasy/floor_ground_grass.png) | CC0-1.0 | RGB565 七级 mipmap 地形及岩石 |
-| kenney/wall_rock.png | Kenney | [原始 PNG](https://github.com/shorepine/kenney/blob/main/2d/Retro%20Textures%20Fantasy/wall_rock.png) | CC0-1.0 | RGB565 七级 mipmap 地形及岩石 |
-| kenney/floor_ground_sand.png | Kenney | [原始 PNG](https://github.com/shorepine/kenney/blob/main/2d/Retro%20Textures%20Fantasy/floor_ground_sand.png) | CC0-1.0 | RGB565 七级 mipmap 地形及岩石 |
-
-飞行器、无人机、水晶的表面纹理复用 `../../gpu_test2d/assets/kenney/playerShip1_blue.png` 与 `../../gpu_test2d/assets/kenney/enemyRed1.png`（Kenney / Space Shooter Remastered / CC0），不复制源文件。
+不依赖外部 OBJ。棋盘、天空渐变和速度线为项目生成；字体沿用 Fusion Pixel / OFL 与 BSP ASCII。
+内置 imagegen 提示词和处理参数见 [STYLE.md](STYLE.md) 与
+[公共 STYLE](../../gpu_test_common/assets/STYLE.md)。Kenney 旧材质已替换。

@@ -87,14 +87,22 @@ void test_init(void)
     memcpy(test.textures, test_asset_texture, TEST_TEXTURE_BYTES);
     memset(test.palettes, 0, 16 * 1024);
     static const uint16_t colors[16] = {
-        0xffff, 0xffff, 0x3fff, 0xfc9f, 0xfd29, 0x0434, 0xbadf, 0xffa5,
-        0x0865, 0x1b12, 0x2298, 0x447d, 0x6d5f, 0x977f, 0x27e9, 0xf986
+        0xffff, 0xffff, 0x3fff, 0xfb8f, 0xfd29, 0x0434, 0xbb5f, 0xffa5,
+        0x1085, 0x6292, 0x52f7, 0x6379, 0x7c1c, 0x949d, 0xad5f, 0xf986
     };
     for (unsigned p = 0; p < 16; ++p) {
         memcpy(test.palettes+p*256, test_asset_palette, sizeof(test_asset_palette));
         test.palettes[p*256+1] = 0xf0000 | colors[p];
-        for (unsigned i = 16; i < 32; ++i)
-            test.palettes[p*256+i] = ((i-16) << 16) | colors[p ? p : 1];
+        for (unsigned i = 16; i < 32; ++i) {
+            unsigned c = colors[p ? p : 1];
+            unsigned core = i > 26 ? (i-26)*255/5 : 0;
+            unsigned r = ((c>>11)&31)*255/31;
+            unsigned g = ((c>>5)&63)*255/63;
+            unsigned b = (c&31)*255/31;
+            c = test_color(r+(255-r)*core/255, g+(255-g)*core/255,
+                           b+(255-b)*core/255);
+            test.palettes[p*256+i] = ((i-16) << 16) | c;
+        }
         if (p == 15)
             for (unsigned i = 1; i < 256; ++i)
                 test.palettes[p*256+i] = (test.palettes[p*256+i] & 0xf0000) | 0xffff;
@@ -197,6 +205,18 @@ void test_text(int x, int y, const char *text, unsigned palette)
         }
     }
 }
+void test_panel(int x, int y, unsigned w, unsigned h, unsigned accent)
+{
+    test_rect(x+2, y, w-4, h, 9);
+    test_rect(x, y+2, w, h-4, 9);
+    test_rect(x+2, y+2, w-4, h-4, 8);
+    test_rect(x+4, y+2, 12, 1, accent);
+    test_rect(x+(int)w-16, y+(int)h-3, 12, 1, accent);
+    test_quad(x, y, 6, 6, 0, 97, 0, 255);
+    test_quad(x+(int)w-6, y, 6, 6, 26, 97, 0, 255);
+    test_quad(x, y+(int)h-6, 6, 6, 0, 105, 0, 255);
+    test_quad(x+(int)w-6, y+(int)h-6, 6, 6, 26, 105, 0, 255);
+}
 void test_sprite(int x, int y, int w, int h, unsigned u, unsigned v,
                  unsigned tw, unsigned th)
 {
@@ -211,13 +231,29 @@ void test_sprite(int x, int y, int w, int h, unsigned u, unsigned v,
 }
 void test_scaled_text(int x, int y, const char *text, unsigned scale, unsigned color)
 {
-    for (; *text; ++text, x += 8*(int)scale/256) {
+    while (*text) {
         unsigned first = test.triangles;
-        unsigned g = (unsigned char)*text-32;
-        test_sprite(x, y, 8*(int)scale/256, 16*(int)scale/256,
-                    (g%16)*8, 128+(g/16)*16, 8, 16);
+        unsigned c = (unsigned char)*text++;
+        unsigned w = 8, h = 16, u, v;
+        if (c < 128) {
+            unsigned g = c-32;
+            u = (g%16)*8;
+            v = 128+(g/16)*16;
+        } else {
+            unsigned cp = (c&15)<<12;
+            cp |= ((unsigned char)*text++ & 63)<<6;
+            cp |= (unsigned char)*text++ & 63;
+            unsigned g = 0;
+            while (test_chinese[g] != cp) ++g;
+            w = 12;
+            h = 12;
+            u = 128+(g%10)*12;
+            v = 128+(g/10)*12;
+        }
+        test_sprite(x, y, w*(int)scale/256, h*(int)scale/256, u, v, w, h);
         for (unsigned i = first; i < test.triangles; ++i)
             test.vertices[i].word[2] = (test.vertices[i].word[2] & 0xffff) | (color << 16);
+        x += w*(int)scale/256;
     }
 }
 void test_vertex(int x, int y, int z, unsigned color, unsigned u, unsigned v, int ny)
@@ -388,8 +424,10 @@ static void software_tri(unsigned first, unsigned count, unsigned blend)
             int c = area*4-a-b;
             if ((area > 0 && a >= 0 && b >= 0 && c >= 0) ||
                 (area < 0 && a <= 0 && b <= 0 && c <= 0)) {
-                unsigned tu = (unsigned)((a*u[0]+b*u[1]+c*u[2])/(area*4)) >> 8;
-                unsigned tv = (unsigned)((a*v[0]+b*v[1]+c*v[2])/(area*4)) >> 8;
+                unsigned tu = (unsigned)(((int64_t)a*u[0]+(int64_t)b*u[1]+
+                                          (int64_t)c*u[2])/(area*4)) >> 8;
+                unsigned tv = (unsigned)(((int64_t)a*v[0]+(int64_t)b*v[1]+
+                                          (int64_t)c*v[2])/(area*4)) >> 8;
                 software_pixel(px, py, tu, tv, 0, 255, blend);
             }
         }
@@ -464,30 +502,32 @@ static void hud(void)
 {
     hud_first = test.draws_count;
     unsigned first = test.quads_count;
-    test_rect(0, 0, 640, 48, 8);
-    test_rect(0, 336, 640, 24, 8);
+    test_panel(10, 8, 182, 36, 2);
+    test_quad(18, 12, 12, 12, 44, 112, 0, 255);
+    test_text(34, 10, "血量", 3);
+    test_rect(64, 14, 116, 8, 9);
+    test_rect(66, 16, test.health*112/100, 4, test.health > 30 ? 2 : 3);
     char line[96];
-    const char *name = test.game == 1 ? "PRISM PATROL" : "CANDY CANYON";
+    snprintf(line, sizeof(line), "得分 %07u", test.score);
+    test_text(18, 26, line, 1);
     const char *mode = test.mode == 0 ? "正常" : test.mode == 1 ? "压测" :
                        test.game == 1 ? "CPU 对比" : "纹理测试";
-    snprintf(line, sizeof(line), "%s / %s / %s / AA %s", name, mode,
-             test.cpu ? "CPU" : "GPU", test.aa ? "ON" : "OFF");
-    test_text(8, 2, line, 1);
-    unsigned count = test.game == 1 ? test.alive_count : test.triangles/3;
-    snprintf(line, sizeof(line), "%s %u  FPS %u.%u  CPU %u.%03u ms",
-             test.game == 1 ? "OBJ" : "TRI", count,
-             (unsigned)test.fps10/10, (unsigned)test.fps10%10,
-             (unsigned)test.cpu_us/1000, (unsigned)test.cpu_us%1000);
-    test_text(8, 18, line, 2);
-    if (test.gpu_us) snprintf(line, sizeof(line), "GPU %u us  得分 %u  血量 %u",
-                              (unsigned)test.gpu_us, test.score, test.health);
-    else snprintf(line, sizeof(line), "GPU n/a  得分 %u  血量 %u", test.score, test.health);
-    test_text(8, 34, line, 7);
-    test_rect(520, 34, test.health, 5, test.health > 30 ? 2 : 3);
-    if (test.game == 2) test3d_hud();
-    const char *help = "NEXT/PREV MOVE  ENTER: CONTROLS  ESC: MENU";
-    test_text(8, 340, help, 1);
+    /* One compact translucent strip; the scene remains visible behind diagnostics. */
+    for (unsigned x = 8; x < 596; x += 8)
+        for (unsigned y = 340; y < 356; y += 8)
+            test_quad((int)x, (int)y, 8, 8, 248, 248, 8, 190);
+    if (test.game == 1) test2d_hud();
+    else test3d_hud();
     test_draw(0, first, test.quads_count-first, 0, 1, 0);
+    unsigned count = test.game == 1 ? test.alive_count : test.triangles/3;
+    snprintf(line, sizeof(line), "%s %s %u FPS %u.%u CPU %u.%03u GPU %u us AA %s %s",
+             mode, test.game == 1 ? "OBJ" : "TRI", count,
+             (unsigned)test.fps10/10, (unsigned)test.fps10%10,
+             (unsigned)test.cpu_us/1000, (unsigned)test.cpu_us%1000,
+             (unsigned)test.gpu_us, test.aa ? "ON" : "OFF", test.cpu ? "CPU" : "GPU");
+    first = test.triangles;
+    test_scaled_text(14, 342, line, 192, 0xbdf7);
+    test_draw(1, first, (test.triangles-first)/3, 0, 1, 0);
 }
 void test_frame(void)
 {

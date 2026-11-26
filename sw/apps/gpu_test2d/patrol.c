@@ -8,10 +8,12 @@
 static const unsigned loads[7] = {1000, 2000, 5000, 10000, 20000, 50000, 100000};
 /* Keep additive glow readable as overlap grows; object populations stay unchanged. */
 static const unsigned glow_alpha[7] = {190, 140, 80, 50, 36, 24, 16};
+enum { ENEMIES = 12, SHOTS = 18, ENEMY_FIRST = ENEMIES+SHOTS };
 static unsigned boss_health;
 static unsigned invulnerable;
 static unsigned flash;
 static unsigned boss_flash;
+static unsigned enemy_flash[ENEMIES];
 static unsigned effect_next;
 static unsigned drop_next;
 struct burst { int x; int y; unsigned born; unsigned damage; };
@@ -29,6 +31,18 @@ static void explosion(int x, int y, unsigned damage)
     }
 }
 static int boss_x;
+void test2d_capture(unsigned event)
+{
+    if (event == 1) {
+        explosion(boss_x+92, 174, 8);
+        bursts[(effect_next-1)%16].born = test.tick-8;
+    }
+    if (event == 2) {
+        explosion(448, 194, 25);
+        explosion(483, 216, 10);
+        explosion(420, 220, 10);
+    }
+}
 static int target[8][4];
 static unsigned get(const struct gpu_object *o, unsigned offset, uint32_t mask, unsigned pos)
 {
@@ -50,10 +64,10 @@ static void spawn(unsigned index, int initial)
 {
     struct gpu_object_args o = {.alive = 1, .alpha = 190, .w = 8, .h = 8,
         .col_hw = 2, .col_hh = 2, .tgt_mask = 1};
-    if (index < 24) {
-        o.px = (80+(index%8)*68)*256;
-        o.py = (initial ? 75+(index/8)*28 : 58)*256;
-        o.vy = 60;
+    if (index < ENEMIES) {
+        o.px = (48+(index%6)*60+(index%6 >= 3 ? 232 : 0))*256;
+        o.py = (initial ? 94+(index/6)*64 : 58)*256;
+        o.vy = 28;
         o.life = 0;
         o.w = 32;
         o.h = 32;
@@ -61,9 +75,10 @@ static void spawn(unsigned index, int initial)
         o.col_hw = 10;
         o.col_hh = 8;
         o.alpha = 255;
-    } else if (index < 88) {
+    } else if (index < ENEMY_FIRST) {
         o.px = (unsigned)(test.player_x + ((int)(index%3)-1)*6)*256;
-        o.py = (unsigned)(initial ? 60+(int)(index-24)*4 : test.player_y-14)*256;
+        o.py = (unsigned)(initial ? test.player_y-20-(int)(index-ENEMIES)*10 :
+                          test.player_y-14)*256;
         o.vy = (uint32_t)(test.weapon == 1 ? -2400 : -1400);
         o.vx = test.weapon == 0 ? (unsigned)(((int)(index%3)-1)*250) : 0;
         if (test.weapon) {
@@ -73,22 +88,38 @@ static void spawn(unsigned index, int initial)
             o.px = (unsigned)(test.player_x+((int)(index%2)*2-1)*9)*256;
         }
         o.tgt_mask = 254;
+        o.u0 = test.weapon == 2 ? 224 : 8;
+        o.w = 8;
+        o.h = test.weapon == 1 ? 32 : 16;
         o.life = 72;
         o.pal_group = test.weapon == 2 ? 7 : 2;
     } else {
-        o.alpha = test.mode == 1 ? glow_alpha[test.level] : 190;
+        o.alpha = test.mode == 1 ? glow_alpha[test.level] : 255;
         unsigned phase = (test.tick/240)%3;
-        unsigned angle = (index*97 + test.tick*(phase == 1 ? 3 : 1)) & 255;
+        unsigned j = index-ENEMY_FIRST;
+        unsigned angle = phase == 0 ? 12+(j%14)*104/13 :
+                         phase == 1 ? (j%14)*256/14+(j/14)*5 :
+                         (j%14)*256/14;
+        angle = (angle+test.tick*(phase == 1 ? 2 : 0))&255;
         int vx = test_sine[(angle+64)&255]*420/16384;
         int vy = test_sine[angle]*420/16384;
         if (phase == 2) {
             vx = test_sine[(test.tick+index*9)&255]*320/16384;
             vy = 300+(int)(index%5)*40;
         }
-        unsigned age = initial ? index*137%180 : 0;
+        unsigned age = initial ? (index-ENEMY_FIRST)/14*6 : 0;
         int x = boss_x + vx*(int)age/256;
-        int y = 96 + vy*(int)age/256;
-        if (initial) {
+        int y = 126 + vy*(int)age/256;
+        if (initial && test.mode != 1) {
+            int radius = 22+(int)(j/14)*9;
+            x = boss_x+test_sine[(angle+64)&255]*radius/16384;
+            y = 126+test_sine[angle]*radius/16384;
+            if (phase == 2) {
+                x = 40+(int)(j%20)*28;
+                y = 144+(int)(j/20)*12;
+            }
+        }
+        if (initial && test.mode == 1) {
             x = 24+(int)((index*73)%592);
             y = 60+(int)((index*137)%272);
         }
@@ -97,13 +128,13 @@ static void spawn(unsigned index, int initial)
         o.vx = (unsigned)vx;
         o.vy = (unsigned)vy;
         o.life = 180 + index%120;
-        o.pal_group = phase == 0 ? 3 : phase == 1 ? 7 : 2;
+        o.pal_group = phase == 0 ? 3 : phase == 1 ? 6 : 7;
     }
     gpu_object(test.objects+index, &o);
 }
 void test2d_init(void)
 {
-    test.objects_count = test.mode == 1 ? loads[test.level] : 1500;
+    test.objects_count = test.mode == 1 ? loads[test.level] : ENEMY_FIRST+280;
     test.alive_count = test.objects_count;
     test.hit_count = 0;
     test.free_count = 0;
@@ -112,6 +143,7 @@ void test2d_init(void)
     invulnerable = 0;
     flash = 0;
     boss_flash = 0;
+    memset(enemy_flash, 0, sizeof(enemy_flash));
     effect_next = 0;
     drop_next = 0;
     memset(bursts, 0, sizeof(bursts));
@@ -164,33 +196,35 @@ void test2d_update(uint32_t keys)
     if (test.player_x > 620) test.player_x = 620;
     if (test.player_y < 64) test.player_y = 64;
     if (test.player_y > 316) test.player_y = 316;
-    boss_x = 320+test_sine[(test.tick/2)&255]*120/16384;
+    boss_x = 320+test_sine[(test.tick/2)&255]*65/16384;
     target[0][0] = test.player_x-3;
     target[0][1] = test.player_y-3;
     target[0][2] = test.player_x+3;
     target[0][3] = test.player_y+3;
-    target[1][0] = boss_x-26;
+    target[1][0] = boss_x-40;
     target[1][1] = 68;
-    target[1][2] = boss_x+26;
-    target[1][3] = 120;
-    for (unsigned i = 0; i < 24; ++i) {
+    target[1][2] = boss_x+40;
+    target[1][3] = 146;
+    for (unsigned i = 0; i < ENEMIES; ++i) {
         struct gpu_object *o = test.objects+i;
+        if (enemy_flash[i]) --enemy_flash[i];
+        PUT(o, PAL_GROUP, enemy_flash[i] && (test.tick&1) ? 15 : 0);
         unsigned type = i%3;
         int vx = type == 0 ? test_sine[(test.tick*2+i*17)&255]/90 :
                  type == 1 ? ((test.tick/45+i)%2 ? 200 : -200) :
                  test_sine[(test.tick+i*23)&255]/48;
         PUT(o, VX, vx);
-        PUT(o, VY, type == 2 ? 125 : 60);
+        PUT(o, VY, type == 2 ? 58 : 28);
         if (i < 6) {
             int x = (signed24(GET(o, PX))+vx)/256;
-            int y = (signed24(GET(o, PY))+(type == 2 ? 125 : 60))/256;
+            int y = (signed24(GET(o, PY))+(type == 2 ? 58 : 28))/256;
             target[i+2][0] = x-12;
             target[i+2][1] = y-8;
             target[i+2][2] = x+12;
             target[i+2][3] = y+8;
         }
     }
-    if (test.weapon == 2) for (unsigned i = 24; i < 88; ++i) {
+    if (test.weapon == 2) for (unsigned i = ENEMIES; i < ENEMY_FIRST; ++i) {
         struct gpu_object *o = test.objects+i;
         int x = signed24(GET(o, PX))/256;
         int steering = (boss_x-x)*20;
@@ -211,6 +245,7 @@ void test2d_update(uint32_t keys)
         }
         if (d->y > 330) d->alive = 0;
     }
+    if (test.tick%240 == 0) flash = 18;
     if (boss_flash) --boss_flash;
     for (unsigned t = 0; t < 8; ++t)
         gpu_collision_target(t, (int16_t)target[t][0], (int16_t)target[t][1],
@@ -231,7 +266,7 @@ void test2d_results(void)
             flash = 20;
             explosion(test.player_x, test.player_y, 0);
             test_sound(1);
-        } else if (t == 1 && index >= 24 && index < 88) {
+        } else if (t == 1 && index >= ENEMIES && index < ENEMY_FIRST) {
             ++test.score;
             unsigned damage = test.weapon == 0 ? 1 : test.weapon == 1 ? 3 : 8;
             boss_health = boss_health > damage ? boss_health-damage : 0;
@@ -239,19 +274,20 @@ void test2d_results(void)
             if (test.tick%4 == 0) explosion(boss_x+(int)(index%7)*7-24, 96, damage);
             spawn(index, 0);
             test_sound(1);
-        } else if (t > 1 && index >= 24 && index < 88) {
+        } else if (t > 1 && index >= ENEMIES && index < ENEMY_FIRST) {
             test.score += 10;
             flash = 24;
             explosion((target[t][0]+target[t][2])/2, (target[t][1]+target[t][3])/2, 10);
             spawn(t-2, 0);
+            enemy_flash[t-2] = 5;
             spawn(index, 0);
             test_sound(2);
         }
     }
     for (unsigned i = 0; i < test.free_count; ++i)
         spawn(gpu_free_object(test.released[i]), 0);
-    if (test.weapon == 2) for (unsigned i = 0; i < 32; ++i) {
-        const struct gpu_object *o = test.objects+24+i*2;
+    if (test.weapon == 2) for (unsigned i = 0; i < SHOTS; ++i) {
+        const struct gpu_object *o = test.objects+ENEMIES+i;
         missile_trail[i][test.tick%6] = (struct trail){signed24(GET(o, PX))/256,
             signed24(GET(o, PY))/256+8, test.tick};
     }
@@ -280,42 +316,51 @@ static void fin(int cx, int cy, unsigned angle)
 void test2d_scene(void)
 {
     int shake = flash ? ((test.tick&1) ? 3 : -3) : 0;
-    unsigned first = test.quads_count;
-    for (unsigned y = 0; y < 7; ++y) for (unsigned x = 0; x < 11; ++x)
-        test_quad((int)x*64+shake, (int)y*64-(int)(test.tick/4%64),
-                  64, 64, 0, 64, 0, 255);
-    test_draw(0, first, test.quads_count-first, 0, 1, 0);
+    unsigned first = test.triangles;
+    test_sprite(shake-2, -2, 644, 364, 0, 128, 255, 127);
+    test_draw(1, first, 2, 6, 0, 0);
     first = test.quads_count;
-    for (unsigned y = 0; y < 4; ++y) for (unsigned x = 0; x < 6; ++x)
-        test_quad((int)x*128-60+shake, (int)y*128-(int)(test.tick/8%128),
-                  128, 128, 128, 0, 0, 42);
-    test_quad(76+shake, 102-(int)(test.tick/18%30), 96, 96, 0, 0, 0, 150);
-    for (unsigned i = 0; i < 9; ++i)
-        test_quad((int)((i*113+test.tick/2)%700)-32+shake,
-                  64+(int)((i*79+test.tick*2)%270), 32, 32, 128, 128, 0, 110);
+    for (unsigned layer = 0; layer < 2; ++layer)
+        for (unsigned i = 0; i < 42; ++i) {
+            unsigned x = (i*137+layer*59)%640;
+            unsigned y = (i*83+test.tick/(layer ? 2 : 6))%360;
+            test_quad((int)x+shake, (int)y, layer ? 2 : 1, layer ? 2 : 1,
+                      248, 248, layer ? 2 : 9, layer ? 170 : 200);
+        }
+    test_quad(50+shake, 100-(int)(test.tick/24%20), 96, 96, 128, 0, 0, 255);
+    for (unsigned i = 0; i < 5; ++i)
+        test_quad((i&1 ? 490 : 12)+(int)((i*47+test.tick/3)%120)+shake,
+                  75+(int)((i*83+test.tick/2)%248), 32, 32, 224, 0, 0, 255);
     for (unsigned i = 0; i < 12; ++i) if (drops[i].alive)
         test_quad(drops[i].x-8, drops[i].y-8, 16, 16,
-                  drops[i].kind ? 176 : 160, 128, 0, 255);
+                  drops[i].kind ? 144 : 128, 96, 0, test.tick%20 < 10 ? 255 : 150);
     test_draw(0, first, test.quads_count-first, 6, 1, 0);
     first = test.quads_count;
-    test_quad(boss_x-32+shake, 64, 64, 64, 160, 0, boss_flash && (test.tick&2) ? 15 : 0, 255);
+    test_quad(boss_x-64+shake, 64, 128, 96, 0, 0,
+              boss_flash && test.tick%8 == 0 ? 15 : 0, 255);
+    test_draw(0, first, test.quads_count-first, 6, 1, 0);
+    first = test.quads_count;
     test_quad(test.player_x-16+shake, test.player_y-16, 32, 32, 32, 0,
               invulnerable && (test.tick&2) ? 15 : 0, 255);
     test_draw(0, first, test.quads_count-first, 0, 1, 0);
     for (unsigned i = 0; i < 4; ++i) {
         unsigned a = (test.tick+i*64)&255;
-        fin(boss_x+test_sine[(a+64)&255]*46/16384+shake,
-            96+test_sine[a]*30/16384, a);
+        unsigned leg = a*3/256;
+        unsigned t = a*3%256;
+        static const int path[3][2] = {{-65,-20},{65,-20},{0,44}};
+        unsigned next = (leg+1)%3;
+        fin(boss_x+(path[leg][0]*(256-(int)t)+path[next][0]*(int)t)/256+shake,
+            110+(path[leg][1]*(256-(int)t)+path[next][1]*(int)t)/256, a);
     }
     /* Enemy sprites and glowing ammunition share hardware OBJ_STEP draw ordering. */
-    test_draw(2, 0, 24, 0, 1, 0);
-    test_draw(2, 24, test.objects_count-24, 0, 2, 0);
+    test_draw(2, 0, ENEMIES, 0, 1, 0);
+    test_draw(2, ENEMIES, test.objects_count-ENEMIES, 0, 2, 0);
     first = test.quads_count;
-    test_quad(test.player_x-8+shake, test.player_y+12, 16, 24,
-              16+(test.tick/4%3)*16, 32, 0, 255);
+    test_quad(test.player_x-6+shake, test.player_y+12, 12, 24,
+              16+(test.tick/4%4)*12, 32, 0, 255);
     test_quad(test.player_x-32+shake, test.player_y-32, 64, 64, 64, 32,
-              0, invulnerable ? 230 : 100+(test.tick%20)*4);
-    if (test.weapon == 2) for (unsigned i = 0; i < 32; ++i)
+              2, invulnerable ? 230 : 80+(test.tick%20)*3);
+    if (test.weapon == 2) for (unsigned i = 0; i < SHOTS; ++i)
         for (unsigned j = 0; j < 6; ++j) {
             const struct trail *t = &missile_trail[i][j];
             unsigned age = test.tick-t->born;
@@ -325,14 +370,19 @@ void test2d_scene(void)
     for (unsigned i = 0; i < 16; ++i) {
         struct burst *b = bursts+i;
         unsigned age = test.tick-b->born;
-        if (!b->born || age >= 28) continue;
-        test_quad(b->x-16+shake, b->y-16, 32, 32, 128+(age/7)*32, 64, 0, 255);
+        if (!b->born || age >= 40) continue;
+        if (b->damage && b->damage < 8) {
+            if (age < 10)
+                test_quad(b->x-4+shake, b->y-4, 8, 8, 0, 0, 7, 220-age*20);
+            continue;
+        }
+        test_quad(b->x-16+shake, b->y-16, 32, 32, 128+(age/5%4)*32, 64+(age/20)*32, 0, 255);
         for (unsigned j = 0; j < 12; ++j) {
             unsigned a = (j*21+i*7)&255;
             int radius = (int)age*2;
             test_quad(b->x+test_sine[(a+64)&255]*radius/16384-4+shake,
                       b->y+test_sine[a]*radius/16384-4, 8, 8, 0, 0, j%2 ? 4 : 7,
-                      240-age*8);
+                      240-age*6);
         }
     }
     test_draw(0, first, test.quads_count-first, 0, 2, 0);
@@ -345,7 +395,7 @@ void test2d_scene(void)
     for (unsigned i = 0; i < 16; ++i) {
         struct burst *b = bursts+i;
         unsigned age = test.tick-b->born;
-        if (!b->born || !b->damage || age >= 28) continue;
+        if (!b->born || b->damage < 3 || age >= 40) continue;
         char number[12];
         snprintf(number, sizeof(number), "+%u", b->damage);
         unsigned scale = age < 6 ? 384+age*32 : age < 12 ? 576-(age-6)*48 : 288;
@@ -353,15 +403,19 @@ void test2d_scene(void)
                          b->damage >= 10 ? 0xffa5 : 0x7fff);
     }
     test_draw(1, start, (test.triangles-start)/3, 0, 1, 0);
-    first = test.quads_count;
-    test_rect(232, 52, 176, 22, 8);
-    test_text(240, 53, "赤焰核心", 3);
-    test_rect(240, 69, 160, 3, 5);
-    test_rect(240, 69, boss_health*160/1200, 3, 3);
+}
+void test2d_hud(void)
+{
+    test_panel(234, 8, 172, 36, 3);
+    test_text(246, 10, "赤焰核心", 3);
+    test_rect(244, 30, 152, 8, 9);
+    test_rect(246, 32, boss_health*148/1200, 4, 3);
     static const char *phases[3] = {"RADIAL", "SPIRAL", "WAVE"};
-    test_text(512, 56, phases[(test.tick/240)%3], 3);
+    test_text(320, 10, phases[(test.tick/240)%3], 7);
     static const char *weapons[3] = {"散射", "激光", "追踪导弹"};
-    test_text(12, 310, "武器", 2);
-    test_text(44, 310, weapons[test.weapon], 1);
-    test_draw(0, first, test.quads_count-first, 0, 1, 0);
+    test_panel(480, 8, 148, 36, 2);
+    test_quad(490, 18, 8, 16, test.weapon == 2 ? 224 : 8,
+              test.weapon == 2 ? 32 : 0, 2, 255);
+    test_text(508, 10, "武器", 2);
+    test_text(508, 26, weapons[test.weapon], 1);
 }

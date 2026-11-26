@@ -24,6 +24,21 @@ static unsigned gate_flash;
 static int gate_x;
 static int gate_y;
 static unsigned collect_flash;
+void test3d_capture(unsigned event)
+{
+    if (event == 3) {
+        gate_flash = 30;
+        gate_x = camera_x;
+        gate_y = camera_y;
+        test.score += 100;
+        ++ring_passed;
+    }
+    if (event == 4) {
+        hit_flash = 18;
+        test.health -= 8;
+    }
+    if (event == 5) test.tick = 40;
+}
 static int lane_x(unsigned seed)
 {
     return (seed&1024 ? -1 : 1)*(100+(int)((seed>>12)%350));
@@ -32,15 +47,19 @@ static int drone_x(unsigned i)
 {
     return test_sine[(test.tick+i*85)&255]*90/16384;
 }
+static int gem_x(unsigned index)
+{
+    return (index&1 ? 1 : -1)*(34+test_sine[(index*37)&255]*10/16384);
+}
 static unsigned blend_color(unsigned color, unsigned distance)
 {
     if (distance > 1400) distance = 1400;
     unsigned r = ((color>>11)&31)*8;
     unsigned g = ((color>>5)&63)*4;
     unsigned b = (color&31)*8;
-    return test_color((r*(1800-distance)+100*distance)/1800,
-                      (g*(1800-distance)+205*distance)/1800,
-                      (b*(1800-distance)+248*distance)/1800);
+    return test_color((r*(1800-distance)+140*distance)/1800,
+                      (g*(1800-distance)+140*distance)/1800,
+                      (b*(1800-distance)+205*distance)/1800);
 }
 static void vertex(int x, int y, int z, unsigned color, unsigned u, unsigned v, int ny)
 {
@@ -75,7 +94,7 @@ void test3d_update(uint32_t keys)
     if (collect_flash) --collect_flash;
     if (test.mode != 2 && test.tick%60 == 0) {
         unsigned gem = test.tick/60-1;
-        int x = test_sine[(gem*37)&255]*45/16384;
+        int x = gem_x(gem);
         int dx = test.player_x-x;
         int dy = test.player_y;
         if (dx*dx+dy*dy < 24*24) {
@@ -119,7 +138,7 @@ static int terrain_height(int x, unsigned row)
 {
     int a = x < 0 ? -x : x;
     int ridge = (test_sine[(row*13)&255]+16384)*22/32768;
-    return -80+(a > 110 ? (a-110)/2+ridge : 0);
+    return -82+(a > 140 ? (a-140)*6/5+ridge : 0);
 }
 static void terrain(int texture_test)
 {
@@ -135,18 +154,24 @@ static void terrain(int texture_test)
                 int x0 = ((int)col-8)*64;
                 int p[4][3] = {{x0,0,z0},{x0+64,0,z0},
                                {x0+64,0,z0+24},{x0,0,z0+24}};
-                for (unsigned k = 0; k < 4; ++k)
+                for (unsigned k = 0; k < 4; ++k) {
+                    if (!texture_test)
+                        p[k][0] += test_sine[((row+(k > 1))*5+test.tick/8)&255]*32/16384;
                     p[k][1] = texture_test ? -58 : terrain_height(p[k][0], row+(k > 1));
+                }
                 for (unsigned j = 0; j < 6; ++j) {
                     unsigned k = order[j];
-                    vertex(p[k][0], p[k][1], p[k][2], 0xffff,
-                           (k == 1 || k == 2 ? 63 : 0)*256,
-                           (k > 1 ? 63 : 0)*256, 65+(int)(row%3)*28);
+                    unsigned u = (unsigned)(material == 1 ? p[k][2]/4 :
+                                            (p[k][0]+512)/4);
+                    unsigned v = (unsigned)(material == 1 ? (p[k][1]+128)/4 :
+                                            p[k][2]/4);
+                    vertex(p[k][0], p[k][1], p[k][2], 0xffff, u*256, v*256,
+                           material == 1 ? 65+(int)(col%2)*15+(int)(row/4%2)*10 : 100);
                 }
             }
         }
         test_draw(1, first, (test.triangles-first)/3,
-                   texture_test ? (test.checker ? 4 : 1) : material+1, 0, 1);
+                   texture_test ? (test.checker ? 4 : 1) : material == 1 ? 2 : 1, 0, 1);
     }
 }
 static void rock(int x, int y, int z, unsigned seed)
@@ -183,6 +208,12 @@ static void rock(int x, int y, int z, unsigned seed)
             int vx = seed&1 ? cv[0] : iv[0];
             int vy = seed&1 ? cv[1] : iv[1];
             int vz = seed&1 ? cv[2] : iv[2];
+            if (!(seed&1)) {
+                int facet = 80+(int)((seed*17+faces[f][j]*23)%45);
+                vx = vx*facet/100;
+                vy = vy*facet/100;
+                vz = vz*facet/100;
+            }
             int rx = (vx*c-vz*s)*size/65536;
             int rz = (vx*s+vz*c)*size/65536;
             vertex(x+rx, y+vy*size/4, z+rz, color,
@@ -212,16 +243,77 @@ static void ring(int x, int y, int z)
         }
     }
 }
+/* Original 176-triangle spacecraft: lofted body, twin engine pods, swept wings,
+ * canopy and vertical fins. Geometry stays in world units; skin is a 64px mipmap. */
+static void ship_vertex(int x, int y, int z, unsigned color, unsigned u, unsigned v)
+{
+    test_vertex(x+test.player_x/20, y-17, z, color, u*256, v*256, 100);
+}
+static void pod(int cx, int cy, int rear, unsigned sides, unsigned rings, int radius)
+{
+    static const unsigned order[6] = {0,1,2,0,2,3};
+    for (unsigned r = 0; r < rings-1; ++r) for (unsigned side = 0; side < sides; ++side) {
+        for (unsigned j = 0; j < 6; ++j) {
+            unsigned k = order[j];
+            unsigned a = ((side+(k == 1 || k == 2))*256/sides)&255;
+            unsigned ring_id = r+(k > 1);
+            int width = ring_id == rings-1 ? 1 : ring_id == 0 ? radius*3/4 : radius;
+            int x = cx+test_sine[(a+64)&255]*width/16384;
+            int y = cy+test_sine[a]*width/16384;
+            unsigned color = side < sides/2 ? 0xffff : 0x4b37;
+            ship_vertex(x, y, rear+(int)ring_id*7, color,
+                        side < sides/2 ? 1+(side%2)*14 : 33, ring_id*16);
+        }
+    }
+    for (unsigned cap = 0; cap < 2; ++cap) for (unsigned side = 0; side < sides; ++side) {
+        int r = cap ? 1 : radius*3/4;
+        int z = rear+(cap ? (int)(rings-1)*7 : 0);
+        ship_vertex(cx, cy, z, cap ? 0x3fff : cx ? 0xffa5 : 0x1170, 1, 1);
+        for (unsigned j = 0; j < 2; ++j) {
+            unsigned a = ((side+j)*256/sides)&255;
+            ship_vertex(cx+test_sine[(a+64)&255]*r/16384,
+                        cy+test_sine[a]*r/16384, z,
+                        cap ? 0x3fff : cx ? 0xfd29 : 0x1170, 1, 1);
+        }
+    }
+}
 static void aircraft(void)
 {
-    static const int p[7][3] = {{0,-8,24},{-10,-10,15},{10,-10,15},
-        {0,-6,16},{0,-12,13},{-3,-10,12},{3,-10,12}};
-    static const uint8_t f[8][3] = {{0,1,3},{0,3,2},{0,4,1},{0,2,4},
-        {1,4,5},{2,6,4},{3,5,6},{3,6,2}};
-    for (unsigned i = 0; i < 8; ++i) for (unsigned j = 0; j < 3; ++j) {
-        const int *v = p[f[i][j]];
-        test_vertex(v[0]/2+test.player_x/20, v[1]-5, v[2]+18, i%3 ? 0x3fff : 0xffff,
-                    (j == 1 ? 31 : 0)*256, (j == 2 ? 63 : 0)*256, 100);
+    pod(0, 0, 44, 8, 4, 4);
+    pod(-6, -1, 40, 6, 3, 3);
+    pod(6, -1, 40, 6, 3, 3);
+    static const int wing[8][3] = {
+        {3,0,59},{18,-1,44},{17,-1,40},{4,-1,46},
+        {3,-2,59},{18,-3,44},{17,-3,40},{4,-3,46}
+    };
+    static const unsigned faces_wing[12][3] = {
+        {0,1,2},{0,2,3},{4,6,5},{4,7,6},{0,4,5},{0,5,1},
+        {1,5,6},{1,6,2},{2,6,7},{2,7,3},{3,7,4},{3,4,0}
+    };
+    for (int side = -1; side <= 1; side += 2)
+        for (unsigned f = 0; f < 12; ++f) for (unsigned j = 0; j < 3; ++j) {
+            const int *p = wing[faces_wing[f][j]];
+            ship_vertex(p[0]*side, p[1], p[2], f < 2 ? 0xffff : 0x2370,
+                        p[0] > 12 ? 24 : 2, f < 2 ? 8 : 40);
+        }
+    /* Cyan canopy rises above the fuselage and has a clean navy base. */
+    static const int canopy[6][3] = {
+        {-2,3,51},{2,3,51},{-2,3,61},{2,3,61},{-1,6,55},{1,6,55}
+    };
+    static const unsigned cf[8][3] = {
+        {0,1,5},{0,5,4},{2,4,5},{2,5,3},{0,4,2},{1,3,5},{0,2,3},{0,3,1}
+    };
+    for (unsigned f = 0; f < 8; ++f) for (unsigned j = 0; j < 3; ++j) {
+        const int *p = canopy[cf[f][j]];
+        ship_vertex(p[0], p[1], p[2], f < 4 ? 0x3fff : 0x1170, 24, 10);
+    }
+    for (int side = -1; side <= 1; side += 2) {
+        static const int fin[4][3] = {{14,-1,42},{14,5,40},{14,3,49},{13,-1,47}};
+        static const unsigned ff[4][3] = {{0,1,2},{0,2,3},{2,1,0},{3,2,0}};
+        for (unsigned f = 0; f < 4; ++f) for (unsigned j = 0; j < 3; ++j) {
+            const int *p = fin[ff[f][j]];
+            ship_vertex(p[0]*side, p[1], p[2], f%2 ? 0xffff : 0x3fff, 24, 8);
+        }
     }
 }
 static void billboard(int x, int y, int z, int size, unsigned color)
@@ -230,7 +322,7 @@ static void billboard(int x, int y, int z, int size, unsigned color)
     for (unsigned j = 0; j < 6; ++j) {
         unsigned k = order[j];
         vertex(x+(k == 1 || k == 2 ? size : -size), y+(k > 1 ? -size : size), z,
-               color, (k == 1 || k == 2 ? 7 : 0)*256, (k > 1 ? 7 : 0)*256, 100);
+               color, (k == 1 || k == 2 ? 15 : 0)*256, (k > 1 ? 47 : 32)*256, 100);
     }
 }
 static void drone(unsigned id)
@@ -247,36 +339,42 @@ static void drone(unsigned id)
         vertex(x+v[0], y+v[1], z+v[2], i%2 ? 0xfdbb : 0xffff,
                (j == 1 ? 63 : 32)*256, (j == 2 ? 63 : 0)*256, 100);
     }
+    for (int side = -1; side <= 1; side += 2)
+        for (unsigned f = 0; f < 20; ++f) for (unsigned j = 0; j < 3; ++j) {
+            const int8_t *p = ico[faces[f][j]];
+            vertex(x+side*17+p[0]/4, y+p[1]/4, z+3+p[2]/3,
+                   f%3 ? 0xffff : 0xfb8f, 40*256, 12*256, 100);
+        }
 }
 void test3d_scene(void)
 {
     unsigned first = test.quads_count;
-    for (unsigned band = 0; band < 6; ++band)
-        test_rect(0, (int)band*60, 640, 60, 9+band%5);
+    for (unsigned band = 0; band < 18; ++band)
+        test_rect(0, (int)band*20, 640, 20, 10+band*4/17);
     test_draw(0, first, test.quads_count-first, 0, 0, 0);
     first = test.quads_count;
     for (unsigned i = 0; i < 7; ++i)
         test_quad((int)((i*133+test.tick/3)%780)-128, 65+(int)(i%3)*22,
-                  128, 64, 0, 128, 0, 70);
+                  96, 32, 160, 96, 0, 95);
     test_draw(0, first, test.quads_count-first, 6, 1, 0);
     terrain(test.mode == 2);
     if (test.mode != 2) {
-        unsigned count = test.mode == 1 ? rocks[test.level] : 240;
+        unsigned count = test.mode == 1 ? rocks[test.level] : 64;
         for (unsigned material = 0; material < 2; ++material) {
             unsigned start = test.triangles;
             for (unsigned i = material; i < count; i += 2) {
                 unsigned seed = i*2654435761u;
                 int z = 80+(int)((seed/17-test.tick*3)%1120);
                 int x = lane_x(seed);
-                int y = -20+(int)((seed>>23)%190);
+                int y = terrain_height(x, (unsigned)z/24)+12;
                 rock(x, y, z, i);
             }
-            test_draw(1, start, (test.triangles-start)/3, material ? 5 : 2, 0, 1);
+            test_draw(1, start, (test.triangles-start)/3, material ? 5 : 3, 0, 1);
         }
         unsigned gem_start = test.triangles;
         for (unsigned i = 0; i < 3; ++i) {
             unsigned gem = test.tick/60+i;
-            rock(test_sine[(gem*37)&255]*45/16384, 0,
+            rock(gem_x(gem), 0,
                  210+(int)i*180-(int)(test.tick%60)*3, 101+i*2);
         }
         test_draw(1, gem_start, (test.triangles-gem_start)/3, 5, 0, 1);
@@ -293,18 +391,7 @@ void test3d_scene(void)
         aircraft();
         for (unsigned i = 0; i < 3; ++i) drone(i);
         test_draw(1, start, (test.triangles-start)/3, 5, 0, 1);
-        /* Transparent river ribbon, vertex color and GPU source-alpha blending. */
-        start = test.triangles;
-        for (unsigned row = 0; row < 32; ++row) {
-            int z = 36+(int)row*32;
-            static const unsigned order[6] = {0,1,2,0,2,3};
-            for (unsigned j = 0; j < 6; ++j) {
-                unsigned k = order[j];
-                vertex(k == 1 || k == 2 ? 22 : -22, -76, z+(k > 1 ? 32 : 0),
-                       0x3dff, 20*256, 0, 100);
-            }
-        }
-        test_draw(1, start, (test.triangles-start)/3, 0, 1, 1);
+        /* Glowing ammunition and engine particles use alpha-shaped textures. */
         start = test.triangles;
         for (unsigned i = 0; i < 3; ++i) {
             unsigned age = (test.tick+i*40)%120;
@@ -312,11 +399,12 @@ void test3d_scene(void)
             billboard(x, 15, 350-(int)age*3, 6, 0xfb8e);
             billboard(drone_x(i), 15, 184+(int)i*95, 9, 0xfbcf);
         }
-        for (unsigned i = 0; i < 20; ++i) {
-            unsigned age = (test.tick+i*3)%36;
-            billboard(camera_x+test.player_x/20+(int)(i%3)-1,
-                      camera_y-17-(int)(age/20), 34-(int)age/12,
-                      1+(int)age/24, i%2 ? 0x7fff : 0xffa5);
+        for (unsigned i = 0; i < 8; ++i) {
+            unsigned age = (test.tick+i*3)%24;
+            for (int side = -1; side <= 1; side += 2)
+                billboard(camera_x+side*6+(int)(i%3)-1,
+                          camera_y-18-(int)(age/18), 39-(int)age/9,
+                          1, i%3 ? 0xfdc5 : 0xffff);
         }
         for (unsigned i = 0; i < 6; ++i) {
             unsigned gate = test.tick/90+i;
@@ -324,15 +412,15 @@ void test3d_scene(void)
             if (z <= 8) continue;
             int x = test_sine[(gate*53)&255]*60/16384;
             int y = 10+test_sine[(gate*79)&255]*24/16384;
-            for (unsigned j = 0; j < 12; ++j) {
-                unsigned a = j*21;
+            for (unsigned j = 0; j < 32; ++j) {
+                unsigned a = j*8;
                 billboard(x+test_sine[(a+64)&255]*35/16384,
                           y+test_sine[a]*35/16384, z-4, 5, 0xffa5);
             }
         }
         for (unsigned i = 0; i < 3; ++i) {
             unsigned gem = test.tick/60+i;
-            int x = test_sine[(gem*37)&255]*45/16384;
+            int x = gem_x(gem);
             int z = 210+(int)i*180-(int)(test.tick%60)*3;
             billboard(x, 0, z-12, 10+(int)(test.tick%12)/2, 0x7fff);
         }
@@ -345,14 +433,16 @@ void test3d_scene(void)
         /* Crystal sparkle uses the same positions as the textured crystal meshes. */
         for (unsigned i = 1; i < count; i += 12) {
             unsigned seed = i*2654435761u;
-            billboard(lane_x(seed), -20+(int)((seed>>23)%190),
-                      80+(int)((seed/17-test.tick*3)%1120), 9+(int)(test.tick+i)%5, 0x7fff);
+            int z = 80+(int)((seed/17-test.tick*3)%1120);
+            int x = lane_x(seed);
+            billboard(x, terrain_height(x, (unsigned)z/24)+12, z,
+                      7+(int)(test.tick+i)%4, 0x7fff);
         }
         if (gate_flash) for (unsigned i = 0; i < 48; ++i) {
             unsigned a = (i*41)&255;
             int r = (30-(int)gate_flash)*3;
             billboard(gate_x+test_sine[(a+64)&255]*r/16384,
-                      gate_y+test_sine[a]*r/16384, 65+(int)i*2, 3, i%2 ? 0xffa5 : 0x7fff);
+                      gate_y+test_sine[a]*r/16384, 65+(int)i*2, 2, i%2 ? 0xffa5 : 0x7fff);
         }
         test_draw(1, start, (test.triangles-start)/3, 0, 2, 1);
     }
@@ -397,22 +487,23 @@ void test3d_hud(void)
 {
     if (test.mode == 2) {
         static const char *filters[3] = {"NEAREST", "BILINEAR", "TRILINEAR"};
-        test_rect(436, 54, 196, 38, 8);
-        test_text(444, 56, filters[test.filter], 1);
-        test_text(444, 74, test.checker ? "棋盘 / 7 MIP" : "草地 / 7 MIP", 2);
+        test_panel(436, 8, 192, 40, 2);
+        test_text(444, 12, filters[test.filter], 1);
+        test_text(444, 30, test.checker ? "棋盘 / 7 MIP" : "纹理 / 7 MIP", 2);
     } else {
-        test_rect(12, 54, 216, 40, 8);
-        test_text(20, 56, "任务 穿过下一个光环", 1);
+        test_panel(10, 50, 216, 40, 7);
+        test_quad(18, 58, 12, 12, 68, 112, 0, 255);
+        test_text(38, 56, "任务 穿过下一个光环", 1);
         char text[64];
         snprintf(text, sizeof(text), "距离 %u 米  速度 180", 300-(test.tick%90)*3);
         test_text(20, 74, text, 7);
-        test_rect(540, 54, 88, 66, 8);
-        test_text(552, 56, "方向", 2);
+        test_panel(540, 8, 88, 66, 2);
+        test_text(552, 12, "方向", 2);
         unsigned gate = test.tick/90;
         int dx = test_sine[(gate*53)&255]*60/16384-test.player_x;
         int dy = 10+test_sine[(gate*79)&255]*24/16384-test.player_y;
-        test_rect(580, 90, 3, 3, 1);
-        test_rect(580+dx/4, 90-dy/3, 5, 5, 7);
+        test_rect(580, 48, 3, 3, 1);
+        test_rect(580+dx/4, 48-dy/3, 5, 5, 7);
         test_rect(317, 177, 6, 2, 1);
         test_rect(319, 175, 2, 6, 1);
         if (gate_flash) test_text(260, 110, "得分 +100", 7);
