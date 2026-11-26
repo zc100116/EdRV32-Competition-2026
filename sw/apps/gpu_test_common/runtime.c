@@ -91,11 +91,13 @@ void test_init(void)
         0x0865, 0x1b12, 0x2298, 0x447d, 0x6d5f, 0x977f, 0x27e9, 0xf986
     };
     for (unsigned p = 0; p < 16; ++p) {
-        for (unsigned i = 1; i < 16; ++i)
-            test.palettes[p * 256 + i] = 0xf0000 | colors[i];
-        test.palettes[p * 256 + 1] = 0xf0000 | colors[p];
-        test.palettes[p * 256 + 3] = 0xa0000 | colors[3];
-        test.palettes[p * 256 + 7] = 0x40000 | colors[7];
+        memcpy(test.palettes+p*256, test_asset_palette, sizeof(test_asset_palette));
+        test.palettes[p*256+1] = 0xf0000 | colors[p];
+        for (unsigned i = 16; i < 32; ++i)
+            test.palettes[p*256+i] = ((i-16) << 16) | colors[p ? p : 1];
+        if (p == 15)
+            for (unsigned i = 1; i < 256; ++i)
+                test.palettes[p*256+i] = (test.palettes[p*256+i] & 0xf0000) | 0xffff;
     }
     /* Existing public-domain font; 16 columns, six rows at atlas y=128. */
     for (unsigned g = 0; g < 95; ++g)
@@ -177,9 +179,45 @@ void test_rect(int x, int y, unsigned w, unsigned h, unsigned palette)
 }
 void test_text(int x, int y, const char *text, unsigned palette)
 {
-    for (; *text; ++text, x += 8) {
-        unsigned g = (unsigned char)*text - 32;
-        test_quad(x, y, 8, 16, (g % 16) * 8, 128 + (g / 16) * 16, palette, 255);
+    while (*text) {
+        unsigned c = (unsigned char)*text++;
+        if (c < 128) {
+            unsigned g = c-32;
+            test_quad(x, y, 8, 16, (g%16)*8, 128+(g/16)*16, palette, 255);
+            x += 8;
+        } else {
+            unsigned cp = (c & 15) << 12;
+            cp |= ((unsigned char)*text++ & 63) << 6;
+            cp |= (unsigned char)*text++ & 63;
+            unsigned g = 0;
+            /* The shipped BDF subset contains every compiled HUD string. */
+            while (test_chinese[g] != cp) ++g;
+            test_quad(x, y+2, 12, 12, 128+(g%10)*12, 128+(g/10)*12, palette, 255);
+            x += 12;
+        }
+    }
+}
+void test_sprite(int x, int y, int w, int h, unsigned u, unsigned v,
+                 unsigned tw, unsigned th)
+{
+    static const unsigned order[6] = {0,1,2,0,2,3};
+    for (unsigned j = 0; j < 6; ++j) {
+        unsigned k = order[j];
+        unsigned right = k == 1 || k == 2;
+        unsigned bottom = k > 1;
+        test_vertex(x+(right ? w : 0), y+(bottom ? h : 0), 0, 0xffff,
+                    (u+(right ? tw : 0))*256, (v+(bottom ? th : 0))*256, 0);
+    }
+}
+void test_scaled_text(int x, int y, const char *text, unsigned scale, unsigned color)
+{
+    for (; *text; ++text, x += 8*(int)scale/256) {
+        unsigned first = test.triangles;
+        unsigned g = (unsigned char)*text-32;
+        test_sprite(x, y, 8*(int)scale/256, 16*(int)scale/256,
+                    (g%16)*8, 128+(g/16)*16, 8, 16);
+        for (unsigned i = first; i < test.triangles; ++i)
+            test.vertices[i].word[2] = (test.vertices[i].word[2] & 0xffff) | (color << 16);
     }
 }
 void test_vertex(int x, int y, int z, unsigned color, unsigned u, unsigned v, int ny)
@@ -231,20 +269,22 @@ static void render_gpu(void)
             struct test_draw *d = &test.draws[i];
             EMIT(set_matrix, .addr = gpu_physical(test.matrices + d->matrix * 16));
             EMIT(set_pixel, .depth_func = d->matrix ? 0 : 1,
-                 .depth_write = d->matrix ? 1 : 0, .color_write = 1, .st_func = 7,
+                 .depth_write = d->matrix && !d->blend ? 1 : 0, .color_write = 1, .st_func = 7,
                  .bl_fs = d->blend ? 2 : 1, .bl_fd = d->blend == 2 ? 1 : d->blend ? 3 : 0);
-            if (d->texture)
-                EMIT(set_tex, .offset = 65536, .log2_w = 6, .log2_h = 6,
+            if (d->texture && d->texture != 6)
+                EMIT(set_tex, .offset = TEST_MIP_BASE+(d->texture-1)*TEST_MIP_STRIDE,
+                     .log2_w = 6, .log2_h = 6,
                      .format = 2, .levels = 7, .sample = test.filter);
             else
-                EMIT(set_tex, .log2_w = 8, .log2_h = 8, .format = 1, .levels = 1);
+                EMIT(set_tex, .offset = d->texture == 6 ? 65536 : 0,
+                     .log2_w = 8, .log2_h = 8, .format = 1, .levels = 1);
             if (d->kind == 0) {
                 EMIT(draw_quad, .addr = gpu_physical(test.quads + d->first), .count = d->count);
             } else if (d->kind == 1) {
                 EMIT(draw_tri, .addr = gpu_physical(test.vertices + d->first), .count = d->count);
             } else {
-                EMIT(obj_step, .draw = 1, .addr = gpu_physical(test.objects),
-                     .count = test.objects_count);
+                EMIT(obj_step, .draw = 1, .addr = gpu_physical(test.objects+d->first),
+                     .count = d->count);
             }
         }
         unsigned low = test.cpu ? (stripe ? 336 : 0) : y;
@@ -267,13 +307,20 @@ static int signed_bits(unsigned value, unsigned bits)
 {
     return (int)(value ^ (1u << (bits-1))) - (int)(1u << (bits-1));
 }
+static unsigned software_texture;
+static unsigned software_tint = 0xffff;
 static void software_pixel(int x, int y, unsigned u, unsigned v, unsigned p,
                            unsigned alpha, unsigned blend)
 {
     if (x < 0 || x >= 640 || y < 0 || y >= 360) return;
-    unsigned index = test.textures[texture_byte(u & 255, v & 255)];
+    unsigned index = test.textures[software_texture+texture_byte(u & 255, v & 255)];
     uint32_t rgba = test.palettes[p * 256 + index];
     if (!(rgba >> 16)) return;
+    unsigned tint = software_tint;
+    rgba = (rgba & 0xf0000) |
+           (((((rgba >> 11)&31)*((tint >> 11)&31)+15)/31) << 11) |
+           (((((rgba >> 5)&63)*((tint >> 5)&63)+31)/63) << 5) |
+           (((rgba&31)*(tint&31)+15)/31);
     unsigned sa = (((rgba >> 16) * 17) * alpha + 127) / 255;
     uint16_t *dst = &test.surface[test.frame & 1][y * 640 + x];
     if (!blend) { *dst = (uint16_t)rgba; return; }
@@ -321,6 +368,7 @@ static void software_tri(unsigned first, unsigned count, unsigned blend)
             u[i] = p->word[3] & 65535;
             v[i] = p->word[3] >> 16;
         }
+        software_tint = test.vertices[first+t*3].word[2] >> 16;
         int area = edge(x[0], y[0], x[1], y[1], x[2], y[2]);
         if (!area) continue;
         int xmin = x[0], xmax = x[0], ymin = y[0], ymax = y[0];
@@ -377,12 +425,14 @@ static void render_software(void)
     for (unsigned i = 0; i < 640*360; ++i) surface[i] = 0x0865;
     for (unsigned i = 0; i < hud_first; ++i) {
         struct test_draw *d = &test.draws[i];
+        software_texture = d->texture == 6 ? 65536 : 0;
+        software_tint = 0xffff;
         if (d->kind == 0) {
             for (unsigned j = 0; j < d->count; ++j)
                 software_quad(test.quads+d->first+j, d->blend);
         } else if (d->kind == 1) software_tri(d->first, d->count, d->blend);
-        else for (unsigned j = 0; j < test.objects_count; ++j) {
-            struct gpu_object *o = test.objects+j;
+        else for (unsigned j = 0; j < d->count; ++j) {
+            struct gpu_object *o = test.objects+d->first+j;
             if (!OGET(o, ALIVE)) continue;
             unsigned w = OGET(o, W), h = OGET(o, H);
             int x0 = signed_bits(OGET(o, PX), 24)/256-(int)(w/2);
@@ -414,12 +464,12 @@ static void hud(void)
 {
     hud_first = test.draws_count;
     unsigned first = test.quads_count;
-    test_rect(0, 0, 504, 48, 8);
-    test_rect(0, 336, 504, 24, 8);
+    test_rect(0, 0, 640, 48, 8);
+    test_rect(0, 336, 640, 24, 8);
     char line[96];
     const char *name = test.game == 1 ? "PRISM PATROL" : "CANDY CANYON";
-    const char *mode = test.mode == 0 ? "PLAY" : test.mode == 1 ? "STRESS" :
-                       test.game == 1 ? "CPU COMPARE" : "TEXTURE";
+    const char *mode = test.mode == 0 ? "正常" : test.mode == 1 ? "压测" :
+                       test.game == 1 ? "CPU 对比" : "纹理测试";
     snprintf(line, sizeof(line), "%s / %s / %s / AA %s", name, mode,
              test.cpu ? "CPU" : "GPU", test.aa ? "ON" : "OFF");
     test_text(8, 2, line, 1);
@@ -429,10 +479,11 @@ static void hud(void)
              (unsigned)test.fps10/10, (unsigned)test.fps10%10,
              (unsigned)test.cpu_us/1000, (unsigned)test.cpu_us%1000);
     test_text(8, 18, line, 2);
-    if (test.gpu_us) snprintf(line, sizeof(line), "GPU %u us  SCORE %u  HP %u",
+    if (test.gpu_us) snprintf(line, sizeof(line), "GPU %u us  得分 %u  血量 %u",
                               (unsigned)test.gpu_us, test.score, test.health);
-    else snprintf(line, sizeof(line), "GPU n/a  SCORE %u  HP %u", test.score, test.health);
+    else snprintf(line, sizeof(line), "GPU n/a  得分 %u  血量 %u", test.score, test.health);
     test_text(8, 34, line, 7);
+    test_rect(520, 34, test.health, 5, test.health > 30 ? 2 : 3);
     if (test.game == 2) test3d_hud();
     const char *help = "NEXT/PREV MOVE  ENTER: CONTROLS  ESC: MENU";
     test_text(8, 340, help, 1);
@@ -468,8 +519,8 @@ void test_frame(void)
         menu_choice = 0;
     }
     if (test.game & 4) {
-        if (pressed & PLAT_RIGHT) menu_choice = (menu_choice+1)%5;
-        if (pressed & PLAT_LEFT) menu_choice = (menu_choice+4)%5;
+        if (pressed & PLAT_RIGHT) menu_choice = (menu_choice+1)%6;
+        if (pressed & PLAT_LEFT) menu_choice = (menu_choice+5)%6;
         if ((pressed & PLAT_A) && (test.tick & 0x80000000u)) {
             unsigned game = test.game & 3;
             if (menu_choice == 0) test_select(game, (test.mode+1)%3, 0, test.filter);
@@ -479,15 +530,21 @@ void test_frame(void)
                 if (game == 1) test.cpu ^= 1;
                 else test.filter = (test.filter+1)%3;
             }
-            if (menu_choice == 4) test.game = game;
+            if (menu_choice == 4) {
+                if (game == 1) test.weapon = (test.weapon+1)%3;
+                else test.checker ^= 1;
+                test.game = game;
+            }
+            if (menu_choice == 5) test.game = game;
         }
         if (test.game & 4) test.tick |= 0x80000000u;
         test_text(100, 80, "TEST CONTROLS - NEXT/PREV SELECT, ENTER APPLY", 2);
         static const char *items[] = {"MODE: PLAY / STRESS / COMPARE-TEXTURE",
-            "INCREASE LOAD LEVEL", "TOGGLE ANTI-ALIASING", "CPU-GPU / TEXTURE FILTER", "RESUME"};
-        for (unsigned i = 0; i < 5; ++i) {
-            test_text(100, 120+(int)i*32, i == menu_choice ? ">" : " ", 7);
-            test_text(124, 120+(int)i*32, items[i], i == menu_choice ? 1 : 9);
+            "INCREASE LOAD LEVEL", "TOGGLE ANTI-ALIASING", "CPU-GPU / TEXTURE FILTER",
+            "武器切换 / 棋盘切换", "继续"};
+        for (unsigned i = 0; i < 6; ++i) {
+            test_text(100, 110+(int)i*30, i == menu_choice ? ">" : " ", 7);
+            test_text(124, 110+(int)i*30, items[i], i == menu_choice ? 1 : 9);
         }
         test_draw(0, 0, test.quads_count, 0, 1, 0);
         hud_first = 0;

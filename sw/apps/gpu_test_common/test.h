@@ -9,7 +9,9 @@
 #define TEST_OBJECT_MAX 100000u
 #define TEST_TRI_MAX 60000u
 #define TEST_QUAD_MAX 8192u
-#define TEST_TEXTURE_BYTES 76480u
+#define TEST_TEXTURE_BYTES 185792u
+#define TEST_MIP_BASE 131072u
+#define TEST_MIP_STRIDE 10944u
 struct test_draw {
     unsigned kind;
     unsigned first;
@@ -23,6 +25,8 @@ struct test_state {
     unsigned mode;
     unsigned level;
     unsigned filter;
+    unsigned weapon;
+    unsigned checker;
     unsigned aa;
     unsigned cpu;
     unsigned frame;
@@ -66,6 +70,9 @@ void test_quad(int x, int y, unsigned w, unsigned h, unsigned u, unsigned v,
                unsigned palette, unsigned alpha);
 void test_rect(int x, int y, unsigned w, unsigned h, unsigned palette);
 void test_text(int x, int y, const char *text, unsigned palette);
+void test_sprite(int x, int y, int w, int h, unsigned u, unsigned v,
+                 unsigned tw, unsigned th);
+void test_scaled_text(int x, int y, const char *text, unsigned scale, unsigned color);
 void test_vertex(int x, int y, int z, unsigned color, unsigned u, unsigned v, int ny);
 unsigned test_color(unsigned r, unsigned g, unsigned b);
 void test_sound(unsigned effect);

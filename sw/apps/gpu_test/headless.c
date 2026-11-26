@@ -68,7 +68,7 @@ int main(int argc, char **argv)
     test_init();
     test_select(scene, mode, level, filter);
     puts("frame,objects,triangles,commands,passed_pixels,cpu_us,gpu_us,fps10,texture_bytes,"
-         "game,mode,level,filter,cpu,aa,score,health");
+         "game,mode,level,filter,cpu,aa,score,health,weapon,checker");
     for (frame = 1; frame <= frames; ++frame) {
         while (event == 2 && next_frame <= frame) {
             input_keys = next_keys;
@@ -86,11 +86,11 @@ int main(int argc, char **argv)
             pc_png_write(path, pc_soc_pixels());
         }
         struct gpu_emu_usage usage = pc_soc_gpu_usage();
-        printf("%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n",
+        printf("%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n",
                frame, test.alive_count,
                test.triangles/3, test.command_count, test.pixels, test.cpu_us,
                test.gpu_us, test.fps10, usage.texture_bytes, test.game, test.mode, test.level,
-               test.filter, test.cpu, test.aa, test.score, test.health);
+               test.filter, test.cpu, test.aa, test.score, test.health, test.weapon, test.checker);
         fflush(stdout);
     }
     if (script) fclose(script);

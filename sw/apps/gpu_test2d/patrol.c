@@ -6,14 +6,30 @@
 #include <stdio.h>
 #include <string.h>
 static const unsigned loads[7] = {1000, 2000, 5000, 10000, 20000, 50000, 100000};
+/* Keep additive glow readable as overlap grows; object populations stay unchanged. */
+static const unsigned glow_alpha[7] = {190, 140, 80, 50, 36, 24, 16};
 static unsigned boss_health;
 static unsigned invulnerable;
 static unsigned flash;
-static unsigned last_damage;
+static unsigned boss_flash;
+static unsigned effect_next;
+static unsigned drop_next;
+struct burst { int x; int y; unsigned born; unsigned damage; };
+static struct burst bursts[16];
+struct pickup { int x; int y; unsigned alive; unsigned kind; };
+static struct pickup drops[12];
+struct trail { int x; int y; unsigned born; };
+static struct trail missile_trail[32][6];
+static void explosion(int x, int y, unsigned damage)
+{
+    bursts[effect_next++%16] = (struct burst){x,y,test.tick,damage};
+    if (damage >= 10) {
+        unsigned slot = drop_next++%12;
+        drops[slot] = (struct pickup){x,y,1,slot%3 == 0};
+    }
+}
 static int boss_x;
 static int target[8][4];
-static unsigned enemy_tick[6];
-static int enemy_y[6];
 static unsigned get(const struct gpu_object *o, unsigned offset, uint32_t mask, unsigned pos)
 {
     return (o->word[offset/4] & mask) >> pos;
@@ -39,24 +55,28 @@ static void spawn(unsigned index, int initial)
         o.py = (initial ? 75+(index/8)*28 : 58)*256;
         o.vy = 60;
         o.life = 0;
-        if (index < 6) {
-            enemy_tick[index] = test.tick;
-            enemy_y[index] = initial ? 75 : 58;
-        }
         o.w = 32;
         o.h = 32;
-        o.u0 = 64;
+        o.u0 = 64+(index%3)*32;
         o.col_hw = 10;
         o.col_hh = 8;
         o.alpha = 255;
     } else if (index < 88) {
         o.px = (unsigned)(test.player_x + ((int)(index%3)-1)*6)*256;
         o.py = (unsigned)(initial ? 60+(int)(index-24)*4 : test.player_y-14)*256;
-        o.vy = (uint32_t)-1400;
+        o.vy = (uint32_t)(test.weapon == 1 ? -2400 : -1400);
+        o.vx = test.weapon == 0 ? (unsigned)(((int)(index%3)-1)*250) : 0;
+        if (test.weapon) {
+            o.u0 = test.weapon == 2 ? 224 : 8;
+            o.v0 = test.weapon == 2 ? 32 : 0;
+            o.h = test.weapon == 1 ? 32 : 16;
+            o.px = (unsigned)(test.player_x+((int)(index%2)*2-1)*9)*256;
+        }
         o.tgt_mask = 254;
         o.life = 72;
-        o.pal_group = 2;
+        o.pal_group = test.weapon == 2 ? 7 : 2;
     } else {
+        o.alpha = test.mode == 1 ? glow_alpha[test.level] : 190;
         unsigned phase = (test.tick/240)%3;
         unsigned angle = (index*97 + test.tick*(phase == 1 ? 3 : 1)) & 255;
         int vx = test_sine[(angle+64)&255]*420/16384;
@@ -91,6 +111,12 @@ void test2d_init(void)
     boss_x = 320;
     invulnerable = 0;
     flash = 0;
+    boss_flash = 0;
+    effect_next = 0;
+    drop_next = 0;
+    memset(bursts, 0, sizeof(bursts));
+    memset(drops, 0, sizeof(drops));
+    memset(missile_trail, 0, sizeof(missile_trail));
     for (unsigned i = 0; i < test.objects_count; ++i) spawn(i, 1);
 }
 static void software_step(void)
@@ -147,15 +173,45 @@ void test2d_update(uint32_t keys)
     target[1][1] = 68;
     target[1][2] = boss_x+26;
     target[1][3] = 120;
-    for (unsigned t = 2; t < 8; ++t) {
-        /* Six target boxes follow deterministic formation trajectories, no table scan. */
-        int x = 80+(int)(t-2)*68;
-        int y = enemy_y[t-2]+(int)(((test.tick-enemy_tick[t-2])*60)/256);
-        target[t][0] = x-12;
-        target[t][1] = y-8;
-        target[t][2] = x+12;
-        target[t][3] = y+8;
+    for (unsigned i = 0; i < 24; ++i) {
+        struct gpu_object *o = test.objects+i;
+        unsigned type = i%3;
+        int vx = type == 0 ? test_sine[(test.tick*2+i*17)&255]/90 :
+                 type == 1 ? ((test.tick/45+i)%2 ? 200 : -200) :
+                 test_sine[(test.tick+i*23)&255]/48;
+        PUT(o, VX, vx);
+        PUT(o, VY, type == 2 ? 125 : 60);
+        if (i < 6) {
+            int x = (signed24(GET(o, PX))+vx)/256;
+            int y = (signed24(GET(o, PY))+(type == 2 ? 125 : 60))/256;
+            target[i+2][0] = x-12;
+            target[i+2][1] = y-8;
+            target[i+2][2] = x+12;
+            target[i+2][3] = y+8;
+        }
     }
+    if (test.weapon == 2) for (unsigned i = 24; i < 88; ++i) {
+        struct gpu_object *o = test.objects+i;
+        int x = signed24(GET(o, PX))/256;
+        int steering = (boss_x-x)*20;
+        if (steering > 650) steering = 650;
+        if (steering < -650) steering = -650;
+        PUT(o, VX, steering);
+    }
+    for (unsigned i = 0; i < 12; ++i) if (drops[i].alive) {
+        struct pickup *d = drops+i;
+        ++d->y;
+        int dx = test.player_x-d->x;
+        int dy = test.player_y-d->y;
+        if (dx*dx+dy*dy < 28*28) {
+            if (d->kind) test.health = test.health > 80 ? 100 : test.health+20;
+            else test.score += 50;
+            d->alive = 0;
+            test_sound(3);
+        }
+        if (d->y > 330) d->alive = 0;
+    }
+    if (boss_flash) --boss_flash;
     for (unsigned t = 0; t < 8; ++t)
         gpu_collision_target(t, (int16_t)target[t][0], (int16_t)target[t][1],
                              (int16_t)target[t][2], (int16_t)target[t][3]);
@@ -173,18 +229,20 @@ void test2d_results(void)
             if (test.health) --test.health;
             invulnerable = 20;
             flash = 20;
+            explosion(test.player_x, test.player_y, 0);
             test_sound(1);
         } else if (t == 1 && index >= 24 && index < 88) {
             ++test.score;
-            if (boss_health) --boss_health;
-            flash = 12;
-            last_damage = 1;
+            unsigned damage = test.weapon == 0 ? 1 : test.weapon == 1 ? 3 : 8;
+            boss_health = boss_health > damage ? boss_health-damage : 0;
+            boss_flash = 5;
+            if (test.tick%4 == 0) explosion(boss_x+(int)(index%7)*7-24, 96, damage);
             spawn(index, 0);
             test_sound(1);
         } else if (t > 1 && index >= 24 && index < 88) {
             test.score += 10;
             flash = 24;
-            last_damage = 10;
+            explosion((target[t][0]+target[t][2])/2, (target[t][1]+target[t][3])/2, 10);
             spawn(t-2, 0);
             spawn(index, 0);
             test_sound(2);
@@ -192,6 +250,11 @@ void test2d_results(void)
     }
     for (unsigned i = 0; i < test.free_count; ++i)
         spawn(gpu_free_object(test.released[i]), 0);
+    if (test.weapon == 2) for (unsigned i = 0; i < 32; ++i) {
+        const struct gpu_object *o = test.objects+24+i*2;
+        missile_trail[i][test.tick%6] = (struct trail){signed24(GET(o, PX))/256,
+            signed24(GET(o, PY))/256+8, test.tick};
+    }
     test.alive_count = test.objects_count;
     if (!boss_health) { boss_health = 1200; test.score += 500; test_sound(2); }
     if (!test.health) test.health = 100;
@@ -209,56 +272,96 @@ static void fin(int cx, int cy, unsigned angle)
         int rx = (x*test_sine[(angle+64)&255]-y*test_sine[angle])/16384;
         int ry = (x*test_sine[angle]+y*test_sine[(angle+64)&255])/16384;
         test_vertex(cx+rx, cy+ry, 0, 0xffff,
-                    (k == 1 || k == 2 ? 96 : 64)*256, (k > 1 ? 32 : 0)*256, 0);
+                    (k == 1 || k == 2 ? 255 : 224)*256, (k > 1 ? 32 : 0)*256, 0);
     }
     test_draw(1, first, 2, 0, 1, 0);
 }
 
 void test2d_scene(void)
 {
+    int shake = flash ? ((test.tick&1) ? 3 : -3) : 0;
     unsigned first = test.quads_count;
-    for (unsigned layer = 0; layer < 2; ++layer) {
-        unsigned size = layer ? 32 : 64;
-        for (unsigned y = 0; y < 7; ++y) for (unsigned x = 0; x < 11; ++x)
-            test_quad((int)(x*64)-(int)((test.tick/(layer ? 2 : 5))%64),
-                      (int)(y*64)-(int)((test.tick/(layer ? 1 : 3))%64),
-                      size, size, 0, 64, 0, layer ? 100 : 255);
-    }
+    for (unsigned y = 0; y < 7; ++y) for (unsigned x = 0; x < 11; ++x)
+        test_quad((int)x*64+shake, (int)y*64-(int)(test.tick/4%64),
+                  64, 64, 0, 64, 0, 255);
     test_draw(0, first, test.quads_count-first, 0, 1, 0);
     first = test.quads_count;
-    test_quad(boss_x-32, 64, 64, 64, 96, 0, 0, 255);
-    test_quad(test.player_x-16, test.player_y-16, 32, 32, 32, 0, 0,
-              invulnerable && (test.tick&2) ? 90 : 255);
+    for (unsigned y = 0; y < 4; ++y) for (unsigned x = 0; x < 6; ++x)
+        test_quad((int)x*128-60+shake, (int)y*128-(int)(test.tick/8%128),
+                  128, 128, 128, 0, 0, 42);
+    test_quad(76+shake, 102-(int)(test.tick/18%30), 96, 96, 0, 0, 0, 150);
+    for (unsigned i = 0; i < 9; ++i)
+        test_quad((int)((i*113+test.tick/2)%700)-32+shake,
+                  64+(int)((i*79+test.tick*2)%270), 32, 32, 128, 128, 0, 110);
+    for (unsigned i = 0; i < 12; ++i) if (drops[i].alive)
+        test_quad(drops[i].x-8, drops[i].y-8, 16, 16,
+                  drops[i].kind ? 176 : 160, 128, 0, 255);
+    test_draw(0, first, test.quads_count-first, 6, 1, 0);
+    first = test.quads_count;
+    test_quad(boss_x-32+shake, 64, 64, 64, 160, 0, boss_flash && (test.tick&2) ? 15 : 0, 255);
+    test_quad(test.player_x-16+shake, test.player_y-16, 32, 32, 32, 0,
+              invulnerable && (test.tick&2) ? 15 : 0, 255);
     test_draw(0, first, test.quads_count-first, 0, 1, 0);
     for (unsigned i = 0; i < 4; ++i) {
         unsigned a = (test.tick+i*64)&255;
-        fin(boss_x+test_sine[(a+64)&255]*46/16384,
+        fin(boss_x+test_sine[(a+64)&255]*46/16384+shake,
             96+test_sine[a]*30/16384, a);
     }
-    test_draw(2, 0, test.objects_count, 0, 1, 0);
+    /* Enemy sprites and glowing ammunition share hardware OBJ_STEP draw ordering. */
+    test_draw(2, 0, 24, 0, 1, 0);
+    test_draw(2, 24, test.objects_count-24, 0, 2, 0);
     first = test.quads_count;
-    for (unsigned i = 0; i < 48; ++i) {
-        unsigned a = (i*41+test.tick*2)&255;
-        unsigned age = (test.tick+i*7)%36;
-        int x = boss_x+test_sine[(a+64)&255]*(int)age/4096;
-        int y = 96+test_sine[a]*(int)age/4096;
-        test_quad(x-8, y-8, 16, 16, 0, 32, 0, (36-age)*5);
-    }
-    if (flash) for (unsigned i = 0; i < 32; ++i) {
-        unsigned a = (i*8)&255;
-        int radius = (24-(int)flash)*3;
-        test_quad(test.player_x+test_sine[(a+64)&255]*radius/16384-8,
-                  test.player_y+test_sine[a]*radius/16384-8, 16, 16, 0, 32, 0, flash*8);
+    test_quad(test.player_x-8+shake, test.player_y+12, 16, 24,
+              16+(test.tick/4%3)*16, 32, 0, 255);
+    test_quad(test.player_x-32+shake, test.player_y-32, 64, 64, 64, 32,
+              0, invulnerable ? 230 : 100+(test.tick%20)*4);
+    if (test.weapon == 2) for (unsigned i = 0; i < 32; ++i)
+        for (unsigned j = 0; j < 6; ++j) {
+            const struct trail *t = &missile_trail[i][j];
+            unsigned age = test.tick-t->born;
+            if (t->born && age < 6)
+                test_quad(t->x-4, t->y-4, 8, 8, 0, 0, 7, 190-age*28);
+        }
+    for (unsigned i = 0; i < 16; ++i) {
+        struct burst *b = bursts+i;
+        unsigned age = test.tick-b->born;
+        if (!b->born || age >= 28) continue;
+        test_quad(b->x-16+shake, b->y-16, 32, 32, 128+(age/7)*32, 64, 0, 255);
+        for (unsigned j = 0; j < 12; ++j) {
+            unsigned a = (j*21+i*7)&255;
+            int radius = (int)age*2;
+            test_quad(b->x+test_sine[(a+64)&255]*radius/16384-4+shake,
+                      b->y+test_sine[a]*radius/16384-4, 8, 8, 0, 0, j%2 ? 4 : 7,
+                      240-age*8);
+        }
     }
     test_draw(0, first, test.quads_count-first, 0, 2, 0);
-    first = test.quads_count;
-    test_rect(boss_x-60, 55, boss_health/10, 3, 3);
-    for (unsigned i = 0; flash && i < 5; ++i) {
-        char number[12];
-        snprintf(number, sizeof(number), "%u", last_damage);
-        test_text(boss_x-45+(int)i*21, 120-(int)((test.tick+i*9)%42), number, 7);
+    if (test.weapon == 1 && test.player_y > 72) {
+        unsigned beam = test.triangles;
+        test_sprite(test.player_x-5, 56, 10, test.player_y-70, 8, 0, 8, 32);
+        test_draw(1, beam, 2, 0, 2, 0);
     }
+    unsigned start = test.triangles;
+    for (unsigned i = 0; i < 16; ++i) {
+        struct burst *b = bursts+i;
+        unsigned age = test.tick-b->born;
+        if (!b->born || !b->damage || age >= 28) continue;
+        char number[12];
+        snprintf(number, sizeof(number), "+%u", b->damage);
+        unsigned scale = age < 6 ? 384+age*32 : age < 12 ? 576-(age-6)*48 : 288;
+        test_scaled_text(b->x-12, b->y-20-(int)age, number, scale,
+                         b->damage >= 10 ? 0xffa5 : 0x7fff);
+    }
+    test_draw(1, start, (test.triangles-start)/3, 0, 1, 0);
+    first = test.quads_count;
+    test_rect(232, 52, 176, 22, 8);
+    test_text(240, 53, "赤焰核心", 3);
+    test_rect(240, 69, 160, 3, 5);
+    test_rect(240, 69, boss_health*160/1200, 3, 3);
     static const char *phases[3] = {"RADIAL", "SPIRAL", "WAVE"};
-    test_text(520, 56, phases[(test.tick/240)%3], 3);
+    test_text(512, 56, phases[(test.tick/240)%3], 3);
+    static const char *weapons[3] = {"散射", "激光", "追踪导弹"};
+    test_text(12, 310, "武器", 2);
+    test_text(44, 310, weapons[test.weapon], 1);
     test_draw(0, first, test.quads_count-first, 0, 1, 0);
 }

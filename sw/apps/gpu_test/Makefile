@@ -20,6 +20,9 @@ BOARD := sw/lib/plat/board.c sw/bsp/start.S sw/bsp/host.c sw/bsp/cache.c \
     sw/drivers/i2c.c sw/drivers/eth.c sw/lib/virtual_input.c sw/apps/gpu_hello/runtime.c
 HEADERS := $(COMMON)/test.h $(wildcard $(ROOT)/sw/bsp/include/regs/*.h)
 ASSETS := $(OUT)/generated/assets.h
+ASSET_INPUTS := $(wildcard $(ROOT)/sw/apps/gpu_test2d/assets/kenney/*.png) \
+    $(wildcard $(ROOT)/sw/apps/gpu_test3d/assets/kenney/*.png) \
+    $(wildcard $(COMMON)/assets/fusion-pixel/*.bdf)
 .PHONY: board linux windows hud-test
 board: $(OUT)/gpu_test.elf
 linux: $(OUT)/gpu_test
@@ -29,7 +32,7 @@ hud-test: $(OUT)/hud_test
 $(OUT)/hud_test: $(SOURCES) $(COMMON)/tools/hud_test.c $(APP)/headless.c $(ASSETS) $(HEADERS)
 	$(CC) -pthread $(PCFLAGS) $(SOURCES) $(COMMON)/tools/hud_test.c \
 	    $(addprefix $(ROOT)/,$(DRIVERS) $(PC) tools/gpu/emu/pc/png.c) -o $@
-$(ASSETS): $(COMMON)/tools/assets.py
+$(ASSETS): $(COMMON)/tools/assets.py $(ASSET_INPUTS)
 	python3 $< $@
 $(OUT)/gpu_test: $(SOURCES) $(APP)/headless.c $(ASSETS) $(HEADERS) $(APP)/Makefile
 	mkdir -p $(OUT)

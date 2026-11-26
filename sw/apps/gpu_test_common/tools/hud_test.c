@@ -55,14 +55,18 @@ int main(void)
                         }
                     }
                     text_pixels(8, 340, "NEXT/PREV MOVE  ENTER: CONTROLS  ESC: MENU", 0xffff);
+                    if (test.quads_count > TEST_QUAD_MAX ||
+                        test.triangles > TEST_TRI_MAX*3 || test.draws_count > 128) {
+                        fprintf(stderr, "Scene list exceeds allocated buffers\n");
+                        return 1;
+                    }
                     if (scene == 2 && mode == 2) {
                         static const char *filters[] = {"NEAREST", "BILINEAR", "TRILINEAR"};
-                        text_pixels(520, 56, filters[filter], 0xffff);
-                        text_pixels(168, 288, "PERSPECTIVE / 7 MIP LEVELS", 0xffa5);
-                    } else if (scene == 2) text_pixels(520, 56, "FLY THRU", 0xffff);
+                        text_pixels(444, 56, filters[filter], 0xffff);
+                    }
                 }
             }
     pc_soc_destroy();
-    puts("PASS aligned quad batches and complete HUD pixels in all modes");
+    puts("PASS aligned batches, list budgets and HUD pixels in all modes");
     return 0;
 }
