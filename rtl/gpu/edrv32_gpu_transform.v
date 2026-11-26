@@ -24,219 +24,875 @@ module edrv32_gpu_transform (
     input wire stop_i,
     output wire idle_o
 );
-    wire [7:0] unused_vertex_padding_w;
-    assign unused_vertex_padding_w = vertex_data_i[79:72];
-
+    reg [31:0] coefficient_0_0_r;
+    reg [15:0] vertex_0_0_r;
+    reg [47:0] matrix_product0_0;
+    reg [47:0] matrix_product0_0_p1;
+    reg [47:0] matrix_product0_0_p2;
+    wire [49:0] matrix_extend0_0_w;
+    reg [31:0] coefficient_0_1_r;
+    reg [15:0] vertex_0_1_r;
+    reg [47:0] matrix_product0_1;
+    reg [47:0] matrix_product0_1_p1;
+    reg [47:0] matrix_product0_1_p2;
+    wire [49:0] matrix_extend0_1_w;
+    reg [31:0] coefficient_0_2_r;
+    reg [15:0] vertex_0_2_r;
+    reg [47:0] matrix_product0_2;
+    reg [47:0] matrix_product0_2_p1;
+    reg [47:0] matrix_product0_2_p2;
+    wire [49:0] matrix_extend0_2_w;
+    reg [31:0] translation0_r;
+    wire [49:0] translation_extend0_w;
+    wire [34:0] matrix_pair0_0_a0_w;
+    wire [34:0] matrix_pair0_0_b0_w;
+    reg [35:0] matrix_pair0_0_part0;
+    wire [34:0] matrix_pair0_0_low0_w;
+    wire [14:0] matrix_pair0_0_a1_w;
+    wire [14:0] matrix_pair0_0_b1_w;
+    reg [14:0] matrix_pair0_0_a1_w_d4;
+    reg [14:0] matrix_pair0_0_b1_w_d4;
+    reg [15:0] unused_matrix_pair0_0_part1;
+    wire [14:0] matrix_pair0_0_low1_w;
+    wire [49:0] matrix_pair0_0_w;
+    reg [34:0] matrix_pair0_0_low0_w_d5;
+    reg [49:0] translation_extend0_w_d1;
+    reg [49:0] translation_extend0_w_d2;
+    reg [49:0] translation_extend0_w_d3;
+    wire [34:0] matrix_pair0_1_a0_w;
+    wire [34:0] matrix_pair0_1_b0_w;
+    reg [35:0] matrix_pair0_1_part0;
+    wire [34:0] matrix_pair0_1_low0_w;
+    wire [14:0] matrix_pair0_1_a1_w;
+    wire [14:0] matrix_pair0_1_b1_w;
+    reg [14:0] matrix_pair0_1_a1_w_d4;
+    reg [14:0] matrix_pair0_1_b1_w_d4;
+    reg [15:0] unused_matrix_pair0_1_part1;
+    wire [14:0] matrix_pair0_1_low1_w;
+    wire [49:0] matrix_pair0_1_w;
+    reg [34:0] matrix_pair0_1_low0_w_d5;
+    wire [34:0] matrix_total0_a0_w;
+    wire [34:0] matrix_total0_b0_w;
+    reg [35:0] matrix_total0_part0;
+    wire [34:0] matrix_total0_low0_w;
+    wire [14:0] matrix_total0_a1_w;
+    wire [14:0] matrix_total0_b1_w;
+    reg [14:0] matrix_total0_a1_w_d6;
+    reg [14:0] matrix_total0_b1_w_d6;
+    reg [15:0] unused_matrix_total0_part1;
+    wire [14:0] matrix_total0_low1_w;
+    wire [49:0] matrix_total0_w;
+    reg [34:0] matrix_total0_low0_w_d7;
+    reg [39:0] matrix_clamp0;
+    reg [31:0] coefficient_1_0_r;
+    reg [15:0] vertex_1_0_r;
+    reg [47:0] matrix_product1_0;
+    reg [47:0] matrix_product1_0_p1;
+    reg [47:0] matrix_product1_0_p2;
+    wire [49:0] matrix_extend1_0_w;
+    reg [31:0] coefficient_1_1_r;
+    reg [15:0] vertex_1_1_r;
+    reg [47:0] matrix_product1_1;
+    reg [47:0] matrix_product1_1_p1;
+    reg [47:0] matrix_product1_1_p2;
+    wire [49:0] matrix_extend1_1_w;
+    reg [31:0] coefficient_1_2_r;
+    reg [15:0] vertex_1_2_r;
+    reg [47:0] matrix_product1_2;
+    reg [47:0] matrix_product1_2_p1;
+    reg [47:0] matrix_product1_2_p2;
+    wire [49:0] matrix_extend1_2_w;
+    reg [31:0] translation1_r;
+    wire [49:0] translation_extend1_w;
+    wire [34:0] matrix_pair1_0_a0_w;
+    wire [34:0] matrix_pair1_0_b0_w;
+    reg [35:0] matrix_pair1_0_part0;
+    wire [34:0] matrix_pair1_0_low0_w;
+    wire [14:0] matrix_pair1_0_a1_w;
+    wire [14:0] matrix_pair1_0_b1_w;
+    reg [14:0] matrix_pair1_0_a1_w_d4;
+    reg [14:0] matrix_pair1_0_b1_w_d4;
+    reg [15:0] unused_matrix_pair1_0_part1;
+    wire [14:0] matrix_pair1_0_low1_w;
+    wire [49:0] matrix_pair1_0_w;
+    reg [34:0] matrix_pair1_0_low0_w_d5;
+    reg [49:0] translation_extend1_w_d1;
+    reg [49:0] translation_extend1_w_d2;
+    reg [49:0] translation_extend1_w_d3;
+    wire [34:0] matrix_pair1_1_a0_w;
+    wire [34:0] matrix_pair1_1_b0_w;
+    reg [35:0] matrix_pair1_1_part0;
+    wire [34:0] matrix_pair1_1_low0_w;
+    wire [14:0] matrix_pair1_1_a1_w;
+    wire [14:0] matrix_pair1_1_b1_w;
+    reg [14:0] matrix_pair1_1_a1_w_d4;
+    reg [14:0] matrix_pair1_1_b1_w_d4;
+    reg [15:0] unused_matrix_pair1_1_part1;
+    wire [14:0] matrix_pair1_1_low1_w;
+    wire [49:0] matrix_pair1_1_w;
+    reg [34:0] matrix_pair1_1_low0_w_d5;
+    wire [34:0] matrix_total1_a0_w;
+    wire [34:0] matrix_total1_b0_w;
+    reg [35:0] matrix_total1_part0;
+    wire [34:0] matrix_total1_low0_w;
+    wire [14:0] matrix_total1_a1_w;
+    wire [14:0] matrix_total1_b1_w;
+    reg [14:0] matrix_total1_a1_w_d6;
+    reg [14:0] matrix_total1_b1_w_d6;
+    reg [15:0] unused_matrix_total1_part1;
+    wire [14:0] matrix_total1_low1_w;
+    wire [49:0] matrix_total1_w;
+    reg [34:0] matrix_total1_low0_w_d7;
+    reg [39:0] matrix_clamp1;
+    reg [79:0] first_rows_r;
+    reg [159:0] coordinates_r;
+    reg [7:0] normal0_r;
+    reg [15:0] light0_r;
+    reg [23:0] light_product0;
+    reg [23:0] light_product0_p1;
+    reg [23:0] light_product0_p2;
+    wire [25:0] light_extend0_w;
+    reg [7:0] normal1_r;
+    reg [15:0] light1_r;
+    reg [23:0] light_product1;
+    reg [23:0] light_product1_p1;
+    reg [23:0] light_product1_p2;
+    wire [25:0] light_extend1_w;
+    reg [7:0] normal2_r;
+    reg [15:0] light2_r;
+    reg [23:0] light_product2;
+    reg [23:0] light_product2_p1;
+    reg [23:0] light_product2_p2;
+    wire [25:0] light_extend2_w;
+    reg [25:0] light_pair;
+    reg [25:0] light_extend2_w_d4;
+    reg [25:0] unused_light_sum;
+    reg [23:0] light_dot;
+    reg [7:0] direct0_r;
+    reg [7:0] ambient0_r;
+    reg [7:0] direct0_r_d1;
+    reg [7:0] direct0_r_d2;
+    reg [7:0] direct0_r_d3;
+    reg [7:0] direct0_r_d4;
+    reg [7:0] direct0_r_d5;
+    reg [7:0] direct0_r_d6;
+    reg [31:0] illumination_product0;
+    reg [31:0] illumination_product0_p1;
+    reg [31:0] illumination_product0_p2;
+    reg [7:0] ambient0_r_d1;
+    reg [7:0] ambient0_r_d2;
+    reg [7:0] ambient0_r_d3;
+    reg [7:0] ambient0_r_d4;
+    reg [7:0] ambient0_r_d5;
+    reg [7:0] ambient0_r_d6;
+    reg [7:0] ambient0_r_d7;
+    reg [7:0] ambient0_r_d8;
+    reg [7:0] ambient0_r_d9;
+    reg [32:0] illumination0;
+    reg [7:0] base_color0_r;
+    reg [7:0] base_color0_r_d1;
+    reg [7:0] base_color0_r_d2;
+    reg [7:0] base_color0_r_d3;
+    reg [7:0] base_color0_r_d4;
+    reg [7:0] base_color0_r_d5;
+    reg [7:0] base_color0_r_d6;
+    reg [7:0] base_color0_r_d7;
+    reg [7:0] base_color0_r_d8;
+    reg [7:0] base_color0_r_d9;
+    reg [7:0] base_color0_r_d10;
+    reg [40:0] color_product0;
+    reg [40:0] color_product0_p1;
+    reg [40:0] color_product0_p2;
+    wire [41:0] color_extend0_w;
+    wire [41:0] color_bias0_w;
+    wire [34:0] color_round0_a0_w;
+    wire [34:0] color_round0_b0_w;
+    reg [35:0] color_round0_part0;
+    wire [34:0] color_round0_low0_w;
+    wire [6:0] color_round0_a1_w;
+    wire [6:0] color_round0_b1_w;
+    reg [6:0] color_round0_a1_w_d14;
+    reg [6:0] color_round0_b1_w_d14;
+    reg [7:0] unused_color_round0_part1;
+    wire [6:0] color_round0_low1_w;
+    wire [41:0] unused_color_round0_w;
+    reg [34:0] color_round0_low0_w_d15;
+    reg [20:0] color_integer0;
+    reg [16:0] unused_color_divide0;
+    reg [20:0] color_integer0_d17;
+    reg [23:0] color_clamp0;
+    reg [7:0] direct1_r;
+    reg [7:0] ambient1_r;
+    reg [7:0] direct1_r_d1;
+    reg [7:0] direct1_r_d2;
+    reg [7:0] direct1_r_d3;
+    reg [7:0] direct1_r_d4;
+    reg [7:0] direct1_r_d5;
+    reg [7:0] direct1_r_d6;
+    reg [31:0] illumination_product1;
+    reg [31:0] illumination_product1_p1;
+    reg [31:0] illumination_product1_p2;
+    reg [7:0] ambient1_r_d1;
+    reg [7:0] ambient1_r_d2;
+    reg [7:0] ambient1_r_d3;
+    reg [7:0] ambient1_r_d4;
+    reg [7:0] ambient1_r_d5;
+    reg [7:0] ambient1_r_d6;
+    reg [7:0] ambient1_r_d7;
+    reg [7:0] ambient1_r_d8;
+    reg [7:0] ambient1_r_d9;
+    reg [32:0] illumination1;
+    reg [7:0] base_color1_r;
+    reg [7:0] base_color1_r_d1;
+    reg [7:0] base_color1_r_d2;
+    reg [7:0] base_color1_r_d3;
+    reg [7:0] base_color1_r_d4;
+    reg [7:0] base_color1_r_d5;
+    reg [7:0] base_color1_r_d6;
+    reg [7:0] base_color1_r_d7;
+    reg [7:0] base_color1_r_d8;
+    reg [7:0] base_color1_r_d9;
+    reg [7:0] base_color1_r_d10;
+    reg [40:0] color_product1;
+    reg [40:0] color_product1_p1;
+    reg [40:0] color_product1_p2;
+    wire [41:0] color_extend1_w;
+    wire [41:0] color_bias1_w;
+    wire [34:0] color_round1_a0_w;
+    wire [34:0] color_round1_b0_w;
+    reg [35:0] color_round1_part0;
+    wire [34:0] color_round1_low0_w;
+    wire [6:0] color_round1_a1_w;
+    wire [6:0] color_round1_b1_w;
+    reg [6:0] color_round1_a1_w_d14;
+    reg [6:0] color_round1_b1_w_d14;
+    reg [7:0] unused_color_round1_part1;
+    wire [6:0] color_round1_low1_w;
+    wire [41:0] unused_color_round1_w;
+    reg [34:0] color_round1_low0_w_d15;
+    reg [20:0] color_integer1;
+    reg [16:0] unused_color_divide1;
+    reg [20:0] color_integer1_d17;
+    reg [23:0] color_clamp1;
+    reg [7:0] direct2_r;
+    reg [7:0] ambient2_r;
+    reg [7:0] direct2_r_d1;
+    reg [7:0] direct2_r_d2;
+    reg [7:0] direct2_r_d3;
+    reg [7:0] direct2_r_d4;
+    reg [7:0] direct2_r_d5;
+    reg [7:0] direct2_r_d6;
+    reg [31:0] illumination_product2;
+    reg [31:0] illumination_product2_p1;
+    reg [31:0] illumination_product2_p2;
+    reg [7:0] ambient2_r_d1;
+    reg [7:0] ambient2_r_d2;
+    reg [7:0] ambient2_r_d3;
+    reg [7:0] ambient2_r_d4;
+    reg [7:0] ambient2_r_d5;
+    reg [7:0] ambient2_r_d6;
+    reg [7:0] ambient2_r_d7;
+    reg [7:0] ambient2_r_d8;
+    reg [7:0] ambient2_r_d9;
+    reg [32:0] illumination2;
+    reg [7:0] base_color2_r;
+    reg [7:0] base_color2_r_d1;
+    reg [7:0] base_color2_r_d2;
+    reg [7:0] base_color2_r_d3;
+    reg [7:0] base_color2_r_d4;
+    reg [7:0] base_color2_r_d5;
+    reg [7:0] base_color2_r_d6;
+    reg [7:0] base_color2_r_d7;
+    reg [7:0] base_color2_r_d8;
+    reg [7:0] base_color2_r_d9;
+    reg [7:0] base_color2_r_d10;
+    reg [40:0] color_product2;
+    reg [40:0] color_product2_p1;
+    reg [40:0] color_product2_p2;
+    wire [41:0] color_extend2_w;
+    wire [41:0] color_bias2_w;
+    wire [34:0] color_round2_a0_w;
+    wire [34:0] color_round2_b0_w;
+    reg [35:0] color_round2_part0;
+    wire [34:0] color_round2_low0_w;
+    wire [6:0] color_round2_a1_w;
+    wire [6:0] color_round2_b1_w;
+    reg [6:0] color_round2_a1_w_d14;
+    reg [6:0] color_round2_b1_w_d14;
+    reg [7:0] unused_color_round2_part1;
+    wire [6:0] color_round2_low1_w;
+    wire [41:0] unused_color_round2_w;
+    reg [34:0] color_round2_low0_w_d15;
+    reg [20:0] color_integer2;
+    reg [16:0] unused_color_divide2;
+    reg [20:0] color_integer2_d17;
+    reg [23:0] color_clamp2;
+    reg [31:0] uv_input_r;
+    wire [39:0] coordinate0_w;
+    wire [39:0] coordinate1_w;
+    wire [39:0] coordinate2_w;
+    wire [39:0] coordinate3_w;
+    wire [15:0] uv0_w;
+    wire [15:0] uv1_w;
+    reg [39:0] coordinate0_w_d11;
+    reg [39:0] coordinate0_w_d12;
+    reg [39:0] coordinate0_w_d13;
+    reg [39:0] coordinate0_w_d14;
+    reg [39:0] coordinate0_w_d15;
+    reg [39:0] coordinate0_w_d16;
+    reg [39:0] coordinate0_w_d17;
+    reg [39:0] coordinate0_w_d18;
+    reg [39:0] output_0_r [0:1];
+    reg [39:0] coordinate1_w_d11;
+    reg [39:0] coordinate1_w_d12;
+    reg [39:0] coordinate1_w_d13;
+    reg [39:0] coordinate1_w_d14;
+    reg [39:0] coordinate1_w_d15;
+    reg [39:0] coordinate1_w_d16;
+    reg [39:0] coordinate1_w_d17;
+    reg [39:0] coordinate1_w_d18;
+    reg [39:0] output_1_r [0:1];
+    reg [39:0] coordinate2_w_d11;
+    reg [39:0] coordinate2_w_d12;
+    reg [39:0] coordinate2_w_d13;
+    reg [39:0] coordinate2_w_d14;
+    reg [39:0] coordinate2_w_d15;
+    reg [39:0] coordinate2_w_d16;
+    reg [39:0] coordinate2_w_d17;
+    reg [39:0] coordinate2_w_d18;
+    reg [39:0] output_2_r [0:1];
+    reg [39:0] coordinate3_w_d11;
+    reg [39:0] coordinate3_w_d12;
+    reg [39:0] coordinate3_w_d13;
+    reg [39:0] coordinate3_w_d14;
+    reg [39:0] coordinate3_w_d15;
+    reg [39:0] coordinate3_w_d16;
+    reg [39:0] coordinate3_w_d17;
+    reg [39:0] coordinate3_w_d18;
+    reg [39:0] output_3_r [0:1];
+    reg [15:0] uv0_w_d1;
+    reg [15:0] uv0_w_d2;
+    reg [15:0] uv0_w_d3;
+    reg [15:0] uv0_w_d4;
+    reg [15:0] uv0_w_d5;
+    reg [15:0] uv0_w_d6;
+    reg [15:0] uv0_w_d7;
+    reg [15:0] uv0_w_d8;
+    reg [15:0] uv0_w_d9;
+    reg [15:0] uv0_w_d10;
+    reg [15:0] uv0_w_d11;
+    reg [15:0] uv0_w_d12;
+    reg [15:0] uv0_w_d13;
+    reg [15:0] uv0_w_d14;
+    reg [15:0] uv0_w_d15;
+    reg [15:0] uv0_w_d16;
+    reg [15:0] uv0_w_d17;
+    reg [15:0] uv0_w_d18;
+    reg [15:0] output_4_r [0:1];
+    reg [15:0] uv1_w_d1;
+    reg [15:0] uv1_w_d2;
+    reg [15:0] uv1_w_d3;
+    reg [15:0] uv1_w_d4;
+    reg [15:0] uv1_w_d5;
+    reg [15:0] uv1_w_d6;
+    reg [15:0] uv1_w_d7;
+    reg [15:0] uv1_w_d8;
+    reg [15:0] uv1_w_d9;
+    reg [15:0] uv1_w_d10;
+    reg [15:0] uv1_w_d11;
+    reg [15:0] uv1_w_d12;
+    reg [15:0] uv1_w_d13;
+    reg [15:0] uv1_w_d14;
+    reg [15:0] uv1_w_d15;
+    reg [15:0] uv1_w_d16;
+    reg [15:0] uv1_w_d17;
+    reg [15:0] uv1_w_d18;
+    reg [15:0] output_5_r [0:1];
+    reg [23:0] output_6_r [0:1];
+    reg [23:0] output_7_r [0:1];
+    reg [23:0] output_8_r [0:1];
     reg phase_r;
-    wire enable_w;
-    wire accept_w;
     reg [47:0] vertex_r;
     wire [47:0] vertex_w;
-    wire signed [47:0] matrix_product_w [0:5];
-    wire signed [31:0] translation_w [0:1];
-    wire signed [49:0] matrix_sum_w [0:1];
-    reg [79:0] first_rows_r;
-    wire [159:0] coordinates_w [2:5];
-    wire signed [23:0] light_product_w [0:2];
-    wire signed [25:0] unused_light_sum_w;
-    reg [23:0] dot_r;
-    wire [31:0] illumination_product_w [0:2];
-    wire [32:0] illumination_w [0:2];
-    wire [40:0] color_product_w [0:2];
-    wire [71:0] rounded_color_w;
-    reg [71:0] color_r;
-    wire [31:0] uv_w [0:5];
-    wire [23:0] base_color_w [0:3];
-    reg [5:0] valid_r;
+    wire enable_w;
+    wire accept_w;
+    wire push_w;
+    wire pop_w;
+    reg [18:0] valid_r;
     reg [1:0] count_r;
     reg read_r;
     reg write_r;
-    wire [39:0] coordinate_w [0:1];
-    wire [23:0] light_color_w [0:2];
-    wire push_w;
-    wire pop_w;
-
+    wire [7:0] unused_padding_w;
+    assign unused_padding_w = vertex_data_i[79:72];
     assign enable_w = count_r != 2 && !stop_i;
     assign vertex_ready_o = enable_w && !phase_r;
     assign accept_w = vertex_valid_i && vertex_ready_o;
     assign vertex_w = phase_r ? vertex_r : vertex_data_i[47:0];
     assign transformed_valid_o = count_r != 0;
-    assign push_w = enable_w && valid_r[5];
+    assign push_w = enable_w && valid_r[18];
     assign pop_w = transformed_valid_o && transformed_ready_i;
     assign idle_o = valid_r == 0 && count_r == 0 && !phase_r;
-    assign unused_light_sum_w = $signed({{2{light_product_w[0][23]}}, light_product_w[0]})
-        + $signed({{2{light_product_w[1][23]}}, light_product_w[1]})
-        + $signed({{2{light_product_w[2][23]}}, light_product_w[2]});
-    assign rounded_color_w = {light_color_w[2], light_color_w[1], light_color_w[0]};
-
-    genvar row_g;
-    genvar column_g;
-    genvar channel_g;
-    genvar stage_g;
-    genvar field_g;
-    generate
-        for (row_g = 0; row_g < 2; row_g = row_g + 1) begin : g_sum
-            // Issue stage: two rows of three 32x16 matrix multipliers and translation muxes.
-            wire [31:0] translation_input_w;
-            reg signed [31:0] translation_r;
-            assign translation_w[row_g] = translation_r;
-            assign translation_input_w = phase_r ? matrix_i[(row_g + 2) * 128 + 96 +: 32]
-                : matrix_i[row_g * 128 + 96 +: 32];
-            always @(posedge clk_i) begin
-                if (enable_w) translation_r <= translation_input_w;
-            end
-            for (column_g = 0; column_g < 3; column_g = column_g + 1) begin : g_product
-                wire signed [31:0] coefficient_w;
-                reg signed [47:0] product_r;
-                assign matrix_product_w[row_g * 3 + column_g] = product_r;
-                assign coefficient_w = phase_r
-                    ? matrix_i[(row_g + 2) * 128 + column_g * 32 +: 32]
-                    : matrix_i[row_g * 128 + column_g * 32 +: 32];
-                always @(posedge clk_i) begin
-                    if (enable_w) product_r
-                        <= coefficient_w * $signed(vertex_w[column_g * 16 +: 16]);
-                end
-            end
-            // Sum stage: three s50 adders and two saturation comparators per row.
-            assign coordinate_w[row_g] = matrix_sum_w[row_g] > 50'sd549755813887
-                ? 40'h7fffffffff : (matrix_sum_w[row_g] < -50'sd549755813888
-                ? 40'h8000000000 : matrix_sum_w[row_g][39:0]);
-            assign matrix_sum_w[row_g] =
-                $signed({{2{matrix_product_w[row_g * 3][47]}}, matrix_product_w[row_g * 3]})
-                + $signed({{2{matrix_product_w[row_g * 3 + 1][47]}},
-                    matrix_product_w[row_g * 3 + 1]})
-                + $signed({{2{matrix_product_w[row_g * 3 + 2][47]}},
-                    matrix_product_w[row_g * 3 + 2]})
-                + $signed({{18{translation_w[row_g][31]}}, translation_w[row_g]});
-        end
-        // Three lighting channels: each has one 8x16 normal product at issue, then one
-        // 24x8 product, one u33 add, one 33x8 product and one constant divide/round/saturate
-        // at the original successive stage boundaries.
-        for (channel_g = 0; channel_g < 3; channel_g = channel_g + 1) begin : g_light
-            reg signed [23:0] light_product_r;
-            reg [31:0] illumination_product_r;
-            reg [32:0] illumination_r;
-            reg [40:0] color_product_r;
-            wire [41:0] rounded_w;
-            assign light_product_w[channel_g] = light_product_r;
-            assign illumination_product_w[channel_g] = illumination_product_r;
-            assign illumination_w[channel_g] = illumination_r;
-            assign color_product_w[channel_g] = color_product_r;
-            assign rounded_w = ({1'b0, color_product_w[channel_g]} + 42'd267386880)
-                / 42'd534773760;
-            assign light_color_w[channel_g] = rounded_w > 255
-                ? 24'hff0000 : {rounded_w[7:0], 16'd0};
-            always @(posedge clk_i) begin
-                if (enable_w) begin
-                    light_product_r <= $signed(vertex_data_i[48 + channel_g * 8 +: 8])
-                        * $signed(light_i[channel_g * 16 +: 16]);
-                    illumination_product_r <= dot_r
-                        * light_i[64 - channel_g * 8 +: 8];
-                    illumination_r <= {1'b0, illumination_product_w[channel_g]}
-                        + ({25'd0, light_i[88 - channel_g * 8 +: 8]} << 21);
-                    color_product_r <= illumination_w[channel_g]
-                        * base_color_w[3][channel_g * 8 +: 8];
-                end
-            end
-        end
-        for (stage_g = 2; stage_g < 6; stage_g = stage_g + 1) begin : g_coordinates
-            reg [159:0] data_r;
-            wire [159:0] next_w;
-            if (stage_g == 2) begin : g_first
-                assign next_w = {coordinate_w[1], coordinate_w[0], first_rows_r};
-            end else begin : g_delay
-                assign next_w = coordinates_w[stage_g - 1];
-            end
-            assign coordinates_w[stage_g] = data_r;
-            always @(posedge clk_i) begin
-                if (enable_w) data_r <= next_w;
-            end
-        end
-        for (stage_g = 0; stage_g < 6; stage_g = stage_g + 1) begin : g_uv
-            reg [31:0] data_r;
-            wire [31:0] next_w;
-            if (stage_g == 0) begin : g_first
-                assign next_w = vertex_data_i[127:96];
-            end else begin : g_delay
-                assign next_w = uv_w[stage_g - 1];
-            end
-            assign uv_w[stage_g] = data_r;
-            always @(posedge clk_i) begin
-                if (enable_w) data_r <= next_w;
-            end
-        end
-        for (stage_g = 0; stage_g < 4; stage_g = stage_g + 1) begin : g_base_color
-            reg [23:0] data_r;
-            wire [23:0] next_w;
-            if (stage_g == 0) begin : g_first
-                assign next_w = {vertex_data_i[84:80], vertex_data_i[84:82],
-                    vertex_data_i[90:85], vertex_data_i[90:89],
-                    vertex_data_i[95:91], vertex_data_i[95:93]};
-            end else begin : g_delay
-                assign next_w = base_color_w[stage_g - 1];
-            end
-            assign base_color_w[stage_g] = data_r;
-            always @(posedge clk_i) begin
-                if (enable_w) data_r <= next_w;
-            end
-        end
-        // Output FIFO: nine independent fields, two slots each.
-        for (field_g = 0; field_g < 9; field_g = field_g + 1) begin : g_output
-            localparam WIDTH = field_g < 4 ? 40 : (field_g < 6 ? 16 : 24);
-            localparam OFFSET = field_g < 4 ? field_g * 40
-                : (field_g < 6 ? 160 + (field_g - 4) * 16 : 192 + (field_g - 6) * 24);
-            reg [WIDTH-1:0] data_r [0:1];
-            wire [WIDTH-1:0] next_w;
-            if (field_g < 4) begin : g_position
-                assign next_w = coordinates_w[5][field_g * 40 +: 40];
-            end else if (field_g < 6) begin : g_uv
-                assign next_w = uv_w[5][(field_g - 4) * 16 +: 16];
-            end else begin : g_color
-                assign next_w = color_r[(field_g - 6) * 24 +: 24];
-            end
-            assign transformed_data_o[OFFSET +: WIDTH] = data_r[read_r];
-            always @(posedge clk_i) begin
-                if (push_w) data_r[write_r] <= next_w;
-            end
-        end
-    endgenerate
-
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
-            phase_r <= 1'b0;
-            valid_r <= 6'd0;
-            count_r <= 2'd0;
-            read_r <= 1'b0;
-            write_r <= 1'b0;
+            phase_r <= 0;
+            valid_r <= 0;
+            count_r <= 0;
+            read_r <= 0;
+            write_r <= 0;
         end else if (stop_i) begin
-            phase_r <= 1'b0;
-            valid_r <= 6'd0;
-            count_r <= 2'd0;
-            read_r <= 1'b0;
-            write_r <= 1'b0;
+            phase_r <= 0;
+            valid_r <= 0;
+            count_r <= 0;
+            read_r <= 0;
+            write_r <= 0;
         end else begin
             if (enable_w) begin
                 phase_r <= accept_w;
-                valid_r <= {valid_r[4:0], accept_w};
+                valid_r <= {valid_r[17:0], accept_w};
             end
             if (push_w) write_r <= !write_r;
             if (pop_w) read_r <= !read_r;
-            begin
-                case ({push_w, pop_w})
-                    2'b10: count_r <= count_r + 2'd1;
-                    2'b01: count_r <= count_r - 2'd1;
-                    default: count_r <= count_r;
-                endcase
-            end
+            case ({push_w, pop_w})
+                2'b10: count_r <= count_r + 1'b1;
+                2'b01: count_r <= count_r - 1'b1;
+                default: count_r <= count_r;
+            endcase
         end
     end
-
+    assign matrix_extend0_0_w = {{2{matrix_product0_0_p2[47]}}, matrix_product0_0_p2};
+    assign matrix_extend0_1_w = {{2{matrix_product0_1_p2[47]}}, matrix_product0_1_p2};
+    assign matrix_extend0_2_w = {{2{matrix_product0_2_p2[47]}}, matrix_product0_2_p2};
+    assign translation_extend0_w = {{18{translation0_r[31]}}, translation0_r};
+    assign matrix_pair0_0_a0_w = matrix_extend0_0_w[0 +: 35];
+    assign matrix_pair0_0_b0_w = matrix_extend0_1_w[0 +: 35];
+    assign matrix_pair0_0_low0_w = matrix_pair0_0_part0[34:0];
+    assign matrix_pair0_0_a1_w = matrix_extend0_0_w[35 +: 15];
+    assign matrix_pair0_0_b1_w = matrix_extend0_1_w[35 +: 15];
+    assign matrix_pair0_0_low1_w = unused_matrix_pair0_0_part1[14:0];
+    assign matrix_pair0_0_w = {matrix_pair0_0_low1_w, matrix_pair0_0_low0_w_d5};
+    assign matrix_pair0_1_a0_w = matrix_extend0_2_w[0 +: 35];
+    assign matrix_pair0_1_b0_w = translation_extend0_w_d3[0 +: 35];
+    assign matrix_pair0_1_low0_w = matrix_pair0_1_part0[34:0];
+    assign matrix_pair0_1_a1_w = matrix_extend0_2_w[35 +: 15];
+    assign matrix_pair0_1_b1_w = translation_extend0_w_d3[35 +: 15];
+    assign matrix_pair0_1_low1_w = unused_matrix_pair0_1_part1[14:0];
+    assign matrix_pair0_1_w = {matrix_pair0_1_low1_w, matrix_pair0_1_low0_w_d5};
+    assign matrix_total0_a0_w = matrix_pair0_0_w[0 +: 35];
+    assign matrix_total0_b0_w = matrix_pair0_1_w[0 +: 35];
+    assign matrix_total0_low0_w = matrix_total0_part0[34:0];
+    assign matrix_total0_a1_w = matrix_pair0_0_w[35 +: 15];
+    assign matrix_total0_b1_w = matrix_pair0_1_w[35 +: 15];
+    assign matrix_total0_low1_w = unused_matrix_total0_part1[14:0];
+    assign matrix_total0_w = {matrix_total0_low1_w, matrix_total0_low0_w_d7};
+    assign matrix_extend1_0_w = {{2{matrix_product1_0_p2[47]}}, matrix_product1_0_p2};
+    assign matrix_extend1_1_w = {{2{matrix_product1_1_p2[47]}}, matrix_product1_1_p2};
+    assign matrix_extend1_2_w = {{2{matrix_product1_2_p2[47]}}, matrix_product1_2_p2};
+    assign translation_extend1_w = {{18{translation1_r[31]}}, translation1_r};
+    assign matrix_pair1_0_a0_w = matrix_extend1_0_w[0 +: 35];
+    assign matrix_pair1_0_b0_w = matrix_extend1_1_w[0 +: 35];
+    assign matrix_pair1_0_low0_w = matrix_pair1_0_part0[34:0];
+    assign matrix_pair1_0_a1_w = matrix_extend1_0_w[35 +: 15];
+    assign matrix_pair1_0_b1_w = matrix_extend1_1_w[35 +: 15];
+    assign matrix_pair1_0_low1_w = unused_matrix_pair1_0_part1[14:0];
+    assign matrix_pair1_0_w = {matrix_pair1_0_low1_w, matrix_pair1_0_low0_w_d5};
+    assign matrix_pair1_1_a0_w = matrix_extend1_2_w[0 +: 35];
+    assign matrix_pair1_1_b0_w = translation_extend1_w_d3[0 +: 35];
+    assign matrix_pair1_1_low0_w = matrix_pair1_1_part0[34:0];
+    assign matrix_pair1_1_a1_w = matrix_extend1_2_w[35 +: 15];
+    assign matrix_pair1_1_b1_w = translation_extend1_w_d3[35 +: 15];
+    assign matrix_pair1_1_low1_w = unused_matrix_pair1_1_part1[14:0];
+    assign matrix_pair1_1_w = {matrix_pair1_1_low1_w, matrix_pair1_1_low0_w_d5};
+    assign matrix_total1_a0_w = matrix_pair1_0_w[0 +: 35];
+    assign matrix_total1_b0_w = matrix_pair1_1_w[0 +: 35];
+    assign matrix_total1_low0_w = matrix_total1_part0[34:0];
+    assign matrix_total1_a1_w = matrix_pair1_0_w[35 +: 15];
+    assign matrix_total1_b1_w = matrix_pair1_1_w[35 +: 15];
+    assign matrix_total1_low1_w = unused_matrix_total1_part1[14:0];
+    assign matrix_total1_w = {matrix_total1_low1_w, matrix_total1_low0_w_d7};
+    assign light_extend0_w = {{2{light_product0_p2[23]}}, light_product0_p2};
+    assign light_extend1_w = {{2{light_product1_p2[23]}}, light_product1_p2};
+    assign light_extend2_w = {{2{light_product2_p2[23]}}, light_product2_p2};
+    assign color_extend0_w = {1'b0, color_product0_p2};
+    assign color_bias0_w = 42'd267386880;
+    assign color_round0_a0_w = color_extend0_w[0 +: 35];
+    assign color_round0_b0_w = color_bias0_w[0 +: 35];
+    assign color_round0_low0_w = color_round0_part0[34:0];
+    assign color_round0_a1_w = color_extend0_w[35 +: 7];
+    assign color_round0_b1_w = color_bias0_w[35 +: 7];
+    assign color_round0_low1_w = unused_color_round0_part1[6:0];
+    assign unused_color_round0_w = {color_round0_low1_w, color_round0_low0_w_d15};
+    assign color_extend1_w = {1'b0, color_product1_p2};
+    assign color_bias1_w = 42'd267386880;
+    assign color_round1_a0_w = color_extend1_w[0 +: 35];
+    assign color_round1_b0_w = color_bias1_w[0 +: 35];
+    assign color_round1_low0_w = color_round1_part0[34:0];
+    assign color_round1_a1_w = color_extend1_w[35 +: 7];
+    assign color_round1_b1_w = color_bias1_w[35 +: 7];
+    assign color_round1_low1_w = unused_color_round1_part1[6:0];
+    assign unused_color_round1_w = {color_round1_low1_w, color_round1_low0_w_d15};
+    assign color_extend2_w = {1'b0, color_product2_p2};
+    assign color_bias2_w = 42'd267386880;
+    assign color_round2_a0_w = color_extend2_w[0 +: 35];
+    assign color_round2_b0_w = color_bias2_w[0 +: 35];
+    assign color_round2_low0_w = color_round2_part0[34:0];
+    assign color_round2_a1_w = color_extend2_w[35 +: 7];
+    assign color_round2_b1_w = color_bias2_w[35 +: 7];
+    assign color_round2_low1_w = unused_color_round2_part1[6:0];
+    assign unused_color_round2_w = {color_round2_low1_w, color_round2_low0_w_d15};
+    assign coordinate0_w = coordinates_r[0 +: 40];
+    assign coordinate1_w = coordinates_r[40 +: 40];
+    assign coordinate2_w = coordinates_r[80 +: 40];
+    assign coordinate3_w = coordinates_r[120 +: 40];
+    assign uv0_w = uv_input_r[0 +: 16];
+    assign uv1_w = uv_input_r[16 +: 16];
+    assign transformed_data_o[0 +: 40] = output_0_r[read_r];
+    always @(posedge clk_i) begin
+        if (push_w) output_0_r[write_r] <= coordinate0_w_d18;
+    end
+    assign transformed_data_o[40 +: 40] = output_1_r[read_r];
+    always @(posedge clk_i) begin
+        if (push_w) output_1_r[write_r] <= coordinate1_w_d18;
+    end
+    assign transformed_data_o[80 +: 40] = output_2_r[read_r];
+    always @(posedge clk_i) begin
+        if (push_w) output_2_r[write_r] <= coordinate2_w_d18;
+    end
+    assign transformed_data_o[120 +: 40] = output_3_r[read_r];
+    always @(posedge clk_i) begin
+        if (push_w) output_3_r[write_r] <= coordinate3_w_d18;
+    end
+    assign transformed_data_o[160 +: 16] = output_4_r[read_r];
+    always @(posedge clk_i) begin
+        if (push_w) output_4_r[write_r] <= uv0_w_d18;
+    end
+    assign transformed_data_o[176 +: 16] = output_5_r[read_r];
+    always @(posedge clk_i) begin
+        if (push_w) output_5_r[write_r] <= uv1_w_d18;
+    end
+    assign transformed_data_o[192 +: 24] = output_6_r[read_r];
+    always @(posedge clk_i) begin
+        if (push_w) output_6_r[write_r] <= color_clamp0;
+    end
+    assign transformed_data_o[216 +: 24] = output_7_r[read_r];
+    always @(posedge clk_i) begin
+        if (push_w) output_7_r[write_r] <= color_clamp1;
+    end
+    assign transformed_data_o[240 +: 24] = output_8_r[read_r];
+    always @(posedge clk_i) begin
+        if (push_w) output_8_r[write_r] <= color_clamp2;
+    end
     always @(posedge clk_i) begin
         if (enable_w) begin
+            coefficient_0_0_r <= phase_r ? matrix_i[256 +: 32] : matrix_i[0 +: 32];
+            vertex_0_0_r <= vertex_w[0 +: 16];
+            matrix_product0_0 <= $signed(coefficient_0_0_r) * $signed(vertex_0_0_r);
+            matrix_product0_0_p1 <= matrix_product0_0;
+            matrix_product0_0_p2 <= matrix_product0_0_p1;
+            coefficient_0_1_r <= phase_r ? matrix_i[288 +: 32] : matrix_i[32 +: 32];
+            vertex_0_1_r <= vertex_w[16 +: 16];
+            matrix_product0_1 <= $signed(coefficient_0_1_r) * $signed(vertex_0_1_r);
+            matrix_product0_1_p1 <= matrix_product0_1;
+            matrix_product0_1_p2 <= matrix_product0_1_p1;
+            coefficient_0_2_r <= phase_r ? matrix_i[320 +: 32] : matrix_i[64 +: 32];
+            vertex_0_2_r <= vertex_w[32 +: 16];
+            matrix_product0_2 <= $signed(coefficient_0_2_r) * $signed(vertex_0_2_r);
+            matrix_product0_2_p1 <= matrix_product0_2;
+            matrix_product0_2_p2 <= matrix_product0_2_p1;
+            translation0_r <= phase_r ? matrix_i[352 +: 32] : matrix_i[96 +: 32];
+            matrix_pair0_0_part0 <= {1'b0, matrix_pair0_0_a0_w} + {1'b0, matrix_pair0_0_b0_w};
+            matrix_pair0_0_a1_w_d4 <= matrix_pair0_0_a1_w;
+            matrix_pair0_0_b1_w_d4 <= matrix_pair0_0_b1_w;
+            unused_matrix_pair0_0_part1 <= {1'b0, matrix_pair0_0_a1_w_d4} + {1'b0,
+            matrix_pair0_0_b1_w_d4} + {15'b0, matrix_pair0_0_part0[35]};
+            matrix_pair0_0_low0_w_d5 <= matrix_pair0_0_low0_w;
+            translation_extend0_w_d1 <= translation_extend0_w;
+            translation_extend0_w_d2 <= translation_extend0_w_d1;
+            translation_extend0_w_d3 <= translation_extend0_w_d2;
+            matrix_pair0_1_part0 <= {1'b0, matrix_pair0_1_a0_w} + {1'b0, matrix_pair0_1_b0_w};
+            matrix_pair0_1_a1_w_d4 <= matrix_pair0_1_a1_w;
+            matrix_pair0_1_b1_w_d4 <= matrix_pair0_1_b1_w;
+            unused_matrix_pair0_1_part1 <= {1'b0, matrix_pair0_1_a1_w_d4} + {1'b0,
+            matrix_pair0_1_b1_w_d4} + {15'b0, matrix_pair0_1_part0[35]};
+            matrix_pair0_1_low0_w_d5 <= matrix_pair0_1_low0_w;
+            matrix_total0_part0 <= {1'b0, matrix_total0_a0_w} + {1'b0, matrix_total0_b0_w};
+            matrix_total0_a1_w_d6 <= matrix_total0_a1_w;
+            matrix_total0_b1_w_d6 <= matrix_total0_b1_w;
+            unused_matrix_total0_part1 <= {1'b0, matrix_total0_a1_w_d6} + {1'b0,
+            matrix_total0_b1_w_d6} + {15'b0, matrix_total0_part0[35]};
+            matrix_total0_low0_w_d7 <= matrix_total0_low0_w;
+            matrix_clamp0 <= $signed(matrix_total0_w) > 50'sd549755813887 ? 40'h7fffffffff :
+            $signed(matrix_total0_w) < -50'sd549755813888 ? 40'h8000000000 : matrix_total0_w[39:0];
+            coefficient_1_0_r <= phase_r ? matrix_i[384 +: 32] : matrix_i[128 +: 32];
+            vertex_1_0_r <= vertex_w[0 +: 16];
+            matrix_product1_0 <= $signed(coefficient_1_0_r) * $signed(vertex_1_0_r);
+            matrix_product1_0_p1 <= matrix_product1_0;
+            matrix_product1_0_p2 <= matrix_product1_0_p1;
+            coefficient_1_1_r <= phase_r ? matrix_i[416 +: 32] : matrix_i[160 +: 32];
+            vertex_1_1_r <= vertex_w[16 +: 16];
+            matrix_product1_1 <= $signed(coefficient_1_1_r) * $signed(vertex_1_1_r);
+            matrix_product1_1_p1 <= matrix_product1_1;
+            matrix_product1_1_p2 <= matrix_product1_1_p1;
+            coefficient_1_2_r <= phase_r ? matrix_i[448 +: 32] : matrix_i[192 +: 32];
+            vertex_1_2_r <= vertex_w[32 +: 16];
+            matrix_product1_2 <= $signed(coefficient_1_2_r) * $signed(vertex_1_2_r);
+            matrix_product1_2_p1 <= matrix_product1_2;
+            matrix_product1_2_p2 <= matrix_product1_2_p1;
+            translation1_r <= phase_r ? matrix_i[480 +: 32] : matrix_i[224 +: 32];
+            matrix_pair1_0_part0 <= {1'b0, matrix_pair1_0_a0_w} + {1'b0, matrix_pair1_0_b0_w};
+            matrix_pair1_0_a1_w_d4 <= matrix_pair1_0_a1_w;
+            matrix_pair1_0_b1_w_d4 <= matrix_pair1_0_b1_w;
+            unused_matrix_pair1_0_part1 <= {1'b0, matrix_pair1_0_a1_w_d4} + {1'b0,
+            matrix_pair1_0_b1_w_d4} + {15'b0, matrix_pair1_0_part0[35]};
+            matrix_pair1_0_low0_w_d5 <= matrix_pair1_0_low0_w;
+            translation_extend1_w_d1 <= translation_extend1_w;
+            translation_extend1_w_d2 <= translation_extend1_w_d1;
+            translation_extend1_w_d3 <= translation_extend1_w_d2;
+            matrix_pair1_1_part0 <= {1'b0, matrix_pair1_1_a0_w} + {1'b0, matrix_pair1_1_b0_w};
+            matrix_pair1_1_a1_w_d4 <= matrix_pair1_1_a1_w;
+            matrix_pair1_1_b1_w_d4 <= matrix_pair1_1_b1_w;
+            unused_matrix_pair1_1_part1 <= {1'b0, matrix_pair1_1_a1_w_d4} + {1'b0,
+            matrix_pair1_1_b1_w_d4} + {15'b0, matrix_pair1_1_part0[35]};
+            matrix_pair1_1_low0_w_d5 <= matrix_pair1_1_low0_w;
+            matrix_total1_part0 <= {1'b0, matrix_total1_a0_w} + {1'b0, matrix_total1_b0_w};
+            matrix_total1_a1_w_d6 <= matrix_total1_a1_w;
+            matrix_total1_b1_w_d6 <= matrix_total1_b1_w;
+            unused_matrix_total1_part1 <= {1'b0, matrix_total1_a1_w_d6} + {1'b0,
+            matrix_total1_b1_w_d6} + {15'b0, matrix_total1_part0[35]};
+            matrix_total1_low0_w_d7 <= matrix_total1_low0_w;
+            matrix_clamp1 <= $signed(matrix_total1_w) > 50'sd549755813887 ? 40'h7fffffffff :
+            $signed(matrix_total1_w) < -50'sd549755813888 ? 40'h8000000000 : matrix_total1_w[39:0];
+            first_rows_r <= {matrix_clamp1, matrix_clamp0};
+            coordinates_r <= {matrix_clamp1, matrix_clamp0, first_rows_r};
+            normal0_r <= vertex_data_i[48 +: 8];
+            light0_r <= light_i[0 +: 16];
+            light_product0 <= $signed(normal0_r) * $signed(light0_r);
+            light_product0_p1 <= light_product0;
+            light_product0_p2 <= light_product0_p1;
+            normal1_r <= vertex_data_i[56 +: 8];
+            light1_r <= light_i[16 +: 16];
+            light_product1 <= $signed(normal1_r) * $signed(light1_r);
+            light_product1_p1 <= light_product1;
+            light_product1_p2 <= light_product1_p1;
+            normal2_r <= vertex_data_i[64 +: 8];
+            light2_r <= light_i[32 +: 16];
+            light_product2 <= $signed(normal2_r) * $signed(light2_r);
+            light_product2_p1 <= light_product2;
+            light_product2_p2 <= light_product2_p1;
+            light_pair <= light_extend0_w + light_extend1_w;
+            light_extend2_w_d4 <= light_extend2_w;
+            unused_light_sum <= light_pair + light_extend2_w_d4;
+            light_dot <= unused_light_sum[25] ? 24'b0 : unused_light_sum[23:0];
+            direct0_r <= light_i[64 +: 8];
+            ambient0_r <= light_i[88 +: 8];
+            direct0_r_d1 <= direct0_r;
+            direct0_r_d2 <= direct0_r_d1;
+            direct0_r_d3 <= direct0_r_d2;
+            direct0_r_d4 <= direct0_r_d3;
+            direct0_r_d5 <= direct0_r_d4;
+            direct0_r_d6 <= direct0_r_d5;
+            illumination_product0 <= light_dot * direct0_r_d6;
+            illumination_product0_p1 <= illumination_product0;
+            illumination_product0_p2 <= illumination_product0_p1;
+            ambient0_r_d1 <= ambient0_r;
+            ambient0_r_d2 <= ambient0_r_d1;
+            ambient0_r_d3 <= ambient0_r_d2;
+            ambient0_r_d4 <= ambient0_r_d3;
+            ambient0_r_d5 <= ambient0_r_d4;
+            ambient0_r_d6 <= ambient0_r_d5;
+            ambient0_r_d7 <= ambient0_r_d6;
+            ambient0_r_d8 <= ambient0_r_d7;
+            ambient0_r_d9 <= ambient0_r_d8;
+            illumination0 <= {1'b0, illumination_product0_p2} + {4'b0, ambient0_r_d9, 21'b0};
+            base_color0_r <= {vertex_data_i[95:91], vertex_data_i[95:93]};
+            base_color0_r_d1 <= base_color0_r;
+            base_color0_r_d2 <= base_color0_r_d1;
+            base_color0_r_d3 <= base_color0_r_d2;
+            base_color0_r_d4 <= base_color0_r_d3;
+            base_color0_r_d5 <= base_color0_r_d4;
+            base_color0_r_d6 <= base_color0_r_d5;
+            base_color0_r_d7 <= base_color0_r_d6;
+            base_color0_r_d8 <= base_color0_r_d7;
+            base_color0_r_d9 <= base_color0_r_d8;
+            base_color0_r_d10 <= base_color0_r_d9;
+            color_product0 <= illumination0 * base_color0_r_d10;
+            color_product0_p1 <= color_product0;
+            color_product0_p2 <= color_product0_p1;
+            color_round0_part0 <= {1'b0, color_round0_a0_w} + {1'b0, color_round0_b0_w};
+            color_round0_a1_w_d14 <= color_round0_a1_w;
+            color_round0_b1_w_d14 <= color_round0_b1_w;
+            unused_color_round0_part1 <= {1'b0, color_round0_a1_w_d14} + {1'b0,
+            color_round0_b1_w_d14} + {7'b0, color_round0_part0[35]};
+            color_round0_low0_w_d15 <= color_round0_low0_w;
+            color_integer0 <= unused_color_round0_w[41:21];
+            unused_color_divide0 <= {1'b0, color_integer0[15:0]} + {9'b0, color_integer0[15:8]}
+            + 17'd1;
+            color_integer0_d17 <= color_integer0;
+            color_clamp0 <= color_integer0_d17 >= 21'd65025 ? 24'hff0000 :
+            {unused_color_divide0[15:8], 16'b0};
+            direct1_r <= light_i[56 +: 8];
+            ambient1_r <= light_i[80 +: 8];
+            direct1_r_d1 <= direct1_r;
+            direct1_r_d2 <= direct1_r_d1;
+            direct1_r_d3 <= direct1_r_d2;
+            direct1_r_d4 <= direct1_r_d3;
+            direct1_r_d5 <= direct1_r_d4;
+            direct1_r_d6 <= direct1_r_d5;
+            illumination_product1 <= light_dot * direct1_r_d6;
+            illumination_product1_p1 <= illumination_product1;
+            illumination_product1_p2 <= illumination_product1_p1;
+            ambient1_r_d1 <= ambient1_r;
+            ambient1_r_d2 <= ambient1_r_d1;
+            ambient1_r_d3 <= ambient1_r_d2;
+            ambient1_r_d4 <= ambient1_r_d3;
+            ambient1_r_d5 <= ambient1_r_d4;
+            ambient1_r_d6 <= ambient1_r_d5;
+            ambient1_r_d7 <= ambient1_r_d6;
+            ambient1_r_d8 <= ambient1_r_d7;
+            ambient1_r_d9 <= ambient1_r_d8;
+            illumination1 <= {1'b0, illumination_product1_p2} + {4'b0, ambient1_r_d9, 21'b0};
+            base_color1_r <= {vertex_data_i[90:85], vertex_data_i[90:89]};
+            base_color1_r_d1 <= base_color1_r;
+            base_color1_r_d2 <= base_color1_r_d1;
+            base_color1_r_d3 <= base_color1_r_d2;
+            base_color1_r_d4 <= base_color1_r_d3;
+            base_color1_r_d5 <= base_color1_r_d4;
+            base_color1_r_d6 <= base_color1_r_d5;
+            base_color1_r_d7 <= base_color1_r_d6;
+            base_color1_r_d8 <= base_color1_r_d7;
+            base_color1_r_d9 <= base_color1_r_d8;
+            base_color1_r_d10 <= base_color1_r_d9;
+            color_product1 <= illumination1 * base_color1_r_d10;
+            color_product1_p1 <= color_product1;
+            color_product1_p2 <= color_product1_p1;
+            color_round1_part0 <= {1'b0, color_round1_a0_w} + {1'b0, color_round1_b0_w};
+            color_round1_a1_w_d14 <= color_round1_a1_w;
+            color_round1_b1_w_d14 <= color_round1_b1_w;
+            unused_color_round1_part1 <= {1'b0, color_round1_a1_w_d14} + {1'b0,
+            color_round1_b1_w_d14} + {7'b0, color_round1_part0[35]};
+            color_round1_low0_w_d15 <= color_round1_low0_w;
+            color_integer1 <= unused_color_round1_w[41:21];
+            unused_color_divide1 <= {1'b0, color_integer1[15:0]} + {9'b0, color_integer1[15:8]}
+            + 17'd1;
+            color_integer1_d17 <= color_integer1;
+            color_clamp1 <= color_integer1_d17 >= 21'd65025 ? 24'hff0000 :
+            {unused_color_divide1[15:8], 16'b0};
+            direct2_r <= light_i[48 +: 8];
+            ambient2_r <= light_i[72 +: 8];
+            direct2_r_d1 <= direct2_r;
+            direct2_r_d2 <= direct2_r_d1;
+            direct2_r_d3 <= direct2_r_d2;
+            direct2_r_d4 <= direct2_r_d3;
+            direct2_r_d5 <= direct2_r_d4;
+            direct2_r_d6 <= direct2_r_d5;
+            illumination_product2 <= light_dot * direct2_r_d6;
+            illumination_product2_p1 <= illumination_product2;
+            illumination_product2_p2 <= illumination_product2_p1;
+            ambient2_r_d1 <= ambient2_r;
+            ambient2_r_d2 <= ambient2_r_d1;
+            ambient2_r_d3 <= ambient2_r_d2;
+            ambient2_r_d4 <= ambient2_r_d3;
+            ambient2_r_d5 <= ambient2_r_d4;
+            ambient2_r_d6 <= ambient2_r_d5;
+            ambient2_r_d7 <= ambient2_r_d6;
+            ambient2_r_d8 <= ambient2_r_d7;
+            ambient2_r_d9 <= ambient2_r_d8;
+            illumination2 <= {1'b0, illumination_product2_p2} + {4'b0, ambient2_r_d9, 21'b0};
+            base_color2_r <= {vertex_data_i[84:80], vertex_data_i[84:82]};
+            base_color2_r_d1 <= base_color2_r;
+            base_color2_r_d2 <= base_color2_r_d1;
+            base_color2_r_d3 <= base_color2_r_d2;
+            base_color2_r_d4 <= base_color2_r_d3;
+            base_color2_r_d5 <= base_color2_r_d4;
+            base_color2_r_d6 <= base_color2_r_d5;
+            base_color2_r_d7 <= base_color2_r_d6;
+            base_color2_r_d8 <= base_color2_r_d7;
+            base_color2_r_d9 <= base_color2_r_d8;
+            base_color2_r_d10 <= base_color2_r_d9;
+            color_product2 <= illumination2 * base_color2_r_d10;
+            color_product2_p1 <= color_product2;
+            color_product2_p2 <= color_product2_p1;
+            color_round2_part0 <= {1'b0, color_round2_a0_w} + {1'b0, color_round2_b0_w};
+            color_round2_a1_w_d14 <= color_round2_a1_w;
+            color_round2_b1_w_d14 <= color_round2_b1_w;
+            unused_color_round2_part1 <= {1'b0, color_round2_a1_w_d14} + {1'b0,
+            color_round2_b1_w_d14} + {7'b0, color_round2_part0[35]};
+            color_round2_low0_w_d15 <= color_round2_low0_w;
+            color_integer2 <= unused_color_round2_w[41:21];
+            unused_color_divide2 <= {1'b0, color_integer2[15:0]} + {9'b0, color_integer2[15:8]}
+            + 17'd1;
+            color_integer2_d17 <= color_integer2;
+            color_clamp2 <= color_integer2_d17 >= 21'd65025 ? 24'hff0000 :
+            {unused_color_divide2[15:8], 16'b0};
+            uv_input_r <= vertex_data_i[127:96];
+            coordinate0_w_d11 <= coordinate0_w;
+            coordinate0_w_d12 <= coordinate0_w_d11;
+            coordinate0_w_d13 <= coordinate0_w_d12;
+            coordinate0_w_d14 <= coordinate0_w_d13;
+            coordinate0_w_d15 <= coordinate0_w_d14;
+            coordinate0_w_d16 <= coordinate0_w_d15;
+            coordinate0_w_d17 <= coordinate0_w_d16;
+            coordinate0_w_d18 <= coordinate0_w_d17;
+            coordinate1_w_d11 <= coordinate1_w;
+            coordinate1_w_d12 <= coordinate1_w_d11;
+            coordinate1_w_d13 <= coordinate1_w_d12;
+            coordinate1_w_d14 <= coordinate1_w_d13;
+            coordinate1_w_d15 <= coordinate1_w_d14;
+            coordinate1_w_d16 <= coordinate1_w_d15;
+            coordinate1_w_d17 <= coordinate1_w_d16;
+            coordinate1_w_d18 <= coordinate1_w_d17;
+            coordinate2_w_d11 <= coordinate2_w;
+            coordinate2_w_d12 <= coordinate2_w_d11;
+            coordinate2_w_d13 <= coordinate2_w_d12;
+            coordinate2_w_d14 <= coordinate2_w_d13;
+            coordinate2_w_d15 <= coordinate2_w_d14;
+            coordinate2_w_d16 <= coordinate2_w_d15;
+            coordinate2_w_d17 <= coordinate2_w_d16;
+            coordinate2_w_d18 <= coordinate2_w_d17;
+            coordinate3_w_d11 <= coordinate3_w;
+            coordinate3_w_d12 <= coordinate3_w_d11;
+            coordinate3_w_d13 <= coordinate3_w_d12;
+            coordinate3_w_d14 <= coordinate3_w_d13;
+            coordinate3_w_d15 <= coordinate3_w_d14;
+            coordinate3_w_d16 <= coordinate3_w_d15;
+            coordinate3_w_d17 <= coordinate3_w_d16;
+            coordinate3_w_d18 <= coordinate3_w_d17;
+            uv0_w_d1 <= uv0_w;
+            uv0_w_d2 <= uv0_w_d1;
+            uv0_w_d3 <= uv0_w_d2;
+            uv0_w_d4 <= uv0_w_d3;
+            uv0_w_d5 <= uv0_w_d4;
+            uv0_w_d6 <= uv0_w_d5;
+            uv0_w_d7 <= uv0_w_d6;
+            uv0_w_d8 <= uv0_w_d7;
+            uv0_w_d9 <= uv0_w_d8;
+            uv0_w_d10 <= uv0_w_d9;
+            uv0_w_d11 <= uv0_w_d10;
+            uv0_w_d12 <= uv0_w_d11;
+            uv0_w_d13 <= uv0_w_d12;
+            uv0_w_d14 <= uv0_w_d13;
+            uv0_w_d15 <= uv0_w_d14;
+            uv0_w_d16 <= uv0_w_d15;
+            uv0_w_d17 <= uv0_w_d16;
+            uv0_w_d18 <= uv0_w_d17;
+            uv1_w_d1 <= uv1_w;
+            uv1_w_d2 <= uv1_w_d1;
+            uv1_w_d3 <= uv1_w_d2;
+            uv1_w_d4 <= uv1_w_d3;
+            uv1_w_d5 <= uv1_w_d4;
+            uv1_w_d6 <= uv1_w_d5;
+            uv1_w_d7 <= uv1_w_d6;
+            uv1_w_d8 <= uv1_w_d7;
+            uv1_w_d9 <= uv1_w_d8;
+            uv1_w_d10 <= uv1_w_d9;
+            uv1_w_d11 <= uv1_w_d10;
+            uv1_w_d12 <= uv1_w_d11;
+            uv1_w_d13 <= uv1_w_d12;
+            uv1_w_d14 <= uv1_w_d13;
+            uv1_w_d15 <= uv1_w_d14;
+            uv1_w_d16 <= uv1_w_d15;
+            uv1_w_d17 <= uv1_w_d16;
+            uv1_w_d18 <= uv1_w_d17;
             if (accept_w) vertex_r <= vertex_data_i[47:0];
-            first_rows_r <= {coordinate_w[1], coordinate_w[0]};
-            dot_r <= unused_light_sum_w[25] ? 24'd0 : unused_light_sum_w[23:0];
-            color_r <= rounded_color_w;
         end
     end
 endmodule
