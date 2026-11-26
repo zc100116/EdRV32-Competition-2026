@@ -19,10 +19,10 @@ python3 sw/apps/gpu_test_common/tools/capture.py
 
 | 操作 | 板上按键 | Windows / ETH 虚拟手柄 |
 |---|---|---|
-| next / 向右 | GPIO 按键 bit0 | → / VI_RIGHT |
-| prev / 向左 | GPIO 按键 bit1 | ← / VI_LEFT |
-| enter / 确认 | GPIO 按键 bit2 | Enter 或 Z / VI_A |
-| esc / 返回开机菜单 | GPIO 按键 bit3 | Esc / VI_START 或 VI_SELECT |
+| next / 向右 | GPIO 按键 bit0 | → / VI_RIGHT、VI_NEXT |
+| prev / 向左 | GPIO 按键 bit1 | ← / VI_LEFT、VI_PREV |
+| enter / 确认 | GPIO 按键 bit2 | Enter 或 Z / VI_A、VI_ENTER |
+| esc / 返回开机菜单 | GPIO 按键 bit3 | Esc / VI_START、VI_SELECT、VI_ESC |
 | 上下移动 | ETH 输入 | ↑↓ / VI_UP、VI_DOWN |
 
 开机 next/prev 选 2D/3D，enter 开始；场景内左右移动，2D 自动射击，3D 穿过光环得分。

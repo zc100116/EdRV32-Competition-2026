@@ -17,6 +17,7 @@ uint64_t test_clock_us(void)
     return (uint64_t)now.tv_sec*1000000 + (unsigned)now.tv_nsec/1000;
 }
 uint32_t pc_frontend_wait(void) { return 800; }
+uint32_t test_input_keys(void) { return plat_keys(); }
 uint32_t pc_frontend_keys(void) { return input_keys; }
 uint32_t pc_frontend_millis(void) { return frame*1000/60; }
 void pc_frontend_audio(const int16_t *samples, uint32_t frames)

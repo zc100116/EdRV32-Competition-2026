@@ -95,6 +95,7 @@ uint32_t pc_frontend_wait(void)
     if (now.QuadPart > deadline.QuadPart + frequency.QuadPart / 60) deadline = now;
     return frames;
 }
+uint32_t test_input_keys(void) { return plat_keys(); }
 uint32_t pc_frontend_keys(void) { messages(); return keys; }
 uint64_t test_clock_us(void)
 {

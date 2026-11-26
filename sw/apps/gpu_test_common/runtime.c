@@ -437,7 +437,7 @@ void test_frame(void)
     uint64_t elapsed = start-previous_frame;
     if (test.frame && elapsed) test.fps10 = (uint32_t)(10000000/elapsed);
     previous_frame = start;
-    uint32_t keys = plat_keys();
+    uint32_t keys = test_input_keys();
     uint32_t pressed = keys & ~test.previous_keys;
     test.previous_keys = keys;
     ++test.frame;

@@ -54,6 +54,7 @@ void test3d_update(uint32_t keys)
     if (test.player_y > 65) test.player_y = 65;
     camera_x = test.player_x;
     camera_y = test.player_y;
+    if (test.mode == 2) return;
     if (test.tick%90 == 0) {
         unsigned gate = test.tick/90-1;
         int gx = test_sine[(gate*53)&255]*60/16384;
