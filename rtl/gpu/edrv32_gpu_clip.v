@@ -26,7 +26,7 @@ module edrv32_gpu_clip (
 );
     wire [791:0] triangle_saved_w;
     wire source_accept_w;
-    reg [3:0] wait_r;
+    reg [4:0] wait_r;
     wire [85:0] distance_left_w;
     wire [85:0] distance_right_w;
     wire [1:0] distance_subtract_w;
@@ -354,12 +354,110 @@ module edrv32_gpu_clip (
     reg [39:0] current_component_r;
     reg [42:0] current_distance_r;
     reg [42:0] previous_distance_input_r;
-    reg [82:0] previous_product_r;
-    reg [82:0] previous_product_p1_r;
-    reg [82:0] previous_product_p2_r;
-    reg [82:0] current_product_r;
-    reg [82:0] current_product_p1_r;
-    reg [82:0] current_product_p2_r;
+    // Two 40x43 signed multipliers: nine native signed <=18x18 APMs each.
+    // Radix-2^17 digits have a zero sign bit except for each operand's top digit.
+    // Four balanced sum levels each take three clocks (35/35/13-bit carry segments).
+    // The 13-clock product replaces the old three clocks: +10 per component.
+    wire [82:0] previous_product_w;
+    wire [82:0] current_product_w;
+    wire [165:0] product_result_w;
+    assign previous_product_w = product_result_w[0 +: 83];
+    assign current_product_w = product_result_w[83 +: 83];
+    genvar product_g;
+    genvar digit_a_g;
+    genvar digit_b_g;
+    genvar sum_level_g;
+    genvar sum_node_g;
+    generate
+        for (product_g = 0; product_g < 2; product_g = product_g + 1) begin : g_product
+            wire [39:0] component_w;
+            wire [42:0] distance_w;
+            // 9 leaves, then 5/3/2/1 nodes; flat vectors avoid hierarchy references.
+            wire [1659:0] tree_w;
+            assign component_w = product_g == 0 ? previous_component_r : current_component_r;
+            assign distance_w = product_g == 0 ? current_distance_r : previous_distance_input_r;
+            for (digit_a_g = 0; digit_a_g < 3; digit_a_g = digit_a_g + 1) begin : g_digit_a
+                localparam A_WIDTH = digit_a_g == 2 ? 6 : 18;
+                for (digit_b_g = 0; digit_b_g < 3;
+                    digit_b_g = digit_b_g + 1) begin : g_digit_b
+                    localparam B_WIDTH = digit_b_g == 2 ? 9 : 18;
+                    localparam P_WIDTH = A_WIDTH + B_WIDTH;
+                    localparam SHIFT = 17 * (digit_a_g + digit_b_g);
+                    localparam EXTEND = 83 - P_WIDTH - SHIFT;
+                    wire signed [A_WIDTH-1:0] a_w;
+                    wire signed [B_WIDTH-1:0] b_w;
+                    reg signed [P_WIDTH-1:0] partial_r;
+                    if (digit_a_g == 2) begin : g_a_signed
+                        assign a_w = component_w[39:34];
+                    end else begin : g_a_unsigned
+                        assign a_w = {1'b0, component_w[digit_a_g*17 +: 17]};
+                    end
+                    if (digit_b_g == 2) begin : g_b_signed
+                        assign b_w = distance_w[42:34];
+                    end else begin : g_b_unsigned
+                        assign b_w = {1'b0, distance_w[digit_b_g*17 +: 17]};
+                    end
+                    always @(posedge clk_i) begin
+                        partial_r <= a_w * b_w;
+                    end
+                    assign tree_w[(digit_a_g*3+digit_b_g)*83 +: 83] =
+                        {{EXTEND{partial_r[P_WIDTH-1]}}, partial_r, {SHIFT{1'b0}}};
+                end
+            end
+            for (sum_level_g = 0; sum_level_g < 4;
+                sum_level_g = sum_level_g + 1) begin : g_sum_level
+                localparam INPUTS = (9 + (1 << sum_level_g) - 1) >> sum_level_g;
+                localparam OUTPUTS = (INPUTS + 1) / 2;
+                localparam IN_BASE = sum_level_g == 0 ? 0 :
+                    sum_level_g == 1 ? 9 : sum_level_g == 2 ? 14 : 17;
+                localparam OUT_BASE = IN_BASE + INPUTS;
+                for (sum_node_g = 0; sum_node_g < OUTPUTS;
+                    sum_node_g = sum_node_g + 1) begin : g_sum_node
+                    wire [82:0] a_w;
+                    wire [82:0] result_w;
+                    assign a_w = tree_w[(IN_BASE+sum_node_g*2)*83 +: 83];
+                    if (sum_node_g*2+1 < INPUTS) begin : g_add
+                        wire [82:0] b_w;
+                        reg [35:0] low_r;
+                        reg [47:0] a_high_r;
+                        reg [47:0] b_high_r;
+                        reg [35:0] middle_r;
+                        reg [12:0] a_top_r;
+                        reg [12:0] b_top_r;
+                        reg [34:0] low_delay_r;
+                        reg [82:0] sum_r;
+                        wire [12:0] top_w;
+                        assign b_w = tree_w[(IN_BASE+sum_node_g*2+1)*83 +: 83];
+                        assign top_w = a_top_r + b_top_r + {12'b0, middle_r[35]};
+                        always @(posedge clk_i) begin
+                            low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
+                            a_high_r <= a_w[82:35];
+                            b_high_r <= b_w[82:35];
+                            middle_r <= {1'b0, a_high_r[34:0]} +
+                                {1'b0, b_high_r[34:0]} + {35'b0, low_r[35]};
+                            a_top_r <= a_high_r[47:35];
+                            b_top_r <= b_high_r[47:35];
+                            low_delay_r <= low_r[34:0];
+                            sum_r <= {top_w, middle_r[34:0], low_delay_r};
+                        end
+                        assign result_w = sum_r;
+                    end else begin : g_delay
+                        reg [82:0] delay0_r;
+                        reg [82:0] delay1_r;
+                        reg [82:0] delay2_r;
+                        always @(posedge clk_i) begin
+                            delay0_r <= a_w;
+                            delay1_r <= delay0_r;
+                            delay2_r <= delay1_r;
+                        end
+                        assign result_w = delay2_r;
+                    end
+                    assign tree_w[(OUT_BASE+sum_node_g)*83 +: 83] = result_w;
+                end
+            end
+            assign product_result_w[product_g*83 +: 83] = tree_w[19*83 +: 83];
+        end
+    endgenerate
     wire [83:0] previous_product_ext_w;
     wire [83:0] current_product_ext_w;
     wire [34:0] numerator_a0_w;
@@ -680,8 +778,8 @@ module edrv32_gpu_clip (
     assign edge_sub1_low1_w = unused_edge_sub1_part1_r[7:0];
     assign edge_sub1_w = {edge_sub1_low1_w, edge_sub1_low0_w_d2_r};
     assign edge_distance_w[1] = edge_subtract1_r_d2_r ? edge_sub1_w : edge_add1_w;
-    assign previous_product_ext_w = {previous_product_p2_r[82], previous_product_p2_r};
-    assign current_product_ext_w = {current_product_p2_r[82], current_product_p2_r};
+    assign previous_product_ext_w = {previous_product_w[82], previous_product_w};
+    assign current_product_ext_w = {current_product_w[82], current_product_w};
     assign numerator_a0_w = previous_product_ext_w[0 +: 35];
     assign numerator_b0_w = current_product_ext_w[0 +: 35];
     assign numerator_low0_w = numerator_part0_r[34:0];
@@ -1090,7 +1188,7 @@ module edrv32_gpu_clip (
                     if (previous_distance_r[42] != current_distance_w[42]) begin
                         component_r <= 4'd0;
                         begin end
-                        wait_r <= 12;
+                        wait_r <= 22;
                     end else begin
                         begin end
                     end
@@ -1114,7 +1212,7 @@ module edrv32_gpu_clip (
                     else begin
                         component_r <= component_r + 4'd1;
                         begin end
-                        wait_r <= 12;
+                        wait_r <= 22;
                     end
                 end
                 S_APPEND_INTERSECTION: begin
@@ -1295,12 +1393,6 @@ module edrv32_gpu_clip (
     current_component_r <= current_selected_w;
     current_distance_r <= current_distance_w;
     previous_distance_input_r <= previous_distance_r;
-    previous_product_r <= $signed(previous_component_r) * $signed(current_distance_r);
-    previous_product_p1_r <= previous_product_r;
-    previous_product_p2_r <= previous_product_p1_r;
-    current_product_r <= $signed(current_component_r) * $signed(previous_distance_input_r);
-    current_product_p1_r <= current_product_r;
-    current_product_p2_r <= current_product_p1_r;
     numerator_part0_r <= {1'b0, numerator_a0_w} + {1'b0, ~numerator_b0_w} + 36'd1;
     numerator_a1_w_d4_r <= numerator_a1_w;
     numerator_b1_w_d4_r <= numerator_b1_w;

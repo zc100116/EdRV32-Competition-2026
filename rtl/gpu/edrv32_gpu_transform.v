@@ -24,22 +24,57 @@ module edrv32_gpu_transform (
     input wire stop_i,
     output wire idle_o
 );
+    // Wide products use two registered radix-2^17 partial products and two sum stages.
+    // The existing three product clocks and all downstream alignment are preserved.
     reg [31:0] coefficient_0_0_r;
     reg [15:0] vertex_0_0_r;
-    reg [47:0] matrix_product0_0_r;
-    reg [47:0] matrix_product0_0_p1_r;
+    reg [33:0] matrix_product0_0_partial0_r;
+    wire [47:0] matrix_product0_0_term0_w;
+    assign matrix_product0_0_term0_w =
+        {{14{matrix_product0_0_partial0_r[33]}}, matrix_product0_0_partial0_r};
+    reg [30:0] matrix_product0_0_partial1_r;
+    wire [47:0] matrix_product0_0_term1_w;
+    assign matrix_product0_0_term1_w = {matrix_product0_0_partial1_r, 17'b0};
+    reg [35:0] matrix_product0_0_low_r;
+    reg [12:0] matrix_product0_0_high0_r;
+    reg [12:0] matrix_product0_0_high1_r;
+    wire [12:0] matrix_product0_0_high_w;
+    assign matrix_product0_0_high_w = matrix_product0_0_high0_r + matrix_product0_0_high1_r +
+        {12'b0, matrix_product0_0_low_r[35]};
     reg [47:0] matrix_product0_0_p2_r;
     wire [49:0] matrix_extend0_0_w;
     reg [31:0] coefficient_0_1_r;
     reg [15:0] vertex_0_1_r;
-    reg [47:0] matrix_product0_1_r;
-    reg [47:0] matrix_product0_1_p1_r;
+    reg [33:0] matrix_product0_1_partial0_r;
+    wire [47:0] matrix_product0_1_term0_w;
+    assign matrix_product0_1_term0_w =
+        {{14{matrix_product0_1_partial0_r[33]}}, matrix_product0_1_partial0_r};
+    reg [30:0] matrix_product0_1_partial1_r;
+    wire [47:0] matrix_product0_1_term1_w;
+    assign matrix_product0_1_term1_w = {matrix_product0_1_partial1_r, 17'b0};
+    reg [35:0] matrix_product0_1_low_r;
+    reg [12:0] matrix_product0_1_high0_r;
+    reg [12:0] matrix_product0_1_high1_r;
+    wire [12:0] matrix_product0_1_high_w;
+    assign matrix_product0_1_high_w = matrix_product0_1_high0_r + matrix_product0_1_high1_r +
+        {12'b0, matrix_product0_1_low_r[35]};
     reg [47:0] matrix_product0_1_p2_r;
     wire [49:0] matrix_extend0_1_w;
     reg [31:0] coefficient_0_2_r;
     reg [15:0] vertex_0_2_r;
-    reg [47:0] matrix_product0_2_r;
-    reg [47:0] matrix_product0_2_p1_r;
+    reg [33:0] matrix_product0_2_partial0_r;
+    wire [47:0] matrix_product0_2_term0_w;
+    assign matrix_product0_2_term0_w =
+        {{14{matrix_product0_2_partial0_r[33]}}, matrix_product0_2_partial0_r};
+    reg [30:0] matrix_product0_2_partial1_r;
+    wire [47:0] matrix_product0_2_term1_w;
+    assign matrix_product0_2_term1_w = {matrix_product0_2_partial1_r, 17'b0};
+    reg [35:0] matrix_product0_2_low_r;
+    reg [12:0] matrix_product0_2_high0_r;
+    reg [12:0] matrix_product0_2_high1_r;
+    wire [12:0] matrix_product0_2_high_w;
+    assign matrix_product0_2_high_w = matrix_product0_2_high0_r + matrix_product0_2_high1_r +
+        {12'b0, matrix_product0_2_low_r[35]};
     reg [47:0] matrix_product0_2_p2_r;
     wire [49:0] matrix_extend0_2_w;
     reg [31:0] translation0_r;
@@ -86,20 +121,53 @@ module edrv32_gpu_transform (
     reg [39:0] matrix_clamp0_r;
     reg [31:0] coefficient_1_0_r;
     reg [15:0] vertex_1_0_r;
-    reg [47:0] matrix_product1_0_r;
-    reg [47:0] matrix_product1_0_p1_r;
+    reg [33:0] matrix_product1_0_partial0_r;
+    wire [47:0] matrix_product1_0_term0_w;
+    assign matrix_product1_0_term0_w =
+        {{14{matrix_product1_0_partial0_r[33]}}, matrix_product1_0_partial0_r};
+    reg [30:0] matrix_product1_0_partial1_r;
+    wire [47:0] matrix_product1_0_term1_w;
+    assign matrix_product1_0_term1_w = {matrix_product1_0_partial1_r, 17'b0};
+    reg [35:0] matrix_product1_0_low_r;
+    reg [12:0] matrix_product1_0_high0_r;
+    reg [12:0] matrix_product1_0_high1_r;
+    wire [12:0] matrix_product1_0_high_w;
+    assign matrix_product1_0_high_w = matrix_product1_0_high0_r + matrix_product1_0_high1_r +
+        {12'b0, matrix_product1_0_low_r[35]};
     reg [47:0] matrix_product1_0_p2_r;
     wire [49:0] matrix_extend1_0_w;
     reg [31:0] coefficient_1_1_r;
     reg [15:0] vertex_1_1_r;
-    reg [47:0] matrix_product1_1_r;
-    reg [47:0] matrix_product1_1_p1_r;
+    reg [33:0] matrix_product1_1_partial0_r;
+    wire [47:0] matrix_product1_1_term0_w;
+    assign matrix_product1_1_term0_w =
+        {{14{matrix_product1_1_partial0_r[33]}}, matrix_product1_1_partial0_r};
+    reg [30:0] matrix_product1_1_partial1_r;
+    wire [47:0] matrix_product1_1_term1_w;
+    assign matrix_product1_1_term1_w = {matrix_product1_1_partial1_r, 17'b0};
+    reg [35:0] matrix_product1_1_low_r;
+    reg [12:0] matrix_product1_1_high0_r;
+    reg [12:0] matrix_product1_1_high1_r;
+    wire [12:0] matrix_product1_1_high_w;
+    assign matrix_product1_1_high_w = matrix_product1_1_high0_r + matrix_product1_1_high1_r +
+        {12'b0, matrix_product1_1_low_r[35]};
     reg [47:0] matrix_product1_1_p2_r;
     wire [49:0] matrix_extend1_1_w;
     reg [31:0] coefficient_1_2_r;
     reg [15:0] vertex_1_2_r;
-    reg [47:0] matrix_product1_2_r;
-    reg [47:0] matrix_product1_2_p1_r;
+    reg [33:0] matrix_product1_2_partial0_r;
+    wire [47:0] matrix_product1_2_term0_w;
+    assign matrix_product1_2_term0_w =
+        {{14{matrix_product1_2_partial0_r[33]}}, matrix_product1_2_partial0_r};
+    reg [30:0] matrix_product1_2_partial1_r;
+    wire [47:0] matrix_product1_2_term1_w;
+    assign matrix_product1_2_term1_w = {matrix_product1_2_partial1_r, 17'b0};
+    reg [35:0] matrix_product1_2_low_r;
+    reg [12:0] matrix_product1_2_high0_r;
+    reg [12:0] matrix_product1_2_high1_r;
+    wire [12:0] matrix_product1_2_high_w;
+    assign matrix_product1_2_high_w = matrix_product1_2_high0_r + matrix_product1_2_high1_r +
+        {12'b0, matrix_product1_2_low_r[35]};
     reg [47:0] matrix_product1_2_p2_r;
     wire [49:0] matrix_extend1_2_w;
     reg [31:0] translation1_r;
@@ -176,8 +244,13 @@ module edrv32_gpu_transform (
     reg [7:0] direct0_r_d4_r;
     reg [7:0] direct0_r_d5_r;
     reg [7:0] direct0_r_d6_r;
-    reg [31:0] illumination_product0_r;
-    reg [31:0] illumination_product0_p1_r;
+    reg [24:0] illumination_product0_partial0_r;
+    wire [31:0] illumination_product0_term0_w;
+    assign illumination_product0_term0_w = {7'b0, illumination_product0_partial0_r};
+    reg [14:0] illumination_product0_partial1_r;
+    wire [31:0] illumination_product0_term1_w;
+    assign illumination_product0_term1_w = {illumination_product0_partial1_r, 17'b0};
+    reg [31:0] illumination_product0_sum_r;
     reg [31:0] illumination_product0_p2_r;
     reg [7:0] ambient0_r_d1_r;
     reg [7:0] ambient0_r_d2_r;
@@ -200,8 +273,18 @@ module edrv32_gpu_transform (
     reg [7:0] base_color0_r_d8_r;
     reg [7:0] base_color0_r_d9_r;
     reg [7:0] base_color0_r_d10_r;
-    reg [40:0] color_product0_r;
-    reg [40:0] color_product0_p1_r;
+    reg [24:0] color_product0_partial0_r;
+    wire [40:0] color_product0_term0_w;
+    assign color_product0_term0_w = {16'b0, color_product0_partial0_r};
+    reg [23:0] color_product0_partial1_r;
+    wire [40:0] color_product0_term1_w;
+    assign color_product0_term1_w = {color_product0_partial1_r, 17'b0};
+    reg [35:0] color_product0_low_r;
+    reg [5:0] color_product0_high0_r;
+    reg [5:0] color_product0_high1_r;
+    wire [5:0] color_product0_high_w;
+    assign color_product0_high_w = color_product0_high0_r + color_product0_high1_r +
+        {5'b0, color_product0_low_r[35]};
     reg [40:0] color_product0_p2_r;
     wire [41:0] color_extend0_w;
     wire [41:0] color_bias0_w;
@@ -229,8 +312,13 @@ module edrv32_gpu_transform (
     reg [7:0] direct1_r_d4_r;
     reg [7:0] direct1_r_d5_r;
     reg [7:0] direct1_r_d6_r;
-    reg [31:0] illumination_product1_r;
-    reg [31:0] illumination_product1_p1_r;
+    reg [24:0] illumination_product1_partial0_r;
+    wire [31:0] illumination_product1_term0_w;
+    assign illumination_product1_term0_w = {7'b0, illumination_product1_partial0_r};
+    reg [14:0] illumination_product1_partial1_r;
+    wire [31:0] illumination_product1_term1_w;
+    assign illumination_product1_term1_w = {illumination_product1_partial1_r, 17'b0};
+    reg [31:0] illumination_product1_sum_r;
     reg [31:0] illumination_product1_p2_r;
     reg [7:0] ambient1_r_d1_r;
     reg [7:0] ambient1_r_d2_r;
@@ -253,8 +341,18 @@ module edrv32_gpu_transform (
     reg [7:0] base_color1_r_d8_r;
     reg [7:0] base_color1_r_d9_r;
     reg [7:0] base_color1_r_d10_r;
-    reg [40:0] color_product1_r;
-    reg [40:0] color_product1_p1_r;
+    reg [24:0] color_product1_partial0_r;
+    wire [40:0] color_product1_term0_w;
+    assign color_product1_term0_w = {16'b0, color_product1_partial0_r};
+    reg [23:0] color_product1_partial1_r;
+    wire [40:0] color_product1_term1_w;
+    assign color_product1_term1_w = {color_product1_partial1_r, 17'b0};
+    reg [35:0] color_product1_low_r;
+    reg [5:0] color_product1_high0_r;
+    reg [5:0] color_product1_high1_r;
+    wire [5:0] color_product1_high_w;
+    assign color_product1_high_w = color_product1_high0_r + color_product1_high1_r +
+        {5'b0, color_product1_low_r[35]};
     reg [40:0] color_product1_p2_r;
     wire [41:0] color_extend1_w;
     wire [41:0] color_bias1_w;
@@ -282,8 +380,13 @@ module edrv32_gpu_transform (
     reg [7:0] direct2_r_d4_r;
     reg [7:0] direct2_r_d5_r;
     reg [7:0] direct2_r_d6_r;
-    reg [31:0] illumination_product2_r;
-    reg [31:0] illumination_product2_p1_r;
+    reg [24:0] illumination_product2_partial0_r;
+    wire [31:0] illumination_product2_term0_w;
+    assign illumination_product2_term0_w = {7'b0, illumination_product2_partial0_r};
+    reg [14:0] illumination_product2_partial1_r;
+    wire [31:0] illumination_product2_term1_w;
+    assign illumination_product2_term1_w = {illumination_product2_partial1_r, 17'b0};
+    reg [31:0] illumination_product2_sum_r;
     reg [31:0] illumination_product2_p2_r;
     reg [7:0] ambient2_r_d1_r;
     reg [7:0] ambient2_r_d2_r;
@@ -306,8 +409,18 @@ module edrv32_gpu_transform (
     reg [7:0] base_color2_r_d8_r;
     reg [7:0] base_color2_r_d9_r;
     reg [7:0] base_color2_r_d10_r;
-    reg [40:0] color_product2_r;
-    reg [40:0] color_product2_p1_r;
+    reg [24:0] color_product2_partial0_r;
+    wire [40:0] color_product2_term0_w;
+    assign color_product2_term0_w = {16'b0, color_product2_partial0_r};
+    reg [23:0] color_product2_partial1_r;
+    wire [40:0] color_product2_term1_w;
+    assign color_product2_term1_w = {color_product2_partial1_r, 17'b0};
+    reg [35:0] color_product2_low_r;
+    reg [5:0] color_product2_high0_r;
+    reg [5:0] color_product2_high1_r;
+    wire [5:0] color_product2_high_w;
+    assign color_product2_high_w = color_product2_high0_r + color_product2_high1_r +
+        {5'b0, color_product2_low_r[35]};
     reg [40:0] color_product2_p2_r;
     wire [41:0] color_extend2_w;
     wire [41:0] color_bias2_w;
@@ -606,19 +719,37 @@ module edrv32_gpu_transform (
         if (pipeline_enable_w[0]) begin
             coefficient_0_0_r <= phase_r ? matrix_i[256 +: 32] : matrix_i[0 +: 32];
             vertex_0_0_r <= vertex_w[0 +: 16];
-            matrix_product0_0_r <= $signed(coefficient_0_0_r) * $signed(vertex_0_0_r);
-            matrix_product0_0_p1_r <= matrix_product0_0_r;
-            matrix_product0_0_p2_r <= matrix_product0_0_p1_r;
+            matrix_product0_0_partial0_r <=
+                $signed({1'b0, coefficient_0_0_r[16:0]}) * $signed(vertex_0_0_r);
+            matrix_product0_0_partial1_r <=
+                $signed(coefficient_0_0_r[31:17]) * $signed(vertex_0_0_r);
+            matrix_product0_0_low_r <= {1'b0, matrix_product0_0_term0_w[34:0]} +
+                {1'b0, matrix_product0_0_term1_w[34:0]};
+            matrix_product0_0_high0_r <= matrix_product0_0_term0_w[47:35];
+            matrix_product0_0_high1_r <= matrix_product0_0_term1_w[47:35];
+            matrix_product0_0_p2_r <= {matrix_product0_0_high_w, matrix_product0_0_low_r[34:0]};
             coefficient_0_1_r <= phase_r ? matrix_i[288 +: 32] : matrix_i[32 +: 32];
             vertex_0_1_r <= vertex_w[16 +: 16];
-            matrix_product0_1_r <= $signed(coefficient_0_1_r) * $signed(vertex_0_1_r);
-            matrix_product0_1_p1_r <= matrix_product0_1_r;
-            matrix_product0_1_p2_r <= matrix_product0_1_p1_r;
+            matrix_product0_1_partial0_r <=
+                $signed({1'b0, coefficient_0_1_r[16:0]}) * $signed(vertex_0_1_r);
+            matrix_product0_1_partial1_r <=
+                $signed(coefficient_0_1_r[31:17]) * $signed(vertex_0_1_r);
+            matrix_product0_1_low_r <= {1'b0, matrix_product0_1_term0_w[34:0]} +
+                {1'b0, matrix_product0_1_term1_w[34:0]};
+            matrix_product0_1_high0_r <= matrix_product0_1_term0_w[47:35];
+            matrix_product0_1_high1_r <= matrix_product0_1_term1_w[47:35];
+            matrix_product0_1_p2_r <= {matrix_product0_1_high_w, matrix_product0_1_low_r[34:0]};
             coefficient_0_2_r <= phase_r ? matrix_i[320 +: 32] : matrix_i[64 +: 32];
             vertex_0_2_r <= vertex_w[32 +: 16];
-            matrix_product0_2_r <= $signed(coefficient_0_2_r) * $signed(vertex_0_2_r);
-            matrix_product0_2_p1_r <= matrix_product0_2_r;
-            matrix_product0_2_p2_r <= matrix_product0_2_p1_r;
+            matrix_product0_2_partial0_r <=
+                $signed({1'b0, coefficient_0_2_r[16:0]}) * $signed(vertex_0_2_r);
+            matrix_product0_2_partial1_r <=
+                $signed(coefficient_0_2_r[31:17]) * $signed(vertex_0_2_r);
+            matrix_product0_2_low_r <= {1'b0, matrix_product0_2_term0_w[34:0]} +
+                {1'b0, matrix_product0_2_term1_w[34:0]};
+            matrix_product0_2_high0_r <= matrix_product0_2_term0_w[47:35];
+            matrix_product0_2_high1_r <= matrix_product0_2_term1_w[47:35];
+            matrix_product0_2_p2_r <= {matrix_product0_2_high_w, matrix_product0_2_low_r[34:0]};
             translation0_r <= phase_r ? matrix_i[352 +: 32] : matrix_i[96 +: 32];
             matrix_pair0_0_part0_r <= {1'b0, matrix_pair0_0_a0_w} + {1'b0, matrix_pair0_0_b0_w};
             matrix_pair0_0_a1_w_d4_r <= matrix_pair0_0_a1_w;
@@ -650,19 +781,37 @@ module edrv32_gpu_transform (
     end
     always @(posedge clk_i) begin
         if (pipeline_enable_w[1]) begin
-            matrix_product1_0_r <= $signed(coefficient_1_0_r) * $signed(vertex_1_0_r);
-            matrix_product1_0_p1_r <= matrix_product1_0_r;
-            matrix_product1_0_p2_r <= matrix_product1_0_p1_r;
+            matrix_product1_0_partial0_r <=
+                $signed({1'b0, coefficient_1_0_r[16:0]}) * $signed(vertex_1_0_r);
+            matrix_product1_0_partial1_r <=
+                $signed(coefficient_1_0_r[31:17]) * $signed(vertex_1_0_r);
+            matrix_product1_0_low_r <= {1'b0, matrix_product1_0_term0_w[34:0]} +
+                {1'b0, matrix_product1_0_term1_w[34:0]};
+            matrix_product1_0_high0_r <= matrix_product1_0_term0_w[47:35];
+            matrix_product1_0_high1_r <= matrix_product1_0_term1_w[47:35];
+            matrix_product1_0_p2_r <= {matrix_product1_0_high_w, matrix_product1_0_low_r[34:0]};
             coefficient_1_1_r <= phase_r ? matrix_i[416 +: 32] : matrix_i[160 +: 32];
             vertex_1_1_r <= vertex_w[16 +: 16];
-            matrix_product1_1_r <= $signed(coefficient_1_1_r) * $signed(vertex_1_1_r);
-            matrix_product1_1_p1_r <= matrix_product1_1_r;
-            matrix_product1_1_p2_r <= matrix_product1_1_p1_r;
+            matrix_product1_1_partial0_r <=
+                $signed({1'b0, coefficient_1_1_r[16:0]}) * $signed(vertex_1_1_r);
+            matrix_product1_1_partial1_r <=
+                $signed(coefficient_1_1_r[31:17]) * $signed(vertex_1_1_r);
+            matrix_product1_1_low_r <= {1'b0, matrix_product1_1_term0_w[34:0]} +
+                {1'b0, matrix_product1_1_term1_w[34:0]};
+            matrix_product1_1_high0_r <= matrix_product1_1_term0_w[47:35];
+            matrix_product1_1_high1_r <= matrix_product1_1_term1_w[47:35];
+            matrix_product1_1_p2_r <= {matrix_product1_1_high_w, matrix_product1_1_low_r[34:0]};
             coefficient_1_2_r <= phase_r ? matrix_i[448 +: 32] : matrix_i[192 +: 32];
             vertex_1_2_r <= vertex_w[32 +: 16];
-            matrix_product1_2_r <= $signed(coefficient_1_2_r) * $signed(vertex_1_2_r);
-            matrix_product1_2_p1_r <= matrix_product1_2_r;
-            matrix_product1_2_p2_r <= matrix_product1_2_p1_r;
+            matrix_product1_2_partial0_r <=
+                $signed({1'b0, coefficient_1_2_r[16:0]}) * $signed(vertex_1_2_r);
+            matrix_product1_2_partial1_r <=
+                $signed(coefficient_1_2_r[31:17]) * $signed(vertex_1_2_r);
+            matrix_product1_2_low_r <= {1'b0, matrix_product1_2_term0_w[34:0]} +
+                {1'b0, matrix_product1_2_term1_w[34:0]};
+            matrix_product1_2_high0_r <= matrix_product1_2_term0_w[47:35];
+            matrix_product1_2_high1_r <= matrix_product1_2_term1_w[47:35];
+            matrix_product1_2_p2_r <= {matrix_product1_2_high_w, matrix_product1_2_low_r[34:0]};
             translation1_r <= phase_r ? matrix_i[480 +: 32] : matrix_i[224 +: 32];
             matrix_pair1_0_part0_r <= {1'b0, matrix_pair1_0_a0_w} + {1'b0, matrix_pair1_0_b0_w};
             matrix_pair1_0_a1_w_d4_r <= matrix_pair1_0_a1_w;
@@ -721,9 +870,11 @@ module edrv32_gpu_transform (
             direct0_r_d4_r <= direct0_r_d3_r;
             direct0_r_d5_r <= direct0_r_d4_r;
             direct0_r_d6_r <= direct0_r_d5_r;
-            illumination_product0_r <= light_dot_r * direct0_r_d6_r;
-            illumination_product0_p1_r <= illumination_product0_r;
-            illumination_product0_p2_r <= illumination_product0_p1_r;
+            illumination_product0_partial0_r <= light_dot_r[16:0] * direct0_r_d6_r;
+            illumination_product0_partial1_r <= light_dot_r[23:17] * direct0_r_d6_r;
+            illumination_product0_sum_r <=
+                illumination_product0_term0_w + illumination_product0_term1_w;
+            illumination_product0_p2_r <= illumination_product0_sum_r;
             ambient0_r_d1_r <= ambient0_r;
             ambient0_r_d2_r <= ambient0_r_d1_r;
             ambient0_r_d3_r <= ambient0_r_d2_r;
@@ -745,9 +896,13 @@ module edrv32_gpu_transform (
             base_color0_r_d8_r <= base_color0_r_d7_r;
             base_color0_r_d9_r <= base_color0_r_d8_r;
             base_color0_r_d10_r <= base_color0_r_d9_r;
-            color_product0_r <= illumination0_r * base_color0_r_d10_r;
-            color_product0_p1_r <= color_product0_r;
-            color_product0_p2_r <= color_product0_p1_r;
+            color_product0_partial0_r <= illumination0_r[16:0] * base_color0_r_d10_r;
+            color_product0_partial1_r <= illumination0_r[32:17] * base_color0_r_d10_r;
+            color_product0_low_r <= {1'b0, color_product0_term0_w[34:0]} +
+                {1'b0, color_product0_term1_w[34:0]};
+            color_product0_high0_r <= color_product0_term0_w[40:35];
+            color_product0_high1_r <= color_product0_term1_w[40:35];
+            color_product0_p2_r <= {color_product0_high_w, color_product0_low_r[34:0]};
             color_round0_part0_r <= {1'b0, color_round0_a0_w} + {1'b0, color_round0_b0_w};
             color_round0_a1_w_d14_r <= color_round0_a1_w;
             color_round0_b1_w_d14_r <= color_round0_b1_w;
@@ -773,9 +928,11 @@ module edrv32_gpu_transform (
             direct1_r_d4_r <= direct1_r_d3_r;
             direct1_r_d5_r <= direct1_r_d4_r;
             direct1_r_d6_r <= direct1_r_d5_r;
-            illumination_product1_r <= light_dot_r * direct1_r_d6_r;
-            illumination_product1_p1_r <= illumination_product1_r;
-            illumination_product1_p2_r <= illumination_product1_p1_r;
+            illumination_product1_partial0_r <= light_dot_r[16:0] * direct1_r_d6_r;
+            illumination_product1_partial1_r <= light_dot_r[23:17] * direct1_r_d6_r;
+            illumination_product1_sum_r <=
+                illumination_product1_term0_w + illumination_product1_term1_w;
+            illumination_product1_p2_r <= illumination_product1_sum_r;
             ambient1_r_d1_r <= ambient1_r;
             ambient1_r_d2_r <= ambient1_r_d1_r;
             ambient1_r_d3_r <= ambient1_r_d2_r;
@@ -797,9 +954,13 @@ module edrv32_gpu_transform (
             base_color1_r_d8_r <= base_color1_r_d7_r;
             base_color1_r_d9_r <= base_color1_r_d8_r;
             base_color1_r_d10_r <= base_color1_r_d9_r;
-            color_product1_r <= illumination1_r * base_color1_r_d10_r;
-            color_product1_p1_r <= color_product1_r;
-            color_product1_p2_r <= color_product1_p1_r;
+            color_product1_partial0_r <= illumination1_r[16:0] * base_color1_r_d10_r;
+            color_product1_partial1_r <= illumination1_r[32:17] * base_color1_r_d10_r;
+            color_product1_low_r <= {1'b0, color_product1_term0_w[34:0]} +
+                {1'b0, color_product1_term1_w[34:0]};
+            color_product1_high0_r <= color_product1_term0_w[40:35];
+            color_product1_high1_r <= color_product1_term1_w[40:35];
+            color_product1_p2_r <= {color_product1_high_w, color_product1_low_r[34:0]};
             color_round1_part0_r <= {1'b0, color_round1_a0_w} + {1'b0, color_round1_b0_w};
             color_round1_a1_w_d14_r <= color_round1_a1_w;
             color_round1_b1_w_d14_r <= color_round1_b1_w;
@@ -821,9 +982,11 @@ module edrv32_gpu_transform (
             direct2_r_d4_r <= direct2_r_d3_r;
             direct2_r_d5_r <= direct2_r_d4_r;
             direct2_r_d6_r <= direct2_r_d5_r;
-            illumination_product2_r <= light_dot_r * direct2_r_d6_r;
-            illumination_product2_p1_r <= illumination_product2_r;
-            illumination_product2_p2_r <= illumination_product2_p1_r;
+            illumination_product2_partial0_r <= light_dot_r[16:0] * direct2_r_d6_r;
+            illumination_product2_partial1_r <= light_dot_r[23:17] * direct2_r_d6_r;
+            illumination_product2_sum_r <=
+                illumination_product2_term0_w + illumination_product2_term1_w;
+            illumination_product2_p2_r <= illumination_product2_sum_r;
             ambient2_r_d1_r <= ambient2_r;
             ambient2_r_d2_r <= ambient2_r_d1_r;
             ambient2_r_d3_r <= ambient2_r_d2_r;
@@ -845,9 +1008,13 @@ module edrv32_gpu_transform (
             base_color2_r_d8_r <= base_color2_r_d7_r;
             base_color2_r_d9_r <= base_color2_r_d8_r;
             base_color2_r_d10_r <= base_color2_r_d9_r;
-            color_product2_r <= illumination2_r * base_color2_r_d10_r;
-            color_product2_p1_r <= color_product2_r;
-            color_product2_p2_r <= color_product2_p1_r;
+            color_product2_partial0_r <= illumination2_r[16:0] * base_color2_r_d10_r;
+            color_product2_partial1_r <= illumination2_r[32:17] * base_color2_r_d10_r;
+            color_product2_low_r <= {1'b0, color_product2_term0_w[34:0]} +
+                {1'b0, color_product2_term1_w[34:0]};
+            color_product2_high0_r <= color_product2_term0_w[40:35];
+            color_product2_high1_r <= color_product2_term1_w[40:35];
+            color_product2_p2_r <= {color_product2_high_w, color_product2_low_r[34:0]};
             color_round2_part0_r <= {1'b0, color_round2_a0_w} + {1'b0, color_round2_b0_w};
             color_round2_a1_w_d14_r <= color_round2_a1_w;
         end
