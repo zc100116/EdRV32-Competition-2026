@@ -1,0 +1,70 @@
+Card 107 round 10 | upstream bfaa8a41 | local run 74c53048
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | snapshot 2026-11-26T23:06:38+08:00
+
+Original line numbers from place_route/run.log; stage durations can include substage durations.
+9404: Phase 1 Pre global placement started.
+9408: C: Place-2039: The placement site of clk_i_ibuf/opit_1 and u_pll_sys/u_gpll/gpll_inst is incompatible.
+9420: Phase 1.1 1st GP placement started.
+9421: Design Utilization : 69%.
+9424: 1st GP placement takes 4.00 sec.
+9426: Phase 1.2 Clock placement started.
+9442: Clock placement takes 0.94 sec.
+9445: Pre global placement takes 5.36 sec.
+9447: Phase 2 Global placement started.
+9448: Phase 2.1 Fixed placement started.
+9596: Fixed placement takes 2.39 sec.
+9598: Phase 2.2 Process placement started.
+9604: Process placement takes 0.00 sec.
+9606: Phase 2.3 IO placement started.
+9607: IO placement takes 0.11 sec.
+9613: Phase 2.4 2nd GP placement started.
+9619: Design Utilization : 69%.
+9621: Worst slack after global placement is -3021
+9622: 2nd GP placement takes 14.44 sec.
+9625: Global placement takes 18.30 sec.
+9627: Phase 3 Post global placement started.
+9628: Phase 3.1 Macro cell placement started.
+9631: Macro cell placement takes 10.06 sec.
+9635: Phase 3.2 3rd GP placement started.
+9636: Design Utilization : 69%.
+9638: Worst slack after post global placement is -2903
+9639: 3rd GP placement takes 6.88 sec.
+9645: Post global placement takes 19.61 sec.
+9647: Phase 4 Legalization started.
+9650: Legalization takes 3.61 sec.
+9652: Phase 5 Timing-driven detailed placement started.
+9653: Phase 5.1 Replication placement started.
+9654: Worst slack before Replication Place is -3022.
+9655: Replication placement takes 11.25 sec.
+9658: Phase 5.2 Swapping placement started.
+9659: Worst slack before detailed placement is -3022, TNS before detailed placement is -26580613.
+9660: Cost at Swap iteration 0 : -3022, wslk -2850, tns -23898179, takes 2.88 sec.
+9662: Cost at DP iteration 0 : -2850, wslk -2757, tns -16545921, takes 1.56 sec.
+9664: Cost at Swap iteration 1 : -2757, wslk -2685, tns -14873856, takes 1.92 sec.
+9666: Cost at Swap iteration 2 : -2685, wslk -2577, tns -14522850, takes 1.00 sec.
+9668: Cost at DP iteration 2 : -2577, wslk -2577, tns -12784484, takes 1.50 sec.
+9670: Cost at Swap iteration 3 : -2577, wslk -2577, tns -12650665, takes 1.73 sec.
+9672: Cost at Swap iteration 4 : -2577, wslk -2564, tns -12115876, takes 0.53 sec.
+9674: Cost at DP iteration 4 : -2564, wslk -2505, tns -11437378, takes 0.34 sec.
+9676: Cost at Swap iteration 5 : -2505, wslk -2505, tns -10960738, takes 1.84 sec.
+9678: Cost at Swap iteration 6 : -2505, wslk -2424, tns -10574763, takes 0.77 sec.
+9680: Cost at DP iteration 6 : -2424, wslk -2424, tns -10471496, takes 0.95 sec.
+9682: Cost at Swap iteration 7 : -2424, wslk -2424, tns -10207701, takes 2.17 sec.
+9684: Cost at Swap iteration 8 : -2424, wslk -2424, tns -9948966, takes 0.94 sec.
+9686: Cost at DP iteration 8 : -2424, wslk -2399, tns -9721638, takes 1.33 sec.
+9688: Cost at Swap iteration 9 : -2399, wslk -2399, tns -9724787, takes 0.95 sec.
+9690: Cost at Swap iteration 10 : -2399, wslk -2399, tns -9599633, takes 0.47 sec.
+9692: Cost at DP iteration 10 : -2399, wslk -2399, tns -9433739, takes 1.06 sec.
+9694: Cost at Swap iteration 11 : -2399, wslk -2394, tns -9467248, takes 0.94 sec.
+9696: Cost at Swap iteration 12 : -2394, wslk -2394, tns -9506361, takes 1.41 sec.
+9698: Cost at DP iteration 12 : -2394, wslk -2394, tns -9464190, takes 0.64 sec.
+9700: Cost at Swap iteration 13 : -2394, wslk -2394, tns -9426875, takes 0.77 sec.
+9702: Cost at Swap iteration 14 : -2394, wslk -2394, tns -9354157, takes 1.69 sec.
+9704: Cost at DP iteration 14 : -2394, wslk -2394, tns -9071386, takes 0.95 sec.
+9706: Worst slack after detailed placement is -2394, TNS after detailed placement is -9071386.
+9707: Swapping placement takes 29.86 sec.
+9900: Timing-driven detailed placement takes 41.20 sec.
+9902: Worst slack is -2394, TNS after placement is -9124844.
+9903: Placement done.
+9904: Total placement takes 92.39 sec.
+9905: Finished placement.
