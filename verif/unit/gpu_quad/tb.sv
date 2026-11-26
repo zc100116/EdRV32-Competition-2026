@@ -16,9 +16,9 @@ module tb;
     reg sink_ready_r = 0;
     wire sink_valid_w;
     reg [161:0] stimulus_r [0:32767];
-    reg [1854:0] expected_r [0:262143];
+    reg [848:0] expected_r [0:262143];
     reg [161:0] source_r = 0;
-    wire [1854:0] actual_w;
+    wire [848:0] actual_w;
     integer input_total_r;
     integer output_total_r;
     integer sent_r = 0;
@@ -38,16 +38,19 @@ module tb;
     wire [127:0] object_quad_data_w;
     wire [16:0] object_quad_x_w;
     wire [16:0] object_quad_y_w;
-    wire [15:0] fragment_x_w;
-    wire [15:0] fragment_y_w;
-    wire [3:0] fragment_mask_w;
-    wire [0:0] fragment_quad_w;
-    wire [1735:0] fragment_plane_w;
-    wire [69:0] fragment_h_w;
-    wire [3:0] fragment_palette_w;
-    wire [7:0] fragment_alpha_w;
+    wire [15:0] sample_x_w;
+    wire [15:0] sample_y_w;
+    wire [3:0] sample_mask_w;
+    wire [0:0] sample_quad_w;
+    wire [127:0] sample_u_w;
+    wire [127:0] sample_v_w;
+    wire [383:0] sample_span_w;
+    wire [63:0] sample_depth_w;
+    wire [95:0] sample_color_w;
+    wire [3:0] sample_palette_w;
+    wire [7:0] sample_alpha_w;
     assign {object_quad_y_w, object_quad_x_w, object_quad_data_w} = source_r;
-    assign actual_w = {fragment_alpha_w, fragment_palette_w, fragment_h_w, fragment_plane_w, fragment_quad_w, fragment_mask_w, fragment_y_w, fragment_x_w};
+    assign actual_w = {sample_alpha_w, sample_palette_w, sample_color_w, sample_depth_w, sample_span_w, sample_v_w, sample_u_w, sample_quad_w, sample_mask_w, sample_y_w, sample_x_w};
     reg state_valid_r = 0;
     reg [255:0] target_r = 0;
     wire state_ready_w;
@@ -79,16 +82,19 @@ module tb;
         .quad_record_valid_i(source_valid_r && object_r == 0),
         .quad_record_ready_o(record_ready_w),
         .quad_record_data_i(object_quad_data_w),
-        .fragment_valid_o(sink_valid_w),
-        .fragment_ready_i(sink_ready_r),
-        .fragment_x_o(fragment_x_w),
-        .fragment_y_o(fragment_y_w),
-        .fragment_mask_o(fragment_mask_w),
-        .fragment_quad_o(fragment_quad_w),
-        .fragment_plane_o(fragment_plane_w),
-        .fragment_h_o(fragment_h_w),
-        .fragment_palette_o(fragment_palette_w),
-        .fragment_alpha_o(fragment_alpha_w)
+        .sample_valid_o(sink_valid_w),
+        .sample_ready_i(sink_ready_r),
+        .sample_x_o(sample_x_w),
+        .sample_y_o(sample_y_w),
+        .sample_mask_o(sample_mask_w),
+        .sample_quad_o(sample_quad_w),
+        .sample_u_o(sample_u_w),
+        .sample_v_o(sample_v_w),
+        .sample_span_o(sample_span_w),
+        .sample_depth_o(sample_depth_w),
+        .sample_color_o(sample_color_w),
+        .sample_palette_o(sample_palette_w),
+        .sample_alpha_o(sample_alpha_w)
     );
     initial begin
         if (!$value$plusargs("INPUT=%s", input_path_r) ||

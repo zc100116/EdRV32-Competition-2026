@@ -35,7 +35,6 @@ module edrv32_gpu_raster (
     output wire [15:0] fragment_x_o,
     output wire [15:0] fragment_y_o,
     output wire [3:0] fragment_mask_o,
-    output wire fragment_quad_o,
     output wire [1735:0] fragment_plane_o,
     output wire [69:0] fragment_h_o,
     output wire [3:0] fragment_palette_o,
@@ -670,7 +669,6 @@ module edrv32_gpu_raster (
     assign output_input_w[32 +: 4] = mask_w;
     assign fragment_mask_o = unused_output_data_w[32 +: 4];
     assign output_input_w[36 +: 1] = 1'b0;
-    assign fragment_quad_o = unused_output_data_w[36 +: 1];
     assign output_input_w[37 +: 70] = pipe_h_w;
     assign fragment_h_o = unused_output_data_w[37 +: 70];
     assign output_input_w[107 +: 4] = pipe_palette_w;

@@ -227,7 +227,7 @@ def perspective_vectors():
         ar = PixelArithmetic.__new__(PixelArithmetic)
         ar.exponents = [-8, rng.randrange(-61, -11), rng.randrange(-61, -11),
                         rng.randrange(-61, -11), -12, -12, -12]
-        quad = i >= 530 and i % 13 == 0
+        quad = False
         rows = []
         for row in range(2):
             lanes = []
@@ -347,6 +347,27 @@ def run(kind):
         inputs, outputs = (perspective_vectors() if kind == 'perspective' else
                            quad_vectors(wide, obj, perf) if kind == 'quad' else
                            raster_vectors(wide))
+        if kind == 'quad':
+            converted = []
+            for value in outputs:
+                fields = {}
+                offset = 0
+                for key, width in FRAG.items():
+                    fields[key] = (value >> offset) & ((1 << width)-1)
+                    offset += width
+                uv = [[], []]
+                depth = []
+                for lane in range(4):
+                    plane = fields['plane'] >> (lane*434)
+                    depth.append((plane >> 8) & 65535)
+                    for axis, start in enumerate((128, 194)):
+                        coord = (plane >> (start+34)) & ((1 << 32)-1)
+                        uv[axis].append((coord << 8) & ((1 << 32)-1))
+                converted.append(record(dict(x=fields['x'], y=fields['y'],
+                    mask=fields['mask'], quad=1, u=packed(uv[0], [32]*4),
+                    v=packed(uv[1], [32]*4), span=0, depth=packed(depth, [16]*4),
+                    color=(1 << 96)-1, palette=fields['palette'], alpha=fields['alpha']), SAMPLE))
+            outputs = converted
         inp, out = build/'input.hex', build/'expected.hex'
         inp.write_text(''.join(f'{x:x}\n' for x in inputs))
         out.write_text(''.join(f'{x:x}\n' for x in outputs))

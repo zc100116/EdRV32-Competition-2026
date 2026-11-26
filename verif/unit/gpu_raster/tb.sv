@@ -42,7 +42,7 @@ module tb;
     wire [15:0] fragment_x_w;
     wire [15:0] fragment_y_w;
     wire [3:0] fragment_mask_w;
-    wire [0:0] fragment_quad_w;
+    wire [0:0] fragment_quad_w = 1'b0;
     wire [1735:0] fragment_plane_w;
     wire [69:0] fragment_h_w;
     wire [3:0] fragment_palette_w;
@@ -81,7 +81,6 @@ module tb;
         .fragment_x_o(fragment_x_w),
         .fragment_y_o(fragment_y_w),
         .fragment_mask_o(fragment_mask_w),
-        .fragment_quad_o(fragment_quad_w),
         .fragment_plane_o(fragment_plane_w),
         .fragment_h_o(fragment_h_w),
         .fragment_palette_o(fragment_palette_w),

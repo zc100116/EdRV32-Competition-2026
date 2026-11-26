@@ -1,7 +1,7 @@
 // File: edrv32_gpu_perspective.v
 // Spec: gpu-spec 2.5, 2.8, 2.13; microarch 4.2, 4.4, 4.6.
 // Description: Four-lane ordered streaming pixel arithmetic.
-//              P18 coordinates, paired 2x2 differences and independent exact quad bypass.
+//              P18 coordinates, paired 2x2 differences for the triangle sample stream.
 // Clock domain: clk_gpu.
 module edrv32_gpu_perspective (
     // Clock and reset.,
@@ -14,7 +14,6 @@ module edrv32_gpu_perspective (
     input wire [15:0] fragment_x_i,
     input wire [15:0] fragment_y_i,
     input wire [3:0] fragment_mask_i,
-    input wire fragment_quad_i,
     input wire [1735:0] fragment_plane_i,
     input wire [69:0] fragment_h_i,
     input wire [3:0] fragment_palette_i,
@@ -60,14 +59,12 @@ module edrv32_gpu_perspective (
     reg [15:0] input_x_r [0:1];
     reg [15:0] input_y_r [0:1];
     reg [3:0] input_mask_r [0:1];
-    reg [0:0] input_quad_r [0:1];
     reg [69:0] input_h_r [0:1];
     reg [3:0] input_palette_r [0:1];
     reg [7:0] input_alpha_r [0:1];
     wire [15:0] pipe_x_w;
     wire [15:0] pipe_y_w;
     wire [3:0] pipe_mask_w;
-    wire [0:0] pipe_quad_w;
     wire [3:0] pipe_palette_w;
     wire [7:0] pipe_alpha_w;
     wire [848:0] output_input_w;
@@ -75,7 +72,6 @@ module edrv32_gpu_perspective (
     wire [15:0] output_x_w;
     wire [15:0] output_y_w;
     wire [3:0] output_mask_w;
-    wire [0:0] output_quad_w;
     wire [3:0] output_palette_w;
     wire [7:0] output_alpha_w;
     wire [127:0] output_u_w;
@@ -99,8 +95,8 @@ module edrv32_gpu_perspective (
     wire [159:0] delay_shade_input_w;
     wire [215:0] unused_delay_shade_data_w;
     wire [8:0] delay_shade_read_w;
-    wire [304:0] delay_metadata_input_w;
-    wire [359:0] unused_delay_metadata_data_w;
+    wire [48:0] delay_metadata_input_w;
+    wire [71:0] unused_delay_metadata_data_w;
     wire [8:0] delay_metadata_read_w;
     wire [119:0] delay_scale_input_w;
     wire [143:0] unused_delay_scale_data_w;
@@ -122,7 +118,7 @@ module edrv32_gpu_perspective (
     assign sample_valid_o = output_valid_r && !stop_i;
     assign input_push_w = fragment_valid_i && fragment_ready_o && !stop_i;
     assign input_pop_w = input_count_r != 0 && !stop_i &&
-        (input_quad_r[input_read_r] || pair_second_r || input_count_r == 2 || input_push_w);
+        (pair_second_r || input_count_r == 2 || input_push_w);
     assign output_push_w = valid_r[42] && !stop_i;
     assign output_pop_w = sample_valid_o && sample_ready_i;
     // The RAM output holds the prefetched head during downstream backpressure.
@@ -130,12 +126,11 @@ module edrv32_gpu_perspective (
         (output_pop_w && output_count_r > 1));
     assign output_addr_w = output_read_r + {8'b0, output_pop_w};
 
-    assign pipe_x_w = unused_delay_metadata_data_w[256 +: 16];
-    assign pipe_y_w = unused_delay_metadata_data_w[272 +: 16];
-    assign pipe_mask_w = unused_delay_metadata_data_w[288 +: 4];
-    assign pipe_quad_w = unused_delay_metadata_data_w[292 +: 1];
-    assign pipe_palette_w = unused_delay_metadata_data_w[293 +: 4];
-    assign pipe_alpha_w = unused_delay_metadata_data_w[297 +: 8];
+    assign pipe_x_w = unused_delay_metadata_data_w[0 +: 16];
+    assign pipe_y_w = unused_delay_metadata_data_w[16 +: 16];
+    assign pipe_mask_w = unused_delay_metadata_data_w[32 +: 4];
+    assign pipe_palette_w = unused_delay_metadata_data_w[37 +: 4];
+    assign pipe_alpha_w = unused_delay_metadata_data_w[41 +: 8];
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
@@ -202,7 +197,6 @@ module edrv32_gpu_perspective (
             input_x_r[input_write_r] <= fragment_x_i;
             input_y_r[input_write_r] <= fragment_y_i;
             input_mask_r[input_write_r] <= fragment_mask_i;
-            input_quad_r[input_write_r] <= fragment_quad_i;
             input_h_r[input_write_r] <= fragment_h_i;
             input_palette_r[input_write_r] <= fragment_palette_i;
             input_alpha_r[input_write_r] <= fragment_alpha_i;
@@ -212,14 +206,13 @@ module edrv32_gpu_perspective (
     assign output_x_w = pipe_x_w;
     assign output_y_w = pipe_y_w;
     assign output_mask_w = pipe_mask_w;
-    assign output_quad_w = pipe_quad_w;
     assign output_palette_w = pipe_palette_w;
     assign output_alpha_w = pipe_alpha_w;
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) pair_second_r <= 0;
         else if (stop_i) pair_second_r <= 0;
-        else if (input_pop_w && !input_quad_r[input_read_r]) pair_second_r <= !pair_second_r;
+        else if (input_pop_w) pair_second_r <= !pair_second_r;
     end
     always @(posedge clk_i) begin
         previous_u_r <= u_normal_w;
@@ -232,7 +225,7 @@ module edrv32_gpu_perspective (
     assign sample_y_o = unused_output_data_w[16 +: 16];
     assign output_input_w[32 +: 4] = output_mask_w;
     assign sample_mask_o = unused_output_data_w[32 +: 4];
-    assign output_input_w[36 +: 1] = output_quad_w;
+    assign output_input_w[36 +: 1] = 1'b0;
     assign sample_quad_o = unused_output_data_w[36 +: 1];
     assign output_input_w[37 +: 4] = output_palette_w;
     assign sample_palette_o = unused_output_data_w[37 +: 4];
@@ -495,46 +488,10 @@ module edrv32_gpu_perspective (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
-        .wr_data_i(delay_metadata_input_w[0 +: 72]),
+        .wr_data_i({23'b0, delay_metadata_input_w}),
         .rd_en_i(advance_w),
         .rd_addr_i(delay_metadata_read_w),
-        .rd_data_o(unused_delay_metadata_data_w[0 +: 72])
-    );
-    edrv32_ram_gpu_delay u_delay_metadata_1 (
-        .clk_i(clk_i),
-        .wr_en_i(advance_w),
-        .wr_addr_i(delay_write_r),
-        .wr_data_i(delay_metadata_input_w[72 +: 72]),
-        .rd_en_i(advance_w),
-        .rd_addr_i(delay_metadata_read_w),
-        .rd_data_o(unused_delay_metadata_data_w[72 +: 72])
-    );
-    edrv32_ram_gpu_delay u_delay_metadata_2 (
-        .clk_i(clk_i),
-        .wr_en_i(advance_w),
-        .wr_addr_i(delay_write_r),
-        .wr_data_i(delay_metadata_input_w[144 +: 72]),
-        .rd_en_i(advance_w),
-        .rd_addr_i(delay_metadata_read_w),
-        .rd_data_o(unused_delay_metadata_data_w[144 +: 72])
-    );
-    edrv32_ram_gpu_delay u_delay_metadata_3 (
-        .clk_i(clk_i),
-        .wr_en_i(advance_w),
-        .wr_addr_i(delay_write_r),
-        .wr_data_i(delay_metadata_input_w[216 +: 72]),
-        .rd_en_i(advance_w),
-        .rd_addr_i(delay_metadata_read_w),
-        .rd_data_o(unused_delay_metadata_data_w[216 +: 72])
-    );
-    edrv32_ram_gpu_delay u_delay_metadata_4 (
-        .clk_i(clk_i),
-        .wr_en_i(advance_w),
-        .wr_addr_i(delay_write_r),
-        .wr_data_i({55'b0, delay_metadata_input_w[288 +: 17]}),
-        .rd_en_i(advance_w),
-        .rd_addr_i(delay_metadata_read_w),
-        .rd_data_o(unused_delay_metadata_data_w[288 +: 72])
+        .rd_data_o(unused_delay_metadata_data_w)
     );
     assign delay_scale_read_w = delay_write_r - 9'd2;
     edrv32_ram_gpu_delay u_delay_scale_0 (
@@ -619,9 +576,9 @@ module edrv32_gpu_perspective (
         .rd_addr_i(delay_bypass_read_w),
         .rd_data_o(unused_delay_bypass_data_w[432 +: 72])
     );
-    assign delay_metadata_input_w[256 +: 49] =
+    assign delay_metadata_input_w[0 +: 49] =
         {input_alpha_r[input_read_r], input_palette_r[input_read_r],
-        input_quad_r[input_read_r], input_mask_r[input_read_r],
+        1'b0, input_mask_r[input_read_r],
         input_y_r[input_read_r], input_x_r[input_read_r]};
 
     genvar lane;
@@ -769,16 +726,6 @@ module edrv32_gpu_perspective (
             assign delay_shade_input_w[128+lane*8 +: 8] = blue_clamped_r;
             wire [7:0] final_blue_w;
             assign final_blue_w = delay_bypass_w;
-            wire [31:0] delay_26_w;
-            assign delay_26_w = unused_delay_metadata_data_w[0+lane*32 +: 32];
-            assign delay_metadata_input_w[0+lane*32 +: 32] = unused_plane_w[166 +: 32];
-            wire [31:0] bypass_u_w;
-            assign bypass_u_w = delay_26_w;
-            wire [31:0] delay_27_w;
-            assign delay_27_w = unused_delay_metadata_data_w[128+lane*32 +: 32];
-            assign delay_metadata_input_w[128+lane*32 +: 32] = unused_plane_w[236 +: 32];
-            wire [31:0] bypass_v_w;
-            assign bypass_v_w = delay_27_w;
             edrv32_gpu_perspective_absolute u_q_absolute (
                 .clk_i(clk_i),
                 .en_i(advance_w),
@@ -985,12 +932,9 @@ module edrv32_gpu_perspective (
                         || unused_blue_rounded_r[8]) ? 8'd255 : unused_blue_rounded_r[7:0];
                 end
             end
-            assign output_u_w[lane*32 +: 32] = pipe_quad_w ?
-                        bypass_u_w : delay_7_w;
-            assign output_v_w[lane*32 +: 32] = pipe_quad_w ?
-                        bypass_v_w : delay_sign_w;
-            assign output_span_w[lane*96 +: 96] = pipe_quad_w ?
-                        96'b0 : pipe_y_w[0] ? previous_span_r[(lane/2)*96 +: 96] :
+            assign output_u_w[lane*32 +: 32] = delay_7_w;
+            assign output_v_w[lane*32 +: 32] = delay_sign_w;
+            assign output_span_w[lane*96 +: 96] = pipe_y_w[0] ? previous_span_r[(lane/2)*96 +: 96] :
                 quad_span_w[(lane/2)*96 +: 96];
             assign output_depth_w[lane*16 +: 16] = final_depth_w;
             assign output_color_w[lane*24 +: 24] =

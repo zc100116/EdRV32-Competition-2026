@@ -36,7 +36,7 @@ module tb;
     wire [15:0] fragment_x_w;
     wire [15:0] fragment_y_w;
     wire [3:0] fragment_mask_w;
-    wire [0:0] fragment_quad_w;
+    wire [0:0] unused_fragment_quad_w;
     wire [1735:0] fragment_plane_w;
     wire [69:0] fragment_h_w;
     wire [3:0] fragment_palette_w;
@@ -52,7 +52,7 @@ module tb;
     wire [95:0] sample_color_w;
     wire [3:0] sample_palette_w;
     wire [7:0] sample_alpha_w;
-    assign {fragment_alpha_w, fragment_palette_w, fragment_h_w, fragment_plane_w, fragment_quad_w, fragment_mask_w, fragment_y_w, fragment_x_w} = source_r;
+    assign {fragment_alpha_w, fragment_palette_w, fragment_h_w, fragment_plane_w, unused_fragment_quad_w, fragment_mask_w, fragment_y_w, fragment_x_w} = source_r;
     assign actual_w = {sample_alpha_w, sample_palette_w, sample_color_w, sample_depth_w, sample_span_w, sample_v_w, sample_u_w, sample_quad_w, sample_mask_w, sample_y_w, sample_x_w};
     edrv32_gpu_perspective u_dut (
         .clk_i(clk_i),
@@ -65,7 +65,6 @@ module tb;
         .fragment_x_i(fragment_x_w),
         .fragment_y_i(fragment_y_w),
         .fragment_mask_i(fragment_mask_w),
-        .fragment_quad_i(fragment_quad_w),
         .fragment_plane_i(fragment_plane_w),
         .fragment_h_i(fragment_h_w),
         .fragment_palette_i(fragment_palette_w),
