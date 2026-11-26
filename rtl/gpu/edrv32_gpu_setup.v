@@ -74,27 +74,27 @@ module edrv32_gpu_setup (
     reg [3:0] front_tag_r;
     wire signed [36:0] edge_result_w;
     wire [3:0] area_tag_r;
-    reg [3:0] reciprocal_tag_0_r;
-    reg [3:0] reciprocal_tag_1_r;
-    reg [3:0] reciprocal_tag_2_r;
-    reg [3:0] reciprocal_tag_3_r;
-    reg [3:0] reciprocal_tag_4_r;
-    reg [3:0] reciprocal_tag_5_r;
-    reg [3:0] reciprocal_tag_6_r;
-    reg [3:0] reciprocal_tag_7_r;
-    reg [3:0] reciprocal_tag_8_r;
-    reg [3:0] reciprocal_tag_9_r;
-    reg [3:0] reciprocal_tag_10_r;
-    reg [3:0] reciprocal_tag_11_r;
-    reg [3:0] reciprocal_tag_12_r;
-    reg [3:0] reciprocal_tag_13_r;
-    reg [3:0] reciprocal_tag_14_r;
-    reg [3:0] reciprocal_tag_15_r;
-    reg [3:0] reciprocal_tag_16_r;
-    reg [3:0] reciprocal_tag_17_r;
-    reg [3:0] reciprocal_tag_18_r;
-    reg [3:0] reciprocal_tag_19_r;
 
+    // Must equal the total enabled-clock latency of edrv32_gpu_project_recip.
+    localparam RECIP_LATENCY = 24;
+    wire [RECIP_LATENCY*4-1:0] reciprocal_tag_w;
+    genvar reciprocal_stage;
+    generate
+        for (reciprocal_stage = 0; reciprocal_stage < RECIP_LATENCY;
+            reciprocal_stage = reciprocal_stage + 1) begin : g_reciprocal_tag
+            reg [3:0] tag_r;
+            wire [3:0] previous_w;
+            if (reciprocal_stage == 0) begin : g_first
+                assign previous_w = area_tag_r;
+            end else begin : g_previous
+                assign previous_w = reciprocal_tag_w[(reciprocal_stage-1)*4 +: 4];
+            end
+            assign reciprocal_tag_w[reciprocal_stage*4 +: 4] = tag_r;
+            always @(posedge clk_i) begin
+                if (enable_w) tag_r <= previous_w;
+            end
+        end
+    endgenerate
     wire reciprocal_valid_w;
     wire [30:0] reciprocal_w;
     wire [5:0] reciprocal_exponent_w;
@@ -425,26 +425,6 @@ module edrv32_gpu_setup (
     always @(posedge clk_i) begin
         if (enable_w) begin
             if (area_valid_r) nonzero_r[area_tag_r] <= area_w != 0;
-            reciprocal_tag_0_r <= area_tag_r;
-            reciprocal_tag_1_r <= reciprocal_tag_0_r;
-            reciprocal_tag_2_r <= reciprocal_tag_1_r;
-            reciprocal_tag_3_r <= reciprocal_tag_2_r;
-            reciprocal_tag_4_r <= reciprocal_tag_3_r;
-            reciprocal_tag_5_r <= reciprocal_tag_4_r;
-            reciprocal_tag_6_r <= reciprocal_tag_5_r;
-            reciprocal_tag_7_r <= reciprocal_tag_6_r;
-            reciprocal_tag_8_r <= reciprocal_tag_7_r;
-            reciprocal_tag_9_r <= reciprocal_tag_8_r;
-            reciprocal_tag_10_r <= reciprocal_tag_9_r;
-            reciprocal_tag_11_r <= reciprocal_tag_10_r;
-            reciprocal_tag_12_r <= reciprocal_tag_11_r;
-            reciprocal_tag_13_r <= reciprocal_tag_12_r;
-            reciprocal_tag_14_r <= reciprocal_tag_13_r;
-            reciprocal_tag_15_r <= reciprocal_tag_14_r;
-            reciprocal_tag_16_r <= reciprocal_tag_15_r;
-            reciprocal_tag_17_r <= reciprocal_tag_16_r;
-            reciprocal_tag_18_r <= reciprocal_tag_17_r;
-            reciprocal_tag_19_r <= reciprocal_tag_18_r;
 
             if (accept_w) begin
                 delta_r[allocate_r] <= delta_w;
@@ -467,7 +447,7 @@ module edrv32_gpu_setup (
                 front_offset_y_2_r <= edge_offset_y_w[2];
             end
             if (reciprocal_valid_w) begin
-                attribute_tag_r <= reciprocal_tag_19_r;
+                attribute_tag_r <= reciprocal_tag_w[(RECIP_LATENCY-1)*4 +: 4];
                 attribute_reciprocal_r <= reciprocal_w;
                 attribute_exponent_r <= reciprocal_exponent_w;
             end
@@ -505,12 +485,13 @@ module edrv32_gpu_setup (
     genvar attribute;
     generate
         for (attribute = 0; attribute < 7; attribute = attribute + 1) begin : g_attribute
-            reg [152:0] value_r [0:15];
+            // Input values live through the reciprocal and seven attribute reads (<64 clocks).
+            reg [152:0] value_r [0:7];
             wire [152:0] value_w;
             reg [152:0] value_read_r;
             assign attribute_value_wires_w[attribute] = value_read_r;
             always @(posedge clk_i) begin
-                if (enable_w) value_read_r <= value_r[attribute_tag_r];
+                if (enable_w) value_read_r <= value_r[attribute_tag_r[2:0]];
             end
             if (attribute == 0) begin : g_input_0
                 assign value_w = {
@@ -565,36 +546,39 @@ module edrv32_gpu_setup (
                 62 + (attribute-1)*66 : 260 + (attribute-4)*58;
             localparam GRAD_OFFSET = attribute == 0 ? 0 : attribute < 4 ?
                 96 + (attribute-1)*104 : 408 + (attribute-4)*88;
-            reg [WIDTH-1:0] start_r [0:15];
+            // Ordered attribute returns need one assembly register per field.
+            // The next triangle's attribute 0 may arrive on the old triangle's push clock;
+            // nonblocking writes retain the old coefficient for that output transfer.
+            reg [WIDTH-1:0] start_r;
             reg [WIDTH-1:0] output_start_r [0:1];
             assign triangle_setup_start_o[START_OFFSET +: WIDTH] =
                 output_start_r[output_read_r];
             always @(posedge clk_i) begin
                 if (enable_w && plane_valid_w && plane_tag_w[2:0] == attribute)
-                    start_r[plane_tag_w[6:3]] <= plane_start_w[WIDTH-1:0];
-                if (push_w) output_start_r[output_write_r] <= start_r[complete_tag_r];
+                    start_r <= plane_start_w[WIDTH-1:0];
+                if (push_w) output_start_r[output_write_r] <= start_r;
             end
-            reg [2*GRAD_WIDTH-1:0] gradient_r [0:15];
+            reg [2*GRAD_WIDTH-1:0] gradient_r;
             reg [2*GRAD_WIDTH-1:0] output_gradient_r [0:1];
             assign triangle_setup_gradient_o[GRAD_OFFSET +: 2*GRAD_WIDTH] =
                 output_gradient_r[output_read_r];
             always @(posedge clk_i) begin
                 if (enable_w && plane_valid_w && plane_tag_w[2:0] == attribute)
-                    gradient_r[plane_tag_w[6:3]] <= {plane_gradient_w[52 +: GRAD_WIDTH],
+                    gradient_r <= {plane_gradient_w[52 +: GRAD_WIDTH],
                         plane_gradient_w[0 +: GRAD_WIDTH]};
-                if (push_w) output_gradient_r[output_write_r] <= gradient_r[complete_tag_r];
+                if (push_w) output_gradient_r[output_write_r] <= gradient_r;
             end
-            reg [9:0] h_r [0:15];
+            reg [9:0] h_r;
             reg [9:0] output_h_r [0:1];
             assign triangle_setup_h_o[attribute*10 +: 10] =
                 output_h_r[output_read_r];
             always @(posedge clk_i) begin
                 if (enable_w && plane_valid_w && plane_tag_w[2:0] == attribute)
-                    h_r[plane_tag_w[6:3]] <= plane_h_w;
-                if (push_w) output_h_r[output_write_r] <= h_r[complete_tag_r];
+                    h_r <= plane_h_w;
+                if (push_w) output_h_r[output_write_r] <= h_r;
             end
             always @(posedge clk_i) begin
-                if (enable_w && accept_w) value_r[allocate_r] <= value_w;
+                if (enable_w && accept_w) value_r[allocate_r[2:0]] <= value_w;
             end
         end
     endgenerate
