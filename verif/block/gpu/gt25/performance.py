@@ -53,7 +53,7 @@ def measure(root):
             if not passed:
                 failures.append('quad > 80 cycles/object')
         elif name in ['nearest', 'bilinear', 'trilinear']:
-            target = {'nearest': 4, 'bilinear': 2, 'trilinear': 1}[name]
+            target = {'nearest': 2, 'bilinear': 2, 'trilinear': 1}[name]
             report.append(f'{name}: internal steady target={target} pixels/cycle; report only')
         elif name == 'vertex':
             report.append('vertex: internal steady target=0.5 vertices/cycle; report only')

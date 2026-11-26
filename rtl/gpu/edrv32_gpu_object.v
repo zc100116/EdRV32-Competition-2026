@@ -141,13 +141,13 @@ module edrv32_gpu_object (
     // spec 2.12: signed nearest rounding, ties away from zero.
     function [15:0] rounded_acceleration;
         input [15:0] acceleration_i;
-        reg [15:0] magnitude;
-        reg [15:0] unused_rounded;
+        reg [15:0] magnitude_r;
+        reg [15:0] unused_rounded_r;
         begin
-            magnitude = acceleration_i[15] ? -acceleration_i : acceleration_i;
-            unused_rounded = (magnitude + 16'd8) >> 4;
+            magnitude_r = acceleration_i[15] ? -acceleration_i : acceleration_i;
+            unused_rounded_r = (magnitude_r + 16'd8) >> 4;
             rounded_acceleration = acceleration_i[15] ?
-                -unused_rounded[15:0] : unused_rounded[15:0];
+                -unused_rounded_r[15:0] : unused_rounded_r[15:0];
         end
     endfunction
 

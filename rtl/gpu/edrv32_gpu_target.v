@@ -78,6 +78,7 @@ module edrv32_gpu_target (
     wire [15:0] write_addr_w;
     wire [159:0] write_data_w;
     wire idle_w;
+    wire [15:0] clear_row_five_w;
     reg [159:0] cleared_w;
     integer lane;
     assign clear_ready_o = !clear_active_r && idle_w && !stop_i;
@@ -85,9 +86,9 @@ module edrv32_gpu_target (
     assign resolve_read_ready_o = !clear_active_r && read_ready_w && !stop_i &&
         !target_read_valid_i;
     assign target_write_ready_o = !clear_active_r && !stop_i;
-    assign clear_first_addr_w = clear_wide_r
-        ? {8'd0, clear_y_r} * 16'd320 + {7'd0, clear_x_r[10:2]}
-        : {8'd0, clear_y_r} * 16'd160 + {7'd0, clear_x_r[10:2]};
+    assign clear_row_five_w = {8'b0, clear_y_r} + ({8'b0, clear_y_r} << 2);
+    assign clear_first_addr_w = (clear_wide_r ? clear_row_five_w << 6 :
+        clear_row_five_w << 5) + {7'b0, clear_x_r[10:2]};
     assign clear_row_step_w = (clear_wide_r ? 16'd320 : 16'd160)
         - ({7'd0, clear_last_x_r[10:2]} - {7'd0, clear_first_x_r[10:2]});
     assign read_valid_w = !stop_i && (clear_active_r
@@ -238,7 +239,9 @@ module edrv32_gpu_target (
             // microarch 4.2: finish low must clear the previous command's completion.
             if (!finish_i) begin
                 unit_done_o <= 0;
-            end else if (idle_w && !clear_active_r && !read_valid_w && !write_valid_w) begin
+            end else if (idle_w && !clear_active_r &&
+                (stop_i || !(target_read_valid_i || resolve_read_valid_i ||
+                    target_write_valid_i))) begin
                 unit_done_o <= 1;
             end
         end

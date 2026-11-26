@@ -41,15 +41,15 @@ module edrv32_gpu_resolve (
     output wire unit_done_o,
     output wire perf_resolve_busy_o
 );
-    localparam [3:0] S_IDLE = 4'd0;
-    localparam [3:0] S_FILL = 4'd1;
-    localparam [3:0] S_REQ = 4'd2;
-    localparam [3:0] S_SCAN = 4'd3;
-    localparam [3:0] S_FLUSH = 4'd4;
-    localparam [3:0] S_WAIT = 4'd5;
-    localparam [3:0] S_DONE = 4'd6;
-    localparam [3:0] S_EMPTY = 4'd7;
-    reg [3:0] state_r;
+    localparam [7:0] S_IDLE = 8'd1;
+    localparam [7:0] S_FILL = 8'd2;
+    localparam [7:0] S_REQ = 8'd4;
+    localparam [7:0] S_SCAN = 8'd8;
+    localparam [7:0] S_FLUSH = 8'd16;
+    localparam [7:0] S_WAIT = 8'd32;
+    localparam [7:0] S_DONE = 8'd64;
+    localparam [7:0] S_EMPTY = 8'd128;
+    reg [7:0] state_r;
     reg aa_r;
     reg [7:0] threshold_r;
     reg [31:0] base_r;
@@ -60,7 +60,7 @@ module edrv32_gpu_resolve (
     reg [15:0] y1_r;
     reg [15:0] target_x_r;
     reg [15:0] target_y_r;
-    reg [8:0] target_words_r;
+    reg target_wide_r;
     reg [15:0] y_r;
     reg [15:0] fill_y_r;
     reg [1:0] north_bank_r;
@@ -76,6 +76,17 @@ module edrv32_gpu_resolve (
     wire request_fire_w;
     wire color_fire_w;
     wire advance_w;
+    wire [15:0] resolve_row_w;
+    wire [15:0] resolve_row_five_w;
+    reg [31:0] row_product_r;
+    reg [31:0] row_base_r;
+    reg [31:0] row_address_r;
+    reg [1:0] request_wait_r;
+    always @(posedge clk_i) begin
+        row_product_r <= y_r * stride_r;
+        row_base_r <= row_product_r + base_r;
+        row_address_r <= row_base_r + {15'b0, x0_r, 1'b0};
+    end
     wire line_read_w;
     wire [8:0] line_addr_w;
     wire [71:0] line_data_w [0:2];
@@ -134,28 +145,29 @@ module edrv32_gpu_resolve (
     endfunction
     function [7:0] luminance;
         input [23:0] color_i;
-        reg [9:0] unused_sum;
+        reg [9:0] unused_sum_r;
         begin
-            unused_sum = {2'b0, color_i[23:16]} + {1'b0, color_i[15:8], 1'b0}
+            unused_sum_r = {2'b0, color_i[23:16]} + {1'b0, color_i[15:8], 1'b0}
                 + {2'b0, color_i[7:0]};
-            luminance = unused_sum[9:2];
+            luminance = unused_sum_r[9:2];
         end
     endfunction
-    assign resolve_ready_o = state_r == S_IDLE || state_r == S_DONE;
+    assign resolve_ready_o = state_r[0] || state_r[6];
     assign unit_done_o = done_r;
-    assign perf_resolve_busy_o = state_r != S_IDLE && state_r != S_DONE;
+    assign perf_resolve_busy_o = !state_r[0] && !state_r[6];
     assign resolve_color_ready_o = 1'b1;
     // During scan, the retired north row is replaced only after its original word was read.
-    assign resolve_read_valid_o = !stop_i && ((state_r == S_FILL && sent_r < groups_r)
-        || ((state_r == S_SCAN || state_r == S_FLUSH || state_r == S_WAIT)
+    assign resolve_read_valid_o = !stop_i && ((state_r[1] && sent_r < groups_r)
+        || ((state_r[3] || state_r[4] || state_r[5])
             && y_r + 16'd2 < y1_r && sent_r < scan_r));
-    assign resolve_read_addr_o = (fill_y_r - target_y_r) * {7'b0, target_words_r}
-        + ((x0_r - target_x_r) >> 2) + {7'b0, sent_r};
+    assign resolve_row_w = fill_y_r - target_y_r;
+    assign resolve_row_five_w = resolve_row_w + (resolve_row_w << 2);
+    assign resolve_read_addr_o = (target_wide_r ? resolve_row_five_w << 6 :
+        resolve_row_five_w << 5) + ((x0_r - target_x_r) >> 2) + {7'b0, sent_r};
     assign request_fire_w = resolve_read_valid_o && resolve_read_ready_i;
     assign color_fire_w = resolve_color_valid_i;
-    assign write_req_valid_o = state_r == S_REQ && !stop_i;
-    assign write_req_addr_o = base_r + {16'b0, y_r} * {16'b0, stride_r}
-        + {15'b0, x0_r, 1'b0};
+    assign write_req_valid_o = state_r[2] && request_wait_r == 0 && !stop_i;
+    assign write_req_addr_o = row_address_r;
     assign write_req_bytes_o = {15'b0, x1_r - x0_r, 1'b0};
     assign write_data_valid_o = output_count_r != 0;
     assign write_data_data_o = output_r[output_head_r];
@@ -163,14 +175,14 @@ module edrv32_gpu_resolve (
     assign write_data_last_o = output_last_r[output_head_r];
     assign output_pop_w = write_data_valid_o && write_data_ready_i;
     assign advance_w = output_count_r < 2;
-    assign line_read_w = state_r == S_SCAN && scan_r < groups_r && advance_w;
+    assign line_read_w = state_r[3] && scan_r < groups_r && advance_w;
     assign line_addr_w = scan_r;
     assign current_center_w = line_data_w[center_bank_r][63:0];
     assign current_north_w = y_r == y0_r ? current_center_w
         : line_data_w[north_bank_r][63:0];
     assign current_south_w = y_r + 16'd1 == y1_r ? current_center_w
         : line_data_w[south_bank_r][63:0];
-    assign flush_w = state_r == S_FLUSH && !read_valid_r;
+    assign flush_w = state_r[4] && !read_valid_r;
     assign emit_w = advance_w && previous_valid_r && (read_valid_r || flush_w);
     assign east_w = flush_w ? previous_center_r[63:48] : current_center_w[15:0];
     assign pack_emit_w = advance_w && aa_valid_r[5];
@@ -180,7 +192,13 @@ module edrv32_gpu_resolve (
     // microarch 4.5/4.9: place four pixels at their aligned DDR byte lanes.
     always @(*) begin
         pack_data_w = pack_r;
-        pack_data_w[pack_group_r*64 +: 64] = filtered_w;
+        case (pack_group_r)
+            2'd0: pack_data_w[0 +: 64] = filtered_w;
+            2'd1: pack_data_w[64 +: 64] = filtered_w;
+            2'd2: pack_data_w[128 +: 64] = filtered_w;
+            2'd3: pack_data_w[192 +: 64] = filtered_w;
+            default: begin end
+        endcase
     end
 
     generate
@@ -304,7 +322,7 @@ module edrv32_gpu_resolve (
             y1_r <= resolve_command_i[191:176];
             target_x_r <= resolve_target_i[47:32];
             target_y_r <= resolve_target_i[63:48];
-            target_words_r <= resolve_wide_i ? 9'd320 : 9'd160;
+            target_wide_r <= resolve_wide_i;
         end
         if (advance_w && read_valid_r) begin
             previous_center_r <= current_center_w;
@@ -352,7 +370,9 @@ module edrv32_gpu_resolve (
             output_head_r <= 1'b0;
             output_tail_r <= 1'b0;
             output_count_r <= 2'b0;
+            request_wait_r <= 0;
         end else begin
+            if (request_wait_r != 0) request_wait_r <= request_wait_r - 1'b1;
             if (advance_w) begin
                 aa_valid_r <= {aa_valid_r[4:0], emit_w};
                 aa_group_r[0] <= previous_group_r;
@@ -360,7 +380,7 @@ module edrv32_gpu_resolve (
                     aa_group_r[stage_r] <= aa_group_r[stage_r-1];
             end
             finish_r <= finish_i;
-            if (finish_i && (state_r == S_IDLE || state_r == S_DONE)) done_r <= 1'b1;
+            if (finish_i && (state_r[0] || state_r[6])) done_r <= 1'b1;
             if ((finish_r && !finish_i) || (resolve_valid_i && resolve_ready_o))
                 done_r <= 1'b0;
             if (write_done_i) row_done_r <= 1'b1;
@@ -389,8 +409,9 @@ module edrv32_gpu_resolve (
                     default: begin end
                 endcase
             end
-            case (state_r)
-                S_IDLE, S_DONE: begin
+            begin : g_state_decode
+            (* parallel_case *) case (1'b1)
+                state_r[0], state_r[6]: begin
                     if (resolve_valid_i) begin
                         aa_valid_r <= 6'b0;
                         row_started_r <= 1'b0;
@@ -410,8 +431,8 @@ module edrv32_gpu_resolve (
                             ? S_EMPTY : S_FILL;
                     end
                 end
-                S_EMPTY: if (finish_i) state_r <= S_DONE;
-                S_FILL: begin
+                state_r[7]: if (finish_i) state_r <= S_DONE;
+                state_r[1]: begin
                     if (stop_i) state_r <= S_WAIT;
                     else if ((!initial_r && fill_y_r >= y1_r)
                         || (sent_r == groups_r && returned_r == groups_r)) begin
@@ -424,12 +445,13 @@ module edrv32_gpu_resolve (
                         end else begin
                             initial_r <= 1'b0;
                             state_r <= S_REQ;
+                            request_wait_r <= 3;
                         end
                     end
                 end
-                S_REQ: begin
+                state_r[2]: begin
                     if (stop_i) state_r <= S_WAIT;
-                    else if (write_req_ready_i) begin
+                    else if (write_req_ready_i && request_wait_r == 0) begin
                         row_done_r <= 1'b0;
                         row_started_r <= 1'b1;
                         scan_r <= 9'b0;
@@ -444,9 +466,9 @@ module edrv32_gpu_resolve (
                         state_r <= S_SCAN;
                     end
                 end
-                S_SCAN: if (scan_r == groups_r) state_r <= S_FLUSH;
-                S_FLUSH: if (flush_w && emit_w) state_r <= S_WAIT;
-                S_WAIT: begin
+                state_r[3]: if (scan_r == groups_r) state_r <= S_FLUSH;
+                state_r[4]: if (flush_w && emit_w) state_r <= S_WAIT;
+                state_r[5]: begin
                     if (stop_i && output_count_r == 0 && sent_r == returned_r
                         && aa_valid_r == 0 && (!row_started_r || row_done_r)) begin
                         if (finish_i) state_r <= S_DONE;
@@ -466,6 +488,7 @@ module edrv32_gpu_resolve (
                 end
                 default: begin end
             endcase
+            end
         end
     end
 endmodule

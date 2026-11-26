@@ -79,6 +79,10 @@ module edrv32_gpu_quad (
     assign scissor_y0_w = {{2{render_state_target_i[95]}}, render_state_target_i[80 +: 16]};
     assign scissor_x1_w = {{2{render_state_target_i[111]}}, render_state_target_i[96 +: 16]};
     assign scissor_y1_w = {{2{render_state_target_i[127]}}, render_state_target_i[112 +: 16]};
+    reg [1:0] input_last_r;
+    reg [1:0] input_singleton_r;
+    wire signed [17:0] unused_prepare_last_x_w;
+    wire signed [17:0] prepare_last_y_w;
     reg cfg_pending_r;
     reg cfg_valid_r;
     reg signed [17:0] target_x0_r;
@@ -141,6 +145,13 @@ module edrv32_gpu_quad (
     wire output_pop_w;
     wire scan_w;
     wire last_w;
+    wire x_end_w;
+    reg last_r;
+    reg singleton_x_r;
+    reg signed [15:0] penultimate_x_r;
+    reg signed [17:0] penultimate_y_r;
+    wire signed [17:0] unused_end_x_minus_one_w;
+    wire signed [17:0] end_y_minus_one_w;
     reg [127:0] input_data_r [0:1];
     reg [16:0] input_x_r [0:1];
     reg [16:0] input_y_r [0:1];
@@ -215,9 +226,22 @@ module edrv32_gpu_quad (
     assign sample_valid_o = (output_count_r != 0) && !stop_i;
     assign output_pop_w = sample_valid_o && sample_ready_i;
     assign scan_w = active_r && advance_w && !stop_i;
-    assign last_w = x_r[17:2] == unused_last_x_r[17:2] && y_r == last_y_r;
+    assign unused_end_x_minus_one_w = end_x_w - 18'sd1;
+    assign end_y_minus_one_w = end_y_w - 18'sd1;
+    assign x_end_w = x_r[17:2] == unused_last_x_r[17:2];
+    assign last_w = last_r;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) last_r <= 0;
+        else if (stop_i) last_r <= 0;
+        else if (input_pop_w) last_r <= input_last_r[input_read_r];
+        else if (scan_w) last_r <=
+            (!x_end_w && $signed(x_r[17:2]) == penultimate_x_r && y_r == last_y_r) ||
+            (x_end_w && singleton_x_r && y_r == penultimate_y_r);
+    end
+    assign unused_prepare_last_x_w = prepare_end_x_1_r - 18'sd1;
+    assign prepare_last_y_w = prepare_end_y_1_r - 18'sd1;
     assign input_pop_w = prepared_r[input_read_r] &&
-        (!active_r || (scan_w && last_w)) && !stop_i;
+        (!active_r || (advance_w && last_w)) && !stop_i;
     assign output_push_w = valid_r[2] && pipe_mask_w[2] != 0 && advance_w && !stop_i;
     assign object_quad_ready_o = input_count_r < 2 && cfg_valid_r;
     assign quad_record_ready_o = input_count_r < 2 && cfg_valid_r;
@@ -325,6 +349,11 @@ module edrv32_gpu_quad (
         prepare_height_1_r <= prepare_height_0_r;
         if (preparing_r[1]) begin
             input_data_r[prepare_index_r[1]] <= prepare_data_1_r;
+            input_singleton_r[prepare_index_r[1]] <=
+                prepare_begin_x_1_r[17:2] == unused_prepare_last_x_w[17:2];
+            input_last_r[prepare_index_r[1]] <=
+                prepare_begin_x_1_r[17:2] == unused_prepare_last_x_w[17:2] &&
+                prepare_begin_y_1_r == prepare_last_y_w;
             input_x_r[prepare_index_r[1]] <= unused_prepare_x_1_r[16:0];
             input_y_r[prepare_index_r[1]] <= unused_prepare_y_1_r[16:0];
             input_begin_x_r[prepare_index_r[1]] <= prepare_begin_x_1_r;
@@ -359,7 +388,10 @@ module edrv32_gpu_quad (
             y_r <= begin_y_w;
             x1_r <= end_x_w;
             unused_last_x_r <= end_x_w - 18'sd1;
-            last_y_r <= end_y_w - 18'sd1;
+            last_y_r <= end_y_minus_one_w;
+            singleton_x_r <= input_singleton_r[input_read_r];
+            penultimate_x_r <= $signed(unused_end_x_minus_one_w[17:2]) - 16'sd1;
+            penultimate_y_r <= end_y_w - 18'sd2;
             width_r <= input_width_r[input_read_r];
             height_r <= input_height_r[input_read_r];
             position_x_r <= {input_x_r[input_read_r][16], input_x_r[input_read_r]};

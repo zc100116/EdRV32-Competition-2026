@@ -91,7 +91,19 @@ module edrv32_gpu_geometry (
     reg screen_write_bank_r;
     reg screen_read_bank_r;
     reg [1:0] screen_count_r;
+    wire [3:0] counts_head_w;
+    wire [2:0] counts_even_index_w;
+    reg [3:0] counts_even_cache_r;
+    reg [3:0] counts_odd_cache_r;
+    assign counts_even_index_w = counts_read_r[3:1] + {2'b0, counts_read_r[0]};
+    assign counts_head_w = counts_read_r[0] ? counts_odd_cache_r : counts_even_cache_r;
+    always @(posedge clk_i) begin
+        counts_even_cache_r <= counts_r[{counts_even_index_w, 1'b0}];
+        counts_odd_cache_r <= counts_r[{counts_read_r[3:1], 1'b1}];
+    end
     reg [3:0] screen_counts_r [0:1];
+    wire [3:0] next_screen_count_w;
+    assign next_screen_count_w = screen_read_bank_r ? screen_counts_r[0] : screen_counts_r[1];
     wire fan_last_w;
     assign fan_last_w = fan_advance_w && {1'b0, fan_index_r} + 4'd2 == fan_count_r;
     reg fan_r;
@@ -104,8 +116,7 @@ module edrv32_gpu_geometry (
     wire [35:0] fan_delta_x_w;
     wire [35:0] fan_delta_y_w;
     wire [71:0] fan_product_w;
-    reg fan_nonzero_r;
-    reg fan_positive_r;
+    reg fan_keep_r;
     reg fan_negative_r;
     reg [2:0] fan_wait_r;
     wire fan_keep_w;
@@ -131,10 +142,8 @@ module edrv32_gpu_geometry (
     assign project_input_valid_w = sending_r && !send_phase_r && !stop_i;
     assign project_ready_w = screen_count_r != 2 && counts_count_r != 0 && !stop_i;
     assign polygon_complete_w = project_valid_w && project_ready_w
-        && {1'b0, screen_index_r} + 4'd1 == counts_r[counts_read_r];
-    assign fan_keep_w = fan_nonzero_r
-        && !(unused_pixel_r[36:35] == 1 && fan_positive_r)
-        && !(unused_pixel_r[36:35] == 2 && fan_negative_r);
+        && {1'b0, screen_index_r} + 4'd1 == counts_head_w;
+    assign fan_keep_w = fan_keep_r;
     assign fan_advance_w = fan_r && fan_wait_r == 0 && (!fan_keep_w || output_count_r != 2) &&
             !stop_i;
     assign output_push_w = fan_advance_w && fan_keep_w;
@@ -337,8 +346,11 @@ module edrv32_gpu_geometry (
         end
     endgenerate
     always @(posedge clk_i) begin
-        fan_nonzero_r <= $signed(fan_product_w[0 +: 36]) != $signed(fan_product_w[36 +: 36]);
-        fan_positive_r <= $signed(fan_product_w[0 +: 36]) > $signed(fan_product_w[36 +: 36]);
+        fan_keep_r <= fan_product_w[0 +: 36] != fan_product_w[36 +: 36] &&
+            !(unused_pixel_r[36:35] == 1 &&
+                $signed(fan_product_w[0 +: 36]) > $signed(fan_product_w[36 +: 36])) &&
+            !(unused_pixel_r[36:35] == 2 &&
+                $signed(fan_product_w[0 +: 36]) < $signed(fan_product_w[36 +: 36]));
         fan_negative_r <= $signed(fan_product_w[0 +: 36]) < $signed(fan_product_w[36 +: 36]);
     end
 
@@ -458,7 +470,7 @@ module edrv32_gpu_geometry (
                 fan_wait_r <= 5;
                 fan_index_r <= 1;
                 fan_count_r <= screen_count_r != 0 ? screen_counts_r[screen_read_bank_r]
-                    : counts_r[counts_read_r];
+                    : counts_head_w;
             end
             if (fan_advance_w) begin
                 fan_wait_r <= 5;
@@ -466,7 +478,7 @@ module edrv32_gpu_geometry (
                     fan_r <= screen_count_r > 1 || polygon_complete_w;
                     fan_index_r <= 1;
                     fan_count_r <= screen_count_r > 1 ?
-                        screen_counts_r[!screen_read_bank_r] : counts_r[counts_read_r];
+                        next_screen_count_w : counts_head_w;
                 end else fan_index_r <= fan_index_r + 1'b1;
             end
             if (output_push_w) output_write_r <= !output_write_r;
@@ -490,6 +502,6 @@ module edrv32_gpu_geometry (
         end
         if (polygon_accept_w) counts_r[counts_write_r] <= polygon_count_w;
         if (polygon_complete_w)
-            screen_counts_r[screen_write_bank_r] <= counts_r[counts_read_r];
+            screen_counts_r[screen_write_bank_r] <= counts_head_w;
     end
 endmodule

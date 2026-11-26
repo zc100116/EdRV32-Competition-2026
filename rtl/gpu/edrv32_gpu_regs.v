@@ -15,7 +15,7 @@ module edrv32_gpu_regs (
     input wire [31:0] s_apb_pwdata_i,
     input wire [3:0] s_apb_pstrb_i,
     output wire s_apb_pready_o,
-    output reg [31:0] s_apb_prdata_o,
+    output wire [31:0] s_apb_prdata_o,
     output wire s_apb_pslverr_o,
 
     // Command control and completion.
@@ -275,55 +275,174 @@ module edrv32_gpu_regs (
         end
     end
 
-    always @(*) begin
-        s_apb_prdata_o = 32'b0;
-        case (apb_addr_r)
-            12'h000: s_apb_prdata_o = 32'h00060001;
-            12'h004: s_apb_prdata_o = {31'b0, enable_r};
-            12'h008: s_apb_prdata_o = {29'b0, irq_stat_r[1], !busy_i, busy_i};
-            12'h00c: s_apb_prdata_o = {30'b0, irq_en_r};
-            12'h010: s_apb_prdata_o = {30'b0, irq_stat_r};
-            12'h014: s_apb_prdata_o = err_code_r;
-            12'h020: s_apb_prdata_o = desc_base_r;
-            12'h024: s_apb_prdata_o = {16'b0, desc_count_r};
-            12'h02c: s_apb_prdata_o = done_count_r;
-            12'h100: s_apb_prdata_o = {31'b0, wide_r};
-            12'h110: s_apb_prdata_o = object_live_r[31:0];
-            12'h114: s_apb_prdata_o = object_live_r[63:32];
-            12'h118: s_apb_prdata_o = object_hit_base_r;
-            12'h11c: s_apb_prdata_o = {8'b0, object_hit_max_r};
-            12'h120: s_apb_prdata_o = {8'b0, object_hit_count_r};
-            12'h124: s_apb_prdata_o = object_free_base_r;
-            12'h128: s_apb_prdata_o = {8'b0, object_free_max_r};
-            12'h12c: s_apb_prdata_o = {8'b0, object_free_count_r};
-            12'h130: s_apb_prdata_o = {8'b0, object_alive_count_r};
-            12'h134: s_apb_prdata_o = {30'b0, object_overflow_r};
-            12'h140: s_apb_prdata_o = object_targets_r[31:0];
-            12'h144: s_apb_prdata_o = object_targets_r[63:32];
-            12'h148: s_apb_prdata_o = object_targets_r[95:64];
-            12'h14c: s_apb_prdata_o = object_targets_r[127:96];
-            12'h150: s_apb_prdata_o = object_targets_r[159:128];
-            12'h154: s_apb_prdata_o = object_targets_r[191:160];
-            12'h158: s_apb_prdata_o = object_targets_r[223:192];
-            12'h15c: s_apb_prdata_o = object_targets_r[255:224];
-            12'h160: s_apb_prdata_o = object_targets_r[287:256];
-            12'h164: s_apb_prdata_o = object_targets_r[319:288];
-            12'h168: s_apb_prdata_o = object_targets_r[351:320];
-            12'h16c: s_apb_prdata_o = object_targets_r[383:352];
-            12'h170: s_apb_prdata_o = object_targets_r[415:384];
-            12'h174: s_apb_prdata_o = object_targets_r[447:416];
-            12'h178: s_apb_prdata_o = object_targets_r[479:448];
-            12'h17c: s_apb_prdata_o = object_targets_r[511:480];
-            12'h040: s_apb_prdata_o = perf_r[0];
-            12'h044: s_apb_prdata_o = perf_r[1];
-            12'h048: s_apb_prdata_o = perf_r[2];
-            12'h04c: s_apb_prdata_o = perf_r[3];
-            12'h050: s_apb_prdata_o = perf_r[4];
-            12'h054: s_apb_prdata_o = perf_r[5];
-            12'h058: s_apb_prdata_o = perf_r[6];
-            12'h05c: s_apb_prdata_o = perf_r[7];
-            12'h060: s_apb_prdata_o = perf_r[8];
-            default: begin end
-        endcase
+    reg [44:0] read_select_r;
+    wire [31:0] read_term_w [0:44];
+    assign read_term_w[0] = {32{read_select_r[0]}} & (32'h00060001);
+    assign read_term_w[1] = {32{read_select_r[1]}} & ({31'b0, enable_r});
+    assign read_term_w[2] = {32{read_select_r[2]}} & ({29'b0, irq_stat_r[1], !busy_i, busy_i});
+    assign read_term_w[3] = {32{read_select_r[3]}} & ({30'b0, irq_en_r});
+    assign read_term_w[4] = {32{read_select_r[4]}} & ({30'b0, irq_stat_r});
+    assign read_term_w[5] = {32{read_select_r[5]}} & (err_code_r);
+    assign read_term_w[6] = {32{read_select_r[6]}} & (desc_base_r);
+    assign read_term_w[7] = {32{read_select_r[7]}} & ({16'b0, desc_count_r});
+    assign read_term_w[8] = {32{read_select_r[8]}} & (done_count_r);
+    assign read_term_w[9] = {32{read_select_r[9]}} & ({31'b0, wide_r});
+    assign read_term_w[10] = {32{read_select_r[10]}} & (object_live_r[31:0]);
+    assign read_term_w[11] = {32{read_select_r[11]}} & (object_live_r[63:32]);
+    assign read_term_w[12] = {32{read_select_r[12]}} & (object_hit_base_r);
+    assign read_term_w[13] = {32{read_select_r[13]}} & ({8'b0, object_hit_max_r});
+    assign read_term_w[14] = {32{read_select_r[14]}} & ({8'b0, object_hit_count_r});
+    assign read_term_w[15] = {32{read_select_r[15]}} & (object_free_base_r);
+    assign read_term_w[16] = {32{read_select_r[16]}} & ({8'b0, object_free_max_r});
+    assign read_term_w[17] = {32{read_select_r[17]}} & ({8'b0, object_free_count_r});
+    assign read_term_w[18] = {32{read_select_r[18]}} & ({8'b0, object_alive_count_r});
+    assign read_term_w[19] = {32{read_select_r[19]}} & ({30'b0, object_overflow_r});
+    assign read_term_w[20] = {32{read_select_r[20]}} & (object_targets_r[31:0]);
+    assign read_term_w[21] = {32{read_select_r[21]}} & (object_targets_r[63:32]);
+    assign read_term_w[22] = {32{read_select_r[22]}} & (object_targets_r[95:64]);
+    assign read_term_w[23] = {32{read_select_r[23]}} & (object_targets_r[127:96]);
+    assign read_term_w[24] = {32{read_select_r[24]}} & (object_targets_r[159:128]);
+    assign read_term_w[25] = {32{read_select_r[25]}} & (object_targets_r[191:160]);
+    assign read_term_w[26] = {32{read_select_r[26]}} & (object_targets_r[223:192]);
+    assign read_term_w[27] = {32{read_select_r[27]}} & (object_targets_r[255:224]);
+    assign read_term_w[28] = {32{read_select_r[28]}} & (object_targets_r[287:256]);
+    assign read_term_w[29] = {32{read_select_r[29]}} & (object_targets_r[319:288]);
+    assign read_term_w[30] = {32{read_select_r[30]}} & (object_targets_r[351:320]);
+    assign read_term_w[31] = {32{read_select_r[31]}} & (object_targets_r[383:352]);
+    assign read_term_w[32] = {32{read_select_r[32]}} & (object_targets_r[415:384]);
+    assign read_term_w[33] = {32{read_select_r[33]}} & (object_targets_r[447:416]);
+    assign read_term_w[34] = {32{read_select_r[34]}} & (object_targets_r[479:448]);
+    assign read_term_w[35] = {32{read_select_r[35]}} & (object_targets_r[511:480]);
+    assign read_term_w[36] = {32{read_select_r[36]}} & (perf_r[0]);
+    assign read_term_w[37] = {32{read_select_r[37]}} & (perf_r[1]);
+    assign read_term_w[38] = {32{read_select_r[38]}} & (perf_r[2]);
+    assign read_term_w[39] = {32{read_select_r[39]}} & (perf_r[3]);
+    assign read_term_w[40] = {32{read_select_r[40]}} & (perf_r[4]);
+    assign read_term_w[41] = {32{read_select_r[41]}} & (perf_r[5]);
+    assign read_term_w[42] = {32{read_select_r[42]}} & (perf_r[6]);
+    assign read_term_w[43] = {32{read_select_r[43]}} & (perf_r[7]);
+    assign read_term_w[44] = {32{read_select_r[44]}} & (perf_r[8]);
+    (* keep = "true" *) wire [31:0] read_tree_0_w [0:14];
+    assign read_tree_0_w[0] = read_term_w[0] |
+        read_term_w[1] |
+        read_term_w[2];
+    assign read_tree_0_w[1] = read_term_w[3] |
+        read_term_w[4] |
+        read_term_w[5];
+    assign read_tree_0_w[2] = read_term_w[6] |
+        read_term_w[7] |
+        read_term_w[8];
+    assign read_tree_0_w[3] = read_term_w[9] |
+        read_term_w[10] |
+        read_term_w[11];
+    assign read_tree_0_w[4] = read_term_w[12] |
+        read_term_w[13] |
+        read_term_w[14];
+    assign read_tree_0_w[5] = read_term_w[15] |
+        read_term_w[16] |
+        read_term_w[17];
+    assign read_tree_0_w[6] = read_term_w[18] |
+        read_term_w[19] |
+        read_term_w[20];
+    assign read_tree_0_w[7] = read_term_w[21] |
+        read_term_w[22] |
+        read_term_w[23];
+    assign read_tree_0_w[8] = read_term_w[24] |
+        read_term_w[25] |
+        read_term_w[26];
+    assign read_tree_0_w[9] = read_term_w[27] |
+        read_term_w[28] |
+        read_term_w[29];
+    assign read_tree_0_w[10] = read_term_w[30] |
+        read_term_w[31] |
+        read_term_w[32];
+    assign read_tree_0_w[11] = read_term_w[33] |
+        read_term_w[34] |
+        read_term_w[35];
+    assign read_tree_0_w[12] = read_term_w[36] |
+        read_term_w[37] |
+        read_term_w[38];
+    assign read_tree_0_w[13] = read_term_w[39] |
+        read_term_w[40] |
+        read_term_w[41];
+    assign read_tree_0_w[14] = read_term_w[42] |
+        read_term_w[43] |
+        read_term_w[44];
+    (* keep = "true" *) wire [31:0] read_tree_1_w [0:4];
+    assign read_tree_1_w[0] = read_tree_0_w[0] |
+        read_tree_0_w[1] |
+        read_tree_0_w[2];
+    assign read_tree_1_w[1] = read_tree_0_w[3] |
+        read_tree_0_w[4] |
+        read_tree_0_w[5];
+    assign read_tree_1_w[2] = read_tree_0_w[6] |
+        read_tree_0_w[7] |
+        read_tree_0_w[8];
+    assign read_tree_1_w[3] = read_tree_0_w[9] |
+        read_tree_0_w[10] |
+        read_tree_0_w[11];
+    assign read_tree_1_w[4] = read_tree_0_w[12] |
+        read_tree_0_w[13] |
+        read_tree_0_w[14];
+    (* keep = "true" *) wire [31:0] read_tree_2_w [0:1];
+    assign read_tree_2_w[0] = read_tree_1_w[0] |
+        read_tree_1_w[1] |
+        read_tree_1_w[2];
+    assign read_tree_2_w[1] = read_tree_1_w[3] |
+        read_tree_1_w[4];
+    (* keep = "true" *) wire [31:0] read_tree_3_w [0:0];
+    assign read_tree_3_w[0] = read_tree_2_w[0] |
+        read_tree_2_w[1];
+    assign s_apb_prdata_o = read_tree_3_w[0];
+    always @(posedge clk_i) begin
+        if (s_apb_psel_i && !s_apb_penable_i) begin
+            read_select_r <= {
+                s_apb_paddr_i == 12'h060,
+                s_apb_paddr_i == 12'h05c,
+                s_apb_paddr_i == 12'h058,
+                s_apb_paddr_i == 12'h054,
+                s_apb_paddr_i == 12'h050,
+                s_apb_paddr_i == 12'h04c,
+                s_apb_paddr_i == 12'h048,
+                s_apb_paddr_i == 12'h044,
+                s_apb_paddr_i == 12'h040,
+                s_apb_paddr_i == 12'h17c,
+                s_apb_paddr_i == 12'h178,
+                s_apb_paddr_i == 12'h174,
+                s_apb_paddr_i == 12'h170,
+                s_apb_paddr_i == 12'h16c,
+                s_apb_paddr_i == 12'h168,
+                s_apb_paddr_i == 12'h164,
+                s_apb_paddr_i == 12'h160,
+                s_apb_paddr_i == 12'h15c,
+                s_apb_paddr_i == 12'h158,
+                s_apb_paddr_i == 12'h154,
+                s_apb_paddr_i == 12'h150,
+                s_apb_paddr_i == 12'h14c,
+                s_apb_paddr_i == 12'h148,
+                s_apb_paddr_i == 12'h144,
+                s_apb_paddr_i == 12'h140,
+                s_apb_paddr_i == 12'h134,
+                s_apb_paddr_i == 12'h130,
+                s_apb_paddr_i == 12'h12c,
+                s_apb_paddr_i == 12'h128,
+                s_apb_paddr_i == 12'h124,
+                s_apb_paddr_i == 12'h120,
+                s_apb_paddr_i == 12'h11c,
+                s_apb_paddr_i == 12'h118,
+                s_apb_paddr_i == 12'h114,
+                s_apb_paddr_i == 12'h110,
+                s_apb_paddr_i == 12'h100,
+                s_apb_paddr_i == 12'h02c,
+                s_apb_paddr_i == 12'h024,
+                s_apb_paddr_i == 12'h020,
+                s_apb_paddr_i == 12'h014,
+                s_apb_paddr_i == 12'h010,
+                s_apb_paddr_i == 12'h00c,
+                s_apb_paddr_i == 12'h008,
+                s_apb_paddr_i == 12'h004,
+                s_apb_paddr_i == 12'h000
+            };
+        end
     end
 endmodule

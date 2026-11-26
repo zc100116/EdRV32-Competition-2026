@@ -94,11 +94,17 @@ module edrv32_gpu_write_dma (
     reg [1:0] choose_w;
     reg [4:0] length_w;
     reg [8:0] boundary_w;
-    integer scan_w;
-    reg [1:0] client_w;
     integer idx_r;
     integer data_idx_r;
 
+    reg [1:0] prepare_state_r;
+    reg [1:0] prepare_client_r;
+    reg [31:0] prepare_addr_r;
+    reg [4:0] prepare_beats_r;
+    reg prepare_small_r;
+    reg prepare_final_r;
+    wire prepare_start_w;
+    wire prepare_build_w;
     reg [1:0] occupied_r;
     reg [1:0] filled_r;
     reg [1:0] issued_r;
@@ -210,21 +216,78 @@ module edrv32_gpu_write_dma (
         .rd_data_o(pool_data_w)
     );
 
-    always @(*) begin
-        choose_valid_w = 1'b0;
-        choose_w = 2'b0;
-        client_w = 0;
-        length_w = 5'd16;
-        boundary_w = 9'b0;
-        for (scan_w = 0; scan_w < 4; scan_w = scan_w + 1) begin
-            client_w = round_r + scan_w[1:0];
-            if (!choose_valid_w && issue_r[client_w]) begin
-                choose_valid_w = 1'b1;
-                choose_w = client_w[1:0];
-            end
+    // Rotating priority is explicit over the fixed client set; selection is registered.
+    assign prepare_start_w = prepare_state_r == 0 && choose_valid_w &&
+        !filling_r && !occupied_r[alloc_ptr_r];
+    assign prepare_build_w = prepare_state_r == 2;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) prepare_state_r <= 0;
+        else begin
+            case (prepare_state_r)
+                2'd0: if (prepare_start_w) prepare_state_r <= 1;
+                2'd1: prepare_state_r <= 2;
+                2'd2: prepare_state_r <= 0;
+                default: prepare_state_r <= prepare_state_r;
+            endcase
         end
-        boundary_w = 9'd128 - {2'b0, addr_r[choose_w][11:5]};
-        if (beats_r[choose_w] < 32'd16) length_w = beats_r[choose_w][4:0];
+    end
+    always @(posedge clk_i) begin
+        if (prepare_start_w) prepare_client_r <= choose_w;
+        if (prepare_state_r == 1) begin
+            prepare_addr_r <= addr_r[prepare_client_r];
+            prepare_beats_r <= beats_r[prepare_client_r][4:0];
+            prepare_small_r <= beats_r[prepare_client_r] < 32'd16;
+            prepare_final_r <= beats_r[prepare_client_r][31:5] == 0;
+        end
+    end
+
+
+    always @(*) begin
+        choose_valid_w = |issue_r;
+        choose_w = 0;
+        case (round_r)
+            2'd0: begin
+                casez (issue_r)
+                    4'b???1: choose_w = 2'd0;
+                    4'b??10: choose_w = 2'd1;
+                    4'b?100: choose_w = 2'd2;
+                    4'b1000: choose_w = 2'd3;
+                    default: choose_w = 0;
+                endcase
+            end
+            2'd1: begin
+                casez (issue_r)
+                    4'b??1?: choose_w = 2'd1;
+                    4'b?10?: choose_w = 2'd2;
+                    4'b100?: choose_w = 2'd3;
+                    4'b0001: choose_w = 2'd0;
+                    default: choose_w = 0;
+                endcase
+            end
+            2'd2: begin
+                casez (issue_r)
+                    4'b?1??: choose_w = 2'd2;
+                    4'b10??: choose_w = 2'd3;
+                    4'b00?1: choose_w = 2'd0;
+                    4'b0010: choose_w = 2'd1;
+                    default: choose_w = 0;
+                endcase
+            end
+            2'd3: begin
+                casez (issue_r)
+                    4'b1???: choose_w = 2'd3;
+                    4'b0??1: choose_w = 2'd0;
+                    4'b0?10: choose_w = 2'd1;
+                    4'b0100: choose_w = 2'd2;
+                    default: choose_w = 0;
+                endcase
+            end
+            default: choose_w = 0;
+        endcase
+    end
+    always @(*) begin
+        length_w = prepare_small_r ? prepare_beats_r : 5'd16;
+        boundary_w = 9'd128 - {2'b0, prepare_addr_r[11:5]};
         if ({4'b0, length_w} > boundary_w) length_w = boundary_w[4:0];
     end
 
@@ -235,11 +298,11 @@ module edrv32_gpu_write_dma (
                         >> ((32'd0 - req_addr_w[data_idx_r] - req_bytes_w[data_idx_r]) & 32'd31);
             end
         end
-        if (!filling_r && choose_valid_w && !occupied_r[alloc_ptr_r]) begin
-            owner_r[alloc_ptr_r] <= choose_w;
-            burst_addr_r[alloc_ptr_r] <= addr_r[choose_w];
+        if (prepare_build_w) begin
+            owner_r[alloc_ptr_r] <= prepare_client_r;
+            burst_addr_r[alloc_ptr_r] <= prepare_addr_r;
             length_r[alloc_ptr_r] <= length_w;
-            logical_last_r[alloc_ptr_r] <= (beats_r[choose_w] == {27'b0, length_w});
+            logical_last_r[alloc_ptr_r] <= (prepare_final_r && prepare_beats_r == length_w);
         end
         if (fill_w) strobe_r[{alloc_ptr_r, fill_beat_r}] <= fill_keep_w;
         if (pool_read_w) begin
@@ -293,7 +356,7 @@ module edrv32_gpu_write_dma (
 
                 end
             end
-            if (!filling_r && choose_valid_w && !occupied_r[alloc_ptr_r]) begin
+            if (prepare_build_w) begin
                 occupied_r[alloc_ptr_r] <= 1'b1;
                 filling_r <= 1'b1;
                 fill_beat_r <= 4'b0;

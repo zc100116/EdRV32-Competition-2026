@@ -153,14 +153,14 @@ module edrv32_gpu_setup (
             screen_triangle_x_i[34 +: 17]};
         y_w[2] = {screen_triangle_y_i[50],
             screen_triangle_y_i[34 +: 17]};
-        minimum_x_w = x_w[1] < x_w[0] ? x_w[1] : x_w[0];
-        minimum_x_w = x_w[2] < minimum_x_w ? x_w[2] : minimum_x_w;
-        minimum_y_w = y_w[1] < y_w[0] ? y_w[1] : y_w[0];
-        minimum_y_w = y_w[2] < minimum_y_w ? y_w[2] : minimum_y_w;
-        maximum_x_w = x_w[1] > x_w[0] ? x_w[1] : x_w[0];
-        maximum_x_w = x_w[2] > maximum_x_w ? x_w[2] : maximum_x_w;
-        maximum_y_w = y_w[1] > y_w[0] ? y_w[1] : y_w[0];
-        maximum_y_w = y_w[2] > maximum_y_w ? y_w[2] : maximum_y_w;
+        minimum_x_w = x_w[0] <= x_w[1] && x_w[0] <= x_w[2] ? x_w[0] :
+            x_w[1] <= x_w[2] ? x_w[1] : x_w[2];
+        minimum_y_w = y_w[0] <= y_w[1] && y_w[0] <= y_w[2] ? y_w[0] :
+            y_w[1] <= y_w[2] ? y_w[1] : y_w[2];
+        maximum_x_w = x_w[0] >= x_w[1] && x_w[0] >= x_w[2] ? x_w[0] :
+            x_w[1] >= x_w[2] ? x_w[1] : x_w[2];
+        maximum_y_w = y_w[0] >= y_w[1] && y_w[0] >= y_w[2] ? y_w[0] :
+            y_w[1] >= y_w[2] ? y_w[1] : y_w[2];
         origin_x_w = minimum_x_w >>> 4;
         origin_y_w = minimum_y_w >>> 4;
         bound_x0_w = ((minimum_x_w + 18'sd7) >>> 6) <<< 2;
@@ -293,10 +293,25 @@ module edrv32_gpu_setup (
         end
     endgenerate
 
+    (* keep = 1 *) reg [1:0] area_count_r /* synthesis syn_preserve=1 */;
+    wire area_enable_w;
+    assign area_enable_w = area_count_r != 2 && !stop_i;
+    (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) area_count_r <= 0;
+        else if (stop_i) area_count_r <= 0;
+        else begin
+            case ({push_w, pop_w})
+                2'b10: area_count_r <= area_count_r + 1'b1;
+                2'b01: area_count_r <= area_count_r - 1'b1;
+                default: area_count_r <= area_count_r;
+            endcase
+        end
+    end
+
     edrv32_gpu_project_recip u_area_reciprocal (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .enable_i(enable_w),
+        .enable_i(area_enable_w),
         .stop_i(stop_i),
         .value_valid_i(area_valid_r),
         .value_i({4'd0, area_w}),
@@ -471,19 +486,19 @@ module edrv32_gpu_setup (
         if (push_w) output_origin_r[output_write_r] <= origin_r[complete_tag_r];
     end
     wire [152:0] attribute_value_w;
-    wire [152:0] attribute_value_wires [0:6];
+    wire [152:0] attribute_value_wires_w [0:6];
     reg [152:0] selected_attribute_w;
     assign attribute_value_w = selected_attribute_w;
     always @(*) begin
         selected_attribute_w = 153'd0;
         case (attribute_read_tag_r[2:0])
-            3'd0: selected_attribute_w = attribute_value_wires[0];
-            3'd1: selected_attribute_w = attribute_value_wires[1];
-            3'd2: selected_attribute_w = attribute_value_wires[2];
-            3'd3: selected_attribute_w = attribute_value_wires[3];
-            3'd4: selected_attribute_w = attribute_value_wires[4];
-            3'd5: selected_attribute_w = attribute_value_wires[5];
-            3'd6: selected_attribute_w = attribute_value_wires[6];
+            3'd0: selected_attribute_w = attribute_value_wires_w[0];
+            3'd1: selected_attribute_w = attribute_value_wires_w[1];
+            3'd2: selected_attribute_w = attribute_value_wires_w[2];
+            3'd3: selected_attribute_w = attribute_value_wires_w[3];
+            3'd4: selected_attribute_w = attribute_value_wires_w[4];
+            3'd5: selected_attribute_w = attribute_value_wires_w[5];
+            3'd6: selected_attribute_w = attribute_value_wires_w[6];
             default: selected_attribute_w = 153'd0;
         endcase
     end
@@ -493,7 +508,7 @@ module edrv32_gpu_setup (
             reg [152:0] value_r [0:15];
             wire [152:0] value_w;
             reg [152:0] value_read_r;
-            assign attribute_value_wires[attribute] = value_read_r;
+            assign attribute_value_wires_w[attribute] = value_read_r;
             always @(posedge clk_i) begin
                 if (enable_w) value_read_r <= value_r[attribute_tag_r];
             end
