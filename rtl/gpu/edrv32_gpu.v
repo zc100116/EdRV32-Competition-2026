@@ -279,9 +279,9 @@ module edrv32_gpu (
     wire raster_finish_w;
     wire [7:0] raster_fragment_alpha_w;
     wire [69:0] raster_fragment_h_w;
-    wire [3:0] raster_fragment_mask_w;
+    wire [1:0] raster_fragment_mask_w;
     wire [3:0] raster_fragment_palette_w;
-    wire [1735:0] raster_fragment_plane_w;
+    wire [867:0] raster_fragment_plane_w;
     wire raster_fragment_ready_w;
     wire raster_fragment_valid_w;
     wire [15:0] raster_fragment_x_w;

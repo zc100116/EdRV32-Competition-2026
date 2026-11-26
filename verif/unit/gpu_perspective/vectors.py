@@ -318,6 +318,26 @@ def run_normal():
                         f'+COUNT={len(inputs)}', f'+STALL={stall}'], check=True)
 
 
+def half_fragments(groups):
+    result = []
+    layout = dict(FRAG, plane=868)
+    for index in range(0, len(groups), 2):
+        rows = []
+        for value in groups[index:index+2]:
+            fields = {}
+            offset = 0
+            for key, width in FRAG.items():
+                fields[key] = (value >> offset) & ((1 << width)-1)
+                offset += width
+            rows.append(fields)
+        for half in (0, 1):
+            for row in rows:
+                result.append(record(dict(row, x=row['x']+half*2,
+                    mask=(row['mask'] >> (half*2)) & 3,
+                    plane=(row['plane'] >> (half*868)) & ((1 << 868)-1)), layout))
+    return result
+
+
 def run(kind):
     unit = ROOT / 'verif/unit' / ('gpu_'+kind)
     build = ROOT / 'build/unit' / ('gpu_'+kind)
@@ -347,6 +367,10 @@ def run(kind):
         inputs, outputs = (perspective_vectors() if kind == 'perspective' else
                            quad_vectors(wide, obj, perf) if kind == 'quad' else
                            raster_vectors(wide))
+        if kind == 'perspective':
+            inputs = half_fragments(inputs)
+        if kind == 'raster':
+            outputs = half_fragments(outputs)
         if kind == 'quad':
             converted = []
             for value in outputs:
