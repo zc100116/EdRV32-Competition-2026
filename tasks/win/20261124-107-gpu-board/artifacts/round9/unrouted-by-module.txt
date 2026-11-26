@@ -1,0 +1,162 @@
+Card 107 round 9 / run 1f540308 | PDS fail_route_nets.txt
+Source: G:/codex_project/edrv32-card107/build/card107-pds-check/logbackup/before-round10/place_route/fail_route_nets.txt
+Counted 106,405 unique design net records (one design net: header per net).
+Classification is by printed net-name hierarchy, not load ownership or physical congestion.
+Primary groups are disjoint: u_soc/u_gpu/u_core child, otherwise u_soc child,
+otherwise top-level instance or a net without a hierarchy. A module's own nets stay at that level.
+
+Primary groups, sorted by net count (prefix | count)
+u_soc/u_gpu/u_core/u_geometry | 21809
+u_soc/u_cpu | 14358
+u_soc/u_gpu/u_core/u_perspective | 8039
+u_soc/u_gpu/u_core/u_setup | 7092
+u_soc/u_gpu/u_core/u_texture | 7080
+u_soc/u_gpu/u_core/u_raster | 6936
+u_soc/u_gpu/u_core/u_target | 5479
+u_soc/u_gpu/u_core | 5343
+u_soc/u_mem | 4009
+u_ddr3 | 3443
+u_soc/u_gpu/u_core/u_pixel | 2419
+u_soc/u_eth | 2320
+u_soc/u_gpu/u_core/u_texture_ram | 2098
+u_soc/u_gpu/u_core/u_resolve | 1666
+u_soc/u_gpu/u_core/u_write_dma | 1279
+u_soc/u_disp | 1266
+u_soc/u_sys | 1243
+u_soc/u_gpu/u_core/u_palette | 1216
+u_soc/u_gpu/u_core/u_unpack | 1183
+u_soc | 1162
+u_soc/u_gpu/u_core/u_object | 1161
+u_soc/u_gpu/u_core/u_regs | 1079
+u_soc/u_gpu/u_core/u_list_pack | 1018
+u_soc/u_gpu/u_core/u_quad | 960
+u_soc/u_gpu/u_core/u_read_dma | 941
+[top-level / no hierarchy] | 658
+u_soc/u_gpu | 437
+u_soc/u_aud | 396
+u_soc/u_gpu/u_core/u_command | 314
+u_rgmii | 1
+
+u_soc/u_gpu/u_core/u_geometry: next level (prefix | count)
+u_soc/u_gpu/u_core/u_geometry/u_clip | 12081
+u_soc/u_gpu/u_core/u_geometry [direct nets] | 5028
+u_soc/u_gpu/u_core/u_geometry/u_project | 3169
+u_soc/u_gpu/u_core/u_geometry/u_transform | 1531
+
+u_soc/u_cpu: next level (prefix | count)
+u_soc/u_cpu/u_core | 9663
+u_soc/u_cpu/u_dcache | 2342
+u_soc/u_cpu/u_icache | 1946
+u_soc/u_cpu [direct nets] | 364
+u_soc/u_cpu/u_cache_ctrl | 43
+
+u_soc/u_gpu/u_core/u_perspective: next level (prefix | count)
+u_soc/u_gpu/u_core/u_perspective [direct nets] | 4359
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[0].g_axis[0].u_difference | 259
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[0].g_axis[1].u_difference | 258
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[1].g_axis[0].u_difference | 211
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[1].g_axis[1].u_difference | 179
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[3].g_axis[1].u_difference | 177
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[2].g_axis[1].u_difference | 170
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[2].g_axis[0].u_difference | 160
+u_soc/u_gpu/u_core/u_perspective/g_lane[0].u_uq | 130
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[1].g_axis[0].u_span | 128
+u_soc/u_gpu/u_core/u_perspective/g_lane[0].u_vq | 119
+u_soc/u_gpu/u_core/u_perspective/g_lane[1].u_uq | 117
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[3].g_axis[0].u_difference | 115
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[0].g_axis[1].u_span | 112
+u_soc/u_gpu/u_core/u_perspective/g_lane[0].u_q | 111
+u_soc/u_gpu/u_core/u_perspective/g_lane[1].u_q | 111
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[0].g_axis[0].u_span | 107
+u_soc/u_gpu/u_core/u_perspective/g_lane[1].u_vq | 106
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[1].g_axis[1].u_span | 105
+u_soc/u_gpu/u_core/u_perspective/g_lane[1].u_v | 100
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[3].g_axis[1].u_span | 91
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[3].g_axis[0].u_span | 89
+u_soc/u_gpu/u_core/u_perspective/g_lane[1].u_u | 88
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[2].g_axis[1].u_span | 88
+u_soc/u_gpu/u_core/u_perspective/g_lane[0].u_v | 84
+u_soc/u_gpu/u_core/u_perspective/g_lane[0].u_u | 81
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[2].g_axis[0].u_span | 77
+u_soc/u_gpu/u_core/u_perspective/g_lane[1].u_u_coordinate_magnitude | 43
+u_soc/u_gpu/u_core/u_perspective/g_lane[1].u_v_coordinate_magnitude | 38
+u_soc/u_gpu/u_core/u_perspective/g_lane[0].u_u_coordinate_magnitude | 29
+u_soc/u_gpu/u_core/u_perspective/g_lane[1].u_u_multiply | 29
+u_soc/u_gpu/u_core/u_perspective/g_lane[0].u_v_coordinate_magnitude | 26
+u_soc/u_gpu/u_core/u_perspective/g_lane[0].u_v_multiply | 26
+u_soc/u_gpu/u_core/u_perspective/g_lane[0].u_u_multiply | 24
+u_soc/u_gpu/u_core/u_perspective/g_lane[1].u_newton_second | 16
+u_soc/u_gpu/u_core/u_perspective/g_lane[1].u_v_multiply | 14
+u_soc/u_gpu/u_core/u_perspective/g_lane[0].u_uq_absolute | 12
+u_soc/u_gpu/u_core/u_perspective/g_lane[1].u_vq_absolute | 10
+u_soc/u_gpu/u_core/u_perspective/g_lane[1].u_uq_absolute | 8
+u_soc/u_gpu/u_core/u_perspective/g_lane[0].u_newton_second | 7
+u_soc/u_gpu/u_core/u_perspective/g_lane[1].u_q_absolute | 7
+u_soc/u_gpu/u_core/u_perspective/g_lane[0].u_newton_first | 2
+u_soc/u_gpu/u_core/u_perspective/g_lane[0].u_vq_absolute | 2
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_maximum[0].u_maximum_2 | 2
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_maximum[1].u_maximum_2 | 2
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[1].u_maximum_1 | 2
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[3].u_maximum_1 | 2
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].u_maximum_3 | 2
+u_soc/u_gpu/u_core/u_perspective/g_lane[0].u_q_absolute | 1
+u_soc/u_gpu/u_core/u_perspective/g_lane[1].u_newton_first | 1
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[0].u_maximum_1 | 1
+u_soc/u_gpu/u_core/u_perspective/g_quad_span[0].g_pair[2].u_maximum_1 | 1
+
+50 original net names (first 10 in each of the five largest qualifying module groups):
+[u_soc/u_gpu/u_core/u_geometry]
+u_soc/u_gpu/u_core/u_geometry/_N417583
+u_soc/u_gpu/u_core/u_geometry/_N417585
+u_soc/u_gpu/u_core/u_geometry/_N417587
+u_soc/u_gpu/u_core/u_geometry/_N417589
+u_soc/u_gpu/u_core/u_geometry/_N417591
+u_soc/u_gpu/u_core/u_geometry/_N419546
+u_soc/u_gpu/u_core/u_geometry/_N419547
+u_soc/u_gpu/u_core/u_geometry/_N427551
+u_soc/u_gpu/u_core/u_geometry/_N434582
+u_soc/u_gpu/u_core/u_geometry/_N442096
+[u_soc/u_cpu]
+u_soc/u_cpu/_N416891
+u_soc/u_cpu/_N492424
+u_soc/u_cpu/_N492562
+u_soc/u_cpu/_N495409
+u_soc/u_cpu/_N498331
+u_soc/u_cpu/_N498509
+u_soc/u_cpu/_N499741
+u_soc/u_cpu/_N502182
+u_soc/u_cpu/_N502227
+u_soc/u_cpu/_N503300
+[u_soc/u_gpu/u_core/u_perspective]
+u_soc/u_gpu/u_core/u_perspective/_N13869
+u_soc/u_gpu/u_core/u_perspective/_N14107
+u_soc/u_gpu/u_core/u_perspective/_N14172
+u_soc/u_gpu/u_core/u_perspective/_N14229
+u_soc/u_gpu/u_core/u_perspective/_N14239
+u_soc/u_gpu/u_core/u_perspective/_N14279
+u_soc/u_gpu/u_core/u_perspective/_N14311
+u_soc/u_gpu/u_core/u_perspective/_N14325
+u_soc/u_gpu/u_core/u_perspective/_N14335
+u_soc/u_gpu/u_core/u_perspective/_N14343
+[u_soc/u_gpu/u_core/u_setup]
+u_soc/u_gpu/u_core/u_setup/_N21992
+u_soc/u_gpu/u_core/u_setup/_N22068
+u_soc/u_gpu/u_core/u_setup/_N36420
+u_soc/u_gpu/u_core/u_setup/_N36421
+u_soc/u_gpu/u_core/u_setup/_N188264
+u_soc/u_gpu/u_core/u_setup/_N188265
+u_soc/u_gpu/u_core/u_setup/_N188267
+u_soc/u_gpu/u_core/u_setup/_N188269
+u_soc/u_gpu/u_core/u_setup/_N188271
+u_soc/u_gpu/u_core/u_setup/_N188274
+[u_soc/u_gpu/u_core/u_texture]
+u_soc/u_gpu/u_core/u_texture/_N8721
+u_soc/u_gpu/u_core/u_texture/_N8753
+u_soc/u_gpu/u_core/u_texture/_N8909
+u_soc/u_gpu/u_core/u_texture/_N10395
+u_soc/u_gpu/u_core/u_texture/_N10427
+u_soc/u_gpu/u_core/u_texture/_N10471
+u_soc/u_gpu/u_core/u_texture/_N10575
+u_soc/u_gpu/u_core/u_texture/_N10675
+u_soc/u_gpu/u_core/u_texture/_N10676
+u_soc/u_gpu/u_core/u_texture/_N10677

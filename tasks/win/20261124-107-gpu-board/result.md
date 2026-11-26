@@ -65,6 +65,12 @@ PDS 布线日志已报告迭代的计数原值随附件上传。当前 P&R 日�
 
 原始快照保存在 `G:/codex_project/edrv32-card107/build/card107-pds-check/logbackup/round10-pnr-20261126-230638`。
 
+### 第 10 轮补充时序
+
+按补充任务，已从本轮原始 ADS 综合报告导出 **50 条 `clk_mem → clk_mem` setup 路径**，包含起点、终点、裕量和逻辑级数。Slack 范围 **−1.731 至 −0.360 ns**。最差路径从 `u_soc/u_aud/u_dma/rd_ptr_o[5]/CLK` 到 `u_soc/u_aud/u_dma/m_axi_araddr_o[5]/CE`，**19 逻辑级**。[clk_mem 最差 50 条路径](artifacts/round10/setup_top50_clk_mem.txt)
+
+第 10 轮最终未布网模块分布及 CLMA／CLMS 等资源数据待本轮 P&R 结束后提取。
+
 ## 第 9 轮资源、时序与布局快照
 
 | 项 | 内容 |
@@ -128,6 +134,18 @@ P&R 于 2026-11-26 20:18:20（北京时间）以 `Route-0039` 和 `Route-0008` �
 布局结束时，PDS 的全局 `Worst slack` 为 `-2358`、`TNS` 为 `-6274897`（路由日志原值）。布线后各时钟域 WNS/TNS/WHS/THS、clk_gpu 最差路径、比特流及上板结果未取得。可用的各时钟域数据是本轮综合估算。[综合时序](artifacts/round9/timing_summary.txt)
 
 原始最终 P&R 日志、失败资源报告和未布网清单已备份到 `G:/codex_project/edrv32-card107/build/card107-pds-check/logbackup/before-round10/place_route`。
+
+### 第 9 轮未布网模块分布
+
+按 PDS 最终 `fail_route_nets.txt` 的 `design net:` 网名统计，清单共有 **106,405 条不同的网**。该总数等于 PDS 最终 `Total net` 224,179 减去 `route succeed net` 117,774。以下按网名的层次前缀归类。
+
+| 排名 | 一级统计模块 | 网数 | 下一级最多的模块 | 网数 |
+|---:|---|---:|---|---:|
+| 1 | `u_soc/u_gpu/u_core/u_geometry` | 21,809 | `u_clip` | 12,081 |
+| 2 | `u_soc/u_cpu` | 14,358 | `u_core` | 9,663 |
+| 3 | `u_soc/u_gpu/u_core/u_perspective` | 8,039 | 模块直接网 | 4,359 |
+
+附件列出所有一级归类、前三组的下一级分布和 50 条 PDS 原网名。[第 9 轮未布网统计](artifacts/round9/unrouted-by-module.txt)
 
 ## 第 8 轮 Device Map 结果
 
