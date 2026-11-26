@@ -67,6 +67,8 @@ module edrv32_disp_scan_gpu (
     wire [255:0] l0_packet_w;
     wire l0_good_w;
     wire [15:0] pixel_w;
+    wire [15:0] lanes_w [0:15];
+    genvar lane;
     wire [23:0] background_w;
     integer stage_idx;
     assign frame_req_o = vblank_i && enable_i;
@@ -86,8 +88,13 @@ module edrv32_disp_scan_gpu (
     // Select the lane instead of rotating a whole 256-bit beat by the scroll offset.
     assign l0_packet_w = group_start_r ? fifo_data_i : pixels_r;
     assign l0_good_w = group_start_r ? group_good_w : group_good_r;
+    generate
+        for (lane = 0; lane < 16; lane = lane + 1) begin : g_lane
+            assign lanes_w[lane] = l0_packet_w[lane*16 +: 16];
+        end
+    endgenerate
     assign pixel_w = l0_active_r && l0_good_w ?
-        l0_packet_w[{phase_r, 4'd0} +: 16] : 16'd0;
+        lanes_w[phase_r] : 16'd0;
     assign background_w = {pixel_w[15:11], pixel_w[15:13], pixel_w[10:5],
         pixel_w[10:9], pixel_w[4:0], pixel_w[4:2]};
     assign rgb_o = rgb_pipe_r[7];
