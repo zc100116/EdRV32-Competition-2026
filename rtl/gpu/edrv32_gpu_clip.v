@@ -66,7 +66,6 @@ module edrv32_gpu_clip (
     wire [39:0] intersection_value_w;
     wire all_inside_w;
     wire [14:0] outside_w;
-    wire [2:0] last_index_w;
     wire signed [39:0] previous_component_w [0:8];
     wire signed [39:0] current_component_w [0:8];
     reg signed [39:0] previous_selected_w;
@@ -92,7 +91,6 @@ module edrv32_gpu_clip (
     assign pop_w = polygon_valid_o && polygon_ready_i;
     assign idle_o = state_r == S_IDLE && count_r == 0;
     assign remainder_shift_w = {remainder_r[43:0], quotient_r[83]};
-    assign last_index_w = input_count_r[2:0] - 3'd1;
     assign last_distance_w = edge_distance_w[0];
     assign current_distance_w = edge_distance_w[1];
     assign all_inside_w = ~|outside_w;
@@ -856,6 +854,10 @@ module edrv32_gpu_clip (
         for (field_g = 0; field_g < 9; field_g = field_g + 1) begin : g_field
             (* keep = 1 *) reg [3:0] region_state_r /* synthesis syn_preserve=1 */;
             (* keep = 1 *) reg region_bank_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg [2:0] region_vertex_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg [3:0] region_input_count_r /* synthesis syn_preserve=1 */;
+            wire [2:0] region_last_index_w;
+            assign region_last_index_w = region_input_count_r[2:0] - 3'd1;
             wire region_push_w;
             assign region_push_w = !stop_i && ((region_state_r == S_CHECK && wait_r == 0 &&
             all_inside_w)
@@ -864,10 +866,21 @@ module edrv32_gpu_clip (
                 if (!rst_n_i) begin
                     region_state_r <= S_IDLE;
                     region_bank_r <= 0;
+                    region_vertex_r <= 0;
+                    region_input_count_r <= 0;
                 end else if (stop_i) region_state_r <= S_IDLE;
                 else begin
                     region_state_r <= state_next_w;
-                    if (accept_w && !all_inside_w) region_bank_r <= 0;
+                    if (accept_w && !all_inside_w) begin
+                        region_bank_r <= 0;
+                        region_input_count_r <= 3;
+                    end
+                    if (region_state_r == S_BEGIN && wait_r == 0) region_vertex_r <= 0;
+                    if (region_state_r == S_ADVANCE) begin
+                        if ({1'b0, region_vertex_r} + 4'd1 == region_input_count_r) begin
+                            if (result_count_r >= 3) region_input_count_r <= result_count_r;
+                        end else region_vertex_r <= region_vertex_r + 3'd1;
+                    end
                     if (region_state_r == S_ADVANCE &&
                         {1'b0, vertex_index_r} + 4'd1 == input_count_r && result_count_r >= 3)
                         region_bank_r <= !region_bank_r;
@@ -885,8 +898,8 @@ module edrv32_gpu_clip (
             wire [3:0] last_select_w;
             wire [WIDTH*4-1:0] current_quarter_w;
             wire [WIDTH*4-1:0] last_quarter_w;
-            assign current_select_w = {region_bank_r, vertex_index_r};
-            assign last_select_w = {region_bank_r, last_index_w};
+            assign current_select_w = {region_bank_r, region_vertex_r};
+            assign last_select_w = {region_bank_r, region_last_index_w};
             genvar quarter;
             for (quarter = 0; quarter < 4; quarter = quarter + 1) begin : g_select
                 wire [WIDTH*4-1:0] values_w;
