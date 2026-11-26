@@ -293,7 +293,7 @@ module tb_gpu_command;
         .target_unit_done_i(target_unit_done_i),
         .resolve_finish_o(resolve_finish_o),
         .resolve_unit_done_i(resolve_unit_done_i),
-        .stop_o(stop_o)
+        .stop_region_o(), .stop_o(stop_o)
     );
     task tick;
         @(posedge clk_i); #1;

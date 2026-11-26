@@ -161,6 +161,7 @@ module edrv32_gpu_command (
     input wire target_unit_done_i,
     output reg resolve_finish_o,
     input wire resolve_unit_done_i,
+    output wire [15:0] stop_region_o,
     output wire stop_o
 );
     localparam [13:0] S_IDLE = 14'd1;
@@ -197,6 +198,7 @@ module edrv32_gpu_command (
     reg [5:0] count_r;
     wire push_w;
     wire pop_w;
+    (* keep = "true", syn_preserve = 1 *) reg [15:0] stop_region_r;
     reg stop_r;
     reg error_pending_r;
     reg [31:0] error_code_r;
@@ -247,6 +249,7 @@ module edrv32_gpu_command (
     assign is_object_w = is_object_r;
     assign is_draw_w = is_tri_w || is_quad_w || is_object_w;
     assign busy_o = !state_r[0];
+    assign stop_region_o = stop_region_r;
     assign stop_o = stop_r;
     assign push_w = command_read_data_valid_i && command_read_data_ready_o && !stop_r;
     assign pop_w = state_r[2] && count_r != 0;
@@ -433,6 +436,7 @@ module edrv32_gpu_command (
             tail_r <= 5'b0;
             count_r <= 6'b0;
             stop_r <= 1'b0;
+            stop_region_r <= {16{1'b0}};
             done_o <= 1'b0;
             error_o <= 1'b0;
             err_code_o <= 32'b0;
@@ -490,6 +494,7 @@ module edrv32_gpu_command (
             (* parallel_case *) case (1'b1)
                 state_r[0]: begin
                     stop_r <= 1'b0;
+                    stop_region_r <= {16{1'b0}};
                     if (start_i && enable_i) begin
                         wide_r <= wide_i;
                         remaining_r <= desc_count_i;
@@ -584,6 +589,7 @@ module edrv32_gpu_command (
                             error_pending_r <= 1'b1;
                             error_code_r <= 32'd1;
                             stop_r <= 1'b1;
+                            stop_region_r <= {16{1'b1}};
                             state_r <= S_DRAIN;
                         end
                     endcase
@@ -593,6 +599,7 @@ module edrv32_gpu_command (
                             error_pending_r <= 1'b1;
                             error_code_r <= 32'd4;
                             stop_r <= 1'b1;
+                            stop_region_r <= {16{1'b1}};
                             state_r <= S_DRAIN;
                         end
                     end
@@ -609,6 +616,7 @@ module edrv32_gpu_command (
                             error_pending_r <= 1'b1;
                             error_code_r <= 32'd3;
                             stop_r <= 1'b1;
+                            stop_region_r <= {16{1'b1}};
                             state_r <= S_DRAIN;
                         end else state_r <= S_RETIRE;
                     end
@@ -720,6 +728,7 @@ module edrv32_gpu_command (
                 if (busy_o && !dma_start_o && !state_r[11]
                     && (abort_i || soft_rst_i || read_dma_error_i || write_dma_error_i)) begin
                     stop_r <= 1'b1;
+                    stop_region_r <= {16{1'b1}};
                     state_r <= S_DRAIN;
                     if (read_dma_error_i || write_dma_error_i) begin
                         error_pending_r <= 1'b1;

@@ -1167,3 +1167,48 @@ python3 verif/block/gpu/gt25/performance.py rtl
 
 状态：S-6 RTL、存储清点和仿真验收完成；DRM/LUT估算等待PDS验证，
 实际FF、分布式RAM用量和clk_gpu时序也交下一轮PDS确认。
+
+
+## S-7：时序、clip 存储与 LOD 分时（2026-11-26）
+
+### 开工估算
+
+输入为 `4426bf9e5`，Yosys 0.70+219（5053d0e26），沿用 RAM/ROM blackbox、
+保留模块层次、`synth -noabc -noalumacc` 与 ABC `strash; if -K 6` 口径。
+原始脚本、网表和日志在 `build/s7/`；按模块串行综合，每次先检查可用内存。
+基线临时测量副本仅将 geometry 的 `next_index_w` 声明前移，解决 Yosys
+前向声明读取失败；未改变电路。
+
+| 基线模块 | FF | LUT6 | table 实例 |
+|---|---:|---:|---:|
+| clip | 13711 | 29820 | 0 |
+| geometry（包含 clip） | 38812 | 79989 | 34 |
+| perspective | 16475 | 21725 | 22 |
+
+A3 的基线网表清点：clip 工作集4224 FF、两个多边形输出槽4224 FF、geometry
+多边形捕获2112 FF，共10560 FF。`estimate.py` 从 current/last/polygon 输出及
+project 输入回溯到时序边界，得到 clip 选择锥7761 LUT6、geometry选择锥1074 LUT6。
+这些是可替换逻辑的上界，包含写入选择等共享逻辑，不能当作净收益；计划串行读写
+后保守预留2000 FF、4000 LUT6用于端点/输出寄存、装载及控制，估算净省约8560 FF、
+4835 LUT6，均超过开工阈值。table容量本身不计入blackbox外LUT6，实际物理资源以PDS为准。
+
+A4 核实为一个2×2组、4条边×2轴，共8个subtract；每两次advance才有一组
+有效结果，四边形已绕过本单元。Yosys subtract单实例487 FF、708 LUT6；
+8→4个即算术本体省1948 FF、2832 LUT6，另可减少scale和最大值树，
+预留选择与对齐约1000 LUT6后仍超过1k LUT，决定实施。
+
+### T1 实现
+
+command 将同一 stop 状态并行写入16份带keep/syn_preserve的寄存器，各直接送一个
+使用单元；没有延迟一拍，也没有改变ABORT时序。texture先寄存每lane的96位span，
+LOD有效位、slot及地址发起全部顺延一拍。过滤fraction缓存提前计算256−fx/fy，
+mode/lane只选择已经寄存的权重，移除mode选择后的进位链，过滤流水长度不变。
+geometry输出FIFO改为注册head/tail，移除output_read选择器，输出延迟/吞吐不变；
+fan的next index与index一起推进，移除fan_index后的加一器，等待周期仍为5。
+project与setup各增加三份同步占用计数副本，分摊原common CE，均无新增流水延迟。
+
+T1 Yosys：geometry 38819 FF / 80769 LUT6 / 34 table；perspective与基线相同；
+setup 26009 FF / 42896 LUT6 / 41 table；texture与command见`build/s7/t1b-counts.json`。
+前向声明整理也包含setup的edge值、系数和标签声明，语义不变。
+仿真主机首次只读检查后连接失效，协调者同意重建一次；重建仍连接超时，
+故本步先按协调者指示提交，相关单元仿真留待主机恢复后运行。
