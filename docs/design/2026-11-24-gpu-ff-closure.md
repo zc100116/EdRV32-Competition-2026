@@ -600,3 +600,216 @@ RAM物理配置沿用已有IP。perspective输出逻辑队列由128组缩为32�
 | resolve | 28, 28840, 22, 88, 22, 46, 22, 22, 28837, 39535, 22, 28834, 39496 | 28, 28840, 22, 88, 31, 55, 28, 25, 28840, 40015, 22, 28837, 40033 |
 
 复现：GPU unit逐目录执行`python3 tools/regress.py full --path verif/unit/gpu_<模块> -j 1`；GT逐目录执行`python3 tools/regress.py full --path verif/block/gpu/gtNN -j 1`。风格`python3 tools/check/verilog_style.py rtl/gpu`；顶层lint在`rtl/filelists/`执行`sh ../../tools/check/lint.sh -DSIM_MODE -f gpu.f --top-module edrv32_gpu`。Yosys逐模块读取`gpu.f`并将`edrv32_ram_gpu_*`/`edrv32_rom_gpu_*`设为blackbox，`synth -top edrv32_gpu_<模块> -noabc`后映射LUT6，递归统计DFF/LUT6与DRM包装实例；粗网表使用`-noalumacc -flatten -run begin:fine`保留算术以追踪参考深度。原始统计、网表及日志存`build/s4/`，仿真摘要和GT25结果复制到同目录。所有RTL仿真均在指定仿真环境执行，结束后清理本任务的进程与目录。
+
+## S-5：宽乘法的 APM 部分积流水
+
+### 背景、约束与决策
+
+基线为 `cefbd28fa`（卡107第8轮输入 `38095a121` 的GPU RTL相同）。第8轮
+`artifacts/round8/synthesis-clk_gpu-setup.txt` 的三条最差路径均属于 project 的
+`N788_m1→m4`：CPO/CPI级联之间夹有LUT6CARRY，11级、WNS −3.145ns，综合估算
+114.9MHz。第8轮报告只有三条综合setup明细，无法据此把每个RTL乘法一一对应到
+PDS内部编号；以下区分原RTL操作数/乘积寄存和已经观测到的PDS级联，不虚构其他
+乘法的原生拆块数。
+
+保持gpu-spec v0.5、微结构4.13/4.14、舍入位置、完整有效位、输出顺序和吞吐。
+采用基数2^17分块：非最高块补零后为s18，最高块按原操作数符号扩展；每个部分积
+独立寄存，再由平衡加法树相加。加法每拍最多35个有效位加一个进位位，上段操作数
+仅传到实际消费拍，低段只保留结果。原方案把整个宽乘法交给PDS拆分、随后延迟完整
+乘积两拍；两拍延迟不能隔开PDS自动生成的级联路径。本次让寄存器落在部分积和
+求和级之间，仍需下一轮PDS确认物理映射、频率和器件资源。
+
+协调者补充要求同时收缩数据寄存：稳定的draw配置保留局部上下文；逐项常数按标签
+保存，延迟至少8拍且宽度至少36位的纯延迟使用既有delay RAM包装。不新增IP类型，
+不改变texture、pixel、target接口或SoC端口。所有数据寄存均不复位，只有控制状态
+复位/stop清除；加深流水同时调整valid、标签和负载的相位。
+
+### 宽乘法清单
+
+`s/u`分别表示有符号/无符号，位宽为原RTL实际操作数；括号内另列已知恒零位。
+原流水拍数从已寄存操作数开始计，原乘法均为“乘积1拍＋完整乘积延迟2拍”。
+project_recip同时被project和setup各实例化一次，下面先按单模块列出，实例统计再
+递归计入父模块。乘法的旧阶段用原寄存器名称定位，避免将不同模块的局部拍号混用。
+
+| 模块与旧乘积阶段 | 原宽度、份数 | 原拆块方式 |
+|---|---|---|
+| transform `matrix_product{0,1}_{0,1,2}` | s32×s16，6份，输入寄存后第1～3拍 | PDS自动拆分，模块共24 APM（含其余乘法） |
+| transform `illumination_product{0,1,2}` | u24×u8，3份 | 同上 |
+| transform `color_product{0,1,2}` | u33×u8，3份 | 同上 |
+| clip `previous_product/current_product` | s40×s43，2份，交点分量乘积第1～3拍 | PDS自动拆分，模块共10 APM |
+| project `position_product{0,1,2}` | s40×s36（第二输入为u35补零），3份 | 自动拆分，project不含倒数共24 APM；最差N788为4块级联 |
+| project `uv_product{0,1}` | u16×u35，2份 | 自动拆分 |
+| project `viewport_product{0,1}` | s94×s17（第二输入为u16补零），2份；乘积保留低94位 | 自动拆分 |
+| project_recip `newton_product` | u31×u30，1份 | 自动拆分，两个牛顿乘法共8 APM |
+| project_recip `newton_result` | u30×u32，1份；目标62位 | 同上 |
+| setup_plane `product{0,1}_{0,1}` | s34×s18，4份；原局部第21～23拍 | 自动拆分，plane全部乘法共26 APM |
+| setup_plane `inverse{0,1}` | s56×s32（第二输入为u31补零），2份；分子低4位为零 | 自动拆分 |
+| setup_plane `origin_product{0,1}` | s56×s18，2份 | 自动拆分 |
+
+setup前端两份s18×s18、geometry扇形两份s18×s18均保留。texture中配置尺寸最大
+u9×u9、权重u9×u9、过滤u8×u17、LOD u8×u9、调制u8×u8；pixel_lane为
+u8×u8；resolve为u16×u11，都未超过单块宽度。texture的常量乘256是固定移位。
+perspective八份u18×u18虽需注意符号模式，但第8轮层次表恰为8 APM；协调者据此
+确认每份已经只用1 APM，保留已寄存输入/输出的原实现。其余GPU RTL未找到需要
+拆分的运行时乘法。
+
+### 高扇出区域复制
+
+geometry原`polygon_accept_w`的2,129负载主要来自8顶点×264位保存寄存。
+按九个字段分别复制sending状态和counts占用计数，用本字段状态译码accept；
+每个字段只驱动自身8顶点数据，控制仍由原握手推进，增加54位控制FF且不增加周期。
+主干accept只保留控制和计数写入负载。
+
+集成末发现新增project部分积树共用旧使能区域，两个区域的FF使能负载分别达到
+2560和2073。经协调者确认，position_product1和position_product2各自改用独立
+credit副本，区域数9→11，新增四位控制FF；该修改无数据或valid相位变化。最终通用映射的11个区域输入引脚负载分别为
+899/1280/793/1580/266/1748/692/636/299/1280/1280，最大1748。geometry
+资源在此修改后重测，其余模块采用本轮相同RTL已完成的测量。
+
+palette原`rd_en_r`的2,592负载对应八份当前调色板读使能被合并。
+经协调者授权扩展归属到`rtl/tech/edrv32_ram_gpu_palette_current.v`，每个page
+各保存一份读使能，驱动本page的20位输出寄存；page选择另有原相位的使能寄存。
+FPGA/行为模型共用这段流水，IP配置、端口、ifdef结构及四拍读语义不变。
+所有区域副本带`(* keep = "true", syn_preserve = 1 *)`；实际PDS扇出仍待下一轮核验。
+
+### 统计口径与复现
+
+FF/LUT6使用同一Yosys 0.67+94（7defa5186）通用映射。分别对geometry、setup、
+texture、pixel、palette、perspective、resolve读取`gpu.f`列出的文件，定义
+`SIM_MODE`并加入`rtl/include`；将`edrv32_ram_gpu_*`、`edrv32_rom_gpu_*`设为
+blackbox，然后执行：
+
+```text
+synth -top edrv32_gpu_<模块> -noabc -noalumacc -run begin:fine
+write_json <粗网表>
+synth -top edrv32_gpu_<模块> -noabc -run fine:check
+abc -lut 6 -script <包含 strash 和 if -K 6 两行的ABC脚本>
+write_json <映射网表>
+```
+
+FF递归计映射网表所有DFF单元位数，LUT6计`$lut`个数，乘法实例计粗网表的`$mul`；
+共享子模块递归计入父模块。此处乘法实例数不是PDS APM数；宽乘法拆成多个小乘法后，
+该列自然增加。RAM/ROM包装blackbox的内部FF和LUT不计入，外围寄存保留；因此palette
+页内使能复制不反映在palette一行。与S-4资源表使用的算术映射流程不同，不直接比较
+两节的LUT绝对值；本节前后严格采用相同命令。基线RTL由`git archive cefbd28fa rtl`
+提取；最终RTL取本节列出的提交。原始统计、综合日志及回归日志放在`build/s5/`。
+
+### 新的部分积与延迟
+
+| 乘法 | 每份新部分积数 | 原3拍→新拍数 |
+|---|---:|---:|
+| transform matrix / illumination / color | 各2 | 3→3 |
+| clip previous / current | 各9 | 3→最多13 |
+| project position | 各9 | 3→11 |
+| project uv | 各3 | 3→5 |
+| project viewport | 各6 | 3→9 |
+| project_recip 两个Newton乘法 | 各4 | 3→5 |
+| setup_plane difference×delta | 各2 | 3→3 |
+| setup_plane numerator×reciprocal | 各8 | 3→10 |
+| setup_plane gradient×offset | 各4 | 3→7 |
+
+transform完整流水仍为19拍、顶点II=2；clip未裁剪旁路仍为3拍，一个交点的9个
+分量合计增加90拍。clip在已有S_MULTIPLY等待期间保持操作数稳定，所有新部分积和
+加法均有真实寄存，不使用多周期路径例外。project_recip为20→24拍，project含
+倒数和FIFO写入为57→75拍。setup_plane为74→85拍，setup接收到output-valid为
+109→124个使能边沿间隔，含面积倒数多出的4拍；三角形II仍为8。停顿期间各局部
+credit副本、RAM地址与负载保持同一个使能周期计数。
+
+transform把RGB565和UV分别存在16项标签表，共768位数据，只传4位顶点标签；
+稳定的draw光照配置仅保留48位局部值。四路坐标的8拍纯延迟合并成三个72位delay
+bank。project视口快照按使能周期标签存入64项既有read_pool，长坐标/颜色延迟增加四块delay，
+视口与结果对齐共增加七个read_pool。setup_plane的倒数31位、指数6位、delta72位、
+offset36位共145位常数每三角形只存一次，16项表按原四位三角形标签读出；新增十块
+delay。setup的原始属性值只活跃到面积倒数返回和七属性读出，最长小于64个使能周期，
+因此16项缩为8项；按序返回的每属性起点/梯度/h只保留一项组装寄存，出口仍保留两项。
+
+完整GPU层次统计：delay包装实例34→51，新增17块；DRM/ROM包装实例总数226→243，
+与S-4相同口径，排除read_pool、write_pool和palette_current分布式RAM。
+read_pool为5→12，其余DRM/ROM包装数不变。第8轮PDS的GPU层次值为269.5 DRM，
+整片为332/415；按既有512×72 delay IP每实例占1 DRM估算，新增17块后分别为
+286.5和349/415（约84.1%）。这些估算只计显式delay增量，不含推断存储重映射，最终物理占用须由PDS确认，
+不能把243个包装实例等同为243个器件DRM。
+
+实现提交：`a43b6de00`（区域复制）、`aa61a0d08`（transform/clip分块）、
+`3283aa900`（transform/clip存储收缩）、`477cf77d8`（setup/plane）、
+`a1a6225ff`（project/reciprocal）、`587fb7f2d`（geometry单元文件列表连接
+read_pool依赖）、`d6aabe62f`（新增部分积树的使能区域复制）。最终RTL版本为`d6aabe62f`；其后的本节记录不改变RTL。
+GPU风格检查37文件0告警，完整顶层lint 0告警；命令与S-4相同，另包含授权修改的
+palette_current包装。geometry首次编译缺少read_pool源文件，补全文件列表后重跑通过；
+没有修改测试激励、参考模型或数值期望。
+
+最终粗网表中geometry递归100个乘法、setup递归42个乘法，所有乘法的两个输入
+宽度都不超过18位（检查`$mul`的A_WIDTH/B_WIDTH，含符号位）；原先的宽乘法已消失。
+该结构检查不把LUT乘法或APM数当作物理映射结果。
+
+### 同口径资源结果
+
+各格按 **FF / LUT6 / 乘法实例** 列出；父模块包含子模块，父子行不能再次相加。
+
+| 模块 | cefbd28fa | d6aabe62f |
+|---|---:|---:|
+| geometry | 46792 / 62495 / 28 | 43130 / 66392 / 100 |
+| transform | 6617 / 11782 / 15 | 4980 / 12870 / 27 |
+| clip | 12770 / 19466 / 2 | 13711 / 19874 / 18 |
+| project | 16360 / 23208 / 9 | 13340 / 25500 / 53 |
+| project_recip | 1163 / 4272 / 2 | 1734 / 4602 / 8 |
+| setup | 68370 / 43514 / 12 | 38623 / 38868 / 42 |
+| setup_plane | 26937 / 22866 / 8 | 19643 / 25222 / 32 |
+| texture | 56744 / 38874 / 73 | 56744 / 38860 / 73 |
+| pixel | 24228 / 14512 / 24 | 24228 / 14512 / 24 |
+| pixel_lane | 1444 / 1302 / 6 | 1444 / 1302 / 6 |
+| palette | 197 / 138 / 0 | 197 / 138 / 0 |
+| perspective | 15003 / 20487 / 8 | 15003 / 20487 / 8 |
+| perspective_multiply | 141 / 674 / 1 | 141 / 674 / 1 |
+| resolve | 3373 / 3897 / 1 | 3373 / 3897 / 1 |
+
+geometry/setup合计FF 115162→81753，减少33409（约29.0%）；LUT6 106009→105260，
+减少749。clip和reciprocal的部分积树增加了局部寄存，其余延迟/上下文收缩抵消了增加。
+texture RTL未改，FF/乘法实例相同，通用映射LUT仍有14个差异；如实列出，不将其
+解释为纹理逻辑变化。上述数字均为通用综合对比，不替代PDS器件资源。
+
+### GT-25逐命令周期
+
+180MHz、默认DDR延迟，含APB观察开销；每格按命令1…N列全。基线取cefbd28fa
+中已记录的S-4最终实测；本次使用相同场景和模型。
+
+| 场景 | cefbd28fa | d6aabe62f |
+|---|---|---|
+| quad | 28, 28840, 22, 88, 31, 55, 28, 412, 82, 31, 25, 40, 16618, 40009 | 28, 28840, 22, 88, 31, 55, 28, 412, 82, 31, 25, 40, 16618, 40009 |
+| nearest | 28, 28840, 22, 88, 31, 55, 28, 265, 49, 28, 43, 8656, 39937 | 28, 28840, 22, 88, 31, 55, 28, 265, 49, 28, 43, 8689, 39904 |
+| bilinear | 28, 28840, 22, 88, 31, 55, 28, 265, 49, 49, 58060, 40096 | 28, 28840, 22, 88, 31, 55, 28, 265, 49, 49, 58093, 40063 |
+| trilinear | 28, 28840, 22, 88, 31, 55, 28, 265, 49, 49, 75517, 39901 | 28, 28840, 22, 88, 31, 55, 28, 265, 49, 49, 75550, 39868 |
+| palette_i4 | 28, 28840, 22, 88, 31, 55, 28, 412, 82, 31, 307, 58321, 40081 | 28, 28840, 22, 88, 31, 55, 28, 412, 82, 31, 307, 58354, 40048 |
+| palette_i8 | 28, 28840, 22, 88, 31, 55, 28, 412, 133, 31, 307, 58327, 40195 | 28, 28840, 22, 88, 31, 55, 28, 412, 133, 31, 307, 58360, 40162 |
+| vertex | 28, 28840, 22, 88, 31, 55, 28, 25, 28, 43, 3034, 40003 | 28, 28840, 22, 88, 31, 55, 28, 25, 28, 43, 3052, 39985 |
+| setup | 28, 28840, 22, 88, 31, 55, 28, 25, 28, 43, 543871, 40165 | 28, 28840, 22, 88, 31, 55, 28, 25, 28, 43, 543904, 40132 |
+| objects | 25, 28840, 25, 82, 31, 55, 28, 46, 74695, 40297 | 25, 28840, 25, 82, 31, 55, 28, 46, 74695, 40297 |
+| resolve | 28, 28840, 22, 88, 31, 55, 28, 25, 28840, 40015, 22, 28837, 40033 | 28, 28840, 22, 88, 31, 55, 28, 25, 28840, 40015, 22, 28837, 40033 |
+
+AA RESOLVE仍为80048周期（0.444711ms），低于90000周期上限。四边形净周期/对象
+保持基线；三角形命令差来自新增算术流水的建立/排空，稳态顶点II=2和三角形II=8
+由geometry/setup单元的原有吞吐检查验证，texture/pixel流水未改。
+
+### 回归与状态
+
+首轮18个GPU单元测试、GT-01～GT-25全部通过，DDR/寄存器/输出组序继续由
+原模型逐位比较。geometry文件列表修复后单独重跑通过。最后的使能区域复制仅改变
+project，按协调者确认重跑geometry和GT全套，其余17个单元RTL未变，沿用本轮通过
+结果；无RTL仿真失败。GT-12覆盖57子场景，GT-13的16组宽度/翻转/边界场景全部通过。
+texture仍通过13248组及最近邻/双线性/三线性稳态吞吐检查；geometry和setup的原有
+II检查通过。GT-25四边形净周期为64.757812/对象，AA RESOLVE为80048周期；相比
+cefbd28fa，三角形DRAW多33周期、vertex场景多18周期，其后RESOLVE分别少33/18周期，
+其他逐命令周期见上表。
+
+复现：GPU单元逐目录执行`python3 tools/regress.py full --path verif/unit/gpu_<模块> -j 1`；
+GT使用`verif/block/gpu/run.py`的原generate/compare流程，按RTL版本编译完整GPU bench后，
+用相同binary逐GT运行全部子场景，GT-25再执行原`performance.measure`统计和判定。
+最后一轮GT复用同一组已生成的激励和期望，逐场景全部重新仿真和比较。
+GT-18/19模型使用已有Python 3.9；未安装工具，未改变模型或期望值。原始摘要在
+`build/s5/regression/`和最终`build/s5/recheck/`，GT-25逐命令统计在`build/s5/gt25-performance-final.txt`，资源在
+`build/s5/{baseline,final}-counts.json`及对应综合日志。全部仿真及本节同口径资源测量在指定仿真环境执行，
+本机未运行RTL仿真；仿真目录在结果归档后已清理。
+
+状态：S-5 RTL和本卡仿真验收完成；原N788类宽乘法已被寄存的原生宽度部分积替代。
+物理APM使用、区域副本保留、实际扇出和clk_gpu时序交下一轮PDS确认，本节不声称
+已经达到150/180MHz。
