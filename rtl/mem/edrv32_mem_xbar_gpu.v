@@ -3,7 +3,7 @@
 // Description: Five-port AXI256 crossbar with two-stage registered grant decisions.
 // Global outstanding releases on DDR B/RLAST; port outstanding on upstream B/RLAST.
 // Port limits are 0-8. B FIFOs have eight entries; R credit reserves exact LEN+1 beats.
-// Statistics count DDR handshakes; WAIT includes capacity stalls and the grant pipeline.
+// gpu-soc-spec 8.3: urgent RT, CPU, then transaction round robin; fixed limits.
 // APB writes ignore PSTRB. CTRL is unused; ERR_CODE aliases ERR_TYPE.
 // LEN is four bits: LEN>15 cannot be represented and has no detector.
 // Clock: clk_mem; reset is externally synchronized rst_mem_core_n.
@@ -302,10 +302,6 @@ module edrv32_mem_xbar_gpu (
     wire [4:0] read_credit_w;
     reg [2:0] aw_error_r [0:4];
     reg [2:0] ar_error_r [0:4];
-    reg [15:0] aw_wait_r [0:4];
-    reg [15:0] ar_wait_r [0:4];
-    reg [15:0] aw_wait_next_r [0:4];
-    reg [15:0] ar_wait_next_r [0:4];
     reg [4:0] w_complete_r;
     reg [4:0] w_count_r [0:4];
     wire [1439:0] w_ram_data_w;
@@ -315,10 +311,6 @@ module edrv32_mem_xbar_gpu (
     reg [3:0] w_length_r;
     reg cmd_valid_r;
     reg cmd_write_r;
-    reg [15:0] cmd_wait_r;
-    reg cmd_urgent_r;
-    reg cmd_switch_r;
-    wire [15:0] stat_wait_w;
     reg [3:0] cmd_id_r;
     reg [31:0] cmd_addr_r;
     reg [3:0] cmd_len_r;
@@ -331,30 +323,16 @@ module edrv32_mem_xbar_gpu (
     reg [2:0] b_tail_r [0:4];
     reg [3:0] b_count_r [0:4];
     reg [2:0] b_fifo_r [0:39];
-    wire [3:0] outst_total_w;
-    wire [7:0] urg_max_w;
-    wire [15:0] starve_cyc_w;
-    wire [7:0] dir_batch_w;
     wire [19:0] outst_rd_w;
     wire [19:0] outst_wr_w;
-    wire [19:0] weight_w;
-    wire [44:0] rate_w;
     reg [9:0] eligible_w;
-    reg [49:0] beats_w;
     reg [9:0] eligible_r;
     wire prepare_w;
-    reg [9:0] queued_w;
-    wire cfg_write_w;
     wire slot_ready_w;
-    reg [4:0] ar_starved_r;
-    reg [4:0] aw_starved_r;
     reg [1:0] urgent_level_r;
-    wire [9:0] starved_w;
     wire grant_w;
     wire [2:0] grant_port_w;
     wire grant_write_w;
-    wire grant_urgent_w;
-    wire dir_switch_w;
     reg bad_read_w;
     reg bad_read_r;
     reg [2:0] bad_read_port_r;
@@ -387,8 +365,7 @@ module edrv32_mem_xbar_gpu (
                 ({1'b0, addr_i} + ({9'b0, len_i} + 13'd1)*13'd32) > 13'd4096};
         end
     endfunction
-    assign bad_read_do_w = bad_read_r && !cmd_valid_r && !cfg_write_w;
-    assign stat_wait_w = cmd_wait_r == 16'hffff ? cmd_wait_r : cmd_wait_r + 16'd1;
+    assign bad_read_do_w = bad_read_r && !cmd_valid_r;
     assign cmd_take_w = cmd_valid_r &&
                         (cmd_write_r ? ddr_awready_i : ddr_arready_i);
     assign ddr_awvalid_o = cmd_valid_r && cmd_write_r;
@@ -431,8 +408,6 @@ module edrv32_mem_xbar_gpu (
             // Capture LEN+1 with AR; credit checks precede arbitration in the same cycle.
             assign reserve_port_beats_w[p*5 +: 5] = reserve_beats_r[p];
             assign read_credit_w[p] = free_cnt_w >= {3'b0, reserve_beats_r[p]};
-            assign starved_w[p*2] = ar_starved_r[p];
-            assign starved_w[p*2+1] = aw_starved_r[p];
             assign awready_w[p] = !aw_pending_r[p] &&
                 !(cmd_valid_r && cmd_write_r && cmd_id_r[3:1] == p) &&
                                     !(w_active_r && w_port_r == p) && p > 1;
@@ -512,57 +487,35 @@ module edrv32_mem_xbar_gpu (
         .rvalid_o(rvalid_w),
         .rready_i(rready_w)
     );
+    // gpu-soc-spec 6.2: fixed per-port limits, P4 through P0.
+    assign outst_rd_w = {4'd2, 4'd4, 4'd1, 4'd1, 4'd4};
+    assign outst_wr_w = {4'd2, 4'd2, 4'd1, 4'd0, 4'd0};
+    wire unused_reset_w;
+    assign unused_reset_w = &{rst_mem_regs_n_i[2:1], rst_mem_stat_n_i};
     edrv32_mem_xbar_sched_gpu u_sched (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i[2]),
-        .enable_i(!cmd_valid_r && !bad_read_r && !cfg_write_w),
+        .enable_i(!cmd_valid_r && !bad_read_r),
         .prepare_o(prepare_w),
         .candidates_i(eligible_w),
-        .queued_i(queued_w),
         .eligible_i(eligible_r),
-        .beats_i(beats_w),
-        .starved_i(starved_w),
         .urgent_i(urgent_level_r),
         .grant_o(grant_w),
         .port_o(grant_port_w),
-        .write_o(grant_write_w),
-        .urgent_o(grant_urgent_w),
-        .dir_switch_o(dir_switch_w),
-        .urg_max_i(urg_max_w),
-        .dir_batch_i(dir_batch_w),
-        .weight_i(weight_w),
-        .rate_i(rate_w)
+        .write_o(grant_write_w)
     );
     edrv32_mem_xbar_regs_gpu u_regs (
         .clk_i(clk_i),
-        .rst_n_i(rst_mem_regs_n_i),
-        .rst_mem_stat_n_i(rst_mem_stat_n_i),
+        .rst_n_i(rst_mem_regs_n_i[0]),
         .apb_paddr_i(apb_paddr_i),
         .apb_psel_i(apb_psel_i),
         .apb_penable_i(apb_penable_i),
         .apb_pwrite_i(apb_pwrite_i),
         .apb_pwdata_i(apb_pwdata_i),
         .apb_pstrb_i(apb_pstrb_i),
-        .cfg_write_o(cfg_write_w),
         .apb_pready_o(apb_pready_o),
         .apb_prdata_o(apb_prdata_o),
         .apb_pslverr_o(apb_pslverr_o),
-        .outst_total_o(outst_total_w),
-        .urg_max_o(urg_max_w),
-        .starve_cyc_o(starve_cyc_w),
-        .dir_batch_o(dir_batch_w),
-        .outst_rd_o(outst_rd_w),
-        .outst_wr_o(outst_wr_w),
-        .weight_o(weight_w),
-        .rate_o(rate_w),
-        .grant_i(cmd_take_w),
-        .grant_write_i(cmd_write_r),
-        .grant_port_i(cmd_id_r[3:1]),
-        .grant_beats_i({1'b0, cmd_len_r} + 5'd1),
-        .grant_wait_i(stat_wait_w),
-        .grant_urgent_i(cmd_urgent_r),
-        .dir_switch_i(cmd_take_w && cmd_switch_r),
-        .ds_busy_i(ds_count_r != 0),
         .busy_i(busy_w),
         .err_valid_i(err_valid_w),
         .err_port_i(err_port_w),
@@ -572,22 +525,13 @@ module edrv32_mem_xbar_gpu (
     );
     always @(*) begin
         eligible_w = 10'b0;
-        queued_w = 10'b0;
-        beats_w = 50'b0;
         bad_read_w = 1'b0;
         bad_read_port_w = 3'b0;
         bad_write_w = 1'b0;
         bad_write_port_w = 3'b0;
         busy_w = cmd_valid_r || w_active_r || ds_count_r != 0 || free_cnt_w != 8'd128;
         for (eligible_idx = 0; eligible_idx < 5; eligible_idx = eligible_idx + 1) begin
-            beats_w[(eligible_idx*2)*5 +: 5] = reserve_beats_r[eligible_idx];
-            beats_w[(eligible_idx*2+1)*5 +: 5] = {1'b0, awlen_r[eligible_idx]} + 5'd1;
-            // Queue ownership is independent of temporary grant-capacity limits.
-            queued_w[eligible_idx*2] = ar_pending_r[eligible_idx] &&
-                ar_error_r[eligible_idx] == 0;
-            queued_w[eligible_idx*2+1] = aw_pending_r[eligible_idx] &&
-                aw_error_r[eligible_idx] == 0 && w_complete_r[eligible_idx];
-            if (ds_count_r < outst_total_w) begin
+            if (ds_count_r < 4'd8) begin
                 eligible_w[eligible_idx*2] = ar_pending_r[eligible_idx] &&
                     ar_error_r[eligible_idx] == 0 && slot_ready_w &&
                     rd_count_r[eligible_idx] < outst_rd_w[eligible_idx*4 +: 4] &&
@@ -659,12 +603,9 @@ module edrv32_mem_xbar_gpu (
             w_length_r <= 4'b0;
             eligible_r <= 10'b0;
             bad_read_r <= 1'b0;
-            ar_starved_r <= 5'b0;
-            aw_starved_r <= 5'b0;
             urgent_level_r <= 2'b0;
             cmd_valid_r <= 1'b0;
             cmd_write_r <= 1'b0;
-            cmd_wait_r <= 16'b0;
             ds_count_r <= 4'b0;
             for (update_idx = 0; update_idx < 5; update_idx = update_idx + 1) begin
                 w_count_r[update_idx] <= 5'b0;
@@ -673,8 +614,6 @@ module edrv32_mem_xbar_gpu (
                 b_count_r[update_idx] <= 4'b0;
                 b_head_r[update_idx] <= 3'b0;
                 b_tail_r[update_idx] <= 3'b0;
-                aw_wait_r[update_idx] <= 16'b0;
-                ar_wait_r[update_idx] <= 16'b0;
             end
         end else begin
             urgent_level_r <= {p1_urgent_i, p0_urgent_i};
@@ -686,9 +625,6 @@ module edrv32_mem_xbar_gpu (
             ds_count_r <= ds_count_r + (cmd_take_w ? 4'd1 : 4'd0) -
                             (ddr_bvalid_i ? 4'd1 : 4'd0) -
                             (ddr_rvalid_i && ddr_rlast_i ? 4'd1 : 4'd0);
-            if (cmd_valid_r && cmd_wait_r != 16'hffff) begin
-                cmd_wait_r <= cmd_wait_r + 16'd1;
-            end
             if (cmd_take_w) begin
                 cmd_valid_r <= 1'b0;
                 if (cmd_write_r) begin
@@ -709,13 +645,8 @@ module edrv32_mem_xbar_gpu (
             if (grant_w) begin
                 cmd_valid_r <= 1'b1;
                 cmd_write_r <= grant_write_w;
-                cmd_wait_r <= grant_write_w ?
-                    aw_wait_next_r[grant_port_w] :
-                    ar_wait_next_r[grant_port_w];
             end
             for (update_idx = 0; update_idx < 5; update_idx = update_idx + 1) begin
-                ar_starved_r[update_idx] <= ar_wait_r[update_idx] > starve_cyc_w;
-                aw_starved_r[update_idx] <= aw_wait_r[update_idx] > starve_cyc_w;
                 rd_count_r[update_idx] <= rd_count_r[update_idx] +
                     ((reserve_w && {29'b0, reserve_port_w} == update_idx) ? 4'd1 : 4'd0) -
                     ((rvalid_w[update_idx] && rready_w[update_idx] && rlast_w[update_idx]) ?
@@ -743,33 +674,16 @@ module edrv32_mem_xbar_gpu (
                 end
                 if (awvalid_w[update_idx] && awready_w[update_idx]) begin
                     aw_pending_r[update_idx] <= 1'b1;
-                    aw_wait_r[update_idx] <= 16'b0;
-                    aw_starved_r[update_idx] <= 1'b0;
-                end else if (aw_pending_r[update_idx] && w_complete_r[update_idx] &&
-                    aw_wait_r[update_idx] != 16'hffff)
-                begin
-                    aw_wait_r[update_idx] <= aw_wait_r[update_idx] + 16'd1;
-                    aw_starved_r[update_idx] <= aw_wait_r[update_idx] + 16'd1 > starve_cyc_w;
                 end
                 if (arvalid_w[update_idx] && arready_w[update_idx]) begin
                     ar_pending_r[update_idx] <= 1'b1;
-                    ar_wait_r[update_idx] <= 16'b0;
-                    ar_starved_r[update_idx] <= 1'b0;
-                end else if (ar_pending_r[update_idx] && ar_wait_r[update_idx] != 16'hffff)
-                begin
-                    ar_wait_r[update_idx] <= ar_wait_r[update_idx] + 16'd1;
-                    ar_starved_r[update_idx] <= ar_wait_r[update_idx] + 16'd1 > starve_cyc_w;
                 end
                 if ((grant_w && grant_write_w && {29'b0, grant_port_w} == update_idx) ||
                     (bad_write_w && {29'b0, bad_write_port_w} == update_idx)) begin
                     aw_pending_r[update_idx] <= 1'b0;
-                    aw_wait_r[update_idx] <= 16'b0;
-                    aw_starved_r[update_idx] <= 1'b0;
                 end
                 if (reserve_w && {29'b0, reserve_port_w} == update_idx) begin
                     ar_pending_r[update_idx] <= 1'b0;
-                    ar_wait_r[update_idx] <= 16'b0;
-                    ar_starved_r[update_idx] <= 1'b0;
                 end
                 if (bad_write_w && {29'b0, bad_write_port_w} == update_idx) begin
                     w_complete_r[update_idx] <= 1'b0;
@@ -781,29 +695,6 @@ module edrv32_mem_xbar_gpu (
     // Transaction and response payloads are not reset.
     always @(posedge clk_i) begin
         for (payload_idx = 0; payload_idx < 5; payload_idx = payload_idx + 1) begin
-            // X-F1 path 5: prepare the next cycle's saturated WAIT+1 before selection.
-            // The predictions follow the same enqueue, retirement and W-complete edges as WAIT.
-            if ((arvalid_w[payload_idx] && arready_w[payload_idx]) ||
-                (reserve_w && reserve_port_w == payload_idx[2:0])) begin
-                ar_wait_next_r[payload_idx] <= 16'd1;
-            end else if (ar_pending_r[payload_idx]) begin
-                ar_wait_next_r[payload_idx] <= ar_wait_r[payload_idx] >= 16'hfffe ?
-                    16'hffff : ar_wait_r[payload_idx] + 16'd2;
-            end else begin
-                ar_wait_next_r[payload_idx] <= ar_wait_r[payload_idx] == 16'hffff ?
-                    16'hffff : ar_wait_r[payload_idx] + 16'd1;
-            end
-            if ((awvalid_w[payload_idx] && awready_w[payload_idx]) ||
-                (grant_w && grant_write_w && grant_port_w == payload_idx[2:0]) ||
-                (bad_write_w && bad_write_port_w == payload_idx[2:0])) begin
-                aw_wait_next_r[payload_idx] <= 16'd1;
-            end else if (aw_pending_r[payload_idx] && w_complete_r[payload_idx]) begin
-                aw_wait_next_r[payload_idx] <= aw_wait_r[payload_idx] >= 16'hfffe ?
-                    16'hffff : aw_wait_r[payload_idx] + 16'd2;
-            end else begin
-                aw_wait_next_r[payload_idx] <= aw_wait_r[payload_idx] == 16'hffff ?
-                    16'hffff : aw_wait_r[payload_idx] + 16'd1;
-            end
             if (awvalid_w[payload_idx] && awready_w[payload_idx]) begin
                 awid_r[payload_idx] <= awid_w[payload_idx];
                 awaddr_r[payload_idx] <= awaddr_w[payload_idx*32 +: 32];
@@ -831,8 +722,6 @@ module edrv32_mem_xbar_gpu (
         end
         if (prepare_w) bad_read_port_r <= bad_read_port_w;
         if (grant_w) begin
-            cmd_urgent_r <= grant_urgent_w;
-            cmd_switch_r <= dir_switch_w;
             cmd_id_r <= {grant_port_w, grant_write_w ?
                             awid_r[grant_port_w] : arid_r[grant_port_w]};
             cmd_addr_r <= grant_write_w ? awaddr_r[grant_port_w] : araddr_r[grant_port_w];
