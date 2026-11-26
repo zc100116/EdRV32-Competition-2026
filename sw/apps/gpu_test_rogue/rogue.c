@@ -17,7 +17,7 @@ static struct enemy enemies[132];
 static struct bullet bullets[8448];
 static struct particle particles[512];
 static unsigned seed, initial_seed, next_seed=0x264b42u;
-static unsigned current, count, roll, cooldown, angle, swing, hitstop, shake;
+static unsigned current, count, roll, cooldown, angle, swing, hitstop, shake, door_close;
 static unsigned coins, choice, selected, item[4], complete, failed, press_time;
 static uint32_t previous;
 static int px, py, aim, flash;
@@ -39,8 +39,10 @@ void demo_load(void)
     for(unsigned i=32;i<104;++i){
         unsigned c=test.palettes[i]&65535;
         unsigned r=((c>>11)&31)*8,g=((c>>5)&63)*4,b=(c&31)*8;
-        test.palettes[12*256+i]=0xf0000|test_color(r+((255-r)/4),g*3/4,b*3/4);
+        test.palettes[12*256+i]=0xf0000|test_color(r+12,g*7/8,b*7/8);
+        test.palettes[13*256+i]=0xf0000|test_color(r*7/8,g+8,b+8);
     }
+    for(unsigned p=0;p<16;++p)test.palettes[p*256+104]=0x80000|0x0865;
     memcpy(test.textures, rogue_primary, sizeof(rogue_primary));
     memcpy(test.textures+65536, rogue_tiles, sizeof(rogue_tiles));
     for (unsigned g = 0; g < sizeof(demo_chinese)/sizeof(*demo_chinese); ++g)
@@ -73,11 +75,15 @@ void demo_diagnostics(unsigned blocks)
     unsigned first = test.quads_count;
     test_panel(8, 338, 624, 20, 2);
     char text[128];
-    snprintf(text, sizeof(text), "%s %s %u  BLK %u FPS %u.%u CPU %u.%03u ms GPU %u us",
-             test.mode ? "压测" : "正常", test.game == 3 ? "对象" : "三角形",
-             test.game == 3 ? test.alive_count : test.triangles/3, blocks,
-             (unsigned)test.fps10/10, (unsigned)test.fps10%10, (unsigned)test.cpu_us/1000,
-             (unsigned)test.cpu_us%1000, (unsigned)test.gpu_us);
+    if(test.game==3)
+        snprintf(text,sizeof(text),"SEED %08x 对象 %u FPS %u.%u CPU %u.%03u ms GPU %u us",
+            initial_seed,test.alive_count,(unsigned)test.fps10/10,(unsigned)test.fps10%10,
+            (unsigned)test.cpu_us/1000,(unsigned)test.cpu_us%1000,(unsigned)test.gpu_us);
+    else
+        snprintf(text,sizeof(text),"%s 三角形 %u BLK %u FPS %u.%u CPU %u.%03u ms GPU %u us",
+            test.mode?"压测":"正常",test.triangles/3,blocks,
+            (unsigned)test.fps10/10,(unsigned)test.fps10%10,
+            (unsigned)test.cpu_us/1000,(unsigned)test.cpu_us%1000,(unsigned)test.gpu_us);
     demo_text(14, 340, text, 1);
     test_draw(0, first, test.quads_count-first, 0, 1, 0);
 }
@@ -93,7 +99,7 @@ static void burst(int x, int y, unsigned color, unsigned number)
 static void damage_text(int x, int y, unsigned amount)
 {
     for (unsigned i = 0; i < 512; ++i) if (!particles[i].life) {
-        particles[i] = (struct particle){x*256,y*256,0,-220,30,7,amount};
+        particles[i] = (struct particle){x*256,y*256,0,-430,36,7,amount};
         return;
     }
 }
@@ -122,7 +128,7 @@ static void enter_room(unsigned n)
 {
     current = n;
     struct room *r = &rooms[n];
-    r->seen = 1;
+    r->seen = 1;door_close=r->clear?0:16;
     memset(enemies,0,sizeof(enemies));
     memset(bullets,0,sizeof(bullets));
     memset(loot,0,sizeof(loot));
@@ -180,6 +186,8 @@ static void hurt(struct enemy *e, unsigned amount)
     e->x += (e->x > px ? 1 : -1)*3*256;
     damage_text(e->x/256,e->y/256,amount);
     hitstop = test.weapon == 2 ? 4 : 2; shake = 5;
+    burst(e->x/256,e->y/256,4,7);
+    burst(e->x/256,e->y/256,9,5);
     test_sound(1);
     if (item[2] && test.health < 100) ++test.health;
     if (e->hp <= 0) {
@@ -194,6 +202,8 @@ static void hurt(struct enemy *e, unsigned amount)
 void rogue_update(uint32_t keys)
 {
     uint32_t pressed = keys&~previous; previous = keys;
+    if(door_close)--door_close;
+    if(rooms[current].door&&rooms[current].door<16)++rooms[current].door;
     if (choice) {
         if (pressed&PLAT_LEFT) selected=(selected+2)%3;
         if (pressed&PLAT_RIGHT) selected=(selected+1)%3;
@@ -203,7 +213,7 @@ void rogue_update(uint32_t keys)
     if (complete || failed) { if (pressed&PLAT_A) rogue_init(); return; }
     for (unsigned i = 0; i < 512; ++i) if (particles[i].life) {
         struct particle *p = &particles[i]; --p->life;
-        p->x+=p->vx; p->y+=p->vy; if (!p->text) p->vy+=25;
+        p->x+=p->vx; p->y+=p->vy; p->vy+=p->text?19:25;
     }
     if (flash) --flash;
     if (shake) --shake;
@@ -315,7 +325,6 @@ void rogue_update(uint32_t keys)
     if(!living() && !r->clear && (r->type==1 || r->type==4)) {
         r->clear=1;r->door=1;if(r->type==1) {choice=1;coins+=5;}
     }
-    if(r->door && r->door<16) ++r->door;
     if(r->clear) for(unsigned i=0;i<9;++i) if(i!=current) {
         int x=rooms[i].x-r->x,y=rooms[i].y-r->y;
         int go=(x==1&&y==0&&px>575*256&&abs(py/256-185)<35)||
@@ -336,21 +345,22 @@ void rogue_update(uint32_t keys)
 }
 static void actor(int x,int y,unsigned slot,unsigned size,unsigned white)
 {
-    if(slot==4){
-        unsigned first=test.triangles;
-        test_sprite(x-48,y-48,96,96,0,64,64,64);
-        if(white)for(unsigned i=first;i<test.triangles;++i)
-            test.vertices[i].word[2]=(test.vertices[i].word[2]&65535)|(0xffffu<<16);
-    }else test_quad(x-(int)size/2,y-(int)size/2,size,size,
-                   (slot%4)*64,(slot/4)*64,white?15:0,255);
+    unsigned source=slot<4?32:slot<6?64:48;
+    unsigned u=(slot%4)*64,v=(slot/4)*64+(slot==0?32:0);
+    /* Hit flash uses the white palette while preserving the sprite silhouette. */
+    if(white&&slot<4){
+        test_quad(x-16,y-16,32,32,u,v,15,255);
+        return;
+    }
+    test_sprite(x-(int)size/2,y-(int)size/2,(int)size,(int)size,u,v,source,source);
 }
 static void rotated(int x,int y,unsigned a,int length,unsigned color)
 {
-    static const int corner[6][2]={{0,-7},{1,-7},{1,7},{0,-7},{1,7},{0,7}};
+    static const int corner[6][2]={{0,-13},{1,-13},{1,13},{0,-13},{1,13},{0,13}};
     for(unsigned i=0;i<6;++i) {
         int lx=corner[i][0]*length,ly=corner[i][1];
         test_vertex(x+(lx*cs(a)-ly*sn(a))/16384,y+(lx*sn(a)+ly*cs(a))/16384,0,
-            color,(64+(corner[i][0]?63:0))*256,(64+(corner[i][1]>0?63:0))*256,0);
+            color,(64+(corner[i][0]?63:0))*256,(85+(corner[i][1]>0?25:0))*256,0);
     }
 }
 static void gun(int x,int y,unsigned a,int length,int half,unsigned color)
@@ -366,27 +376,47 @@ void rogue_scene(void)
 {
     int sx=shake?(int)(test.tick%5)-2:0,sy=shake?(int)(test.tick%3)-1:0;
     unsigned first=test.quads_count;
-    for(int y=48;y<336;y+=32) for(int x=32;x<608;x+=32)
-        test_quad(x+sx,y+sy,32,32,(unsigned)((x/32+y/32+current)%3)*32,0,current%2?12:0,255);
-    for(int x=32;x<608;x+=32) {
-        test_quad(x,48,32,20,96,0,0,255);test_quad(x,316,32,20,96,0,0,255);
+    unsigned theme=current%3==1?12:current%3==2?13:0;
+    for(int y=48;y<336;y+=16) for(int x=16;x<624;x+=16) {
+        unsigned variant=((unsigned)(x/16)*13+(unsigned)(y/16)*7+current*3)%17;
+        test_quad(x+sx,y+sy,16,16,(variant<11?3:variant%3)*16,0,theme,255);
     }
-    for(int y=64;y<316;y+=28) {
-        test_quad(32,y,18,28,96,0,0,255);test_quad(590,y,18,28,96,0,0,255);
+    for(int x=16;x<624;x+=32) {
+        test_quad(x,48,32,32,(x/32)%4==1?64:0,32,theme,255);
+        test_quad(x,312,32,24,32,32,theme,255);
     }
+    for(int y=80;y<312;y+=32) {
+        test_quad(16,y,24,32,32,32,theme,255);
+        test_quad(600,y,24,32,32,32,theme,255);
+        if(y%96==16){test_quad(16,y,24,32,0,32,theme,255);
+                    test_quad(600,y,24,32,64,32,theme,255);}
+    }
+    test_draw(0,first,test.quads_count-first,6,0,0);
+    /* Four-frame copper leaves slide apart inside a cyan emissive frame. */
+    first=test.quads_count;
     for(unsigned i=0;i<9;++i) if(i!=current) {
         int dx=rooms[i].x-rooms[current].x,dy=rooms[i].y-rooms[current].y;
         if(abs(dx)+abs(dy)!=1)continue;
-        int x=dx==0?296:dx>0?584:32,y=dy==0?164:dy>0?310:48;
-        unsigned w=dx?24:48,h=dx?48:20;
-        test_quad(x,y,w,h,128,0,0,255);
-        if(rooms[current].clear)
-            test_quad(x+4,y+4,w-8,(h-8)*(rooms[current].door?rooms[current].door:16)/16,
-                      160,0,0,255);
+        int x=dx==0?304:dx>0?592:16,y=dy==0?172:dy>0?304:48;
+        unsigned open=rooms[current].clear?(rooms[current].door?rooms[current].door:16):door_close;
+        unsigned gap=(open/4)*3;
+        test_quad(x,y,32,32,96,32,0,255);
+        test_quad(x+5,y+4,22,24,160,0,0,255);
+        test_quad(x+4-(int)gap,y+4,12,24,101,36,0,255);
+        test_quad(x+16+(int)gap,y+4,12,24,112,36,0,255);
     }
     for(unsigned k=0;k<64;++k)if(loot[k].alive)
         test_quad(loot[k].x-6,loot[k].y-6,12,12,64,96,0,255);
     test_draw(0,first,test.quads_count-first,6,0,0);
+    first=test.quads_count;
+    /* Ellipses use alpha blending and are submitted before all feet. */
+    for(unsigned i=0;i<132;++i)if(enemies[i].hp>0) {
+        int x=enemies[i].x/256,y=enemies[i].y/256;
+        test_quad(x-16,y+(enemies[i].type==3?37:10),32,12,80,96,0,160);
+        if(enemies[i].type==3)test_quad(x+8,y+37,32,12,80,96,0,160);
+    }
+    test_quad(px/256-16,py/256+10,32,12,80,96,0,180);
+    test_draw(0,first,test.quads_count-first,6,1,0);
     first=test.quads_count;
     unsigned actors_first=test.triangles;
     if(rooms[current].type==2)actor(320,180,6,48,0);
@@ -394,10 +424,10 @@ void rogue_scene(void)
     for(unsigned i=0;i<132;++i)if(enemies[i].hp>0) {
         struct enemy *e=&enemies[i];
         actor(e->x/256+sx,e->y/256+sy,e->type==3?4:e->type==4?3:e->type+1,
-              e->type==3?64:e->type==4?20:32,e->flash);
+              e->type==3?116:e->type==4?20:e->type==0?38:34,e->flash);
     }
     if(roll)for(int i=3;i>0;--i)
-        test_quad(px/256-16-cs(angle)*i/1500,py/256-16-sn(angle)*i/1500,32,32,0,0,2,65);
+        test_quad(px/256-16-cs(angle)*i/1500,py/256-16-sn(angle)*i/1500,32,32,0,32,2,65);
     actor(px/256+sx,py/256+sy,0,32,flash && (test.tick&2));
     test_draw(0,first,test.quads_count-first,0,1,0);
     test_draw(1,actors_first,(test.triangles-actors_first)/3,0,1,0);
@@ -406,22 +436,23 @@ void rogue_scene(void)
         gun(px/256,py/256,(unsigned)aim,test.weapon?22:15,5,0x1085);
         gun(px/256,py/256,(unsigned)aim,test.weapon?20:13,3,test.weapon?0xfd29:0x3fff);
     }
-    if(swing) for(unsigned t=0;t<4;++t)
-        rotated(px/256,py/256,(unsigned)(aim-48+(10-swing)*10-(int)t*9),48-t*4,
+    if(swing) for(unsigned t=0;t<1;++t)
+        rotated(px/256,py/256,(unsigned)(aim-48+(10-swing)*10-(int)t*9),58-t*4,
                 t?test_color(30,100+30*t,150+20*t):0xffff);
     test_draw(1,first,(test.triangles-first)/3,0,1,0);
     first=test.triangles;
-    if(swing)for(unsigned j=0;j<12;++j) {
-        unsigned a=(unsigned)(aim-52+(10-swing)*10-(int)j*5);
+    if(swing)for(unsigned j=0;j<18;++j) {
+        unsigned a=(unsigned)(aim-52+(10-swing)*10-(int)j*4);
         int x=px/256,y=py/256;
-        test_vertex(x+cs(a)*55/16384,y+sn(a)*55/16384,0,0x3fff,256,256,0);
-        test_vertex(x+cs(a+5)*55/16384,y+sn(a+5)*55/16384,0,0x3fff,256,256,0);
-        test_vertex(x+cs(a+5)*40/16384,y+sn(a+5)*40/16384,0,0x3fff,256,256,0);
-        test_vertex(x+cs(a)*55/16384,y+sn(a)*55/16384,0,0x3fff,256,256,0);
-        test_vertex(x+cs(a+5)*40/16384,y+sn(a+5)*40/16384,0,0x3fff,256,256,0);
-        test_vertex(x+cs(a)*40/16384,y+sn(a)*40/16384,0,0x3fff,256,256,0);
+        unsigned u=(128+j*30/18)*256;
+        test_vertex(x+cs(a)*65/16384,y+sn(a)*65/16384,0,0x7fff,u,96*256,0);
+        test_vertex(x+cs(a+4)*65/16384,y+sn(a+4)*65/16384,0,0x7fff,u,96*256,0);
+        test_vertex(x+cs(a+4)*37/16384,y+sn(a+4)*37/16384,0,0x3fff,u,111*256,0);
+        test_vertex(x+cs(a)*65/16384,y+sn(a)*65/16384,0,0x7fff,u,96*256,0);
+        test_vertex(x+cs(a+4)*37/16384,y+sn(a+4)*37/16384,0,0x3fff,u,111*256,0);
+        test_vertex(x+cs(a)*37/16384,y+sn(a)*37/16384,0,0x3fff,u,111*256,0);
     }
-    test_draw(1,first,(test.triangles-first)/3,0,2,0);
+    test_draw(1,first,(test.triangles-first)/3,6,2,0);
     first=test.quads_count;
     unsigned active=living()+1;
     test.objects_count=0;
@@ -433,24 +464,37 @@ void rogue_scene(void)
     }
     for(unsigned i=0;i<512;++i)if(particles[i].life&&!particles[i].text) {
         ++active;struct particle *p=&particles[i];
-        if(p->color==9)test_quad(p->x/256,p->y/256,3,2,248,248,7,255);
+        if(p->color==9)test_quad(p->x/256,p->y/256,8,8,112,96,0,255);
         else test_quad(p->x/256,p->y/256,4,4,0,96,p->color,220);
     }
     for(unsigned i=0;i<6;++i) {
-        int x=i%2?565:60,y=85+(int)(i/2)*95;
-        test_quad(x-12,y-12,32,32,16,96,i%2?4:2,140+(test.tick+i*13)%70);
+        int x=i%2?578:50,y=98+(int)(i/2)*92;
+        test_quad(x-16,y-16,32,32,16,96,i%2?4:2,95+(test.tick+i*13)%90);
     }
     test_draw(0,first,test.quads_count-first,6,2,0);
     test_draw(2,0,test.objects_count,6,2,0);
+    first=test.quads_count;
+    for(unsigned i=0;i<6;++i) {
+        int x=i%2?578:50,y=98+(int)(i/2)*92;
+        test_quad(x-5,y+7,10,5,0,32,0,255);
+        test_quad(x-8,y-16,16,24,128+((test.tick/6+i)%4)*16,32,0,255);
+    }
+    test_draw(0,first,test.quads_count-first,6,1,0);
     test.alive_count=active;
     first=test.quads_count;
+    unsigned numbers=test.triangles;
     for(unsigned i=0;i<512;++i)if(particles[i].life&&particles[i].text) {
         char number[12];snprintf(number,sizeof(number),"%u",particles[i].text);
-        demo_text(particles[i].x/256,particles[i].y/256,number,7);
+        unsigned scale=particles[i].life>28?448+(36-particles[i].life)*12:384;
+        int x=particles[i].x/256,y=particles[i].y/256;
+        for(int dy=-1;dy<=1;++dy)for(int dx=-1;dx<=1;++dx)if(dx||dy)
+            test_scaled_text(x+dx,y+dy,number,scale,0x0865);
+        test_scaled_text(x,y,number,scale,0xffa5);
     }
+    test_draw(1,numbers,(test.triangles-numbers)/3,0,1,0);
     test_panel(8,8,200,36,2);demo_text(16,10,"棱炉地宫",1);
     test_rect(16,28,100,6,9);test_rect(16,28,test.health,6,3);
-    char s[80];snprintf(s,sizeof(s),"SEED %08x",initial_seed);demo_text(218,47,s,9);
+    char s[80];
     snprintf(s,sizeof(s),"金币 %u",coins);demo_text(125,24,s,7);
     test_panel(456,8,176,34,2);
     demo_text(464,10,test.weapon==0?"点射枪":test.weapon==1?"霰弹枪":"弧刃",2);
@@ -463,14 +507,28 @@ void rogue_scene(void)
         test_rect(230,28,hp*200/900,5,hp<450?3:6);
     }
     test_panel(493,245,134,87,2);
-    int minx=0,miny=0;
+    int minx=0,miny=0,maxx=0,maxy=0;
     for(unsigned i=0;i<9;++i){
         if(rooms[i].x<minx)minx=rooms[i].x;
         if(rooms[i].y<miny)miny=rooms[i].y;
+        if(rooms[i].x>maxx)maxx=rooms[i].x;
+        if(rooms[i].y>maxy)maxy=rooms[i].y;
     }
-    for(unsigned i=0;i<9;++i)if(rooms[i].seen||i==current) {
-        int x=501+(rooms[i].x-minx)*13,y=253+(rooms[i].y-miny)*12;
-        test_rect(x,y,10,9,i==current?7:rooms[i].clear?2:6);
+    int cellx=118/(maxx-minx+1),celly=68/(maxy-miny+1);
+    if(cellx>20)cellx=20;
+    if(celly>18)celly=18;
+    for(unsigned i=0;i<9;++i)for(unsigned j=i+1;j<9;++j) {
+        int dx=rooms[j].x-rooms[i].x,dy=rooms[j].y-rooms[i].y;
+        if(abs(dx)+abs(dy)!=1)continue;
+        int x=503+(rooms[i].x-minx)*cellx,y=255+(rooms[i].y-miny)*celly;
+        test_rect(dx<0?x-cellx:x,dy<0?y-celly:y,
+                  dx?cellx+4:4,dy?celly+4:4,rooms[i].seen&&rooms[j].seen?2:9);
+    }
+    for(unsigned i=0;i<9;++i) {
+        int x=500+(rooms[i].x-minx)*cellx,y=252+(rooms[i].y-miny)*celly;
+        test_rect(x,y,11,10,rooms[i].seen?1:9);
+        test_rect(x+1,y+1,9,8,i==current?7:rooms[i].seen?rooms[i].clear?2:6:8);
+        if(i==current)test_rect(x+4,y+3,3,3,1);
     }
     if(choice) {
         test_panel(84,108,472,143,2);demo_text(226,116,"选择强化",1);
@@ -493,12 +551,19 @@ void rogue_capture(unsigned event)
 {
     if(event==1){
         enter_room(8);px=320*256;py=255*256;
+        spawn(0,170,235);spawn(1,180,130);spawn(2,480,185);spawn(0,455,245);
         for(unsigned i=0;i<132;++i)if(enemies[i].type==3&&enemies[i].hp>0){
             enemies[i].hp=420;enemies[i].age=35;
         }
     }
-    if(event==2){test.weapon=2;swing=9;aim=220;spawn(0,355,220);}
+    if(event==2){
+        enter_room(1);test.weapon=2;px=290*256;py=242*256;swing=9;aim=235;
+        spawn(0,341,226);damage_text(350,201,28);burst(345,223,4,15);burst(348,225,9,9);
+    }
     if(event==3){choice=1;selected=1;}
     if(event==4){for(unsigned i=0;i<9;++i)rooms[i].seen=1;}
-    if(event==5){enter_room(1);px=320*256;py=250*256;}
+    if(event==5){
+        enter_room(1);px=320*256;py=250*256;
+        for(unsigned i=0;i<6;++i)shoot((160+(int)i*58)*256,160*256,64,2,1);
+    }
 }

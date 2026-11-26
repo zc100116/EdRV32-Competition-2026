@@ -62,6 +62,6 @@ $(OUT)/generated/rogue_assets.h: $(ROOT)/sw/apps/gpu_test_rogue/tools/assets.py 
     $(COMMON)/assets/palette.json
 	python3 $(ROOT)/sw/apps/gpu_test_rogue/tools/assets.py $@
 $(OUT)/generated/world_assets.h: $(ROOT)/sw/apps/gpu_test_world/tools/assets.py \
-    $(ROOT)/sw/apps/gpu_test_world/assets/terrain.png $(COMMON)/tools/art.py \
+    $(ROOT)/sw/apps/gpu_test_world/assets/terrain-v2.png $(COMMON)/tools/art.py \
     $(COMMON)/assets/palette.json
 	python3 $(ROOT)/sw/apps/gpu_test_world/tools/assets.py $@

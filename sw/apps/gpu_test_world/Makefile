@@ -6,7 +6,7 @@ CFLAGS := -std=c11 -O2 -Wall -Wextra -Werror -ffunction-sections -fdata-sections
     -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/bsp/include -I$(ROOT)/sw/lib/plat
 .PHONY: assets state-test
 assets: $(OUT)/world_assets.h
-$(OUT)/world_assets.h: tools/assets.py assets/terrain.png \
+$(OUT)/world_assets.h: tools/assets.py assets/terrain-v2.png \
     $(ROOT)/sw/apps/gpu_test_common/tools/art.py \
     $(ROOT)/sw/apps/gpu_test_common/assets/palette.json
 	python3 tools/assets.py $@

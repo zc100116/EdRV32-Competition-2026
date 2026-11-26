@@ -41,6 +41,24 @@ static void diagnostic_ink(unsigned scene,unsigned mode)
             }
         }
 }
+/* Fusion Pixel U+653E / U+5C04: distinguish 放射 from the similar 旋 glyph. */
+static void radial_phase_ink(void)
+{
+    static const unsigned rows[2][12]={
+        {0,0x4200,0x2200,0xfbe0,0x4440,0x4240,0x7a40,0x4a80,0x4a80,0x4900,0x4a80,0x9c60},
+        {0,0x2040,0x7840,0x4be0,0x7840,0x4840,0x7a40,0x4940,0xf940,0x2840,0x4840,0x99c0}
+    };
+    const uint16_t *surface=test.surface[test.frame&1];
+    for(unsigned g=0;g<2;++g)for(unsigned y=0;y<12;++y)for(unsigned x=0;x<12;++x)
+        if(rows[g][y]&(0x8000u>>x)){
+            unsigned actual=surface[(12+y)*640+320+g*12+x];
+            if(actual!=0xffa5){
+                fprintf(stderr,"Radial phase glyph %u (%u,%u): expected ffa5, actual %04x\n",
+                        g,x,y,actual);
+                exit(1);
+            }
+        }
+}
 int main(void)
 {
     test_init();
@@ -66,13 +84,14 @@ int main(void)
                     test_frame();
                     for (unsigned i = 0; i < test.draws_count; ++i) {
                         const struct test_draw *draw = &test.draws[i];
-                        if (draw->kind == 0 && (draw->first & 1)) {
-                            fprintf(stderr, "Unaligned quad batch %u starts at %u\n",
+                        if (draw->kind != 2 && (draw->first & 1)) {
+                            fprintf(stderr, "Unaligned draw batch %u starts at %u\n",
                                     i, draw->first);
                             return 1;
                         }
                     }
                     diagnostic_ink(scene,mode);
+                    if(scene==1)radial_phase_ink();
                     char score[16];
                     snprintf(score, sizeof(score), "%07u", test.score);
                     text_pixels(50, 26, score, 0xffff);
@@ -87,6 +106,22 @@ int main(void)
                     }
                 }
             }
+    for(unsigned scene=3;scene<=4;++scene){
+        test_select(scene,0,0,2);
+        if(scene==4)world_capture(3);
+        test_frame();
+        for(unsigned i=0;i<test.draws_count;++i){
+            const struct test_draw *draw=&test.draws[i];
+            if(draw->kind!=2&&(draw->first&1)){
+                fprintf(stderr,"Scene %u unaligned draw %u starts at %u\n",scene,i,draw->first);
+                return 1;
+            }
+        }
+        if(test.quads_count>TEST_QUAD_MAX||test.triangles>25000*3||test.draws_count>128){
+            fprintf(stderr,"Scene %u exceeds normal list budget\n",scene);
+            return 1;
+        }
+    }
     pc_soc_destroy();
     puts("PASS aligned batches, list budgets and HUD pixels in all modes");
     return 0;
