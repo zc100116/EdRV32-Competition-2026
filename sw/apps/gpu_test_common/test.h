@@ -76,6 +76,7 @@ void test2d_results(void);
 void test3d_init(void);
 void test3d_update(uint32_t keys);
 void test3d_scene(void);
+void test3d_hud(void);
 uint64_t test_clock_us(void);
 uint32_t test_input_keys(void);
 #endif

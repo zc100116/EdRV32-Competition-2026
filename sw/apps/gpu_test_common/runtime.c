@@ -156,6 +156,9 @@ void test_draw(unsigned kind, unsigned first, unsigned count, unsigned texture,
                unsigned blend, unsigned matrix)
 {
     test.draws[test.draws_count++] = (struct test_draw){kind, first, count, texture, blend, matrix};
+    /* DRAW_QUAD.ADDR is 32-byte aligned; each quad occupies only 16 bytes.
+     * Leave an unused slot after odd batches so the next batch starts aligned. */
+    if (kind == 0) test.quads_count = (test.quads_count + 1) & ~1u;
 }
 void test_quad(int x, int y, unsigned w, unsigned h, unsigned u, unsigned v,
                unsigned palette, unsigned alpha)
@@ -430,6 +433,7 @@ static void hud(void)
                               (unsigned)test.gpu_us, test.score, test.health);
     else snprintf(line, sizeof(line), "GPU n/a  SCORE %u  HP %u", test.score, test.health);
     test_text(8, 34, line, 7);
+    if (test.game == 2) test3d_hud();
     const char *help = "NEXT/PREV MOVE  ENTER: CONTROLS  ESC: MENU";
     test_text(8, 340, help, 1);
     test_draw(0, first, test.quads_count-first, 0, 1, 0);

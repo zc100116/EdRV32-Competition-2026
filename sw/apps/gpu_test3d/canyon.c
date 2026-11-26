@@ -181,10 +181,15 @@ void test3d_scene(void)
         aircraft();
     }
     test_draw(1, start, (test.triangles-start)/3, 0, 0, 1);
-    first = test.quads_count;
+}
+void test3d_hud(void)
+{
+    /* Screen-space text follows all geometry, with opaque backing for contrast. */
+    test_rect(512, 52, 120, test.mode == 2 ? 24 : 40, 8);
     if (test.mode == 2) {
         static const char *filters[3] = {"NEAREST", "BILINEAR", "TRILINEAR"};
         test_text(520, 56, filters[test.filter], 1);
+        test_rect(160, 284, 224, 24, 8);
         test_text(168, 288, "PERSPECTIVE / 7 MIP LEVELS", 7);
     } else {
         test_text(520, 56, "FLY THRU", 1);
@@ -194,5 +199,4 @@ void test3d_scene(void)
         test_rect(317, 177, 6, 2, 1);
         test_rect(319, 175, 2, 6, 1);
     }
-    test_draw(0, first, test.quads_count-first, 0, 1, 0);
 }
