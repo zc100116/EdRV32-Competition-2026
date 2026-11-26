@@ -684,6 +684,10 @@ module edrv32_gpu_texture (
     wire [31:0] lod_ready_w;
     wire [3:0] completed_w [0:31];
 
+    wire [143:0] retire_context_input_w;
+    wire [143:0] unused_retire_context_read0_w;
+    wire [143:0] shade_context_input_w;
+    wire [143:0] unused_shade_context_read0_w;
     reg [3:0] mask_r [0:31];
 
     reg quad_r [0:31];
@@ -1042,6 +1046,7 @@ module edrv32_gpu_texture (
         for (lane = 0; lane < 4; lane = lane + 1) begin : g_lod
 
             reg result_mask_r [0:31];
+            wire [11:0] clamped_w;
             // Explicit LUTRAM uv_context: 1 slice(s) per combinational read port.
             wire [71:0] uv_context_input_w;
             assign uv_context_input_w =
@@ -1161,7 +1166,6 @@ module edrv32_gpu_texture (
             reg signed [15:0] logarithm_r;
             wire signed [15:0] biased_w;
             wire signed [15:0] maximum_w;
-            wire [11:0] clamped_w;
             assign biased_w = logarithm_r + ($signed({{8{bias_r[7]}}, bias_r}) <<< 4);
             assign maximum_w = $signed({4'b0, levels_r - 4'd1, 8'b0});
             assign clamped_w = biased_w < 0 ? 12'd0 :
@@ -4399,9 +4403,7 @@ module edrv32_gpu_texture (
     assign unused_address_scaled_u3_1_wide_w = $signed(address_u3_r_d1_r) >>> address_next_level3_r;
     assign unused_address_scaled_v3_1_wide_w = $signed(address_v3_r_d1_r) >>> address_next_level3_r;
     // Explicit LUTRAM retire_context: 2 slice(s) per combinational read port.
-    wire [143:0] retire_context_input_w;
     assign retire_context_input_w = {48'b0, sample_depth_i, sample_y_i, sample_x_i};
-    wire [143:0] unused_retire_context_read0_w;
     edrv32_ram_gpu_table u_retire_context_p0_b0 (
         .clk_i(clk_i),
         .wr_en_i(accept_w),
@@ -4419,9 +4421,7 @@ module edrv32_gpu_texture (
         .rd_data_o(unused_retire_context_read0_w[72 +: 72])
     );
     // Explicit LUTRAM shade_context: 2 slice(s) per combinational read port.
-    wire [143:0] shade_context_input_w;
     assign shade_context_input_w = {40'b0, sample_alpha_i, sample_color_i};
-    wire [143:0] unused_shade_context_read0_w;
     edrv32_ram_gpu_table u_shade_context_p0_b0 (
         .clk_i(clk_i),
         .wr_en_i(accept_w),
