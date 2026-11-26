@@ -1,0 +1,42 @@
+Card 107 round 9 | upstream 4426bf9e | local run 1f540308
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | snapshot 2026-11-26T17:29:05+08:00
+
+Generated IP, configuration, port widths and synthesis hierarchy usage.
+IP Generator (Version 2022.2-SP6.1 build 138931)
+Check out license ...
+Start generating at 2026-11-26 17:09
+Instance: ip_lutram_gpu_table (G:\codex_project\EdRV32-FPGA\board_gpu\ipcore\ip_lutram_gpu_table\ip_lutram_gpu_table.idf)
+IP: Pango Distributed Simple Dual Port RAM (1.3)
+Part: Logos2-PG2L200H-FBB676--6
+Create directory 'rtl' ...
+Copy 'rtl\ipm_distributed_sdpram_v1_3.v.xml' to 'rtl' ...
+Compile file 'rtl\ipm_distributed_sdpram_v1_3.v.xml' to 'rtl\ipm_distributed_sdpram_v1_3_ip_lutram_gpu_table.v' ...
+Copy 'ipm_distributed_sdpram_wrapper_v1_3.v.xml' ...
+Copy 'ipm_distributed_sdpram_wrapper_v1_2_tb.v.xml' ...
+Copy 'init_param_bin_exmp.dat' ...
+Copy 'init_param_hex_exmp.dat' ...
+Compile file 'ipm_distributed_sdpram_wrapper_v1_3.v.xml' to 'ip_lutram_gpu_table.v' ...
+Found top module 'ip_lutram_gpu_table' in file 'ip_lutram_gpu_table.v'.
+Compile file 'ipm_distributed_sdpram_wrapper_v1_2_tb.v.xml' to 'ip_lutram_gpu_table_tb.v' ...
+Create template file 'ip_lutram_gpu_table_tmpl.v' ...
+Create template file 'ip_lutram_gpu_table_tmpl.vhdl' ...
+There are 2 source files to synthesize.
+Synthesis is disabled.
+Done: 0 error(s), 0 warning(s)
+
+ADDR_WIDTH: 6
+DATA_WIDTH: 72
+OUT_REG: false
+INIT_ENABLE: false
+
+wr_data: input, 72
+wr_addr: input, 6
+rd_addr: input, 6
+wr_clk: input, 1
+rd_clk: input, 1
+wr_en: input, 1
+rst: input, 1
+rd_data: output, 72
+
+Synthesis hierarchy: 220 ip_lutram_gpu_table implementations.
+Distributed RAM LUT total for those rows: 7467; per-instance counts: {17: 22, 16: 40, 35: 3, 51: 6, 72: 42, 8: 6, 40: 2, 32: 8, 24: 3, 70: 2, 69: 1, 15: 1, 56: 1, 29: 1, 44: 1, 54: 1, 9: 3, 48: 2, 47: 1, 33: 2, 37: 6, 1: 3, 36: 1, 59: 1, 22: 3, 18: 22, 31: 1, 52: 2, 71: 3, 11: 1, 19: 24, 64: 4, 66: 1}.

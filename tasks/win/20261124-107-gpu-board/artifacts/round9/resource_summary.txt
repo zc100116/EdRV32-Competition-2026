@@ -1,0 +1,49 @@
+Card 107 round 9 | upstream 4426bf9e | local run 1f540308
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | snapshot 2026-11-26T17:29:05+08:00
+
+Device Map .dmr, original lines 9750-9779
+Device Utilization Summary:
++--------------------------------------------------------------------------+
+| Logic Utilization     | Used       | Available     | Utilization(%)
++--------------------------------------------------------------------------+
+| APM                   | 243        | 740           | 33
+| FF                    | 174211     | 319600        | 55
+| LUT                   | 116167     | 159800        | 73
+| Distributed RAM       | 11974      | 39500         | 31
+| DRM                   | 254        | 415           | 62
+| IO                    | 115        | 400           | 29
+| RCKB                  | 2          | 40            | 5
+| SCANCHAIN             | 0          | 1             | 0
+| USCM                  | 8          | 32            | 25
+| CCS                   | 1          | 1             | 100
+| ADC                   | 0          | 1             | 0
+| DDR_PHY               | 7          | 40            | 18
+| HSSTLP                | 0          | 2             | 0
+| GPLL                  | 7          | 10            | 70
+| PPLL                  | 2          | 10            | 20
+| DDRPHY_CPD            | 1          | 20            | 5
+| HCKB                  | 0          | 120           | 0
+| IOCKB                 | 0          | 40            | 0
+| MRCKB                 | 1          | 20            | 5
+| PCIE                  | 0          | 1             | 0
+| DDRPHY_IOCLK_DIV      | 2          | 10            | 20
+| ANALOG                | 0          | 1             | 0
+| TSERDES               | 14         | 80            | 18
+| KEYRAM                | 0          | 1             | 0
++--------------------------------------------------------------------------+
+
+Synthesis .snr, original lines 61-76
+Mapping Summary:
+Total LUTs: 116171 of 159800 (72.70%)
+	LUTs as dram: 11974 of 39500 (30.31%)
+	LUTs as logic: 104197
+Total Registers: 174245 of 319600 (54.52%)
+Total Latches: 0
+
+DRM36K/FIFO:
+Total DRM = 254.0 of 415 (61.20%)
+
+APMs:
+Total APMs = 243.00 of 740 (32.84%)
+
+Total I/O ports = 115 of 400 (28.75%)

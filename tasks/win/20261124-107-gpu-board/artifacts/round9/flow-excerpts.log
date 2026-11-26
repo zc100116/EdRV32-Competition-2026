@@ -1,0 +1,39 @@
+Card 107 round 9 | upstream 4426bf9e | local run 1f540308
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | snapshot 2026-11-26T17:29:05+08:00
+
+33: I: Flow-6003: IP "ip_lutram_gpu_table.idf" regenerate successfully.
+38: Process "Compile" started.
+17360: Action compile: Real time elapsed is 0h:2m:33s
+17361: Action compile: CPU time elapsed is 0h:0m:27s
+17362: Action compile: Process CPU time elapsed is 0h:0m:27s
+17364: Action compile: Peak memory pool usage is 882 MB
+17368: Process "Compile" done.
+17371: Process "Synthesize" started.
+48617: Action synthesize: Real time elapsed is 0h:10m:27s
+48618: Action synthesize: CPU time elapsed is 0h:2m:34s
+48619: Action synthesize: Process CPU time elapsed is 0h:2m:44s
+48621: Action synthesize: Peak memory pool usage is 5,265 MB
+48625: Process "Synthesize" done.
+48628: Process "Device Map" started.
+52488: Action dev_map: Real time elapsed is 0h:2m:19s
+52489: Action dev_map: CPU time elapsed is 0h:0m:35s
+52490: Action dev_map: Process CPU time elapsed is 0h:0m:37s
+52492: Action dev_map: Peak memory pool usage is 3,118 MB
+52496: Process "Device Map" done.
+52499: Process "Place & Route" started.
+
+compile/run.log, all E: lines:
+(none at snapshot)
+
+synthesize/run.log, all E: lines:
+(none at snapshot)
+
+device_map/run.log, all E: lines:
+(none at snapshot)
+
+place_route/run.log, all E: lines:
+(none at snapshot)
+
+P&R progress markers from captured log:
+9396: Phase 1 Pre global placement started.
+9412: Phase 1.1 1st GP placement started.

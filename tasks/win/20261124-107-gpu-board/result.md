@@ -1,5 +1,52 @@
 # 卡 107 结果
 
+## 第 9 轮资源、时序与布局快照
+
+| 项 | 内容 |
+|---|---|
+| 实测版本 | 本地 `1f540308`，RTL 与任务卡 `4426bf9e` 一致 |
+| 环境 | Windows PDS 2022.2-SP6.1 build 138931，ADS 综合，Logos2 PG2L200H-6 FBB676 |
+| 工程 | `G:/codex_project/EdRV32-FPGA/board_gpu/board_gpu.pds` |
+| 阶段用时 | Compile 通过（2 分 33 秒），Synthesize 通过（10 分 27 秒），Device Map 通过（2 分 19 秒） |
+| 布线门槛 | `clk_gpu` 综合估算 **153.6182 MHz**，WNS **−0.954 ns**，满足本轮 150 MHz 门槛（WNS ≥ −1.11 ns） |
+| 截取状态 | 北京时间 2026-11-26 17:29:05。P&R 于 17:27:15 启动，截取时在第 1 次全局布局。最终布线耗时、拥塞和布线后时序未取得。 |
+
+截至快照，Compile、Synthesize、Device Map 和 P&R 日志均无 `E:` 行。[阶段日志](artifacts/round9/flow-excerpts.log)
+
+### Device Map 资源
+
+| 资源 | 第 8 轮用量 | 第 9 轮用量 | 容量 | 第 9 轮 PDS 占用 |
+|---|---:|---:|---:|---:|
+| LUT | 107,291 | 116,167 | 159,800 | 73% |
+| FF | 185,127 | 174,211 | 319,600 | 55% |
+| DRM（36K 等效） | 332 | 254 | 415 | 62% |
+| APM | 217 | 243 | 740 | 33% |
+| 分布式 RAM | 5,999 | 11,974 | 39,500 | 31% |
+| I/O | 115 | 115 | 400 | 29% |
+| GPLL | 7 | 7 | 10 | 70% |
+| PPLL | 2 | 2 | 10 | 20% |
+
+相较第 8 轮，DRM 少 **78** 块，FF 少 **10,916** 个，LUT 多 **8,876** 个，分布式 RAM 多 **5,975** 个，APM 多 **26** 个。综合层次报告显示，GPU 的 DRM 从 **269.5** 降到 **191.5**，其中 `u_perspective` 从 **25** 降到 **1**，`u_setup` 从 **33.5** 降到 **1**。[Device Map 资源原文](artifacts/round9/resource_summary.txt) · [GPU 各子模块及完整综合层次表](artifacts/round9/resource_hier.txt)
+
+`ip_lutram_gpu_table` 生成结果为 0 错误、0 警告，实际 8 个端口与包装一致。确认 **64 × 72、组合读、输出不寄存、无初始化**。综合层次表记录 220 个该 IP 的实现实例，合计 7,467 个分布式 RAM LUT。[IP 生成记录、参数和端口](artifacts/round9/ip_lutram_gpu_table.txt)
+
+### 综合预估时序
+
+| 时钟域 | 估算 MHz | WNS（ns） | TNS（ns） | WHS（ns） | THS（ns） |
+|---|---:|---:|---:|---:|---:|
+| `clk_gpu` | 153.6182 | −0.954 | −1759.131 | 0.324 | 0.000 |
+| `clk_sys` | 116.6444 | −0.573 | −83.752 | 0.324 | 0.000 |
+| `clk_mem` | 109.2061 | −1.157 | −69.531 | −0.006 | −0.942 |
+| `clk_aud` | 276.6247 | 77.765 | 0.000 | 0.619 | 0.000 |
+
+`clk_gpu` 综合估算由第 8 轮的 **114.9311 MHz** 提升至 **153.6182 MHz**，全设计汇总 WNS **−1.157 ns** 对应 `clk_mem`。原 GUI 综合报告已包含 200 条 GPU setup 路径，核对为 200 个不同端点，slack 从 −0.954 ns 到 −0.557 ns。最差路径从 `u_soc/u_gpu/u_core/sample_quad_select_r/CLK` 到 `u_soc/u_gpu/u_core/u_texture/g_lod[0].amount_r[1]/D`，9 逻辑级。[所有时钟域时序](artifacts/round9/timing_summary.txt) · [GPU 最差 200 条 setup 路径](artifacts/round9/setup_top200_clk_gpu.txt) · [前 20 条逐级明细](artifacts/round9/setup_top20_detail.txt)
+
+### 高扇出
+
+综合报告记录 2,257 组控制集，`maximum fanout` 为 37,705，对应控制集表的单独时钟项 `CLK(clk_gpu_w)`。Device Map 的 GPU 全局时钟网 `ntclkbufg_0` 扇出为 150,511。Other 表中 GPU 的 `u_geometry/project_input_ready_w` 为 3,002，`u_setup/enable_w` 为 2,097。[Clock、Reset、CE、Other 原表](artifacts/round9/high_fanout.txt)
+
+原始日志和报告快照存于 `G:/codex_project/edrv32-card107/build/card107-pds-check/logbackup/round9-20261126-172905`。
+
 ## 第 8 轮 Device Map 结果
 
 | 项 | 内容 |
