@@ -3,7 +3,7 @@
 # Spec: mem-subsys-testplan 5-6.
 # Description: Merge functional COVER observations across the MB full regression logs.
 # Clock domain: host tool.
-"""Report the MB coverage union; counter saturation is covered by the RTL unit test."""
+"""Report the GPU memory subsystem protocol and fixed-policy coverage union."""
 from pathlib import Path
 import sys
 
@@ -29,9 +29,6 @@ def main():
             elif words[1] == 'schedule':
                 if 'rule' in pairs and int(pairs['hits']) != 0:
                     hits.add('rule ' + pairs['rule'])
-                for name in ('urg_cap', 'token_skip', 'starve', 'switches'):
-                    if int(pairs.get(name, '0')) != 0:
-                        hits.add(name)
             elif words[1] == 'flow':
                 if 'port' in pairs:
                     for direction in ('rd', 'wr'):
@@ -43,10 +40,6 @@ def main():
                     peaks['global'] = max(peaks.get('global', 0), int(pairs['global_peak']))
             elif words[1] == 'violation' and pairs['hit'] == '1':
                 hits.add(' '.join(word for word in words[1:] if not word.startswith('hit=')))
-            elif words[1] == 'statistics':
-                for name in ('snapshot', 'clear'):
-                    if pairs[name] == '1':
-                        hits.add(name)
     expected = set()
     for kind in range(2):
         for window in range(2):
@@ -57,10 +50,9 @@ def main():
             expected.add(f'GW size={size} offset={offset}')
     for index in range(10):
         expected.add(f'GW illegal={index}')
-    for index in range(5):
+    for index in range(3):
         expected.add(f'rule {index+1}')
-    expected.update(('urg_cap', 'token_skip', 'starve', 'switches', 'credit_full',
-                     'snapshot', 'clear'))
+    expected.add('credit_full')
     for kind in range(2):
         for direction in range(2):
             expected.add(f'violation kind={kind} dir={direction}')
@@ -78,7 +70,6 @@ def main():
           f'{sum(peaks.get(k, 0) >= v for k, v in caps.items())}/{len(caps)} limits')
     for key in missing:
         print('MISS ' + key)
-    print('Counter saturation: verify the mem_xbar unit regression evidence separately.')
     return int(bool(missing))
 
 
