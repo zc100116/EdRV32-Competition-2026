@@ -19,14 +19,14 @@ from tmds_ref import generate  # noqa: E402
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('tier', choices=('smoke', 'full', 'slim1', 'x2full'))
+    parser.add_argument('tier', choices=('smoke', 'full', 'x2full'))
     parser.add_argument('--parallel', type=int, default=1)
     args = parser.parse_args()
     out = ROOT / 'build/disp_gpu'
     out.mkdir(parents=True, exist_ok=True)
     sources = expand_files(ROOT / 'verif/block/disp_gpu/files.f')
     tops = [('tb_layers', 'obj_layers')]
-    if args.tier in ('full', 'slim1'):
+    if args.tier == 'full':
         tops.append(('tb', 'obj'))
     if args.tier in ('full', 'x2full'):
         tops.append(('tb_urgent', 'obj_urgent'))

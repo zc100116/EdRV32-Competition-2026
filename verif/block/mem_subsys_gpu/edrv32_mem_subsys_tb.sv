@@ -838,6 +838,11 @@ module edrv32_mem_subsys_tb;
                             rt_rows, rt_level[0], $time);
                     rt_level[0] -= 40;
                     rt_rows++;
+                    if (rt_rows%180 == 0) begin
+                        $display("ST-03 rows=%0d samples=%0d FIFO=%0d/%0d time=%0t",
+                            rt_rows,rt_samples,rt_level[0],rt_level[1],$time);
+                        $fflush();
+                    end
                 end
                 if (sample_phase >= 125000000) begin
                     sample_phase -= 125000000;
@@ -927,6 +932,9 @@ module edrv32_mem_subsys_tb;
                 wait (rt_level[0] >= 80 && rt_level[1] >= 128);
                 @(negedge clk_mem);
                 rt_consume = 1;
+                $display("ST-03 primed FIFO=%0d beats/%0d samples time=%0t",
+                    rt_level[0],rt_level[1],$time);
+                $fflush();
                 wait (rt_rows == 720);
                 @(negedge clk_mem);
                 rt_consume = 0;

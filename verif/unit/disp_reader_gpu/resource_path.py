@@ -66,16 +66,10 @@ for group, candidates in (
                    for n in lookup.get(e[3], []))]),
         ('admission occupancy registers', [e for e in endpoints if any(
              n.startswith('u_reader.admission_used') for n in lookup.get(e[3], []))]),
-        ('L1 row address', [e for e in endpoints if e[2] == 'D' and any(
-                           n.startswith('u_reader.l1_line_base_r')
-                           for n in lookup.get(e[3], []))]),
         ('descriptor outputs', [e for e in endpoints if any(n.startswith((
              'u_reader.desc_', 'u_dma.desc_base_i', 'u_dma.desc_stride_i',
              'u_dma.desc_width_bytes_i'))
                                for n in lookup.get(e[3], []))])):
-    # The baseline has no L1 address registers.
-    if group in ('L1 row address', 'admission occupancy registers') and not candidates:
-        continue
     longest, name, port, output = max(candidates, key=lambda entry: len(entry[0]))
     print(f'{group} longest generic path: {len(longest)-1} LUT4 levels: '
           f'{label(longest[0])} -> {label(output)} ({port})')
