@@ -24,7 +24,8 @@ for name,frames in shots:
 target=pathlib.Path('build/g4/captures')/f'{a.demo}-sequence'
 target.mkdir(parents=True,exist_ok=True)
 command=[str(a.binary.resolve()),'--scene',str(scene),'--frames','180','--sequence','1',
-         '--out',str(target),'--shot','combat' if scene==3 else 'day']
+         '--out',str(target)]
+if scene==3:command+=['--shot','combat']
 with (out/f'{a.demo}-3s.csv').open('w') as log:subprocess.run(command,stdout=log,check=True)
 with zipfile.ZipFile(out/f'{a.demo}-3s.zip','w',zipfile.ZIP_DEFLATED) as archive:
     for i in range(1,181):archive.write(target/f'frame{i:04}.png',f'frame{i:04}.png')

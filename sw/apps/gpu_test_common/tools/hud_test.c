@@ -23,6 +23,24 @@ static void text_pixels(int x, int y, const char *text, uint16_t color)
             }
     }
 }
+static void diagnostic_ink(unsigned scene,unsigned mode)
+{
+    char number[16];
+    snprintf(number,sizeof(number),"%u",scene==1?test.alive_count:test.triangles/3);
+    unsigned mode_width=mode<2?24:scene==1?56:48;
+    unsigned x0=14+mode_width+8+(scene==1?24:36)+8+(unsigned)strlen(number)*8+8;
+    const uint16_t *surface=test.surface[test.frame&1];
+    const char *label="FPS";
+    for(unsigned i=0;i<3;++i)for(unsigned y=0;y<16;++y)for(unsigned x=0;x<8;++x)
+        if(font8x16[(unsigned char)label[i]-32][y]&(128u>>x)){
+            unsigned actual=surface[(340+y)*640+x0+i*8+x];
+            if(actual!=0xffff){
+                fprintf(stderr,"Diagnostic FPS ink (%u,%u): expected ffff, actual %04x\n",
+                        x0+i*8+x,340+y,actual);
+                exit(1);
+            }
+        }
+}
 int main(void)
 {
     test_init();
@@ -54,6 +72,7 @@ int main(void)
                             return 1;
                         }
                     }
+                    diagnostic_ink(scene,mode);
                     char score[16];
                     snprintf(score, sizeof(score), "%07u", test.score);
                     text_pixels(50, 26, score, 0xffff);

@@ -261,6 +261,21 @@ static void objects(void)
     }
     test_draw(1,first,(test.triangles-first)/3,6,1,1);
 }
+static void glows(void)
+{
+    unsigned first=test.triangles;
+    static const int corners[6][2]={{-1,-1},{1,-1},{1,1},{-1,-1},{1,1},{-1,1}};
+    for(unsigned i=0;i<24;++i)if(!picked[i]){
+        int x=700+(int)(random_at(i,7)%700),z=680+(int)(random_at(i,9)%700);
+        int y=height(x,z)+8+sn(test.tick+i*21)/8192;
+        for(unsigned j=0;j<6;++j){
+            int side=corners[j][0],up=corners[j][1];
+            vertex(x+side*cs(yaw)*7/16384,y+up*7,z-side*sn(yaw)*7/16384,
+                   0x3fff,(unsigned)(side>0?48:16)*256,(unsigned)(up>0?96:128)*256);
+        }
+    }
+    test_draw(1,first,(test.triangles-first)/3,6,2,1);
+}
 void world_init(void)
 {
     memcpy(test.textures+TEST_MIP_BASE,world_materials,sizeof(world_materials));
@@ -330,7 +345,7 @@ void world_update(uint32_t keys)
 }
 void world_scene(void)
 {
-    sky();terrain();objects();
+    sky();terrain();objects();glows();
     unsigned first=test.quads_count;
     char s[96];test_panel(8,8,210,38,2);demo_text(16,10,"云脊漫游",1);
     snprintf(s,sizeof(s),"光种 %02u/24",collected);demo_text(16,28,s,2);

@@ -72,11 +72,12 @@ void demo_diagnostics(unsigned blocks)
 {
     unsigned first = test.quads_count;
     test_panel(8, 338, 624, 20, 2);
-    char text[100];
-    snprintf(text, sizeof(text), "%s %s %u  BLK %u FPS %u.%u CPU %u.%03u GPU %u us",
-             test.mode ? "STRESS" : "PLAY", test.game == 3 ? "OBJ" : "TRI",
+    char text[128];
+    snprintf(text, sizeof(text), "%s %s %u  BLK %u FPS %u.%u CPU %u.%03u ms GPU %u us",
+             test.mode ? "压测" : "正常", test.game == 3 ? "对象" : "三角形",
              test.game == 3 ? test.alive_count : test.triangles/3, blocks,
-             test.fps10/10, test.fps10%10, test.cpu_us/1000, test.cpu_us%1000, test.gpu_us);
+             (unsigned)test.fps10/10, (unsigned)test.fps10%10, (unsigned)test.cpu_us/1000,
+             (unsigned)test.cpu_us%1000, (unsigned)test.gpu_us);
     demo_text(14, 340, text, 1);
     test_draw(0, first, test.quads_count-first, 0, 1, 0);
 }

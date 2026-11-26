@@ -410,7 +410,7 @@ void test2d_hud(void)
     test_text(246, 10, "赤焰核心", 3);
     test_rect(244, 30, 152, 8, 9);
     test_rect(246, 32, boss_health*148/1200, 4, 3);
-    static const char *phases[3] = {"RADIAL", "SPIRAL", "WAVE"};
+    static const char *phases[3] = {"放射", "螺旋", "波浪"};
     test_text(320, 10, phases[(test.tick/240)%3], 7);
     static const char *weapons[3] = {"散射", "激光", "追踪导弹"};
     test_panel(480, 8, 148, 36, 2);

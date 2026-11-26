@@ -8,11 +8,13 @@ ZIG := $(HOME)/.local/opt/zig-0.17.0/zig
 CFLAGS := -std=c11 -O2 -Wall -Wextra -Werror -I$(COMMON) -I$(OUT)/generated \
     -I$(ROOT)/sw/bsp/include -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/lib \
     -I$(ROOT)/sw/lib/plat -I$(ROOT)/tools/gpu/emu -I$(ROOT)/tools/gpu/emu/pc
+CFLAGS += -I$(ROOT)/sw/apps/gpu_test_rogue
 MAP := -DEDRV32_SOC_MAP_H -include $(ROOT)/sw/bsp/include/gpu_soc_map.h
 PCFLAGS := -I$(ROOT)/sw/bsp/pc/include $(CFLAGS) $(MAP) -O3 \
     -DGPU_TEST_PC -DGPU_EMU_TEXTURE_BYTES=196608 -include $(ROOT)/sw/bsp/pc/include/mmio.h
 SOURCES := $(COMMON)/runtime.c $(ROOT)/sw/apps/gpu_test2d/patrol.c \
     $(ROOT)/sw/apps/gpu_test3d/canyon.c
+SOURCES += $(ROOT)/sw/apps/gpu_test_rogue/rogue.c $(ROOT)/sw/apps/gpu_test_world/world.c
 DRIVERS := sw/drivers/gpu.c sw/drivers/aud.c sw/drivers/disp.c sw/drivers/plic.c
 PC := sw/lib/plat/pc.c sw/bsp/pc/soc.c sw/bsp/pc/cache.c tools/gpu/emu/gpu_emu.c
 BOARD := sw/lib/plat/board.c sw/bsp/start.S sw/bsp/host.c sw/bsp/cache.c \
@@ -51,3 +53,15 @@ $(OUT)/gpu_test.elf: $(SOURCES) $(APP)/main.c $(ASSETS) $(HEADERS) $(APP)/Makefi
 	    -ffunction-sections -fdata-sections -nostdlib -Wl,--gc-sections \
 	    -Tsw/bsp/ld/ddr.ld $(SOURCES) $(APP)/main.c \
 	    $(addprefix $(ROOT)/,$(DRIVERS) $(BOARD)) -lc -lgcc -o $@
+
+G4_HEADERS := $(OUT)/generated/rogue_assets.h $(OUT)/generated/world_assets.h
+$(OUT)/gpu_test $(OUT)/gpu_test.exe $(OUT)/gpu_test.elf $(OUT)/hud_test: $(G4_HEADERS) \
+    $(ROOT)/sw/apps/gpu_test_rogue/demo.h
+$(OUT)/generated/rogue_assets.h: $(ROOT)/sw/apps/gpu_test_rogue/tools/assets.py \
+    $(wildcard $(ROOT)/sw/apps/gpu_test_rogue/assets/*) $(COMMON)/tools/art.py \
+    $(COMMON)/assets/palette.json
+	python3 $(ROOT)/sw/apps/gpu_test_rogue/tools/assets.py $@
+$(OUT)/generated/world_assets.h: $(ROOT)/sw/apps/gpu_test_world/tools/assets.py \
+    $(ROOT)/sw/apps/gpu_test_world/assets/terrain.png $(COMMON)/tools/art.py \
+    $(COMMON)/assets/palette.json
+	python3 $(ROOT)/sw/apps/gpu_test_world/tools/assets.py $@

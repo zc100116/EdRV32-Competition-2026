@@ -2,6 +2,7 @@
  * CPU frame thread; GPU owns submitted DDR ranges until gpu_wait returns.
  */
 #include "test.h"
+#include "demo.h"
 #include "aud.h"
 #include "disp.h"
 #include "cache.h"
@@ -20,6 +21,8 @@ static unsigned oscillator;
 static volatile unsigned sound_left;
 static volatile unsigned sound_hz;
 static unsigned menu_choice;
+static unsigned a_hold;
+static unsigned new_menu;
 static unsigned hud_first;
 static uint64_t previous_frame;
 static uint64_t gpu_wait_elapsed;
@@ -68,6 +71,20 @@ static unsigned texture_byte(unsigned x, unsigned y)
     unsigned bx = x / 2;
     unsigned address = 8 * ((y / 2) * 64 + bx / 2) + 2 * ((bx & 1) + 2 * (y & 1));
     return address + (x & 1);
+}
+static void upload_assets(void)
+{
+    unsigned n = 0;
+    EMIT(tex_load, .src = gpu_physical(test.textures), .bytes = TEST_TEXTURE_BYTES);
+    for (unsigned p = 0; p < 16; ++p)
+        EMIT(pal_load, .group = p, .src = gpu_physical(test.palettes + p * 256), .entries = 256);
+    const struct gpu_range sources[] = {
+        {(uintptr_t)test.textures, TEST_TEXTURE_BYTES}, {(uintptr_t)test.palettes, 16384}
+    };
+    struct gpu_batch batch = {commands, n, sources, 2, NULL, 0};
+    gpu_submit(&batch);
+    struct gpu_event event = gpu_wait();
+    if (event.error) { plat_printf("GPU asset load error %u\n", event.error); abort(); }
 }
 void test_init(void)
 {
@@ -133,17 +150,8 @@ void test_init(void)
     aud_enable(1);
     mmio_write32(EDRV32_DISP_BASE + EDRV32_DISP_GPU_LAYER_CTRL_OFFSET,
         EDRV32_DISP_GPU_LAYER_CTRL_L0_EN_MASK | EDRV32_DISP_GPU_LAYER_CTRL_L0_X2_MASK);
-    unsigned n = 0;
-    EMIT(tex_load, .src = gpu_physical(test.textures), .bytes = TEST_TEXTURE_BYTES);
-    for (unsigned p = 0; p < 16; ++p)
-        EMIT(pal_load, .group = p, .src = gpu_physical(test.palettes + p * 256), .entries = 256);
-    const struct gpu_range sources[] = {
-        {(uintptr_t)test.textures, TEST_TEXTURE_BYTES}, {(uintptr_t)test.palettes, 16384}
-    };
-    struct gpu_batch batch = {commands, n, sources, 2, NULL, 0};
-    gpu_submit(&batch);
-    struct gpu_event event = gpu_wait();
-    if (event.error) { plat_printf("GPU asset load error %u\n", event.error); abort(); }
+    demo_load();
+    upload_assets();
     test.aa = 1;
     previous_frame = test_clock_us();
 }
@@ -159,8 +167,16 @@ void test_select(unsigned game, unsigned mode, unsigned level, unsigned filter)
     test.health = 100;
     test.player_x = 320;
     test.player_y = game == 1 ? 290 : 0;
+    memcpy(test.textures,test_asset_texture,TEST_TEXTURE_BYTES);
+    for(unsigned g=0;g<95;++g)for(unsigned y=0;y<16;++y)for(unsigned x=0;x<8;++x)
+        test.textures[texture_byte((g%16)*8+x,128+(g/16)*16+y)]=
+            (font8x16[g][y]&(128u>>x))?1:0;
+    if(game==0||game>=3)demo_load();
     if (game == 1) test2d_init();
     if (game == 2) test3d_init();
+    if (game == 3) rogue_init();
+    if (game == 4) world_init();
+    upload_assets();
 }
 void test_draw(unsigned kind, unsigned first, unsigned count, unsigned texture,
                unsigned blend, unsigned matrix)
@@ -212,10 +228,11 @@ void test_panel(int x, int y, unsigned w, unsigned h, unsigned accent)
     test_rect(x+2, y+2, w-4, h-4, 8);
     test_rect(x+4, y+2, 12, 1, accent);
     test_rect(x+(int)w-16, y+(int)h-3, 12, 1, accent);
-    test_quad(x, y, 6, 6, 0, 97, 0, 255);
-    test_quad(x+(int)w-6, y, 6, 6, 26, 97, 0, 255);
-    test_quad(x, y+(int)h-6, 6, 6, 0, 105, 0, 255);
-    test_quad(x+(int)w-6, y+(int)h-6, 6, 6, 26, 105, 0, 255);
+    unsigned u=(test.game&7)>=3?224:0,v=(test.game&7)>=3?32:97;
+    test_quad(x, y, 6, 6, u, v, 0, 255);
+    test_quad(x+(int)w-6, y, 6, 6, u+26, v, 0, 255);
+    test_quad(x, y+(int)h-6, 6, 6, u, v+8, 0, 255);
+    test_quad(x+(int)w-6, y+(int)h-6, 6, 6, u+26, v+8, 0, 255);
 }
 void test_sprite(int x, int y, int w, int h, unsigned u, unsigned v,
                  unsigned tw, unsigned th)
@@ -300,7 +317,12 @@ static void render_gpu(void)
              .vp_w = 640, .vp_h = 360);
         EMIT(clear, .color = 0x0865, .depth = 65535, .en_color = 1, .en_depth = 1,
              .en_stencil = 1);
-        EMIT(set_light, .ly = 12000, .lz = 11000, .dir_rgb = 0x404040, .amb_rgb = 0xbfbfbf);
+        extern int world_light_y,world_light_z;
+        extern unsigned world_light_dir,world_light_ambient;
+        EMIT(set_light, .ly = test.game==4?world_light_y:12000,
+             .lz = test.game==4?world_light_z:11000,
+             .dir_rgb = test.game==4?world_light_dir:0x404040,
+             .amb_rgb = test.game==4?world_light_ambient:0xbfbfbf);
         for (unsigned i = test.cpu ? hud_first : 0; i < test.draws_count; ++i) {
             struct test_draw *d = &test.draws[i];
             EMIT(set_matrix, .addr = gpu_physical(test.matrices + d->matrix * 16));
@@ -507,27 +529,27 @@ static void hud(void)
     test_text(34, 10, "血量", 3);
     test_rect(64, 14, 116, 8, 9);
     test_rect(66, 16, test.health*112/100, 4, test.health > 30 ? 2 : 3);
-    char line[96];
+    char line[128];
     snprintf(line, sizeof(line), "得分 %07u", test.score);
     test_text(18, 26, line, 1);
     const char *mode = test.mode == 0 ? "正常" : test.mode == 1 ? "压测" :
                        test.game == 1 ? "CPU 对比" : "纹理测试";
     /* One compact translucent strip; the scene remains visible behind diagnostics. */
-    for (unsigned x = 8; x < 596; x += 8)
+    for (unsigned x = 8; x < 632; x += 8)
         for (unsigned y = 340; y < 356; y += 8)
             test_quad((int)x, (int)y, 8, 8, 248, 248, 8, 190);
     if (test.game == 1) test2d_hud();
     else test3d_hud();
-    test_draw(0, first, test.quads_count-first, 0, 1, 0);
     unsigned count = test.game == 1 ? test.alive_count : test.triangles/3;
-    snprintf(line, sizeof(line), "%s %s %u FPS %u.%u CPU %u.%03u GPU %u us AA %s %s",
-             mode, test.game == 1 ? "OBJ" : "TRI", count,
+    snprintf(line, sizeof(line), "%s %s %u FPS %u.%u CPU %u.%03u ms GPU %u us",
+             mode, test.game == 1 ? "对象" : "三角形", count,
              (unsigned)test.fps10/10, (unsigned)test.fps10%10,
              (unsigned)test.cpu_us/1000, (unsigned)test.cpu_us%1000,
-             (unsigned)test.gpu_us, test.aa ? "ON" : "OFF", test.cpu ? "CPU" : "GPU");
-    first = test.triangles;
-    test_scaled_text(14, 342, line, 192, 0xbdf7);
-    test_draw(1, first, (test.triangles-first)/3, 0, 1, 0);
+             (unsigned)test.gpu_us);
+    /* Keep every font texel: 3/4-size nearest sampling removed strokes in FPS/CPU.
+     * Native 8x16 ASCII and 12x12 Chinese fit this compact single-line layout. */
+    test_text(14, 340, line, 1);
+    test_draw(0, first, test.quads_count-first, 0, 1, 0);
 }
 void test_frame(void)
 {
@@ -547,22 +569,50 @@ void test_frame(void)
     uint32_t gpu_start = mmio_read32(EDRV32_GPU_BASE + EDRV32_GPU_PERF_OFFSET(0));
     uint32_t pixel_start = mmio_read32(EDRV32_GPU_BASE + EDRV32_GPU_PERF_OFFSET(4));
     if (pressed & (PLAT_START | PLAT_SELECT)) {
-        test.game = 0; /* board fourth button is esc */
+        test_select(0,0,0,2); /* board fourth button is esc */
         menu_choice = 0;
+        new_menu = 0;
+        a_hold = 0;
     }
     if (!test.game) {
-        if (pressed & (PLAT_LEFT | PLAT_RIGHT)) menu_choice ^= 1;
+        if (pressed & PLAT_RIGHT) menu_choice=(menu_choice+1)%4;
+        if (pressed & PLAT_LEFT) menu_choice=(menu_choice+3)%4;
         if (pressed & PLAT_A) test_select(menu_choice+1, 0, 0, 2);
-    } else if ((pressed & PLAT_A) && !(test.game & 4)) {
+    } else if(test.game>=3 && test.game<=4) {
+        if(keys&PLAT_A)++a_hold;else a_hold=0;
+        if(a_hold==30){test.game|=8;new_menu=1;menu_choice=0;}
+    } else if ((pressed & PLAT_A) && !(test.game & 8)) {
         /* Four physical buttons: enter opens a small control menu. */
-        test.game |= 4;
+        test.game |= 8;
         menu_choice = 0;
     }
-    if (test.game & 4) {
+    if((test.game&8) && new_menu) {
+        if(pressed&PLAT_RIGHT)menu_choice=(menu_choice+1)%6;
+        if(pressed&PLAT_LEFT)menu_choice=(menu_choice+5)%6;
+        unsigned game=test.game&7;
+        if((pressed&PLAT_A)&&!a_hold){
+            if(menu_choice==0)test_select(game,(test.mode+1)%2,0,test.filter);
+            if(menu_choice==1)test_select(game,test.mode,(test.level+1)%3,test.filter);
+            if(menu_choice==2){if(game==3)test.weapon=(test.weapon+1)%3;else world_lod^=1;}
+            if(menu_choice==3){if(game==4)world_time=(world_time+1)%4;else test.aa^=1;}
+            if(menu_choice==4)test.game=game;
+            if(menu_choice==5)test_select(game,0,0,2);
+            if(!(test.game&8))new_menu=0;
+        }
+        if(!(keys&PLAT_A))a_hold=0;
+        static const char *items[]={"模式","负载","武器 / LOD",
+            "AA / 昼夜","继续","重新开始"};
+        unsigned first=test.quads_count;
+        test_panel(90,60,460,250,2);
+        for(unsigned i=0;i<6;++i){demo_text(110,80+(int)i*34,i==menu_choice?">":" ",7);
+            demo_text(130,80+(int)i*34,items[i],i==menu_choice?1:9);}
+        test_draw(0,first,test.quads_count-first,0,1,0);
+        hud_first=0;
+    } else if (test.game & 8) {
         if (pressed & PLAT_RIGHT) menu_choice = (menu_choice+1)%6;
         if (pressed & PLAT_LEFT) menu_choice = (menu_choice+5)%6;
         if ((pressed & PLAT_A) && (test.tick & 0x80000000u)) {
-            unsigned game = test.game & 3;
+            unsigned game = test.game & 7;
             if (menu_choice == 0) test_select(game, (test.mode+1)%3, 0, test.filter);
             if (menu_choice == 1) test_select(game, test.mode, (test.level+1)%7, test.filter);
             if (menu_choice == 2) test.aa ^= 1;
@@ -577,7 +627,7 @@ void test_frame(void)
             }
             if (menu_choice == 5) test.game = game;
         }
-        if (test.game & 4) test.tick |= 0x80000000u;
+        if (test.game & 8) test.tick |= 0x80000000u;
         test_text(100, 80, "TEST CONTROLS - NEXT/PREV SELECT, ENTER APPLY", 2);
         static const char *items[] = {"MODE: PLAY / STRESS / COMPARE-TEXTURE",
             "INCREASE LOAD LEVEL", "TOGGLE ANTI-ALIASING", "CPU-GPU / TEXTURE FILTER",
@@ -590,9 +640,11 @@ void test_frame(void)
         hud_first = 0;
     } else if (!test.game) {
         test_text(128, 90, "EDRV32 / GPU LAB", 2);
-        test_text(128, 122, "TWO SMALL GAMES. ONE GPU.", 1);
-        test_text(128, 180, menu_choice ? "  2D / PRISM PATROL" : "> 2D / PRISM PATROL", 7);
-        test_text(128, 212, menu_choice ? "> 3D / CANDY CANYON" : "  3D / CANDY CANYON", 3);
+        test_text(128, 122, "FOUR SMALL DEMOS. ONE GPU.", 1);
+        static const char *games[]={"2D / PRISM PATROL","3D / CANDY CANYON",
+            "2D / 棱炉地宫","3D / 云脊漫游"};
+        for(unsigned i=0;i<4;++i){test_text(110,160+(int)i*26,i==menu_choice?">":" ",7);
+            demo_text(128,160+(int)i*26,games[i],i==menu_choice?2:1);}
         test_text(128, 280, "NEXT/PREV SELECT - ENTER PLAY", 1);
         test_draw(0, 0, test.quads_count, 0, 1, 0);
         hud_first = 0;
@@ -603,14 +655,17 @@ void test_frame(void)
             test2d_update(keys);
             object_step();
             test2d_scene();
+        } else if(test.game==2) {
+            test3d_update(keys);test3d_scene();
+        } else if(test.game==3) {
+            rogue_update(keys);rogue_scene();
         } else {
-            test3d_update(keys);
-            test3d_scene();
+            world_update(keys);world_scene();
         }
-        hud();
+        if(test.game<3)hud();
     }
     unsigned cpu_mode = test.cpu;
-    if (!test.game || (test.game & 4)) test.cpu = 0;
+    if (!test.game || (test.game & 8)) test.cpu = 0;
     if (test.cpu) render_software();
     render_gpu();
     test.cpu_us = (uint32_t)(test_clock_us()-start-gpu_wait_elapsed);

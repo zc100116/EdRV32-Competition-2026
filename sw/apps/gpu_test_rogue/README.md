@@ -30,7 +30,7 @@ CPU执行AI、弹体运动和碰撞；GPU用DRAW_QUAD绘制瓦片/实体、DRAW_
 复用共享185792B纹理RAM布局（192KiB上限）：主图集65536、场景图集65536、
 五个10944B的RGB565 mip槽。肉鸽实际使用前两个图集131072B；其余mip槽保持
 公共布局并同批装入，不参与场景采样。独立源图是actors.png，32px实体、64px Boss
-源（GPU放大到96px）、64px旋转弧刃；字体为94字Fusion Pixel子集。
+源（GPU放大到96px）、64px旋转弧刃；字体为75字Fusion Pixel子集。
 进入场景TEX_LOAD一次185792B，之后每帧0B；PAL_LOAD仅换场景。CPU战斗状态
 约0.32MiB，弹体GPU表最多8192×32B，复用公共命令、顶点、quad和Surface。
 预算初估见DESIGN.md，板端CPU/GPU耗时和60fps目标尚未实测；PC GPU周期为0时

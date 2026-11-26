@@ -26,6 +26,11 @@ for slot in range(8):
     cell = process(cell,size,size)
     for yy,row in enumerate(cell):
         for xx,p in enumerate(row): put(primary,(slot%4)*64+xx,(slot//4)*64+yy,index(p))
+# New-scene panel corners occupy an unused cell gap, away from the Boss sprite.
+for y in range(16):
+    for x in range(32):
+        edge=min(x,31-x,y,15-y)
+        put(primary,224+x,32+y,2 if edge==1 else 9 if edge==0 else 0)
 # Native floor/wall/door palette tiles: dark large clusters, two edge shades.
 colors = [(35,40,77),(42,49,88),(49,58,99),(82,76,117),(126,68,57),(12,20,39)]
 for t,(r,g,b) in enumerate(colors):

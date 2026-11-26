@@ -1,6 +1,6 @@
 # GPU 上板小游戏
 
-`gpu_test.elf` 包含两个原创测试场景：俯视弹幕射击 Prism Patrol 与低多边形飞行 Candy Canyon。
+`gpu_test.elf` 包含四个原创场景：Prism Patrol、Candy Canyon、棱炉地宫、云脊漫游。
 G-3 采用经用户确认的现代卡通像素画风：深色描边、2～3 阶明暗、白青主角、亮芯发光效果；
 2D 用深蓝紫星云衬托敌机，3D 用暖橙岩壁、金色沙路与蓝紫天空。
 
@@ -75,7 +75,7 @@ GPU n/a 在参考模型中以 0 us 显示；不从 PC 墙钟推算板端性能�
 - [共用 72 色调色板](../gpu_test_common/assets/palette.json)。
 - [2D STYLE / 提示词](../gpu_test2d/assets/STYLE.md)、[2D SOURCES](../gpu_test2d/assets/SOURCES.md)。
 - [3D STYLE / 提示词](../gpu_test3d/assets/STYLE.md)、[3D SOURCES](../gpu_test3d/assets/SOURCES.md)。
-- [字体 SOURCES](../gpu_test_common/assets/SOURCES.md)：Fusion Pixel 12px、54 字中文子集，SIL OFL 1.1；ASCII 为 BSP public-domain 字体。
+- [字体 SOURCES](../gpu_test_common/assets/SOURCES.md)：Fusion Pixel 12px、63 字中文子集，SIL OFL 1.1；ASCII 为 BSP public-domain 字体。
 
 `gpu_test_common/tools/art.py` 可供后续 demo import：PNG 读写、分格裁切、面积缩小、
 alpha 加权、固定调色板、去孤立杂点、1 像素深色描边。只用 Python 标准库。
@@ -140,3 +140,27 @@ build/gpu_test/gpu_test --scene 2 --frames 27 --shot ring --out build/gpu_test/e
 3D 正常、无人机、穿环、受击、最高压测，以及最近邻、双线性、三线性、棋盘四种纹理视图。
 2D / 3D 正常与 2D CPU 各有一份 **180 个连续游戏帧**、60 tick/s、3 秒 ZIP；序列不注入截图效果。
 设定图 `style2-*.png` 保留为画风记录，验收截图来自修改后程序的真实渲染。
+
+## G-4 新增 demo
+
+开机菜单左右循环选择四项：Prism Patrol、Candy Canyon、棱炉地宫、云脊漫游。
+新 demo 的操作和独立资源预算见 [肉鸽 README](../gpu_test_rogue/README.md) 与
+[开放世界 README](../gpu_test_world/README.md)。新 demo 短按确认执行翻滚/停驻，
+长按30个tick打开中文控制菜单；原两个 demo 保持短按确认开菜单。Esc统一回开机菜单。
+
+公共诊断行现在用原生8×16 ASCII与12×12中文四边形绘制，取消3/4最近邻缩小造成的
+笔画丢失，显示“正常 对象/三角形 … FPS … CPU … ms GPU … us”。原2D Boss弹幕名为
+放射/螺旋/波浪。共享字形从54增至63；新场景使用独立75字子集。
+
+```sh
+make -C sw/apps/gpu_test_rogue state-test -j1
+make -C sw/apps/gpu_test_world state-test -j1
+python3 sw/apps/gpu_test_rogue/tools/controls_test.py
+python3 sw/apps/gpu_test_rogue/tools/capture.py rogue
+python3 sw/apps/gpu_test_rogue/tools/capture.py world
+```
+
+headless `--scene` 扩为0菜单/1原2D/2原3D/3肉鸽/4开放世界。
+新shot为肉鸽combat/slash/boss/choice/minimap，世界day/dusk/coast/landmark/lod；
+压测仍用`--mode 1 --level 0..2`。新场景每次进入会重新装载185792B公共布局，
+之后每帧TEX_LOAD=0B；原两场景切入时恢复原纹理和中文子集。

@@ -2,6 +2,7 @@
  * Clock domain: host wall-clock measurements, virtual 60 Hz simulation ticks.
  */
 #include "test.h"
+#include "demo.h"
 #include "pc_soc.h"
 #include "png.h"
 #include <stdio.h>
@@ -27,9 +28,10 @@ void pc_frontend_audio(const int16_t *samples, uint32_t frames)
 }
 static _Noreturn void usage(void)
 {
-    fputs("gpu_test --scene 0|1|2 --mode 0|1|2 --level 0..6 --filter 0|1|2 "
+    fputs("gpu_test --scene 0..4 --mode 0|1|2 --level 0..6 --filter 0|1|2 "
           "--frames N --out existing-dir [--sequence 0|1] [--input script] "
-          "[--tick N] [--weapon 0|1|2] [--shot boss|explosion|ring|hit|drone]\n", stderr);
+          "[--tick N] [--weapon 0|1|2] [--shot boss|explosion|ring|hit|drone|combat|slash|"
+          "choice|minimap|day|dusk|coast|landmark|lod]\n", stderr);
     exit(1);
 }
 int main(int argc, char **argv)
@@ -61,7 +63,7 @@ int main(int argc, char **argv)
             else usage();
         }
     }
-    if (scene > 2 || mode > 2 || level > 6 || filter > 2 || weapon > 2 || !frames || !out)
+    if (scene > 4 || mode > 2 || level > 6 || filter > 2 || weapon > 2 || !frames || !out)
         usage();
     unsigned capture = 0;
     if (shot) {
@@ -70,7 +72,21 @@ int main(int argc, char **argv)
         else if (!strcmp(shot, "ring") && scene == 2) capture = 3;
         else if (!strcmp(shot, "hit") && scene == 2) capture = 4;
         else if (!strcmp(shot, "drone") && scene == 2) capture = 5;
-        else usage();
+        else if(scene==3){
+            if(!strcmp(shot,"boss"))capture=1;
+            else if(!strcmp(shot,"slash"))capture=2;
+            else if(!strcmp(shot,"choice"))capture=3;
+            else if(!strcmp(shot,"minimap"))capture=4;
+            else if(!strcmp(shot,"combat"))capture=5;
+            else usage();
+        } else if(scene==4){
+            if(!strcmp(shot,"day"))capture=1;
+            else if(!strcmp(shot,"dusk"))capture=2;
+            else if(!strcmp(shot,"coast"))capture=3;
+            else if(!strcmp(shot,"landmark"))capture=4;
+            else if(!strcmp(shot,"lod"))capture=5;
+            else usage();
+        } else usage();
     }
     FILE *script = NULL;
     unsigned next_frame = 0;
@@ -99,9 +115,11 @@ int main(int argc, char **argv)
         }
         /* Named shots trigger the same scene effects used during normal play.
          * Frame 20 gives the screenshot six ticks of visible effect development. */
-        if (frame == 20 && capture) {
+        if (((scene<3&&frame==20)||(scene>=3&&frame==1)) && capture) {
             if (scene == 1) test2d_capture(capture);
-            else test3d_capture(capture);
+            else if(scene==2)test3d_capture(capture);
+            else if(scene==3)rogue_capture(capture);
+            else world_capture(capture);
         }
         test_frame();
         plat_wait_vsync();
