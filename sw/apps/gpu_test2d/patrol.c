@@ -198,19 +198,22 @@ void test2d_results(void)
 }
 static void fin(int cx, int cy, unsigned angle)
 {
-    const int local[3][2] = {{-10,-14},{10,-14},{0,28}};
+    static const int local[4][2] = {{-16,-16},{16,-16},{16,16},{-16,16}};
+    static const unsigned order[6] = {0,1,2,0,2,3};
     unsigned first = test.triangles;
     int scale = 22+test_sine[(test.tick*2)&255]*5/16384;
-    for (unsigned i = 0; i < 3; ++i) {
-        int x = local[i][0]*scale/22;
-        int y = local[i][1]*scale/22;
+    for (unsigned i = 0; i < 6; ++i) {
+        unsigned k = order[i];
+        int x = local[k][0]*scale/22;
+        int y = local[k][1]*scale/22;
         int rx = (x*test_sine[(angle+64)&255]-y*test_sine[angle])/16384;
         int ry = (x*test_sine[angle]+y*test_sine[(angle+64)&255])/16384;
-        test_vertex(cx+rx, cy+ry, 0, 0xffff, (250+(i==1 ? 3 : 0))*256,
-                    (250+(i==2 ? 3 : 0))*256, 0);
+        test_vertex(cx+rx, cy+ry, 0, 0xffff,
+                    (k == 1 || k == 2 ? 96 : 64)*256, (k > 1 ? 32 : 0)*256, 0);
     }
-    test_draw(1, first, 1, 0, 1, 0);
+    test_draw(1, first, 2, 0, 1, 0);
 }
+
 void test2d_scene(void)
 {
     unsigned first = test.quads_count;
