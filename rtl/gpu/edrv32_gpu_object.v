@@ -414,6 +414,32 @@ module edrv32_gpu_object (
     // Stage 4: one lifetime decrement and four signed live-bound comparisons.
     generate
         begin : g_alive
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [0:0] ingress_r [0:1];
             assign ingress_data_w[0:0] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -438,11 +464,37 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end
         begin : g_flags
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [14:0] ingress_r [0:1];
             assign ingress_data_w[15:1] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -461,11 +513,37 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end
         begin : g_lifetime
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [15:0] ingress_r [0:1];
             assign ingress_data_w[31:16] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -486,11 +564,37 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end
         begin : g_position_x
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [23:0] ingress_r [0:1];
             assign ingress_data_w[55:32] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -512,11 +616,37 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end
         begin : g_reserved_x
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [7:0] ingress_r [0:1];
             assign ingress_data_w[63:56] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -535,11 +665,37 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end
         begin : g_position_y
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [23:0] ingress_r [0:1];
             assign ingress_data_w[87:64] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -561,11 +717,37 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end
         begin : g_reserved_y
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [7:0] ingress_r [0:1];
             assign ingress_data_w[95:88] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -584,11 +766,37 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end
         begin : g_velocity_x
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [15:0] ingress_r [0:1];
             assign ingress_data_w[111:96] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -609,11 +817,37 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end
         begin : g_velocity_y
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [15:0] ingress_r [0:1];
             assign ingress_data_w[127:112] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -634,11 +868,37 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end
         begin : g_acceleration_x
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [15:0] ingress_r [0:1];
             assign ingress_data_w[143:128] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -657,11 +917,37 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end
         begin : g_acceleration_y
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [15:0] ingress_r [0:1];
             assign ingress_data_w[159:144] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -680,11 +966,37 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end
         begin : g_half_width
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [7:0] ingress_r [0:1];
             assign ingress_data_w[167:160] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -703,11 +1015,37 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end
         begin : g_half_height
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [7:0] ingress_r [0:1];
             assign ingress_data_w[175:168] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -726,11 +1064,37 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end
         begin : g_reserved_shape
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [15:0] ingress_r [0:1];
             assign ingress_data_w[191:176] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -749,11 +1113,37 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end
         begin : g_quad
+            (* keep = 1 *) reg region_update_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_event_pending_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_quad_pending_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = (!region_update_pending_r || object_update_ready_i) &&
+                (!region_event_pending_r || object_event_ready_i) &&
+                (!region_quad_pending_r || object_quad_ready_i) && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (stop_i) begin
+                    region_update_pending_r <= 0;
+                    region_event_pending_r <= 0;
+                    region_quad_pending_r <= 0;
+                end else if (region_advance_w) begin
+                    region_update_pending_r <= valid_r[10] && step_r && original_alive_r[10];
+                    region_event_pending_r <= valid_r[10] && step_r;
+                    region_quad_pending_r <= valid_r[10] && draw_r && record_w[10][0];
+                end else begin
+                    if (object_update_ready_i) region_update_pending_r <= 0;
+                    if (object_event_ready_i) region_event_pending_r <= 0;
+                    if (object_quad_ready_i) region_quad_pending_r <= 0;
+                end
+            end
             reg [63:0] ingress_r [0:1];
             assign ingress_data_w[255:192] = ingress_r[ingress_read_r];
             always @(posedge clk_i) begin
@@ -772,7 +1162,7 @@ module edrv32_gpu_object (
                     end
                 end
                 always @(posedge clk_i) begin
-                    if (advance_w) data_r <= data_w;
+                    if (region_advance_w) data_r <= data_w;
                 end
             end
         end

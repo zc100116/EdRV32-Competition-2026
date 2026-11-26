@@ -200,6 +200,19 @@ module edrv32_gpu_resolve (
     // Six arithmetic stages retain four pixels per cycle without a long AA feedback path.
     generate
         for (bank = 0; bank < 4; bank = bank + 1) begin : g_aa
+            (* keep = 1 *) reg [1:0] region_output_count_r /* synthesis syn_preserve=1 */;
+            wire region_advance_w;
+            assign region_advance_w = region_output_count_r < 2;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) region_output_count_r <= 0;
+                else begin
+                    case ({beat_push_w, output_pop_w})
+                        2'b10: region_output_count_r <= region_output_count_r + 1'b1;
+                        2'b01: region_output_count_r <= region_output_count_r - 1'b1;
+                        default: region_output_count_r <= region_output_count_r;
+                    endcase
+                end
+            end
             reg [23:0] color_a_r [0:4];
             reg [23:0] color_b_r [0:4];
             reg [23:0] color_c_r [0:4];
@@ -235,7 +248,7 @@ module edrv32_gpu_resolve (
             assign min_w = center_c_r < min_neighbors_w ? center_c_r : min_neighbors_w;
             assign filtered_w[bank*16 +: 16] = result_f_r;
             always @(posedge clk_i) begin
-                if (advance_w) begin
+                if (region_advance_w) begin
                     color_a_r[0] <= expand(previous_center_r[bank*16 +: 16]);
                     color_a_r[1] <= expand(previous_north_r[bank*16 +: 16]);
                     color_a_r[2] <= expand(previous_south_r[bank*16 +: 16]);

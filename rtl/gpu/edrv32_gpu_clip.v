@@ -766,6 +766,38 @@ module edrv32_gpu_clip (
     assign intersection_signed_w = {intersection_signed_low1_w, intersection_signed_low0_w_d7};
     assign intersection_value_w = intersection_signed_w;
 
+    reg [3:0] state_next_w;
+    always @(*) begin
+        state_next_w = state_r;
+        case (state_r)
+            S_IDLE: if (source_accept_w) state_next_w = S_CHECK;
+            S_CHECK: if (wait_r == 0)
+                state_next_w = all_inside_w ? S_IDLE : S_BEGIN;
+            S_BEGIN: if (wait_r == 0) state_next_w = S_EDGE;
+            S_EDGE: if (wait_r == 0) begin
+                if (previous_distance_r[42] != current_distance_w[42])
+                    state_next_w = S_MULTIPLY;
+                else state_next_w = current_distance_w[42] ? S_ADVANCE : S_APPEND_CURRENT;
+            end
+            S_MULTIPLY: if (wait_r == 0) state_next_w = S_DIVIDE_LOAD;
+            S_DIVIDE_LOAD: state_next_w = S_DIVIDE;
+            S_DIVIDE: if (wait_r == 0 && divide_count_r == 1) state_next_w = S_ROUND;
+            S_ROUND: if (wait_r == 0)
+                state_next_w = component_r == 8 ? S_APPEND_INTERSECTION : S_MULTIPLY;
+            S_APPEND_INTERSECTION:
+                state_next_w = current_distance_w[42] ? S_ADVANCE : S_APPEND_CURRENT;
+            S_APPEND_CURRENT: state_next_w = S_ADVANCE;
+            S_ADVANCE: begin
+                if ({1'b0, vertex_index_r} + 4'd1 == input_count_r)
+                    state_next_w = result_count_r < 3 ? S_IDLE :
+                        plane_r == 4 ? S_OUTPUT : S_BEGIN;
+                else state_next_w = S_EDGE;
+            end
+            S_OUTPUT: if (count_r != 2) state_next_w = S_IDLE;
+            default: state_next_w = state_r;
+        endcase
+    end
+
     genvar vertex_g;
     genvar distance_g;
     genvar field_g;
@@ -822,6 +854,25 @@ module edrv32_gpu_clip (
         // Nine independent fields: 16 workset registers and two output slots each.
         // Each workset register has one full-field write point, including initial load.
         for (field_g = 0; field_g < 9; field_g = field_g + 1) begin : g_field
+            (* keep = 1 *) reg [3:0] region_state_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) reg region_bank_r /* synthesis syn_preserve=1 */;
+            wire region_push_w;
+            assign region_push_w = !stop_i && ((region_state_r == S_CHECK && wait_r == 0 &&
+            all_inside_w)
+                || (region_state_r == S_OUTPUT && count_r != 2));
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    region_state_r <= S_IDLE;
+                    region_bank_r <= 0;
+                end else if (stop_i) region_state_r <= S_IDLE;
+                else begin
+                    region_state_r <= state_next_w;
+                    if (accept_w && !all_inside_w) region_bank_r <= 0;
+                    if (region_state_r == S_ADVANCE &&
+                        {1'b0, vertex_index_r} + 4'd1 == input_count_r && result_count_r >= 3)
+                        region_bank_r <= !region_bank_r;
+                end
+            end
             localparam WIDTH = field_g < 4 ? 40 : (field_g < 6 ? 16 : 24);
             localparam OFFSET = field_g < 4 ? field_g * 40
                 : (field_g < 6 ? 160 + (field_g - 4) * 16 : 192 + (field_g - 6) * 24);
@@ -832,7 +883,7 @@ module edrv32_gpu_clip (
             reg [WIDTH-1:0] intersection_r;
             always @(*) begin
                 current_w = 0;
-                case ({bank_r, vertex_index_r})
+                case ({region_bank_r, vertex_index_r})
                     4'd0: current_w = workset_w[WIDTH*0 +: WIDTH];
                     4'd1: current_w = workset_w[WIDTH*1 +: WIDTH];
                     4'd2: current_w = workset_w[WIDTH*2 +: WIDTH];
@@ -854,7 +905,7 @@ module edrv32_gpu_clip (
             end
             always @(*) begin
                 last_w = 0;
-                case ({bank_r, last_index_w})
+                case ({region_bank_r, last_index_w})
                     4'd0: last_w = workset_w[WIDTH*0 +: WIDTH];
                     4'd1: last_w = workset_w[WIDTH*1 +: WIDTH];
                     4'd2: last_w = workset_w[WIDTH*2 +: WIDTH];
@@ -887,9 +938,9 @@ module edrv32_gpu_clip (
                 assign last_position_w[AXIS] = last_w;
             end
             always @(posedge clk_i) begin
-                if (state_r == S_BEGIN) previous_r <= last_w;
-                if (state_r == S_ADVANCE) previous_r <= current_w;
-                if (state_r == S_ROUND && wait_r == 0 && component_r == field_g)
+                if (region_state_r == S_BEGIN) previous_r <= last_w;
+                if (region_state_r == S_ADVANCE) previous_r <= current_w;
+                if (region_state_r == S_ROUND && wait_r == 0 && component_r == field_g)
                     intersection_r <= intersection_value_w[WIDTH-1:0];
             end
             for (slot_g = 0; slot_g < 16; slot_g = slot_g + 1) begin : g_workset
@@ -906,9 +957,10 @@ module edrv32_gpu_clip (
                 end else begin : g_no_input
                     assign load_data_w = {WIDTH{1'b0}};
                 end
-                assign append_w = bank_r == (slot_g < 8) && result_count_r[2:0] == INDEX
-                    && (state_r == S_APPEND_INTERSECTION || state_r == S_APPEND_CURRENT);
-                assign append_data_w = state_r == S_APPEND_INTERSECTION
+                assign append_w = region_bank_r == (slot_g < 8) && result_count_r[2:0] == INDEX
+                    && (region_state_r == S_APPEND_INTERSECTION || region_state_r ==
+            S_APPEND_CURRENT);
+                assign append_data_w = region_state_r == S_APPEND_INTERSECTION
                     ? intersection_r : current_w;
                 always @(posedge clk_i) begin
                     if (load_w || append_w) data_r <= load_w ? load_data_w : append_data_w;
@@ -923,12 +975,12 @@ module edrv32_gpu_clip (
                 end else begin : g_padding
                     assign bypass_w = {WIDTH{1'b0}};
                 end
-                assign push_wide_w = state_r == S_CHECK ? bypass_w
-                    : (bank_r ? workset_w[WIDTH*(8 + slot_g) +: WIDTH]
+                assign push_wide_w = region_state_r == S_CHECK ? bypass_w
+                    : (region_bank_r ? workset_w[WIDTH*(8 + slot_g) +: WIDTH]
                         : workset_w[WIDTH*slot_g +: WIDTH]);
                 assign polygon_data_o[slot_g * 264 + OFFSET +: WIDTH] = data_r[read_r];
                 always @(posedge clk_i) begin
-                    if (push_w) data_r[write_r] <= push_wide_w;
+                    if (region_push_w) data_r[write_r] <= push_wide_w;
                 end
             end
         end
@@ -1000,6 +1052,7 @@ module edrv32_gpu_clip (
             read_r <= 1'b0;
             write_r <= 1'b0;
         end else begin
+            state_r <= state_next_w;
             if (push_w) write_r <= !write_r;
             if (pop_w) read_r <= !read_r;
             begin
@@ -1013,83 +1066,83 @@ module edrv32_gpu_clip (
             case (state_r)
                 S_IDLE: begin
                     if (source_accept_w) begin
-                        state_r <= S_CHECK;
+                        begin end
                         wait_r <= 2;
                     end
                 end
                 S_CHECK: begin
-                    if (wait_r == 0 && all_inside_w) state_r <= S_IDLE;
+                    if (wait_r == 0 && all_inside_w) begin end
                     if (accept_w && !all_inside_w) begin
                         wait_r <= 3;
                         bank_r <= 1'b0;
                         plane_r <= 3'd0;
                         input_count_r <= 4'd3;
-                        state_r <= S_BEGIN;
+                        begin end
                     end
                 end
                 S_BEGIN: if (wait_r == 0) begin
                     wait_r <= 3;
                     vertex_index_r <= 3'd0;
                     result_count_r <= 4'd0;
-                    state_r <= S_EDGE;
+                    begin end
                 end
                 S_EDGE: if (wait_r == 0) begin
                     if (previous_distance_r[42] != current_distance_w[42]) begin
                         component_r <= 4'd0;
-                        state_r <= S_MULTIPLY;
+                        begin end
                         wait_r <= 12;
                     end else begin
-                        state_r <= current_distance_w[42] ? S_ADVANCE : S_APPEND_CURRENT;
+                        begin end
                     end
                 end
-                S_MULTIPLY: if (wait_r == 0) state_r <= S_DIVIDE_LOAD;
+                S_MULTIPLY: if (wait_r == 0) begin end
                 S_DIVIDE_LOAD: begin
                     divide_count_r <= 7'd84;
                     wait_r <= 2;
-                    state_r <= S_DIVIDE;
+                    begin end
                 end
                 S_DIVIDE: if (wait_r == 0) begin
                     wait_r <= 2;
                     divide_count_r <= divide_count_r - 7'd1;
                     if (divide_count_r == 1) begin
-                        state_r <= S_ROUND;
+                        begin end
                         wait_r <= 8;
                     end
                 end
                 S_ROUND: if (wait_r == 0) begin
-                    if (component_r == 8) state_r <= S_APPEND_INTERSECTION;
+                    if (component_r == 8) begin end
                     else begin
                         component_r <= component_r + 4'd1;
-                        state_r <= S_MULTIPLY;
+                        begin end
                         wait_r <= 12;
                     end
                 end
                 S_APPEND_INTERSECTION: begin
                     result_count_r <= result_count_r + 4'd1;
-                    state_r <= current_distance_w[42] ? S_ADVANCE : S_APPEND_CURRENT;
+                    begin end
                 end
                 S_APPEND_CURRENT: begin
                     result_count_r <= result_count_r + 4'd1;
-                    state_r <= S_ADVANCE;
+                    begin end
                 end
                 S_ADVANCE: begin
                     if ({1'b0, vertex_index_r} + 4'd1 == input_count_r) begin
-                        if (result_count_r < 3) state_r <= S_IDLE;
+                        if (result_count_r < 3) begin end
                         else begin
                             bank_r <= !bank_r;
                             input_count_r <= result_count_r;
                             plane_r <= plane_r + 3'd1;
-                            state_r <= plane_r == 4 ? S_OUTPUT : S_BEGIN;
+                            begin end
                             wait_r <= 3;
                         end
                     end else begin
                         vertex_index_r <= vertex_index_r + 3'd1;
-                        state_r <= S_EDGE;
+                        begin end
                         wait_r <= 3;
                     end
                 end
-                S_OUTPUT: if (count_r != 2) state_r <= S_IDLE;
-                default: state_r <= state_r;
+                S_OUTPUT: if (count_r != 2) begin end
+                default: begin end
             endcase
         end
     end

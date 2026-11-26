@@ -581,8 +581,29 @@ module edrv32_gpu_transform (
     always @(posedge clk_i) begin
         if (push_w) output_8_r[write_r] <= color_clamp2;
     end
+    // Each region owns the output-credit count used by its local clock enable.
+    wire [5:0] pipeline_enable_w;
+    genvar enable_region;
+    generate
+        for (enable_region = 0; enable_region < 6;
+            enable_region = enable_region + 1) begin : g_enable_region
+            (* keep = 1 *) reg [1:0] region_count_r /* synthesis syn_preserve=1 */;
+            assign pipeline_enable_w[enable_region] = region_count_r != 2 && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) region_count_r <= 0;
+                else if (stop_i) region_count_r <= 0;
+                else begin
+                    case ({push_w, pop_w})
+                        2'b10: region_count_r <= region_count_r + 1'b1;
+                        2'b01: region_count_r <= region_count_r - 1'b1;
+                        default: region_count_r <= region_count_r;
+                    endcase
+                end
+            end
+        end
+    endgenerate
     always @(posedge clk_i) begin
-        if (enable_w) begin
+        if (pipeline_enable_w[0]) begin
             coefficient_0_0_r <= phase_r ? matrix_i[256 +: 32] : matrix_i[0 +: 32];
             vertex_0_0_r <= vertex_w[0 +: 16];
             matrix_product0_0 <= $signed(coefficient_0_0_r) * $signed(vertex_0_0_r);
@@ -603,7 +624,7 @@ module edrv32_gpu_transform (
             matrix_pair0_0_a1_w_d4 <= matrix_pair0_0_a1_w;
             matrix_pair0_0_b1_w_d4 <= matrix_pair0_0_b1_w;
             unused_matrix_pair0_0_part1 <= {1'b0, matrix_pair0_0_a1_w_d4} + {1'b0,
-            matrix_pair0_0_b1_w_d4} + {15'b0, matrix_pair0_0_part0[35]};
+                        matrix_pair0_0_b1_w_d4} + {15'b0, matrix_pair0_0_part0[35]};
             matrix_pair0_0_low0_w_d5 <= matrix_pair0_0_low0_w;
             translation_extend0_w_d1 <= translation_extend0_w;
             translation_extend0_w_d2 <= translation_extend0_w_d1;
@@ -612,18 +633,23 @@ module edrv32_gpu_transform (
             matrix_pair0_1_a1_w_d4 <= matrix_pair0_1_a1_w;
             matrix_pair0_1_b1_w_d4 <= matrix_pair0_1_b1_w;
             unused_matrix_pair0_1_part1 <= {1'b0, matrix_pair0_1_a1_w_d4} + {1'b0,
-            matrix_pair0_1_b1_w_d4} + {15'b0, matrix_pair0_1_part0[35]};
+                        matrix_pair0_1_b1_w_d4} + {15'b0, matrix_pair0_1_part0[35]};
             matrix_pair0_1_low0_w_d5 <= matrix_pair0_1_low0_w;
             matrix_total0_part0 <= {1'b0, matrix_total0_a0_w} + {1'b0, matrix_total0_b0_w};
             matrix_total0_a1_w_d6 <= matrix_total0_a1_w;
             matrix_total0_b1_w_d6 <= matrix_total0_b1_w;
             unused_matrix_total0_part1 <= {1'b0, matrix_total0_a1_w_d6} + {1'b0,
-            matrix_total0_b1_w_d6} + {15'b0, matrix_total0_part0[35]};
+                        matrix_total0_b1_w_d6} + {15'b0, matrix_total0_part0[35]};
             matrix_total0_low0_w_d7 <= matrix_total0_low0_w;
             matrix_clamp0 <= $signed(matrix_total0_w) > 50'sd549755813887 ? 40'h7fffffffff :
-            $signed(matrix_total0_w) < -50'sd549755813888 ? 40'h8000000000 : matrix_total0_w[39:0];
+                        $signed(matrix_total0_w) < -50'sd549755813888 ? 40'h8000000000 :
+            matrix_total0_w[39:0];
             coefficient_1_0_r <= phase_r ? matrix_i[384 +: 32] : matrix_i[128 +: 32];
             vertex_1_0_r <= vertex_w[0 +: 16];
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[1]) begin
             matrix_product1_0 <= $signed(coefficient_1_0_r) * $signed(vertex_1_0_r);
             matrix_product1_0_p1 <= matrix_product1_0;
             matrix_product1_0_p2 <= matrix_product1_0_p1;
@@ -642,7 +668,7 @@ module edrv32_gpu_transform (
             matrix_pair1_0_a1_w_d4 <= matrix_pair1_0_a1_w;
             matrix_pair1_0_b1_w_d4 <= matrix_pair1_0_b1_w;
             unused_matrix_pair1_0_part1 <= {1'b0, matrix_pair1_0_a1_w_d4} + {1'b0,
-            matrix_pair1_0_b1_w_d4} + {15'b0, matrix_pair1_0_part0[35]};
+                        matrix_pair1_0_b1_w_d4} + {15'b0, matrix_pair1_0_part0[35]};
             matrix_pair1_0_low0_w_d5 <= matrix_pair1_0_low0_w;
             translation_extend1_w_d1 <= translation_extend1_w;
             translation_extend1_w_d2 <= translation_extend1_w_d1;
@@ -651,17 +677,22 @@ module edrv32_gpu_transform (
             matrix_pair1_1_a1_w_d4 <= matrix_pair1_1_a1_w;
             matrix_pair1_1_b1_w_d4 <= matrix_pair1_1_b1_w;
             unused_matrix_pair1_1_part1 <= {1'b0, matrix_pair1_1_a1_w_d4} + {1'b0,
-            matrix_pair1_1_b1_w_d4} + {15'b0, matrix_pair1_1_part0[35]};
+                        matrix_pair1_1_b1_w_d4} + {15'b0, matrix_pair1_1_part0[35]};
             matrix_pair1_1_low0_w_d5 <= matrix_pair1_1_low0_w;
             matrix_total1_part0 <= {1'b0, matrix_total1_a0_w} + {1'b0, matrix_total1_b0_w};
             matrix_total1_a1_w_d6 <= matrix_total1_a1_w;
             matrix_total1_b1_w_d6 <= matrix_total1_b1_w;
             unused_matrix_total1_part1 <= {1'b0, matrix_total1_a1_w_d6} + {1'b0,
-            matrix_total1_b1_w_d6} + {15'b0, matrix_total1_part0[35]};
+                        matrix_total1_b1_w_d6} + {15'b0, matrix_total1_part0[35]};
             matrix_total1_low0_w_d7 <= matrix_total1_low0_w;
             matrix_clamp1 <= $signed(matrix_total1_w) > 50'sd549755813887 ? 40'h7fffffffff :
-            $signed(matrix_total1_w) < -50'sd549755813888 ? 40'h8000000000 : matrix_total1_w[39:0];
+                        $signed(matrix_total1_w) < -50'sd549755813888 ? 40'h8000000000 :
+            matrix_total1_w[39:0];
             first_rows_r <= {matrix_clamp1, matrix_clamp0};
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[2]) begin
             coordinates_r <= {matrix_clamp1, matrix_clamp0, first_rows_r};
             normal0_r <= vertex_data_i[48 +: 8];
             light0_r <= light_i[0 +: 16];
@@ -721,14 +752,18 @@ module edrv32_gpu_transform (
             color_round0_a1_w_d14 <= color_round0_a1_w;
             color_round0_b1_w_d14 <= color_round0_b1_w;
             unused_color_round0_part1 <= {1'b0, color_round0_a1_w_d14} + {1'b0,
-            color_round0_b1_w_d14} + {7'b0, color_round0_part0[35]};
+                        color_round0_b1_w_d14} + {7'b0, color_round0_part0[35]};
             color_round0_low0_w_d15 <= color_round0_low0_w;
             color_integer0 <= unused_color_round0_w[41:21];
             unused_color_divide0 <= {1'b0, color_integer0[15:0]} + {9'b0, color_integer0[15:8]}
-            + 17'd1;
+                        + 17'd1;
             color_integer0_d17 <= color_integer0;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[3]) begin
             color_clamp0 <= color_integer0_d17 >= 21'd65025 ? 24'hff0000 :
-            {unused_color_divide0[15:8], 16'b0};
+                        {unused_color_divide0[15:8], 16'b0};
             direct1_r <= light_i[56 +: 8];
             ambient1_r <= light_i[80 +: 8];
             direct1_r_d1 <= direct1_r;
@@ -768,14 +803,14 @@ module edrv32_gpu_transform (
             color_round1_a1_w_d14 <= color_round1_a1_w;
             color_round1_b1_w_d14 <= color_round1_b1_w;
             unused_color_round1_part1 <= {1'b0, color_round1_a1_w_d14} + {1'b0,
-            color_round1_b1_w_d14} + {7'b0, color_round1_part0[35]};
+                        color_round1_b1_w_d14} + {7'b0, color_round1_part0[35]};
             color_round1_low0_w_d15 <= color_round1_low0_w;
             color_integer1 <= unused_color_round1_w[41:21];
             unused_color_divide1 <= {1'b0, color_integer1[15:0]} + {9'b0, color_integer1[15:8]}
-            + 17'd1;
+                        + 17'd1;
             color_integer1_d17 <= color_integer1;
             color_clamp1 <= color_integer1_d17 >= 21'd65025 ? 24'hff0000 :
-            {unused_color_divide1[15:8], 16'b0};
+                        {unused_color_divide1[15:8], 16'b0};
             direct2_r <= light_i[48 +: 8];
             ambient2_r <= light_i[72 +: 8];
             direct2_r_d1 <= direct2_r;
@@ -813,16 +848,20 @@ module edrv32_gpu_transform (
             color_product2_p2 <= color_product2_p1;
             color_round2_part0 <= {1'b0, color_round2_a0_w} + {1'b0, color_round2_b0_w};
             color_round2_a1_w_d14 <= color_round2_a1_w;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[4]) begin
             color_round2_b1_w_d14 <= color_round2_b1_w;
             unused_color_round2_part1 <= {1'b0, color_round2_a1_w_d14} + {1'b0,
-            color_round2_b1_w_d14} + {7'b0, color_round2_part0[35]};
+                        color_round2_b1_w_d14} + {7'b0, color_round2_part0[35]};
             color_round2_low0_w_d15 <= color_round2_low0_w;
             color_integer2 <= unused_color_round2_w[41:21];
             unused_color_divide2 <= {1'b0, color_integer2[15:0]} + {9'b0, color_integer2[15:8]}
-            + 17'd1;
+                        + 17'd1;
             color_integer2_d17 <= color_integer2;
             color_clamp2 <= color_integer2_d17 >= 21'd65025 ? 24'hff0000 :
-            {unused_color_divide2[15:8], 16'b0};
+                        {unused_color_divide2[15:8], 16'b0};
             uv_input_r <= vertex_data_i[127:96];
             coordinate0_w_d11 <= coordinate0_w;
             coordinate0_w_d12 <= coordinate0_w_d11;
@@ -849,6 +888,10 @@ module edrv32_gpu_transform (
             coordinate2_w_d17 <= coordinate2_w_d16;
             coordinate2_w_d18 <= coordinate2_w_d17;
             coordinate3_w_d11 <= coordinate3_w;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[5]) begin
             coordinate3_w_d12 <= coordinate3_w_d11;
             coordinate3_w_d13 <= coordinate3_w_d12;
             coordinate3_w_d14 <= coordinate3_w_d13;

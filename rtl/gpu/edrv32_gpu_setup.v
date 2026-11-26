@@ -332,6 +332,8 @@ module edrv32_gpu_setup (
         .rst_n_i(rst_n_i),
         .enable_i(enable_w),
         .stop_i(stop_i),
+        .credit_push_i(push_w),
+        .credit_pop_i(pop_w),
         .plane_valid_i(attribute_read_valid_r),
         .plane_tag_i(attribute_read_tag_r),
         .plane_value_i(attribute_value_w),

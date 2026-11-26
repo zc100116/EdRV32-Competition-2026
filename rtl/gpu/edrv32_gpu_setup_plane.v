@@ -8,6 +8,8 @@ module edrv32_gpu_setup_plane (
     input wire clk_i,
     input wire rst_n_i,
     input wire enable_i,
+    input wire credit_push_i,
+    input wire credit_pop_i,
     input wire stop_i,
 
     // Attribute and triangle context.
@@ -2779,8 +2781,29 @@ module edrv32_gpu_setup_plane (
     assign plane_gradient_o = {stored_signed1_w_d73, stored_signed0_w_d73};
     assign plane_h_o = h_d73;
     assign plane_tag_o = tag_0_r_d73;
+    // Each region owns the output-credit count used by its local clock enable.
+    wire [26:0] pipeline_enable_w;
+    genvar enable_region;
+    generate
+        for (enable_region = 0; enable_region < 27;
+            enable_region = enable_region + 1) begin : g_enable_region
+            (* keep = 1 *) reg [1:0] region_count_r /* synthesis syn_preserve=1 */;
+            assign pipeline_enable_w[enable_region] = region_count_r != 2 && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) region_count_r <= 0;
+                else if (stop_i) region_count_r <= 0;
+                else begin
+                    case ({credit_push_i, credit_pop_i})
+                        2'b10: region_count_r <= region_count_r + 1'b1;
+                        2'b01: region_count_r <= region_count_r - 1'b1;
+                        default: region_count_r <= region_count_r;
+                    endcase
+                end
+            end
+        end
+    endgenerate
     always @(posedge clk_i) begin
-        if (enable_i) begin
+        if (pipeline_enable_w[0]) begin
             value_0_r <= plane_value_i;
             tag_0_r <= plane_tag_i;
             delta_0_r <= plane_delta_i;
@@ -2788,66 +2811,68 @@ module edrv32_gpu_setup_plane (
             reciprocal_0_r <= plane_reciprocal_i;
             exponent_0_r <= plane_exponent_i;
             maximum01_compare <= {vertex0_w[50:26] > vertex1_w[50:26], vertex0_w[50:26] ==
-            vertex1_w[50:26], vertex0_w[25:0] > vertex1_w[25:0]};
+                        vertex1_w[50:26], vertex0_w[25:0] > vertex1_w[25:0]};
             vertex0_w_d1 <= vertex0_w;
             vertex1_w_d1 <= vertex1_w;
             maximum01_select <= (maximum01_compare[2] || (maximum01_compare[1] &&
-            maximum01_compare[0])) ? vertex0_w_d1 : vertex1_w_d1;
+                        maximum01_compare[0])) ? vertex0_w_d1 : vertex1_w_d1;
             vertex2_w_d1 <= vertex2_w;
             vertex2_w_d2 <= vertex2_w_d1;
             maximum012_compare <= {maximum01_select[50:26] > vertex2_w_d2[50:26],
-            maximum01_select[50:26] == vertex2_w_d2[50:26], maximum01_select[25:0] >
-            vertex2_w_d2[25:0]};
+                        maximum01_select[50:26] == vertex2_w_d2[50:26], maximum01_select[25:0] >
+                        vertex2_w_d2[25:0]};
             maximum01_select_d3 <= maximum01_select;
             vertex2_w_d3 <= vertex2_w_d2;
             maximum012_select <= (maximum012_compare[2] || (maximum012_compare[1] &&
-            maximum012_compare[0])) ? maximum01_select_d3 : vertex2_w_d3;
+                        maximum012_compare[0])) ? maximum01_select_d3 : vertex2_w_d3;
             leading_group0 <= maximum012_select[3] ? 6'd3 : maximum012_select[2] ? 6'd2 :
-            maximum012_select[1] ? 6'd1 : maximum012_select[0] ? 6'd0 : 6'd0;
+                        maximum012_select[1] ? 6'd1 : maximum012_select[0] ? 6'd0 : 6'd0;
             leading_group1 <= maximum012_select[7] ? 6'd7 : maximum012_select[6] ? 6'd6 :
-            maximum012_select[5] ? 6'd5 : maximum012_select[4] ? 6'd4 : 6'd0;
+                        maximum012_select[5] ? 6'd5 : maximum012_select[4] ? 6'd4 : 6'd0;
             leading_group2 <= maximum012_select[11] ? 6'd11 : maximum012_select[10] ? 6'd10 :
-            maximum012_select[9] ? 6'd9 : maximum012_select[8] ? 6'd8 : 6'd0;
+                        maximum012_select[9] ? 6'd9 : maximum012_select[8] ? 6'd8 : 6'd0;
             leading_group3 <= maximum012_select[15] ? 6'd15 : maximum012_select[14] ? 6'd14 :
-            maximum012_select[13] ? 6'd13 : maximum012_select[12] ? 6'd12 : 6'd0;
+                        maximum012_select[13] ? 6'd13 : maximum012_select[12] ? 6'd12 : 6'd0;
             leading_group4 <= maximum012_select[19] ? 6'd19 : maximum012_select[18] ? 6'd18 :
-            maximum012_select[17] ? 6'd17 : maximum012_select[16] ? 6'd16 : 6'd0;
+                        maximum012_select[17] ? 6'd17 : maximum012_select[16] ? 6'd16 : 6'd0;
             leading_group5 <= maximum012_select[23] ? 6'd23 : maximum012_select[22] ? 6'd22 :
-            maximum012_select[21] ? 6'd21 : maximum012_select[20] ? 6'd20 : 6'd0;
+                        maximum012_select[21] ? 6'd21 : maximum012_select[20] ? 6'd20 : 6'd0;
             leading_group6 <= maximum012_select[27] ? 6'd27 : maximum012_select[26] ? 6'd26 :
-            maximum012_select[25] ? 6'd25 : maximum012_select[24] ? 6'd24 : 6'd0;
+                        maximum012_select[25] ? 6'd25 : maximum012_select[24] ? 6'd24 : 6'd0;
             leading_group7 <= maximum012_select[31] ? 6'd31 : maximum012_select[30] ? 6'd30 :
-            maximum012_select[29] ? 6'd29 : maximum012_select[28] ? 6'd28 : 6'd0;
+                        maximum012_select[29] ? 6'd29 : maximum012_select[28] ? 6'd28 : 6'd0;
             leading_group8 <= maximum012_select[35] ? 6'd35 : maximum012_select[34] ? 6'd34 :
-            maximum012_select[33] ? 6'd33 : maximum012_select[32] ? 6'd32 : 6'd0;
+                        maximum012_select[33] ? 6'd33 : maximum012_select[32] ? 6'd32 : 6'd0;
             leading_group9 <= maximum012_select[39] ? 6'd39 : maximum012_select[38] ? 6'd38 :
-            maximum012_select[37] ? 6'd37 : maximum012_select[36] ? 6'd36 : 6'd0;
+                        maximum012_select[37] ? 6'd37 : maximum012_select[36] ? 6'd36 : 6'd0;
             leading_group10 <= maximum012_select[43] ? 6'd43 : maximum012_select[42] ? 6'd42 :
-            maximum012_select[41] ? 6'd41 : maximum012_select[40] ? 6'd40 : 6'd0;
+                        maximum012_select[41] ? 6'd41 : maximum012_select[40] ? 6'd40 : 6'd0;
             leading_group11 <= maximum012_select[47] ? 6'd47 : maximum012_select[46] ? 6'd46 :
-            maximum012_select[45] ? 6'd45 : maximum012_select[44] ? 6'd44 : 6'd0;
+                        maximum012_select[45] ? 6'd45 : maximum012_select[44] ? 6'd44 : 6'd0;
             leading_group12 <= maximum012_select[50] ? 6'd50 : maximum012_select[49] ? 6'd49 :
-            maximum012_select[48] ? 6'd48 : 6'd0;
+                        maximum012_select[48] ? 6'd48 : 6'd0;
             nonzero_groups <= {(|maximum012_select[48 +: 3]), (|maximum012_select[44 +: 4]),
-            (|maximum012_select[40 +: 4]), (|maximum012_select[36 +: 4]),
-            (|maximum012_select[32 +: 4]), (|maximum012_select[28 +: 4]),
-            (|maximum012_select[24 +: 4]), (|maximum012_select[20 +: 4]),
-            (|maximum012_select[16 +: 4]), (|maximum012_select[12 +: 4]), (|maximum012_select[8
-            +: 4]), (|maximum012_select[4 +: 4]), (|maximum012_select[0 +: 4])};
+                        (|maximum012_select[40 +: 4]), (|maximum012_select[36 +: 4]),
+                        (|maximum012_select[32 +: 4]), (|maximum012_select[28 +: 4]),
+                        (|maximum012_select[24 +: 4]), (|maximum012_select[20 +: 4]),
+                        (|maximum012_select[16 +: 4]), (|maximum012_select[12 +: 4]),
+            (|maximum012_select[8
+                        +: 4]), (|maximum012_select[4 +: 4]), (|maximum012_select[0 +: 4])};
             leading_partial0 <= nonzero_groups[3] ? leading_group3 : nonzero_groups[2] ?
-            leading_group2 : nonzero_groups[1] ? leading_group1 : nonzero_groups[0] ?
-            leading_group0 : 6'd0;
+                        leading_group2 : nonzero_groups[1] ? leading_group1 : nonzero_groups[0] ?
+                        leading_group0 : 6'd0;
             leading_partial1 <= nonzero_groups[7] ? leading_group7 : nonzero_groups[6] ?
-            leading_group6 : nonzero_groups[5] ? leading_group5 : nonzero_groups[4] ?
-            leading_group4 : 6'd0;
+                        leading_group6 : nonzero_groups[5] ? leading_group5 : nonzero_groups[4] ?
+                        leading_group4 : 6'd0;
             leading_partial2 <= nonzero_groups[11] ? leading_group11 : nonzero_groups[10] ?
-            leading_group10 : nonzero_groups[9] ? leading_group9 : nonzero_groups[8] ?
-            leading_group8 : 6'd0;
+                        leading_group10 : nonzero_groups[9] ? leading_group9 : nonzero_groups[8] ?
+                        leading_group8 : 6'd0;
             leading_partial3 <= nonzero_groups[12] ? leading_group12 : 6'd0;
             nonzero_groups_d6 <= nonzero_groups;
             leading <= (|nonzero_groups_d6[12 +: 1]) ? leading_partial3 : (|nonzero_groups_d6[8
-            +: 4]) ? leading_partial2 : (|nonzero_groups_d6[4 +: 4]) ? leading_partial1 :
-            (|nonzero_groups_d6[0 +: 4]) ? leading_partial0 : 6'd0;
+                        +: 4]) ? leading_partial2 : (|nonzero_groups_d6[4 +: 4]) ?
+            leading_partial1 :
+                        (|nonzero_groups_d6[0 +: 4]) ? leading_partial0 : 6'd0;
             tag_0_r_d1 <= tag_0_r;
             tag_0_r_d2 <= tag_0_r_d1;
             tag_0_r_d3 <= tag_0_r_d2;
@@ -2859,11 +2884,15 @@ module edrv32_gpu_setup_plane (
             maximum012_select_d6 <= maximum012_select_d5;
             maximum012_select_d7 <= maximum012_select_d6;
             h <= tag_0_r_d7[2:0] == 0 ? -10'sd16 : tag_0_r_d7[2:0] < 4 ? (maximum012_select_d7
-            == 0 ? -10'sd32 : {4'b0, leading} - 10'd31) : -10'sd8;
+                        == 0 ? -10'sd32 : {4'b0, leading} - 10'd31) : -10'sd8;
             right_amount <= $signed(h) > 0 ? h[5:0] : 6'b0;
             left_amount <= $signed(h) < 0 ? -h[5:0] : 6'b0;
             v52_0_w_d1 <= v52_0_w;
             v52_0_w_d2 <= v52_0_w_d1;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[1]) begin
             v52_0_w_d3 <= v52_0_w_d2;
             v52_0_w_d4 <= v52_0_w_d3;
             v52_0_w_d5 <= v52_0_w_d4;
@@ -2892,7 +2921,7 @@ module edrv32_gpu_setup_plane (
             scale_add0_a1_w_d14 <= scale_add0_a1_w;
             scale_add0_b1_w_d14 <= scale_add0_b1_w;
             unused_scale_add0_part1 <= {1'b0, scale_add0_a1_w_d14} + {1'b0,
-            scale_add0_b1_w_d14} + {17'b0, scale_add0_part0[35]};
+                        scale_add0_b1_w_d14} + {17'b0, scale_add0_part0[35]};
             scale_add0_low0_w_d15 <= scale_add0_low0_w;
             scale_rounded0_amt0_w_d10 <= scale_rounded0_amt0_w;
             scale_rounded0_amt0_w_d11 <= scale_rounded0_amt0_w_d10;
@@ -2917,6 +2946,10 @@ module edrv32_gpu_setup_plane (
             scale_rounded0_amt2_w_d15 <= scale_rounded0_amt2_w_d14;
             scale_rounded0_amt2_w_d16 <= scale_rounded0_amt2_w_d15;
             scale_rounded0_amt2_w_d17 <= scale_rounded0_amt2_w_d16;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[2]) begin
             unused_scale_rounded0_2_r <= scale_rounded0_2_w;
             h_d9 <= h;
             h_d10 <= h_d9;
@@ -2935,7 +2968,7 @@ module edrv32_gpu_setup_plane (
             scale_left0_2_r_d17 <= scale_left0_2_r_d16;
             unused_scale_left0_2_r_d18 <= scale_left0_2_r_d17;
             scaled0 <= $signed(h_d18) > 0 ? unused_scale_rounded0_2_r[32:0] :
-            unused_scale_left0_2_r_d18[32:0];
+                        unused_scale_left0_2_r_d18[32:0];
             v52_1_w_d1 <= v52_1_w;
             v52_1_w_d2 <= v52_1_w_d1;
             v52_1_w_d3 <= v52_1_w_d2;
@@ -2954,6 +2987,10 @@ module edrv32_gpu_setup_plane (
             scale_bit1 <= right_amount - 6'd1;
             scale_bias1_0_r <= scale_bias1_0_w;
             scale_bias1_amt1_w_d11 <= scale_bias1_amt1_w;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[3]) begin
             scale_bias1_1_r <= scale_bias1_1_w;
             scale_bias1_amt2_w_d11 <= scale_bias1_amt2_w;
             scale_bias1_amt2_w_d12 <= scale_bias1_amt2_w_d11;
@@ -2966,7 +3003,7 @@ module edrv32_gpu_setup_plane (
             scale_add1_a1_w_d14 <= scale_add1_a1_w;
             scale_add1_b1_w_d14 <= scale_add1_b1_w;
             unused_scale_add1_part1 <= {1'b0, scale_add1_a1_w_d14} + {1'b0,
-            scale_add1_b1_w_d14} + {17'b0, scale_add1_part0[35]};
+                        scale_add1_b1_w_d14} + {17'b0, scale_add1_part0[35]};
             scale_add1_low0_w_d15 <= scale_add1_low0_w;
             scale_rounded1_amt0_w_d10 <= scale_rounded1_amt0_w;
             scale_rounded1_amt0_w_d11 <= scale_rounded1_amt0_w_d10;
@@ -2999,11 +3036,15 @@ module edrv32_gpu_setup_plane (
             scale_left1_2_r_d17 <= scale_left1_2_r_d16;
             unused_scale_left1_2_r_d18 <= scale_left1_2_r_d17;
             scaled1 <= $signed(h_d18) > 0 ? unused_scale_rounded1_2_r[32:0] :
-            unused_scale_left1_2_r_d18[32:0];
+                        unused_scale_left1_2_r_d18[32:0];
             v52_2_w_d1 <= v52_2_w;
             v52_2_w_d2 <= v52_2_w_d1;
             v52_2_w_d3 <= v52_2_w_d2;
             v52_2_w_d4 <= v52_2_w_d3;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[4]) begin
             v52_2_w_d5 <= v52_2_w_d4;
             v52_2_w_d6 <= v52_2_w_d5;
             v52_2_w_d7 <= v52_2_w_d6;
@@ -3030,7 +3071,7 @@ module edrv32_gpu_setup_plane (
             scale_add2_a1_w_d14 <= scale_add2_a1_w;
             scale_add2_b1_w_d14 <= scale_add2_b1_w;
             unused_scale_add2_part1 <= {1'b0, scale_add2_a1_w_d14} + {1'b0,
-            scale_add2_b1_w_d14} + {17'b0, scale_add2_part0[35]};
+                        scale_add2_b1_w_d14} + {17'b0, scale_add2_part0[35]};
             scale_add2_low0_w_d15 <= scale_add2_low0_w;
             scale_rounded2_amt0_w_d10 <= scale_rounded2_amt0_w;
             scale_rounded2_amt0_w_d11 <= scale_rounded2_amt0_w_d10;
@@ -3057,13 +3098,17 @@ module edrv32_gpu_setup_plane (
             scale_rounded2_amt2_w_d17 <= scale_rounded2_amt2_w_d16;
             unused_scale_rounded2_2_r <= scale_rounded2_2_w;
             scale_left2_2_r_d13 <= scale_left2_2_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[5]) begin
             scale_left2_2_r_d14 <= scale_left2_2_r_d13;
             scale_left2_2_r_d15 <= scale_left2_2_r_d14;
             scale_left2_2_r_d16 <= scale_left2_2_r_d15;
             scale_left2_2_r_d17 <= scale_left2_2_r_d16;
             unused_scale_left2_2_r_d18 <= scale_left2_2_r_d17;
             scaled2 <= $signed(h_d18) > 0 ? unused_scale_rounded2_2_r[32:0] :
-            unused_scale_left2_2_r_d18[32:0];
+                        unused_scale_left2_2_r_d18[32:0];
             difference0 <= $signed({1'b0, scaled1}) - $signed({1'b0, scaled0});
             difference1 <= $signed({1'b0, scaled2}) - $signed({1'b0, scaled0});
             mult_delta0_0_w_d1 <= mult_delta0_0_w;
@@ -3106,6 +3151,10 @@ module edrv32_gpu_setup_plane (
             mult_delta0_1_w_d15 <= mult_delta0_1_w_d14;
             mult_delta0_1_w_d16 <= mult_delta0_1_w_d15;
             mult_delta0_1_w_d17 <= mult_delta0_1_w_d16;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[6]) begin
             mult_delta0_1_w_d18 <= mult_delta0_1_w_d17;
             mult_delta0_1_w_d19 <= mult_delta0_1_w_d18;
             mult_delta0_1_w_d20 <= mult_delta0_1_w_d19;
@@ -3116,7 +3165,7 @@ module edrv32_gpu_setup_plane (
             numerator0_a1_w_d24 <= numerator0_a1_w;
             numerator0_b1_w_d24 <= numerator0_b1_w;
             unused_numerator0_part1 <= {1'b0, numerator0_a1_w_d24} + {1'b0,
-            numerator0_b1_w_d24} + {21'b0, numerator0_part0[35]};
+                        numerator0_b1_w_d24} + {21'b0, numerator0_part0[35]};
             numerator0_low0_w_d25 <= numerator0_low0_w;
             numerator_shift0 <= numerator0_w << 4;
             reciprocal_0_r_d1 <= reciprocal_0_r;
@@ -3144,6 +3193,10 @@ module edrv32_gpu_setup_plane (
             reciprocal_0_r_d23 <= reciprocal_0_r_d22;
             reciprocal_0_r_d24 <= reciprocal_0_r_d23;
             reciprocal_0_r_d25 <= reciprocal_0_r_d24;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[7]) begin
             reciprocal_0_r_d26 <= reciprocal_0_r_d25;
             inverse0 <= $signed(numerator_shift0) * $signed({1'b0, reciprocal_0_r_d26});
             inverse0_p1 <= inverse0;
@@ -3154,13 +3207,13 @@ module edrv32_gpu_setup_plane (
             inverse_abs0_a1_w_d31 <= inverse_abs0_a1_w;
             inverse_abs0_b1_w_d31 <= inverse_abs0_b1_w;
             inverse_abs0_part1 <= {1'b0, inverse_abs0_a1_w_d31} + {1'b0, inverse_abs0_b1_w_d31}
-            + {35'b0, inverse_abs0_part0[35]};
+                        + {35'b0, inverse_abs0_part0[35]};
             inverse_abs0_a2_w_d31 <= inverse_abs0_a2_w;
             inverse_abs0_a2_w_d32 <= inverse_abs0_a2_w_d31;
             inverse_abs0_b2_w_d31 <= inverse_abs0_b2_w;
             inverse_abs0_b2_w_d32 <= inverse_abs0_b2_w_d31;
             unused_inverse_abs0_part2 <= {1'b0, inverse_abs0_a2_w_d32} + {1'b0,
-            inverse_abs0_b2_w_d32} + {17'b0, inverse_abs0_part1[35]};
+                        inverse_abs0_b2_w_d32} + {17'b0, inverse_abs0_part1[35]};
             inverse_abs0_low1_w_d33 <= inverse_abs0_low1_w;
             inverse_abs0_low0_w_d32 <= inverse_abs0_low0_w;
             inverse_abs0_low0_w_d33 <= inverse_abs0_low0_w_d32;
@@ -3177,6 +3230,10 @@ module edrv32_gpu_setup_plane (
             gradient_bias0_amt3_w_d4 <= gradient_bias0_amt3_w_d3;
             gradient_bias0_3_r <= gradient_bias0_3_w;
             gradient_bias0_3_r_d6 <= gradient_bias0_3_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[8]) begin
             gradient_bias0_3_r_d7 <= gradient_bias0_3_r_d6;
             gradient_bias0_3_r_d8 <= gradient_bias0_3_r_d7;
             gradient_bias0_3_r_d9 <= gradient_bias0_3_r_d8;
@@ -3190,6 +3247,10 @@ module edrv32_gpu_setup_plane (
             gradient_bias0_3_r_d17 <= gradient_bias0_3_r_d16;
             gradient_bias0_3_r_d18 <= gradient_bias0_3_r_d17;
             gradient_bias0_3_r_d19 <= gradient_bias0_3_r_d18;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[9]) begin
             gradient_bias0_3_r_d20 <= gradient_bias0_3_r_d19;
             gradient_bias0_3_r_d21 <= gradient_bias0_3_r_d20;
             gradient_bias0_3_r_d22 <= gradient_bias0_3_r_d21;
@@ -3203,18 +3264,22 @@ module edrv32_gpu_setup_plane (
             gradient_bias0_3_r_d30 <= gradient_bias0_3_r_d29;
             gradient_bias0_3_r_d31 <= gradient_bias0_3_r_d30;
             gradient_bias0_3_r_d32 <= gradient_bias0_3_r_d31;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[10]) begin
             gradient_bias0_3_r_d33 <= gradient_bias0_3_r_d32;
             gradient_round0_part0 <= {1'b0, gradient_round0_a0_w} + {1'b0, gradient_round0_b0_w};
             gradient_round0_a1_w_d34 <= gradient_round0_a1_w;
             gradient_round0_b1_w_d34 <= gradient_round0_b1_w;
             gradient_round0_part1 <= {1'b0, gradient_round0_a1_w_d34} + {1'b0,
-            gradient_round0_b1_w_d34} + {35'b0, gradient_round0_part0[35]};
+                        gradient_round0_b1_w_d34} + {35'b0, gradient_round0_part0[35]};
             gradient_round0_a2_w_d34 <= gradient_round0_a2_w;
             gradient_round0_a2_w_d35 <= gradient_round0_a2_w_d34;
             gradient_round0_b2_w_d34 <= gradient_round0_b2_w;
             gradient_round0_b2_w_d35 <= gradient_round0_b2_w_d34;
             unused_gradient_round0_part2 <= {1'b0, gradient_round0_a2_w_d35} + {1'b0,
-            gradient_round0_b2_w_d35} + {18'b0, gradient_round0_part1[35]};
+                        gradient_round0_b2_w_d35} + {18'b0, gradient_round0_part1[35]};
             gradient_round0_low1_w_d36 <= gradient_round0_low1_w;
             gradient_round0_low0_w_d35 <= gradient_round0_low0_w;
             gradient_round0_low0_w_d36 <= gradient_round0_low0_w_d35;
@@ -3384,7 +3449,11 @@ module edrv32_gpu_setup_plane (
             gradient_signed0_a1_w_d42 <= gradient_signed0_a1_w;
             gradient_signed0_b1_w_d42 <= gradient_signed0_b1_w;
             unused_gradient_signed0_part1 <= {1'b0, gradient_signed0_a1_w_d42} + {1'b0,
-            gradient_signed0_b1_w_d42} + {21'b0, gradient_signed0_part0[35]};
+                        gradient_signed0_b1_w_d42} + {21'b0, gradient_signed0_part0[35]};
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[11]) begin
             gradient_signed0_low0_w_d43 <= gradient_signed0_low0_w;
             origin_offset0_w_d1 <= origin_offset0_w;
             origin_offset0_w_d2 <= origin_offset0_w_d1;
@@ -3435,12 +3504,16 @@ module edrv32_gpu_setup_plane (
             drop_gradient0 <= tag_0_r[2:0] == 0 ? 4'd7 : tag_0_r[2:0] < 4 ? 4'd3 : 4'd11;
             gradient_abs0_sign <= gradient_signed0_w[55];
             gradient_abs0_invert <= gradient_signed0_w[55] ? ~gradient_signed0_w :
-            gradient_signed0_w;
+                        gradient_signed0_w;
             gradient_abs0_part0 <= {1'b0, gradient_abs0_a0_w} + {1'b0, gradient_abs0_b0_w};
             gradient_abs0_a1_w_d45 <= gradient_abs0_a1_w;
             gradient_abs0_b1_w_d45 <= gradient_abs0_b1_w;
             unused_gradient_abs0_part1 <= {1'b0, gradient_abs0_a1_w_d45} + {1'b0,
-            gradient_abs0_b1_w_d45} + {21'b0, gradient_abs0_part0[35]};
+                        gradient_abs0_b1_w_d45} + {21'b0, gradient_abs0_part0[35]};
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[12]) begin
             gradient_abs0_low0_w_d46 <= gradient_abs0_low0_w;
             gradient_drop0_amt0_w_d2 <= gradient_drop0_amt0_w;
             gradient_drop0_amt0_w_d3 <= gradient_drop0_amt0_w_d2;
@@ -3539,7 +3612,7 @@ module edrv32_gpu_setup_plane (
             stored_round0_a1_w_d49 <= stored_round0_a1_w;
             stored_round0_b1_w_d49 <= stored_round0_b1_w;
             unused_stored_round0_part1 <= {1'b0, stored_round0_a1_w_d49} + {1'b0,
-            stored_round0_b1_w_d49} + {17'b0, stored_round0_part0[35]};
+                        stored_round0_b1_w_d49} + {17'b0, stored_round0_part0[35]};
             stored_round0_low0_w_d50 <= stored_round0_low0_w;
             gradient_abs0_sign_d45 <= gradient_abs0_sign;
             gradient_abs0_sign_d46 <= gradient_abs0_sign_d45;
@@ -3553,7 +3626,7 @@ module edrv32_gpu_setup_plane (
             stored_signed0_a1_w_d52 <= stored_signed0_a1_w;
             stored_signed0_b1_w_d52 <= stored_signed0_b1_w;
             unused_stored_signed0_part1 <= {1'b0, stored_signed0_a1_w_d52} + {1'b0,
-            stored_signed0_b1_w_d52} + {17'b0, stored_signed0_part0[35]};
+                        stored_signed0_b1_w_d52} + {17'b0, stored_signed0_part0[35]};
             stored_signed0_low0_w_d53 <= stored_signed0_low0_w;
             mult_delta1_0_w_d1 <= mult_delta1_0_w;
             mult_delta1_0_w_d2 <= mult_delta1_0_w_d1;
@@ -3580,6 +3653,10 @@ module edrv32_gpu_setup_plane (
             product1_0_p2 <= product1_0_p1;
             mult_delta1_1_w_d1 <= mult_delta1_1_w;
             mult_delta1_1_w_d2 <= mult_delta1_1_w_d1;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[13]) begin
             mult_delta1_1_w_d3 <= mult_delta1_1_w_d2;
             mult_delta1_1_w_d4 <= mult_delta1_1_w_d3;
             mult_delta1_1_w_d5 <= mult_delta1_1_w_d4;
@@ -3605,7 +3682,7 @@ module edrv32_gpu_setup_plane (
             numerator1_a1_w_d24 <= numerator1_a1_w;
             numerator1_b1_w_d24 <= numerator1_b1_w;
             unused_numerator1_part1 <= {1'b0, numerator1_a1_w_d24} + {1'b0,
-            numerator1_b1_w_d24} + {21'b0, numerator1_part0[35]};
+                        numerator1_b1_w_d24} + {21'b0, numerator1_part0[35]};
             numerator1_low0_w_d25 <= numerator1_low0_w;
             numerator_shift1 <= numerator1_w << 4;
             inverse1 <= $signed(numerator_shift1) * $signed({1'b0, reciprocal_0_r_d26});
@@ -3617,13 +3694,17 @@ module edrv32_gpu_setup_plane (
             inverse_abs1_a1_w_d31 <= inverse_abs1_a1_w;
             inverse_abs1_b1_w_d31 <= inverse_abs1_b1_w;
             inverse_abs1_part1 <= {1'b0, inverse_abs1_a1_w_d31} + {1'b0, inverse_abs1_b1_w_d31}
-            + {35'b0, inverse_abs1_part0[35]};
+                        + {35'b0, inverse_abs1_part0[35]};
             inverse_abs1_a2_w_d31 <= inverse_abs1_a2_w;
             inverse_abs1_a2_w_d32 <= inverse_abs1_a2_w_d31;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[14]) begin
             inverse_abs1_b2_w_d31 <= inverse_abs1_b2_w;
             inverse_abs1_b2_w_d32 <= inverse_abs1_b2_w_d31;
             unused_inverse_abs1_part2 <= {1'b0, inverse_abs1_a2_w_d32} + {1'b0,
-            inverse_abs1_b2_w_d32} + {17'b0, inverse_abs1_part1[35]};
+                        inverse_abs1_b2_w_d32} + {17'b0, inverse_abs1_part1[35]};
             inverse_abs1_low1_w_d33 <= inverse_abs1_low1_w;
             inverse_abs1_low0_w_d32 <= inverse_abs1_low0_w;
             inverse_abs1_low0_w_d33 <= inverse_abs1_low0_w_d32;
@@ -3646,6 +3727,10 @@ module edrv32_gpu_setup_plane (
             gradient_bias1_3_r_d10 <= gradient_bias1_3_r_d9;
             gradient_bias1_3_r_d11 <= gradient_bias1_3_r_d10;
             gradient_bias1_3_r_d12 <= gradient_bias1_3_r_d11;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[15]) begin
             gradient_bias1_3_r_d13 <= gradient_bias1_3_r_d12;
             gradient_bias1_3_r_d14 <= gradient_bias1_3_r_d13;
             gradient_bias1_3_r_d15 <= gradient_bias1_3_r_d14;
@@ -3659,6 +3744,10 @@ module edrv32_gpu_setup_plane (
             gradient_bias1_3_r_d23 <= gradient_bias1_3_r_d22;
             gradient_bias1_3_r_d24 <= gradient_bias1_3_r_d23;
             gradient_bias1_3_r_d25 <= gradient_bias1_3_r_d24;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[16]) begin
             gradient_bias1_3_r_d26 <= gradient_bias1_3_r_d25;
             gradient_bias1_3_r_d27 <= gradient_bias1_3_r_d26;
             gradient_bias1_3_r_d28 <= gradient_bias1_3_r_d27;
@@ -3671,13 +3760,13 @@ module edrv32_gpu_setup_plane (
             gradient_round1_a1_w_d34 <= gradient_round1_a1_w;
             gradient_round1_b1_w_d34 <= gradient_round1_b1_w;
             gradient_round1_part1 <= {1'b0, gradient_round1_a1_w_d34} + {1'b0,
-            gradient_round1_b1_w_d34} + {35'b0, gradient_round1_part0[35]};
+                        gradient_round1_b1_w_d34} + {35'b0, gradient_round1_part0[35]};
             gradient_round1_a2_w_d34 <= gradient_round1_a2_w;
             gradient_round1_a2_w_d35 <= gradient_round1_a2_w_d34;
             gradient_round1_b2_w_d34 <= gradient_round1_b2_w;
             gradient_round1_b2_w_d35 <= gradient_round1_b2_w_d34;
             unused_gradient_round1_part2 <= {1'b0, gradient_round1_a2_w_d35} + {1'b0,
-            gradient_round1_b2_w_d35} + {18'b0, gradient_round1_part1[35]};
+                        gradient_round1_b2_w_d35} + {18'b0, gradient_round1_part1[35]};
             gradient_round1_low1_w_d36 <= gradient_round1_low1_w;
             gradient_round1_low0_w_d35 <= gradient_round1_low0_w;
             gradient_round1_low0_w_d36 <= gradient_round1_low0_w_d35;
@@ -3717,6 +3806,10 @@ module edrv32_gpu_setup_plane (
             gradient_shift1_amt0_w_d35 <= gradient_shift1_amt0_w_d34;
             gradient_shift1_amt0_w_d36 <= gradient_shift1_amt0_w_d35;
             gradient_shift1_0_r <= gradient_shift1_0_w;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[17]) begin
             gradient_shift1_amt1_w_d2 <= gradient_shift1_amt1_w;
             gradient_shift1_amt1_w_d3 <= gradient_shift1_amt1_w_d2;
             gradient_shift1_amt1_w_d4 <= gradient_shift1_amt1_w_d3;
@@ -3847,7 +3940,7 @@ module edrv32_gpu_setup_plane (
             gradient_signed1_a1_w_d42 <= gradient_signed1_a1_w;
             gradient_signed1_b1_w_d42 <= gradient_signed1_b1_w;
             unused_gradient_signed1_part1 <= {1'b0, gradient_signed1_a1_w_d42} + {1'b0,
-            gradient_signed1_b1_w_d42} + {21'b0, gradient_signed1_part0[35]};
+                        gradient_signed1_b1_w_d42} + {21'b0, gradient_signed1_part0[35]};
             gradient_signed1_low0_w_d43 <= gradient_signed1_low0_w;
             origin_offset1_w_d1 <= origin_offset1_w;
             origin_offset1_w_d2 <= origin_offset1_w_d1;
@@ -3879,6 +3972,10 @@ module edrv32_gpu_setup_plane (
             origin_offset1_w_d28 <= origin_offset1_w_d27;
             origin_offset1_w_d29 <= origin_offset1_w_d28;
             origin_offset1_w_d30 <= origin_offset1_w_d29;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[18]) begin
             origin_offset1_w_d31 <= origin_offset1_w_d30;
             origin_offset1_w_d32 <= origin_offset1_w_d31;
             origin_offset1_w_d33 <= origin_offset1_w_d32;
@@ -3898,12 +3995,12 @@ module edrv32_gpu_setup_plane (
             drop_gradient1 <= tag_0_r[2:0] == 0 ? 4'd7 : tag_0_r[2:0] < 4 ? 4'd3 : 4'd11;
             gradient_abs1_sign <= gradient_signed1_w[55];
             gradient_abs1_invert <= gradient_signed1_w[55] ? ~gradient_signed1_w :
-            gradient_signed1_w;
+                        gradient_signed1_w;
             gradient_abs1_part0 <= {1'b0, gradient_abs1_a0_w} + {1'b0, gradient_abs1_b0_w};
             gradient_abs1_a1_w_d45 <= gradient_abs1_a1_w;
             gradient_abs1_b1_w_d45 <= gradient_abs1_b1_w;
             unused_gradient_abs1_part1 <= {1'b0, gradient_abs1_a1_w_d45} + {1'b0,
-            gradient_abs1_b1_w_d45} + {21'b0, gradient_abs1_part0[35]};
+                        gradient_abs1_b1_w_d45} + {21'b0, gradient_abs1_part0[35]};
             gradient_abs1_low0_w_d46 <= gradient_abs1_low0_w;
             gradient_drop1_amt0_w_d2 <= gradient_drop1_amt0_w;
             gradient_drop1_amt0_w_d3 <= gradient_drop1_amt0_w_d2;
@@ -4002,7 +4099,7 @@ module edrv32_gpu_setup_plane (
             stored_round1_a1_w_d49 <= stored_round1_a1_w;
             stored_round1_b1_w_d49 <= stored_round1_b1_w;
             unused_stored_round1_part1 <= {1'b0, stored_round1_a1_w_d49} + {1'b0,
-            stored_round1_b1_w_d49} + {17'b0, stored_round1_part0[35]};
+                        stored_round1_b1_w_d49} + {17'b0, stored_round1_part0[35]};
             stored_round1_low0_w_d50 <= stored_round1_low0_w;
             gradient_abs1_sign_d45 <= gradient_abs1_sign;
             gradient_abs1_sign_d46 <= gradient_abs1_sign_d45;
@@ -4015,20 +4112,24 @@ module edrv32_gpu_setup_plane (
             stored_signed1_part0 <= {1'b0, stored_signed1_a0_w} + {1'b0, stored_signed1_b0_w};
             stored_signed1_a1_w_d52 <= stored_signed1_a1_w;
             stored_signed1_b1_w_d52 <= stored_signed1_b1_w;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[19]) begin
             unused_stored_signed1_part1 <= {1'b0, stored_signed1_a1_w_d52} + {1'b0,
-            stored_signed1_b1_w_d52} + {17'b0, stored_signed1_part0[35]};
+                        stored_signed1_b1_w_d52} + {17'b0, stored_signed1_part0[35]};
             stored_signed1_low0_w_d53 <= stored_signed1_low0_w;
             origin_sum_part0 <= {1'b0, origin_sum_a0_w} + {1'b0, origin_sum_b0_w};
             origin_sum_a1_w_d47 <= origin_sum_a1_w;
             origin_sum_b1_w_d47 <= origin_sum_b1_w;
             origin_sum_part1 <= {1'b0, origin_sum_a1_w_d47} + {1'b0, origin_sum_b1_w_d47} +
-            {35'b0, origin_sum_part0[35]};
+                        {35'b0, origin_sum_part0[35]};
             origin_sum_a2_w_d47 <= origin_sum_a2_w;
             origin_sum_a2_w_d48 <= origin_sum_a2_w_d47;
             origin_sum_b2_w_d47 <= origin_sum_b2_w;
             origin_sum_b2_w_d48 <= origin_sum_b2_w_d47;
             unused_origin_sum_part2 <= {1'b0, origin_sum_a2_w_d48} + {1'b0,
-            origin_sum_b2_w_d48} + {5'b0, origin_sum_part1[35]};
+                        origin_sum_b2_w_d48} + {5'b0, origin_sum_part1[35]};
             origin_sum_low1_w_d49 <= origin_sum_low1_w;
             origin_sum_low0_w_d48 <= origin_sum_low0_w;
             origin_sum_low0_w_d49 <= origin_sum_low0_w_d48;
@@ -4038,13 +4139,13 @@ module edrv32_gpu_setup_plane (
             origin_absolute_a1_w_d51 <= origin_absolute_a1_w;
             origin_absolute_b1_w_d51 <= origin_absolute_b1_w;
             origin_absolute_part1 <= {1'b0, origin_absolute_a1_w_d51} + {1'b0,
-            origin_absolute_b1_w_d51} + {35'b0, origin_absolute_part0[35]};
+                        origin_absolute_b1_w_d51} + {35'b0, origin_absolute_part0[35]};
             origin_absolute_a2_w_d51 <= origin_absolute_a2_w;
             origin_absolute_a2_w_d52 <= origin_absolute_a2_w_d51;
             origin_absolute_b2_w_d51 <= origin_absolute_b2_w;
             origin_absolute_b2_w_d52 <= origin_absolute_b2_w_d51;
             unused_origin_absolute_part2 <= {1'b0, origin_absolute_a2_w_d52} + {1'b0,
-            origin_absolute_b2_w_d52} + {5'b0, origin_absolute_part1[35]};
+                        origin_absolute_b2_w_d52} + {5'b0, origin_absolute_part1[35]};
             origin_absolute_low1_w_d53 <= origin_absolute_low1_w;
             origin_absolute_low0_w_d52 <= origin_absolute_low0_w;
             origin_absolute_low0_w_d53 <= origin_absolute_low0_w_d52;
@@ -4052,13 +4153,13 @@ module edrv32_gpu_setup_plane (
             origin_round_a1_w_d54 <= origin_round_a1_w;
             origin_round_b1_w_d54 <= origin_round_b1_w;
             origin_round_part1 <= {1'b0, origin_round_a1_w_d54} + {1'b0, origin_round_b1_w_d54}
-            + {35'b0, origin_round_part0[35]};
+                        + {35'b0, origin_round_part0[35]};
             origin_round_a2_w_d54 <= origin_round_a2_w;
             origin_round_a2_w_d55 <= origin_round_a2_w_d54;
             origin_round_b2_w_d54 <= origin_round_b2_w;
             origin_round_b2_w_d55 <= origin_round_b2_w_d54;
             unused_origin_round_part2 <= {1'b0, origin_round_a2_w_d55} + {1'b0,
-            origin_round_b2_w_d55} + {5'b0, origin_round_part1[35]};
+                        origin_round_b2_w_d55} + {5'b0, origin_round_part1[35]};
             origin_round_low1_w_d56 <= origin_round_low1_w;
             origin_round_low0_w_d55 <= origin_round_low0_w;
             origin_round_low0_w_d56 <= origin_round_low0_w_d55;
@@ -4074,15 +4175,19 @@ module edrv32_gpu_setup_plane (
             origin_absolute_sign_d58 <= origin_absolute_sign_d57;
             origin_signed_part0 <= {1'b0, origin_signed_a0_w} + {1'b0, origin_signed_b0_w};
             origin_signed_a1_w_d59 <= origin_signed_a1_w;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[20]) begin
             origin_signed_b1_w_d59 <= origin_signed_b1_w;
             origin_signed_part1 <= {1'b0, origin_signed_a1_w_d59} + {1'b0,
-            origin_signed_b1_w_d59} + {35'b0, origin_signed_part0[35]};
+                        origin_signed_b1_w_d59} + {35'b0, origin_signed_part0[35]};
             origin_signed_a2_w_d59 <= origin_signed_a2_w;
             origin_signed_a2_w_d60 <= origin_signed_a2_w_d59;
             origin_signed_b2_w_d59 <= origin_signed_b2_w;
             origin_signed_b2_w_d60 <= origin_signed_b2_w_d59;
             unused_origin_signed_part2 <= {1'b0, origin_signed_a2_w_d60} + {1'b0,
-            origin_signed_b2_w_d60} + {5'b0, origin_signed_part1[35]};
+                        origin_signed_b2_w_d60} + {5'b0, origin_signed_part1[35]};
             origin_signed_low1_w_d61 <= origin_signed_low1_w;
             origin_signed_low0_w_d60 <= origin_signed_low0_w;
             origin_signed_low0_w_d61 <= origin_signed_low0_w_d60;
@@ -4100,6 +4205,10 @@ module edrv32_gpu_setup_plane (
             start_base_w_d31 <= start_base_w_d30;
             start_base_w_d32 <= start_base_w_d31;
             start_base_w_d33 <= start_base_w_d32;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[21]) begin
             start_base_w_d34 <= start_base_w_d33;
             start_base_w_d35 <= start_base_w_d34;
             start_base_w_d36 <= start_base_w_d35;
@@ -4117,6 +4226,10 @@ module edrv32_gpu_setup_plane (
             start_base_w_d48 <= start_base_w_d47;
             start_base_w_d49 <= start_base_w_d48;
             start_base_w_d50 <= start_base_w_d49;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[22]) begin
             start_base_w_d51 <= start_base_w_d50;
             start_base_w_d52 <= start_base_w_d51;
             start_base_w_d53 <= start_base_w_d52;
@@ -4132,7 +4245,7 @@ module edrv32_gpu_setup_plane (
             start_sum_a1_w_d62 <= start_sum_a1_w;
             start_sum_b1_w_d62 <= start_sum_b1_w;
             unused_start_sum_part1 <= {1'b0, start_sum_a1_w_d62} + {1'b0, start_sum_b1_w_d62} +
-            {35'b0, start_sum_part0[35]};
+                        {35'b0, start_sum_part0[35]};
             start_sum_low0_w_d63 <= start_sum_low0_w;
             start_absolute_sign <= start_sum_w[69];
             start_absolute_invert <= start_sum_w[69] ? ~start_sum_w : start_sum_w;
@@ -4140,9 +4253,13 @@ module edrv32_gpu_setup_plane (
             start_absolute_a1_w_d65 <= start_absolute_a1_w;
             start_absolute_b1_w_d65 <= start_absolute_b1_w;
             unused_start_absolute_part1 <= {1'b0, start_absolute_a1_w_d65} + {1'b0,
-            start_absolute_b1_w_d65} + {35'b0, start_absolute_part0[35]};
+                        start_absolute_b1_w_d65} + {35'b0, start_absolute_part0[35]};
             start_absolute_low0_w_d66 <= start_absolute_low0_w;
             drop_start <= tag_0_r[2:0] == 0 ? 4'd7 : tag_0_r[2:0] < 4 ? 4'd3 : 4'd11;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[23]) begin
             start_drop_amt0_w_d2 <= start_drop_amt0_w;
             start_drop_amt0_w_d3 <= start_drop_amt0_w_d2;
             start_drop_amt0_w_d4 <= start_drop_amt0_w_d3;
@@ -4280,7 +4397,7 @@ module edrv32_gpu_setup_plane (
             start_round_a1_w_d69 <= start_round_a1_w;
             start_round_b1_w_d69 <= start_round_b1_w;
             unused_start_round_part1 <= {1'b0, start_round_a1_w_d69} + {1'b0,
-            start_round_b1_w_d69} + {31'b0, start_round_part0[35]};
+                        start_round_b1_w_d69} + {31'b0, start_round_part0[35]};
             start_round_low0_w_d70 <= start_round_low0_w;
             start_absolute_sign_d65 <= start_absolute_sign;
             start_absolute_sign_d66 <= start_absolute_sign_d65;
@@ -4294,7 +4411,7 @@ module edrv32_gpu_setup_plane (
             start_signed_a1_w_d72 <= start_signed_a1_w;
             start_signed_b1_w_d72 <= start_signed_b1_w;
             unused_start_signed_part1 <= {1'b0, start_signed_a1_w_d72} + {1'b0,
-            start_signed_b1_w_d72} + {31'b0, start_signed_part0[35]};
+                        start_signed_b1_w_d72} + {31'b0, start_signed_part0[35]};
             start_signed_low0_w_d73 <= start_signed_low0_w;
             stored_signed1_w_d54 <= stored_signed1_w;
             stored_signed1_w_d55 <= stored_signed1_w_d54;
@@ -4303,6 +4420,10 @@ module edrv32_gpu_setup_plane (
             stored_signed1_w_d58 <= stored_signed1_w_d57;
             stored_signed1_w_d59 <= stored_signed1_w_d58;
             stored_signed1_w_d60 <= stored_signed1_w_d59;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[24]) begin
             stored_signed1_w_d61 <= stored_signed1_w_d60;
             stored_signed1_w_d62 <= stored_signed1_w_d61;
             stored_signed1_w_d63 <= stored_signed1_w_d62;
@@ -4326,6 +4447,10 @@ module edrv32_gpu_setup_plane (
             stored_signed0_w_d61 <= stored_signed0_w_d60;
             stored_signed0_w_d62 <= stored_signed0_w_d61;
             stored_signed0_w_d63 <= stored_signed0_w_d62;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[25]) begin
             stored_signed0_w_d64 <= stored_signed0_w_d63;
             stored_signed0_w_d65 <= stored_signed0_w_d64;
             stored_signed0_w_d66 <= stored_signed0_w_d65;
@@ -4409,6 +4534,10 @@ module edrv32_gpu_setup_plane (
             tag_0_r_d23 <= tag_0_r_d22;
             tag_0_r_d24 <= tag_0_r_d23;
             tag_0_r_d25 <= tag_0_r_d24;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[26]) begin
             tag_0_r_d26 <= tag_0_r_d25;
             tag_0_r_d27 <= tag_0_r_d26;
             tag_0_r_d28 <= tag_0_r_d27;

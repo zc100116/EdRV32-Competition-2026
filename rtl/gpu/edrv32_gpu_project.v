@@ -1060,8 +1060,29 @@ module edrv32_gpu_project (
     always @(posedge clk_i) begin
         if (push_w) output_6_r[write_r] <= color_input_r_d35;
     end
+    // Each region owns the output-credit count used by its local clock enable.
+    wire [15:0] pipeline_enable_w;
+    genvar enable_region;
+    generate
+        for (enable_region = 0; enable_region < 16;
+            enable_region = enable_region + 1) begin : g_enable_region
+            (* keep = 1 *) reg [1:0] region_count_r /* synthesis syn_preserve=1 */;
+            assign pipeline_enable_w[enable_region] = region_count_r != 2 && !stop_i;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) region_count_r <= 0;
+                else if (stop_i) region_count_r <= 0;
+                else begin
+                    case ({push_w, pop_w})
+                        2'b10: region_count_r <= region_count_r + 1'b1;
+                        2'b01: region_count_r <= region_count_r - 1'b1;
+                        default: region_count_r <= region_count_r;
+                    endcase
+                end
+            end
+        end
+    endgenerate
     always @(posedge clk_i) begin
-        if (enable_w) begin
+        if (pipeline_enable_w[0]) begin
             reciprocal_input_r <= reciprocal_w;
             restore_exponent_r <= exponent_w;
             restore_right <= restore_exponent_r > 6'd16 ? restore_exponent_r - 6'd16 : 6'b0;
@@ -1075,7 +1096,7 @@ module edrv32_gpu_project (
             restore_round_a1_w_d4 <= restore_round_a1_w;
             restore_round_b1_w_d4 <= restore_round_b1_w;
             unused_restore_round_part1 <= {1'b0, restore_round_a1_w_d4} + {1'b0,
-            restore_round_b1_w_d4} + {5'b0, restore_round_part0[35]};
+                        restore_round_b1_w_d4} + {5'b0, restore_round_part0[35]};
             restore_round_low0_w_d5 <= restore_round_low0_w;
             restore_shift_right_amt0_w_d2 <= restore_shift_right_amt0_w;
             restore_shift_right_amt0_w_d3 <= restore_shift_right_amt0_w_d2;
@@ -1114,7 +1135,7 @@ module edrv32_gpu_project (
             restore_shift_left_2_r_d7 <= restore_shift_left_2_r_d6;
             unused_restore_shift_left_2_r_d8 <= restore_shift_left_2_r_d7;
             restored <= restore_exponent_r_d8 > 6'd16 ? unused_restore_shift_right_2_r[34:0] :
-            unused_restore_shift_left_2_r_d8[34:0];
+                        unused_restore_shift_left_2_r_d8[34:0];
             position_input0_r <= position_input_w[0];
             position_input1_r <= position_input_w[1];
             position_input2_r <= position_input_w[2];
@@ -1124,6 +1145,10 @@ module edrv32_gpu_project (
             position_input0_r_d2 <= position_input0_r;
             position_input0_r_d3 <= position_input0_r_d2;
             position_input0_r_d4 <= position_input0_r_d3;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[1]) begin
             position_input0_r_d5 <= position_input0_r_d4;
             position_input0_r_d6 <= position_input0_r_d5;
             position_input0_r_d7 <= position_input0_r_d6;
@@ -1148,6 +1173,10 @@ module edrv32_gpu_project (
             position_input2_r_d4 <= position_input2_r_d3;
             position_input2_r_d5 <= position_input2_r_d4;
             position_input2_r_d6 <= position_input2_r_d5;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[2]) begin
             position_input2_r_d7 <= position_input2_r_d6;
             position_input2_r_d8 <= position_input2_r_d7;
             position_input2_r_d9 <= position_input2_r_d8;
@@ -1180,13 +1209,17 @@ module edrv32_gpu_project (
             viewport_adjust0_a1_w_d13 <= viewport_adjust0_a1_w;
             viewport_adjust0_b1_w_d13 <= viewport_adjust0_b1_w;
             viewport_adjust0_part1 <= {1'b0, viewport_adjust0_a1_w_d13} + {1'b0,
-            viewport_adjust0_b1_w_d13} + {35'b0, viewport_adjust0_part0[35]};
+                        viewport_adjust0_b1_w_d13} + {35'b0, viewport_adjust0_part0[35]};
             viewport_adjust0_a2_w_d13 <= viewport_adjust0_a2_w;
             viewport_adjust0_a2_w_d14 <= viewport_adjust0_a2_w_d13;
             viewport_adjust0_b2_w_d13 <= viewport_adjust0_b2_w;
             viewport_adjust0_b2_w_d14 <= viewport_adjust0_b2_w_d13;
             unused_viewport_adjust0_part2 <= {1'b0, viewport_adjust0_a2_w_d14} + {1'b0,
-            viewport_adjust0_b2_w_d14} + {24'b0, viewport_adjust0_part1[35]};
+                        viewport_adjust0_b2_w_d14} + {24'b0, viewport_adjust0_part1[35]};
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[3]) begin
             viewport_adjust0_low1_w_d15 <= viewport_adjust0_low1_w;
             viewport_adjust0_low0_w_d14 <= viewport_adjust0_low0_w;
             viewport_adjust0_low0_w_d15 <= viewport_adjust0_low0_w_d14;
@@ -1207,7 +1240,7 @@ module edrv32_gpu_project (
             viewport_size0_r_d14 <= viewport_size0_r_d13;
             viewport_size0_r_d15 <= viewport_size0_r_d14;
             viewport_product0 <= $signed(viewport_adjust0_w) * $signed({1'b0,
-            viewport_size0_r_d15});
+                        viewport_size0_r_d15});
             viewport_product0_p1 <= viewport_product0;
             viewport_product0_p2 <= viewport_product0_p1;
             viewport_shift0 <= viewport_product0_p2 << 3;
@@ -1216,16 +1249,20 @@ module edrv32_gpu_project (
             position_negate_a1_w_d14 <= position_negate_a1_w;
             position_negate_b1_w_d14 <= position_negate_b1_w;
             position_negate_part1 <= {1'b0, position_negate_a1_w_d14} + {1'b0,
-            position_negate_b1_w_d14} + {35'b0, position_negate_part0[35]};
+                        position_negate_b1_w_d14} + {35'b0, position_negate_part0[35]};
             position_negate_a2_w_d14 <= position_negate_a2_w;
             position_negate_a2_w_d15 <= position_negate_a2_w_d14;
             position_negate_b2_w_d14 <= position_negate_b2_w;
             position_negate_b2_w_d15 <= position_negate_b2_w_d14;
             unused_position_negate_part2 <= {1'b0, position_negate_a2_w_d15} + {1'b0,
-            position_negate_b2_w_d15} + {24'b0, position_negate_part1[35]};
+                        position_negate_b2_w_d15} + {24'b0, position_negate_part1[35]};
             position_negate_low1_w_d16 <= position_negate_low1_w;
             position_negate_low0_w_d15 <= position_negate_low0_w;
             position_negate_low0_w_d16 <= position_negate_low0_w_d15;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[4]) begin
             viewport_one1_w_d13 <= viewport_one1_w;
             viewport_one1_w_d14 <= viewport_one1_w_d13;
             viewport_one1_w_d15 <= viewport_one1_w_d14;
@@ -1234,13 +1271,13 @@ module edrv32_gpu_project (
             viewport_adjust1_a1_w_d17 <= viewport_adjust1_a1_w;
             viewport_adjust1_b1_w_d17 <= viewport_adjust1_b1_w;
             viewport_adjust1_part1 <= {1'b0, viewport_adjust1_a1_w_d17} + {1'b0,
-            viewport_adjust1_b1_w_d17} + {35'b0, viewport_adjust1_part0[35]};
+                        viewport_adjust1_b1_w_d17} + {35'b0, viewport_adjust1_part0[35]};
             viewport_adjust1_a2_w_d17 <= viewport_adjust1_a2_w;
             viewport_adjust1_a2_w_d18 <= viewport_adjust1_a2_w_d17;
             viewport_adjust1_b2_w_d17 <= viewport_adjust1_b2_w;
             viewport_adjust1_b2_w_d18 <= viewport_adjust1_b2_w_d17;
             unused_viewport_adjust1_part2 <= {1'b0, viewport_adjust1_a2_w_d18} + {1'b0,
-            viewport_adjust1_b2_w_d18} + {24'b0, viewport_adjust1_part1[35]};
+                        viewport_adjust1_b2_w_d18} + {24'b0, viewport_adjust1_part1[35]};
             viewport_adjust1_low1_w_d19 <= viewport_adjust1_low1_w;
             viewport_adjust1_low0_w_d18 <= viewport_adjust1_low0_w;
             viewport_adjust1_low0_w_d19 <= viewport_adjust1_low0_w_d18;
@@ -1265,7 +1302,11 @@ module edrv32_gpu_project (
             viewport_size1_r_d18 <= viewport_size1_r_d17;
             viewport_size1_r_d19 <= viewport_size1_r_d18;
             viewport_product1 <= $signed(viewport_adjust1_w) * $signed({1'b0,
-            viewport_size1_r_d19});
+                        viewport_size1_r_d19});
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[5]) begin
             viewport_product1_p1 <= viewport_product1;
             viewport_product1_p2 <= viewport_product1_p1;
             viewport_shift1 <= viewport_product1_p2 << 3;
@@ -1274,13 +1315,13 @@ module edrv32_gpu_project (
             depth_negate_a1_w_d14 <= depth_negate_a1_w;
             depth_negate_b1_w_d14 <= depth_negate_b1_w;
             depth_negate_part1 <= {1'b0, depth_negate_a1_w_d14} + {1'b0, depth_negate_b1_w_d14}
-            + {35'b0, depth_negate_part0[35]};
+                        + {35'b0, depth_negate_part0[35]};
             depth_negate_a2_w_d14 <= depth_negate_a2_w;
             depth_negate_a2_w_d15 <= depth_negate_a2_w_d14;
             depth_negate_b2_w_d14 <= depth_negate_b2_w;
             depth_negate_b2_w_d15 <= depth_negate_b2_w_d14;
             unused_depth_negate_part2 <= {1'b0, depth_negate_a2_w_d15} + {1'b0,
-            depth_negate_b2_w_d15} + {24'b0, depth_negate_part1[35]};
+                        depth_negate_b2_w_d15} + {24'b0, depth_negate_part1[35]};
             depth_negate_low1_w_d16 <= depth_negate_low1_w;
             depth_negate_low0_w_d15 <= depth_negate_low0_w;
             depth_negate_low0_w_d16 <= depth_negate_low0_w_d15;
@@ -1290,15 +1331,19 @@ module edrv32_gpu_project (
             depth_left_w_d16 <= depth_left_w_d15;
             depth_subtract_part0 <= {1'b0, depth_subtract_a0_w} + {1'b0, depth_subtract_b0_w};
             depth_subtract_a1_w_d17 <= depth_subtract_a1_w;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[6]) begin
             depth_subtract_b1_w_d17 <= depth_subtract_b1_w;
             depth_subtract_part1 <= {1'b0, depth_subtract_a1_w_d17} + {1'b0,
-            depth_subtract_b1_w_d17} + {35'b0, depth_subtract_part0[35]};
+                        depth_subtract_b1_w_d17} + {35'b0, depth_subtract_part0[35]};
             depth_subtract_a2_w_d17 <= depth_subtract_a2_w;
             depth_subtract_a2_w_d18 <= depth_subtract_a2_w_d17;
             depth_subtract_b2_w_d17 <= depth_subtract_b2_w;
             depth_subtract_b2_w_d18 <= depth_subtract_b2_w_d17;
             unused_depth_subtract_part2 <= {1'b0, depth_subtract_a2_w_d18} + {1'b0,
-            depth_subtract_b2_w_d18} + {24'b0, depth_subtract_part1[35]};
+                        depth_subtract_b2_w_d18} + {24'b0, depth_subtract_part1[35]};
             depth_subtract_low1_w_d19 <= depth_subtract_low1_w;
             depth_subtract_low0_w_d18 <= depth_subtract_low0_w;
             depth_subtract_low0_w_d19 <= depth_subtract_low0_w_d18;
@@ -1308,13 +1353,13 @@ module edrv32_gpu_project (
             screen_abs0_a1_w_d21 <= screen_abs0_a1_w;
             screen_abs0_b1_w_d21 <= screen_abs0_b1_w;
             screen_abs0_part1 <= {1'b0, screen_abs0_a1_w_d21} + {1'b0, screen_abs0_b1_w_d21} +
-            {35'b0, screen_abs0_part0[35]};
+                        {35'b0, screen_abs0_part0[35]};
             screen_abs0_a2_w_d21 <= screen_abs0_a2_w;
             screen_abs0_a2_w_d22 <= screen_abs0_a2_w_d21;
             screen_abs0_b2_w_d21 <= screen_abs0_b2_w;
             screen_abs0_b2_w_d22 <= screen_abs0_b2_w_d21;
             unused_screen_abs0_part2 <= {1'b0, screen_abs0_a2_w_d22} + {1'b0,
-            screen_abs0_b2_w_d22} + {24'b0, screen_abs0_part1[35]};
+                        screen_abs0_b2_w_d22} + {24'b0, screen_abs0_part1[35]};
             screen_abs0_low1_w_d23 <= screen_abs0_low1_w;
             screen_abs0_low0_w_d22 <= screen_abs0_low0_w;
             screen_abs0_low0_w_d23 <= screen_abs0_low0_w_d22;
@@ -1322,7 +1367,7 @@ module edrv32_gpu_project (
             screen_round0_a1_w_d24 <= screen_round0_a1_w;
             screen_round0_b1_w_d24 <= screen_round0_b1_w;
             unused_screen_round0_part1 <= {1'b0, screen_round0_a1_w_d24} + {1'b0,
-            screen_round0_b1_w_d24} + {14'b0, screen_round0_part0[35]};
+                        screen_round0_b1_w_d24} + {14'b0, screen_round0_part0[35]};
             screen_round0_low0_w_d25 <= screen_round0_low0_w;
             screen_abs0_sign_d21 <= screen_abs0_sign;
             screen_abs0_sign_d22 <= screen_abs0_sign_d21;
@@ -1335,11 +1380,15 @@ module edrv32_gpu_project (
             screen_signed0_a1_w_d27 <= screen_signed0_a1_w;
             screen_signed0_b1_w_d27 <= screen_signed0_b1_w;
             unused_screen_signed0_part1 <= {1'b0, screen_signed0_a1_w_d27} + {1'b0,
-            screen_signed0_b1_w_d27} + {14'b0, screen_signed0_part0[35]};
+                        screen_signed0_b1_w_d27} + {14'b0, screen_signed0_part0[35]};
             screen_signed0_low0_w_d28 <= screen_signed0_low0_w;
             viewport_offset0_r <= viewport_i[0 +: 16];
             viewport_offset_ext0_w_d1 <= viewport_offset_ext0_w;
             viewport_offset_ext0_w_d2 <= viewport_offset_ext0_w_d1;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[7]) begin
             viewport_offset_ext0_w_d3 <= viewport_offset_ext0_w_d2;
             viewport_offset_ext0_w_d4 <= viewport_offset_ext0_w_d3;
             viewport_offset_ext0_w_d5 <= viewport_offset_ext0_w_d4;
@@ -1364,29 +1413,34 @@ module edrv32_gpu_project (
             viewport_offset_ext0_w_d24 <= viewport_offset_ext0_w_d23;
             viewport_offset_ext0_w_d25 <= viewport_offset_ext0_w_d24;
             viewport_offset_ext0_w_d26 <= viewport_offset_ext0_w_d25;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[8]) begin
             viewport_offset_ext0_w_d27 <= viewport_offset_ext0_w_d26;
             viewport_offset_ext0_w_d28 <= viewport_offset_ext0_w_d27;
             screen_offset0_part0 <= {1'b0, screen_offset0_a0_w} + {1'b0, screen_offset0_b0_w};
             screen_offset0_a1_w_d29 <= screen_offset0_a1_w;
             screen_offset0_b1_w_d29 <= screen_offset0_b1_w;
             unused_screen_offset0_part1 <= {1'b0, screen_offset0_a1_w_d29} + {1'b0,
-            screen_offset0_b1_w_d29} + {14'b0, screen_offset0_part0[35]};
+                        screen_offset0_b1_w_d29} + {14'b0, screen_offset0_part0[35]};
             screen_offset0_low0_w_d30 <= screen_offset0_low0_w;
             screen_clamp0 <= $signed(screen_offset0_w) > 49'sd65535 ? 17'h0ffff :
-            $signed(screen_offset0_w) < -49'sd65536 ? 17'h10000 : screen_offset0_w[16:0];
+                        $signed(screen_offset0_w) < -49'sd65536 ? 17'h10000 :
+            screen_offset0_w[16:0];
             screen_abs1_sign <= viewport_shift1[93];
             screen_abs1_invert <= viewport_shift1[93] ? ~viewport_shift1 : viewport_shift1;
             screen_abs1_part0 <= {1'b0, screen_abs1_a0_w} + {1'b0, screen_abs1_b0_w};
             screen_abs1_a1_w_d25 <= screen_abs1_a1_w;
             screen_abs1_b1_w_d25 <= screen_abs1_b1_w;
             screen_abs1_part1 <= {1'b0, screen_abs1_a1_w_d25} + {1'b0, screen_abs1_b1_w_d25} +
-            {35'b0, screen_abs1_part0[35]};
+                        {35'b0, screen_abs1_part0[35]};
             screen_abs1_a2_w_d25 <= screen_abs1_a2_w;
             screen_abs1_a2_w_d26 <= screen_abs1_a2_w_d25;
             screen_abs1_b2_w_d25 <= screen_abs1_b2_w;
             screen_abs1_b2_w_d26 <= screen_abs1_b2_w_d25;
             unused_screen_abs1_part2 <= {1'b0, screen_abs1_a2_w_d26} + {1'b0,
-            screen_abs1_b2_w_d26} + {24'b0, screen_abs1_part1[35]};
+                        screen_abs1_b2_w_d26} + {24'b0, screen_abs1_part1[35]};
             screen_abs1_low1_w_d27 <= screen_abs1_low1_w;
             screen_abs1_low0_w_d26 <= screen_abs1_low0_w;
             screen_abs1_low0_w_d27 <= screen_abs1_low0_w_d26;
@@ -1394,7 +1448,7 @@ module edrv32_gpu_project (
             screen_round1_a1_w_d28 <= screen_round1_a1_w;
             screen_round1_b1_w_d28 <= screen_round1_b1_w;
             unused_screen_round1_part1 <= {1'b0, screen_round1_a1_w_d28} + {1'b0,
-            screen_round1_b1_w_d28} + {14'b0, screen_round1_part0[35]};
+                        screen_round1_b1_w_d28} + {14'b0, screen_round1_part0[35]};
             screen_round1_low0_w_d29 <= screen_round1_low0_w;
             screen_abs1_sign_d25 <= screen_abs1_sign;
             screen_abs1_sign_d26 <= screen_abs1_sign_d25;
@@ -1407,13 +1461,17 @@ module edrv32_gpu_project (
             screen_signed1_a1_w_d31 <= screen_signed1_a1_w;
             screen_signed1_b1_w_d31 <= screen_signed1_b1_w;
             unused_screen_signed1_part1 <= {1'b0, screen_signed1_a1_w_d31} + {1'b0,
-            screen_signed1_b1_w_d31} + {14'b0, screen_signed1_part0[35]};
+                        screen_signed1_b1_w_d31} + {14'b0, screen_signed1_part0[35]};
             screen_signed1_low0_w_d32 <= screen_signed1_low0_w;
             viewport_offset1_r <= viewport_i[16 +: 16];
             viewport_offset_ext1_w_d1 <= viewport_offset_ext1_w;
             viewport_offset_ext1_w_d2 <= viewport_offset_ext1_w_d1;
             viewport_offset_ext1_w_d3 <= viewport_offset_ext1_w_d2;
             viewport_offset_ext1_w_d4 <= viewport_offset_ext1_w_d3;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[9]) begin
             viewport_offset_ext1_w_d5 <= viewport_offset_ext1_w_d4;
             viewport_offset_ext1_w_d6 <= viewport_offset_ext1_w_d5;
             viewport_offset_ext1_w_d7 <= viewport_offset_ext1_w_d6;
@@ -1438,6 +1496,10 @@ module edrv32_gpu_project (
             viewport_offset_ext1_w_d26 <= viewport_offset_ext1_w_d25;
             viewport_offset_ext1_w_d27 <= viewport_offset_ext1_w_d26;
             viewport_offset_ext1_w_d28 <= viewport_offset_ext1_w_d27;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[10]) begin
             viewport_offset_ext1_w_d29 <= viewport_offset_ext1_w_d28;
             viewport_offset_ext1_w_d30 <= viewport_offset_ext1_w_d29;
             viewport_offset_ext1_w_d31 <= viewport_offset_ext1_w_d30;
@@ -1446,20 +1508,21 @@ module edrv32_gpu_project (
             screen_offset1_a1_w_d33 <= screen_offset1_a1_w;
             screen_offset1_b1_w_d33 <= screen_offset1_b1_w;
             unused_screen_offset1_part1 <= {1'b0, screen_offset1_a1_w_d33} + {1'b0,
-            screen_offset1_b1_w_d33} + {14'b0, screen_offset1_part0[35]};
+                        screen_offset1_b1_w_d33} + {14'b0, screen_offset1_part0[35]};
             screen_offset1_low0_w_d34 <= screen_offset1_low0_w;
             screen_clamp1 <= $signed(screen_offset1_w) > 49'sd65535 ? 17'h0ffff :
-            $signed(screen_offset1_w) < -49'sd65536 ? 17'h10000 : screen_offset1_w[16:0];
+                        $signed(screen_offset1_w) < -49'sd65536 ? 17'h10000 :
+            screen_offset1_w[16:0];
             depth_round_part0 <= {1'b0, depth_round_a0_w} + {1'b0, depth_round_b0_w};
             depth_round_a1_w_d20 <= depth_round_a1_w;
             depth_round_b1_w_d20 <= depth_round_b1_w;
             unused_depth_round_part1 <= {1'b0, depth_round_a1_w_d20} + {1'b0,
-            depth_round_b1_w_d20} + {14'b0, depth_round_part0[35]};
+                        depth_round_b1_w_d20} + {14'b0, depth_round_part0[35]};
             depth_round_low0_w_d21 <= depth_round_low0_w;
             depth_subtract_w_d20 <= depth_subtract_w;
             unused_depth_subtract_w_d21 <= depth_subtract_w_d20;
             depth_clamp <= unused_depth_subtract_w_d21[93] ? 16'b0 : depth_round_w > 65535 ?
-            16'hffff : depth_round_w[15:0];
+                        16'hffff : depth_round_w[15:0];
             screen_clamp0_d32 <= screen_clamp0;
             screen_clamp0_d33 <= screen_clamp0_d32;
             screen_clamp0_d34 <= screen_clamp0_d33;
@@ -1484,6 +1547,10 @@ module edrv32_gpu_project (
             restored_d14 <= restored_d13;
             restored_d15 <= restored_d14;
             restored_d16 <= restored_d15;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[11]) begin
             restored_d17 <= restored_d16;
             restored_d18 <= restored_d17;
             restored_d19 <= restored_d18;
@@ -1513,6 +1580,10 @@ module edrv32_gpu_project (
             uv_product0_p2_d20 <= uv_product0_p2_d19;
             uv_product0_p2_d21 <= uv_product0_p2_d20;
             uv_product0_p2_d22 <= uv_product0_p2_d21;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[12]) begin
             uv_product0_p2_d23 <= uv_product0_p2_d22;
             uv_product0_p2_d24 <= uv_product0_p2_d23;
             uv_product0_p2_d25 <= uv_product0_p2_d24;
@@ -1536,6 +1607,10 @@ module edrv32_gpu_project (
             uv_product1_p2_d20 <= uv_product1_p2_d19;
             uv_product1_p2_d21 <= uv_product1_p2_d20;
             uv_product1_p2_d22 <= uv_product1_p2_d21;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[13]) begin
             uv_product1_p2_d23 <= uv_product1_p2_d22;
             uv_product1_p2_d24 <= uv_product1_p2_d23;
             uv_product1_p2_d25 <= uv_product1_p2_d24;
@@ -1556,6 +1631,10 @@ module edrv32_gpu_project (
             color_input_r_d6 <= color_input_r_d5;
             color_input_r_d7 <= color_input_r_d6;
             color_input_r_d8 <= color_input_r_d7;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[14]) begin
             color_input_r_d9 <= color_input_r_d8;
             color_input_r_d10 <= color_input_r_d9;
             color_input_r_d11 <= color_input_r_d10;
@@ -1572,6 +1651,10 @@ module edrv32_gpu_project (
             color_input_r_d22 <= color_input_r_d21;
             color_input_r_d23 <= color_input_r_d22;
             color_input_r_d24 <= color_input_r_d23;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[15]) begin
             color_input_r_d25 <= color_input_r_d24;
             color_input_r_d26 <= color_input_r_d25;
             color_input_r_d27 <= color_input_r_d26;
