@@ -813,3 +813,357 @@ GT-18/19模型使用已有Python 3.9；未安装工具，未改变模型或期�
 状态：S-5 RTL和本卡仿真验收完成；原N788类宽乘法已被寄存的原生宽度部分积替代。
 物理APM使用、区域副本保留、实际扇出和clk_gpu时序交下一轮PDS确认，本节不声称
 已经达到150/180MHz。
+
+
+## S-6：GPU 片上存储归类（2026-11-26）
+
+### 背景、约束与决策
+
+第8轮层次表基线为 `origin/win/20261124-107-gpu-board` 的
+`tasks/win/20261124-107-gpu-board/artifacts/round8/resource_hier.txt`：
+GPU 269.5 DRM，整片332 DRM；S-5新增17个delay实例后估算分别286.5、349。
+本节只改变小存储的物理归类，不改变规格、接口、算术、使能、停顿或有效位时序。
+
+协调者在 `6e91f70f2` 更新微结构4.15并替换包装：使用既有
+`edrv32_ram_gpu_table`（64×72，同步写、组合读）；原 `delay64` 名称不再使用。
+单读口同步表在原读位置保留输出寄存器，组合读保持组合读；多读口复制表、并联写口。
+深度≤4或总位数<256的结构保留寄存器。比较器并行读取的地址记分牌、并行组包、
+多写/复位控制状态和带中途修改/多抽头的运算流水仍是原寄存器电路，不作为RAM重推断。
+没有新增IP，没有数据复位或额外保护。
+
+### 显式delay清点
+
+下表“深度”是有效时钟距离，包含原RAM末级寄存读，不是原IP的512项物理容量；
+原类型全部为512×72 DRM。每个列出的旧实例均已移除，未留下深度>64的delay。
+`d72`、`d84`是所在流水级编号，实际存储距离只有53、24拍，不能按名字判断容量。
+同深度字段在能减少片数时合并；每片最多72位，不整体搬运超过256位记录。
+project的8拍三片（152位）和setup_plane的24拍两片（104位）已经达到
+ceil(总宽/72)的最少片数，保持原字段分片；34拍双88位则由4片合并成3片。
+
+| 模块 | 旧实例（范围列出全部后缀） | 深度×有效宽度 / 用途 | 改后 |
+|---|---|---|---|
+| project | `u_input_delay_0,1,2,3` | 24×224，倒数对齐的顶点负载 | 4 table+原输出寄存 |
+| project | `u_payload_delay0` | 49×72，颜色对齐 | 1 table+原输出寄存 |
+| project | `u_payload_delay1,2,3` | 8×(72+40+40)，坐标/UV | 3 table+原输出寄存 |
+| transform | `g_coordinate_ram[0,1,2].u_delay` | 8×160，四坐标 | 3 table+原输出寄存 |
+| object | `u_index` | 12×24，对象索引 | 1 table+原输出寄存 |
+| raster | `u_metadata_9_0` | 5×5，边包含/裁剪位 | 25位移位寄存器 |
+| raster | `u_metadata_10_0,1` | 6×106，坐标/h/palette | 2 table+原输出寄存 |
+| perspective | `u_output_0,1,2,3,4,5,6,7,8,9` | 32×657，样本输出队列 | 10 table+原输出寄存 |
+| perspective | `u_delay_sign_0` | 4×4，符号 | 16位使能移位寄存器 |
+| perspective | `u_delay_q_0` | 12×24，q | 1 table+原输出寄存 |
+| perspective | `u_delay_uvq_0,1` | 14×116，uq/vq | 2 table+原输出寄存 |
+| perspective | `u_delay_coordinate_0,1` | 13×128，坐标 | 2 table+原输出寄存 |
+| perspective | `u_delay_shade_0,1` | 41×80，着色输入 | 2 table+原输出寄存 |
+| perspective | `u_delay_metadata_0` | 43×49，样本元数据 | 1 table+原输出寄存 |
+| perspective | `u_delay_scale_0` | 3×60，缩放因子 | 180位使能移位寄存器 |
+| perspective | `u_delay_bypass_0,1,2,3` | 10×232，旁路负载 | 4 table+原输出寄存 |
+| setup_plane | `u_v52_0_w_d9_r_bank0, u_v52_1_w_d9_r_bank0, u_v52_2_w_d9_r_bank0` | 9×156，三顶点 | 合并3 table+原输出寄存 |
+| setup_plane | `u_gradient_bias0_3_r_d40_r_bank0,1; u_gradient_bias1_3_r_d40_r_bank0,1` | 34×176，两个梯度偏置 | 合并3 table+原输出寄存（原4片） |
+| setup_plane | `u_start_base_w_d72_r_bank0` | 53×70，平面起点基值 | 1 table+原输出寄存 |
+| setup_plane | `u_stored_signed1_w_d84_r_bank0, u_stored_signed0_w_d84_r_bank0` | 24×(52+52)，两梯度 | 2 table+原输出寄存 |
+| texture | `g_delay[0,1].u_metadata` | 6×144，过滤权重/分数（外部另有原流水） | 2 table+原输出寄存 |
+
+合计51个旧delay→47个table和3组短寄存器；少1片来自两个88位梯度偏置的共同分片。
+原RAM指针由9位收为6位，地址差、使能和所有末级寄存器保持相同，回绕不改变有效数据。
+
+### 小数组重映射
+
+| 模块 | 旧数组 / 深度×宽度 | 改前→改后 / 用途 |
+|---|---|---|
+| setup | 七属性 `value_r`：8×153，含常零位 | 推断存储→12 table；按16/35/51/51/24/24/24位顶点字段存储并补回51位，保留原同步读 |
+| setup | `delta_r, offset_r`：16×(72+36) | 推断存储→2 table，共用属性标签读口 |
+| setup | `origin_r, bounds_r`：16×(32+64) | 推断存储→2 table，共用完成标签读口 |
+| setup | 三边 `value_r`：16×40；`dx_r,dy_r,bias_r`：16×(40+40+40) | 推断存储→每边1+2 table，保留原输出槽寄存器 |
+| setup_plane | `reciprocal_context_r`：16×31；`delta_context0..3_r, offset_context0..1_r`：16×18 | 推断存储→7 table，各保留原同步读；`exponent_context_r`仅96位，保留寄存器 |
+| transform | `vertex_color_r,vertex_uv_r`：16×16/32 | 推断存储→各1 table，分别按原标签组合读 |
+| geometry | 七字段 `screen_r`：16×17/17/16/35/51/51/72 | 推断三读口存储→每字段3 table（共21），扇形顶点三读口写口并联 |
+| pixel | `depth_r,color_r,alpha_r`：32×(64+96+32) | 推断同步表→3 table；mask仅128位保留寄存器 |
+| pixel | `old_r`：32×160；`result_r`：32×160 | 推断表→3 table及双读口6 table，保留旧字同步读与结果组合读 |
+| texture | `x_r,y_r,depth_r`：32×(16+16+64) | 推断表→2 table，退队组合读 |
+| texture | `color_r,alpha_r`：32×(96+8) | 推断表→2 table，着色组合读 |
+| texture | 四lane `u_r,v_r`：32×(32+32)；`lod_r`：32×12 | 推断表→各lane 1 table及双读口2 table；原偶/奇缓存寄存器不变 |
+| texture | 四lane `result_color_r,result_alpha_r`：32×(24+8) | 推断表→每lane 1 table；result_mask仅32位保留寄存器 |
+| texture | `g_nearest_compare`及44个`g_address_pool_*`的even/odd：各16×22/21/16 | 原推断LUTRAM→90显式table，原缓存读拍不变；不是纹理数据bank |
+| write_dma | `strobe_r`：32×32 | 推断表→1 table，保留原同步读 |
+
+setup第8轮的32.5 DRM推断量只能由父模块剩余量核对，层次表没有给数组逐项归属；
+因此不伪造单数组DRM分摊。texture的6 DRM、pixel的5.5 DRM和write_dma的0.5 DRM
+也按模块剩余量记录。原read_pool/write_pool仍使用既有显式LUTRAM包装。
+
+### DRM与LUT估算
+
+单位为第8轮的36K等效DRM；S-5后的“改前”只在对应模块加入实际新增delay数。
+ROM和范围外功能存储全部保留，不能把table实例数当成DRM减少量。
+
+| 模块（父子不重复相加） | 第8轮 | S-5后改前估算 | S-6后估算 | S-6 table实例 |
+|---|---:|---:|---:|---:|
+| geometry（含transform/project） | 5 | 12 | 1 | 34 |
+| setup（含setup_plane/area_reciprocal） | 33.5 | 43.5 | 1 | 41 |
+| perspective | 25 | 25 | 1 | 22 |
+| raster | 3 | 3 | 0 | 2 |
+| texture（不含独立texture_ram） | 8 | 8 | 0 | 112 |
+| pixel | 5.5 | 5.5 | 0 | 12 |
+| object | 1 | 1 | 0 | 1 |
+| write_dma | 0.5 | 0.5 | 0 | 1 |
+| target / texture_ram / palette / resolve | 129 / 48 / 8 / 3 | 同第8轮 | 同第8轮 | 0 |
+| 其他GPU模块 | 0 | 0 | 0 | 0 |
+| GPU合计 | 269.5 | 286.5 | 191 | 225 |
+| 整片（GPU外62.5不变） | 332 | 349 | 253.5/415（61.1%） | — |
+
+估算减少95.5 DRM，其中显式delay 51、setup推断32.5、texture推断6、pixel推断5.5、
+write_dma推断0.5。物理映射、ROM打包和小表常量裁剪最终由PDS确认。
+225个64×72 table的未裁剪容量为1,036,800位；按既有64×256 read_pool的256 LUTRAM/LUT
+口径，每table至多72 LUTRAM/LUT，未裁剪上界16,200 LUT。按有效字段宽度相加为8193 LUT（geometry 1433 + setup 2004 + perspective 1286 +
+raster 106 + texture 2636 + pixel 672 + object 24 + write_dma 32），
+其中texture原偶奇地址表已占原推断LUTRAM，不能全部计为增量；大量常零/无用字段可继续裁剪。
+此估算不包含地址译码与输出寄存器，不能声称净增只有微结构早期预估的3～4千LUT。
+LUT/FF净变化及分布式RAM占用等待PDS实测，不用通用网表冒充器件映射结果。
+
+### 寄存器数组完整复核
+
+以下从S-6输入版本 `6e91f70f2` 逐声明清点，宽度为Verilog常量表达式，深度为元素数；
+重复同名项按声明数合并，generate的复制倍数在上方重映射表中注明。
+“原寄存器”包括组合运算的临时数组以及带复位/多写口/并行读取的控制或运算寄存器，
+不是新增的RAM推断。target/texture_ram/palette/resolve保持任务边界。
+
+| 模块 | 数组 | 深度 | 宽度 | 改前→改后；用途 |
+|---|---|---:|---|---|
+| clip | `output_count_r` | 2 | 4 | 原寄存器→原寄存器；裁剪输出槽 |
+| clip | `data_r` | 2 | `WIDTH-1:0` (高位:低位) | 原寄存器→原寄存器；裁剪输出槽 |
+| geometry | `counts_r` | 16 | 4 | 原寄存器→原寄存器；几何计数/屏幕表/输出槽 |
+| geometry | `screen_counts_r` | 2 | 4 | 原寄存器→原寄存器；几何计数/屏幕表/输出槽 |
+| geometry | `fan_dx_w` | 2 | 18 | 原寄存器→原寄存器；几何计数/屏幕表/输出槽 |
+| geometry | `fan_dy_w` | 2 | 18 | 原寄存器→原寄存器；几何计数/屏幕表/输出槽 |
+| geometry | `data_r` | 2 | `WIDTH-1:0` (高位:低位) | 原寄存器→原寄存器；几何计数/屏幕表/输出槽 |
+| geometry | `screen_r` | 16 | `WIDTH-1:0` (高位:低位) | 推断数组→显式table；几何计数/屏幕表/输出槽 |
+| geometry | `output_r` | 2 | `WIDTH*3-1:0` (高位:低位) | 原寄存器→原寄存器；几何计数/屏幕表/输出槽 |
+| list_pack | `hit_pack_r` | 8 | 32 | 原寄存器→原寄存器；并行列表组包/事件槽 |
+| list_pack | `free_pack_r` | 8 | 32 | 原寄存器→原寄存器；并行列表组包/事件槽 |
+| list_pack | `event_idx_r` | 2 | 24 | 原寄存器→原寄存器；并行列表组包/事件槽 |
+| list_pack | `event_hit_r` | 2 | 8 | 原寄存器→原寄存器；并行列表组包/事件槽 |
+| list_pack | `event_free_r` | 2 | 1 | 原寄存器→原寄存器；并行列表组包/事件槽 |
+| list_pack | `data_r` | 2 | 256 | 原寄存器→原寄存器；并行列表组包/事件槽 |
+| list_pack | `addr_r` | 2 | 32 | 原寄存器→原寄存器；并行列表组包/事件槽 |
+| list_pack | `bytes_r` | 2 | 6 | 原寄存器→原寄存器；并行列表组包/事件槽 |
+| object | `ingress_idx_r` | 2 | 24 | 原寄存器→原寄存器；对象输入/输出槽 |
+| object | `ingress_r` | 2 | 1 | 原寄存器→原寄存器；对象输入/输出槽 |
+| object | `ingress_r` | 2 | 15 | 原寄存器→原寄存器；对象输入/输出槽 |
+| object | `ingress_r`（6处声明） | 2 | 16 | 原寄存器→原寄存器；对象输入/输出槽 |
+| object | `ingress_r`（2处声明） | 2 | 24 | 原寄存器→原寄存器；对象输入/输出槽 |
+| object | `ingress_r`（4处声明） | 2 | 8 | 原寄存器→原寄存器；对象输入/输出槽 |
+| object | `ingress_r` | 2 | 64 | 原寄存器→原寄存器；对象输入/输出槽 |
+| palette | `prepare_idx_r` | 4 | 8 | 原类型→原类型（范围外）；调色板控制（范围外） |
+| perspective | `input_x_r` | 2 | 16 | 原寄存器→原寄存器；透视输入槽 |
+| perspective | `input_y_r` | 2 | 16 | 原寄存器→原寄存器；透视输入槽 |
+| perspective | `input_mask_r` | 2 | 4 | 原寄存器→原寄存器；透视输入槽 |
+| perspective | `input_h_r` | 2 | 70 | 原寄存器→原寄存器；透视输入槽 |
+| perspective | `input_palette_r` | 2 | 4 | 原寄存器→原寄存器；透视输入槽 |
+| perspective | `input_alpha_r` | 2 | 8 | 原寄存器→原寄存器；透视输入槽 |
+| perspective | `input_plane_r` | 2 | 70 | 原寄存器→原寄存器；透视输入槽 |
+| perspective_multiply | `exponent_r` | 2 | 10 | 原寄存器→原寄存器；透视乘法流水 |
+| pixel | `addr_r` | 32 | 16 | 原寄存器→原寄存器；像素记分牌/负载 |
+| pixel | `mask_r` | 32 | 4 | 原寄存器→原寄存器；像素记分牌/负载 |
+| pixel | `depth_r` | 32 | 64 | 推断数组→显式table；像素记分牌/负载 |
+| pixel | `color_r` | 32 | 96 | 推断数组→显式table；像素记分牌/负载 |
+| pixel | `alpha_r` | 32 | 32 | 推断数组→显式table；像素记分牌/负载 |
+| pixel | `old_r` | 32 | 160 | 推断数组→显式table；像素记分牌/负载 |
+| pixel | `result_r` | 32 | 160 | 推断数组→显式table；像素记分牌/负载 |
+| pixel | `return_slot_r` | 32 | 5 | 原寄存器→原寄存器；像素记分牌/负载 |
+| pixel | `pipe_slot_r` | 16 | 5 | 原寄存器→原寄存器；像素记分牌/负载 |
+| pixel | `even_r` | 16 | 12 | 原寄存器→原寄存器；像素记分牌/负载 |
+| pixel | `odd_r` | 16 | 12 | 原寄存器→原寄存器；像素记分牌/负载 |
+| pixel_lane | `base_r` | 15 | 40 | 原寄存器→原寄存器；像素运算流水/中途更新字段 |
+| pixel_lane | `source_r` | 6 | 24 | 原寄存器→原寄存器；像素运算流水/中途更新字段 |
+| pixel_lane | `alpha_r` | 4 | 8 | 原寄存器→原寄存器；像素运算流水/中途更新字段 |
+| pixel_lane | `depth_r` | 3 | 16 | 原寄存器→原寄存器；像素运算流水/中途更新字段 |
+| pixel_lane | `operation_r` | 2 | 3 | 原寄存器→原寄存器；像素运算流水/中途更新字段 |
+| pixel_lane | `destination_r` | 3 | 24 | 原寄存器→原寄存器；像素运算流水/中途更新字段 |
+| pixel_lane | `factor_source_r` | 2 | 24 | 原寄存器→原寄存器；像素运算流水/中途更新字段 |
+| pixel_lane | `factor_dest_r` | 2 | 24 | 原寄存器→原寄存器；像素运算流水/中途更新字段 |
+| pixel_lane | `product_source_r` | 3 | 48 | 原寄存器→原寄存器；像素运算流水/中途更新字段 |
+| pixel_lane | `product_dest_r` | 3 | 48 | 原寄存器→原寄存器；像素运算流水/中途更新字段 |
+| project | `output_0_r` | 2 | 17 | 原寄存器→原寄存器；投影输出槽 |
+| project | `output_1_r` | 2 | 17 | 原寄存器→原寄存器；投影输出槽 |
+| project | `output_2_r` | 2 | 16 | 原寄存器→原寄存器；投影输出槽 |
+| project | `output_3_r` | 2 | 35 | 原寄存器→原寄存器；投影输出槽 |
+| project | `output_4_r` | 2 | 51 | 原寄存器→原寄存器；投影输出槽 |
+| project | `output_5_r` | 2 | 51 | 原寄存器→原寄存器；投影输出槽 |
+| project | `output_6_r` | 2 | 72 | 原寄存器→原寄存器；投影输出槽 |
+| quad | `input_data_r` | 2 | 128 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `input_x_r` | 2 | 17 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `input_y_r` | 2 | 17 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `output_x_r` | 2 | 16 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `output_y_r` | 2 | 16 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `output_mask_r` | 2 | 4 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `output_depth_r` | 2 | 16 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `output_unused_palette_r` | 2 | 4 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `output_alpha_r` | 2 | 8 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `input_begin_x_r` | 2 | 18 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `input_begin_y_r` | 2 | 18 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `input_end_x_r` | 2 | 18 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `input_end_y_r` | 2 | 18 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `input_width_r` | 2 | 9 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `input_height_r` | 2 | 9 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `output_u_r` | 2 | 32 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| quad | `output_v_r` | 2 | 32 | 原寄存器→原寄存器；四边形输入/输出槽 |
+| raster | `input_bounds_r` | 2 | 64 | 原寄存器→原寄存器；光栅输入槽 |
+| raster | `input_origin_r` | 2 | 32 | 原寄存器→原寄存器；光栅输入槽 |
+| raster | `input_h_r` | 2 | 70 | 原寄存器→原寄存器；光栅输入槽 |
+| raster | `input_start_r` | 2 | `WIDTH-1:0` (高位:低位) | 原寄存器→原寄存器；光栅输入槽 |
+| raster | `input_gx_r` | 2 | `GRAD_WIDTH-1:0` (高位:低位) | 原寄存器→原寄存器；光栅输入槽 |
+| raster | `input_gy_r` | 2 | `GRAD_WIDTH-1:0` (高位:低位) | 原寄存器→原寄存器；光栅输入槽 |
+| raster | `input_start_r` | 2 | 40 | 原寄存器→原寄存器；光栅输入槽 |
+| raster | `input_gx_r` | 2 | 40 | 原寄存器→原寄存器；光栅输入槽 |
+| raster | `input_gy_r` | 2 | 40 | 原寄存器→原寄存器；光栅输入槽 |
+| raster | `input_inclusive_r` | 2 | 1 | 原寄存器→原寄存器；光栅输入槽 |
+| read_dma | `addr_r` | 7 | 32 | 原寄存器→原寄存器；DMA描述符/读返回槽 |
+| read_dma | `beats_r` | 7 | 32 | 原寄存器→原寄存器；DMA描述符/读返回槽 |
+| read_dma | `last_keep_r` | 7 | 32 | 原寄存器→原寄存器；DMA描述符/读返回槽 |
+| read_dma | `owner_r` | 4 | 3 | 原寄存器→原寄存器；DMA描述符/读返回槽 |
+| read_dma | `length_r` | 4 | 5 | 原寄存器→原寄存器；DMA描述符/读返回槽 |
+| read_dma | `head_keep_r` | 4 | 32 | 原寄存器→原寄存器；DMA描述符/读返回槽 |
+| read_dma | `tail_keep_r` | 4 | 32 | 原寄存器→原寄存器；DMA描述符/读返回槽 |
+| read_dma | `logical_last_r` | 4 | 1 | 原寄存器→原寄存器；DMA描述符/读返回槽 |
+| read_dma | `data_r` | 2 | 256 | 原寄存器→原寄存器；DMA描述符/读返回槽 |
+| read_dma | `keep_r` | 2 | 32 | 原寄存器→原寄存器；DMA描述符/读返回槽 |
+| read_dma | `client_r` | 2 | 3 | 原寄存器→原寄存器；DMA描述符/读返回槽 |
+| read_dma | `last_r` | 2 | 1 | 原寄存器→原寄存器；DMA描述符/读返回槽 |
+| read_dma | `end_r` | 2 | 1 | 原寄存器→原寄存器；DMA描述符/读返回槽 |
+| read_dma | `slot_r` | 2 | 2 | 原寄存器→原寄存器；DMA描述符/读返回槽 |
+| regs | `perf_event_r` | 9 | 3 | 原寄存器→原寄存器；性能计数/寄存器状态 |
+| regs | `perf_r` | 9 | 32 | 原寄存器→原寄存器；性能计数/寄存器状态 |
+| resolve | `output_r` | 2 | 256 | 原类型→原类型（范围外）；解析流水（范围外） |
+| resolve | `output_last_r` | 2 | 1 | 原类型→原类型（范围外）；解析流水（范围外） |
+| resolve | `output_keep_r` | 2 | 32 | 原类型→原类型（范围外）；解析流水（范围外） |
+| resolve | `aa_group_r` | 6 | 9 | 原类型→原类型（范围外）；解析流水（范围外） |
+| resolve | `color_a_r` | 5 | 24 | 原类型→原类型（范围外）；解析流水（范围外） |
+| resolve | `color_b_r` | 5 | 24 | 原类型→原类型（范围外）；解析流水（范围外） |
+| resolve | `color_c_r` | 5 | 24 | 原类型→原类型（范围外）；解析流水（范围外） |
+| resolve | `color_d_r` | 5 | 24 | 原类型→原类型（范围外）；解析流水（范围外） |
+| resolve | `light_b_r` | 5 | 8 | 原类型→原类型（范围外）；解析流水（范围外） |
+| setup | `delta_r` | 16 | 72 | 推断数组→显式table；建立标签表/边/输出槽 |
+| setup | `offset_r` | 16 | 36 | 推断数组→显式table；建立标签表/边/输出槽 |
+| setup | `origin_r` | 16 | 32 | 推断数组→显式table；建立标签表/边/输出槽 |
+| setup | `bounds_r` | 16 | 64 | 推断数组→显式table；建立标签表/边/输出槽 |
+| setup | `nonzero_r` | 16 | 1 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `multiply_a_w` | 2 | 18 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `multiply_b_w` | 2 | 18 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `x_w` | 3 | 18 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `y_w` | 3 | 18 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `difference_x_w` | 3 | 18 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `difference_y_w` | 3 | 18 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `edge_offset_x_w` | 3 | 18 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `edge_offset_y_w` | 3 | 18 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `output_bounds_r` | 2 | 64 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `output_origin_r` | 2 | 32 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `value_r` | 8 | 153 | 推断数组→显式table；建立标签表/边/输出槽 |
+| setup | `output_start_r` | 2 | `WIDTH-1:0` (高位:低位) | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `output_gradient_r` | 2 | `2*GRAD_WIDTH-1:0` (高位:低位) | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `output_h_r` | 2 | 10 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `value_r` | 16 | 40 | 推断数组→显式table；建立标签表/边/输出槽 |
+| setup | `output_value_r` | 2 | 40 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `dx_r` | 16 | 40 | 推断数组→显式table；建立标签表/边/输出槽 |
+| setup | `output_dx_r` | 2 | 40 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `dy_r` | 16 | 40 | 推断数组→显式table；建立标签表/边/输出槽 |
+| setup | `output_dy_r` | 2 | 40 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup | `bias_r` | 16 | 40 | 推断数组→显式table；建立标签表/边/输出槽 |
+| setup | `output_bias_r` | 2 | 40 | 原寄存器→原寄存器；建立标签表/边/输出槽 |
+| setup_plane | `reciprocal_context_r` | 16 | 31 | 推断数组→显式table；平面标签常数 |
+| setup_plane | `exponent_context_r` | 16 | 6 | 原寄存器→原寄存器；平面标签常数 |
+| setup_plane | `delta_context0_r` | 16 | 18 | 推断数组→显式table；平面标签常数 |
+| setup_plane | `delta_context1_r` | 16 | 18 | 推断数组→显式table；平面标签常数 |
+| setup_plane | `delta_context2_r` | 16 | 18 | 推断数组→显式table；平面标签常数 |
+| setup_plane | `delta_context3_r` | 16 | 18 | 推断数组→显式table；平面标签常数 |
+| setup_plane | `offset_context0_r` | 16 | 18 | 推断数组→显式table；平面标签常数 |
+| setup_plane | `offset_context1_r` | 16 | 18 | 推断数组→显式table；平面标签常数 |
+| target_store | `addr_r` | 4 | 16 | 原类型→原类型（范围外）；目标功能存储/写队列（范围外） |
+| target_store | `meta_r` | 4 | 6 | 原类型→原类型（范围外）；目标功能存储/写队列（范围外） |
+| target_store | `bypass_data_r` | 2 | 160 | 原类型→原类型（范围外）；目标功能存储/写队列（范围外） |
+| target_store | `group_data_r` | 4 | 160 | 原类型→原类型（范围外）；目标功能存储/写队列（范围外） |
+| target_store | `fifo_data_r` | 16 | 160 | 原类型→原类型（范围外）；目标功能存储/写队列（范围外） |
+| target_store | `fifo_addr_r` | 16 | 16 | 原类型→原类型（范围外）；目标功能存储/写队列（范围外） |
+| target_store | `fifo_meta_r` | 16 | 6 | 原类型→原类型（范围外）；目标功能存储/写队列（范围外） |
+| texture | `x_r` | 32 | 16 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `y_r` | 32 | 16 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `mask_r` | 32 | 4 | 原寄存器→原寄存器；纹理上下文/寻址元数据 |
+| texture | `depth_r` | 32 | 64 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `color_r` | 32 | 96 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `alpha_r` | 32 | 8 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `quad_r` | 32 | 1 | 原寄存器→原寄存器；纹理上下文/寻址元数据 |
+| texture | `palette_r` | 32 | 4 | 原寄存器→原寄存器；纹理上下文/寻址元数据 |
+| texture | `u_r` | 32 | 32 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `v_r` | 32 | 32 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `lod_r` | 32 | 12 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `result_color_r` | 32 | 24 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `result_alpha_r` | 32 | 8 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `result_mask_r` | 32 | 1 | 原寄存器→原寄存器；纹理上下文/寻址元数据 |
+| texture | `even_r` | 16 | 22 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `odd_r` | 16 | 22 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `even_r`（36处声明） | 16 | 21 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `odd_r`（36处声明） | 16 | 21 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `even_r`（8处声明） | 16 | 16 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| texture | `odd_r`（8处声明） | 16 | 16 | 推断数组→显式table；纹理上下文/寻址元数据 |
+| transform | `output_0_r` | 2 | 40 | 原寄存器→原寄存器；变换输出槽/顶点标签表 |
+| transform | `output_1_r` | 2 | 40 | 原寄存器→原寄存器；变换输出槽/顶点标签表 |
+| transform | `output_2_r` | 2 | 40 | 原寄存器→原寄存器；变换输出槽/顶点标签表 |
+| transform | `output_3_r` | 2 | 40 | 原寄存器→原寄存器；变换输出槽/顶点标签表 |
+| transform | `output_4_r` | 2 | 16 | 原寄存器→原寄存器；变换输出槽/顶点标签表 |
+| transform | `output_5_r` | 2 | 16 | 原寄存器→原寄存器；变换输出槽/顶点标签表 |
+| transform | `output_6_r` | 2 | 24 | 原寄存器→原寄存器；变换输出槽/顶点标签表 |
+| transform | `output_7_r` | 2 | 24 | 原寄存器→原寄存器；变换输出槽/顶点标签表 |
+| transform | `output_8_r` | 2 | 24 | 原寄存器→原寄存器；变换输出槽/顶点标签表 |
+| transform | `vertex_color_r` | 16 | 16 | 推断数组→显式table；变换输出槽/顶点标签表 |
+| transform | `vertex_uv_r` | 16 | 32 | 推断数组→显式table；变换输出槽/顶点标签表 |
+| unpack | `count_r` | 5 | 2 | 原寄存器→原寄存器；解包状态 |
+| write_dma | `addr_r` | 4 | 32 | 原寄存器→原寄存器；DMA描述符/字节使能/输出槽 |
+| write_dma | `beats_r` | 4 | 32 | 原寄存器→原寄存器；DMA描述符/字节使能/输出槽 |
+| write_dma | `last_keep_r` | 4 | 32 | 原寄存器→原寄存器；DMA描述符/字节使能/输出槽 |
+| write_dma | `owner_r` | 2 | 2 | 原寄存器→原寄存器；DMA描述符/字节使能/输出槽 |
+| write_dma | `burst_addr_r` | 2 | 32 | 原寄存器→原寄存器；DMA描述符/字节使能/输出槽 |
+| write_dma | `length_r` | 2 | 5 | 原寄存器→原寄存器；DMA描述符/字节使能/输出槽 |
+| write_dma | `logical_last_r` | 2 | 1 | 原寄存器→原寄存器；DMA描述符/字节使能/输出槽 |
+| write_dma | `strobe_r` | 32 | 32 | 推断数组→显式table；DMA描述符/字节使能/输出槽 |
+| write_dma | `out_data_r` | 2 | 256 | 原寄存器→原寄存器；DMA描述符/字节使能/输出槽 |
+| write_dma | `out_keep_r` | 2 | 32 | 原寄存器→原寄存器；DMA描述符/字节使能/输出槽 |
+| write_dma | `out_last_r` | 2 | 1 | 原寄存器→原寄存器；DMA描述符/字节使能/输出槽 |
+
+### 验证与状态
+
+RTL提交为 `9a30a7705`（以 `6e91f70f2` 的既有table包装为基础），
+`be0af54e9`补全raster/perspective Python构建器的独立源列表连接，
+`ca3b28ace`将纹理table切片信号声明前移以兼容Icarus；最终RTL版本为`ca3b28ace`。
+首轮perspective编译暴露源列表遗漏，纹理编译暴露Icarus对先用后声明切片的限制；
+仅补依赖和移动声明，未修改激励、模型或期望值。
+
+在最终版本`ca3b28ace`上重新从头执行完整一轮：18个GPU单元全部通过，
+GT-01～GT-25共128个子场景全部通过；没有拼接不同RTL版本的通过结果。
+GT-12为57个子场景，GT-13为16个子场景；texture通过13248组、预加载261拍，
+最近邻/双线性/三线性稳态吞吐检查通过。geometry/setup原II检查全部通过。
+GT-25十个工作负载的124项逐命令周期，与S-5最终`d6aabe62f`全部相同；
+比较基线取`b58b512c7`所记录的S-5最终表，未使用较早的S-4数值。
+quad净周期64.757812/对象，AA RESOLVE为80048周期（0.444711ms）。
+
+风格检查37文件0告警，GPU顶层lint 0告警；`git diff --check`通过。
+本机只执行风格/lint，运行lint前可用内存大于2GiB，没有在本机执行RTL仿真。
+复现命令：
+
+```sh
+python3 tools/check/verilog_style.py rtl/gpu/*.v rtl/tech/edrv32_ram_gpu_table.v
+(cd rtl/filelists && sh ../../tools/check/lint.sh -DSIM_MODE -f gpu.f --top-module edrv32_gpu)
+for path in verif/unit/gpu_*; do python3 tools/regress.py full --path "$path" -j 1; done
+python3 verif/block/gpu/run.py rtl gt01 gt02 gt03 gt04 gt05 gt06 gt07 gt08 gt09 gt10 gt11 gt12 gt13 gt14 gt15 gt16 gt17 gt18 gt19 gt20 gt21 gt22 gt23 gt24
+python3 verif/block/gpu/gt25/performance.py rtl
+```
+
+本次GT实跑将完整bench只编译一次（Verilator 5.051，`--timing -Wall --timescale 1ns/1ps
+-j 1 --output-groups 0 -MAKEFLAGS OPT_FAST=-O1`，与S-5相同构建选项），
+用`tools.regress.expand_files`展开既有文件列表，再按原`run.generate`、binary+
+`CASE_DIR/SEED/sim_args`、`run.compare`流程逐场景运行；最后调用原`performance.measure`。
+已有Python 3.9用于模型，没有安装工具。两路并行任务在同一仿真会话中执行，
+每路构建均为`-j 1`，全部最终仿真完成后归档并清理独立仿真目录。
+原始摘要与GT-25报告在`build/s6/regression/`，逐命令基线比较在
+`build/s6/cycle-comparison.log`，风格/lint日志在`build/s6/{style,lint}.log`。
+
+状态：S-6 RTL、存储清点和仿真验收完成；DRM/LUT估算等待PDS验证，
+实际FF、分布式RAM用量和clk_gpu时序也交下一轮PDS确认。
