@@ -201,6 +201,10 @@ static struct gpu_event submit(unsigned n, int objects)
     struct gpu_batch batch = {commands, n, sources, 4, results, objects ? 3u : 0u};
     uint64_t wait_start = test_clock_us();
     gpu_submit(&batch);
+#ifndef GPU_TEST_PC
+    /* Board submission is CPU/cache work; host submission executes the GPU model. */
+    wait_start = test_clock_us();
+#endif
     struct gpu_event event = gpu_wait();
     gpu_wait_elapsed += test_clock_us()-wait_start;
     if (event.error || event.object_status) {

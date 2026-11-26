@@ -10,7 +10,7 @@ CFLAGS := -std=c11 -O2 -Wall -Wextra -Werror -I$(COMMON) -I$(OUT)/generated \
     -I$(ROOT)/sw/lib/plat -I$(ROOT)/tools/gpu/emu -I$(ROOT)/tools/gpu/emu/pc
 MAP := -DEDRV32_SOC_MAP_H -include $(ROOT)/sw/bsp/include/gpu_soc_map.h
 PCFLAGS := -I$(ROOT)/sw/bsp/pc/include $(CFLAGS) $(MAP) -O3 \
-    -DGPU_EMU_TEXTURE_BYTES=196608 -include $(ROOT)/sw/bsp/pc/include/mmio.h
+    -DGPU_TEST_PC -DGPU_EMU_TEXTURE_BYTES=196608 -include $(ROOT)/sw/bsp/pc/include/mmio.h
 SOURCES := $(COMMON)/runtime.c $(ROOT)/sw/apps/gpu_test2d/patrol.c \
     $(ROOT)/sw/apps/gpu_test3d/canyon.c
 DRIVERS := sw/drivers/gpu.c sw/drivers/aud.c sw/drivers/disp.c sw/drivers/plic.c
