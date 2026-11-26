@@ -1,0 +1,523 @@
+Card 107 round 8 | upstream 38095a12 | local run 18a9395f
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | snapshot 2026-11-26T15:05:17+08:00
+
+Available from the synthesis .snr: 3 clk_gpu setup paths.
+The report was generated with the default number of paths.
+
+Source line | Slack ns | Logic levels | Startpoint -> Endpoint
+2505 | -3.145 | 11 | u_soc/u_gpu/u_core/u_geometry/u_project/N788_m1/CLK (GTP_APM_E2) -> u_soc/u_gpu/u_core/u_geometry/u_project/N788_m4/Z[19] (GTP_APM_E2)
+2678 | -3.145 | 11 | u_soc/u_gpu/u_core/u_geometry/u_project/N788_m1/CLK (GTP_APM_E2) -> u_soc/u_gpu/u_core/u_geometry/u_project/N788_m4/Z[20] (GTP_APM_E2)
+2851 | -3.145 | 11 | u_soc/u_gpu/u_core/u_geometry/u_project/N788_m1/CLK (GTP_APM_E2) -> u_soc/u_gpu/u_core/u_geometry/u_project/N788_m4/Z[21] (GTP_APM_E2)
+
+Detailed path, .snr lines 2505-2673
+Startpoint  : u_soc/u_gpu/u_core/u_geometry/u_project/N788_m1/CLK (GTP_APM_E2)
+Endpoint    : u_soc/u_gpu/u_core/u_geometry/u_project/N788_m4/Z[19] (GTP_APM_E2)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=155587)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m1/CLK (GTP_APM_E2)
+
+                                   tco                   1.698       6.566 r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m1/CPO[47] (GTP_APM_E2)
+                                   net (fanout=1)        0.000       6.566         u_soc/u_gpu/u_core/u_geometry/u_project/_N42525
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_m2/CPI[47] (GTP_APM_E2)
+                                   td                    1.362       7.928 r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m2/P[0] (GTP_APM_E2)
+                                   net (fanout=2)        1.372       9.300         u_soc/u_gpu/u_core/u_geometry/u_project/_N2156
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_8/I2 (GTP_LUT6CARRY)
+                                   td                    0.159       9.459 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_8/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.459         u_soc/u_gpu/u_core/u_geometry/u_project/_N66159
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_9/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.481 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_9/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.481         u_soc/u_gpu/u_core/u_geometry/u_project/_N66160
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_10/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.503 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_10/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.503         u_soc/u_gpu/u_core/u_geometry/u_project/_N66161
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_11/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.525 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_11/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.525         u_soc/u_gpu/u_core/u_geometry/u_project/_N66162
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_12/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.547 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_12/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.547         u_soc/u_gpu/u_core/u_geometry/u_project/_N66163
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_13/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.569 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_13/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.569         u_soc/u_gpu/u_core/u_geometry/u_project/_N66164
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_14/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.591 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_14/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.591         u_soc/u_gpu/u_core/u_geometry/u_project/_N66165
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_15/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.613 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_15/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.613         u_soc/u_gpu/u_core/u_geometry/u_project/_N66166
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_16/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.635 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_16/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.635         u_soc/u_gpu/u_core/u_geometry/u_project/_N66167
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_17/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.657 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_17/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.657         u_soc/u_gpu/u_core/u_geometry/u_project/_N66168
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_18/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.679 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_18/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.679         u_soc/u_gpu/u_core/u_geometry/u_project/_N66169
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_19/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.701 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_19/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.701         u_soc/u_gpu/u_core/u_geometry/u_project/_N66170
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_20/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.723 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_20/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.723         u_soc/u_gpu/u_core/u_geometry/u_project/_N66171
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_21/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.745 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_21/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.745         u_soc/u_gpu/u_core/u_geometry/u_project/_N66172
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_22/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.767 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_22/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.767         u_soc/u_gpu/u_core/u_geometry/u_project/_N66173
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_23/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.789 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_23/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.789         u_soc/u_gpu/u_core/u_geometry/u_project/_N66174
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_24/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.811 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_24/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.811         u_soc/u_gpu/u_core/u_geometry/u_project/_N66175
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_25/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.833 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_25/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.833         u_soc/u_gpu/u_core/u_geometry/u_project/_N66176
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_26/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.855 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_26/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.855         u_soc/u_gpu/u_core/u_geometry/u_project/_N66177
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_27/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.877 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_27/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.877         u_soc/u_gpu/u_core/u_geometry/u_project/_N66178
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_28/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.899 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_28/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.899         u_soc/u_gpu/u_core/u_geometry/u_project/_N66179
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_29/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.921 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_29/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.921         u_soc/u_gpu/u_core/u_geometry/u_project/_N66180
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_30/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.943 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_30/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.943         u_soc/u_gpu/u_core/u_geometry/u_project/_N66181
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_31/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.965 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_31/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.965         u_soc/u_gpu/u_core/u_geometry/u_project/_N66182
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_32/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.987 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_32/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.987         u_soc/u_gpu/u_core/u_geometry/u_project/_N66183
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_33/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.009 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_33/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.009         u_soc/u_gpu/u_core/u_geometry/u_project/_N66184
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_34/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.031 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_34/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.031         u_soc/u_gpu/u_core/u_geometry/u_project/_N66185
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_35/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.053 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_35/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.053         u_soc/u_gpu/u_core/u_geometry/u_project/_N66186
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_36/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.075 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_36/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.075         u_soc/u_gpu/u_core/u_geometry/u_project/_N66187
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_37/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.097 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_37/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.097         u_soc/u_gpu/u_core/u_geometry/u_project/_N66188
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_38/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.119 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_38/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.119         u_soc/u_gpu/u_core/u_geometry/u_project/_N66189
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_39/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.141 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_39/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.141         u_soc/u_gpu/u_core/u_geometry/u_project/_N66190
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_40/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.163 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_40/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.163         u_soc/u_gpu/u_core/u_geometry/u_project/_N66191
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_41/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.185 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_41/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.185         u_soc/u_gpu/u_core/u_geometry/u_project/_N66192
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_42/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.207 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_42/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.207         u_soc/u_gpu/u_core/u_geometry/u_project/_N66193
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_43/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.229 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_43/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.229         u_soc/u_gpu/u_core/u_geometry/u_project/_N66194
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_44/CIN (GTP_LUT6CARRY)
+                                   td                    0.068      10.297 r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_44/Z (GTP_LUT6CARRY)
+                                   net (fanout=29)       1.572      11.869         u_soc/u_gpu/u_core/u_geometry/u_project/_N2251
+                                                                           r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m4/Z[19] (GTP_APM_E2)
+
+ Data arrival time                                                  11.869         Logic Levels: 11
+                                                                                   Logic: 4.057ns(57.949%), Route: 2.944ns(42.051%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=155587)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m4/CLK (GTP_APM_E2)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -1.149       8.724
+
+ Data required time                                                  8.724
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.724
+ Data arrival time                                                  11.869
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -3.145
+
+Detailed path, .snr lines 2678-2846
+Startpoint  : u_soc/u_gpu/u_core/u_geometry/u_project/N788_m1/CLK (GTP_APM_E2)
+Endpoint    : u_soc/u_gpu/u_core/u_geometry/u_project/N788_m4/Z[20] (GTP_APM_E2)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=155587)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m1/CLK (GTP_APM_E2)
+
+                                   tco                   1.698       6.566 r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m1/CPO[47] (GTP_APM_E2)
+                                   net (fanout=1)        0.000       6.566         u_soc/u_gpu/u_core/u_geometry/u_project/_N42525
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_m2/CPI[47] (GTP_APM_E2)
+                                   td                    1.362       7.928 r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m2/P[0] (GTP_APM_E2)
+                                   net (fanout=2)        1.372       9.300         u_soc/u_gpu/u_core/u_geometry/u_project/_N2156
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_8/I2 (GTP_LUT6CARRY)
+                                   td                    0.159       9.459 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_8/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.459         u_soc/u_gpu/u_core/u_geometry/u_project/_N66159
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_9/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.481 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_9/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.481         u_soc/u_gpu/u_core/u_geometry/u_project/_N66160
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_10/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.503 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_10/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.503         u_soc/u_gpu/u_core/u_geometry/u_project/_N66161
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_11/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.525 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_11/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.525         u_soc/u_gpu/u_core/u_geometry/u_project/_N66162
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_12/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.547 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_12/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.547         u_soc/u_gpu/u_core/u_geometry/u_project/_N66163
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_13/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.569 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_13/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.569         u_soc/u_gpu/u_core/u_geometry/u_project/_N66164
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_14/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.591 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_14/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.591         u_soc/u_gpu/u_core/u_geometry/u_project/_N66165
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_15/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.613 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_15/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.613         u_soc/u_gpu/u_core/u_geometry/u_project/_N66166
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_16/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.635 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_16/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.635         u_soc/u_gpu/u_core/u_geometry/u_project/_N66167
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_17/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.657 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_17/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.657         u_soc/u_gpu/u_core/u_geometry/u_project/_N66168
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_18/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.679 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_18/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.679         u_soc/u_gpu/u_core/u_geometry/u_project/_N66169
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_19/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.701 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_19/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.701         u_soc/u_gpu/u_core/u_geometry/u_project/_N66170
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_20/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.723 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_20/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.723         u_soc/u_gpu/u_core/u_geometry/u_project/_N66171
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_21/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.745 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_21/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.745         u_soc/u_gpu/u_core/u_geometry/u_project/_N66172
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_22/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.767 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_22/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.767         u_soc/u_gpu/u_core/u_geometry/u_project/_N66173
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_23/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.789 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_23/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.789         u_soc/u_gpu/u_core/u_geometry/u_project/_N66174
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_24/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.811 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_24/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.811         u_soc/u_gpu/u_core/u_geometry/u_project/_N66175
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_25/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.833 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_25/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.833         u_soc/u_gpu/u_core/u_geometry/u_project/_N66176
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_26/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.855 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_26/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.855         u_soc/u_gpu/u_core/u_geometry/u_project/_N66177
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_27/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.877 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_27/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.877         u_soc/u_gpu/u_core/u_geometry/u_project/_N66178
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_28/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.899 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_28/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.899         u_soc/u_gpu/u_core/u_geometry/u_project/_N66179
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_29/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.921 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_29/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.921         u_soc/u_gpu/u_core/u_geometry/u_project/_N66180
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_30/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.943 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_30/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.943         u_soc/u_gpu/u_core/u_geometry/u_project/_N66181
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_31/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.965 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_31/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.965         u_soc/u_gpu/u_core/u_geometry/u_project/_N66182
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_32/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.987 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_32/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.987         u_soc/u_gpu/u_core/u_geometry/u_project/_N66183
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_33/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.009 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_33/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.009         u_soc/u_gpu/u_core/u_geometry/u_project/_N66184
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_34/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.031 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_34/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.031         u_soc/u_gpu/u_core/u_geometry/u_project/_N66185
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_35/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.053 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_35/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.053         u_soc/u_gpu/u_core/u_geometry/u_project/_N66186
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_36/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.075 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_36/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.075         u_soc/u_gpu/u_core/u_geometry/u_project/_N66187
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_37/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.097 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_37/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.097         u_soc/u_gpu/u_core/u_geometry/u_project/_N66188
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_38/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.119 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_38/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.119         u_soc/u_gpu/u_core/u_geometry/u_project/_N66189
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_39/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.141 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_39/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.141         u_soc/u_gpu/u_core/u_geometry/u_project/_N66190
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_40/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.163 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_40/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.163         u_soc/u_gpu/u_core/u_geometry/u_project/_N66191
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_41/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.185 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_41/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.185         u_soc/u_gpu/u_core/u_geometry/u_project/_N66192
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_42/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.207 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_42/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.207         u_soc/u_gpu/u_core/u_geometry/u_project/_N66193
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_43/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.229 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_43/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.229         u_soc/u_gpu/u_core/u_geometry/u_project/_N66194
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_44/CIN (GTP_LUT6CARRY)
+                                   td                    0.068      10.297 r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_44/Z (GTP_LUT6CARRY)
+                                   net (fanout=29)       1.572      11.869         u_soc/u_gpu/u_core/u_geometry/u_project/_N2251
+                                                                           r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m4/Z[20] (GTP_APM_E2)
+
+ Data arrival time                                                  11.869         Logic Levels: 11
+                                                                                   Logic: 4.057ns(57.949%), Route: 2.944ns(42.051%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=155587)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m4/CLK (GTP_APM_E2)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -1.149       8.724
+
+ Data required time                                                  8.724
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.724
+ Data arrival time                                                  11.869
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -3.145
+
+Detailed path, .snr lines 2851-3019
+Startpoint  : u_soc/u_gpu/u_core/u_geometry/u_project/N788_m1/CLK (GTP_APM_E2)
+Endpoint    : u_soc/u_gpu/u_core/u_geometry/u_project/N788_m4/Z[21] (GTP_APM_E2)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=155587)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m1/CLK (GTP_APM_E2)
+
+                                   tco                   1.698       6.566 r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m1/CPO[47] (GTP_APM_E2)
+                                   net (fanout=1)        0.000       6.566         u_soc/u_gpu/u_core/u_geometry/u_project/_N42525
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_m2/CPI[47] (GTP_APM_E2)
+                                   td                    1.362       7.928 r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m2/P[0] (GTP_APM_E2)
+                                   net (fanout=2)        1.372       9.300         u_soc/u_gpu/u_core/u_geometry/u_project/_N2156
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_8/I2 (GTP_LUT6CARRY)
+                                   td                    0.159       9.459 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_8/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.459         u_soc/u_gpu/u_core/u_geometry/u_project/_N66159
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_9/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.481 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_9/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.481         u_soc/u_gpu/u_core/u_geometry/u_project/_N66160
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_10/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.503 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_10/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.503         u_soc/u_gpu/u_core/u_geometry/u_project/_N66161
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_11/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.525 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_11/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.525         u_soc/u_gpu/u_core/u_geometry/u_project/_N66162
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_12/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.547 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_12/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.547         u_soc/u_gpu/u_core/u_geometry/u_project/_N66163
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_13/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.569 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_13/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.569         u_soc/u_gpu/u_core/u_geometry/u_project/_N66164
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_14/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.591 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_14/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.591         u_soc/u_gpu/u_core/u_geometry/u_project/_N66165
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_15/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.613 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_15/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.613         u_soc/u_gpu/u_core/u_geometry/u_project/_N66166
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_16/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.635 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_16/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.635         u_soc/u_gpu/u_core/u_geometry/u_project/_N66167
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_17/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.657 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_17/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.657         u_soc/u_gpu/u_core/u_geometry/u_project/_N66168
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_18/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.679 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_18/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.679         u_soc/u_gpu/u_core/u_geometry/u_project/_N66169
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_19/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.701 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_19/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.701         u_soc/u_gpu/u_core/u_geometry/u_project/_N66170
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_20/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.723 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_20/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.723         u_soc/u_gpu/u_core/u_geometry/u_project/_N66171
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_21/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.745 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_21/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.745         u_soc/u_gpu/u_core/u_geometry/u_project/_N66172
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_22/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.767 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_22/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.767         u_soc/u_gpu/u_core/u_geometry/u_project/_N66173
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_23/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.789 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_23/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.789         u_soc/u_gpu/u_core/u_geometry/u_project/_N66174
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_24/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.811 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_24/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.811         u_soc/u_gpu/u_core/u_geometry/u_project/_N66175
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_25/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.833 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_25/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.833         u_soc/u_gpu/u_core/u_geometry/u_project/_N66176
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_26/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.855 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_26/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.855         u_soc/u_gpu/u_core/u_geometry/u_project/_N66177
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_27/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.877 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_27/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.877         u_soc/u_gpu/u_core/u_geometry/u_project/_N66178
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_28/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.899 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_28/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.899         u_soc/u_gpu/u_core/u_geometry/u_project/_N66179
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_29/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.921 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_29/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.921         u_soc/u_gpu/u_core/u_geometry/u_project/_N66180
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_30/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.943 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_30/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.943         u_soc/u_gpu/u_core/u_geometry/u_project/_N66181
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_31/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.965 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_31/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.965         u_soc/u_gpu/u_core/u_geometry/u_project/_N66182
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_32/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       9.987 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_32/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       9.987         u_soc/u_gpu/u_core/u_geometry/u_project/_N66183
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_33/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.009 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_33/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.009         u_soc/u_gpu/u_core/u_geometry/u_project/_N66184
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_34/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.031 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_34/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.031         u_soc/u_gpu/u_core/u_geometry/u_project/_N66185
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_35/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.053 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_35/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.053         u_soc/u_gpu/u_core/u_geometry/u_project/_N66186
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_36/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.075 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_36/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.075         u_soc/u_gpu/u_core/u_geometry/u_project/_N66187
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_37/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.097 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_37/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.097         u_soc/u_gpu/u_core/u_geometry/u_project/_N66188
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_38/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.119 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_38/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.119         u_soc/u_gpu/u_core/u_geometry/u_project/_N66189
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_39/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.141 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_39/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.141         u_soc/u_gpu/u_core/u_geometry/u_project/_N66190
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_40/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.163 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_40/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.163         u_soc/u_gpu/u_core/u_geometry/u_project/_N66191
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_41/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.185 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_41/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.185         u_soc/u_gpu/u_core/u_geometry/u_project/_N66192
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_42/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.207 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_42/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.207         u_soc/u_gpu/u_core/u_geometry/u_project/_N66193
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_43/CIN (GTP_LUT6CARRY)
+                                   td                    0.022      10.229 f       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_43/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000      10.229         u_soc/u_gpu/u_core/u_geometry/u_project/_N66194
+                                                                                   u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_44/CIN (GTP_LUT6CARRY)
+                                   td                    0.068      10.297 r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_a2_44/Z (GTP_LUT6CARRY)
+                                   net (fanout=29)       1.572      11.869         u_soc/u_gpu/u_core/u_geometry/u_project/_N2251
+                                                                           r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m4/Z[21] (GTP_APM_E2)
+
+ Data arrival time                                                  11.869         Logic Levels: 11
+                                                                                   Logic: 4.057ns(57.949%), Route: 2.944ns(42.051%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=155587)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_geometry/u_project/N788_m4/CLK (GTP_APM_E2)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -1.149       8.724
+
+ Data required time                                                  8.724
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.724
+ Data arrival time                                                  11.869
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -3.145

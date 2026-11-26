@@ -1,0 +1,50 @@
+Card 107 round 8 | upstream 38095a12 | local run 18a9395f
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | snapshot 2026-11-26T15:05:17+08:00
+
+10: Process "Compile" started.
+16918: Action compile: Real time elapsed is 0h:3m:33s
+16919: Action compile: CPU time elapsed is 0h:0m:43s
+16920: Action compile: Process CPU time elapsed is 0h:0m:43s
+16922: Action compile: Peak memory pool usage is 852 MB
+16926: Process "Compile" done.
+16929: Process "Synthesize" started.
+47693: Action synthesize: Real time elapsed is 0h:15m:37s
+47694: Action synthesize: CPU time elapsed is 0h:5m:32s
+47695: Action synthesize: Process CPU time elapsed is 0h:6m:1s
+47697: Action synthesize: Peak memory pool usage is 3,676 MB
+47701: Process "Synthesize" done.
+47704: Process "Device Map" started.
+51315: Action dev_map: Real time elapsed is 0h:2m:16s
+51316: Action dev_map: CPU time elapsed is 0h:0m:20s
+51317: Action dev_map: Process CPU time elapsed is 0h:0m:21s
+51319: Action dev_map: Peak memory pool usage is 3,070 MB
+51323: Process "Device Map" done.
+51326: Process "Place & Route" started.
+
+compile/run.log, all E: lines:
+(none at snapshot)
+
+synthesize/run.log, all E: lines:
+(none at snapshot)
+
+device_map/run.log, all E: lines:
+(none at snapshot)
+
+place_route/run.log, all E: lines:
+(none at snapshot)
+
+Captured end of the live P&R log:
+Phase 2.3 IO placement started.
+IO placement takes 0.06 sec.
+
+PBM start.
+Total cost after SA planning is 19451532.139977.
+SA total time: 6803 msec
+PBM of GP end, takes 3.38 sec.
+Phase 2.4 2nd GP placement started.
+Run super clustering :
+	Initial slack -10761.
+	13 iterations finished.
+	Final slack -7307.
+Super clustering done.
+Design Utilization : 82%.

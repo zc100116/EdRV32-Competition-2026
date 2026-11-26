@@ -1,5 +1,48 @@
 # 卡 107 结果
 
+## 第 8 轮 Device Map 结果
+
+| 项 | 内容 |
+|---|---|
+| 实测版本 | 本地 `18a9395f`，RTL 与任务卡 `38095a12` 一致 |
+| 环境 | Windows PDS 2022.2-SP6.1 build 138931，ADS 综合，Logos2 PG2L200H-6 FBB676 |
+| 工程 | `G:/codex_project/EdRV32-FPGA/board_gpu/board_gpu.pds` |
+| 阶段与用时 | Compile 通过（3 分 33 秒），Synthesize 通过（15 分 37 秒），Device Map 通过（2 分 16 秒） |
+| 布线门槛 | `clk_gpu` 综合估算 **114.9311 MHz**，WNS **−3.145 ns**，低于第 8 轮要求的 150 MHz（WNS ≥ −1.11 ns） |
+| 采集状态 | 北京时间 2026-11-26 15:05:17。日志显示 15:00:46 已启动 P&R，采集时处于布局，未取得本轮布线后报告。 |
+
+[阶段日志](artifacts/round8/flow-excerpts.log)
+
+### Device Map 资源
+
+| 资源 | 第 7 轮用量 | 第 8 轮用量 | 容量 | 当前 PDS 占用 |
+|---|---:|---:|---:|---:|
+| LUT | 117,864 | 107,291 | 159,800 | 68% |
+| FF | 148,974 | 185,127 | 319,600 | 58% |
+| DRM（36K 等效） | 343 | 332 | 415 | 80% |
+| APM | 227 | 217 | 740 | 30% |
+| 分布式 RAM | 6,328 | 5,999 | 39,500 | 16% |
+| I/O | 115 | 115 | 400 | 29% |
+| GPLL | 7 | 7 | 10 | 70% |
+| PPLL | 2 | 2 | 10 | 20% |
+
+与第 7 轮相比，LUT 少 10,573、DRM 少 11、APM 少 10，FF 多 36,153。综合层次表显示 `u_geometry` 的 FF 从 19,135 增至 40,215，`u_setup` 从 6,317 增至 30,988；`u_perspective` 从 24,407 降至 13,479，DRM 从 41 降至 25，APM 从 16 降至 8。[Device Map 资源原文](artifacts/round8/resource_summary.txt) · [综合层次资源表](artifacts/round8/resource_hier.txt)
+
+### 综合预估时序和高扇出
+
+| 时钟域 | 估算 MHz | WNS（ns） | TNS（ns） |
+|---|---:|---:|---:|
+| `clk_gpu` | 114.9311 | −3.145 | −10849.357 |
+| `clk_sys` | 115.7130 | −0.642 | −82.148 |
+| `clk_mem` | 118.7790 | −0.419 | −15.351 |
+| `clk_aud` | 276.6247 | 77.765 | 0.000 |
+
+`clk_gpu` 综合估算从第 7 轮的 50.2539 MHz 提升至 114.9311 MHz。当前 ADS 综合报告只列出 3 条 GPU setup 路径，三条均从 `u_geometry/u_project/N788_m1/CLK` 到 `N788_m4/Z[19:21]` 的三个端点，WNS −3.145 ns，11 逻辑级。任务卡要求的前 200 条和前 20 条逐级明细尚未取得。此次回传保留现有 3 条完整明细。[全部时钟域估算](artifacts/round8/timing_summary.txt) · [GPU setup 路径](artifacts/round8/synthesis-clk_gpu-setup.txt)
+
+综合报告记录 2,110 组控制集，`maximum fanout` 为 35,549，对应控制集表中的 `CLK(clk_gpu_w)` 单独时钟项。Device Map 的全局 GPU 时钟网 `ntclkbufg_0` 扇出为 155,587。Other 表中 GPU 非时钟信号包括 `u_palette/g_current[0].u_ram/rd_en_r`（2,592）和 `u_geometry/polygon_accept_w`（2,129）。Reset、CE 和 Other 三张原表均已回传。[高扇出报告](artifacts/round8/high_fanout.txt)
+
+原始日志和报告快照存于 `G:/codex_project/edrv32-card107/build/card107-pds-check/logbackup/round8-device-map-20261126-150517`。
+
 ## 第 7 轮进度快照
 
 | 项 | 内容 |
