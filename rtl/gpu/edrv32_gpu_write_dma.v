@@ -120,7 +120,7 @@ module edrv32_gpu_write_dma (
     reg filling_r;
     reg [3:0] fill_beat_r;
     reg [4:0] send_beat_r;
-    reg [31:0] strobe_r [0:31];
+
     wire fill_w;
     wire [31:0] fill_keep_w;
     wire aw_fire_w;
@@ -304,9 +304,9 @@ module edrv32_gpu_write_dma (
             length_r[alloc_ptr_r] <= length_w;
             logical_last_r[alloc_ptr_r] <= (prepare_final_r && prepare_beats_r == length_w);
         end
-        if (fill_w) strobe_r[{alloc_ptr_r, fill_beat_r}] <= fill_keep_w;
+
         if (pool_read_w) begin
-            pending_keep_r <= strobe_r[pool_addr_w];
+            pending_keep_r <= unused_strobe_read0_w[0 +: 32];
             pending_last_r <= (send_beat_r + 5'd1 == length_r[write_ptr_r]);
         end
         if (pending_r) begin
@@ -428,4 +428,16 @@ module edrv32_gpu_write_dma (
             end
         end
     endgenerate
+    // Explicit LUTRAM strobe: 1 slice(s) per combinational read port.
+    wire [71:0] strobe_input_w;
+    assign strobe_input_w = {40'b0, fill_keep_w};
+    wire [71:0] unused_strobe_read0_w;
+    edrv32_ram_gpu_table u_strobe_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(fill_w),
+        .wr_addr_i({1'b0, alloc_ptr_r, fill_beat_r}),
+        .wr_data_i(strobe_input_w[0 +: 72]),
+        .rd_addr_i({1'b0, pool_addr_w}),
+        .rd_data_o(unused_strobe_read0_w[0 +: 72])
+    );
 endmodule

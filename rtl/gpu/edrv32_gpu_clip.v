@@ -26,7 +26,7 @@ module edrv32_gpu_clip (
 );
     wire [791:0] triangle_saved_w;
     wire source_accept_w;
-    reg [3:0] wait_r;
+    reg [4:0] wait_r;
     wire [85:0] distance_left_w;
     wire [85:0] distance_right_w;
     wire [1:0] distance_subtract_w;
@@ -354,12 +354,286 @@ module edrv32_gpu_clip (
     reg [39:0] current_component_r;
     reg [42:0] current_distance_r;
     reg [42:0] previous_distance_input_r;
-    reg [82:0] previous_product_r;
-    reg [82:0] previous_product_p1_r;
-    reg [82:0] previous_product_p2_r;
-    reg [82:0] current_product_r;
-    reg [82:0] current_product_p1_r;
-    reg [82:0] current_product_p2_r;
+    // Two 40x43 signed products: nine registered native signed <=18x18 APMs each.
+    // Four balanced tree levels settle within three clocks each; +10 per component.
+    // S_MULTIPLY holds each component/distance constant throughout its 22-clock wait;
+    // the result is sampled only after that wait. Finished low/middle fields remain
+    // in their own registers instead of being delayed to align with the high field.
+    // Every carry crosses a register: all paths remain single-clock paths, with no
+    // multicycle timing exceptions. The thirteen-clock settling bound is unchanged.
+    // Store only each node's live signed range: constant low zeros and sign copies
+    // are reconstructed at its consumer, never shifted through data registers.
+    wire [82:0] previous_product_w;
+    wire [82:0] current_product_w;
+    wire [165:0] product_result_w;
+    assign previous_product_w = product_result_w[0 +: 83];
+    assign current_product_w = product_result_w[83 +: 83];
+    genvar product_g;
+    generate
+        for (product_g = 0; product_g < 2; product_g = product_g + 1) begin : g_product
+            wire [39:0] component_w;
+            wire [42:0] distance_w;
+            assign component_w = product_g == 0 ? previous_component_r : current_component_r;
+            assign distance_w = product_g == 0 ? current_distance_r : previous_distance_input_r;
+            wire [35:0] node0_w;
+            wire [35:0] node1_w;
+            wire [26:0] node2_w;
+            wire [35:0] node3_w;
+            wire [35:0] node4_w;
+            wire [26:0] node5_w;
+            wire [23:0] node6_w;
+            wire [23:0] node7_w;
+            wire [14:0] node8_w;
+            wire [53:0] node9_w;
+            wire [44:0] node10_w;
+            wire [44:0] node11_w;
+            wire [41:0] node12_w;
+            wire [14:0] node13_w;
+            wire [62:0] node14_w;
+            wire [45:0] node15_w;
+            wire [14:0] node16_w;
+            wire [80:0] node17_w;
+            wire [14:0] node18_w;
+            wire [82:0] node19_w;
+            begin : g_node_0
+                wire signed [17:0] a_w;
+                wire signed [17:0] b_w;
+                reg signed [35:0] partial_r;
+                assign a_w = {1'b0, component_w[0 +: 17]};
+                assign b_w = {1'b0, distance_w[0 +: 17]};
+                always @(posedge clk_i) begin
+                    partial_r <= a_w * b_w;
+                end
+                assign node0_w = partial_r;
+            end
+            begin : g_node_1
+                wire signed [17:0] a_w;
+                wire signed [17:0] b_w;
+                reg signed [35:0] partial_r;
+                assign a_w = {1'b0, component_w[0 +: 17]};
+                assign b_w = {1'b0, distance_w[17 +: 17]};
+                always @(posedge clk_i) begin
+                    partial_r <= a_w * b_w;
+                end
+                assign node1_w = partial_r;
+            end
+            begin : g_node_2
+                wire signed [17:0] a_w;
+                wire signed [8:0] b_w;
+                reg signed [26:0] partial_r;
+                assign a_w = {1'b0, component_w[0 +: 17]};
+                assign b_w = distance_w[42:34];
+                always @(posedge clk_i) begin
+                    partial_r <= a_w * b_w;
+                end
+                assign node2_w = partial_r;
+            end
+            begin : g_node_3
+                wire signed [17:0] a_w;
+                wire signed [17:0] b_w;
+                reg signed [35:0] partial_r;
+                assign a_w = {1'b0, component_w[17 +: 17]};
+                assign b_w = {1'b0, distance_w[0 +: 17]};
+                always @(posedge clk_i) begin
+                    partial_r <= a_w * b_w;
+                end
+                assign node3_w = partial_r;
+            end
+            begin : g_node_4
+                wire signed [17:0] a_w;
+                wire signed [17:0] b_w;
+                reg signed [35:0] partial_r;
+                assign a_w = {1'b0, component_w[17 +: 17]};
+                assign b_w = {1'b0, distance_w[17 +: 17]};
+                always @(posedge clk_i) begin
+                    partial_r <= a_w * b_w;
+                end
+                assign node4_w = partial_r;
+            end
+            begin : g_node_5
+                wire signed [17:0] a_w;
+                wire signed [8:0] b_w;
+                reg signed [26:0] partial_r;
+                assign a_w = {1'b0, component_w[17 +: 17]};
+                assign b_w = distance_w[42:34];
+                always @(posedge clk_i) begin
+                    partial_r <= a_w * b_w;
+                end
+                assign node5_w = partial_r;
+            end
+            begin : g_node_6
+                wire signed [5:0] a_w;
+                wire signed [17:0] b_w;
+                reg signed [23:0] partial_r;
+                assign a_w = component_w[39:34];
+                assign b_w = {1'b0, distance_w[0 +: 17]};
+                always @(posedge clk_i) begin
+                    partial_r <= a_w * b_w;
+                end
+                assign node6_w = partial_r;
+            end
+            begin : g_node_7
+                wire signed [5:0] a_w;
+                wire signed [17:0] b_w;
+                reg signed [23:0] partial_r;
+                assign a_w = component_w[39:34];
+                assign b_w = {1'b0, distance_w[17 +: 17]};
+                always @(posedge clk_i) begin
+                    partial_r <= a_w * b_w;
+                end
+                assign node7_w = partial_r;
+            end
+            begin : g_node_8
+                wire signed [5:0] a_w;
+                wire signed [8:0] b_w;
+                reg signed [14:0] partial_r;
+                assign a_w = component_w[39:34];
+                assign b_w = distance_w[42:34];
+                always @(posedge clk_i) begin
+                    partial_r <= a_w * b_w;
+                end
+                assign node8_w = partial_r;
+            end
+            begin : g_node_9
+                wire [53:0] a_w;
+                wire [53:0] b_w;
+                assign a_w =
+                    {{18{node0_w[35]}}, node0_w};
+                assign b_w =
+                    {{1{node1_w[35]}}, node1_w, 17'b0};
+                reg [35:0] low_r;
+                reg [18:0] high_r;
+                always @(posedge clk_i) begin
+                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
+                    high_r <= a_w[53:35] + b_w[53:35] + {18'b0, low_r[35]};
+                end
+                assign node9_w = {high_r, low_r[34:0]};
+            end
+            begin : g_node_10
+                wire [44:0] a_w;
+                wire [44:0] b_w;
+                assign a_w =
+                    {{1{node2_w[26]}}, node2_w, 17'b0};
+                assign b_w =
+                    {{9{node3_w[35]}}, node3_w};
+                reg [35:0] low_r;
+                reg [9:0] high_r;
+                always @(posedge clk_i) begin
+                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
+                    high_r <= a_w[44:35] + b_w[44:35] + {9'b0, low_r[35]};
+                end
+                assign node10_w = {high_r, low_r[34:0]};
+            end
+            begin : g_node_11
+                wire [44:0] a_w;
+                wire [44:0] b_w;
+                assign a_w =
+                    {{9{node4_w[35]}}, node4_w};
+                assign b_w =
+                    {{1{node5_w[26]}}, node5_w, 17'b0};
+                reg [35:0] low_r;
+                reg [9:0] high_r;
+                always @(posedge clk_i) begin
+                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
+                    high_r <= a_w[44:35] + b_w[44:35] + {9'b0, low_r[35]};
+                end
+                assign node11_w = {high_r, low_r[34:0]};
+            end
+            begin : g_node_12
+                wire [41:0] a_w;
+                wire [41:0] b_w;
+                assign a_w =
+                    {{18{node6_w[23]}}, node6_w};
+                assign b_w =
+                    {{1{node7_w[23]}}, node7_w, 17'b0};
+                reg [35:0] low_r;
+                reg [6:0] high_r;
+                always @(posedge clk_i) begin
+                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
+                    high_r <= a_w[41:35] + b_w[41:35] + {6'b0, low_r[35]};
+                end
+                assign node12_w = {high_r, low_r[34:0]};
+            end
+            begin : g_node_13
+                assign node13_w = node8_w;
+            end
+            begin : g_node_14
+                wire [62:0] a_w;
+                wire [62:0] b_w;
+                assign a_w =
+                    {{9{node9_w[53]}}, node9_w};
+                assign b_w =
+                    {{1{node10_w[44]}}, node10_w, 17'b0};
+                reg [35:0] low_r;
+                reg [27:0] high_r;
+                always @(posedge clk_i) begin
+                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
+                    high_r <= a_w[62:35] + b_w[62:35] + {27'b0, low_r[35]};
+                end
+                assign node14_w = {high_r, low_r[34:0]};
+            end
+            begin : g_node_15
+                wire [45:0] a_w;
+                wire [45:0] b_w;
+                assign a_w =
+                    {{1{node11_w[44]}}, node11_w};
+                assign b_w =
+                    {{4{node12_w[41]}}, node12_w};
+                reg [35:0] low_r;
+                reg [10:0] high_r;
+                always @(posedge clk_i) begin
+                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
+                    high_r <= a_w[45:35] + b_w[45:35] + {10'b0, low_r[35]};
+                end
+                assign node15_w = {high_r, low_r[34:0]};
+            end
+            begin : g_node_16
+                assign node16_w = node13_w;
+            end
+            begin : g_node_17
+                wire [80:0] a_w;
+                wire [80:0] b_w;
+                assign a_w =
+                    {{18{node14_w[62]}}, node14_w};
+                assign b_w =
+                    {{1{node15_w[45]}}, node15_w, 34'b0};
+                reg [35:0] low_r;
+                reg [35:0] middle_r;
+                reg [10:0] top_r;
+                always @(posedge clk_i) begin
+                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
+                    middle_r <= {1'b0, a_w[69:35]} +
+                        {1'b0, b_w[69:35]} + {35'b0, low_r[35]};
+                    top_r <= a_w[80:70] + b_w[80:70] +
+                        {10'b0, middle_r[35]};
+                end
+                assign node17_w = {top_r, middle_r[34:0], low_r[34:0]};
+            end
+            begin : g_node_18
+                assign node18_w = node16_w;
+            end
+            begin : g_node_19
+                wire [82:0] a_w;
+                wire [82:0] b_w;
+                assign a_w =
+                    {{2{node17_w[80]}}, node17_w};
+                assign b_w =
+                    {node18_w, 68'b0};
+                reg [35:0] low_r;
+                reg [35:0] middle_r;
+                reg [12:0] top_r;
+                always @(posedge clk_i) begin
+                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
+                    middle_r <= {1'b0, a_w[69:35]} +
+                        {1'b0, b_w[69:35]} + {35'b0, low_r[35]};
+                    top_r <= a_w[82:70] + b_w[82:70] +
+                        {12'b0, middle_r[35]};
+                end
+                assign node19_w = {top_r, middle_r[34:0], low_r[34:0]};
+            end
+            assign product_result_w[product_g*83 +: 83] = node19_w;
+        end
+    endgenerate
     wire [83:0] previous_product_ext_w;
     wire [83:0] current_product_ext_w;
     wire [34:0] numerator_a0_w;
@@ -680,8 +954,8 @@ module edrv32_gpu_clip (
     assign edge_sub1_low1_w = unused_edge_sub1_part1_r[7:0];
     assign edge_sub1_w = {edge_sub1_low1_w, edge_sub1_low0_w_d2_r};
     assign edge_distance_w[1] = edge_subtract1_r_d2_r ? edge_sub1_w : edge_add1_w;
-    assign previous_product_ext_w = {previous_product_p2_r[82], previous_product_p2_r};
-    assign current_product_ext_w = {current_product_p2_r[82], current_product_p2_r};
+    assign previous_product_ext_w = {previous_product_w[82], previous_product_w};
+    assign current_product_ext_w = {current_product_w[82], current_product_w};
     assign numerator_a0_w = previous_product_ext_w[0 +: 35];
     assign numerator_b0_w = current_product_ext_w[0 +: 35];
     assign numerator_low0_w = numerator_part0_r[34:0];
@@ -1090,7 +1364,7 @@ module edrv32_gpu_clip (
                     if (previous_distance_r[42] != current_distance_w[42]) begin
                         component_r <= 4'd0;
                         begin end
-                        wait_r <= 12;
+                        wait_r <= 22;
                     end else begin
                         begin end
                     end
@@ -1114,7 +1388,7 @@ module edrv32_gpu_clip (
                     else begin
                         component_r <= component_r + 4'd1;
                         begin end
-                        wait_r <= 12;
+                        wait_r <= 22;
                     end
                 end
                 S_APPEND_INTERSECTION: begin
@@ -1295,12 +1569,6 @@ module edrv32_gpu_clip (
     current_component_r <= current_selected_w;
     current_distance_r <= current_distance_w;
     previous_distance_input_r <= previous_distance_r;
-    previous_product_r <= $signed(previous_component_r) * $signed(current_distance_r);
-    previous_product_p1_r <= previous_product_r;
-    previous_product_p2_r <= previous_product_p1_r;
-    current_product_r <= $signed(current_component_r) * $signed(previous_distance_input_r);
-    current_product_p1_r <= current_product_r;
-    current_product_p2_r <= current_product_p1_r;
     numerator_part0_r <= {1'b0, numerator_a0_w} + {1'b0, ~numerator_b0_w} + 36'd1;
     numerator_a1_w_d4_r <= numerator_a1_w;
     numerator_b1_w_d4_r <= numerator_b1_w;

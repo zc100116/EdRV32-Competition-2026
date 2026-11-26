@@ -86,8 +86,8 @@ module edrv32_gpu_object (
 
     wire [255:0] record_w [0:STAGES-1];
     wire [23:0] idx_11_r;
-    reg [8:0] index_write_r;
-    wire [8:0] index_read_w;
+    reg [5:0] index_write_r;
+    wire [5:0] index_read_w;
     wire [71:0] unused_index_data_w;
     reg [STAGES-1:0] original_alive_r;
     reg [15:0] acceleration_x_r;
@@ -160,20 +160,25 @@ module edrv32_gpu_object (
     endfunction
 
     // Index metadata advances with all twelve object stages, including their common stall.
-    assign index_read_w = index_write_r - 9'd11;
+    assign index_read_w = index_write_r - 6'd11;
     assign idx_11_r = unused_index_data_w[23:0];
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) index_write_r <= 0;
         else if (advance_w) index_write_r <= index_write_r + 1'b1;
     end
-    edrv32_ram_gpu_delay u_index (
+    wire [71:0] u_index_data_w;
+    reg [71:0] u_index_data_r;
+    assign unused_index_data_w = u_index_data_r;
+    always @(posedge clk_i) begin
+        if (advance_w) u_index_data_r <= u_index_data_w;
+    end
+    edrv32_ram_gpu_table u_index (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(index_write_r),
         .wr_data_i({48'b0, ingress_idx_r[ingress_read_r]}),
-        .rd_en_i(advance_w),
         .rd_addr_i(index_read_w),
-        .rd_data_o(unused_index_data_w)
+        .rd_data_o(u_index_data_w)
     );
 
     assign rounded_x_w = rounded_acceleration(ingress_data_w[143:128]);

@@ -46,10 +46,7 @@ module edrv32_gpu_setup (
     reg [1:0] output_count_r;
     reg output_read_r;
     reg output_write_r;
-    reg [71:0] delta_r [0:15];
-    reg [35:0] offset_r [0:15];
-    reg [31:0] origin_r [0:15];
-    reg [63:0] bounds_r [0:15];
+
     reg nonzero_r [0:15];
     wire area_valid_r;
     reg signed [17:0] front_delta_x_0_r;
@@ -74,27 +71,27 @@ module edrv32_gpu_setup (
     reg [3:0] front_tag_r;
     wire signed [36:0] edge_result_w;
     wire [3:0] area_tag_r;
-    reg [3:0] reciprocal_tag_0_r;
-    reg [3:0] reciprocal_tag_1_r;
-    reg [3:0] reciprocal_tag_2_r;
-    reg [3:0] reciprocal_tag_3_r;
-    reg [3:0] reciprocal_tag_4_r;
-    reg [3:0] reciprocal_tag_5_r;
-    reg [3:0] reciprocal_tag_6_r;
-    reg [3:0] reciprocal_tag_7_r;
-    reg [3:0] reciprocal_tag_8_r;
-    reg [3:0] reciprocal_tag_9_r;
-    reg [3:0] reciprocal_tag_10_r;
-    reg [3:0] reciprocal_tag_11_r;
-    reg [3:0] reciprocal_tag_12_r;
-    reg [3:0] reciprocal_tag_13_r;
-    reg [3:0] reciprocal_tag_14_r;
-    reg [3:0] reciprocal_tag_15_r;
-    reg [3:0] reciprocal_tag_16_r;
-    reg [3:0] reciprocal_tag_17_r;
-    reg [3:0] reciprocal_tag_18_r;
-    reg [3:0] reciprocal_tag_19_r;
 
+    // Must equal the total enabled-clock latency of edrv32_gpu_project_recip.
+    localparam RECIP_LATENCY = 24;
+    wire [RECIP_LATENCY*4-1:0] reciprocal_tag_w;
+    genvar reciprocal_stage;
+    generate
+        for (reciprocal_stage = 0; reciprocal_stage < RECIP_LATENCY;
+            reciprocal_stage = reciprocal_stage + 1) begin : g_reciprocal_tag
+            reg [3:0] tag_r;
+            wire [3:0] previous_w;
+            if (reciprocal_stage == 0) begin : g_first
+                assign previous_w = area_tag_r;
+            end else begin : g_previous
+                assign previous_w = reciprocal_tag_w[(reciprocal_stage-1)*4 +: 4];
+            end
+            assign reciprocal_tag_w[reciprocal_stage*4 +: 4] = tag_r;
+            always @(posedge clk_i) begin
+                if (enable_w) tag_r <= previous_w;
+            end
+        end
+    endgenerate
     wire reciprocal_valid_w;
     wire [30:0] reciprocal_w;
     wire [5:0] reciprocal_exponent_w;
@@ -335,8 +332,8 @@ module edrv32_gpu_setup (
     always @(posedge clk_i) begin
         if (enable_w) begin
             attribute_read_tag_r <= {attribute_tag_r, attribute_index_r};
-            attribute_read_delta_r <= delta_r[attribute_tag_r];
-            attribute_read_offset_r <= offset_r[attribute_tag_r];
+            attribute_read_delta_r <= unused_attribute_context_read0_w[0 +: 72];
+            attribute_read_offset_r <= unused_attribute_context_read0_w[72 +: 36];
             attribute_read_reciprocal_r <= attribute_reciprocal_r;
             attribute_read_exponent_r <= attribute_exponent_r;
         end
@@ -425,33 +422,9 @@ module edrv32_gpu_setup (
     always @(posedge clk_i) begin
         if (enable_w) begin
             if (area_valid_r) nonzero_r[area_tag_r] <= area_w != 0;
-            reciprocal_tag_0_r <= area_tag_r;
-            reciprocal_tag_1_r <= reciprocal_tag_0_r;
-            reciprocal_tag_2_r <= reciprocal_tag_1_r;
-            reciprocal_tag_3_r <= reciprocal_tag_2_r;
-            reciprocal_tag_4_r <= reciprocal_tag_3_r;
-            reciprocal_tag_5_r <= reciprocal_tag_4_r;
-            reciprocal_tag_6_r <= reciprocal_tag_5_r;
-            reciprocal_tag_7_r <= reciprocal_tag_6_r;
-            reciprocal_tag_8_r <= reciprocal_tag_7_r;
-            reciprocal_tag_9_r <= reciprocal_tag_8_r;
-            reciprocal_tag_10_r <= reciprocal_tag_9_r;
-            reciprocal_tag_11_r <= reciprocal_tag_10_r;
-            reciprocal_tag_12_r <= reciprocal_tag_11_r;
-            reciprocal_tag_13_r <= reciprocal_tag_12_r;
-            reciprocal_tag_14_r <= reciprocal_tag_13_r;
-            reciprocal_tag_15_r <= reciprocal_tag_14_r;
-            reciprocal_tag_16_r <= reciprocal_tag_15_r;
-            reciprocal_tag_17_r <= reciprocal_tag_16_r;
-            reciprocal_tag_18_r <= reciprocal_tag_17_r;
-            reciprocal_tag_19_r <= reciprocal_tag_18_r;
 
             if (accept_w) begin
-                delta_r[allocate_r] <= delta_w;
-                offset_r[allocate_r] <= offset_w;
-                origin_r[allocate_r] <= {origin_y_w[15:0], origin_x_w[15:0]};
-                bounds_r[allocate_r] <= {unused_bound_y1_w[15:0], unused_bound_x1_w[15:0],
-                    bound_y0_w[15:0], bound_x0_w[15:0]};
+
                 front_tag_r <= allocate_r;
                 front_delta_x_0_r <= difference_x_w[0];
                 front_delta_y_0_r <= difference_y_w[0];
@@ -467,7 +440,7 @@ module edrv32_gpu_setup (
                 front_offset_y_2_r <= edge_offset_y_w[2];
             end
             if (reciprocal_valid_w) begin
-                attribute_tag_r <= reciprocal_tag_19_r;
+                attribute_tag_r <= reciprocal_tag_w[(RECIP_LATENCY-1)*4 +: 4];
                 attribute_reciprocal_r <= reciprocal_w;
                 attribute_exponent_r <= reciprocal_exponent_w;
             end
@@ -478,12 +451,14 @@ module edrv32_gpu_setup (
     reg [63:0] output_bounds_r [0:1];
     assign triangle_setup_bounds_o = output_bounds_r[output_read_r];
     always @(posedge clk_i) begin
-        if (push_w) output_bounds_r[output_write_r] <= bounds_r[complete_tag_r];
+        if (push_w)
+            output_bounds_r[output_write_r] <= unused_output_context_read0_w[32 +: 64];
     end
     reg [31:0] output_origin_r [0:1];
     assign triangle_setup_origin_o = output_origin_r[output_read_r];
     always @(posedge clk_i) begin
-        if (push_w) output_origin_r[output_write_r] <= origin_r[complete_tag_r];
+        if (push_w)
+            output_origin_r[output_write_r] <= unused_output_context_read0_w[0 +: 32];
     end
     wire [152:0] attribute_value_w;
     wire [152:0] attribute_value_wires_w [0:6];
@@ -505,55 +480,52 @@ module edrv32_gpu_setup (
     genvar attribute;
     generate
         for (attribute = 0; attribute < 7; attribute = attribute + 1) begin : g_attribute
-            reg [152:0] value_r [0:15];
-            wire [152:0] value_w;
-            reg [152:0] value_read_r;
+            // Input values live through the reciprocal and seven attribute reads (<64 clocks).
+            wire [152:0] unused_value_w;
+            wire [152:0] value_read_r;
             assign attribute_value_wires_w[attribute] = value_read_r;
-            always @(posedge clk_i) begin
-                if (enable_w) value_read_r <= value_r[attribute_tag_r];
-            end
             if (attribute == 0) begin : g_input_0
-                assign value_w = {
+                assign unused_value_w = {
                     35'd0,
                     screen_triangle_depth_i[32 +: 16], 35'd0,
                     screen_triangle_depth_i[16 +: 16], 35'd0,
                     screen_triangle_depth_i[0 +: 16]};
             end
             if (attribute == 1) begin : g_input_1
-                assign value_w = {
+                assign unused_value_w = {
                     16'd0,
                     screen_triangle_q_i[70 +: 35], 16'd0,
                     screen_triangle_q_i[35 +: 35], 16'd0,
                     screen_triangle_q_i[0 +: 35]};
             end
             if (attribute == 2) begin : g_input_2
-                assign value_w = {
+                assign unused_value_w = {
                     screen_triangle_uq_i[102 +: 51],
                     screen_triangle_uq_i[51 +: 51],
                     screen_triangle_uq_i[0 +: 51]};
             end
             if (attribute == 3) begin : g_input_3
-                assign value_w = {
+                assign unused_value_w = {
                     screen_triangle_vq_i[102 +: 51],
                     screen_triangle_vq_i[51 +: 51],
                     screen_triangle_vq_i[0 +: 51]};
             end
             if (attribute == 4) begin : g_input_4
-                assign value_w = {
+                assign unused_value_w = {
                     27'd0,
                     screen_triangle_color_i[144 +: 24], 27'd0,
                     screen_triangle_color_i[72 +: 24], 27'd0,
                     screen_triangle_color_i[0 +: 24]};
             end
             if (attribute == 5) begin : g_input_5
-                assign value_w = {
+                assign unused_value_w = {
                     27'd0,
                     screen_triangle_color_i[168 +: 24], 27'd0,
                     screen_triangle_color_i[96 +: 24], 27'd0,
                     screen_triangle_color_i[24 +: 24]};
             end
             if (attribute == 6) begin : g_input_6
-                assign value_w = {
+                assign unused_value_w = {
                     27'd0,
                     screen_triangle_color_i[192 +: 24], 27'd0,
                     screen_triangle_color_i[120 +: 24], 27'd0,
@@ -565,36 +537,70 @@ module edrv32_gpu_setup (
                 62 + (attribute-1)*66 : 260 + (attribute-4)*58;
             localparam GRAD_OFFSET = attribute == 0 ? 0 : attribute < 4 ?
                 96 + (attribute-1)*104 : 408 + (attribute-4)*88;
-            reg [WIDTH-1:0] start_r [0:15];
+            // Ordered attribute returns need one assembly register per field.
+            // The next triangle's attribute 0 may arrive on the old triangle's push clock;
+            // nonblocking writes retain the old coefficient for that output transfer.
+            reg [WIDTH-1:0] start_r;
             reg [WIDTH-1:0] output_start_r [0:1];
             assign triangle_setup_start_o[START_OFFSET +: WIDTH] =
                 output_start_r[output_read_r];
             always @(posedge clk_i) begin
                 if (enable_w && plane_valid_w && plane_tag_w[2:0] == attribute)
-                    start_r[plane_tag_w[6:3]] <= plane_start_w[WIDTH-1:0];
-                if (push_w) output_start_r[output_write_r] <= start_r[complete_tag_r];
+                    start_r <= plane_start_w[WIDTH-1:0];
+                if (push_w)
+                    output_start_r[output_write_r] <= start_r;
             end
-            reg [2*GRAD_WIDTH-1:0] gradient_r [0:15];
+            reg [2*GRAD_WIDTH-1:0] gradient_r;
             reg [2*GRAD_WIDTH-1:0] output_gradient_r [0:1];
             assign triangle_setup_gradient_o[GRAD_OFFSET +: 2*GRAD_WIDTH] =
                 output_gradient_r[output_read_r];
             always @(posedge clk_i) begin
                 if (enable_w && plane_valid_w && plane_tag_w[2:0] == attribute)
-                    gradient_r[plane_tag_w[6:3]] <= {plane_gradient_w[52 +: GRAD_WIDTH],
+                    gradient_r <= {plane_gradient_w[52 +: GRAD_WIDTH],
                         plane_gradient_w[0 +: GRAD_WIDTH]};
-                if (push_w) output_gradient_r[output_write_r] <= gradient_r[complete_tag_r];
+                if (push_w)
+                    output_gradient_r[output_write_r] <= gradient_r;
             end
-            reg [9:0] h_r [0:15];
+            reg [9:0] h_r;
             reg [9:0] output_h_r [0:1];
             assign triangle_setup_h_o[attribute*10 +: 10] =
                 output_h_r[output_read_r];
             always @(posedge clk_i) begin
                 if (enable_w && plane_valid_w && plane_tag_w[2:0] == attribute)
-                    h_r[plane_tag_w[6:3]] <= plane_h_w;
-                if (push_w) output_h_r[output_write_r] <= h_r[complete_tag_r];
+                    h_r <= plane_h_w;
+                if (push_w)
+                    output_h_r[output_write_r] <= h_r;
             end
-            always @(posedge clk_i) begin
-                if (enable_w && accept_w) value_r[allocate_r] <= value_w;
+            // Store only significant vertex bits; reconstruct the original 51-bit fields.
+            localparam FIELD_WIDTH = attribute == 0 ? 16 : attribute == 1 ? 35
+                : attribute < 4 ? 51 : 24;
+            localparam BANKS = (3*FIELD_WIDTH+71)/72;
+            wire [BANKS*72-1:0] value_input_w;
+            wire [BANKS*72-1:0] unused_value_data_w;
+            assign value_input_w = {{(BANKS*72-3*FIELD_WIDTH){1'b0}},
+                unused_value_w[102 +: FIELD_WIDTH], unused_value_w[51 +: FIELD_WIDTH],
+                unused_value_w[0 +: FIELD_WIDTH]};
+            assign value_read_r = {{(51-FIELD_WIDTH){1'b0}},
+                unused_value_data_w[2*FIELD_WIDTH +: FIELD_WIDTH],
+                {(51-FIELD_WIDTH){1'b0}},
+                unused_value_data_w[FIELD_WIDTH +: FIELD_WIDTH],
+                {(51-FIELD_WIDTH){1'b0}}, unused_value_data_w[0 +: FIELD_WIDTH]};
+            genvar value_bank;
+            for (value_bank = 0; value_bank < BANKS; value_bank = value_bank + 1) begin : g_value
+                wire [71:0] u_value_data_w;
+                reg [71:0] u_value_data_r;
+                assign unused_value_data_w[value_bank*72 +: 72] = u_value_data_r;
+                always @(posedge clk_i) begin
+                    if (enable_w) u_value_data_r <= u_value_data_w;
+                end
+                edrv32_ram_gpu_table u_value (
+                    .clk_i(clk_i),
+                    .wr_en_i(enable_w && accept_w),
+                    .wr_addr_i({3'b0, allocate_r[2:0]}),
+                    .wr_data_i(value_input_w[value_bank*72 +: 72]),
+                    .rd_addr_i({3'b0, attribute_tag_r[2:0]}),
+                    .rd_data_o(u_value_data_w)
+                );
             end
         end
     endgenerate
@@ -603,14 +609,46 @@ module edrv32_gpu_setup (
         // Three edge coefficient banks; two shared front multipliers retain their issue schedule.
         for (edge_bank = 0; edge_bank < 3; edge_bank = edge_bank + 1) begin : g_edge
             localparam VERTEX = (edge_bank + 1) % 3;
-            reg [39:0] value_r [0:15];
+
             reg [39:0] output_value_r [0:1];
-            reg [39:0] dx_r [0:15];
+
             reg [39:0] output_dx_r [0:1];
-            reg [39:0] dy_r [0:15];
+
             reg [39:0] output_dy_r [0:1];
-            reg [39:0] bias_r [0:15];
+
             reg [39:0] output_bias_r [0:1];
+            // Explicit LUTRAM edge_value: 1 slice(s) per combinational read port.
+            wire [71:0] edge_value_input_w;
+            assign edge_value_input_w = {32'b0, value_w};
+            wire [71:0] unused_edge_value_read0_w;
+            edrv32_ram_gpu_table u_edge_value_p0_b0 (
+                .clk_i(clk_i),
+                .wr_en_i(enable_w && value_write_w),
+                .wr_addr_i({2'b0, value_tag_w}),
+                .wr_data_i(edge_value_input_w[0 +: 72]),
+                .rd_addr_i({2'b0, complete_tag_r}),
+                .rd_data_o(unused_edge_value_read0_w[0 +: 72])
+            );
+            // Explicit LUTRAM edge_coefficients: 2 slice(s) per combinational read port.
+            wire [143:0] edge_coefficients_input_w;
+            assign edge_coefficients_input_w = {24'b0, bias_w, dy_w, dx_w};
+            wire [143:0] unused_edge_coefficients_read0_w;
+            edrv32_ram_gpu_table u_edge_coefficients_p0_b0 (
+                .clk_i(clk_i),
+                .wr_en_i(enable_w && accept_w),
+                .wr_addr_i({2'b0, allocate_r}),
+                .wr_data_i(edge_coefficients_input_w[0 +: 72]),
+                .rd_addr_i({2'b0, complete_tag_r}),
+                .rd_data_o(unused_edge_coefficients_read0_w[0 +: 72])
+            );
+            edrv32_ram_gpu_table u_edge_coefficients_p0_b1 (
+                .clk_i(clk_i),
+                .wr_en_i(enable_w && accept_w),
+                .wr_addr_i({2'b0, allocate_r}),
+                .wr_data_i(edge_coefficients_input_w[72 +: 72]),
+                .rd_addr_i({2'b0, complete_tag_r}),
+                .rd_data_o(unused_edge_coefficients_read0_w[72 +: 72])
+            );
             wire [39:0] dx_w;
             wire [39:0] dy_w;
             wire [39:0] bias_w;
@@ -628,16 +666,16 @@ module edrv32_gpu_setup (
             assign value_tag_w = area_tag_r;
             assign value_w = {{3{edge_result_w[36]}}, edge_result_w};
             always @(posedge clk_i) begin
-                if (enable_w && value_write_w) value_r[value_tag_w] <= value_w;
-                if (enable_w && accept_w) begin
-                    dx_r[allocate_r] <= dx_w;
-                    dy_r[allocate_r] <= dy_w;
-                    bias_r[allocate_r] <= bias_w;
-                end
-                if (push_w) output_value_r[output_write_r] <= value_r[complete_tag_r];
-                if (push_w) output_dx_r[output_write_r] <= dx_r[complete_tag_r];
-                if (push_w) output_dy_r[output_write_r] <= dy_r[complete_tag_r];
-                if (push_w) output_bias_r[output_write_r] <= bias_r[complete_tag_r];
+
+                if (push_w)
+
+                    output_value_r[output_write_r] <= unused_edge_value_read0_w[0 +: 40];
+                if (push_w)
+                    output_dx_r[output_write_r] <= unused_edge_coefficients_read0_w[0 +: 40];
+                if (push_w)
+                    output_dy_r[output_write_r] <= unused_edge_coefficients_read0_w[40 +: 40];
+                if (push_w)
+                    output_bias_r[output_write_r] <= unused_edge_coefficients_read0_w[80 +: 40];
             end
             assign triangle_setup_edge_o[edge_bank*160+0 +: 40] =
                 output_value_r[output_read_r];
@@ -649,4 +687,45 @@ module edrv32_gpu_setup (
                 output_bias_r[output_read_r];
         end
     endgenerate
+    // Explicit LUTRAM attribute_context: 2 slice(s) per combinational read port.
+    wire [143:0] attribute_context_input_w;
+    assign attribute_context_input_w = {36'b0, offset_w, delta_w};
+    wire [143:0] unused_attribute_context_read0_w;
+    edrv32_ram_gpu_table u_attribute_context_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_w && accept_w),
+        .wr_addr_i({2'b0, allocate_r}),
+        .wr_data_i(attribute_context_input_w[0 +: 72]),
+        .rd_addr_i({2'b0, attribute_tag_r}),
+        .rd_data_o(unused_attribute_context_read0_w[0 +: 72])
+    );
+    edrv32_ram_gpu_table u_attribute_context_p0_b1 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_w && accept_w),
+        .wr_addr_i({2'b0, allocate_r}),
+        .wr_data_i(attribute_context_input_w[72 +: 72]),
+        .rd_addr_i({2'b0, attribute_tag_r}),
+        .rd_data_o(unused_attribute_context_read0_w[72 +: 72])
+    );
+    // Explicit LUTRAM output_context: 2 slice(s) per combinational read port.
+    wire [143:0] output_context_input_w;
+    assign output_context_input_w = {48'b0, {unused_bound_y1_w[15:0], unused_bound_x1_w[15:0],
+        bound_y0_w[15:0], bound_x0_w[15:0]}, {origin_y_w[15:0], origin_x_w[15:0]}};
+    wire [143:0] unused_output_context_read0_w;
+    edrv32_ram_gpu_table u_output_context_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_w && accept_w),
+        .wr_addr_i({2'b0, allocate_r}),
+        .wr_data_i(output_context_input_w[0 +: 72]),
+        .rd_addr_i({2'b0, complete_tag_r}),
+        .rd_data_o(unused_output_context_read0_w[0 +: 72])
+    );
+    edrv32_ram_gpu_table u_output_context_p0_b1 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_w && accept_w),
+        .wr_addr_i({2'b0, allocate_r}),
+        .wr_data_i(output_context_input_w[72 +: 72]),
+        .rd_addr_i({2'b0, complete_tag_r}),
+        .rd_data_o(unused_output_context_read0_w[72 +: 72])
+    );
 endmodule

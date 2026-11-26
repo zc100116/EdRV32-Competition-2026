@@ -54,11 +54,7 @@ module edrv32_gpu_pixel (
     reg [31:0] result_valid_r;
     reg [15:0] addr_r [0:31];
     reg [3:0] mask_r [0:31];
-    reg [63:0] depth_r [0:31];
-    reg [95:0] color_r [0:31];
-    reg [31:0] alpha_r [0:31];
-    reg [159:0] old_r [0:31];
-    reg [159:0] result_r [0:31];
+
     reg [4:0] head_r;
     reg [4:0] tail_r;
     reg [4:0] dispatch_r;
@@ -113,7 +109,7 @@ module edrv32_gpu_pixel (
     assign returned_w = target_old_valid_i && target_old_ready_o;
     assign target_write_valid_o = valid_r[head_r] && result_valid_r[head_r] && !stop_i;
     assign target_write_addr_o = addr_r[head_r];
-    assign target_write_data_o = result_r[head_r];
+    assign target_write_data_o = unused_result_word_read0_w[0 +: 160];
     assign commit_w = valid_r[head_r] && (stop_i ? result_valid_r[head_r] :
         (target_write_valid_o && target_write_ready_i));
     assign dispatch_w = undispatched_r != 0 && dependency_ready_r[dispatch_r] &&
@@ -122,16 +118,16 @@ module edrv32_gpu_pixel (
         (!predecessor_w || result_valid_r[predecessor_slot_w])));
     // Target returns own the single old-value write port; forwarding waits one cycle.
     always @(posedge clk_i) begin
-        old_read_r <= old_r[process_r];
+        old_read_r <= unused_old_word_read0_w[0 +: 160];
         input_mask_r <= mask_r[process_r] & {4{!stop_i}};
-        input_depth_r <= depth_r[process_r];
-        input_color_r <= color_r[process_r];
-        input_alpha_r <= alpha_r[process_r];
+        input_depth_r <= unused_shade_context_read0_w[0 +: 64];
+        input_color_r <= unused_shade_context_read0_w[64 +: 96];
+        input_alpha_r <= unused_shade_context_read0_w[160 +: 32];
     end
     assign old_write_w = returned_w || (dispatch_w && (predecessor_w || stop_i));
     assign old_addr_w = returned_w ? return_slot_r[return_rd_r] : dispatch_r;
     assign old_data_w = returned_w ? target_old_data_i :
-        stop_i ? 160'b0 : result_r[predecessor_slot_w];
+        stop_i ? 160'b0 : unused_result_word_read1_w[0 +: 160];
     assign process_w = unprocessed_r != 0 && old_valid_r[process_r];
     // Accept-side dependency search is four stages at one word per clock.
     // Six-bit queue tickets distinguish a committed predecessor from a reused slot.
@@ -377,9 +373,7 @@ module edrv32_gpu_pixel (
         if (accept_w) begin
             addr_r[tail_r] <= address_w[15:0];
             mask_r[tail_r] <= shaded_mask_i;
-            depth_r[tail_r] <= shaded_depth_i;
-            color_r[tail_r] <= shaded_color_i;
-            alpha_r[tail_r] <= shaded_alpha_i;
+
         end
         if (dispatch_w && !predecessor_w && !stop_i) begin
             request_slot_r <= dispatch_r;
@@ -391,16 +385,119 @@ module edrv32_gpu_pixel (
         for (stage = 1; stage < 16; stage = stage + 1) begin
             pipe_slot_r[stage] <= pipe_slot_r[stage-1];
         end
-        if (pipe_valid_r[15]) begin
-            result_r[pipe_slot_r[15]] <= pipe_data_w;
-        end
-    end
-    always @(posedge clk_i) begin
-        if (old_write_w) old_r[old_addr_w] <= old_data_w;
     end
     wire [479:0] unused_state_w;
     wire [17:0] unused_address_w;
     assign unused_state_w = {render_state_tex_i, render_state_target_i[255:64],
         render_state_target_i[31:0]};
     assign unused_address_w = {address_w[31:16], local_x_w[1:0]};
+    // Explicit LUTRAM shade_context: 3 slice(s) per combinational read port.
+    wire [215:0] shade_context_input_w;
+    assign shade_context_input_w = {24'b0, shaded_alpha_i, shaded_color_i, shaded_depth_i};
+    wire [215:0] unused_shade_context_read0_w;
+    edrv32_ram_gpu_table u_shade_context_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(accept_w),
+        .wr_addr_i({1'b0, tail_r}),
+        .wr_data_i(shade_context_input_w[0 +: 72]),
+        .rd_addr_i({1'b0, process_r}),
+        .rd_data_o(unused_shade_context_read0_w[0 +: 72])
+    );
+    edrv32_ram_gpu_table u_shade_context_p0_b1 (
+        .clk_i(clk_i),
+        .wr_en_i(accept_w),
+        .wr_addr_i({1'b0, tail_r}),
+        .wr_data_i(shade_context_input_w[72 +: 72]),
+        .rd_addr_i({1'b0, process_r}),
+        .rd_data_o(unused_shade_context_read0_w[72 +: 72])
+    );
+    edrv32_ram_gpu_table u_shade_context_p0_b2 (
+        .clk_i(clk_i),
+        .wr_en_i(accept_w),
+        .wr_addr_i({1'b0, tail_r}),
+        .wr_data_i(shade_context_input_w[144 +: 72]),
+        .rd_addr_i({1'b0, process_r}),
+        .rd_data_o(unused_shade_context_read0_w[144 +: 72])
+    );
+    // Explicit LUTRAM old_word: 3 slice(s) per combinational read port.
+    wire [215:0] old_word_input_w;
+    assign old_word_input_w = {56'b0, old_data_w};
+    wire [215:0] unused_old_word_read0_w;
+    edrv32_ram_gpu_table u_old_word_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(old_write_w),
+        .wr_addr_i({1'b0, old_addr_w}),
+        .wr_data_i(old_word_input_w[0 +: 72]),
+        .rd_addr_i({1'b0, process_r}),
+        .rd_data_o(unused_old_word_read0_w[0 +: 72])
+    );
+    edrv32_ram_gpu_table u_old_word_p0_b1 (
+        .clk_i(clk_i),
+        .wr_en_i(old_write_w),
+        .wr_addr_i({1'b0, old_addr_w}),
+        .wr_data_i(old_word_input_w[72 +: 72]),
+        .rd_addr_i({1'b0, process_r}),
+        .rd_data_o(unused_old_word_read0_w[72 +: 72])
+    );
+    edrv32_ram_gpu_table u_old_word_p0_b2 (
+        .clk_i(clk_i),
+        .wr_en_i(old_write_w),
+        .wr_addr_i({1'b0, old_addr_w}),
+        .wr_data_i(old_word_input_w[144 +: 72]),
+        .rd_addr_i({1'b0, process_r}),
+        .rd_data_o(unused_old_word_read0_w[144 +: 72])
+    );
+    // Explicit LUTRAM result_word: 3 slice(s) per combinational read port.
+    wire [215:0] result_word_input_w;
+    assign result_word_input_w = {56'b0, pipe_data_w};
+    wire [215:0] unused_result_word_read0_w;
+    edrv32_ram_gpu_table u_result_word_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(pipe_valid_r[15]),
+        .wr_addr_i({1'b0, pipe_slot_r[15]}),
+        .wr_data_i(result_word_input_w[0 +: 72]),
+        .rd_addr_i({1'b0, head_r}),
+        .rd_data_o(unused_result_word_read0_w[0 +: 72])
+    );
+    edrv32_ram_gpu_table u_result_word_p0_b1 (
+        .clk_i(clk_i),
+        .wr_en_i(pipe_valid_r[15]),
+        .wr_addr_i({1'b0, pipe_slot_r[15]}),
+        .wr_data_i(result_word_input_w[72 +: 72]),
+        .rd_addr_i({1'b0, head_r}),
+        .rd_data_o(unused_result_word_read0_w[72 +: 72])
+    );
+    edrv32_ram_gpu_table u_result_word_p0_b2 (
+        .clk_i(clk_i),
+        .wr_en_i(pipe_valid_r[15]),
+        .wr_addr_i({1'b0, pipe_slot_r[15]}),
+        .wr_data_i(result_word_input_w[144 +: 72]),
+        .rd_addr_i({1'b0, head_r}),
+        .rd_data_o(unused_result_word_read0_w[144 +: 72])
+    );
+    wire [215:0] unused_result_word_read1_w;
+    edrv32_ram_gpu_table u_result_word_p1_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(pipe_valid_r[15]),
+        .wr_addr_i({1'b0, pipe_slot_r[15]}),
+        .wr_data_i(result_word_input_w[0 +: 72]),
+        .rd_addr_i({1'b0, predecessor_slot_w}),
+        .rd_data_o(unused_result_word_read1_w[0 +: 72])
+    );
+    edrv32_ram_gpu_table u_result_word_p1_b1 (
+        .clk_i(clk_i),
+        .wr_en_i(pipe_valid_r[15]),
+        .wr_addr_i({1'b0, pipe_slot_r[15]}),
+        .wr_data_i(result_word_input_w[72 +: 72]),
+        .rd_addr_i({1'b0, predecessor_slot_w}),
+        .rd_data_o(unused_result_word_read1_w[72 +: 72])
+    );
+    edrv32_ram_gpu_table u_result_word_p1_b2 (
+        .clk_i(clk_i),
+        .wr_en_i(pipe_valid_r[15]),
+        .wr_addr_i({1'b0, pipe_slot_r[15]}),
+        .wr_data_i(result_word_input_w[144 +: 72]),
+        .rd_addr_i({1'b0, predecessor_slot_w}),
+        .rd_data_o(unused_result_word_read1_w[144 +: 72])
+    );
 endmodule

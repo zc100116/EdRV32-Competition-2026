@@ -344,7 +344,7 @@ def run(kind):
     build.mkdir(parents=True, exist_ok=True)
     sources = ['-I'+str(ROOT/'rtl/include'), str(ROOT/f'rtl/gpu/edrv32_gpu_{kind}.v')]
     if kind == 'raster':
-        sources.append(str(ROOT/'rtl/tech/edrv32_ram_gpu_delay.v'))
+        sources.append(str(ROOT/'rtl/tech/edrv32_ram_gpu_table.v'))
         sources.append(str(ROOT/'rtl/tech/edrv32_ram_gpu_read_pool.v'))
         sources.extend(str(p) for p in sorted((ROOT/'rtl/gpu').glob(
             'edrv32_gpu_raster_*.v')))
@@ -352,7 +352,7 @@ def run(kind):
         sources.extend(str(p) for p in sorted((ROOT/'rtl/gpu').glob(
             'edrv32_gpu_perspective_*.v')))
         sources.append(str(ROOT/'rtl/tech/edrv32_rom_gpu_recip_p18.v'))
-        sources.append(str(ROOT/'rtl/tech/edrv32_ram_gpu_delay.v'))
+        sources.append(str(ROOT/'rtl/tech/edrv32_ram_gpu_table.v'))
     subprocess.run(['iverilog', '-g2012', '-DSIM_MODE', '-s', 'tb', '-o', str(build/'sim'),
                     *sources, str(unit/'tb.sv')], check=True)
     if kind == 'perspective':
