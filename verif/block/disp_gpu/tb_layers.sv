@@ -1,13 +1,10 @@
 // File: tb_layers.sv
 // Spec: DISP v0.3 2.4-2.7, 4-6; testplan DS-06/07/09/13 through DS-19.
-// Description: Independent two-layer APB/AXI/TMDS scoreboard and directed stimuli.
+// Description: Independent L0 APB/AXI/TMDS scoreboard and directed stimuli.
 // Clock domains: clk_mem and clk_pix, with independently varied phase and period.
 `timescale 1ns/1ps
 module tb_layers;
     localparam logic [31:0] BASE_A = 32'h80000000;
-    localparam logic [31:0] BASE_1 = 32'h81000000;
-    localparam int FRAME_PIXELS = 1280*720;
-    localparam int OPACITY[6] = '{0, 1, 128, 255, 73, 219};
     logic clk_mem = 0;
     logic clk_pix = 0;
     logic rst_mem_n = 0;
@@ -51,22 +48,22 @@ module tb_layers;
     bit urgent_row_valid;
     int frame_request[64];
     int scanned;
-    int accepted[2];
-    int returned[2];
-    int demanded[2];
-    int missing[2];
-    int missing_frames[2];
-    bit frame_missing[2];
-    bit group_missing[2];
-    bit repayment[2];
-    int capacity_checks[2];
-    int urgent_low[2];
+    int accepted[1];
+    int returned[1];
+    int demanded[1];
+    int missing[1];
+    int missing_frames[1];
+    bit frame_missing[1];
+    bit group_missing[1];
+    bit repayment[1];
+    int capacity_checks[1];
+    int urgent_low[1];
     int urgent_high;
     int urgent_outside;
-    int last_return[2];
-    int last_demand[2];
-    int descriptor_count[2];
-    int expected_descriptors[2];
+    int last_return[1];
+    int last_demand[1];
+    int descriptor_count[1];
+    int expected_descriptors[1];
     int reference_fd;
     int reference_pixels;
     string reference_path;
@@ -75,18 +72,10 @@ module tb_layers;
     realtime frame_period;
     typedef struct packed {
         logic [31:0] base0;
-        logic [31:0] base1;
         int stride0;
-        int stride1;
         int sx;
         int sy;
         bit en0;
-        bit en1;
-        int left;
-        int top;
-        int width;
-        int height;
-        int opacity;
         bit x2;
     } config_t;
     config_t software_cfg;
@@ -170,7 +159,24 @@ module tb_layers;
         return int'(stimulus_rng % 32'(limit_i));
     endfunction
 
-    `include "blend_ref.svh"
+    function automatic logic [23:0] expand(input logic [15:0] v);
+        return {v[15:11], v[15:13], v[10:5], v[10:9], v[4:0], v[4:2]};
+    endfunction
+
+    function automatic logic [15:0] pixel565(input logic [31:0] base_i,
+                                            input int column_i, input int row_i);
+        logic [31:0] word;
+        int tag;
+        tag = int'((base_i - BASE_A) >> 22);
+        if (test_case == 7 || test_case == 12 || test_case == 13 || test_case == 21)
+            return {5'(1 + (column_i + row_i + tag*7) % 31),
+                    6'((row_i*3 + column_i/7 + tag*13) % 64), 5'b0};
+        word = 32'(column_i+1)*32'h045d9f3b ^ 32'(row_i+1)*32'h119de1f3 ^
+                32'(seed)*32'h10204081 ^ 32'(tag)*32'h17234567;
+        return 16'(word ^ (word >> 16));
+    endfunction
+
+
 
     function automatic logic [255:0] memory_beat(input command_t command_i);
         logic [31:0] address;
@@ -183,36 +189,20 @@ module tb_layers;
         config_t cfg;
         cfg = latched[command_i.frame_id];
         address = command_i.address + 32'(command_i.index*32);
-        base = command_i.layer == 0 ? cfg.base0 : cfg.base1;
+        base = cfg.base0;
         // RAM contents depend on physical address, not this frame's programmed
         // stride. DS-18 changes the view of the same stored surface.
-        pitch = command_i.layer == 0 ? 4096 : 5120;
+        pitch = 4096;
         offset = int'(address - base);
         row = offset / pitch;
         column = offset % pitch;
-        if (command_i.layer == 0) begin
-            for (int p = 0; p < 16; p++)
-                result[p*16+:16] = pixel565(base, column/2+p, row);
-        end else begin
-            for (int p = 0; p < 8; p++)
-                result[p*32+:32] = pixel_argb(base, column/4+p, row);
-        end
+        for (int p = 0; p < 16; p++)
+            result[p*16+:16] = pixel565(base, column/2+p, row);
         return result;
     endfunction
 
-    // Skip exactly those descriptors omitted by spec 2.5, preserving L0/L1 order.
     task automatic next_descriptor;
-        config_t cfg;
-        cfg = latched[ar_frame];
-        while (ar_row < 720 && ((ar_layer == 0 && !cfg.en0) ||
-                (ar_layer == 1 && (!cfg.en1 || ar_row < cfg.top ||
-                                                    ar_row >= cfg.top+cfg.height)))) begin
-            if (ar_layer == 0) ar_layer = 1;
-            else begin
-                ar_layer = 0;
-                ar_row++;
-            end
-        end
+        if (!latched[ar_frame].en0) ar_row = 720;
     endtask
 
     // FRAME is the sole enabled interrupt. Capture the public latch event before AR.
@@ -232,7 +222,6 @@ module tb_layers;
                 ar_column = 0;
                 urgent_row_valid = 0;
                 expected_descriptors[0] += software_cfg.en0 ? 720 : 0;
-                expected_descriptors[1] += software_cfg.en1 ? software_cfg.height : 0;
                 next_descriptor();
                 frame_request[frame_index+1] = latest;
             end
@@ -258,8 +247,6 @@ module tb_layers;
         int occupancy;
         int reserved;
         logic [31:0] expected_address;
-        bit l1_inside;
-        bit l1_outside;
         if (rst_mem_n) begin
             cycles++;
             if (urgent) urgent_cycles++;
@@ -272,10 +259,8 @@ module tb_layers;
                 cfg = latched[ar_frame];
                 check("descriptor has a latched frame", 1, 32'(ar_frame > 0), ar_layer);
                 check("descriptor row in frame", 1, 32'(ar_row < 720), ar_layer);
-                row_beats = ar_layer == 0 ? (cfg.x2 ? 40 : (cfg.sx%16 == 0 ? 80 : 81)) : cfg.width/8;
-                expected_address = ar_layer == 0 ?
-                    cfg.base0 + 32'((cfg.sy+(cfg.x2 ? ar_row/2 : ar_row))*cfg.stride0 + (cfg.sx/16)*32) :
-                    cfg.base1 + 32'((ar_row-cfg.top)*cfg.stride1);
+                row_beats = cfg.x2 ? 40 : (cfg.sx%16 == 0 ? 80 : 81);
+                expected_address = cfg.base0 + 32'((cfg.sy+(cfg.x2 ? ar_row/2 : ar_row))*cfg.stride0 + (cfg.sx/16)*32);
                 expected_address += 32'(ar_column*32);
                 check($sformatf("AR order row=%0d beat=%0d", ar_row, ar_column), expected_address,
                         axi.araddr, ar_layer);
@@ -311,11 +296,7 @@ module tb_layers;
                 ar_column += cmd.beats;
                 if (ar_column == row_beats) begin
                     ar_column = 0;
-                    if (ar_layer == 0) ar_layer = 1;
-                    else begin
-                        ar_layer = 0;
-                        ar_row++;
-                    end
+                    ar_row++;
                     next_descriptor();
                 end
             end
@@ -328,37 +309,7 @@ module tb_layers;
                 end else commands[0].index++;
             end
             check("at most four outstanding", 1, 32'(outstanding <= 4));
-            if (test_case == 9 && ar_frame != 0 && ar_row < 720 && urgent_row_valid) begin
-                cfg = latched[ar_frame];
-                // FRAME case 9 uses full-width L1 when L0 is off. Otherwise L0
-                // constrains descriptor lookahead: 512 FIFO beats / >=80 per row
-                // permits at most seven partial/full rows; eight rows bound it.
-                // Use the last observed AR row, not the next expected descriptor:
-                // before the first AR the reader may still be skipping absent rows.
-                // The DMA's pending row is not observable; classify only intervals
-                // wholly inside/outside the rectangle after a real AR is seen.
-                l1_inside = cfg.en1 && urgent_row >= cfg.top &&
-                            urgent_row+8 < cfg.top+cfg.height;
-                l1_outside = !cfg.en1 || urgent_row+8 < cfg.top ||
-                                urgent_row >= cfg.top+cfg.height;
-                for (int l = 0; l < 2; l++) begin
-                    occupancy = returned[l] - demanded[l];
-                    row_beats = l == 0 ? 81 : cfg.width/8;
-                    if ((l == 0 ? cfg.en0 : l1_inside) &&
-                        occupancy < row_beats-16 && cycles-last_return[l] > 24 &&
-                        cycles-last_demand[l] > 24) begin
-                        check("urgent below layer row watermark", 1, 32'(urgent), l);
-                        urgent_low[l]++;
-                    end
-                end
-                if ((l1_inside || l1_outside) &&
-                    (!cfg.en0 || returned[0]-demanded[0] >= 97) &&
-                    (l1_outside || returned[1]-demanded[1] >= cfg.width/8+16)) begin
-                    check("urgent clear above applicable watermarks", 0, 32'(urgent));
-                    urgent_high++;
-                    if (cfg.en1 && l1_outside) urgent_outside++;
-                end
-            end
+
         end
     end
 
@@ -370,13 +321,9 @@ module tb_layers;
         int p;
         int within0;
         int offset;
-        bit inside1;
         bit need0;
-        bit need1;
         logic [23:0] background;
-        logic [31:0] foreground;
         logic [23:0] expected;
-        logic [23:0] python_pixel;
         if (rst_pix_n) begin
             if (!locked && de) begin
                 locked = 1;
@@ -394,19 +341,15 @@ module tb_layers;
                         cfg = latched[request];
                         p = cfg.sx % 16;
                         within0 = ((cfg.x2 ? x/2 : x)+p) % 16;
-                        inside1 = cfg.en1 && x >= cfg.left && x < cfg.left+cfg.width &&
-                                    y >= cfg.top && y < cfg.top+cfg.height;
                         need0 = cfg.en0 && (x == 0 || (within0 == 0 && (!cfg.x2 || x%2 == 0)));
-                        need1 = inside1 && (x-cfg.left)%8 == 0;
-                        if (need0 || need1) begin
-                            for (int l = 0; l < 2; l++) begin
-                                if (l == 0 ? need0 : need1) begin
+                        if (need0) begin
+                            for (int l = 0; l < 1; l++) begin
+                                if (need0) begin
                                     demanded[l]++;
                                     last_demand[l] = cycles;
                                     group_missing[l] = 0;
                                     if (test_case == 7 || test_case == 12 || test_case == 13 || test_case == 21)
-                                        group_missing[l] = l == 0 ? rgb[23:16] == 0 :
-                                                                    rgb[7:0] == 0;
+                                        group_missing[l] = rgb[23:16] == 0;
                                     if (group_missing[l]) begin
                                         if (!repayment[l] && returned[l]-demanded[l] > 8)
                                             check("miss requires exhausted returned data", 0,
@@ -423,31 +366,19 @@ module tb_layers;
                             end
                         end
                         background = 0;
-                        foreground = 0;
                         if (cfg.en0 && !group_missing[0]) begin
                             offset = ((cfg.x2 ? y/2 : y)+cfg.sy)*cfg.stride0 +
                                 2*((cfg.x2 ? x/2 : x)+cfg.sx);
                             background = expand(pixel565(cfg.base0, (offset%4096)/2,
                                                             offset/4096));
                         end
-                        if (inside1 && !group_missing[1]) begin
-                            offset = (y-cfg.top)*cfg.stride1 + 4*(x-cfg.left);
-                            foreground = pixel_argb(cfg.base1, (offset%5120)/4, offset/5120);
-                        end
-                        expected = mix(background, foreground, cfg.opacity);
-                        if (test_case == 15 && request <= 6) begin
-                            check("Python reference available", 1,
-                                    32'($fscanf(reference_fd, "%h", python_pixel) == 1));
-                            check("Python versus SV blend reference", 32'(python_pixel),
-                                    32'(expected));
-                            reference_pixels++;
-                        end
+                        expected = background;
                     end
-                    check("window / rectangle / blend / debt position", 32'(expected),
+                    check("L0 scroll / X2 / debt position", 32'(expected),
                             32'(rgb));
                     if (x == 1279 && y == 719 && request != 0) begin
                         scanned++;
-                        for (int l = 0; l < 2; l++) begin
+                        for (int l = 0; l < 1; l++) begin
                             if (frame_missing[l]) missing_frames[l]++;
                             frame_missing[l] = 0;
                         end
@@ -494,20 +425,8 @@ module tb_layers;
             end
             12'h118: begin
                 software_cfg.en0 = value_i[0];
-                software_cfg.en1 = value_i[1];
                 software_cfg.x2 = value_i[2];
             end
-            12'h120: software_cfg.base1 = value_i & 32'hfffff000;
-            12'h124: software_cfg.stride1 = int'(value_i & 32'hffe0);
-            12'h128: begin
-                software_cfg.left = int'({value_i[10:3], 3'b0});
-                software_cfg.top = int'(value_i[25:16]);
-            end
-            12'h12c: begin
-                software_cfg.width = int'({value_i[10:3], 3'b0});
-                software_cfg.height = int'(value_i[25:16]);
-            end
-            12'h130: software_cfg.opacity = int'(value_i[7:0]);
             default: begin end
         endcase
     endtask
@@ -526,7 +445,6 @@ module tb_layers;
         wait (latest == frame_i);
         rd_check(12'h110, 32'(frame_i));
         if (latched[frame_i].en0) rd_check(12'h108, latched[frame_i].base0);
-        if (latched[frame_i].en1) rd_check(12'h134, latched[frame_i].base1);
         wr(12'h010, 4);
     endtask
 
@@ -536,7 +454,7 @@ module tb_layers;
         do transfer(0, 12'h008, 0, status); while (!status[1]);
         check("IDLE has no outstanding transactions", 0, 32'(outstanding));
         repeat (40) @(negedge clk_mem);
-        for (int l = 0; l < 2; l++) begin
+        for (int l = 0; l < 1; l++) begin
             check("all accepted beats returned", 32'(accepted[l]), 32'(returned[l]), l);
             check("descriptor count", 32'(expected_descriptors[l]),
                     32'(descriptor_count[l]), l);
@@ -553,23 +471,12 @@ module tb_layers;
     task automatic configure;
         wr(12'h100, BASE_A);
         wr(12'h104, 4096);
-        wr(12'h120, BASE_1);
-        wr(12'h124, 5120);
-        wr(12'h118, 3);
+        wr(12'h118, 1);
         wr(12'h00c, 4);
     endtask
 
-    task automatic release_check(input logic [31:0] flags_i,
-                                    input logic [31:0] rel0_i, input logic [31:0] rel1_i);
-        rd_check(12'h010, flags_i);
-        rd_check(12'h10c, rel0_i);
-        rd_check(12'h138, rel1_i);
-        wr(12'h010, 32'h300);
-        rd_check(12'h010, 0);
-    endtask
-
     initial begin : scenarios
-        int old_missing[2];
+        int old_missing[1];
         logic [31:0] value;
         void'($value$plusargs("CASE=%d", test_case));
         void'($value$plusargs("SEED=%d", seed));
@@ -580,8 +487,7 @@ module tb_layers;
             pix_half = 5.9 + real'(seed%4)*0.55;
             mem_half = 3.7 + real'(seed%3)*0.4;
         end
-        software_cfg = '{BASE_A, BASE_1, 2560, 5120, 0, 0, 1, 0,
-                            0, 0, 1280, 720, 255, 0};
+        software_cfg = '{BASE_A, 2560, 0, 0, 1, 0};
         apb.paddr = 0;
         apb.psel = 0;
         apb.penable = 0;
@@ -608,11 +514,6 @@ module tb_layers;
         axi.rdata = 0;
         axi.rresp = 0;
         axi.rlast = 0;
-        if (test_case == 15) begin
-            void'($value$plusargs("BLEND_REF=%s", reference_path));
-            reference_fd = $fopen(reference_path, "r");
-            check("Python blend frame open", 1, 32'(reference_fd != 0));
-        end
         repeat (8) @(negedge clk_mem);
         rst_mem_n = 1;
         repeat (3) @(negedge clk_pix);
@@ -634,17 +535,14 @@ module tb_layers;
             21: begin
                 // ST-06: mid-frame shadow writes take effect at the next FRAME only.
                 wr(12'h114, 32'h00030020);
-                wr(12'h130, 128);
-                wr(12'h128, 32'h00100008);
-                wr(12'h12c, 32'h02b004e8);
-                wr(12'h118, 7);
+                wr(12'h118, 5);
                 wr(12'h004, 1);
                 await_frame(1);
                 position(1, 100);
-                wr(12'h118, 3);
+                wr(12'h118, 1);
                 await_frame(2);
                 position(2, 100);
-                wr(12'h118, 7);
+                wr(12'h118, 5);
                 await_frame(3);
                 position(3, 120);
                 stopped = 1;
@@ -653,267 +551,23 @@ module tb_layers;
                 position(4, 180);
                 stopped = 0;
                 position(4, 400);
-                for (int l = 0; l < 2; l++) begin
+                for (int l = 0; l < 1; l++) begin
                     old_missing[l] = missing[l];
-                    check("ST-06 per-layer missed beats", 1, 32'(missing[l] > 0), l);
+                    check("ST-06 L0 missed beats", 1, 32'(missing[l] > 0), l);
                 end
                 wr(12'h004, 1);
                 await_frame(4);
                 position(5, 700);
-                for (int l = 0; l < 2; l++)
+                for (int l = 0; l < 1; l++)
                     check("ST-06 debt repaid and next frame aligned", 32'(old_missing[l]),
                             32'(missing[l]), l);
                 finish_scan();
             end
-            6: begin
-                wr(12'h004, 1);
-                await_frame(1);
-                position(1, 700);
-                finish_scan();
-                for (int l = 0; l < 2; l++)
-                    check("full-screen row capacity exercised", 720,
-                            32'(capacity_checks[l]), l);
-            end
-            7: begin
-                wr(12'h130, 128);
-                wr(12'h118, variant == 0 ? 2 : (variant == 1 ? 1 : 3));
-                wr(12'h004, 1);
-                await_frame(1);
-                position(1, 120);
-                stopped = 1;
-                position(1, 200);
-                wr(12'h004, 0);
-                position(2, 180);
-                stopped = 0;
-                position(2, 400);
-                repeat (40) @(negedge clk_mem);
-                transfer(0, 12'h014, 0, value);
-                if (variant == 0) check("L1-only underflow code", 3, value, 1);
-                if (variant == 1) check("L0-only underflow code", 1, value, 0);
-                if (variant == 2)
-                    check("both report a specified underflow code", 1,
-                            32'(value == 1 || value == 3));
-                transfer(0, 12'h010, 0, value);
-                check("underflow ERROR flag", 2, value & 2);
-                wr(12'h010, 2);
-                for (int l = 0; l < 2; l++) old_missing[l] = missing[l];
-                wr(12'h004, 1);
-                await_frame(2);
-                position(3, 700);
-                for (int l = 0; l < 2; l++) begin
-                    check("next scan fully aligned and recovered", 32'(old_missing[l]),
-                            32'(missing[l]), l);
-                    if (l == 0 ? variant != 0 : variant != 1)
-                        check("layer underflow exercised", 1, 32'(missing[l] > 0), l);
-                end
-                finish_scan();
-            end
-            9: begin
-                // L1-only top/bottom rectangles expose the 'outside rectangle' predicate.
-                wr(12'h118, 2);
-                wr(12'h128, 32'h00640000);
-                wr(12'h12c, 32'h00640500);
-                wr(12'h004, 1);
-                await_frame(1);
-                stopped = 1;
-                repeat (200) @(negedge clk_mem);
-                stopped = 0;
-                position(1, 600);
-                wr(12'h118, 1);
-                await_frame(2);
-                stopped = 1;
-                repeat (200) @(negedge clk_mem);
-                stopped = 0;
-                position(2, 600);
-                wr(12'h12c, 32'h00640100);
-                wr(12'h118, 3);
-                await_frame(3);
-                position(3, 700);
-                finish_scan();
-                for (int l = 0; l < 2; l++)
-                    check("layer low urgent observations", 1, 32'(urgent_low[l] > 0), l);
-                check("urgent high observations", 1, 32'(urgent_high > 0));
-                check("L1 outside rectangle does not assert urgent", 1,
-                        32'(urgent_outside > 0), 1);
-            end
-            12: begin
-                wr(12'h130, 128);
-                wr(12'h004, 1);
-                await_frame(1);
-                position(1, 100);
-                wr(12'h120, BASE_1+32'h00400000);
-                await_frame(2);
-                release_check(32'h200, 0, BASE_1);
-                position(2, 120);
-                stopped = 1;
-                position(2, 300);
-                stopped = 0;
-                position(2, 600);
-                check("L1 missing groups observed before SOFT_RST", 1, 32'(missing[1] > 0), 1);
-                wr(12'h004, 8);
-                do transfer(0, 12'h008, 0, value); while (!value[1]);
-                check("SOFT_RST leaves no outstanding responses", 0, 32'(outstanding));
-                repeat (40) @(negedge clk_mem);
-                rd_check(12'h004, 0);
-                rd_check(12'h010, 0);
-                rd_check(12'h014, 0);
-                rd_check(12'h118, 1);
-                rd_check(12'h134, 0);
-                rd_check(12'h138, 0);
-                for (int p = 0; p < 7; p++) rd_check(12'(64+4*p), 0);
-                position(3, 720);
-                rd_check(12'h054, 0);
-                rd_check(12'h058, 0);
-                rd_check(12'h008, 2);
-            end
-            13: begin
-                wr(12'h130, 128);
-                wr(12'h004, 1);
-                for (int f = 1; f <= 6; f++) begin
-                    await_frame(f);
-                    position(f, 40+draw(120), draw(600));
-                    wr(12'h100, BASE_A + 32'(draw(3))*32'h00400000);
-                    wr(12'h120, BASE_1 + 32'(draw(3))*32'h00400000);
-                    wr(12'h118, 32'(draw(4)));
-                    wr(12'h130, 32'(32+draw(192)));
-                    wr(12'h114, 32'(draw(8))*65536 + 32'(draw(49)));
-                    wr(12'h128, 32'(draw(600))*65536 + 32'(draw(80))*8);
-                    wr(12'h12c, 32'(1+draw(120))*65536 + 32'(1+draw(80))*8);
-                    if (draw(2) == 0) begin
-                        stopped = 1;
-                        position(f, 400+draw(200));
-                        stopped = 0;
-                    end
-                    // Disable/re-enable within a frame, preserving six requested frames.
-                    wr(12'h004, 0);
-                    repeat (10+draw(100)) @(negedge clk_mem);
-                    wr(12'h004, 1);
-                end
-                position(6, 700);
-                finish_scan();
-            end
-            14: begin
-                wr(12'h118, 1);
-                wr(12'h114, 32'h00030000 | 32'(variant));
-                wr(12'h004, 1);
-                await_frame(1);
-                position(1, 700);
-                finish_scan();
-                check("all scrolled row descriptors", 720, 32'(descriptor_count[0]), 0);
-            end
-            15: begin
-                wr(12'h130, 32'(OPACITY[0]));
-                wr(12'h004, 1);
-                for (int f = 1; f <= 6; f++) begin
-                    await_frame(f);
-                    position(f, 100);
-                    if (f < 6) wr(12'h130, 32'(OPACITY[f]));
-                end
-                position(6, 700);
-                finish_scan();
-                check("six Python/SV expected frames", 6*FRAME_PIXELS,
-                        32'(reference_pixels));
-                $fclose(reference_fd);
-            end
-            16: begin
-                case (variant)
-                    0: begin
-                        wr(12'h128, 0);
-                        wr(12'h12c, 32'h00010008);
-                    end
-                    1: begin
-                        wr(12'h128, 32'h02cf04f8);
-                        wr(12'h12c, 32'h00010008);
-                    end
-                    2: begin
-                        wr(12'h128, 32'h00100008);
-                        wr(12'h12c, 32'h02c004f8);
-                    end
-                    default: $fatal(1, "FAIL rectangle variant expected=0..2 actual=%0d",
-                                    variant);
-                endcase
-                wr(12'h130, 128);
-                wr(12'h004, 1);
-                await_frame(1);
-                position(1, 700);
-                finish_scan();
-            end
-            17: begin
-                wr(12'h004, 1);
-                await_frame(1);
-                release_check(0, 0, 0);
-                position(1, 100);
-                wr(12'h100, BASE_A+32'h00400000);
-                rd_check(12'h108, BASE_A);
-                await_frame(2);
-                release_check(32'h100, BASE_A, 0);
-                position(2, 100);
-                wr(12'h120, BASE_1+32'h00400000);
-                await_frame(3);
-                release_check(32'h200, BASE_A, BASE_1);
-                position(3, 100);
-                wr(12'h118, 1);
-                await_frame(4);
-                release_check(32'h200, BASE_A, BASE_1+32'h00400000);
-                position(4, 100);
-                wr(12'h118, 3);
-                await_frame(5);
-                release_check(0, BASE_A, BASE_1+32'h00400000);
-                position(5, 100);
-                wr(12'h114, 32'h00020011);
-                wr(12'h128, 32'h00010008);
-                wr(12'h12c, 32'h02cf04f8);
-                wr(12'h130, 73);
-                await_frame(6);
-                release_check(0, BASE_A, BASE_1+32'h00400000);
-                position(6, 700);
-                finish_scan();
-            end
-            18: begin
-                wr(12'h12c, 32'h02ce04f0);
-                wr(12'h004, 1);
-                await_frame(1);
-                await_frame(2);
-                // A separate run per register places its write immediately before/after
-                // the predicted public FRAME event. No DUT internals are inspected.
-                #(frame_period - ($realtime-latch_time) + (variant%2 == 0 ? -64 : 64));
-                check("write falls on intended side of FRAME", variant%2 == 0 ? 2 : 3,
-                        32'(latest));
-                case (variant/2)
-                    0: wr(12'h100, BASE_A+32'h00400000);
-                    1: wr(12'h104, 4128);
-                    2: wr(12'h114, 32'h0003001f);
-                    3: wr(12'h118, 2);
-                    4: wr(12'h120, BASE_1+32'h00400000);
-                    5: wr(12'h124, 5152);
-                    6: wr(12'h128, 32'h00010008);
-                    7: wr(12'h12c, 32'h02cf04f8);
-                    8: wr(12'h130, 73);
-                    default: $fatal(1, "FAIL latch variant expected=0..17 actual=%0d", variant);
-                endcase
-                await_frame(3);
-                position(3, 100);
-                await_frame(4);
-                position(4, 700);
-                finish_scan();
-            end
-            19: begin
-                wr(12'h118, 0);
-                wr(12'h004, 1);
-                await_frame(1);
-                position(1, 600);
-                check("both layers off: no AR", 0, 32'(accepted[0]+accepted[1]));
-                wr(12'h118, 2);
-                await_frame(2);
-                position(2, 700);
-                finish_scan();
-                check("L1-only has no L0 reads", 0, 32'(accepted[0]), 0);
-            end
             default: $fatal(1, "FAIL unknown layer case actual=%0d", test_case);
         endcase
         check("protocol checker", 0, 32'(checker_errors));
-        $display("PASS DS-%02d seed=%0d variant=%0d frames=%0d miss0=%0d miss1=%0d",
-                    test_case, seed, variant, scanned, missing[0], missing[1]);
+        $display("PASS DS-%02d seed=%0d variant=%0d frames=%0d miss0=%0d",
+                    test_case, seed, variant, scanned, missing[0]);
         $finish;
     end
     initial begin

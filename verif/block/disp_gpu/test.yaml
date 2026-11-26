@@ -1,4 +1,4 @@
-# GPU ST-05: X2 full-frame receive/pixel and AXI checks, plus Python reference self-test.
+# GPU ST-05: X2 full-frame receive/pixel and AXI checks.
 top: tb
 files: files.f
 defines: SIM_MODE

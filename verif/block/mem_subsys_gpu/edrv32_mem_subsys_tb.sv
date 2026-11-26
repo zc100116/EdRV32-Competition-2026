@@ -22,7 +22,20 @@ module edrv32_mem_subsys_tb;
     edrv32_axi64_if gw();
     edrv32_axi256_if p[5]();
     edrv32_axi256_if #(.ID_WIDTH(4)) ddr();
-    logic [4:0] urgent;
+    wire [4:0] urgent;
+    wire [4:0] bfm_urgent;
+    int rt_level[2];
+    int rt_reserved[2];
+    int rt_min[2];
+    bit rt_running = 0;
+    bit rt_consume = 0;
+    int rt_rows;
+    int rt_samples;
+    int row_phase;
+    int sample_phase;
+    assign urgent[0] = stress_active ? rt_level[0] < 40 : bfm_urgent[0];
+    assign urgent[1] = stress_active ? rt_level[1] < 64 : bfm_urgent[1];
+    assign urgent[4:2] = bfm_urgent[4:2];
     logic [0:0][11:0] apb_paddr;
     logic [0:0] apb_psel;
     logic [0:0] apb_penable;
@@ -58,8 +71,6 @@ module edrv32_mem_subsys_tb;
     int coverage_illegal_gw[10];
     bit coverage_credit;
     bit coverage_violation[2][2];
-    bit coverage_snapshot;
-    bit coverage_clear;
     bit [31:0] random_state;
 
     edrv32_axi64_master u_gateway (
@@ -73,7 +84,7 @@ module edrv32_mem_subsys_tb;
         ) u_master (
             .clk_i(clk_mem),
             .rst_n_i(rst_mem_n),
-            .urgent_o(urgent[n]),
+            .urgent_o(bfm_urgent[n]),
             .bus(p[n])
         );
         if (n != 2) begin : g_checker
@@ -190,9 +201,6 @@ module edrv32_mem_subsys_tb;
         .urgent_i({3'b0, u_dut.u_xbar.p1_urgent_i, u_dut.u_xbar.p0_urgent_i}),
         .prepare_i(schedule_phase_w[1]),
         .grant_i(schedule_phase_w[0]),
-        .apb_write_i(apb_psel[0] && apb_penable[0] && apb_pready[0] && apb_pwrite[0]),
-        .apb_addr_i(apb_paddr[0]),
-        .apb_data_i(apb_pwdata[0]),
         .upstream(xbar),
         .downstream(ddr)
     );
@@ -586,248 +594,11 @@ module edrv32_mem_subsys_tb;
         bit [31:0] value;
         int start;
         int elapsed;
-        int before_count[5];
-        int before_refills[5];
-        int before_completed[5];
-        int delivered_total;
-        int before_p0_ar_idle;
-        int before_p1_aw_idle;
-        int before_p0_empty;
-        int before_p0_block[6];
-        int before_rules[5];
-        int before_ddr_read;
-        int before_ddr_write;
-        int before_rd_sum[5];
-        int before_wr_sum[5];
-        int before_rd_full[5];
-        int before_wr_full[5];
-        int before_ideal_credit_full[5];
-        int before_ring_credit_full[5];
-        int before_ring_slot_full[5];
-        int before_global_full[5];
-        int before_r_not_ready[5];
-        int before_r_stall[5];
-
-        int weights[5] = '{4,1,0,3,1};
-        int total;
-        real share;
-        real expected;
         case (test)
-            201: begin
-                wr(0, 'h100, 1);
-                total_limit = 1;
-                wr(0, 'h208, 0);
-                g_port[0].u_master.urgent_enable = 1;
-                for (int k = 0; k < 16; k++) begin
-                    send_read(0, 32'(k*512));
-                    send_read(3, 'h10000+32'(k*512));
-                end
-                wait_port(0, 16, 0);
-                wait_port(3, 16, 0);
-                require_grants(32);
-                for (int k = 0; k < 8; k++)
-                    eq("urgent wins", 0, u_schedule.grants[k].port);
-                truth("URG_MAX permits competitor", u_schedule.grants[8].port != 0);
-            end
-            202: begin
-                // Measure token rate without the independent starvation bypass.
-                wr(0, 'h108, 65535);
-                wr(0, 'h24c, 4);
-                for (int k = 0; k < 5000; k++) send_read(3, 32'((k%8)*512));
-                start = cycle;
-                for (int k = 0; k < 1000; k++) gateway_read('h80010000, 3, 3);
-                elapsed = cycle-start;
-                share = real'(u_schedule.beats[2]-32)/real'(elapsed);
-                expected = 4.0/256.0;
-                truth("P2 token rate <=2% error", share >= expected*0.98 && share <= expected*1.02);
-                truth("P2 throttled", elapsed >= (1000-32)*64);
-                truth("P2 grants present", u_schedule.transactions[2] == 1000);
-                start = cycle;
-                for (int k = 0; k < 500; k++) send_read(4, 'h30000+32'((k%8)*512));
-                wait_port(4, 500, 0);
-                elapsed = cycle-start;
-                share = real'(u_schedule.beats[4]-32)/real'(elapsed);
-                expected = 13.0/256.0;
-                truth("P4 token rate <=2% relative error",
-                      share >= expected*0.98 && share <= expected*1.02);
-                truth("token insufficiency observed", u_schedule_reference.token_skips != 0);
-                wait_port(3, 5000, 0);
-                require_grants(6500);
-            end
-            203: begin
-                wr(0, 'h108, 32);
-                wr(0, 'h288, 0);
-                wr(0, 'h100, 1);
-                total_limit = 1;
-                for (int k = 0; k < 64; k++) send_read(3, 32'((k%8)*512));
-                start = cycle;
-                send_read(4, 'h20000);
-                wait_port(4, 1, 0);
-                for (int k = 0; k < u_schedule.grants.size(); k++)
-                    if (u_schedule.grants[k].port == 4) begin
-                        truth("starve threshold reached", u_schedule.grants[k].cycle-start > 32);
-                        truth("starve bound", u_schedule.grants[k].cycle-start <= 32+48);
-                    end
-                eq("zero-weight port served", 1, u_schedule.transactions[4]);
-            end
-            204: begin
-                // Judge all ready read ports, including P1, at OUTST_TOTAL=1.
-                wr(0, 'h100, 1);
-                total_limit = 1;
-                wr(0, 'h108, 65535);
-                rd_eq(0, 'h108, 65535);
-                wr(0, 'h28c, 256);
-                for (int k = 0; k < 4096; k++) begin
-                    send_read(0, 32'((k%8)*512));
-                    send_read(1, 'h10000+32'((k%8)*512));
-                    send_read(3, 'h20000+32'((k%8)*512));
-                    send_read(4, 'h50000+32'((k%8)*512));
-                end
-                for (int phase = 0; phase < 2; phase++) begin
-                    if (phase == 1) begin
-                        total_limit = 8;
-                        wr(0, 'h100, 8);
-                    end
-                    $display("MX04 window TOTAL=%0d judge_reads=%0b", total_limit, phase == 0);
-                    drain(1000);
-                    truth("DRR grants present", u_schedule.grants.size() != 0);
-                    for (int j = 0; j < 5; j++) begin
-                        before_count[j] = u_schedule.beats[j];
-                        before_refills[j] = u_schedule_reference.refill_count[j];
-                        before_rd_sum[j] = u_schedule_reference.flow_rd_sum[j];
-                        before_wr_sum[j] = u_schedule_reference.flow_wr_sum[j];
-                        before_rd_full[j] = u_schedule_reference.flow_rd_full[j];
-                        before_wr_full[j] = u_schedule_reference.flow_wr_full[j];
-                        before_ideal_credit_full[j] =
-                            u_schedule_reference.flow_ideal_credit_full[j];
-                        before_ring_credit_full[j] = u_schedule_reference.flow_ring_credit_full[j];
-                        before_ring_slot_full[j] = u_schedule_reference.flow_ring_slot_full[j];
-                        before_global_full[j] = u_schedule_reference.flow_global_full[j];
-                        before_r_not_ready[j] = u_schedule_reference.flow_r_not_ready[j];
-                        before_r_stall[j] = u_schedule_reference.flow_r_stall[j];
-                        if (j != 2) before_completed[j] = local_reads[j]+local_writes[j];
-                    end
-                    before_p0_ar_idle = u_schedule_reference.flow_p0_ar_idle;
-                    before_p1_aw_idle = u_schedule_reference.flow_p1_aw_idle;
-                    before_p0_empty = u_schedule_reference.flow_p0_empty;
-                    for (int j = 0; j < 6; j++)
-                        before_p0_block[j] = u_schedule_reference.flow_p0_block[j];
-                    for (int j = 0; j < 5; j++)
-                        before_rules[j] = u_schedule_reference.rule_hits[j];
-                    before_ddr_read = u_ddr.read_data_beats;
-                    before_ddr_write = u_ddr.write_data_beats;
-                    ddr_latency_count = 0;
-                    ddr_latency_sum = 0;
-                    ddr_latency_min = 32'h7fffffff;
-                    ddr_latency_max = 0;
-                    start = cycle;
-                    drain(50000);
-                    elapsed = cycle-start;
-                    $display("FLOW source p0_ar_idle=%0d p1_aw_idle=%0d p0_head_empty=%0d",
-                        u_schedule_reference.flow_p0_ar_idle-before_p0_ar_idle,
-                        u_schedule_reference.flow_p1_aw_idle-before_p1_aw_idle,
-                        u_schedule_reference.flow_p0_empty-before_p0_empty);
-                    $display("FLOW P0: 0=global 1=port 2=ring 3=slot 4=direction 5=deficit");
-                    for (int j = 0; j < 6; j++)
-                        $display("FLOW P0 exclusive_reason=%0d cycles=%0d", j,
-                            u_schedule_reference.flow_p0_block[j]-before_p0_block[j]);
-                    for (int j = 0; j < 4; j++)
-                        $display("FLOW rule=%0d grants=%0d", j+1,
-                            u_schedule_reference.rule_hits[j]-before_rules[j]);
-                    $display("FLOW direction_switches=%0d",
-                        u_schedule_reference.rule_hits[4]-before_rules[4]);
-                    $display("FLOW DDR read=%0d write=%0d cyc=%0d busy=%f latency=%0d/%f/%0d",
-                        u_ddr.read_data_beats-before_ddr_read,
-                        u_ddr.write_data_beats-before_ddr_write, elapsed,
-                        real'(u_ddr.read_data_beats-before_ddr_read+
-                            u_ddr.write_data_beats-before_ddr_write)/real'(elapsed),
-                        ddr_latency_min, real'(ddr_latency_sum)/real'(ddr_latency_count),
-                        ddr_latency_max);
-                    $display("FLOW DDR config hit=%0d miss=%0d turn=%0d refi=%0d rfc=%0d b=%0d",
-                        u_ddr.t_hit, u_ddr.t_miss, u_ddr.t_turn, u_ddr.t_refi,
-                        u_ddr.t_rfc, u_ddr.t_b);
-                    total = 0;
-                    for (int j = 0; j < 5; j++) total += u_schedule.beats[j]-before_count[j];
-                    truth("DRR grants present", total > 10000);
-                    delivered_total = 0;
-                    for (int j = 0; j < 5; j++)
-                        if (j != 2)
-                            delivered_total +=
-                                (local_reads[j]+local_writes[j]-before_completed[j])*16;
-                    for (int j = 0; j < 5; j++)
-                        if (j != 2)
-                            $display("DRR port=%0d beats=%0d share=%f rounds=%0d deficit=%0d", j,
-                                u_schedule.beats[j]-before_count[j],
-                                real'(u_schedule.beats[j]-before_count[j])/real'(total),
-                                u_schedule_reference.refill_count[j]-before_refills[j],
-                                u_schedule_reference.deficit[j]);
-                    for (int j = 0; j < 5; j++)
-                        if (j != 2)
-                            $display("DRR delivered port=%0d beats=%0d share=%f", j,
-                                (local_reads[j]+local_writes[j]-before_completed[j])*16,
-                                real'((local_reads[j]+local_writes[j]-before_completed[j])*16)/
-                                real'(delivered_total));
-                    for (int j = 0; j < 5; j++) begin
-                        $display("FLOW occ p=%0d cyc=%0d rd=%f/%0d wr=%f/%0d", j, elapsed,
-                            real'(u_schedule_reference.flow_rd_sum[j]-before_rd_sum[j])/
-                                real'(elapsed),
-                            u_schedule_reference.flow_rd_peak[j],
-                            real'(u_schedule_reference.flow_wr_sum[j]-before_wr_sum[j])/
-                                real'(elapsed),
-                            u_schedule_reference.flow_wr_peak[j]);
-                        $display("FLOW caps p=%0d rd_full=%0d wr_full=%0d global_full=%0d", j,
-                            u_schedule_reference.flow_rd_full[j]-before_rd_full[j],
-                            u_schedule_reference.flow_wr_full[j]-before_wr_full[j],
-                            u_schedule_reference.flow_global_full[j]-before_global_full[j]);
-                        $display("FLOW credit p=%0d ideal=%0d ring=%0d slots=%0d", j,
-                            u_schedule_reference.flow_ideal_credit_full[j]-
-                                before_ideal_credit_full[j],
-                            u_schedule_reference.flow_ring_credit_full[j]-
-                                before_ring_credit_full[j],
-                            u_schedule_reference.flow_ring_slot_full[j]-before_ring_slot_full[j]);
-                        $display("FLOW ready p=%0d r_not_ready=%0d r_stall=%0d", j,
-                            u_schedule_reference.flow_r_not_ready[j]-before_r_not_ready[j],
-                            u_schedule_reference.flow_r_stall[j]-before_r_stall[j]);
-                    end
-                    for (int j = 0; j < 5; j++)
-                        if (phase == 0 && j != 2) begin
-                            share = real'(u_schedule.beats[j]-before_count[j])/real'(total);
-                            expected = real'(weights[j])/9.0;
-                            if (share < expected-0.05 || share > expected+0.05)
-                                $fatal(1, "FAIL DRR p=%0d expected=%f actual=%f time=%0t",
-                                       j, expected, share, $time);
-                            // Verify the allocated share also reaches the ready source ports.
-                            share = real'((local_reads[j]+local_writes[j]-before_completed[j])*16)/
-                                    real'(delivered_total);
-                            if (share < expected-0.05 || share > expected+0.05)
-                                $fatal(1, "FAIL DRR delivered p=%0d expected=%f actual=%f time=%0t",
-                                    j, expected, share, $time);
-                        end
-                end
-            end
-            205: begin
-                wr(0, 'h100, 1);
-                total_limit = 1;
-                wr(0, 'h108, 1000000);
-                for (int k = 0; k < 64; k++) begin
-                    send_read(0, 32'((k%8)*512));
-                    send_write(3, 'h10000+32'((k%8)*512));
-                end
-                do @(negedge clk_mem); while (!(ddr.awvalid && ddr.awready));
-                @(negedge clk_mem);
-                direction_run = 0;
-                last_direction = -1;
-                wait_port(0, 60, 0);
-                wait_port(3, 0, 60);
-                // The reference checks the allowed direction at every grant, including
-                // tail draining when only one direction still has eligible work.
-                truth("DIR_BATCH contested choices", u_schedule_reference.batch_contests > 0);
-                truth("read/write direction switched", u_schedule.direction_switches > 4);
-            end
             206: begin
                 u_ddr.t_hit = 150;
                 u_ddr.t_b = 100;
-                wr(0, 'h28c, 256);
+
                 for (int port = 0; port < 5; port++) begin
                     if (port == 2) continue;
                     for (int k = 0; k < read_limit[port]; k++)
@@ -851,10 +622,6 @@ module edrv32_mem_subsys_tb;
                     send_write(4, 'h90000+32'((k%8)*512));
                 end
                 wait (u_schedule.outstanding == 8);
-                wr(0, 'h100, 2);
-                total_limit = 2;
-                wr(0, 'h260, 1);
-                read_limit[3] = 1;
                 wait_port(0, 20, 0);
                 wait_port(1, 17, 0);
                 wait_port(3, 20, 18);
@@ -866,7 +633,7 @@ module edrv32_mem_subsys_tb;
                 g_port[0].u_master.r_on = 0;
                 g_port[3].u_master.r_on = 0;
                 g_port[4].u_master.r_on = 0;
-                wr(0, 'h28c, 256);
+
                 for (int k = 0; k < 20; k++) begin
                     send_read(0, 32'((k%8)*512));
                     send_read(3, 'h10000+32'((k%8)*512));
@@ -933,80 +700,18 @@ module edrv32_mem_subsys_tb;
                 wait_port(3, 3, 3);
                 require_grants(2);
             end
-            210: begin
-                wr(0, 'h110, 2);
-                for (int k = 0; k < 6; k++) begin
-                    send_write(3, 'h10000+32'(k*512));
-                    send_read(4, 'h20000+32'(k*512));
-                end
-                wait_port(3, 0, 6);
-                wait_port(4, 6, 0);
-                drain();
-                // GPU P3 alternates reads and writes with unequal beat counts.
-                for (int k = 0; k < 3; k++) begin
-                    send_write(3, 'h30000+32'(k*512), k);
-                    wait_port(3, k, k+7);
-                    send_read(3, 'h30000+32'(k*512), k+1);
-                    wait_port(3, k+1, k+7);
-                end
-                drain();
-                wr(0, 'h110, 3);
-                for (int j = 0; j < 5; j++) begin
-                    rd_eq(0, 12'('h400+j*32), j == 4 ? 6 : j == 3 ? 3 : 0);
-                    rd_eq(0, 12'('h404+j*32), j == 4 ? 96 : j == 3 ? 9 : 0);
-                    rd_eq(0, 12'('h414+j*32), j == 3 ? 9 : 0);
-                    rd_eq(0, 12'('h418+j*32), j == 3 ? 102 : 0);
-                    rd_eq(0, 12'('h408+j*32), u_schedule_reference.snap_wait_max[j]);
-                    rd_eq(0, 12'('h40c+j*32), u_schedule_reference.snap_wait_sum[j]);
-                    rd_eq(0, 12'('h410+j*32), u_schedule_reference.snap_urg[j]);
-                end
-                rd_eq(0, 'h500, u_schedule_reference.snap_switch);
-                rd_eq(0, 'h504, u_schedule_reference.snap_busy);
-                rd_eq(0, 'h508, u_schedule_reference.snap_window);
-                coverage_snapshot = 1;
-                wr(0, 'h110, 1);
-                for (int j = 0; j < 5; j++) begin
-                    rd_eq(0, 12'('h400+j*32), 0);
-                    rd_eq(0, 12'('h404+j*32), 0);
-                    rd_eq(0, 12'('h414+j*32), 0);
-                    rd_eq(0, 12'('h418+j*32), 0);
-                    rd_eq(0, 12'('h408+j*32), 0);
-                    rd_eq(0, 12'('h40c+j*32), 0);
-                    rd_eq(0, 12'('h410+j*32), 0);
-                end
-                rd(0, 'h508, value);
-                eq("WINDOW_CYC exact snapshot", int'(u_schedule_reference.snap_window),
-                   int'(value));
-                truth("WINDOW_CYC advancing", value != 0);
-                coverage_clear = 1;
-                require_grants(18);
-            end
             211: begin
                 rd_eq(0, 0, 'h00080001);
-                rd_eq(0, 'h100, 8);
-                rd_eq(0, 'h104, 8);
-                rd_eq(0, 'h108, 256);
-                rd_eq(0, 'h10c, 4);
-                for (int j = 0; j < 5; j++) begin
-                    rd_eq(0, 12'('h200+j*32), 32'(read_limit[j]));
-                    rd_eq(0, 12'('h204+j*32), 32'(write_limit[j]));
-                    if (j != 2) rd_eq(0, 12'('h208+j*32), 32'(weights[j]));
+                for (int offset = 'h100; offset <= 'h110; offset += 4) begin
+                    wr(0, 12'(offset), '1);
+                    rd_eq(0, 12'(offset), 0);
                 end
-                rd_eq(0, 'h24c, 26);
-                rd_eq(0, 'h28c, 13);
-                wr(0, 'h114, 'hffffffff);
-                rd_eq(0, 'h114, 0);
-                wr(0, 'h104, 2);
-                wr(0, 'h108, 17);
-                wr(0, 'h10c, 1);
-                rd_eq(0, 'h104, 2);
-                rd_eq(0, 'h108, 17);
-                rd_eq(0, 'h10c, 1);
-                wr(0, 'h260, 1);
-                read_limit[3] = 1;
+                for (int offset = 'h200; offset <= 'h508; offset += 4) begin
+                    wr(0, 12'(offset), '1);
+                    rd_eq(0, 12'(offset), 0);
+                end
                 for (int k = 0; k < 6; k++) send_read(3, 32'(k*512));
                 wait_port(3, 6, 0);
-                eq("runtime RD cap", 1, u_schedule.max_read[3]);
                 require_grants(6);
             end
             212: begin
@@ -1072,7 +777,7 @@ module edrv32_mem_subsys_tb;
                 require_grants(336);
             end
             213: begin
-                rd_eq(0, 'h220, 1);
+                rd_eq(0, 'h220, 0);
                 rd_eq(0, 'h224, 0);
                 g_port[1].u_master.r_on = 0;
                 for (int k = 0; k < 4; k++) send_read(1, 'h10000, 15, 1'(k));
@@ -1084,36 +789,15 @@ module edrv32_mem_subsys_tb;
                 g_port[1].u_master.r_on = 1;
                 wait_port(1, 4, 0);
                 require_grants(4);
-                total_limit = 1;
-                wr(0, 'h100, 1);
-                wr(0, 'h104, 2);
-                wr(0, 'h228, 0);
-                g_port[1].u_master.urgent_enable = 1;
-                start = u_schedule.grants.size();
-                for (int k = 0; k < 6; k++) begin
-                    send_read(1, 'h10000, 3, 1'(k));
-                    send_read(3, 'h30000+32'(k*512), 3, 1'(k));
-                end
-                wait_port(1, 10, 0);
-                wait_port(3, 6, 0);
-                for (int k = 0; k < 2; k++)
-                    eq("P1 urgent read wins", 1, u_schedule.grants[start+k].port);
-                eq("P1 URG_MAX lets P3 proceed", 3, u_schedule.grants[start+2].port);
-                truth("P1 urgent read statistics", u_schedule_reference.urg[1] >= 6);
-                require_grants(12);
-                g_port[1].u_master.urgent_enable = 0;
-                wr(0, 'h228, 1);
-                total_limit = 8;
-                wr(0, 'h100, 8);
                 g_port[1].u_master.r_random = 1;
                 g_port[1].u_master.r_period = 11;
                 g_port[1].u_master.r_on = 3;
                 for (int k = 0; k < 32; k++)
                     send_read(1, 'h10000, int'(random_next()%16), 1'(k));
-                wait_port(1, 42, 0);
+                wait_port(1, 36, 0);
                 require_grants(32);
                 eq("P1 protocol errors", 0, local_errors[1]);
-                eq("P1 reference checked reads", 42, local_reads[1]);
+                eq("P1 reference checked reads", 36, local_reads[1]);
             end
             default: $fatal(1, "FAIL unimplemented MX test=%0d time=%0t", test, $time);
         endcase
@@ -1131,70 +815,178 @@ module edrv32_mem_subsys_tb;
             u_ddr.t_b = 1+int'(delay_state[11:8]);
         end
     end
+    // ST-03 consumption: 720p60 has 750 total rows, hence 45000 rows/s.
+    // Each X2 active row consumes 40 beats; AUD consumes one 32-bit frame at 48kHz.
+    // Integer phase accumulators preserve fractional clk_mem periods exactly.
+    always @(posedge clk_mem) begin
+        if (stress_active) begin
+            if (p[0].rvalid && p[0].rready) begin
+                rt_level[0]++;
+                rt_reserved[0]--;
+            end
+            if (p[1].rvalid && p[1].rready) begin
+                rt_level[1] += 8;
+                rt_reserved[1] -= 8;
+            end
+            if (rt_consume) begin
+                row_phase += 45000;
+                sample_phase += 48000;
+                if (row_phase >= 125000000) begin
+                    row_phase -= 125000000;
+                    if (rt_level[0] < 40)
+                        $fatal(1,"FAIL ST-03 DISP underflow row=%0d level=%0d time=%0t",
+                            rt_rows, rt_level[0], $time);
+                    rt_level[0] -= 40;
+                    rt_rows++;
+                    if (rt_rows%180 == 0) begin
+                        $display("ST-03 rows=%0d samples=%0d FIFO=%0d/%0d time=%0t",
+                            rt_rows,rt_samples,rt_level[0],rt_level[1],$time);
+                        $fflush();
+                    end
+                end
+                if (sample_phase >= 125000000) begin
+                    sample_phase -= 125000000;
+                    if (rt_level[1] == 0)
+                        $fatal(1,"FAIL ST-03 AUD underrun sample=%0d time=%0t",rt_samples,$time);
+                    rt_level[1]--;
+                    rt_samples++;
+                end
+                for (int port = 0; port < 2; port++)
+                    if (rt_level[port] < rt_min[port]) rt_min[port] = rt_level[port];
+            end
+            for (int port = 0; port < 2; port++)
+                if (rt_level[port]+rt_reserved[port] > 512)
+                    $fatal(1,"FAIL ST-03 FIFO reservation overflow P%0d",port);
+        end
+    end
     task automatic test_stress();
-        wr(0, 'h108, 65535);
+        int reads0;
+        int reads1;
+        int gpu_count;
+        int eth_count;
+        int cpu_count;
+        int total_grants;
+        reads0 = 0;
+        reads1 = 0;
+        gpu_count = 0;
+        eth_count = 0;
+        cpu_count = 0;
+        rt_level[0] = 0;
+        rt_level[1] = 0;
+        rt_reserved[0] = 0;
+        rt_reserved[1] = 0;
+        rt_min[0] = 512;
+        rt_min[1] = 512;
+        rt_rows = 0;
+        rt_samples = 0;
+        row_phase = 0;
+        sample_phase = 0;
         stress_active = 1;
+        rt_running = 1;
         g_port[0].u_master.r_random = 1;
         g_port[0].u_master.r_period = 7;
         g_port[0].u_master.r_on = 3;
-        g_port[0].u_master.seed_random(32'(seed*17));
-        g_port[0].u_master.urgent_enable = 1;
         g_port[1].u_master.r_random = 1;
         g_port[1].u_master.r_period = 7;
         g_port[1].u_master.r_on = 3;
-        g_port[1].u_master.seed_random(32'(seed*17+1));
-        g_port[1].u_master.urgent_enable = 1;
         g_port[3].u_master.r_random = 1;
         g_port[3].u_master.r_period = 7;
         g_port[3].u_master.r_on = 3;
         g_port[3].u_master.b_random = 1;
         g_port[3].u_master.b_period = 9;
         g_port[3].u_master.b_on = 3;
-        g_port[3].u_master.seed_random(32'(seed*17+3));
         g_port[4].u_master.r_random = 1;
         g_port[4].u_master.r_period = 7;
         g_port[4].u_master.r_on = 3;
         g_port[4].u_master.b_random = 1;
         g_port[4].u_master.b_period = 9;
         g_port[4].u_master.b_on = 3;
+        g_port[0].u_master.seed_random(32'(seed*17));
+        g_port[1].u_master.seed_random(32'(seed*17+1));
+        g_port[3].u_master.seed_random(32'(seed*17+3));
         g_port[4].u_master.seed_random(32'(seed*17+4));
-        // Enqueue sustained external streams before the concurrent CPU starts.
-        for (int k = 0; k < 256; k++) begin
-            send_read(0, 32'((k%32)*512), 15, 1'(k));
-            send_read(1, 'h10000+32'((k%32)*512), 15, 1'(k));
-            send_write(3, 'h30000+32'((k%32)*512), 15, 1'(k));
-            send_read(3, 'h40000+32'((k%32)*512), 15, 1'(k));
-            send_write(4, 'h50000+32'((k%32)*512), 15, 1'(k));
-            send_read(4, 'h60000+32'((k%32)*512), 15, 1'(k));
-        end
         fork
             begin
-                for (int k = 0; k < 256; k++) begin
-                    gateway_write('h80070000+32'((k%32)*32), 3, 3);
-                    gateway_read('hc0070000+32'((k%32)*32), 3, 3);
+                while (rt_running) begin
+                    @(negedge clk_mem);
+                    if (rt_level[0]+rt_reserved[0] <= 472) begin
+                        rt_reserved[0] += 40;
+                        send_read(0, 32'((reads0%32)*512), 15, 1'(reads0)); reads0++;
+                        send_read(0, 32'((reads0%32)*512), 15, 1'(reads0)); reads0++;
+                        send_read(0, 32'((reads0%32)*512), 7, 1'(reads0)); reads0++;
+                    end
                 end
             end
             begin
-                wait_port(0, 256, 0);
-                wait_port(1, 256, 0);
-                wait_port(3, 256, 256);
-                wait_port(4, 256, 256);
+                while (rt_running) begin
+                    @(negedge clk_mem);
+                    if (rt_level[1]+rt_reserved[1] <= 384) begin
+                        rt_reserved[1] += 128;
+                        send_read(1, 'h10000+32'((reads1%32)*512), 15, 1'(reads1));
+                        reads1++;
+                    end
+                end
+            end
+            begin
+                // Prime actual FIFO contents before starting screen/audio consumption.
+                wait (rt_level[0] >= 80 && rt_level[1] >= 128);
+                @(negedge clk_mem);
+                rt_consume = 1;
+                $display("ST-03 primed FIFO=%0d beats/%0d samples time=%0t",
+                    rt_level[0],rt_level[1],$time);
+                $fflush();
+                wait (rt_rows == 720);
+                @(negedge clk_mem);
+                rt_consume = 0;
+                rt_running = 0;
+            end
+            begin
+                while (rt_running) begin
+                    gateway_write('h80070000+32'((cpu_count%32)*32), 3, 3);
+                    gateway_read('hc0070000+32'((cpu_count%32)*32), 3, 3);
+                    cpu_count++;
+                end
+            end
+            begin
+                while (rt_running) begin
+                    if (gpu_count-local_reads[3] < 16 && gpu_count-local_writes[3] < 16) begin
+                        send_write(3, 'h30000+32'((gpu_count%32)*512), 15, 1'(gpu_count));
+                        send_read(3, 'h40000+32'((gpu_count%32)*512), 15, 1'(gpu_count));
+                        gpu_count++;
+                    end
+                    @(negedge clk_mem);
+                end
+            end
+            begin
+                while (rt_running) begin
+                    if (eth_count-local_reads[4] < 16 && eth_count-local_writes[4] < 16) begin
+                        send_write(4, 'h50000+32'((eth_count%32)*512), 15, 1'(eth_count));
+                        send_read(4, 'h60000+32'((eth_count%32)*512), 15, 1'(eth_count));
+                        eth_count++;
+                    end
+                    @(negedge clk_mem);
+                end
             end
         join
+        wait_port(0, reads0, 0);
+        wait_port(1, reads1, 0);
+        wait_port(3, gpu_count, gpu_count);
+        wait_port(4, eth_count, eth_count);
         drain();
         stress_active = 0;
-        require_grants(2048);
-        // The scheduling reference checks urgent-class eligibility at every grant.
+        total_grants = reads0+reads1+2*(cpu_count+gpu_count+eth_count);
+        require_grants(total_grants);
         truth("ST-03 P0 urgent grants", u_schedule_reference.urg[0] > 0);
         truth("ST-03 P1 urgent grants", u_schedule_reference.urg[1] > 0);
-        for (int port = 0; port < 5; port++)
-            truth("ST-03 each port progresses", u_schedule.transactions[port] >= 256);
+        truth("ST-03 CPU progresses", cpu_count > 0);
+        truth("ST-03 GPU progresses", gpu_count > 0);
+        truth("ST-03 ETH progresses", eth_count > 0);
         eq("ST-03 P0 protocol errors", 0, local_errors[0]);
         eq("ST-03 P1 protocol errors", 0, local_errors[1]);
         eq("ST-03 GPU protocol errors", 0, local_errors[3]);
         eq("ST-03 ETH protocol errors", 0, local_errors[4]);
-        $display("ST-03 grants=2048 P0_urgent=%0d P1_urgent=%0d cycles=%0d",
-            u_schedule_reference.urg[0], u_schedule_reference.urg[1], cycle);
+        $display("ST-03 grants=%0d rows=%0d samples=%0d min_fifo_beats=%0d min_samples=%0d",
+            total_grants,rt_rows,rt_samples,rt_min[0],rt_min[1]);
     endtask
 
     // BW-01: one testbench master keeps same-row sequential read bursts queued.
@@ -1249,11 +1041,8 @@ module edrv32_mem_subsys_tb;
                          coverage_size[size][offset]);
         for (int j = 0; j < 10; j++)
             $display("COVER GW illegal=%0d hits=%0d", j, coverage_illegal_gw[j]);
-        for (int j = 0; j < 5; j++)
+        for (int j = 0; j < 3; j++)
             $display("COVER schedule rule=%0d hits=%0d", j+1, u_schedule_reference.rule_hits[j]);
-        $display("COVER schedule urg_cap=%0b token_skip=%0b starve=%0b switches=%0d",
-                 u_schedule_reference.urg_cap_hits != 0, u_schedule_reference.token_skips != 0,
-                 u_schedule_reference.starve_hits != 0, u_schedule.direction_switches);
         $display("COVER flow global_peak=%0d credit_peak=%0d credit_full=%0b",
                  u_schedule.max_outstanding, max_credit, coverage_credit);
         for (int j = 0; j < 5; j++)
@@ -1263,8 +1052,6 @@ module edrv32_mem_subsys_tb;
             for (int direction = 0; direction < 2; direction++)
                 $display("COVER violation kind=%0d dir=%0d hit=%0b", kind,
                          direction, coverage_violation[kind][direction]);
-        $display("COVER statistics snapshot=%0b clear=%0b saturation=unit_test",
-                 coverage_snapshot, coverage_clear);
     endtask
 
     initial begin

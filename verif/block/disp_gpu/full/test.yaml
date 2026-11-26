@@ -1,4 +1,4 @@
-# GPU ST-04..07: original 75 DS instances, X2 pixel/debt cases and exact urgent checks.
+# GPU ST-04..07: native L0 cases, X2 pixel/debt cases and exact urgent checks.
 top: tb
 files: files.f
 defines: SIM_MODE

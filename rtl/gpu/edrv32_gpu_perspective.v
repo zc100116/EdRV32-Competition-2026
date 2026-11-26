@@ -53,7 +53,7 @@ module edrv32_gpu_perspective (
     wire [5:0] output_addr_w;
     reg [4:0] output_read_r;
     reg [4:0] output_write_r;
-    reg [42:0] valid_r;
+    reg [43:0] valid_r;
     wire advance_w;
     wire input_push_w;
     wire input_pop_w;
@@ -95,10 +95,10 @@ module edrv32_gpu_perspective (
     wire [48:0] delay_metadata_input_w;
     wire [71:0] unused_delay_metadata_data_w;
     wire [5:0] delay_metadata_read_w;
-    wire [59:0] delay_scale_input_w;
+    wire [39:0] delay_scale_input_w;
     wire [71:0] unused_delay_scale_data_w;
-    wire [231:0] delay_bypass_input_w;
-    wire [287:0] unused_delay_bypass_data_w;
+    wire [115:0] delay_bypass_input_w;
+    wire [143:0] unused_delay_bypass_data_w;
     wire [5:0] delay_bypass_read_w;
     reg pair_second_r;
     wire [57:0] u_normal_w;
@@ -107,7 +107,7 @@ module edrv32_gpu_perspective (
     reg [57:0] previous_v_r;
     wire [95:0] quad_span_w;
     reg [95:0] previous_span_r;
-    // Two input slots decouple acceptance; 128 result credits cover the 43-stage arithmetic pipeline.
+    // Two input slots decouple acceptance; 128 result credits cover the 44-stage arithmetic pipeline.
 
     assign advance_w = 1'b1;
     assign fragment_ready_o = input_count_r < 2 && outstanding_r < 64;
@@ -183,7 +183,7 @@ module edrv32_gpu_perspective (
                     output_read_r <= output_read_r + 1'b1;
                 end
                 if (advance_w) begin
-                    valid_r <= {valid_r[41:0], input_pop_w};
+                    valid_r <= {valid_r[42:0], input_pop_w};
                 end
             end
         end
@@ -210,7 +210,7 @@ module edrv32_gpu_perspective (
         previous_v_r <= v_normal_w;
         previous_span_r <= quad_span_w;
     end
-    assign block_complete_w = valid_r[42] && result_phase_r == 3;
+    assign block_complete_w = valid_r[43] && result_phase_r == 3;
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             result_phase_r <= 0;
@@ -219,7 +219,7 @@ module edrv32_gpu_perspective (
             result_phase_r <= 0;
             second_row_r <= 0;
         end else begin
-            if (valid_r[42]) result_phase_r <= result_phase_r + 1'b1;
+            if (valid_r[43]) result_phase_r <= result_phase_r + 1'b1;
             second_row_r <= block_complete_w;
         end
     end
@@ -231,16 +231,16 @@ module edrv32_gpu_perspective (
     assign output_u_w = second_row_r ?
         {row_u_3_r, row_u_1_r} : {row_u_2_r, row_u_0_r};
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 0) row_u_0_r <= raw_u_w;
+        if (valid_r[43] && result_phase_r == 0) row_u_0_r <= raw_u_w;
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 1) row_u_1_r <= raw_u_w;
+        if (valid_r[43] && result_phase_r == 1) row_u_1_r <= raw_u_w;
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 2) row_u_2_r <= raw_u_w;
+        if (valid_r[43] && result_phase_r == 2) row_u_2_r <= raw_u_w;
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 3) row_u_3_r <= raw_u_w;
+        if (valid_r[43] && result_phase_r == 3) row_u_3_r <= raw_u_w;
     end
     reg [63:0] row_v_0_r;
     reg [63:0] row_v_1_r;
@@ -250,16 +250,16 @@ module edrv32_gpu_perspective (
     assign output_v_w = second_row_r ?
         {row_v_3_r, row_v_1_r} : {row_v_2_r, row_v_0_r};
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 0) row_v_0_r <= raw_v_w;
+        if (valid_r[43] && result_phase_r == 0) row_v_0_r <= raw_v_w;
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 1) row_v_1_r <= raw_v_w;
+        if (valid_r[43] && result_phase_r == 1) row_v_1_r <= raw_v_w;
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 2) row_v_2_r <= raw_v_w;
+        if (valid_r[43] && result_phase_r == 2) row_v_2_r <= raw_v_w;
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 3) row_v_3_r <= raw_v_w;
+        if (valid_r[43] && result_phase_r == 3) row_v_3_r <= raw_v_w;
     end
     reg [31:0] row_depth_0_r;
     reg [31:0] row_depth_1_r;
@@ -269,16 +269,16 @@ module edrv32_gpu_perspective (
     assign output_depth_w = second_row_r ?
         {row_depth_3_r, row_depth_1_r} : {row_depth_2_r, row_depth_0_r};
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 0) row_depth_0_r <= raw_depth_w;
+        if (valid_r[43] && result_phase_r == 0) row_depth_0_r <= raw_depth_w;
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 1) row_depth_1_r <= raw_depth_w;
+        if (valid_r[43] && result_phase_r == 1) row_depth_1_r <= raw_depth_w;
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 2) row_depth_2_r <= raw_depth_w;
+        if (valid_r[43] && result_phase_r == 2) row_depth_2_r <= raw_depth_w;
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 3) row_depth_3_r <= raw_depth_w;
+        if (valid_r[43] && result_phase_r == 3) row_depth_3_r <= raw_depth_w;
     end
     reg [47:0] row_color_0_r;
     reg [47:0] row_color_1_r;
@@ -288,16 +288,16 @@ module edrv32_gpu_perspective (
     assign output_color_w = second_row_r ?
         {row_color_3_r, row_color_1_r} : {row_color_2_r, row_color_0_r};
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 0) row_color_0_r <= raw_color_w;
+        if (valid_r[43] && result_phase_r == 0) row_color_0_r <= raw_color_w;
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 1) row_color_1_r <= raw_color_w;
+        if (valid_r[43] && result_phase_r == 1) row_color_1_r <= raw_color_w;
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 2) row_color_2_r <= raw_color_w;
+        if (valid_r[43] && result_phase_r == 2) row_color_2_r <= raw_color_w;
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 3) row_color_3_r <= raw_color_w;
+        if (valid_r[43] && result_phase_r == 3) row_color_3_r <= raw_color_w;
     end
     reg [1:0] row_mask_0_r;
     reg [1:0] row_mask_1_r;
@@ -307,16 +307,16 @@ module edrv32_gpu_perspective (
     assign output_mask_w = second_row_r ?
         {row_mask_3_r, row_mask_1_r} : {row_mask_2_r, row_mask_0_r};
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 0) row_mask_0_r <= pipe_mask_w[1:0];
+        if (valid_r[43] && result_phase_r == 0) row_mask_0_r <= pipe_mask_w[1:0];
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 1) row_mask_1_r <= pipe_mask_w[1:0];
+        if (valid_r[43] && result_phase_r == 1) row_mask_1_r <= pipe_mask_w[1:0];
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 2) row_mask_2_r <= pipe_mask_w[1:0];
+        if (valid_r[43] && result_phase_r == 2) row_mask_2_r <= pipe_mask_w[1:0];
     end
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 3) row_mask_3_r <= pipe_mask_w[1:0];
+        if (valid_r[43] && result_phase_r == 3) row_mask_3_r <= pipe_mask_w[1:0];
     end
     reg [95:0] left_span_r;
     reg [95:0] right_span_r;
@@ -327,18 +327,18 @@ module edrv32_gpu_perspective (
     reg [3:0] second_palette_r;
     reg [7:0] second_alpha_r;
     always @(posedge clk_i) begin
-        if (valid_r[42] && result_phase_r == 0) begin
+        if (valid_r[43] && result_phase_r == 0) begin
             left_span_r <= unused_raw_span_w[0 +: 96];
             block_x_r <= pipe_x_w;
             block_y_r <= pipe_y_w;
             block_palette_r <= pipe_palette_w;
             block_alpha_r <= pipe_alpha_w;
         end
-        if (valid_r[42] && result_phase_r == 1) begin
+        if (valid_r[43] && result_phase_r == 1) begin
             second_palette_r <= pipe_palette_w;
             second_alpha_r <= pipe_alpha_w;
         end
-        if (valid_r[42] && result_phase_r == 2)
+        if (valid_r[43] && result_phase_r == 2)
             right_span_r <= unused_raw_span_w[0 +: 96];
     end
     assign output_input_w[0 +: 16] = block_x_r;
@@ -569,7 +569,7 @@ module edrv32_gpu_perspective (
         .rd_addr_i(delay_uvq_read_w),
         .rd_data_o(u_delay_uvq_1_data_w)
     );
-    assign delay_coordinate_read_w = delay_write_r - 6'd12;
+    assign delay_coordinate_read_w = delay_write_r - 6'd13;
     wire [71:0] u_delay_coordinate_0_data_w;
     reg [71:0] u_delay_coordinate_0_data_r;
     assign unused_delay_coordinate_data_w[0 +: 72] = u_delay_coordinate_0_data_r;
@@ -598,7 +598,7 @@ module edrv32_gpu_perspective (
         .rd_addr_i(delay_coordinate_read_w),
         .rd_data_o(u_delay_coordinate_1_data_w)
     );
-    assign delay_shade_read_w = delay_write_r - 6'd40;
+    assign delay_shade_read_w = delay_write_r - 6'd41;
     wire [71:0] u_delay_shade_0_data_w;
     reg [71:0] u_delay_shade_0_data_r;
     assign unused_delay_shade_data_w[0 +: 72] = u_delay_shade_0_data_r;
@@ -627,7 +627,7 @@ module edrv32_gpu_perspective (
         .rd_addr_i(delay_shade_read_w),
         .rd_data_o(u_delay_shade_1_data_w)
     );
-    assign delay_metadata_read_w = delay_write_r - 6'd42;
+    assign delay_metadata_read_w = delay_write_r - 6'd43;
     wire [71:0] u_delay_metadata_0_data_w;
     reg [71:0] u_delay_metadata_0_data_r;
     assign unused_delay_metadata_data_w[0 +: 72] = u_delay_metadata_0_data_r;
@@ -643,17 +643,17 @@ module edrv32_gpu_perspective (
         .rd_data_o(u_delay_metadata_0_data_w)
     );
     // 3 enabled stages, including the former RAM output register.
-    reg [59:0] scale_r [0:2];
+    reg [39:0] scale_r [0:2];
     integer scale_stage;
     always @(posedge clk_i) begin
         if (advance_w) begin
-            scale_r[0] <= delay_scale_input_w[0 +: 60];
+            scale_r[0] <= delay_scale_input_w[0 +: 40];
             for (scale_stage = 1; scale_stage < 3;
                 scale_stage = scale_stage + 1)
                 scale_r[scale_stage] <= scale_r[scale_stage-1];
         end
     end
-    assign unused_delay_scale_data_w[0 +: 72] = {12'b0, scale_r[2]};
+    assign unused_delay_scale_data_w[0 +: 72] = {32'b0, scale_r[2]};
     assign delay_bypass_read_w = delay_write_r - 6'd9;
     wire [71:0] u_delay_bypass_0_data_w;
     reg [71:0] u_delay_bypass_0_data_r;
@@ -679,37 +679,9 @@ module edrv32_gpu_perspective (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
-        .wr_data_i(delay_bypass_input_w[72 +: 72]),
+        .wr_data_i({28'b0, delay_bypass_input_w[72 +: 44]}),
         .rd_addr_i(delay_bypass_read_w),
         .rd_data_o(u_delay_bypass_1_data_w)
-    );
-    wire [71:0] u_delay_bypass_2_data_w;
-    reg [71:0] u_delay_bypass_2_data_r;
-    assign unused_delay_bypass_data_w[144 +: 72] = u_delay_bypass_2_data_r;
-    always @(posedge clk_i) begin
-        if (advance_w) u_delay_bypass_2_data_r <= u_delay_bypass_2_data_w;
-    end
-    edrv32_ram_gpu_table u_delay_bypass_2 (
-        .clk_i(clk_i),
-        .wr_en_i(advance_w),
-        .wr_addr_i(delay_write_r),
-        .wr_data_i(delay_bypass_input_w[144 +: 72]),
-        .rd_addr_i(delay_bypass_read_w),
-        .rd_data_o(u_delay_bypass_2_data_w)
-    );
-    wire [71:0] u_delay_bypass_3_data_w;
-    reg [71:0] u_delay_bypass_3_data_r;
-    assign unused_delay_bypass_data_w[216 +: 72] = u_delay_bypass_3_data_r;
-    always @(posedge clk_i) begin
-        if (advance_w) u_delay_bypass_3_data_r <= u_delay_bypass_3_data_w;
-    end
-    edrv32_ram_gpu_table u_delay_bypass_3 (
-        .clk_i(clk_i),
-        .wr_en_i(advance_w),
-        .wr_addr_i(delay_write_r),
-        .wr_data_i({56'b0, delay_bypass_input_w[216 +: 16]}),
-        .rd_addr_i(delay_bypass_read_w),
-        .rd_data_o(u_delay_bypass_3_data_w)
     );
     assign delay_metadata_input_w[0 +: 49] =
         {input_alpha_r[input_read_r], input_palette_r[input_read_r],
@@ -1077,77 +1049,94 @@ module edrv32_gpu_perspective (
                 {final_blue_w, final_green_w, final_red_w};
         end
     endgenerate
-    genvar quad_idx;
+    // U/V are valid 25 clocks after input_pop. A completed 2x2 group issues
+    // horizontal edges first, then vertical edges on the following clock.
+    // Four subtract/scale paths sustain eight differences per two clocks.
+    reg [24:0] lod_row_r;
+    reg issue_vertical_r;
+    reg [57:0] saved_top_u_r;
+    reg [57:0] saved_top_v_r;
+    always @(posedge clk_i) begin
+        lod_row_r <= {lod_row_r[23:0], input_y_r[input_read_r][0]};
+        if (valid_r[24] && lod_row_r[24]) begin
+            saved_top_u_r <= previous_u_r;
+            saved_top_v_r <= previous_v_r;
+        end
+    end
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) issue_vertical_r <= 0;
+        else if (stop_i) issue_vertical_r <= 0;
+        else issue_vertical_r <= valid_r[24] && lod_row_r[24];
+    end
+    wire [383:0] edge_span_w;
+    wire [191:0] maximum_1_w;
+    wire [95:0] maximum_2_w;
+    reg [95:0] previous_maximum_r;
+    always @(posedge clk_i) begin
+        previous_maximum_r <= maximum_2_w;
+    end
     genvar pair_idx;
     genvar axis;
     generate
-        // Two quads, four edges and two texture axes: sixteen normalized subtractors.
-        for (quad_idx = 0; quad_idx < 1; quad_idx = quad_idx + 1) begin : g_quad_span
-            wire [767:0] edge_span_w;
-            wire [383:0] maximum_1_w;
-            wire [191:0] maximum_2_w;
-            for (pair_idx = 0; pair_idx < 4; pair_idx = pair_idx + 1) begin : g_pair
-                localparam PAIR_OFFSET = pair_idx*2;
-                for (axis = 0; axis < 2; axis = axis + 1) begin : g_axis
-                    localparam SLOT = quad_idx*8 + PAIR_OFFSET + axis;
-                    localparam LEFT = quad_idx*2 + (pair_idx == 3 ? 1 : 0);
-                    localparam RIGHT = quad_idx*2 + (pair_idx < 2 ? 1 : pair_idx-2);
-                    wire [57:0] unused_top_w;
-                    wire [57:0] unused_bottom_w;
-                    wire [28:0] a_w;
-                    wire [28:0] b_w;
-                    wire [28:0] unused_difference_w;
-                    assign unused_top_w = axis == 0 ? previous_u_r : previous_v_r;
-                    assign unused_bottom_w = axis == 0 ? u_normal_w : v_normal_w;
-                    assign a_w = pair_idx == 0 ? unused_top_w[RIGHT*29 +: 29] :
-                        unused_bottom_w[RIGHT*29 +: 29];
-                    assign b_w = pair_idx == 1 ? unused_bottom_w[LEFT*29 +: 29] :
-                        unused_top_w[LEFT*29 +: 29];
-                    edrv32_gpu_perspective_subtract u_difference (
-                        .clk_i(clk_i),
-                        .en_i(advance_w),
-                        .a_i(a_w),
-                        .b_i(b_w),
-                        .normal_o(unused_difference_w),
-                        .delay_bypass_wr_data_o(delay_bypass_input_w[SLOT*29 +: 29]),
-                        .delay_bypass_rd_data_i(unused_delay_bypass_data_w[SLOT*29 +: 29])
-                    );
-                    edrv32_gpu_perspective_scale #(
-                        .WIDTH(96)
-                    ) u_span (
-                        .clk_i(clk_i),
-                        .en_i(advance_w),
-                        .magnitude_i(unused_difference_w[17:0]),
-                        .exponent_i(unused_difference_w[28:19] + 10'd16),
-                        .magnitude_o(edge_span_w[(pair_idx*2+axis)*96 +: 96]),
-                        .delay_scale_wr_data_o(delay_scale_input_w[20+SLOT*5 +: 5]),
-                        .delay_scale_rd_data_i(unused_delay_scale_data_w[20+SLOT*5 +: 5])
-                    );
-                end
-                edrv32_gpu_perspective_maximum u_maximum_1 (
+        for (pair_idx = 0; pair_idx < 2; pair_idx = pair_idx + 1) begin : g_quad_span
+            localparam PAIR_OFFSET = pair_idx*2;
+            for (axis = 0; axis < 2; axis = axis + 1) begin : g_axis
+                localparam SLOT = PAIR_OFFSET + axis;
+                wire [57:0] top_w;
+                wire [57:0] bottom_w;
+                wire [57:0] unused_saved_top_w;
+                wire [28:0] a_w;
+                wire [28:0] b_w;
+                wire [28:0] unused_difference_w;
+                assign top_w = axis == 0 ? previous_u_r : previous_v_r;
+                assign bottom_w = axis == 0 ? u_normal_w : v_normal_w;
+                assign unused_saved_top_w = axis == 0 ? saved_top_u_r : saved_top_v_r;
+                assign a_w = issue_vertical_r ? top_w[pair_idx*29 +: 29] :
+                    (pair_idx == 0 ? top_w[29 +: 29] : bottom_w[29 +: 29]);
+                assign b_w = issue_vertical_r ? unused_saved_top_w[pair_idx*29 +: 29] :
+                    (pair_idx == 0 ? top_w[0 +: 29] : bottom_w[0 +: 29]);
+                edrv32_gpu_perspective_subtract u_difference (
                     .clk_i(clk_i),
                     .en_i(advance_w),
-                    .a_i(edge_span_w[pair_idx*192 +: 96]),
-                    .b_i(edge_span_w[pair_idx*192+96 +: 96]),
-                    .value_o(maximum_1_w[pair_idx*96 +: 96])
+                    .a_i(a_w),
+                    .b_i(b_w),
+                    .normal_o(unused_difference_w),
+                    .delay_bypass_wr_data_o(delay_bypass_input_w[SLOT*29 +: 29]),
+                    .delay_bypass_rd_data_i(unused_delay_bypass_data_w[SLOT*29 +: 29])
                 );
-            end
-            for (pair_idx = 0; pair_idx < 2; pair_idx = pair_idx + 1) begin : g_maximum
-                edrv32_gpu_perspective_maximum u_maximum_2 (
+                edrv32_gpu_perspective_scale #(
+                    .WIDTH(96)
+                ) u_span (
                     .clk_i(clk_i),
                     .en_i(advance_w),
-                    .a_i(maximum_1_w[pair_idx*192 +: 96]),
-                    .b_i(maximum_1_w[pair_idx*192+96 +: 96]),
-                    .value_o(maximum_2_w[pair_idx*96 +: 96])
+                    .magnitude_i(unused_difference_w[17:0]),
+                    .exponent_i(unused_difference_w[28:19] + 10'd16),
+                    .magnitude_o(edge_span_w[SLOT*96 +: 96]),
+                    .delay_scale_wr_data_o(delay_scale_input_w[20+SLOT*5 +: 5]),
+                    .delay_scale_rd_data_i(unused_delay_scale_data_w[20+SLOT*5 +: 5])
                 );
             end
-            edrv32_gpu_perspective_maximum u_maximum_3 (
+            edrv32_gpu_perspective_maximum u_maximum_1 (
                 .clk_i(clk_i),
                 .en_i(advance_w),
-                .a_i(maximum_2_w[0 +: 96]),
-                .b_i(maximum_2_w[96 +: 96]),
-                .value_o(quad_span_w[quad_idx*96 +: 96])
+                .a_i(edge_span_w[pair_idx*192 +: 96]),
+                .b_i(edge_span_w[pair_idx*192+96 +: 96]),
+                .value_o(maximum_1_w[pair_idx*96 +: 96])
             );
         end
     endgenerate
+    edrv32_gpu_perspective_maximum u_maximum_2 (
+        .clk_i(clk_i),
+        .en_i(advance_w),
+        .a_i(maximum_1_w[0 +: 96]),
+        .b_i(maximum_1_w[96 +: 96]),
+        .value_o(maximum_2_w)
+    );
+    edrv32_gpu_perspective_maximum u_maximum_group (
+        .clk_i(clk_i),
+        .en_i(advance_w),
+        .a_i(previous_maximum_r),
+        .b_i(maximum_2_w),
+        .value_o(quad_span_w)
+    );
 endmodule

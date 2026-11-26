@@ -987,7 +987,7 @@ module edrv32_gpu_texture (
     wire [127:0] address_input_v_w;
     wire [15:0] unused_address_input_lod_w;
     wire [20:0] address_cache_w [0:35];
-    wire [15:0] fraction_cache_w [0:7];
+    wire [33:0] fraction_cache_w [0:7];
     wire [3:0] schedule_even_index_w;
     wire [3:0] schedule_odd_index_w;
     reg quad_even_r;
@@ -1496,8 +1496,8 @@ module edrv32_gpu_texture (
             wire [1:0] pixel_w;
             wire [20:0] primary_w [0:3];
             reg [20:0] filtered_address_w;
-            wire [15:0] fraction_w [0:3];
-            reg [15:0] selected_fraction_w;
+            wire [33:0] fraction_w [0:3];
+            reg [33:0] selected_fraction_w;
             genvar cache_lane;
             for (cache_lane = 0; cache_lane < 4; cache_lane = cache_lane + 1) begin : g_cache
                 assign primary_w[cache_lane] = mode_r == 2 && tap >= 4 ?
@@ -1538,11 +1538,11 @@ module edrv32_gpu_texture (
             wire [8:0] weight_y_w;
             wire [17:0] unused_weight_w;
             assign weight_x_w = (tap % 2) == 0 ?
-                9'd256 - {1'b0, selected_fraction_w[7:0]} :
+                selected_fraction_w[8 +: 9] :
                 {1'b0, selected_fraction_w[7:0]};
             assign weight_y_w = ((tap/2) % 2) == 0 ?
-                9'd256 - {1'b0, selected_fraction_w[15:8]} :
-                {1'b0, selected_fraction_w[15:8]};
+                selected_fraction_w[25 +: 9] :
+                {1'b0, selected_fraction_w[17 +: 8]};
             reg [8:0] weight_x_r;
             reg [8:0] weight_y_r;
             reg [17:0] weight_product_0_r;
@@ -2714,8 +2714,8 @@ module edrv32_gpu_texture (
         begin : g_address_pool_fraction_0_0
             wire [71:0] unused_even_data_w;
             wire [71:0] unused_odd_data_w;
-            reg [15:0] even_cache_r;
-            reg [15:0] odd_cache_r;
+            reg [33:0] even_cache_r;
+            reg [33:0] odd_cache_r;
             assign fraction_cache_w[0] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
             edrv32_ram_gpu_table u_even (
                 .clk_i(clk_i),
@@ -2734,8 +2734,12 @@ module edrv32_gpu_texture (
                 .rd_data_o(unused_odd_data_w)
             );
             always @(posedge clk_i) begin
-                even_cache_r <= unused_even_data_w[15:0];
-                odd_cache_r <= unused_odd_data_w[15:0];
+                even_cache_r <= {9'd256 - {1'b0, unused_even_data_w[15:8]},
+                    unused_even_data_w[15:8], 9'd256 - {1'b0, unused_even_data_w[7:0]},
+                    unused_even_data_w[7:0]};
+                odd_cache_r <= {9'd256 - {1'b0, unused_odd_data_w[15:8]},
+                    unused_odd_data_w[15:8], 9'd256 - {1'b0, unused_odd_data_w[7:0]},
+                    unused_odd_data_w[7:0]};
             end
         end
     endgenerate
@@ -2743,8 +2747,8 @@ module edrv32_gpu_texture (
         begin : g_address_pool_fraction_0_1
             wire [71:0] unused_even_data_w;
             wire [71:0] unused_odd_data_w;
-            reg [15:0] even_cache_r;
-            reg [15:0] odd_cache_r;
+            reg [33:0] even_cache_r;
+            reg [33:0] odd_cache_r;
             assign fraction_cache_w[1] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
             edrv32_ram_gpu_table u_even (
                 .clk_i(clk_i),
@@ -2763,8 +2767,12 @@ module edrv32_gpu_texture (
                 .rd_data_o(unused_odd_data_w)
             );
             always @(posedge clk_i) begin
-                even_cache_r <= unused_even_data_w[15:0];
-                odd_cache_r <= unused_odd_data_w[15:0];
+                even_cache_r <= {9'd256 - {1'b0, unused_even_data_w[15:8]},
+                    unused_even_data_w[15:8], 9'd256 - {1'b0, unused_even_data_w[7:0]},
+                    unused_even_data_w[7:0]};
+                odd_cache_r <= {9'd256 - {1'b0, unused_odd_data_w[15:8]},
+                    unused_odd_data_w[15:8], 9'd256 - {1'b0, unused_odd_data_w[7:0]},
+                    unused_odd_data_w[7:0]};
             end
         end
     endgenerate
@@ -3045,8 +3053,8 @@ module edrv32_gpu_texture (
         begin : g_address_pool_fraction_1_0
             wire [71:0] unused_even_data_w;
             wire [71:0] unused_odd_data_w;
-            reg [15:0] even_cache_r;
-            reg [15:0] odd_cache_r;
+            reg [33:0] even_cache_r;
+            reg [33:0] odd_cache_r;
             assign fraction_cache_w[2] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
             edrv32_ram_gpu_table u_even (
                 .clk_i(clk_i),
@@ -3065,8 +3073,12 @@ module edrv32_gpu_texture (
                 .rd_data_o(unused_odd_data_w)
             );
             always @(posedge clk_i) begin
-                even_cache_r <= unused_even_data_w[15:0];
-                odd_cache_r <= unused_odd_data_w[15:0];
+                even_cache_r <= {9'd256 - {1'b0, unused_even_data_w[15:8]},
+                    unused_even_data_w[15:8], 9'd256 - {1'b0, unused_even_data_w[7:0]},
+                    unused_even_data_w[7:0]};
+                odd_cache_r <= {9'd256 - {1'b0, unused_odd_data_w[15:8]},
+                    unused_odd_data_w[15:8], 9'd256 - {1'b0, unused_odd_data_w[7:0]},
+                    unused_odd_data_w[7:0]};
             end
         end
     endgenerate
@@ -3074,8 +3086,8 @@ module edrv32_gpu_texture (
         begin : g_address_pool_fraction_1_1
             wire [71:0] unused_even_data_w;
             wire [71:0] unused_odd_data_w;
-            reg [15:0] even_cache_r;
-            reg [15:0] odd_cache_r;
+            reg [33:0] even_cache_r;
+            reg [33:0] odd_cache_r;
             assign fraction_cache_w[3] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
             edrv32_ram_gpu_table u_even (
                 .clk_i(clk_i),
@@ -3094,8 +3106,12 @@ module edrv32_gpu_texture (
                 .rd_data_o(unused_odd_data_w)
             );
             always @(posedge clk_i) begin
-                even_cache_r <= unused_even_data_w[15:0];
-                odd_cache_r <= unused_odd_data_w[15:0];
+                even_cache_r <= {9'd256 - {1'b0, unused_even_data_w[15:8]},
+                    unused_even_data_w[15:8], 9'd256 - {1'b0, unused_even_data_w[7:0]},
+                    unused_even_data_w[7:0]};
+                odd_cache_r <= {9'd256 - {1'b0, unused_odd_data_w[15:8]},
+                    unused_odd_data_w[15:8], 9'd256 - {1'b0, unused_odd_data_w[7:0]},
+                    unused_odd_data_w[7:0]};
             end
         end
     endgenerate
@@ -3376,8 +3392,8 @@ module edrv32_gpu_texture (
         begin : g_address_pool_fraction_2_0
             wire [71:0] unused_even_data_w;
             wire [71:0] unused_odd_data_w;
-            reg [15:0] even_cache_r;
-            reg [15:0] odd_cache_r;
+            reg [33:0] even_cache_r;
+            reg [33:0] odd_cache_r;
             assign fraction_cache_w[4] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
             edrv32_ram_gpu_table u_even (
                 .clk_i(clk_i),
@@ -3396,8 +3412,12 @@ module edrv32_gpu_texture (
                 .rd_data_o(unused_odd_data_w)
             );
             always @(posedge clk_i) begin
-                even_cache_r <= unused_even_data_w[15:0];
-                odd_cache_r <= unused_odd_data_w[15:0];
+                even_cache_r <= {9'd256 - {1'b0, unused_even_data_w[15:8]},
+                    unused_even_data_w[15:8], 9'd256 - {1'b0, unused_even_data_w[7:0]},
+                    unused_even_data_w[7:0]};
+                odd_cache_r <= {9'd256 - {1'b0, unused_odd_data_w[15:8]},
+                    unused_odd_data_w[15:8], 9'd256 - {1'b0, unused_odd_data_w[7:0]},
+                    unused_odd_data_w[7:0]};
             end
         end
     endgenerate
@@ -3405,8 +3425,8 @@ module edrv32_gpu_texture (
         begin : g_address_pool_fraction_2_1
             wire [71:0] unused_even_data_w;
             wire [71:0] unused_odd_data_w;
-            reg [15:0] even_cache_r;
-            reg [15:0] odd_cache_r;
+            reg [33:0] even_cache_r;
+            reg [33:0] odd_cache_r;
             assign fraction_cache_w[5] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
             edrv32_ram_gpu_table u_even (
                 .clk_i(clk_i),
@@ -3425,8 +3445,12 @@ module edrv32_gpu_texture (
                 .rd_data_o(unused_odd_data_w)
             );
             always @(posedge clk_i) begin
-                even_cache_r <= unused_even_data_w[15:0];
-                odd_cache_r <= unused_odd_data_w[15:0];
+                even_cache_r <= {9'd256 - {1'b0, unused_even_data_w[15:8]},
+                    unused_even_data_w[15:8], 9'd256 - {1'b0, unused_even_data_w[7:0]},
+                    unused_even_data_w[7:0]};
+                odd_cache_r <= {9'd256 - {1'b0, unused_odd_data_w[15:8]},
+                    unused_odd_data_w[15:8], 9'd256 - {1'b0, unused_odd_data_w[7:0]},
+                    unused_odd_data_w[7:0]};
             end
         end
     endgenerate
@@ -3707,8 +3731,8 @@ module edrv32_gpu_texture (
         begin : g_address_pool_fraction_3_0
             wire [71:0] unused_even_data_w;
             wire [71:0] unused_odd_data_w;
-            reg [15:0] even_cache_r;
-            reg [15:0] odd_cache_r;
+            reg [33:0] even_cache_r;
+            reg [33:0] odd_cache_r;
             assign fraction_cache_w[6] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
             edrv32_ram_gpu_table u_even (
                 .clk_i(clk_i),
@@ -3727,8 +3751,12 @@ module edrv32_gpu_texture (
                 .rd_data_o(unused_odd_data_w)
             );
             always @(posedge clk_i) begin
-                even_cache_r <= unused_even_data_w[15:0];
-                odd_cache_r <= unused_odd_data_w[15:0];
+                even_cache_r <= {9'd256 - {1'b0, unused_even_data_w[15:8]},
+                    unused_even_data_w[15:8], 9'd256 - {1'b0, unused_even_data_w[7:0]},
+                    unused_even_data_w[7:0]};
+                odd_cache_r <= {9'd256 - {1'b0, unused_odd_data_w[15:8]},
+                    unused_odd_data_w[15:8], 9'd256 - {1'b0, unused_odd_data_w[7:0]},
+                    unused_odd_data_w[7:0]};
             end
         end
     endgenerate
@@ -3736,8 +3764,8 @@ module edrv32_gpu_texture (
         begin : g_address_pool_fraction_3_1
             wire [71:0] unused_even_data_w;
             wire [71:0] unused_odd_data_w;
-            reg [15:0] even_cache_r;
-            reg [15:0] odd_cache_r;
+            reg [33:0] even_cache_r;
+            reg [33:0] odd_cache_r;
             assign fraction_cache_w[7] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
             edrv32_ram_gpu_table u_even (
                 .clk_i(clk_i),
@@ -3756,8 +3784,12 @@ module edrv32_gpu_texture (
                 .rd_data_o(unused_odd_data_w)
             );
             always @(posedge clk_i) begin
-                even_cache_r <= unused_even_data_w[15:0];
-                odd_cache_r <= unused_odd_data_w[15:0];
+                even_cache_r <= {9'd256 - {1'b0, unused_even_data_w[15:8]},
+                    unused_even_data_w[15:8], 9'd256 - {1'b0, unused_even_data_w[7:0]},
+                    unused_even_data_w[7:0]};
+                odd_cache_r <= {9'd256 - {1'b0, unused_odd_data_w[15:8]},
+                    unused_odd_data_w[15:8], 9'd256 - {1'b0, unused_odd_data_w[7:0]},
+                    unused_odd_data_w[7:0]};
             end
         end
     endgenerate

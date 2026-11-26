@@ -3,9 +3,6 @@
 // Description: Directed late-beat schedules verify whole-group black and debt alignment.
 // Clock domain: test pixel clock.
 module tb;
-    wire unused_fifo1_ready;
-    wire unused_underflow1;
-    wire [9:0] unused_read1_cnt;
     reg clk = 0;
     always #5 clk = ~clk;
     reg rst_n = 0;
@@ -104,9 +101,8 @@ module tb;
         .clk_i(clk), .rst_n_i(rst_n), .enable_i(enable), .de_i(de), .x_i(x), .y_i(y),
         .frame_start_i(de && x == 0 && y == 0),
         .vblank_i(vblank), .params_valid_i(1'b1),
-        .params_i({x2, 1'b1, 4'd0, 1'b0, 11'd0, 10'd0, 11'd1280, 10'd720, 8'd255}),
-        .fifo1_valid_i(1'b0), .fifo1_ready_o(unused_fifo1_ready), .fifo1_data_i(256'd0),
-        .underflow1_o(unused_underflow1), .read1_cnt_o(unused_read1_cnt), .fifo_valid_i(fifo_valid_pipe2), .fifo_ready_o(fifo_ready),
+        .params_i({x2, 1'b1, 4'd0}),
+        .fifo_valid_i(fifo_valid_pipe2), .fifo_ready_o(fifo_ready),
         .fifo_data_i(fifo_data_pipe2), .rgb_o(rgb), .frame_req_o(frame_req),
         .underflow_o(underflow), .read_cnt_o(read_cnt),
         .perf0_o(perf0), .perf1_o(perf1)

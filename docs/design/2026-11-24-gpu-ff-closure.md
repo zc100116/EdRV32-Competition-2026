@@ -1167,3 +1167,212 @@ python3 verif/block/gpu/gt25/performance.py rtl
 
 状态：S-6 RTL、存储清点和仿真验收完成；DRM/LUT估算等待PDS验证，
 实际FF、分布式RAM用量和clk_gpu时序也交下一轮PDS确认。
+
+
+## S-7：时序、clip 存储与 LOD 分时（2026-11-26）
+
+### 开工估算
+
+输入为 `4426bf9e5`，Yosys 0.70+219（5053d0e26），沿用 RAM/ROM blackbox、
+保留模块层次、`synth -noabc -noalumacc` 与 ABC `strash; if -K 6` 口径。
+原始脚本、网表和日志在 `build/s7/`；按模块串行综合，每次先检查可用内存。
+基线临时测量副本仅将 geometry 的 `next_index_w` 声明前移，解决 Yosys
+前向声明读取失败；未改变电路。
+
+| 基线模块 | FF | LUT6 | table 实例 |
+|---|---:|---:|---:|
+| clip | 13711 | 29820 | 0 |
+| geometry（包含 clip） | 38812 | 79989 | 34 |
+| perspective | 16475 | 21725 | 22 |
+
+A3 的基线网表清点：clip 工作集4224 FF、两个多边形输出槽4224 FF、geometry
+多边形捕获2112 FF，共10560 FF。`estimate.py` 从 current/last/polygon 输出及
+project 输入回溯到时序边界，得到 clip 选择锥7761 LUT6、geometry选择锥1074 LUT6。
+这些是可替换逻辑的上界，包含写入选择等共享逻辑，不能当作净收益；计划串行读写
+后保守预留2000 FF、4000 LUT6用于端点/输出寄存、装载及控制，估算净省约8560 FF、
+4835 LUT6，均超过开工阈值。table容量本身不计入blackbox外LUT6，实际物理资源以PDS为准。
+
+A4 核实为一个2×2组、4条边×2轴，共8个subtract；每两次advance才有一组
+有效结果，四边形已绕过本单元。Yosys subtract单实例487 FF、708 LUT6；
+8→4个即算术本体省1948 FF、2832 LUT6，另可减少scale和最大值树，
+预留选择与对齐约1000 LUT6后仍超过1k LUT，决定实施。
+
+### T1 实现与重定时
+
+command 将同一 stop 状态并行写入16份带keep/syn_preserve的寄存器，各直接送一个
+使用单元；没有延迟一拍，也没有改变stop状态的生效时序。初版先在texture内寄存span，
+最终按下述吞吐回归结果将边界移到texture分配上下文之前。过滤fraction缓存提前计算256−fx/fy，
+mode/lane只选择已经寄存的权重，移除mode选择后的进位链，过滤流水长度不变。
+geometry输出FIFO改为注册head/tail，移除output_read选择器，输出延迟/吞吐不变；
+fan的next index与index一起推进，移除fan_index后的加一器，等待周期仍为5。
+project与setup各增加三份同步占用计数副本，分摊原common CE，均无新增流水延迟。
+
+T1 Yosys：geometry 38819 FF / 80769 LUT6 / 34 table；perspective与基线相同；
+setup 26009 FF / 42896 LUT6 / 41 table；texture与command见`build/s7/t1b-counts.json`。
+前向声明整理也包含setup的edge值、系数和标签声明，语义不变。
+仿真主机首次只读检查后连接失效，协调者同意重建一次；重建仍连接超时，
+故本步先按协调者指示提交，相关单元仿真留待主机恢复后运行。
+
+### A3 实现与接口
+
+clip输出改为`polygon_valid_o/ready_i/data_o[263:0]/index_o[2:0]/last_o`，
+每次握手传一个顶点；index从0递增，last标识本多边形最后一个顶点。停顿保持负载，
+顺序仍为裁剪遍历顺序。geometry直接接project输入，不再捕获2112位多边形，
+在last握手时将index+1加入原count队列，project结果仍逐顶点写入原16项screen表，
+扇形输出和屏幕表的三个读口保持原契约。texture/pixel/target与SoC端口不变。
+
+clip九字段分别使用一个table，低4位地址为bank+vertex，两个工作集共用一个写口；
+S_LOAD三拍初始化前三个顶点，交点/内侧端点按原顺序逐项追加。只需一个读口：
+S_BEGIN读最后顶点以保存previous及其距离，随后读current；不用同时读取两项。
+两个多边形输出槽删除，裁剪结果从工作集串行输出；不裁剪时直接从输入捕获寄存器
+输出三个顶点，不访问工作集。无背压时，接收三角形t0，检查完成并发首顶点t3，
+余下两个t4/t5，t6可接下一三角形，保持每6拍三顶点；project本来支持II=1，
+因此三拍burst不降低每2拍一个源顶点的指标。裁剪路径允许增加装载/串行输出时间。
+所有交点算术、舍入点、平面顺序均未修改。
+
+A3后geometry为27827 FF / 66692 LUT6 / 43 table，相比T1省10992 FF、14077 LUT6；
+包含clip为4894 FF / 16970 LUT6 / 9 table（独立clip顶层16968 LUT6，ABC上下文差2）。
+perspective仍16475 FF / 21725 LUT6 / 22 table。风格与顶层lint均0告警；
+提交本步时指定主机不可用，最终仿真覆盖见下文；未在本机运行仿真。
+
+### A4 实现
+
+8个subtract/96位scale减为4个。U/V在输入出队后25拍有效：完整2×2组的下行
+到达时，4单元计算上下两条水平边的U/V差；紧接的一拍用保存的top和previous
+（bottom）计算左右两条竖直边。每拍先求4值最大，再把相邻两拍的最大值合并。
+不改变归一化减法/scale的任何算术或舍入；全部八个输入仍参与，mask不控制跨度。
+组处理II=2，仍可持续每拍2像素。最大值合并增加一拍，元数据、UV/着色延迟与valid
+一同由43拍延至44拍；输出行重组和FIFO协议不变。
+旁路延迟从232位降至116位，4个table减为2个；scale短延迟由60位降至40位。
+
+A4后perspective为13058 FF / 17441 LUT6 / 20 table，较基线省3417 FF、4284 LUT6，
+超过1k LUT实施阈值。geometry保持A3结果；后文列出最终动态验收。
+
+### 分步资源与时序复核
+
+下列均为独立模块保留层次的FF / LUT6 / table实例，包含子模块，不能把clip/project
+再加到geometry。RAM/ROM内部不计入FF/LUT6；LUTRAM容量及Pango APM映射以PDS为准。
+
+| 模块 | 4426bf9e5 | T1（466aa8a99） | A3（fd34ce6ac） | 最终（5e8dc5edc及重定时收尾） |
+|---|---|---|---|---|
+| geometry | 38812 / 79989 / 34 | 38819 / 80769 / 34 | 27827 / 66692 / 43 | 27827 / 66692 / 43 |
+| perspective | 16475 / 21725 / 22 | 同前 | 同前 | 13058 / 17441 / 20 |
+| setup | 25996 / 42828 / 41 | 26009 / 42896 / 41 | 同T1 | 同T1 |
+| texture | 12373 / 25828 / 112 | 13019 / 26278 / 112 | 同T1 | 12629 / 26278 / 112 |
+| command | 2043 / 1235 / 0 | 2043 / 1234 / 0 | 同T1 | 同T1 |
+| 五模块合计（无父子重复） | 95699 / 171605 / 209 | 96365 / 172902 / 209 | 85373 / 158825 / 218 | 81566 / 154541 / 216 |
+| GPU table实例合计 | 225 | 225 | 234 | 232 |
+
+最终相对基线五模块合计减少14133 FF、17064 LUT6。GPU顶层本体另由43 FF / 892 LUT6
+变为893 FF / 898 LUT6，增量850 FF、6 LUT6来自sample寄存边界及其握手；
+将顶层本体一起计入，净省13283 FF、17058 LUT6。其他GPU模块RTL不变。
+command的相同stop位在Yosys完整LUT映射中被合并，故其FF数字没有反映PDS
+syn_preserve要求保留的区域副本；扇出用保留副本的粗网表分析，不能混用为PDS实测。
+
+扇出分析只在`build/s7/fanout.ys`中将GPU粗网表扁平化一次：先按模块综合至fine
+之前，RAM/ROM blackbox，reset_copy的cell加keep，再flatten/opt_clean。
+按DFF使能/复位位负载、mux选择位负载和其他输入引脚计数，时钟及常量不计。
+首次发现project的control_enable[1]仍有2148负载：其中倒数单元1956、其他192。
+将192负载移到已有control_enable[0]，使三份common CE为427/1956/350；
+不增加寄存器或周期。随后只重新综合geometry，将最终project粗网表按端口绑定
+替换到已扁平化图中做层次计数（`fanout_final.py`），未再次扁平化全GPU。
+最终sample重定时后，同法以独立root/texture粗网表替换这两个区域
+（`fanout_rebalanced.py`），最终最大控制扇出仍1956。
+最终无控制网超过2000：project倒数CE为1956，setup.area_enable为1955；
+project原有流水区域最大1902，setup三份common CE为1408/374/183。
+
+| 路径/控制 | 改前→改后寄存边界/拍数 | 改前扇出 | 改后扇出 |
+|---|---|---|---|
+| command stop→各使用区域 | 1拍→1拍，同拍状态副本 | 第9轮PDS stop_w直接4，长路径分布于texture/perspective | 粗网表16份分别1–305，texture85、perspective80 |
+| sample选择→LOD leading/amount | 1拍→2拍，选择后先寄存；texture内部拍数不变 | 852（粗网表；顶层sample mux未改） | 852（不变）；span先寄存后编码 |
+| geometry output_read→setup | 1拍→1拍，FIFO输出mux→注册head | 703（PDS）；778（Yosys LUT6直接引脚） | 0，output_read已删除 |
+| geometry fan_index→fan差分 | 1拍→1拍，next_index先寄存；fan等待仍5 | Yosys LUT6各位12/12/10 | index为8/10/9，next_index为11/10/9 |
+| texture mode→过滤权重 | 1拍→1拍，先形成互补权重再选择 | 第9轮6级；Yosys direct mode每位2 | direct mode每位2（不变）；选择后无256−fraction进位 |
+| project_input_ready/common CE | 1拍→1拍，同拍占用计数副本 | 3002（PDS） | common三份427/1956/350（粗网表） |
+| setup enable | 1拍→1拍，同拍占用计数副本 | 2097（PDS） | 三份1408/374/183（粗网表） |
+
+PDS与粗网表/LUT6计数分别注明，未把参考数字当作实际布线或时序收敛。
+新增span边界和权重预计算切开第9轮9级/6级路径；实际logic levels、WNS和
+复制寄存器是否保留，需要下一轮PDS验证。
+
+### 最近邻吞吐回归与最终sample边界
+
+初版在texture内部增加LOD一拍，功能数值均通过，但texture单元的第一项稳态
+检查发现512组最近邻输出间隔526拍，要求511拍；原始失败记录在
+`build/s7/texture-throughput-before.log`。原因是32项上下文原来恰好覆盖
+最近邻分配到回收的32拍，增加一拍后每次环回都会等一个空位，不是数值错误。
+没有放宽测试期望，也没有增加上下文项数。
+
+最终把选择寄存放在GPU顶层、texture分配上下文之前：一个支持同拍出队/入队的
+sample槽，849位负载按字段保存，384位span分为四份96位寄存器；
+texture内部的LOD valid、slot和地址发起恢复原拍数。该槽的finish只有在槽空时
+才传入texture，使其done仍表示所有已接收样本都排空；stop同拍清valid，数据不复位。
+这是一条流水边界的排空契约，没有新增错误检查或保护条件。
+样本仍每拍可出入一组，三角形/四边形共用同一寄存边界，texture端口不变。
+
+完整回归在这一问题出现前已跑过其余相关单元；修正只影响GPU顶层和texture，
+因此补跑texture并重建最终GT仿真程序，未重复整套单元。GT子场景在修正后才开始，
+所有GT使用同一个最终RTL程序。
+
+### GT-25逐命令周期与最终回归
+
+180MHz、默认DDR延迟；基线取S-6完整回归的124项逐命令周期，与S-5最终一致。
+下表按命令序号递增，包含设置、空绘制、实际绘制和写出；不改任何图像或寄存器期望值。
+
+| 工作负载 | S-6周期 | S-7周期 | 变化命令（序号:差值） |
+|---|---|---|---|
+| quad | 28, 28840, 22, 88, 31, 55, 28, 412, 82, 31, 25, 40, 16618, 40009 | 28, 28840, 22, 88, 31, 55, 28, 412, 82, 31, 25, 40, 16618, 40009 | 无 |
+| nearest | 28, 28840, 22, 88, 31, 55, 28, 265, 49, 28, 43, 8689, 39904 | 28, 28840, 22, 88, 31, 55, 28, 265, 49, 28, 43, 8686, 39907 | 12:-3, 13:+3 |
+| bilinear | 28, 28840, 22, 88, 31, 55, 28, 265, 49, 49, 58093, 40063 | 28, 28840, 22, 88, 31, 55, 28, 265, 49, 49, 58093, 40063 | 无 |
+| trilinear | 28, 28840, 22, 88, 31, 55, 28, 265, 49, 49, 75550, 39868 | 28, 28840, 22, 88, 31, 55, 28, 265, 49, 49, 75472, 39946 | 11:-78, 12:+78 |
+| palette_i4 | 28, 28840, 22, 88, 31, 55, 28, 412, 82, 31, 307, 58354, 40048 | 28, 28840, 22, 88, 31, 55, 28, 412, 82, 31, 307, 58354, 40048 | 无 |
+| palette_i8 | 28, 28840, 22, 88, 31, 55, 28, 412, 133, 31, 307, 58360, 40162 | 28, 28840, 22, 88, 31, 55, 28, 412, 133, 31, 307, 58360, 40162 | 无 |
+| vertex | 28, 28840, 22, 88, 31, 55, 28, 25, 28, 43, 3052, 39985 | 28, 28840, 22, 88, 31, 55, 28, 25, 28, 43, 3049, 39988 | 11:-3, 12:+3 |
+| setup | 28, 28840, 22, 88, 31, 55, 28, 25, 28, 43, 543904, 40132 | 28, 28840, 22, 88, 31, 55, 28, 25, 28, 43, 543901, 40135 | 11:-3, 12:+3 |
+| objects | 25, 28840, 25, 82, 31, 55, 28, 46, 74695, 40297 | 25, 28840, 25, 82, 31, 55, 28, 46, 74695, 40297 | 无 |
+| resolve | 28, 28840, 22, 88, 31, 55, 28, 25, 28840, 40015, 22, 28837, 40033 | 28, 28840, 22, 88, 31, 55, 28, 25, 28840, 40015, 22, 28837, 40033 | 无 |
+
+124项中8项发生变化，分别列在表中；每个工作负载的逐命令周期总和均与S-6相同。
+quad净周期仍64.757812/对象，AA RESOLVE仍80048周期（0.444711ms），均保持S-6结果。
+不把端到端DRAW命令的平均像素率当作单元稳态速率；稳态按下列原单元检查判定。
+
+最终RTL为`b1a6ae0f5`（前三项实现提交为`466aa8a99`、`fd34ce6ac`、`5e8dc5edc`）。
+18个GPU单元全部通过，GT-01～GT-25全部128个子场景通过，图像/DDR/寄存器
+期望值未改；GT-12为57场景，GT-13为16场景，GT-25为10工作负载。
+geometry通过63 draws、615顶点、179个输出三角形，顶点II=2、三角形间隔6；
+setup通过264输入、262非退化输出，II=8；perspective两组无/有背压各3600输入、
+1800输出组逐位通过。texture通过13248组，三种格式×三种过滤模式的稳态分别
+4/2/1像素每拍，预装最大261拍；raster、quad和object的原吞吐检查全部通过。
+
+风格36文件0告警，GPU顶层lint 0告警，`git diff --check`通过。
+本机只跑风格/lint/Yosys，未运行RTL仿真；lint/Yosys前确认可用内存≥2GiB，
+唯一一次全GPU粗网表扁平化前≥3GiB，所有资源综合按模块串行执行。
+仿真使用已有Verilator 5.051、Icarus和Python 3.9，没有安装/升级工具。
+GT最终程序使用`--timing -Wall --timescale 1ns/1ps -j 2 --output-groups 0
+-MAKEFLAGS OPT_FAST=-O1`构建一次并共用，单元编译`-j 1`；主回归最多3个构建任务，
+GT模型生成及子场景仿真均最多8个进程，按可用16核/约14GiB空闲内存的一半配额执行。
+出现texture吞吐失败后只补跑texture及受影响的GT构建/场景，没有重复整套单元回归。
+结束后已清理独立仿真目录、任务进程和专用SSH master。
+
+复现命令与原始数据：
+
+```sh
+python3 tools/check/verilog_style.py rtl/gpu/*.v
+(cd rtl/filelists && sh ../../tools/check/lint.sh -DSIM_MODE -f gpu.f --top-module edrv32_gpu)
+for path in verif/unit/gpu_*; do python3 tools/regress.py full --path "$path" -j 1; done
+python3 verif/block/gpu/run.py rtl gt01 gt02 gt03 gt04 gt05 gt06 gt07 gt08 gt09 gt10 gt11 gt12 gt13 gt14 gt15 gt16 gt17 gt18 gt19 gt20 gt21 gt22 gt23 gt24
+python3 verif/block/gpu/gt25/performance.py rtl
+```
+
+上述GT入口为串行复现入口；本次并行实跑按原`generate`、binary+`CASE_DIR/SEED/
+sim_args`、`compare`流程，将128子场景交给8进程池，未改验证内容。
+脚本在`build/s7/{regression,finish_regression}.py`，最终摘要及各场景日志在
+`build/s7/regression-remote/`，单元完整日志在`build/s7/unit-logs/`，
+GT25原始timing/commands/寄存器数据在`build/s7/gt25-timing/`，124项周期比较在
+`build/s7/{cycle-comparison.log,cycle-table.md,regression/performance.txt}`。
+资源测量沿用本记录上方的filelist/blackbox/LUT6方法，逐模块命令为
+`python3 build/s7/measure.py <阶段> <模块...>`；脚本、阶段网表/日志、root独立测量及
+扇出分析都保留在`build/s7/`。基线导出自4426bf9e5，只调整上述前向声明顺序。
+
+状态：S-7 RTL、资源参考测量、扇出与仿真验收完成；实际LUT/FF密度、
+syn_preserve区域复制和clk_gpu WNS等待下一轮PDS，未宣称已达到全片65% LUT或180MHz。

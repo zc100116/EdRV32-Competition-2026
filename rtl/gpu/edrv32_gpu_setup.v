@@ -36,6 +36,28 @@ module edrv32_gpu_setup (
     output wire perf_triangle_o
 );
     wire enable_w;
+    // Independent occupancy replicas keep the common datapath CE local (microarch 4.14).
+    wire [2:0] control_enable_w;
+    genvar control_region;
+    generate
+        for (control_region = 0; control_region < 3;
+            control_region = control_region + 1) begin : g_control_enable
+            (* keep = "true", syn_preserve = 1 *) reg [1:0] occupancy_r;
+            assign control_enable_w[control_region] = occupancy_r != 2 && !stop_i;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) occupancy_r <= 0;
+                else if (stop_i) occupancy_r <= 0;
+                else begin
+                    case ({push_w, pop_w})
+                        2'b10: occupancy_r <= occupancy_r + 2'd1;
+                        2'b01: occupancy_r <= occupancy_r - 2'd1;
+                        default: occupancy_r <= occupancy_r;
+                    endcase
+                end
+            end
+        end
+    endgenerate
+
     wire accept_w;
     wire pop_w;
     wire complete_w;
@@ -88,7 +110,7 @@ module edrv32_gpu_setup (
             end
             assign reciprocal_tag_w[reciprocal_stage*4 +: 4] = tag_r;
             always @(posedge clk_i) begin
-                if (enable_w) tag_r <= previous_w;
+                if (control_enable_w[0]) tag_r <= previous_w;
             end
         end
     endgenerate
@@ -248,7 +270,7 @@ module edrv32_gpu_setup (
     assign edge_index_r = front_metadata_w[44 +: 2];
     assign area_tag_r = front_metadata_w[40 +: 4];
     always @(posedge clk_i) begin
-        if (enable_w) begin
+        if (control_enable_w[1]) begin
             multiply_a_0_r <= multiply_a_w[0];
             multiply_a_1_r <= multiply_a_w[1];
             multiply_b_0_r <= multiply_b_w[0];
@@ -282,10 +304,10 @@ module edrv32_gpu_setup (
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i) valid_r <= 0;
                 else if (stop_i) valid_r <= 0;
-                else if (enable_w) valid_r <= previous_w[7:6];
+                else if (control_enable_w[2]) valid_r <= previous_w[7:6];
             end
             always @(posedge clk_i) begin
-                if (enable_w) metadata_r <= previous_w[5:0];
+                if (control_enable_w[0]) metadata_r <= previous_w[5:0];
             end
         end
     endgenerate
@@ -327,10 +349,10 @@ module edrv32_gpu_setup (
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) attribute_read_valid_r <= 0;
         else if (stop_i) attribute_read_valid_r <= 0;
-        else if (enable_w) attribute_read_valid_r <= attribute_valid_r;
+        else if (control_enable_w[1]) attribute_read_valid_r <= attribute_valid_r;
     end
     always @(posedge clk_i) begin
-        if (enable_w) begin
+        if (control_enable_w[2]) begin
             attribute_read_tag_r <= {attribute_tag_r, attribute_index_r};
             attribute_read_delta_r <= unused_attribute_context_read0_w[0 +: 72];
             attribute_read_offset_r <= unused_attribute_context_read0_w[72 +: 36];
@@ -342,7 +364,7 @@ module edrv32_gpu_setup (
     edrv32_gpu_setup_plane u_plane (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .enable_i(enable_w),
+        .enable_i(control_enable_w[0]),
         .stop_i(stop_i),
         .credit_push_i(push_w),
         .credit_pop_i(pop_w),
@@ -400,7 +422,7 @@ module edrv32_gpu_setup (
             end
             if (pop_w) output_read_r <= !output_read_r;
             if (push_w) output_write_r <= !output_write_r;
-            if (enable_w) begin
+            if (control_enable_w[1]) begin
                 if (interval_r != 0) interval_r <= interval_r - 3'd1;
                 if (accept_w) begin
                     interval_r <= 3'd7;
@@ -420,7 +442,7 @@ module edrv32_gpu_setup (
     end
 
     always @(posedge clk_i) begin
-        if (enable_w) begin
+        if (control_enable_w[2]) begin
             if (area_valid_r) nonzero_r[area_tag_r] <= area_w != 0;
 
             if (accept_w) begin
@@ -545,7 +567,7 @@ module edrv32_gpu_setup (
             assign triangle_setup_start_o[START_OFFSET +: WIDTH] =
                 output_start_r[output_read_r];
             always @(posedge clk_i) begin
-                if (enable_w && plane_valid_w && plane_tag_w[2:0] == attribute)
+                if (control_enable_w[0] && plane_valid_w && plane_tag_w[2:0] == attribute)
                     start_r <= plane_start_w[WIDTH-1:0];
                 if (push_w)
                     output_start_r[output_write_r] <= start_r;
@@ -555,7 +577,7 @@ module edrv32_gpu_setup (
             assign triangle_setup_gradient_o[GRAD_OFFSET +: 2*GRAD_WIDTH] =
                 output_gradient_r[output_read_r];
             always @(posedge clk_i) begin
-                if (enable_w && plane_valid_w && plane_tag_w[2:0] == attribute)
+                if (control_enable_w[1] && plane_valid_w && plane_tag_w[2:0] == attribute)
                     gradient_r <= {plane_gradient_w[52 +: GRAD_WIDTH],
                         plane_gradient_w[0 +: GRAD_WIDTH]};
                 if (push_w)
@@ -566,7 +588,7 @@ module edrv32_gpu_setup (
             assign triangle_setup_h_o[attribute*10 +: 10] =
                 output_h_r[output_read_r];
             always @(posedge clk_i) begin
-                if (enable_w && plane_valid_w && plane_tag_w[2:0] == attribute)
+                if (control_enable_w[2] && plane_valid_w && plane_tag_w[2:0] == attribute)
                     h_r <= plane_h_w;
                 if (push_w)
                     output_h_r[output_write_r] <= h_r;
@@ -591,11 +613,11 @@ module edrv32_gpu_setup (
                 reg [71:0] u_value_data_r;
                 assign unused_value_data_w[value_bank*72 +: 72] = u_value_data_r;
                 always @(posedge clk_i) begin
-                    if (enable_w) u_value_data_r <= u_value_data_w;
+                    if (control_enable_w[0]) u_value_data_r <= u_value_data_w;
                 end
                 edrv32_ram_gpu_table u_value (
                     .clk_i(clk_i),
-                    .wr_en_i(enable_w && accept_w),
+                    .wr_en_i(control_enable_w[1] && accept_w),
                     .wr_addr_i({3'b0, allocate_r[2:0]}),
                     .wr_data_i(value_input_w[value_bank*72 +: 72]),
                     .rd_addr_i({3'b0, attribute_tag_r[2:0]}),
@@ -609,6 +631,14 @@ module edrv32_gpu_setup (
         // Three edge coefficient banks; two shared front multipliers retain their issue schedule.
         for (edge_bank = 0; edge_bank < 3; edge_bank = edge_bank + 1) begin : g_edge
             localparam VERTEX = (edge_bank + 1) % 3;
+            wire value_write_w;
+            wire [3:0] value_tag_w;
+
+            wire [39:0] dx_w;
+            wire [39:0] dy_w;
+            wire [39:0] bias_w;
+            wire [39:0] value_w;
+
 
             reg [39:0] output_value_r [0:1];
 
@@ -623,7 +653,7 @@ module edrv32_gpu_setup (
             wire [71:0] unused_edge_value_read0_w;
             edrv32_ram_gpu_table u_edge_value_p0_b0 (
                 .clk_i(clk_i),
-                .wr_en_i(enable_w && value_write_w),
+                .wr_en_i(control_enable_w[2] && value_write_w),
                 .wr_addr_i({2'b0, value_tag_w}),
                 .wr_data_i(edge_value_input_w[0 +: 72]),
                 .rd_addr_i({2'b0, complete_tag_r}),
@@ -635,7 +665,7 @@ module edrv32_gpu_setup (
             wire [143:0] unused_edge_coefficients_read0_w;
             edrv32_ram_gpu_table u_edge_coefficients_p0_b0 (
                 .clk_i(clk_i),
-                .wr_en_i(enable_w && accept_w),
+                .wr_en_i(control_enable_w[0] && accept_w),
                 .wr_addr_i({2'b0, allocate_r}),
                 .wr_data_i(edge_coefficients_input_w[0 +: 72]),
                 .rd_addr_i({2'b0, complete_tag_r}),
@@ -643,15 +673,12 @@ module edrv32_gpu_setup (
             );
             edrv32_ram_gpu_table u_edge_coefficients_p0_b1 (
                 .clk_i(clk_i),
-                .wr_en_i(enable_w && accept_w),
+                .wr_en_i(control_enable_w[1] && accept_w),
                 .wr_addr_i({2'b0, allocate_r}),
                 .wr_data_i(edge_coefficients_input_w[72 +: 72]),
                 .rd_addr_i({2'b0, complete_tag_r}),
                 .rd_data_o(unused_edge_coefficients_read0_w[72 +: 72])
             );
-            wire [39:0] dx_w;
-            wire [39:0] dy_w;
-            wire [39:0] bias_w;
             assign dx_w = -$signed({{22{difference_y_w[VERTEX][17]}},
                 difference_y_w[VERTEX]}) <<< 4;
             assign dy_w = $signed({{22{difference_x_w[VERTEX][17]}},
@@ -659,9 +686,6 @@ module edrv32_gpu_setup (
             assign bias_w = difference_y_w[VERTEX] < 0 ||
                 (difference_y_w[VERTEX] == 0 && difference_x_w[VERTEX] > 0)
                 ? 40'd0 : -40'd1;
-            wire value_write_w;
-            wire [3:0] value_tag_w;
-            wire [39:0] value_w;
             assign value_write_w = edge_valid_r && edge_index_r == VERTEX;
             assign value_tag_w = area_tag_r;
             assign value_w = {{3{edge_result_w[36]}}, edge_result_w};
@@ -693,7 +717,7 @@ module edrv32_gpu_setup (
     wire [143:0] unused_attribute_context_read0_w;
     edrv32_ram_gpu_table u_attribute_context_p0_b0 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w && accept_w),
+        .wr_en_i(control_enable_w[2] && accept_w),
         .wr_addr_i({2'b0, allocate_r}),
         .wr_data_i(attribute_context_input_w[0 +: 72]),
         .rd_addr_i({2'b0, attribute_tag_r}),
@@ -701,7 +725,7 @@ module edrv32_gpu_setup (
     );
     edrv32_ram_gpu_table u_attribute_context_p0_b1 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w && accept_w),
+        .wr_en_i(control_enable_w[0] && accept_w),
         .wr_addr_i({2'b0, allocate_r}),
         .wr_data_i(attribute_context_input_w[72 +: 72]),
         .rd_addr_i({2'b0, attribute_tag_r}),
@@ -714,7 +738,7 @@ module edrv32_gpu_setup (
     wire [143:0] unused_output_context_read0_w;
     edrv32_ram_gpu_table u_output_context_p0_b0 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w && accept_w),
+        .wr_en_i(control_enable_w[1] && accept_w),
         .wr_addr_i({2'b0, allocate_r}),
         .wr_data_i(output_context_input_w[0 +: 72]),
         .rd_addr_i({2'b0, complete_tag_r}),
@@ -722,7 +746,7 @@ module edrv32_gpu_setup (
     );
     edrv32_ram_gpu_table u_output_context_p0_b1 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w && accept_w),
+        .wr_en_i(control_enable_w[2] && accept_w),
         .wr_addr_i({2'b0, allocate_r}),
         .wr_data_i(output_context_input_w[72 +: 72]),
         .rd_addr_i({2'b0, complete_tag_r}),

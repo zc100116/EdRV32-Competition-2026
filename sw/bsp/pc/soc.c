@@ -58,14 +58,12 @@ static const struct reg_info disp_gpu_registers[] = {
         D(IRQ_EN_DONE_MASK) |
         D(IRQ_EN_ERROR_MASK) |
         D(IRQ_EN_FRAME_MASK) |
-        D(IRQ_EN_SWITCH_MASK) |
-        D(IRQ_EN_SWITCH1_MASK), 1 },
+        D(IRQ_EN_SWITCH_MASK), 1 },
     {D(IRQ_STAT_OFFSET), D(IRQ_STAT_RESET),
         D(IRQ_STAT_DONE_MASK) |
         D(IRQ_STAT_ERROR_MASK) |
         D(IRQ_STAT_FRAME_MASK) |
-        D(IRQ_STAT_SWITCH_MASK) |
-        D(IRQ_STAT_SWITCH1_MASK), 0 },
+        D(IRQ_STAT_SWITCH_MASK), 0 },
     {D(ERR_CODE_OFFSET), D(ERR_CODE_RESET),
         UINT32_MAX, 0 },
     {D(DESC_BASE_OFFSET), D(DESC_BASE_RESET),
@@ -89,21 +87,8 @@ static const struct reg_info disp_gpu_registers[] = {
     {D(L0_SCROLL_OFFSET), D(L0_SCROLL_RESET),
         D(L0_SCROLL_SCROLL_X_MASK) | D(L0_SCROLL_SCROLL_Y_MASK), 1 },
     {D(LAYER_CTRL_OFFSET), D(LAYER_CTRL_RESET),
-        D(LAYER_CTRL_L0_EN_MASK) | D(LAYER_CTRL_L1_EN_MASK) | D(LAYER_CTRL_L0_X2_MASK), 1 },
-    {D(L1_NEXT_BASE_OFFSET), D(L1_NEXT_BASE_RESET),
-        D(L1_NEXT_BASE_VALUE_MASK), 1 },
-    {D(L1_STRIDE_OFFSET), D(L1_STRIDE_RESET),
-        D(L1_STRIDE_VALUE_MASK), 1 },
-    {D(L1_POS_OFFSET), D(L1_POS_RESET),
-        D(L1_POS_X_MASK) | D(L1_POS_Y_MASK), 1 },
-    {D(L1_SIZE_OFFSET), D(L1_SIZE_RESET),
-        D(L1_SIZE_W_MASK) | D(L1_SIZE_H_MASK), 1 },
-    {D(L1_OPA_OFFSET), D(L1_OPA_RESET),
-        D(L1_OPA_OPA_MASK), 1 },
-    {D(L1_CUR_BASE_OFFSET), D(L1_CUR_BASE_RESET),
-        UINT32_MAX, 0 },
-    {D(L1_REL_BASE_OFFSET), D(L1_REL_BASE_RESET),
-        UINT32_MAX, 0 },
+        D(LAYER_CTRL_L0_EN_MASK) | D(LAYER_CTRL_L0_X2_MASK), 1 },
+
 };
 static const struct reg_info aud_registers[] = {
     {A(ID_OFFSET), A(ID_RESET),
@@ -333,11 +318,6 @@ static void aud_write_reg(uint32_t offset, uint32_t value)
     }
     aud_prefetch();
 }
-static unsigned div255(unsigned value)
-{
-    unsigned t = value + 128;
-    return (t + (t >> 8)) >> 8;
-}
 static uint32_t expand565(uint16_t value)
 {
     unsigned r = value >> 11, g = (value >> 5) & 63, b = value & 31;
@@ -350,19 +330,12 @@ static void display_frame(void)
         return;
     }
     unsigned next = DR(LAYER_CTRL);
-    const uint32_t enabled[] = {D(LAYER_CTRL_L0_EN_MASK), D(LAYER_CTRL_L1_EN_MASK)};
-    const uint32_t bases[] = {D(NEXT_BASE_OFFSET), D(L1_NEXT_BASE_OFFSET)};
-    const uint32_t current[] = {D(CUR_BASE_OFFSET), D(L1_CUR_BASE_OFFSET)};
-    const uint32_t released[] = {D(REL_BASE_OFFSET), D(L1_REL_BASE_OFFSET)};
-    const uint32_t switched[] = {D(IRQ_STAT_SWITCH_MASK), D(IRQ_STAT_SWITCH1_MASK)};
-    for (unsigned i = 0; i < 2; ++i) {
-        if ((layers & enabled[i]) && (!(next & enabled[i]) ||
-            disp[bases[i] / 4] != disp[current[i] / 4])) {
-            disp[released[i] / 4] = disp[current[i] / 4];
-            DR(IRQ_STAT) |= switched[i];
-        }
-        if (next & enabled[i]) disp[current[i] / 4] = disp[bases[i] / 4];
+    if ((layers & D(LAYER_CTRL_L0_EN_MASK)) &&
+        (!(next & D(LAYER_CTRL_L0_EN_MASK)) || DR(NEXT_BASE) != DR(CUR_BASE))) {
+        DR(REL_BASE) = DR(CUR_BASE);
+        DR(IRQ_STAT) |= D(IRQ_STAT_SWITCH_MASK);
     }
+    if (next & D(LAYER_CTRL_L0_EN_MASK)) DR(CUR_BASE) = DR(NEXT_BASE);
     layers = next;
     ++DR(FRAME_CNT);
     ++disp[D(PERF_OFFSET(0)) / 4];
@@ -371,10 +344,6 @@ static void display_frame(void)
     unsigned scale = (layers & D(LAYER_CTRL_L0_X2_MASK)) ? 2 : 1;
     unsigned sx = DR(L0_SCROLL) & D(L0_SCROLL_SCROLL_X_MASK);
     unsigned sy = (DR(L0_SCROLL) & D(L0_SCROLL_SCROLL_Y_MASK)) >> D(L0_SCROLL_SCROLL_Y_POS);
-    unsigned lx = DR(L1_POS) & D(L1_POS_X_MASK);
-    unsigned ly = (DR(L1_POS) & D(L1_POS_Y_MASK)) >> D(L1_POS_Y_POS);
-    unsigned lw = DR(L1_SIZE) & D(L1_SIZE_W_MASK);
-    unsigned lh = (DR(L1_SIZE) & D(L1_SIZE_H_MASK)) >> D(L1_SIZE_H_POS);
     /* L0 is opaque. Expand each source pixel once and replicate X2 rows. */
     if (layers & D(LAYER_CTRL_L0_EN_MASK)) {
         for (unsigned y = 0; y < 720; y += scale) {
@@ -407,31 +376,7 @@ static void display_frame(void)
             if (scale == 2) memcpy(out + 1280, out, 1280 * sizeof(*out));
         }
     } else memset(pixels, 0, sizeof(pixels));
-    if (!(layers & D(LAYER_CTRL_L1_EN_MASK))) return;
-    unsigned right = lx + lw < 1280 ? lx + lw : 1280;
-    unsigned bottom = ly + lh < 720 ? ly + lh : 720;
-    for (unsigned y = ly; y < bottom; ++y) {
-        uint64_t row = (uint64_t)DR(L1_CUR_BASE) + (y - ly) * DR(L1_STRIDE);
-        for (unsigned x = lx; x < right; ++x) {
-            uint64_t address = row + 4 * (x - lx);
-            uint32_t foreground = 0;
-            if (address + 4 > DDR_BYTES) {
-                DR(ERR_CODE) = 2;
-                DR(IRQ_STAT) |= D(IRQ_STAT_ERROR_MASK);
-            } else memcpy(&foreground, ddr + address, 4);
-            unsigned alpha = div255((foreground >> 24) * DR(L1_OPA));
-            if (!alpha) continue;
-            uint32_t *out = pixels + y * 1280 + x;
-            if (alpha == 255) { *out = foreground & 0xffffff; continue; }
-            uint32_t output = 0;
-            for (unsigned shift = 0; shift < 24; shift += 8) {
-                unsigned f = (foreground >> shift) & 255;
-                unsigned b = (*out >> shift) & 255;
-                output |= div255(alpha * f + (255 - alpha) * b) << shift;
-            }
-            *out = output;
-        }
-    }
+
 }
 void pc_soc_vsync(uint32_t audio_frames)
 {
@@ -474,7 +419,7 @@ void mmio_write32(uintptr_t address, uint32_t value)
         uint32_t offset = (uint32_t)(address - EDRV32_DISP_BASE);
         if (offset == D(IRQ_EN_OFFSET))
             DR(IRQ_EN) = value & (D(IRQ_EN_ERROR_MASK) | D(IRQ_EN_FRAME_MASK) |
-                D(IRQ_EN_SWITCH_MASK) | D(IRQ_EN_SWITCH1_MASK));
+                D(IRQ_EN_SWITCH_MASK));
         else if (offset == D(IRQ_STAT_OFFSET)) DR(IRQ_STAT) &= ~value;
         else if (offset == D(CTRL_OFFSET)) {
             DR(CTRL) = value & D(CTRL_ENABLE_MASK);

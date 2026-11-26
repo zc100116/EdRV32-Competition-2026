@@ -352,7 +352,8 @@ module edrv32_gpu (
     wire [15:0] shaded_y_w;
     wire soft_rst_w;
     wire start_w;
-    wire stop_w;
+    wire unused_stop_w;
+    wire [15:0] stop_region_w;
     wire target_finish_w;
     wire [159:0] target_old_data_w;
     wire target_old_ready_w;
@@ -429,6 +430,22 @@ module edrv32_gpu (
     wire write_dma_idle_w;
     reg [23:0] object_record_idx_r;
     reg sample_quad_select_r;
+
+    // Registered sample selection, before texture allocates a context.
+    wire sample_buffer_ready_w;
+    reg sample_buffer_valid_r;
+    wire [383:0] sample_buffer_span_w;
+    reg [7:0] sample_buffer_alpha_r;
+    reg [95:0] sample_buffer_color_r;
+    reg [63:0] sample_buffer_depth_r;
+    reg [3:0] sample_buffer_mask_r;
+    reg [3:0] sample_buffer_palette_r;
+    reg sample_buffer_quad_r;
+    reg [127:0] sample_buffer_u_r;
+    reg [127:0] sample_buffer_v_r;
+    reg [15:0] sample_buffer_x_r;
+    reg [15:0] sample_buffer_y_r;
+
 
     // One regional reset copy per independently placed unit.
     wire regs_rst_n_w;
@@ -615,6 +632,41 @@ module edrv32_gpu (
         ? quad_sample_y_w : perspective_sample_y_w;
     assign sample_valid_w = sample_quad_select_r
         ? quad_sample_valid_w : perspective_sample_valid_w;
+
+    // One elastic sample stage isolates the source mux from texture's LOD encoder.
+    // Keeping this stage before allocation preserves the 32-context nearest throughput.
+    assign sample_ready_w = !stop_region_w[15] &&
+        (!sample_buffer_valid_r || sample_buffer_ready_w);
+    always @(posedge clk_gpu_i or negedge texture_rst_n_w) begin
+        if (!texture_rst_n_w) sample_buffer_valid_r <= 0;
+        else if (stop_region_w[15]) sample_buffer_valid_r <= 0;
+        else if (sample_ready_w) sample_buffer_valid_r <= sample_valid_w;
+    end
+    always @(posedge clk_gpu_i) begin
+        if (sample_valid_w && sample_ready_w) begin
+            sample_buffer_alpha_r <= sample_alpha_w;
+            sample_buffer_color_r <= sample_color_w;
+            sample_buffer_depth_r <= sample_depth_w;
+            sample_buffer_mask_r <= sample_mask_w;
+            sample_buffer_palette_r <= sample_palette_w;
+            sample_buffer_quad_r <= sample_quad_w;
+            sample_buffer_u_r <= sample_u_w;
+            sample_buffer_v_r <= sample_v_w;
+            sample_buffer_x_r <= sample_x_w;
+            sample_buffer_y_r <= sample_y_w;
+        end
+    end
+    genvar sample_lane;
+    generate
+        for (sample_lane = 0; sample_lane < 4; sample_lane = sample_lane + 1) begin : g_sample
+            reg [95:0] span_r;
+            assign sample_buffer_span_w[sample_lane*96 +: 96] = span_r;
+            always @(posedge clk_gpu_i) begin
+                if (sample_valid_w && sample_ready_w)
+                    span_r <= sample_span_w[sample_lane*96 +: 96];
+            end
+        end
+    endgenerate
 
     // regs interface.
     edrv32_gpu_regs u_regs (
@@ -835,7 +887,8 @@ module edrv32_gpu (
         .target_unit_done_i(target_unit_done_w),
         .resolve_finish_o(resolve_finish_w),
         .resolve_unit_done_i(resolve_unit_done_w),
-        .stop_o(stop_w)
+        .stop_region_o(stop_region_w),
+        .stop_o(unused_stop_w)
     );
 
     // read dma interface.
@@ -931,7 +984,7 @@ module edrv32_gpu (
 
         // Run lifecycle and statistics.
         .start_i(dma_start_w),
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[0]),
         .dma_idle_o(read_dma_idle_w),
         .dma_error_o(read_dma_error_w),
         .perf_read_wait_o(perf_read_wait_w)
@@ -1003,7 +1056,7 @@ module edrv32_gpu (
 
         // Run lifecycle.
         .start_i(dma_start_w),
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[1]),
         .dma_idle_o(write_dma_idle_w),
         .dma_error_o(write_dma_error_w)
     );
@@ -1065,7 +1118,7 @@ module edrv32_gpu (
         .palette_load_data_o(palette_load_data_w),
 
         // Lifecycle.
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[2]),
         .unit_done_o(unpack_done_w)
     );
 
@@ -1129,7 +1182,7 @@ module edrv32_gpu (
 
         // Finish follows object unit_done; stop retains data for accepted DMA requests.
         .finish_i(object_unit_done_w),
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[3]),
         .unit_done_o(pack_done_w)
     );
 
@@ -1174,7 +1227,7 @@ module edrv32_gpu (
 
         // Drain and deferred atomic result publication.
         .finish_i(object_finish_w),
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[4]),
         .unit_done_o(object_unit_done_w),
         .object_publish_i(object_publish_w),
         .object_result_valid_o(object_result_valid_w),
@@ -1221,7 +1274,7 @@ module edrv32_gpu (
 
         // Command lifecycle.
         .finish_i(resolve_finish_w),
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[5]),
         .unit_done_o(resolve_unit_done_w),
         .perf_resolve_busy_o(perf_resolve_busy_w)
     );
@@ -1266,7 +1319,7 @@ module edrv32_gpu (
 
         // Completion and pixel event.
         .finish_i(pixel_finish_w),
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[6]),
         .unit_done_o(pixel_unit_done_w),
         .perf_pixel_count_o(perf_pixel_count_w)
     );
@@ -1306,7 +1359,7 @@ module edrv32_gpu (
 
         // Command drain.
         .finish_i(target_finish_w),
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[7]),
         .unit_done_o(target_unit_done_w)
     );
 
@@ -1316,7 +1369,7 @@ module edrv32_gpu (
         .clk_i(clk_gpu_i),
         .rst_n_i(texture_ram_rst_n_w),
         .finish_i(texture_finish_w),
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[8]),
         .unit_done_o(texture_ram_done_w),
 
         // Linear, offline-interleaved byte stream.
@@ -1338,7 +1391,7 @@ module edrv32_gpu (
         .clk_i(clk_gpu_i),
         .rst_n_i(palette_rst_n_w),
         .finish_i(texture_finish_w),
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[9]),
         .unit_done_o(palette_done_w),
 
         // Palette loading and triangle preload control.
@@ -1397,7 +1450,7 @@ module edrv32_gpu (
 
         // Command lifetime and performance event.
         .finish_i(geometry_finish_w),
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[10]),
         .unit_done_o(geometry_unit_done_w),
         .perf_vertex_o(perf_vertex_w)
     );
@@ -1431,7 +1484,7 @@ module edrv32_gpu (
 
         // Command lifetime and performance event.
         .finish_i(setup_finish_w),
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[11]),
         .unit_done_o(setup_unit_done_w),
         .perf_triangle_o(perf_triangle_w)
     );
@@ -1476,7 +1529,7 @@ module edrv32_gpu (
 
         // Command lifecycle.
         .finish_i(raster_finish_w),
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[12]),
         .unit_done_o(raster_unit_done_w)
     );
 
@@ -1524,7 +1577,7 @@ module edrv32_gpu (
 
         // Command lifecycle.
         .finish_i(quad_finish_w),
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[13]),
         .unit_done_o(quad_unit_done_w),
         .perf_quad_o(perf_quad_w)
     );
@@ -1563,7 +1616,7 @@ module edrv32_gpu (
 
         // Command lifecycle.
         .finish_i(perspective_finish_w),
-        .stop_i(stop_w),
+        .stop_i(stop_region_w[14]),
         .unit_done_o(perspective_unit_done_w)
     );
 
@@ -1572,8 +1625,8 @@ module edrv32_gpu (
         // Clock and command lifetime.
         .clk_i(clk_gpu_i),
         .rst_n_i(texture_rst_n_w),
-        .finish_i(texture_finish_w),
-        .stop_i(stop_w),
+        .finish_i(texture_finish_w && !sample_buffer_valid_r),
+        .stop_i(stop_region_w[15]),
         .unit_done_o(texture_pipeline_done_w),
 
         // Frozen render state snapshot.
@@ -1585,19 +1638,19 @@ module edrv32_gpu (
         .render_state_wide_i(texture_render_state_wide_w),
 
         // Four ordered pixels from perspective.
-        .sample_valid_i(sample_valid_w),
-        .sample_ready_o(sample_ready_w),
-        .sample_x_i(sample_x_w),
-        .sample_y_i(sample_y_w),
-        .sample_mask_i(sample_mask_w),
-        .sample_quad_i(sample_quad_w),
-        .sample_u_i(sample_u_w),
-        .sample_v_i(sample_v_w),
-        .sample_span_i(sample_span_w),
-        .sample_depth_i(sample_depth_w),
-        .sample_color_i(sample_color_w),
-        .sample_palette_i(sample_palette_w),
-        .sample_alpha_i(sample_alpha_w),
+        .sample_valid_i(sample_buffer_valid_r),
+        .sample_ready_o(sample_buffer_ready_w),
+        .sample_x_i(sample_buffer_x_r),
+        .sample_y_i(sample_buffer_y_r),
+        .sample_mask_i(sample_buffer_mask_r),
+        .sample_quad_i(sample_buffer_quad_r),
+        .sample_u_i(sample_buffer_u_r),
+        .sample_v_i(sample_buffer_v_r),
+        .sample_span_i(sample_buffer_span_w),
+        .sample_depth_i(sample_buffer_depth_r),
+        .sample_color_i(sample_buffer_color_r),
+        .sample_palette_i(sample_buffer_palette_r),
+        .sample_alpha_i(sample_buffer_alpha_r),
 
         // Ordered group after filtering and shading.
         .shaded_valid_o(shaded_valid_w),

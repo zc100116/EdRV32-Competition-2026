@@ -68,13 +68,10 @@ module edrv32_gpu_geometry (
     wire clip_ready_w;
     wire polygon_valid_w;
     wire polygon_ready_w;
-    wire [2111:0] polygon_data_w;
-    wire [3:0] polygon_count_w;
+    wire [263:0] polygon_data_w;
+    wire [2:0] polygon_index_w;
+    wire polygon_last_w;
     wire clip_idle_w;
-    reg sending_r;
-    reg send_phase_r;
-    reg [3:0] send_count_r;
-    reg [2:0] send_index_r;
     wire project_input_valid_w;
     wire project_input_ready_w;
     wire project_valid_w;
@@ -108,6 +105,7 @@ module edrv32_gpu_geometry (
     assign fan_last_w = fan_advance_w && {1'b0, fan_index_r} + 4'd2 == fan_count_r;
     reg fan_r;
     reg [2:0] fan_index_r;
+    reg [2:0] fan_next_index_r;
     reg [3:0] fan_count_r;
     wire signed [17:0] fan_x_w [0:2];
     wire signed [17:0] fan_y_w [0:2];
@@ -122,8 +120,6 @@ module edrv32_gpu_geometry (
     wire fan_keep_w;
     wire fan_advance_w;
     reg [1:0] output_count_r;
-    reg output_read_r;
-    reg output_write_r;
     wire output_push_w;
     wire output_pop_w;
     wire drained_w;
@@ -137,9 +133,10 @@ module edrv32_gpu_geometry (
     assign transform_ready_w = triangle_count_r != 2 && !stop_i;
     assign triangle_push_w = transform_valid_w && transform_ready_w && assembly_count_r == 2;
     assign triangle_pop_w = triangle_count_r != 0 && clip_ready_w;
-    assign polygon_ready_w = !sending_r && counts_count_r != 16 && !stop_i;
-    assign polygon_accept_w = polygon_valid_w && polygon_ready_w;
-    assign project_input_valid_w = sending_r && !send_phase_r && !stop_i;
+    assign polygon_ready_w = project_input_ready_w && counts_count_r != 16 && !stop_i;
+    assign polygon_accept_w = polygon_valid_w && polygon_ready_w && polygon_last_w;
+    assign project_input_valid_w = polygon_valid_w && counts_count_r != 16 && !stop_i;
+    assign project_input_data_w = polygon_data_w;
     assign project_ready_w = screen_count_r != 2 && counts_count_r != 0 && !stop_i;
     assign polygon_complete_w = project_valid_w && project_ready_w
         && {1'b0, screen_index_r} + 4'd1 == counts_head_w;
@@ -150,7 +147,7 @@ module edrv32_gpu_geometry (
     assign screen_triangle_valid_o = output_count_r != 0;
     assign output_pop_w = screen_triangle_valid_o && screen_triangle_ready_i;
     assign drained_w = remaining_r == 0 && transform_idle_w && assembly_count_r == 0
-        && triangle_count_r == 0 && clip_idle_w && !sending_r && counts_count_r == 0
+        && triangle_count_r == 0 && clip_idle_w && counts_count_r == 0
         && project_idle_w && !fan_r && screen_count_r == 0 && output_count_r == 0 &&
             screen_index_r == 0;
     edrv32_gpu_transform u_transform (
@@ -177,7 +174,8 @@ module edrv32_gpu_geometry (
         .polygon_valid_o(polygon_valid_w),
         .polygon_ready_i(polygon_ready_w),
         .polygon_data_o(polygon_data_w),
-        .polygon_count_o(polygon_count_w),
+        .polygon_index_o(polygon_index_w),
+        .polygon_last_o(polygon_last_w),
         .stop_i(stop_i),
         .idle_o(clip_idle_w)
     );
@@ -214,56 +212,6 @@ module edrv32_gpu_geometry (
             localparam WIDTH = field_g < 4 ? 40 : (field_g < 6 ? 16 : 24);
             localparam OFFSET = field_g < 4 ? field_g * 40
                 : (field_g < 6 ? 160 + (field_g - 4) * 16 : 192 + (field_g - 6) * 24);
-            // Each field owns its accept decode; preserved state prevents PDS merging.
-            (* keep = "true", syn_preserve = 1 *) reg polygon_sending_r;
-            (* keep = "true", syn_preserve = 1 *) reg [4:0] polygon_counts_count_r;
-            (* keep = "true", syn_preserve = 1 *) wire polygon_accept_region_w;
-            assign polygon_accept_region_w = polygon_valid_w && !polygon_sending_r
-                && polygon_counts_count_r != 16 && !stop_i;
-            always @(posedge clk_i or negedge rst_n_i) begin
-                if (!rst_n_i) begin
-                    polygon_sending_r <= 1'b0;
-                    polygon_counts_count_r <= 5'd0;
-                end else if (stop_i) begin
-                    polygon_sending_r <= 1'b0;
-                    polygon_counts_count_r <= 5'd0;
-                end else begin
-                    if (project_input_valid_w && project_input_ready_w
-                        && {1'b0, send_index_r} + 4'd1 == send_count_r)
-                        polygon_sending_r <= 1'b0;
-                    if (polygon_accept_region_w) polygon_sending_r <= 1'b1;
-                    case ({polygon_accept_region_w, polygon_complete_w})
-                        2'b10: polygon_counts_count_r <= polygon_counts_count_r + 5'd1;
-                        2'b01: polygon_counts_count_r <= polygon_counts_count_r - 5'd1;
-                        default: polygon_counts_count_r <= polygon_counts_count_r;
-                    endcase
-                end
-            end
-            wire [WIDTH*8-1:0] polygon_w;
-            reg [WIDTH-1:0] selected_polygon_w;
-            assign project_input_data_w[OFFSET +: WIDTH] = selected_polygon_w;
-            always @(*) begin
-                selected_polygon_w = 0;
-                case (send_index_r)
-                    3'd0: selected_polygon_w = polygon_w[WIDTH*0 +: WIDTH];
-                    3'd1: selected_polygon_w = polygon_w[WIDTH*1 +: WIDTH];
-                    3'd2: selected_polygon_w = polygon_w[WIDTH*2 +: WIDTH];
-                    3'd3: selected_polygon_w = polygon_w[WIDTH*3 +: WIDTH];
-                    3'd4: selected_polygon_w = polygon_w[WIDTH*4 +: WIDTH];
-                    3'd5: selected_polygon_w = polygon_w[WIDTH*5 +: WIDTH];
-                    3'd6: selected_polygon_w = polygon_w[WIDTH*6 +: WIDTH];
-                    3'd7: selected_polygon_w = polygon_w[WIDTH*7 +: WIDTH];
-                    default: selected_polygon_w = 0;
-                endcase
-            end
-            for (vertex_g = 0; vertex_g < 8; vertex_g = vertex_g + 1) begin : g_polygon
-                reg [WIDTH-1:0] data_r;
-                assign polygon_w[WIDTH*vertex_g +: WIDTH] = data_r;
-                always @(posedge clk_i) begin
-                    if (polygon_accept_region_w)
-                        data_r <= polygon_data_w[vertex_g * 264 + OFFSET +: WIDTH];
-                end
-            end
             for (vertex_g = 0; vertex_g < 3; vertex_g = vertex_g + 1) begin : g_triangle
                 wire [WIDTH-1:0] push_data_w;
                 reg [WIDTH-1:0] data_r [0:1];
@@ -291,6 +239,7 @@ module edrv32_gpu_geometry (
                 : (field_g == 2 ? 34 : (field_g == 3 ? 50
                 : (field_g == 4 ? 85 : (field_g == 5 ? 136 : 187)))));
             wire [71:0] unused_screen_data_w [0:2];
+            wire [2:0] next_index_w;
             wire [11:0] screen_address_w;
             assign screen_address_w = {screen_read_bank_r, next_index_w,
                 screen_read_bank_r, fan_index_r, screen_read_bank_r, 3'b0};
@@ -319,18 +268,18 @@ module edrv32_gpu_geometry (
             wire [WIDTH-1:0] screen_read0_w;
             assign unused_screen_read0_w = unused_screen_data_w[0];
             assign screen_read0_w = unused_screen_read0_w[WIDTH-1:0];
-            wire [2:0] next_index_w;
             wire [WIDTH*3-1:0] ordered_w;
             wire [WIDTH*3-1:0] output_w;
-            reg [WIDTH*3-1:0] output_r [0:1];
-            assign next_index_w = fan_index_r + 3'd1;
+            reg [WIDTH*3-1:0] output_head_r;
+            reg [WIDTH*3-1:0] output_tail_r;
+            assign next_index_w = fan_next_index_r;
             assign fan_w[WIDTH*0 +: WIDTH] = screen_read0_w;
             assign fan_w[WIDTH*1 +: WIDTH] = screen_read1_w;
             assign fan_w[WIDTH*2 +: WIDTH] = screen_read2_w;
             assign ordered_w = !fan_negative_r
                 ? {fan_w[WIDTH*2 +: WIDTH], fan_w[WIDTH*1 +: WIDTH], fan_w[WIDTH*0 +: WIDTH]}
                 : {fan_w[WIDTH*1 +: WIDTH], fan_w[WIDTH*2 +: WIDTH], fan_w[WIDTH*0 +: WIDTH]};
-            assign output_w = output_r[output_read_r];
+            assign output_w = output_head_r;
             if (field_g == 0) begin : g_x
                 assign screen_triangle_x_o = output_w;
                 for (vertex_g = 0; vertex_g < 3; vertex_g = vertex_g + 1) begin : g_vertex
@@ -355,7 +304,13 @@ module edrv32_gpu_geometry (
                 assign screen_triangle_color_o = output_w;
             end
             always @(posedge clk_i) begin
-                if (output_push_w) output_r[output_write_r] <= ordered_w;
+                // Head is the registered boundary into setup; no read-pointer mux.
+                if (output_pop_w && output_count_r == 2) output_head_r <= output_tail_r;
+                if (output_push_w) begin
+                    if (output_count_r == 0 || (output_count_r == 1 && output_pop_w))
+                        output_head_r <= ordered_w;
+                    else output_tail_r <= ordered_w;
+                end
             end
         end
     endgenerate
@@ -412,10 +367,6 @@ module edrv32_gpu_geometry (
             triangle_count_r <= 2'd0;
             triangle_read_r <= 1'b0;
             triangle_write_r <= 1'b0;
-            sending_r <= 1'b0;
-            send_phase_r <= 1'b0;
-            send_count_r <= 4'd0;
-            send_index_r <= 3'd0;
             counts_count_r <= 5'd0;
             counts_read_r <= 4'd0;
             counts_write_r <= 4'd0;
@@ -426,10 +377,9 @@ module edrv32_gpu_geometry (
             fan_r <= 1'b0;
             fan_wait_r <= 0;
             fan_index_r <= 3'd0;
+            fan_next_index_r <= 3'd1;
             fan_count_r <= 4'd0;
             output_count_r <= 2'd0;
-            output_read_r <= 1'b0;
-            output_write_r <= 1'b0;
             unit_done_o <= 1'b0;
         end else if (stop_i) begin
             configured_r <= 1'b0;
@@ -439,8 +389,6 @@ module edrv32_gpu_geometry (
             triangle_count_r <= 2'd0;
             triangle_read_r <= 1'b0;
             triangle_write_r <= 1'b0;
-            sending_r <= 1'b0;
-            send_phase_r <= 1'b0;
             counts_count_r <= 5'd0;
             counts_read_r <= 4'd0;
             counts_write_r <= 4'd0;
@@ -451,8 +399,6 @@ module edrv32_gpu_geometry (
             fan_r <= 1'b0;
             fan_wait_r <= 0;
             output_count_r <= 2'd0;
-            output_read_r <= 1'b0;
-            output_write_r <= 1'b0;
             unit_done_o <= finish_i;
         end else begin
             if (fan_wait_r != 0) fan_wait_r <= fan_wait_r - 1'b1;
@@ -481,18 +427,7 @@ module edrv32_gpu_geometry (
                     default: triangle_count_r <= triangle_count_r;
                 endcase
             end
-            if (send_phase_r) send_phase_r <= 1'b0;
-            if (project_input_valid_w && project_input_ready_w) begin
-                send_phase_r <= 1'b1;
-                if ({1'b0, send_index_r} + 4'd1 == send_count_r) sending_r <= 1'b0;
-                else send_index_r <= send_index_r + 3'd1;
-            end
-            if (polygon_accept_w) begin
-                sending_r <= 1'b1;
-                send_index_r <= 3'd0;
-                send_count_r <= polygon_count_w;
-                counts_write_r <= counts_write_r + 4'd1;
-            end
+            if (polygon_accept_w) counts_write_r <= counts_write_r + 4'd1;
             if (polygon_complete_w) counts_read_r <= counts_read_r + 4'd1;
             begin
                 case ({polygon_accept_w, polygon_complete_w})
@@ -518,6 +453,7 @@ module edrv32_gpu_geometry (
                 fan_r <= 1;
                 fan_wait_r <= 5;
                 fan_index_r <= 1;
+                fan_next_index_r <= 2;
                 fan_count_r <= screen_count_r != 0 ? screen_counts_r[screen_read_bank_r]
                     : counts_head_w;
             end
@@ -526,12 +462,14 @@ module edrv32_gpu_geometry (
                 if (fan_last_w) begin
                     fan_r <= screen_count_r > 1 || polygon_complete_w;
                     fan_index_r <= 1;
+                    fan_next_index_r <= 2;
                     fan_count_r <= screen_count_r > 1 ?
                         next_screen_count_w : counts_head_w;
-                end else fan_index_r <= fan_index_r + 1'b1;
+                end else begin
+                    fan_index_r <= fan_next_index_r;
+                    fan_next_index_r <= fan_next_index_r + 3'd1;
+                end
             end
-            if (output_push_w) output_write_r <= !output_write_r;
-            if (output_pop_w) output_read_r <= !output_read_r;
             begin
                 case ({output_push_w, output_pop_w})
                     2'b10: output_count_r <= output_count_r + 2'd1;
@@ -549,7 +487,7 @@ module edrv32_gpu_geometry (
             unused_pixel_r <= geometry_cfg_pixel_i;
             unused_wide_r <= geometry_cfg_wide_i;
         end
-        if (polygon_accept_w) counts_r[counts_write_r] <= polygon_count_w;
+        if (polygon_accept_w) counts_r[counts_write_r] <= {1'b0, polygon_index_w} + 4'd1;
         if (polygon_complete_w)
             screen_counts_r[screen_write_bank_r] <= counts_head_w;
     end

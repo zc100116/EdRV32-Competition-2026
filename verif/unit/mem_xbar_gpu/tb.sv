@@ -263,36 +263,6 @@ module tb;
     reg held_cmd_valid = 0;
     reg held_cmd_write = 0;
 
-    integer ar_start [0:4];
-    integer aw_start [0:4];
-    integer w_start [0:4];
-    integer obs_rd_txn [0:4];
-    integer obs_wr_txn [0:4];
-    integer obs_rd_beats [0:4];
-    integer obs_wr_beats [0:4];
-    integer obs_wait_sum [0:4];
-    integer obs_wait_max [0:4];
-    integer obs_urgent [0:4];
-    integer snap_rd_txn [0:4];
-    integer snap_wr_txn [0:4];
-    integer snap_rd_beats [0:4];
-    integer snap_wr_beats [0:4];
-    integer snap_wait_sum [0:4];
-    integer snap_wait_max [0:4];
-    integer snap_urgent [0:4];
-    integer obs_window = 0;
-    integer obs_busy = 0;
-    integer obs_switch = 0;
-    integer snap_window = 0;
-    integer snap_busy = 0;
-    integer snap_switch = 0;
-    integer elapsed;
-    bit obs_dir_valid = 0;
-    bit obs_dir = 0;
-    wire stat_clear = apb_psel_i && apb_penable_i && apb_pwrite_i &&
-                      apb_paddr_i == 'h110 && apb_pwdata_i[1];
-    wire stat_snapshot = apb_psel_i && apb_penable_i && apb_pwrite_i &&
-                         apb_paddr_i == 'h110 && apb_pwdata_i[0];
     function automatic [255:0] pattern(input [31:0] addr);
         pattern = {8{addr ^ 32'h96a5_c33c}};
     endfunction
@@ -347,60 +317,7 @@ module tb;
                 cfg_wr[monitor_i] = monitor_i < 2 ? 0 : monitor_i == 2 ? 1 : 2;
             end
             cfg_total = 8;
-            obs_window = 0;
-            obs_busy = 0;
-            obs_switch = 0;
-            obs_dir_valid = 0;
-            for (monitor_i = 0; monitor_i < 5; monitor_i = monitor_i + 1) begin
-                obs_rd_txn[monitor_i] = 0;
-                obs_wr_txn[monitor_i] = 0;
-                obs_rd_beats[monitor_i] = 0;
-                obs_wr_beats[monitor_i] = 0;
-                obs_wait_sum[monitor_i] = 0;
-                obs_wait_max[monitor_i] = 0;
-                obs_urgent[monitor_i] = 0;
-                ar_start[monitor_i] = 0;
-                aw_start[monitor_i] = 0;
-                w_start[monitor_i] = 0;
-            end
         end else begin
-            if (stat_snapshot) begin
-                snap_window = obs_window;
-                snap_busy = obs_busy;
-                snap_switch = obs_switch;
-                for (monitor_i = 0; monitor_i < 5; monitor_i = monitor_i + 1) begin
-                    snap_rd_txn[monitor_i] = obs_rd_txn[monitor_i];
-                    snap_wr_txn[monitor_i] = obs_wr_txn[monitor_i];
-                    snap_rd_beats[monitor_i] = obs_rd_beats[monitor_i];
-                    snap_wr_beats[monitor_i] = obs_wr_beats[monitor_i];
-                    snap_wait_sum[monitor_i] = obs_wait_sum[monitor_i];
-                    snap_wait_max[monitor_i] = obs_wait_max[monitor_i];
-                    snap_urgent[monitor_i] = obs_urgent[monitor_i];
-                end
-            end
-            if (stat_clear) begin
-                obs_window = 0;
-                obs_busy = 0;
-                obs_switch = 0;
-                for (monitor_i = 0; monitor_i < 5; monitor_i = monitor_i + 1) begin
-                    obs_rd_txn[monitor_i] = 0;
-                    obs_wr_txn[monitor_i] = 0;
-                    obs_rd_beats[monitor_i] = 0;
-                    obs_wr_beats[monitor_i] = 0;
-                    obs_wait_sum[monitor_i] = 0;
-                    obs_wait_max[monitor_i] = 0;
-                    obs_urgent[monitor_i] = 0;
-                end
-            end else begin
-                obs_window = obs_window+1;
-                if (live_downstream != 0) obs_busy = obs_busy+1;
-            end
-            for (monitor_i = 0; monitor_i < 5; monitor_i = monitor_i + 1) begin
-                if (arvalid[monitor_i] && arready[monitor_i]) ar_start[monitor_i] = cycles;
-                if (awvalid[monitor_i] && awready[monitor_i]) aw_start[monitor_i] = cycles;
-                if (wvalid[monitor_i] && wready[monitor_i] && wlast[monitor_i])
-                    w_start[monitor_i] = cycles;
-            end
             if (held_cmd_valid) begin
                 if (held_cmd_write) begin
                     if (!ddr_awvalid_o || {ddr_awid_o,ddr_awaddr_o,ddr_awlen_o} !== held_cmd)
@@ -425,18 +342,6 @@ module tb;
                 if (check_limits && (live_downstream >= cfg_total ||
                     live_reads[monitor_p] >= cfg_rd[monitor_p]))
                     $fatal(1, "FAIL read outstanding limit p%0d", monitor_p);
-                if (!stat_clear) begin
-                    elapsed = cycles-ar_start[monitor_p];
-                    obs_rd_txn[monitor_p] = obs_rd_txn[monitor_p]+1;
-                    obs_rd_beats[monitor_p] = obs_rd_beats[monitor_p]+int'(ddr_arlen_o)+1;
-                    obs_wait_sum[monitor_p] = obs_wait_sum[monitor_p]+elapsed;
-                    if (elapsed > obs_wait_max[monitor_p]) obs_wait_max[monitor_p] = elapsed;
-                    if (obs_dir_valid && obs_dir) obs_switch = obs_switch+1;
-                    // Tests only assert urgent on P0/P1; the selected command retains class.
-                    if (monitor_p < 2 && dut.cmd_urgent_r) obs_urgent[monitor_p]++;
-                end
-                obs_dir_valid = 1;
-                obs_dir = 0;
                 read_id[read_tail % 256] <= ddr_arid_o;
                 read_addr[read_tail % 256] <= ddr_araddr_o;
                 read_len[read_tail % 256] <= ddr_arlen_o;
@@ -450,18 +355,6 @@ module tb;
                 if (check_limits && (live_downstream >= cfg_total ||
                     live_writes[monitor_p] >= cfg_wr[monitor_p]))
                     $fatal(1, "FAIL write outstanding limit p%0d", monitor_p);
-                if (!stat_clear) begin
-                    elapsed = cycles-(aw_start[monitor_p] > w_start[monitor_p] ?
-                                      aw_start[monitor_p] : w_start[monitor_p]);
-                    obs_wr_txn[monitor_p] = obs_wr_txn[monitor_p]+1;
-                    obs_wr_beats[monitor_p] = obs_wr_beats[monitor_p]+int'(ddr_awlen_o)+1;
-                    obs_wait_sum[monitor_p] = obs_wait_sum[monitor_p]+elapsed;
-                    if (elapsed > obs_wait_max[monitor_p]) obs_wait_max[monitor_p] = elapsed;
-                    if (obs_dir_valid && !obs_dir) obs_switch = obs_switch+1;
-                    if (monitor_p == 1 && dut.cmd_urgent_r) obs_urgent[monitor_p]++;
-                end
-                obs_dir_valid = 1;
-                obs_dir = 1;
                 write_id[write_tail % 256] <= ddr_awid_o;
                 write_addr[write_tail % 256] <= ddr_awaddr_o;
                 write_len[write_tail % 256] <= ddr_awlen_o;
@@ -584,11 +477,6 @@ module tb;
         @(negedge clk);
         apb_psel_i = 0;
         apb_penable_i = 0;
-        if (addr == 'h100) cfg_total = int'({28'b0,value[3:0]});
-        for (integer p = 0; p < 5; p = p + 1) begin
-            if (int'(addr) == 'h200+32*p) cfg_rd[p] = int'({28'b0,value[3:0]});
-            if (int'(addr) == 'h204+32*p) cfg_wr[p] = int'({28'b0,value[3:0]});
-        end
     endtask
     task automatic apb_check(input [11:0] addr, input [31:0] value);
         @(negedge clk);
@@ -706,10 +594,10 @@ module tb;
         send_write(3,0,'h3000,1,0);
         drain;
         apb_write('h110,3);
-        apb_check('h420,1);
-        apb_check('h424,4);
-        apb_check('h474,1);
-        apb_check('h478,2);
+        apb_check('h420,0);
+        apb_check('h424,0);
+        apb_check('h474,0);
+        apb_check('h478,0);
         apb_write('h110,1);
         apb_check('h420,0);
         apb_check('h424,0);
@@ -717,341 +605,83 @@ module tb;
         apb_check('h478,0);
     endtask
 
-    // Independent scheduler instance for five-rule directed tests without FIFO traffic effects.
+    // ST-02 isolates port arbitration from FIFO traffic and response latency.
     reg s_rst_n = 0;
     reg s_enable = 0;
     reg [9:0] s_eligible = 0;
-    reg [9:0] s_blocked = 0;
-    wire [9:0] s_queued = s_eligible | s_blocked;
-    reg [49:0] s_beats = 0;
-    reg [319:0] s_wait = 0;
     reg [1:0] s_urgent = 0;
-    reg [15:0] s_starve = 256;
-    wire [9:0] s_starved;
-    wire unused_s_prepare;
-    for (genvar n = 0; n < 10; n++) begin : g_starved
-        assign s_starved[n] = s_wait[n*32 +: 32] > {16'b0, s_starve};
-    end
+    wire s_prepare;
     wire s_grant;
     wire [2:0] s_port;
     wire s_write;
-    wire s_is_urgent;
-    wire s_switch;
-    reg [7:0] s_urg_max = 8;
-    reg [7:0] s_batch = 4;
-    reg [19:0] s_weight = 0;
-    reg [44:0] s_rate = 0;
     edrv32_mem_xbar_sched_gpu scheduler (
-        .clk_i(clk),
-        .rst_n_i(s_rst_n),
-        .enable_i(s_enable),
-        .prepare_o(unused_s_prepare),
-        .candidates_i(s_eligible),
-        .queued_i(s_queued),
-        .eligible_i(s_eligible),
-        .beats_i(s_beats),
-        .starved_i(s_starved),
-        .urgent_i(s_urgent),
-        .grant_o(s_grant),
-        .port_o(s_port),
-        .write_o(s_write),
-        .urgent_o(s_is_urgent),
-        .dir_switch_o(s_switch),
-        .urg_max_i(s_urg_max),
-        .dir_batch_i(s_batch),
-        .weight_i(s_weight),
-        .rate_i(s_rate)
+        .clk_i(clk), .rst_n_i(s_rst_n), .enable_i(s_enable),
+        .prepare_o(s_prepare), .candidates_i(s_eligible), .eligible_i(s_eligible),
+        .urgent_i(s_urgent), .grant_o(s_grant), .port_o(s_port), .write_o(s_write)
     );
     task automatic scheduler_reset;
         @(negedge clk);
         s_rst_n = 0;
         s_enable = 0;
         s_eligible = 0;
-        s_blocked = 0;
-        s_wait = 0;
         s_urgent = 0;
-        s_urg_max = 8;
-        s_starve = '1;
-        s_batch = 4;
-        for (integer p = 0; p < 5; p = p + 1) begin
-            s_weight[p*4 +: 4] = p == 0 ? 4 : p == 1 ? 1 : p == 3 ? 3 : p == 4 ? 1 : 0;
-            s_rate[p*9 +: 9] = p == 2 ? 26 : p == 4 ? 13 : 0;
-            s_beats[(2*p)*5 +: 5] = 1;
-            s_beats[(2*p+1)*5 +: 5] = 1;
-        end
         tick(2);
         s_rst_n = 1;
         s_enable = 1;
     endtask
-    task automatic scheduler_smoke;
-        integer grants;
-        integer consecutive;
-        bit direction;
-        bit saw_normal;
-        bit saw_other;
-        bit saw_resumed;
-        integer urgent_streak;
-        $display("MX-01 urgent priority, bounded consecutive grants, re-arm");
-        scheduler_reset;
-        s_urgent = 1;
-        s_urg_max = 2;
-        s_weight[0 +: 4] = 0;
-        s_eligible[0] = 1;
-        s_eligible[6] = 1;
-        grants = 0;
-        while (grants < 8) begin
-            @(posedge clk);
-            if (s_grant) begin
-                if (s_port !== (grants % 3 == 2 ? 3'd3 : 3'd0))
-                    $fatal(1,"FAIL urgent sequence grant=%0d port=%0d",grants,s_port);
-                if (s_is_urgent !== (s_port == 0)) $fatal(1,"FAIL urgent accounting");
-                grants = grants + 1;
-            end
-            @(negedge clk);
-        end
-        // Reaching URG_MAX removes only class-1 priority, not normal DRR eligibility.
-        scheduler_reset;
-        s_urgent = 1;
-        s_urg_max = 2;
-        s_eligible[0] = 1;
-        s_eligible[6] = 1;
-        saw_normal = 0;
-        saw_other = 0;
-        saw_resumed = 0;
-        urgent_streak = 0;
-        for (integer i = 0; i < 200; i = i + 1) begin
-            @(posedge clk);
-            if (s_grant) begin
-                if (s_port != 0) begin
-                    urgent_streak = 0;
-                    saw_other = 1;
-                end else if (s_is_urgent) begin
-                    urgent_streak++;
-                    if (urgent_streak > 2) $fatal(1,"FAIL urgent streak exceeded");
-                    if (saw_other) saw_resumed = 1;
-                end else saw_normal = 1;
-            end
-            @(negedge clk);
-        end
-        if (!saw_normal || !saw_other || !saw_resumed)
-            $fatal(1,"FAIL urgent/DRR interaction not exercised");
-        scheduler_reset;
-        s_urgent = 3;
-        s_eligible[0] = 1;
-        s_eligible[2] = 1;
-        grants = 0;
-        while (grants < 8) begin
-            @(posedge clk);
-            if (s_grant) begin
-                if (!s_is_urgent || s_port !== 3'(grants % 2))
-                    $fatal(1,"FAIL urgent tie rotation");
-                grants++;
-            end
-            @(negedge clk);
-        end
-        $display("MX-05 direction batching");
-        scheduler_reset;
-        s_batch = 3;
-        s_weight[3*4 +: 4] = 15;
-        s_weight[4*4 +: 4] = 15;
-        s_eligible[6] = 1;
-        s_eligible[9] = 1;
-        grants = 0;
-        consecutive = 0;
-        direction = 1;
-        while (grants < 30) begin
-            @(posedge clk);
-            if (s_grant) begin
-                if (grants != 0 && s_write != direction) begin
-                    if (consecutive != 3) $fatal(1,"FAIL short direction batch %0d",consecutive);
-                    consecutive = 0;
-                end
-                direction = s_write;
-                consecutive = consecutive + 1;
-                if (consecutive > 3) $fatal(1,"FAIL direction batch exceeded");
-                grants = grants + 1;
-            end
-            @(negedge clk);
-        end
-        scheduler_reset;
-        s_starve = 8;
-        s_eligible = 0;
-        s_eligible[6] = 1;
-        s_eligible[8] = 1;
-        s_wait[6*32 +: 32] = 1000;
-        s_wait[8*32 +: 32] = 100;
-        grants = 0;
-        while (grants < 9) begin
-            @(posedge clk);
-            if (s_grant) begin
-                if (s_port !== 3'(3+grants%2))
-                    $fatal(1,"FAIL rotating starvation grant=%0d p%0d",grants,s_port);
-                grants++;
-            end
-            @(negedge clk);
-        end
-        s_enable = 0;
+    task automatic expect_grant(input integer port, input bit write_dir);
+        @(posedge clk);
+        while (!s_grant) @(posedge clk);
+        if (s_port !== 3'(port) || s_write !== write_dir)
+            $fatal(1,"FAIL ST-02 got P%0d write=%b expected P%0d write=%b at %0t",
+                s_port,s_write,port,write_dir,$time);
+        @(negedge clk);
     endtask
-
-    task automatic scheduler_full;
-        integer grants;
-        integer granted [0:4];
-        integer cost;
-        integer selected_queue;
-        integer age;
-        integer total;
-        integer expected;
-        integer delta;
-        reg [31:0] lfsr;
-        $display("MX-02 fixed-point token rate over 50000 cycles");
+    task automatic scheduler_smoke;
         scheduler_reset;
-        s_eligible[4] = 1;
-        s_eligible[6] = 1;
-        s_eligible[8] = 1;
-        for (integer p = 0; p < 5; p = p + 1) granted[p] = 0;
-        for (integer cycle = 0; cycle < 50000; cycle = cycle + 1) begin
-            @(posedge clk);
-            if (s_grant) granted[s_port] = granted[s_port] + 1;
-            @(negedge clk);
-        end
-        for (integer p = 2; p <= 4; p = p + 2) begin
-            expected = 50000*(p == 2 ? 26 : 13)/256;
-            delta = granted[p] > expected ? granted[p]-expected : expected-granted[p];
-            if (100*delta > 2*expected) $fatal(1,"FAIL token rate p%0d %0d expected%0d",
-                                             p,granted[p],expected);
-        end
-        $display("MX-03 starvation overrides zero DRR weight");
-        scheduler_reset;
-        s_starve = 8;
-        s_weight[4*4 +: 4] = 0;
-        s_rate[4*9 +: 9] = 0;
-        s_eligible[6] = 1;
-        s_eligible[8] = 1;
-        age = 0;
-        begin : wait_starve
-            for (integer cycle = 0; cycle < 12; cycle = cycle + 1) begin
-                @(posedge clk);
-                if (s_grant && s_port == 4) begin
-                    if (age <= 8 || age > 10) $fatal(1,"FAIL starvation age %0d",age);
-                    disable wait_starve;
-                end
-                @(negedge clk);
-                age = age + 1;
-                s_wait[8*32 +: 32] = 32'(age);
-            end
-            $fatal(1,"FAIL starvation never granted");
-        end
-        $display("MX-04 global capacity full does not refill any deficit");
-        scheduler_reset;
+        s_eligible = 10'b0101010101;
+        s_urgent = 3;
+        repeat (12) expect_grant(0,0); // No URG_MAX throttling.
+        s_eligible[0] = 0; // Capacity/credit-blocked P0 does not participate.
+        repeat (3) expect_grant(1,0);
+        s_urgent = 0;
+        repeat (3) expect_grant(2,0);
+        s_eligible[4] = 0;
         s_eligible[0] = 1;
-        @(posedge clk);
-        @(negedge clk);
-        // Capacity closes after prepare; queued heads remain, but none can grant.
-        s_eligible = 0;
-        s_blocked = 10'h3ff;
-        repeat (8) begin
-            @(posedge clk);
-            @(negedge clk);
-            for (integer p = 0; p < 5; p = p + 1)
-                if (scheduler.deficit_r[p] != 0)
-                    $fatal(1,"FAIL full global capacity changed deficit p%0d",p);
+        repeat (3) begin
+            expect_grant(0,0);
+            expect_grant(1,0);
+            expect_grant(3,0);
+            expect_grant(4,0);
         end
-        $display("MX-04 retain one round while a queued head is capacity blocked");
+        // Urgent and CPU grants leave the rotating cursor unchanged.
+        expect_grant(0,0);
+        s_urgent = 1;
+        expect_grant(0,0);
+        s_urgent = 0;
+        s_eligible[4] = 1;
+        expect_grant(2,0);
+        s_eligible[4] = 0;
+        expect_grant(1,0);
+        s_eligible[6] = 0;
+        expect_grant(4,0);
+        expect_grant(0,0);
+        // Independent direction history per port; first contested choice is read.
         scheduler_reset;
-        s_eligible[6] = 1;
-        s_blocked[0] = 1;
-        grants = 0;
-        // Four P3 rounds would wrap an unconditional 8-bit P0 accumulation to zero.
-        while (grants < 145) begin
-            @(posedge clk);
-            if (s_grant) begin
-                if (s_port != 3) $fatal(1,"FAIL blocked DRR port granted");
-                grants++;
-            end
-        end
-        @(negedge clk);
-        s_eligible = 1;
-        s_blocked = 0;
-        @(posedge clk);
-        @(negedge clk);
-        if (!s_grant || s_port != 0)
-            $fatal(1,"FAIL capacity-blocked DRR head lost its round credit");
-        $display("MX-04 variable-length DRR weighted beat shares");
-        scheduler_reset;
-        s_eligible = 10'b01_01_00_01_01;
-        s_rate[4*9 +: 9] = 256;
-        lfsr = 32'h57c2_a913;
-        for (integer p = 0; p < 5; p = p + 1) begin
-            granted[p] = 0;
-            s_beats[(p*2)*5 +: 5] = 5'(p+1);
-            s_beats[(p*2+1)*5 +: 5] = 5'(p+1);
-        end
-        for (integer cycle = 0; cycle < 100000; cycle = cycle + 1) begin
-            @(posedge clk);
-            if (s_grant) begin
-                selected_queue = int'(s_port)*2+int'(s_write);
-                cost = int'(s_beats[selected_queue*5 +: 5]);
-                granted[s_port] = granted[s_port]+cost;
-                @(negedge clk);
-                lfsr = {lfsr[30:0],lfsr[31]^lfsr[21]^lfsr[1]^lfsr[0]};
-                s_beats[selected_queue*5 +: 5] = {1'b0,lfsr[3:0]}+5'd1;
-            end else @(negedge clk);
-        end
-        total = 0;
-        for (integer p = 0; p < 5; p = p + 1) total = total + granted[p];
-        for (integer p = 0; p < 5; p = p + 1) begin
-            if (p != 2) begin
-                expected = total*(p == 0 ? 4 : p == 1 ? 1 : p == 3 ? 3 : p == 4 ? 1 : 0)/9;
-                delta = granted[p] > expected ? granted[p]-expected : expected-granted[p];
-                if (100*delta > 5*expected) $fatal(1,"FAIL DRR p%0d got%0d expected%0d",
-                                                 p,granted[p],expected);
-            end
-        end
+        s_eligible = 10'b0011000000;
+        repeat (3) begin expect_grant(3,0); expect_grant(3,1); end
+        s_eligible = 10'b0000110000;
+        repeat (3) begin expect_grant(2,0); expect_grant(2,1); end
         s_enable = 0;
+        $display("PASS ST-02 urgent/CPU/rotation/blocked/direction sequences");
     endtask
     task automatic crossbar_smoke;
         integer before_count;
-        $display("MX-11 all parameter reset values, public layout and runtime writes");
+        $display("MX-11 common registers and fixed limits");
         reset;
         apb_check('h000, 'h0008_0001);
         apb_check('h004, 0);
         apb_check('h008, 2);
-        apb_check('h100, 8);
-        apb_write('h100,32'hffff_fff8);
-        apb_check('h100,8);
-        apb_write('h264,32'hffff_fff4);
-        apb_check('h264,4);
-        apb_check('h104, 8);
-        apb_check('h108, 256);
-        apb_check('h10c, 4);
-        apb_check('h020, 0);
-        apb_check('h040, 0);
-        apb_check('h7fc, 0);
-        for (integer p = 0; p < 5; p = p + 1) begin
-            apb_check(12'('h200+32*p), 32'(cfg_rd[p]));
-            apb_check(12'('h204+32*p), 32'(cfg_wr[p]));
-            apb_check(12'('h208+32*p), p == 0 ? 4 : p == 2 ? 0 :
-                      p == 3 ? 3 : 1);
-            apb_check(12'('h20c+32*p), p == 2 ? 26 : p == 4 ? 13 : 0);
-            apb_check(12'('h400+32*p), 0);
-        end
-        apb_write('h108, 32'hffff_0400);
-        apb_check('h108, 1024);
-        apb_write('h104, 32'hffff_0003);
-        apb_check('h104, 3);
-        apb_write('h10c, 32'hffff_0002);
-        apb_check('h10c, 2);
-        apb_write('h288, 32'hffff_fff7);
-        apb_check('h288, 7);
-        apb_write('h28c, 32'hffff_fe4d);
-        apb_check('h28c, 77);
-        apb_write('h28c, 13);
-        apb_write('h260, 32'hffff_fff0); // P3 reads disabled while the queue is occupied.
-        send_read(3, 1, 'h5000, 3, 0);
-        tick(12);
-        if (ar_seen != 0) $fatal(1,"FAIL disabled port granted");
-        apb_write('h260, 2);
-        drain;
         for (integer p = 0; p < 5; p = p + 1) begin
             send_read(p, 1, 32'('h10000+p*'h1000), p+1, 0);
             if (p > 1) send_write(p, 1, 32'('h20000+p*'h1000), p, 0);
@@ -1082,7 +712,7 @@ module tb;
         send_write(4,1,'h6000,15,0);
         drain;
 
-        $display("MX-06 global outstanding limit and runtime shrink");
+        $display("MX-06 fixed global outstanding limit");
         reset;
         return_reads = 0;
         for (integer i = 0; i < 4; i = i + 1) begin
@@ -1093,9 +723,6 @@ module tb;
         send_read(4,0,'h4000,0,0);
         tick(6);
         if (ar_seen != 8) $fatal(1,"FAIL global limit");
-        apb_write('h100,2);
-        tick(4);
-        if (ar_seen != 8) $fatal(1,"FAIL shrink accepted extra work");
         return_reads = 1;
         drain;
         if (ar_seen != 9) $fatal(1,"FAIL global recovery");
@@ -1108,37 +735,18 @@ module tb;
         send_read(3,0,'h3100,0,0);
         tick(12);
         if (ar_seen != 4) $fatal(1,"FAIL port read limit");
-        apb_write('h260,1);
-        tick(8);
-        if (ar_seen != 4) $fatal(1,"FAIL shrinking read limit");
         rready[3] = 1;
         drain;
         reset;
-        apb_write('h264,4);
         bready[3] = 0;
-        for (integer i = 0; i < 4; i = i + 1)
+        for (integer i = 0; i < 2; i = i + 1)
             send_write(3,1'(i%2),32'('h1000+i*32),0,0);
         send_write(3,0,'h1100,0,0);
         tick(12);
-        if (aw_seen != 4) $fatal(1,"FAIL port write limit");
-        apb_write('h264,1);
-        tick(6);
-        if (aw_seen != 4) $fatal(1,"FAIL shrinking write limit");
+        if (aw_seen != 2 || dut.b_count_r[3] != 2)
+            $fatal(1,"FAIL fixed write limit/B FIFO retention");
         bready[3] = 1;
         drain;
-
-        reset;
-        apb_write('h264,8);
-        bready[3] = 0;
-        for (integer i = 0; i < 8; i = i + 1)
-            send_write(3,1'(i%2),32'('h1000+i*32),0,0);
-        send_write(3,1,'h1200,0,0);
-        tick(16);
-        if (aw_seen != 8 || dut.b_count_r[3] != 8)
-            $fatal(1,"FAIL full eight-entry B FIFO");
-        bready[3] = 1;
-        drain;
-
         // Distinct IDs return in reverse order; the model's indexed read selector
         // avoids changing a queue array from two procedural writers.
         reset;
@@ -1225,177 +833,16 @@ module tb;
         end
         injected_resp = 0;
     endtask
-    task automatic compare_snapshot;
-        for (integer p = 0; p < 5; p = p + 1) begin
-            apb_check(12'('h400+32*p),32'(snap_rd_txn[p]));
-            apb_check(12'('h404+32*p),32'(snap_rd_beats[p]));
-            apb_check(12'('h414+32*p),32'(snap_wr_txn[p]));
-            apb_check(12'('h418+32*p),32'(snap_wr_beats[p]));
-            apb_check(12'('h408+32*p),32'(snap_wait_max[p]));
-            apb_check(12'('h40c+32*p),32'(snap_wait_sum[p]));
-            apb_check(12'('h410+32*p),32'(snap_urgent[p]));
-        end
-        apb_check('h500,32'(snap_switch));
-        apb_check('h504,32'(snap_busy));
-        apb_check('h508,32'(snap_window));
-    endtask
-    task automatic statistics_carry;
-        $display("MX-10 X-F1 upper-half carry preserves registered counters and snapshots");
-        reset;
-        @(negedge clk);
-        dut.u_regs.g_stat_idx[0].bank_rd_txn_r = 32'h0000_fffe;
-        dut.u_regs.g_stat_idx[0].bank_rd_beat_r = 32'h0000_fffe;
-        dut.u_regs.g_stat_idx[3].bank_wr_txn_r = 32'h0000_fffe;
-        dut.u_regs.g_stat_idx[3].bank_wr_beat_r = 32'h0000_fffe;
-        dut.u_regs.g_stat_idx[0].bank_wait_sum_r = 32'h0000_fffe;
-        dut.u_regs.g_stat_idx[0].bank_urg_cnt_r = 32'h0000_fffe;
-        dut.u_regs.dir_switch_r = 32'h0000_fffe;
-        dut.u_regs.ds_busy_r = 32'h0000_fffe;
-        dut.u_regs.window_cyc_r = 32'h0000_fffe;
-        obs_rd_txn[0] = 'hfffe;
-        obs_rd_beats[0] = 'hfffe;
-        obs_wr_txn[3] = 'hfffe;
-        obs_wr_beats[3] = 'hfffe;
-        obs_wait_sum[0] = 'hfffe;
-        obs_urgent[0] = 'hfffe;
-        obs_switch = 'hfffe;
-        obs_busy = 'hfffe;
-        // Injection sets the live counter; the reference remains one event ahead.
-        obs_window = 'hffff;
-        urgent[0] = 1;
-        send_read(0,0,'h1000,3,0);
-        drain;
-        send_read(0,1,'h2000,3,0);
-        drain;
-        send_write(3,0,'h3000,0,0);
-        drain;
-        send_write(3,1,'h3800,1,0);
-        drain;
-        send_read(3,0,'h4000,0,0);
-        drain;
-        apb_write('h110,3);
-        compare_snapshot;
-        apb_write('h110,1);
-        compare_snapshot;
-    endtask
-
-    task automatic statistics_full;
-        $display("MX-10 handshake counters, wait timestamps, atomic snapshots and CLEAR");
-        reset;
-        apb_write('h110,2);
-        urgent = 3;
-        send_read(0,1,'h1000,15,0);
-        send_read(1,1,'h1800,3,0);
-        send_aw(3,0,'h2000,7,0);
-        tick(12); // W-late time must not enter WAIT statistics.
-        send_w(3,'h2000,7,2);
-        ddr_arready_i = 0;
-        send_read(3,0,'h3000,3,0);
-        tick(10); // Downstream address backpressure must enter WAIT.
-        ddr_arready_i = 1;
-        drain;
-        urgent = 0;
-        send_read(3,0,'h8000,2,0);
-        drain;
-        send_write(3,0,'h9000,4,0);
-        drain;
-        send_read(3,1,'ha000,0,0);
-        drain;
-        send_write(3,1,'hb000,1,0);
-        drain;
-        for (integer p = 2; p < 5; p = p + 1) begin
-            send_read(p,1,32'('h10000+p*'h1000),p,0);
-            send_write(p,0,32'('h20000+p*'h1000),p+1,0);
-        end
-        drain;
-        apb_write('h110,1);
-        compare_snapshot;
-        send_read(4,0,'h50000,0,0);
-        drain;
-        compare_snapshot; // Read registers remain stable until another SNAPSHOT.
-        apb_write('h110,3);
-        compare_snapshot;
-        apb_write('h110,1);
-        compare_snapshot;
-        for (integer p = 0; p < 5; p = p + 1) begin
-            if (snap_rd_txn[p] != 0 || snap_rd_beats[p] != 0 ||
-                snap_wr_txn[p] != 0 || snap_wr_beats[p] != 0 || snap_wait_sum[p] != 0 ||
-                snap_wait_max[p] != 0 || snap_urgent[p] != 0)
-                $fatal(1,"FAIL clear p%0d",p);
-        end
-        reset;
-        apb_write('h260,0);
-        apb_write('h108,65535);
-        send_read(3,0,'h3000,0,0);
-        @(negedge clk);
-        dut.ar_wait_r[3] = 16'hfffe;
-        tick(4);
-        if (dut.ar_wait_r[3] !== 16'hffff || dut.ar_starved_r[3])
-            $fatal(1,"FAIL 16-bit wait saturation");
-        apb_write('h108,0);
-        tick(2);
-        if (!dut.ar_starved_r[3]) $fatal(1,"FAIL saturated head starvation update");
-        apb_write('h260,4);
-        drain;
-        apb_write('h110,1);
-        apb_check('h468,65535);
-        apb_check('h46c,65535);
-        $display("MX-10 saturating counters via testbench initial-value injection");
-        reset;
-        // No RTL test parameters: inject real counter state while the clock is low.
-        @(negedge clk);
-        dut.u_regs.g_stat_idx[0].bank_rd_txn_r = 32'hffff_fffe;
-        dut.u_regs.g_stat_idx[0].bank_rd_beat_r = 32'hffff_fffe;
-        dut.u_regs.g_stat_idx[3].bank_wr_txn_r = 32'hffff_fffe;
-        dut.u_regs.g_stat_idx[3].bank_wr_beat_r = 32'hffff_fffe;
-        dut.u_regs.g_stat_idx[0].bank_wait_sum_r = 32'hffff_fffe;
-        dut.u_regs.g_stat_idx[0].bank_wait_max_r = 16'hffff;
-        dut.u_regs.g_stat_idx[0].bank_urg_cnt_r = 32'hffff_fffe;
-        dut.u_regs.dir_switch_r = 32'hffff_fffe;
-        dut.u_regs.ds_busy_r = 32'hffff_fffe;
-        dut.u_regs.window_cyc_r = 32'hffff_fffe;
-        urgent[0] = 1;
-        send_read(0,0,'h1000,3,0);
-        send_read(0,1,'h2000,3,0);
-        send_write(3,0,'h3000,0,0);
-        send_write(3,1,'h3800,1,0);
-        send_read(3,0,'h4000,0,0);
-        drain;
-        apb_write('h110,1);
-        apb_check('h400,32'hffff_ffff);
-        apb_check('h404,32'hffff_ffff);
-        apb_check('h474,32'hffff_ffff);
-        apb_check('h478,32'hffff_ffff);
-        apb_check('h408,32'h0000_ffff);
-        apb_check('h40c,32'hffff_ffff);
-        apb_check('h410,32'hffff_ffff);
-        apb_check('h500,32'hffff_ffff);
-        apb_check('h504,32'hffff_ffff);
-        apb_check('h508,32'hffff_ffff);
-        apb_write('h110,2);
-        apb_write('h110,1);
-        apb_check('h400,0);
-        apb_check('h404,0);
-        apb_check('h474,0);
-        apb_check('h478,0);
-        apb_check('h408,0);
-        apb_check('h40c,0);
-        apb_check('h410,0);
-        apb_check('h500,0);
-        apb_check('h504,0);
-    endtask
-
-    // gpu-soc-testplan ST-02: all port/local IDs, removed register banks and ETH rate.
+    // ST-02: all port/local IDs and every removed register word.
     task automatic gpu_mapping;
-        integer start_cycle;
-        integer cycles;
         reset;
-        for (integer p = 5; p < 7; p++) begin
-            for (integer offset = 0; offset < 32; offset += 4) begin
-                apb_write(12'('h200+32*p+offset),32'hffffffff);
-                apb_check(12'('h200+32*p+offset),0);
-                apb_check(12'('h400+32*p+offset),0);
-            end
+        for (integer offset = 'h100; offset <= 'h110; offset += 4) begin
+            apb_write(12'(offset),'1);
+            apb_check(12'(offset),0);
+        end
+        for (integer offset = 'h200; offset <= 'h508; offset += 4) begin
+            apb_write(12'(offset),'1);
+            apb_check(12'(offset),0);
         end
         for (integer p = 0; p < 5; p++) begin
             for (integer id = 0; id < 2; id++) begin
@@ -1404,31 +851,14 @@ module tb;
             end
         end
         drain;
-        // Existing data/ID scoreboards check every downstream ID and upstream response.
         if (ar_seen != 10 || aw_seen != 6) $fatal(1,"FAIL ST-02 mapping counts");
         for (integer p = 0; p < 5; p++) begin
             send_read(p,1'b1,32'('h30001+p*4096),0,1);
             drain;
             apb_check('h120,32'(p));
         end
-        reset;
-        apb_write('h108,65535);
-        start_cycle = obs_window;
-        for (integer i = 0; i < 512; i++)
-            send_read(4,1'(i),32'('h40000+(i%8)*512),0,0);
-        drain;
-        cycles = obs_window-start_cycle;
-        // Bucket starts at 32 beats: compare steady-state beats against 13/256 per cycle.
-        if ((512-32)*256*100 < cycles*13*98 ||
-            (512-32)*256*100 > cycles*13*102)
-            $fatal(1,"FAIL ST-02 ETH rate cycles=%0d beats=512",cycles);
-        apb_write('h110,1);
-        apb_check('h480,512);
-        apb_check('h4a0,0);
-        apb_check('h4c0,0);
-        $display("ST-02 mapping=5 ports local_ids=2 ETH_beats=512 cycles=%0d",cycles);
+        scheduler_smoke;
     endtask
-
     initial begin
         awid = 0;
         awaddr = 'x;
@@ -1458,9 +888,9 @@ module tb;
             gpu_mapping;
         end else if (FULL != 0) begin
             reset;
-            scheduler_full;
-            statistics_carry;
-            statistics_full;
+            scheduler_smoke;
+            crossbar_smoke;
+            gpu_mapping;
         end else begin
             error_pipeline;
             scheduler_smoke;

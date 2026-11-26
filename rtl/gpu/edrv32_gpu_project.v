@@ -404,6 +404,28 @@ module edrv32_gpu_project (
     reg read_r;
     reg write_r;
     wire enable_w;
+    // Independent occupancy replicas keep the common datapath CE local (microarch 4.14).
+    wire [2:0] control_enable_w;
+    genvar control_region;
+    generate
+        for (control_region = 0; control_region < 3;
+            control_region = control_region + 1) begin : g_control_enable
+            (* keep = "true", syn_preserve = 1 *) reg [1:0] occupancy_r;
+            assign control_enable_w[control_region] = occupancy_r != 2 && !stop_i;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) occupancy_r <= 0;
+                else if (stop_i) occupancy_r <= 0;
+                else begin
+                    case ({push_w, pop_w})
+                        2'b10: occupancy_r <= occupancy_r + 2'd1;
+                        2'b01: occupancy_r <= occupancy_r - 2'd1;
+                        default: occupancy_r <= occupancy_r;
+                    endcase
+                end
+            end
+        end
+    endgenerate
+
     wire accept_w;
     wire push_w;
     wire pop_w;
@@ -438,7 +460,7 @@ module edrv32_gpu_project (
             read_r <= 0;
             write_r <= 0;
         end else begin
-            if (enable_w) begin
+            if (control_enable_w[0]) begin
                 valid_r <= {valid_r[48:0], reciprocal_valid_w};
                 input_valid_r <= {input_valid_r[22:0], accept_w};
             end
@@ -454,7 +476,7 @@ module edrv32_gpu_project (
     edrv32_gpu_project_recip u_reciprocal (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .enable_i(enable_w),
+        .enable_i(control_enable_w[1]),
         .stop_i(stop_i),
         .value_valid_i(accept_w),
         .value_i(clipped_data_i[159:120]),
@@ -467,17 +489,17 @@ module edrv32_gpu_project (
     assign input_delay_read_w = input_delay_write_r - 6'd23;
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) input_delay_write_r <= 0;
-        else if (enable_w) input_delay_write_r <= input_delay_write_r + 1'b1;
+        else if (control_enable_w[2]) input_delay_write_r <= input_delay_write_r + 1'b1;
     end
     wire [71:0] u_input_delay_0_data_w;
     reg [71:0] u_input_delay_0_data_r;
     assign unused_input_delay_w[0 +: 72] = u_input_delay_0_data_r;
     always @(posedge clk_i) begin
-        if (enable_w) u_input_delay_0_data_r <= u_input_delay_0_data_w;
+        if (control_enable_w[0]) u_input_delay_0_data_r <= u_input_delay_0_data_w;
     end
     edrv32_ram_gpu_table u_input_delay_0 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i(input_prefix_w[0 +: 72]),
         .rd_addr_i(input_delay_read_w),
@@ -487,11 +509,11 @@ module edrv32_gpu_project (
     reg [71:0] u_input_delay_1_data_r;
     assign unused_input_delay_w[72 +: 72] = u_input_delay_1_data_r;
     always @(posedge clk_i) begin
-        if (enable_w) u_input_delay_1_data_r <= u_input_delay_1_data_w;
+        if (control_enable_w[2]) u_input_delay_1_data_r <= u_input_delay_1_data_w;
     end
     edrv32_ram_gpu_table u_input_delay_1 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i(input_prefix_w[72 +: 72]),
         .rd_addr_i(input_delay_read_w),
@@ -501,11 +523,11 @@ module edrv32_gpu_project (
     reg [71:0] u_input_delay_2_data_r;
     assign unused_input_delay_w[144 +: 72] = u_input_delay_2_data_r;
     always @(posedge clk_i) begin
-        if (enable_w) u_input_delay_2_data_r <= u_input_delay_2_data_w;
+        if (control_enable_w[0]) u_input_delay_2_data_r <= u_input_delay_2_data_w;
     end
     edrv32_ram_gpu_table u_input_delay_2 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[2]),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i(input_prefix_w[144 +: 72]),
         .rd_addr_i(input_delay_read_w),
@@ -515,11 +537,11 @@ module edrv32_gpu_project (
     reg [71:0] u_input_delay_3_data_r;
     assign unused_input_delay_w[216 +: 72] = u_input_delay_3_data_r;
     always @(posedge clk_i) begin
-        if (enable_w) u_input_delay_3_data_r <= u_input_delay_3_data_w;
+        if (control_enable_w[0]) u_input_delay_3_data_r <= u_input_delay_3_data_w;
     end
     edrv32_ram_gpu_table u_input_delay_3 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i({64'b0, input_prefix_w[223:216]}),
         .rd_addr_i(input_delay_read_w),
@@ -536,7 +558,7 @@ module edrv32_gpu_project (
                 : (field_g < 5 ? 120 + (field_g - 3) * 16 : 152 + (field_g - 5) * 24);
             reg [WIDTH-1:0] prefix_r;
             always @(posedge clk_i) begin
-                if (enable_w) prefix_r <= clipped_data_i[INPUT_OFFSET +: WIDTH];
+                if (control_enable_w[2]) prefix_r <= clipped_data_i[INPUT_OFFSET +: WIDTH];
             end
             assign input_prefix_w[RAM_OFFSET +: WIDTH] = prefix_r;
             if (field_g < 3) begin : g_position
@@ -2372,10 +2394,10 @@ module edrv32_gpu_project (
     assign viewport_size0_tags_read_w = input_delay_write_r[5:0] - 6'd22;
     edrv32_ram_gpu_read_pool u_viewport_size0_tags (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r[5:0]),
         .wr_data_i({240'b0, viewport_size0_r}),
-        .rd_en_i(enable_w),
+        .rd_en_i(control_enable_w[0]),
         .rd_addr_i(viewport_size0_tags_read_w),
         .rd_data_o(unused_viewport_size0_tags_data_w)
     );
@@ -2388,10 +2410,10 @@ module edrv32_gpu_project (
     assign viewport_size1_tags_read_w = input_delay_write_r[5:0] - 6'd26;
     edrv32_ram_gpu_read_pool u_viewport_size1_tags (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[2]),
         .wr_addr_i(input_delay_write_r[5:0]),
         .wr_data_i({240'b0, viewport_size1_r}),
-        .rd_en_i(enable_w),
+        .rd_en_i(control_enable_w[0]),
         .rd_addr_i(viewport_size1_tags_read_w),
         .rd_data_o(unused_viewport_size1_tags_data_w)
     );
@@ -2404,16 +2426,17 @@ module edrv32_gpu_project (
     assign viewport_offset0_tags_read_w = input_delay_write_r[5:0] - 6'd41;
     edrv32_ram_gpu_read_pool u_viewport_offset0_tags (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r[5:0]),
         .wr_data_i({240'b0, viewport_offset0_r}),
-        .rd_en_i(enable_w),
+        .rd_en_i(control_enable_w[2]),
         .rd_addr_i(viewport_offset0_tags_read_w),
         .rd_data_o(unused_viewport_offset0_tags_data_w)
     );
     reg [0:0] viewport_offset0_tags_d43_r;
     always @(posedge clk_i) begin
-        if (enable_w) viewport_offset0_tags_d43_r <= unused_viewport_offset0_tags_data_w[15];
+        if (control_enable_w[0])
+            viewport_offset0_tags_d43_r <= unused_viewport_offset0_tags_data_w[15];
     end
     wire [15:0] viewport_offset0_tags_d42_w;
     assign viewport_offset0_tags_d42_w = unused_viewport_offset0_tags_data_w[15:0];
@@ -2427,16 +2450,17 @@ module edrv32_gpu_project (
     assign viewport_offset1_tags_read_w = input_delay_write_r[5:0] - 6'd45;
     edrv32_ram_gpu_read_pool u_viewport_offset1_tags (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r[5:0]),
         .wr_data_i({240'b0, viewport_offset1_r}),
-        .rd_en_i(enable_w),
+        .rd_en_i(control_enable_w[2]),
         .rd_addr_i(viewport_offset1_tags_read_w),
         .rd_data_o(unused_viewport_offset1_tags_data_w)
     );
     reg [0:0] viewport_offset1_tags_d47_r;
     always @(posedge clk_i) begin
-        if (enable_w) viewport_offset1_tags_d47_r <= unused_viewport_offset1_tags_data_w[15];
+        if (control_enable_w[0])
+            viewport_offset1_tags_d47_r <= unused_viewport_offset1_tags_data_w[15];
     end
     wire [15:0] viewport_offset1_tags_d46_w;
     assign viewport_offset1_tags_d46_w = unused_viewport_offset1_tags_data_w[15:0];
@@ -2455,11 +2479,11 @@ module edrv32_gpu_project (
     reg [71:0] u_payload_delay0_data_r;
     assign unused_payload_delay0_data_w = u_payload_delay0_data_r;
     always @(posedge clk_i) begin
-        if (enable_w) u_payload_delay0_data_r <= u_payload_delay0_data_w;
+        if (control_enable_w[0]) u_payload_delay0_data_r <= u_payload_delay0_data_w;
     end
     edrv32_ram_gpu_table u_payload_delay0 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[2]),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i(color_input_w),
         .rd_addr_i(payload_delay0_read_w),
@@ -2478,11 +2502,11 @@ module edrv32_gpu_project (
     reg [71:0] u_payload_delay1_data_r;
     assign unused_payload_delay1_data_w = u_payload_delay1_data_r;
     always @(posedge clk_i) begin
-        if (enable_w) u_payload_delay1_data_r <= u_payload_delay1_data_w;
+        if (control_enable_w[0]) u_payload_delay1_data_r <= u_payload_delay1_data_w;
     end
     edrv32_ram_gpu_table u_payload_delay1 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i({uv_input1_r, uv_input0_r, position_input0_r}),
         .rd_addr_i(payload_delay1_read_w),
@@ -2497,11 +2521,11 @@ module edrv32_gpu_project (
     reg [71:0] u_payload_delay2_data_r;
     assign unused_payload_delay2_data_w = u_payload_delay2_data_r;
     always @(posedge clk_i) begin
-        if (enable_w) u_payload_delay2_data_r <= u_payload_delay2_data_w;
+        if (control_enable_w[2]) u_payload_delay2_data_r <= u_payload_delay2_data_w;
     end
     edrv32_ram_gpu_table u_payload_delay2 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i({32'b0, position_input1_r}),
         .rd_addr_i(payload_delay2_read_w),
@@ -2516,11 +2540,11 @@ module edrv32_gpu_project (
     reg [71:0] u_payload_delay3_data_r;
     assign unused_payload_delay3_data_w = u_payload_delay3_data_r;
     always @(posedge clk_i) begin
-        if (enable_w) u_payload_delay3_data_r <= u_payload_delay3_data_w;
+        if (control_enable_w[0]) u_payload_delay3_data_r <= u_payload_delay3_data_w;
     end
     edrv32_ram_gpu_table u_payload_delay3 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[2]),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i({32'b0, position_input2_r}),
         .rd_addr_i(payload_delay3_read_w),
@@ -2533,10 +2557,10 @@ module edrv32_gpu_project (
     assign depth_clamp_d35_align6_r = unused_payload_delay4_data_w[0 +: 16];
     edrv32_ram_gpu_read_pool u_payload_delay4 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r[5:0]),
         .wr_data_i({240'b0, depth_clamp_r}),
-        .rd_en_i(enable_w),
+        .rd_en_i(control_enable_w[0]),
         .rd_addr_i(payload_delay4_read_w),
         .rd_data_o(unused_payload_delay4_data_w)
     );
@@ -2547,10 +2571,10 @@ module edrv32_gpu_project (
     assign restored_d35_align14_r = unused_payload_delay5_data_w[0 +: 35];
     edrv32_ram_gpu_read_pool u_payload_delay5 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[2]),
         .wr_addr_i(input_delay_write_r[5:0]),
         .wr_data_i({221'b0, restored_r}),
-        .rd_en_i(enable_w),
+        .rd_en_i(control_enable_w[0]),
         .rd_addr_i(payload_delay5_read_w),
         .rd_data_o(unused_payload_delay5_data_w)
     );
@@ -2563,10 +2587,10 @@ module edrv32_gpu_project (
     assign uv_product1_p2_d35_align12_r = unused_payload_delay6_data_w[51 +: 51];
     edrv32_ram_gpu_read_pool u_payload_delay6 (
         .clk_i(clk_i),
-        .wr_en_i(enable_w),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r[5:0]),
         .wr_data_i({154'b0, uv_product1_p2_r, uv_product0_p2_r}),
-        .rd_en_i(enable_w),
+        .rd_en_i(control_enable_w[2]),
         .rd_addr_i(payload_delay6_read_w),
         .rd_data_o(unused_payload_delay6_data_w)
     );

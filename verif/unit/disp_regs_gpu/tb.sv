@@ -4,12 +4,7 @@
 // Clock domain: test memory clock.
 module tb;
     wire [31:0] unused_l0_scroll;
-    wire [2:0] unused_layer_ctrl;
-    wire [31:0] unused_l1_next_base;
-    wire [31:0] unused_l1_stride;
-    wire [31:0] unused_l1_pos;
-    wire [31:0] unused_l1_size;
-    wire [7:0] unused_l1_opa;
+    wire [1:0] unused_layer_ctrl;
     reg clk = 0;
     always #5 clk = ~clk;
     reg rst_n = 0;
@@ -30,19 +25,16 @@ module tb;
     reg frame_start = 0;
     reg underflow = 0;
     reg dma_err = 0;
-    reg underflow1 = 0;
     reg [31:0] perf0 = 0;
     reg [31:0] perf1 = 0;
     wire [31:0] scan_cnt;
     wire irq;
     edrv32_disp_regs_gpu dut (
-        .clk_i(clk), .rst_n_i({4{rst_n}}), .apb_paddr_i(paddr), .apb_psel_i(psel),
+        .clk_i(clk), .rst_n_i({3{rst_n}}), .apb_paddr_i(paddr), .apb_psel_i(psel),
         .apb_penable_i(penable), .apb_pwrite_i(pwrite), .apb_pwdata_i(pwdata),
         .apb_pstrb_i(pstrb), .apb_pready_o(pready), .apb_prdata_o(prdata),
         .apb_pslverr_o(pslverr), .enable_o(enable), .next_base_o(next_base),
-        .l0_scroll_o(unused_l0_scroll), .layer_ctrl_o(unused_layer_ctrl), .l1_next_base_o(unused_l1_next_base), .l1_stride_o(unused_l1_stride),
-        .l1_pos_o(unused_l1_pos), .l1_size_o(unused_l1_size), .l1_opa_o(unused_l1_opa), .underflow1_i(underflow1),
-        .stride_o(stride),
+        .l0_scroll_o(unused_l0_scroll), .layer_ctrl_o(unused_layer_ctrl), .stride_o(stride),
         .soft_clear_o(soft_clear), .busy_i(busy),
         .frame_start_i(frame_start), .underflow_i(underflow), .dma_err_i(dma_err),
         .perf0_i(perf0),
@@ -99,14 +91,14 @@ module tb;
         check_reg('h114, 0);
         check_reg('h118, 1);
         check_reg('h120, 0);
-        check_reg('h124, 'h1400);
+        check_reg('h124, 0);
         check_reg('h128, 0);
-        check_reg('h12c, 'h02d00500);
-        check_reg('h130, 255);
+        check_reg('h12c, 0);
+        check_reg('h130, 0);
         check_reg('h134, 0);
         check_reg('h138, 0);
         write_reg('h00c, '1);
-        check_reg('h00c, 'h306);
+        check_reg('h00c, 'h106);
         write_reg('h100, 'h1234_5fff);
         write_reg('h104, 'h9876_123f);
         check_reg('h100, 'h1234_5000);
@@ -208,99 +200,22 @@ module tb;
         check_reg('h040, 1);
         check_reg('h044, 1);
         check_reg('h048, 0);
-        // New shadow registers mask reserved bits, with independent per-layer release.
-        write_reg('h114, '1);
-        check_reg('h114, 'h0fff7fff);
-        write_reg('h120, 'h34567fff);
-        write_reg('h124, 'hffff2345);
-        write_reg('h128, '1);
-        write_reg('h12c, '1);
-        write_reg('h130, 'h12345678);
-        check_reg('h120, 'h34567000);
-        check_reg('h124, 'h2340);
-        check_reg('h128, 'h03ff07f8);
-        check_reg('h12c, 'h03ff07f8);
-        check_reg('h130, 'h78);
-        write_reg('h118, 'hfffffffe);
-        check_reg('h118, 6);
-        start_frame();
-        check_reg('h010, 4);
-        check_reg('h134, 'h34567000);
-        write_reg('h010, '1);
-        // Changing position, size, opacity or scroll never releases a Surface.
-        write_reg('h128, 8);
-        write_reg('h12c, 'h10008);
-        write_reg('h130, 255);
-        write_reg('h114, 1);
-        start_frame();
-        check_reg('h010, 4);
-        write_reg('h010, '1);
-        write_reg('h120, 'h40000000);
-        start_frame();
-        check_reg('h010, 'h204);
-        check_reg('h134, 'h40000000);
-        check_reg('h138, 'h34567000);
-        write_reg('h010, '1);
-        write_reg('h118, 0);
-        start_frame();
-        check_reg('h010, 'h204);
-        check_reg('h138, 'h40000000);
+        // ST-04: the removed L1 bank and enable bit ignore every write.
+        for (int offset = 'h120; offset <= 'h138; offset += 4) begin
+            write_reg(12'(offset), '1);
+            check_reg(12'(offset), 0);
+        end
+        write_reg('h118, '1);
+        check_reg('h118, 5);
         write_reg('h010, '1);
         start_frame();
-        check_reg('h010, 4);
-        underflow1 = 1;
-        tick();
-        underflow1 = 0;
-        check_reg('h014, 3);
-        write_reg('h010, 2);
-        check_reg('h014, 0);
-        tick();
-        check_reg('h054, 0);
-        check_reg('h058, 0);
-        write_reg('h004, 8);
-        repeat (4) tick();
-        check_reg('h054, 0);
-        check_reg('h058, 0);
-        tick();
-        check_reg('h054, 0);
-        check_reg('h058, 0);
-        check_reg('h114, 0);
-        check_reg('h118, 1);
-        check_reg('h124, 'h1400);
-        check_reg('h12c, 'h02d00500);
-        check_reg('h130, 255);
-        write_reg('h100, 'h6000);
-        write_reg('h120, 'h7000);
-        write_reg('h118, 3);
+        check_reg('h010, 4); // SWITCH1 cannot be generated.
+        write_reg('h118, 2);
+        check_reg('h118, 0);
         start_frame();
-        check_reg('h010, 4);
-        write_reg('h010, '1);
-        write_reg('h118, 0);
-        start_frame();
-        check_reg('h010, 'h304);
-        check_reg('h10c, 'h6000);
-        check_reg('h138, 'h7000);
-        write_reg('h010, '1);
-        start_frame();
-        check_reg('h010, 4);
-        write_reg('h010, '1);
-        write_reg('h100, 'h8000);
-        write_reg('h120, 'h9000);
-        start_frame();
-        check_reg('h108, 'h6000);
-        check_reg('h134, 'h7000);
-        check_reg('h010, 4);
-        write_reg('h010, '1);
-        write_reg('h118, 3);
-        start_frame();
-        check_reg('h010, 4);
-        write_reg('h010, '1);
-        write_reg('h100, 'ha000);
-        write_reg('h120, 'hb000);
-        start_frame();
-        check_reg('h010, 'h304);
-        check_reg('h10c, 'h8000);
-        check_reg('h138, 'h9000);
+        check_reg('h010, 'h104); // Only L0 disable releases a Surface.
+        for (int offset = 'h120; offset <= 'h138; offset += 4)
+            check_reg(12'(offset), 0);
         $display("PASS regs: frame handoff, alignment, IRQ/RW1C, counters, deferred SOFT_RST");
         $finish;
     end

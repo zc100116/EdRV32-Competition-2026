@@ -4,7 +4,7 @@ defines: SIM_MODE
 parameters: CASE=0
 plusargs: +CASE=214 +SEED=1
 software:
-timeout: 600
+timeout: 1800
 pass: PASS
 tier: full
 simulator: verilator

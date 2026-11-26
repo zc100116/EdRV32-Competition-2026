@@ -4,9 +4,9 @@
 //              Local software reset drains requested frames before clearing state.
 // Clock domain: clk_mem (clk_i).
 module edrv32_disp_regs_gpu (
-    // Equal-edge reset copies for common, L0, L1 and performance register banks.
+    // Equal-edge reset copies for common, L0 and performance register banks.
     input wire clk_i,
-    input wire [3:0] rst_n_i,
+    input wire [2:0] rst_n_i,
 
     // Media APB slave; pstrb is ignored per spec 4.
     input wire [11:0] apb_paddr_i,
@@ -24,17 +24,11 @@ module edrv32_disp_regs_gpu (
     output wire [31:0] next_base_o,
     output wire [31:0] stride_o,
     output wire [31:0] l0_scroll_o,
-    output wire [2:0] layer_ctrl_o,
-    output wire [31:0] l1_next_base_o,
-    output wire [31:0] l1_stride_o,
-    output wire [31:0] l1_pos_o,
-    output wire [31:0] l1_size_o,
-    output wire [7:0] l1_opa_o,
+    output wire [1:0] layer_ctrl_o,
     output reg soft_clear_o /* synthesis syn_preserve=1 */,
     input wire busy_i,
     input wire frame_start_i,
     input wire underflow_i,
-    input wire underflow1_i,
     input wire dma_err_i,
 
     // Synchronized scan counts; raw counts survive a local SOFT_RST.
@@ -60,7 +54,7 @@ module edrv32_disp_regs_gpu (
         end
     end
 
-    localparam [31:0] IRQ_MASK = 32'h0000_0306;
+    localparam [31:0] IRQ_MASK = 32'h0000_0106;
     reg enable_r;
     reg busy_r;
     reg soft_pending_d_r;
@@ -74,15 +68,8 @@ module edrv32_disp_regs_gpu (
     reg [31:0] rel_base_r;
     reg [31:0] frame_cnt_r;
     reg [31:0] l0_scroll_r;
-    reg [2:0] layer_ctrl_r;
-    reg [1:0] cur_layer_ctrl_r;
-    reg [31:0] l1_next_base_r;
-    reg [31:0] l1_stride_r;
-    reg [31:0] l1_pos_r;
-    reg [31:0] l1_size_r;
-    reg [7:0] l1_opa_r;
-    reg [31:0] l1_cur_base_r;
-    reg [31:0] l1_rel_base_r;
+    reg [1:0] layer_ctrl_r;
+    reg cur_layer_ctrl_r;
     reg [31:0] perf0_r;
     reg [5:0] perf0_less_r;
     reg [5:1] perf0_equal_r;
@@ -96,7 +83,6 @@ module edrv32_disp_regs_gpu (
     wire write_w;
     wire ctrl_write_w;
     wire switch_w;
-    wire switch1_w;
     wire [31:0] irq_set_w;
     wire [31:0] irq_clear_w;
     wire [3:0] unused_pstrb_w;
@@ -137,11 +123,6 @@ module edrv32_disp_regs_gpu (
     assign stride_o = stride_r;
     assign l0_scroll_o = l0_scroll_r;
     assign layer_ctrl_o = layer_ctrl_r;
-    assign l1_next_base_o = l1_next_base_r;
-    assign l1_stride_o = l1_stride_r;
-    assign l1_pos_o = l1_pos_r;
-    assign l1_size_o = l1_size_r;
-    assign l1_opa_o = l1_opa_r;
     // spec 2.8, 4.1: register BUSY/IDLE before APB and the reset-drain decision.
     // Delay the reset request alongside BUSY so an old IDLE cannot skip disable ACK.
     // The stop handshake makes IDLE stable before the registered clear pulse.
@@ -188,12 +169,10 @@ module edrv32_disp_regs_gpu (
         end
     end
     assign scan_cnt_o = count_delta(perf0_r, perf0_base_r, perf0_less_r, perf0_equal_r);
-    assign switch_w = frame_start_i && cur_layer_ctrl_r[0] &&
+    assign switch_w = frame_start_i && cur_layer_ctrl_r &&
         (!layer_ctrl_r[0] || next_base_r != cur_base_r);
-    assign switch1_w = frame_start_i && cur_layer_ctrl_r[1] &&
-        (!layer_ctrl_r[1] || l1_next_base_r != l1_cur_base_r);
-    assign irq_set_w = {22'd0, switch1_w, switch_w, 5'd0, frame_start_i,
-                        (underflow_i || underflow1_i || dma_err_i), 1'b0};
+    assign irq_set_w = {23'd0, switch_w, 5'd0, frame_start_i,
+                        (underflow_i || dma_err_i), 1'b0};
     assign irq_clear_w = write_w && apb_paddr_r == 12'h010 ? apb_pwdata_r : 32'd0;
     assign irq_o = |(irq_en_r & irq_stat_r);
 
@@ -270,29 +249,7 @@ module edrv32_disp_regs_gpu (
             5'h0c: read_group3_w = rel_base_r;
             5'h10: read_group3_w = frame_cnt_r;
             5'h14: read_group3_w = l0_scroll_r;
-            5'h18: read_group3_w = {29'd0, layer_ctrl_r};
-            default: begin end
-        endcase
-    end
-    reg [4:0] read_addr4_r /* synthesis syn_preserve=1 */;
-    reg read_select4_r;
-    reg [31:0] read_group4_w;
-    always @(posedge clk_i) begin
-        if (apb_psel_i && !apb_penable_i) begin
-            read_addr4_r <= apb_paddr_i[4:0];
-            read_select4_r <= apb_paddr_i[11:5] == 7'd9;
-        end
-    end
-    always @(*) begin
-        read_group4_w = 32'd0;
-        case (read_addr4_r)
-            5'h00: read_group4_w = l1_next_base_r;
-            5'h04: read_group4_w = l1_stride_r;
-            5'h08: read_group4_w = l1_pos_r;
-            5'h0c: read_group4_w = l1_size_r;
-            5'h10: read_group4_w = {24'd0, l1_opa_r};
-            5'h14: read_group4_w = l1_cur_base_r;
-            5'h18: read_group4_w = l1_rel_base_r;
+            5'h18: read_group3_w = {29'd0, layer_ctrl_r[1], 1'b0, layer_ctrl_r[0]};
             default: begin end
         endcase
     end
@@ -302,7 +259,6 @@ module edrv32_disp_regs_gpu (
         apb_prdata_o = apb_prdata_o | (read_group1_w & {32{read_select1_r}});
         apb_prdata_o = apb_prdata_o | (read_group2_w & {32{read_select2_r}});
         apb_prdata_o = apb_prdata_o | (read_group3_w & {32{read_select3_r}});
-        apb_prdata_o = apb_prdata_o | (read_group4_w & {32{read_select4_r}});
     end
 
     // Independent control copies preserve the original D, enable and effective edge.
@@ -342,9 +298,6 @@ module edrv32_disp_regs_gpu (
                 if (underflow_i) begin
                     err_code_r <= 2'd1;
                 end
-                if (underflow1_i) begin
-                    err_code_r <= 2'd3;
-                end
                 if (dma_err_i) begin
                     err_code_r <= 2'd2;
                 end
@@ -364,8 +317,8 @@ module edrv32_disp_regs_gpu (
             cur_base_r <= 32'd0;
             rel_base_r <= 32'd0;
             l0_scroll_r <= 32'd0;
-            layer_ctrl_r <= 3'd1;
-            cur_layer_ctrl_r <= 2'd0;
+            layer_ctrl_r <= 2'd1;
+            cur_layer_ctrl_r <= 1'b0;
         end else begin
             if (clear_local_r[1]) begin
                 next_base_r <= 32'd0;
@@ -373,8 +326,8 @@ module edrv32_disp_regs_gpu (
                 cur_base_r <= 32'd0;
                 rel_base_r <= 32'd0;
                 l0_scroll_r <= 32'd0;
-                layer_ctrl_r <= 3'd1;
-                cur_layer_ctrl_r <= 2'd0;
+                layer_ctrl_r <= 2'd1;
+                cur_layer_ctrl_r <= 1'b0;
             end else begin
                 if (write_w && apb_paddr_r == 12'h100) begin
                     next_base_r <= {apb_pwdata_r[31:12], 12'd0};
@@ -388,13 +341,13 @@ module edrv32_disp_regs_gpu (
                             l0_scroll_r <= apb_pwdata_r & 32'h0fff_7fff;
                         end
                         12'h118: begin
-                            layer_ctrl_r <= apb_pwdata_r[2:0];
+                            layer_ctrl_r <= {apb_pwdata_r[2], apb_pwdata_r[0]};
                         end
                         default: begin end
                     endcase
                 end
                 if (frame_start_i) begin
-                    cur_layer_ctrl_r <= layer_ctrl_r[1:0];
+                    cur_layer_ctrl_r <= layer_ctrl_r[0];
                     if (layer_ctrl_r[0]) begin
                         cur_base_r <= next_base_r;
                     end
@@ -407,69 +360,19 @@ module edrv32_disp_regs_gpu (
     end
     always @(posedge clk_i or negedge rst_n_i[2]) begin
         if (!rst_n_i[2]) begin
-            l1_next_base_r <= 32'd0;
-            l1_stride_r <= 32'h0000_1400;
-            l1_pos_r <= 32'd0;
-            l1_size_r <= 32'h02d0_0500;
-            l1_opa_r <= 8'd255;
-            l1_cur_base_r <= 32'd0;
-            l1_rel_base_r <= 32'd0;
-        end else begin
-            if (clear_local_r[2]) begin
-                l1_next_base_r <= 32'd0;
-                l1_stride_r <= 32'h0000_1400;
-                l1_pos_r <= 32'd0;
-                l1_size_r <= 32'h02d0_0500;
-                l1_opa_r <= 8'd255;
-                l1_cur_base_r <= 32'd0;
-                l1_rel_base_r <= 32'd0;
-            end else begin
-                if (write_w) begin
-                    case (apb_paddr_r)
-                        12'h120: begin
-                            l1_next_base_r <= {apb_pwdata_r[31:12], 12'd0};
-                        end
-                        12'h124: begin
-                            l1_stride_r <= {16'd0, apb_pwdata_r[15:5], 5'd0};
-                        end
-                        12'h128: begin
-                            l1_pos_r <= apb_pwdata_r & 32'h03ff_07f8;
-                        end
-                        12'h12c: begin
-                            l1_size_r <= apb_pwdata_r & 32'h03ff_07f8;
-                        end
-                        12'h130: begin
-                            l1_opa_r <= apb_pwdata_r[7:0];
-                        end
-                        default: begin end
-                    endcase
-                end
-                if (frame_start_i) begin
-                    if (layer_ctrl_r[1]) begin
-                        l1_cur_base_r <= l1_next_base_r;
-                    end
-                end
-                if (switch1_w) begin
-                    l1_rel_base_r <= l1_cur_base_r;
-                end
-            end
-        end
-    end
-    always @(posedge clk_i or negedge rst_n_i[3]) begin
-        if (!rst_n_i[3]) begin
             perf0_base_r <= 32'd0;
             perf1_base_r <= 32'd0;
-        end else if (clear_local_r[3]) begin
+        end else if (clear_local_r[2]) begin
             perf0_base_r <= perf0_r;
             perf1_base_r <= perf1_r;
         end
     end
-    reg [3:0] clear_local_r /* synthesis syn_preserve=1 */;
+    reg [2:0] clear_local_r /* synthesis syn_preserve=1 */;
     always @(posedge clk_i or negedge rst_n_i[0]) begin
         if (!rst_n_i[0])
-            clear_local_r <= 4'd0;
+            clear_local_r <= 3'd0;
         else
-            clear_local_r <= {4{soft_pending_r && soft_pending_d_r && !busy_r &&
+            clear_local_r <= {3{soft_pending_r && soft_pending_d_r && !busy_r &&
                 !soft_clear_o}};
     end
 endmodule

@@ -2,13 +2,13 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.2 |
-| 日期 | 2026-11-23 |
-| 对应规格 | `docs/spec/gpu-soc-spec.md` v0.2；`gpu-spec.md` v0.2；`aud-spec.md` v0.1；视觉规格中沿用的条款 |
+| 版本 | v0.3 |
+| 日期 | 2026-11-26 |
+| 对应规格 | `docs/spec/gpu-soc-spec.md` v0.3；`gpu-spec.md` v0.2；`aud-spec.md` v0.1；视觉规格中沿用的条款 |
 
 ## 1. 验证对象和范围
 
-- **沿用模块的改动**：mem_xbar 改为 5 个端口、DISP 的 L0 2 倍放大、reset_ctrl 的改名和新增复位。
+- **沿用模块的改动**：mem_xbar 改为 5 个端口并简化调度（8.3）、DISP 的 L0 2 倍放大和删除 L1（8.2）、reset_ctrl 的改名和新增复位。
 - **SoC 级**：`edrv32_gpu_soc_top` 的连接、启动、GPU 端到端渲染、放音、ETH。
 - **上板**：Windows 任务卡。
 
@@ -16,20 +16,20 @@
 
 ## 2. 验证环境
 
-- **mem_xbar**：沿用视觉项目 `verif/unit/mem_xbar`、`verif/block/mem_subsys` 的测试，复制到本项目目录后按 5 个端口改写。
-- **DISP**：沿用视觉项目 `verif/block/disp` 的测试和模型，在本项目目录下增加 L0_X2 的测试项。
+- **mem_xbar**：`verif/unit/mem_xbar_gpu`、`verif/block/mem_subsys_gpu`，按 `gpu-soc-spec.md` 8.3 的调度规则改写；删除针对 URG_MAX、饿死、加权轮询、令牌桶、读写分组和统计的检查。
+- **DISP**：`verif/block/disp_gpu` 及 `verif/unit/disp_*_gpu`，在视觉项目 DISP 测试的基础上增加 L0_X2 的测试项，删除 L1 相关测试。
 - **SoC 级**：`verif/soc/gpu_*`；软件由 `sw/Makefile` 构建，后门预加载；SYSCTRL `SIM_EXIT` 判定结果；使用 DDR、HDMI 接收、UART、I2S 接收、ETH 对端模型。
 
 ## 3. 测试项清单
 
 | 编号 | 对象 | 测试内容 | 检查 | 档位 |
 |---|---|---|---|---|
-| ST-01 | mem_xbar | 视觉项目的 mem_xbar 单元和模块级测试，按 5 个端口改写后全部运行 | 全部 PASS | smoke |
-| ST-02 | mem_xbar | 端口号映射：下游 ID 的端口号 0–4；ETH 在 P4 上限速；p = 5、6 的寄存器地址读为 0 | 定向检查 | smoke |
-| ST-03 | mem_xbar | 5 个端口同时满负荷，随机延迟 | 无死锁；协议检查通过；P0、P1 紧急优先 | full |
-| ST-04 | DISP | 视觉项目 DISP 测试全部运行（`L0_X2` = 0 时行为不变） | 全部 PASS | smoke |
+| ST-01 | mem_xbar | 按 8.3 改写的单元和模块级测试：在途上限、W 不交织、B FIFO、读返回缓冲 credit 与反压、违规检测 | 全部 PASS | smoke |
+| ST-02 | mem_xbar | 端口号映射（下游 ID 的端口号 0–4）；调度顺序：紧急 P0 先于 P1，其次 P2，其余按 P0→P1→P3→P4 轮转；0x100–0x110、0x200 起、0x400 起、0x500–0x508 读为 0、写忽略 | 定向检查，逐次授权与期望序列比对 | smoke |
+| ST-03 | mem_xbar | 5 个端口同时满负荷，随机延迟 | 无死锁；协议检查通过；DISP 不读空、AUD 不欠载 | full |
+| ST-04 | DISP | 视觉项目 DISP 测试中只涉及 L0 的部分全部运行（`L0_X2` = 0 时行为不变）；L1 寄存器读为 0、写忽略，`SWITCH1` 恒为 0 | 全部 PASS | smoke |
 | ST-05 | DISP | `L0_X2` = 1：640 × 360 测试图，SCROLL 非零（16 的倍数） | 接收模型恢复的 1280 × 720 画面与放大后的源图逐像素一致；L0 读事务的地址和长度 | smoke |
-| ST-06 | DISP | 帧间切换 `L0_X2`；`L0_X2` = 1 与 L1 叠加；`L0_X2` = 1 时读空和欠账 | 逐像素；ERR_CODE | full |
+| ST-06 | DISP | 帧间切换 `L0_X2`；`L0_X2` = 1 时读空和欠账 | 逐像素；ERR_CODE | full |
 | ST-07 | DISP | `L0_X2` = 1 时的 `urgent_o` 阈值（40 beat） | 定向检查 | full |
 | ST-08 | SoC | 启动：bootloader 打印启动信息，CHIP_ID = 0xED32_0002；监控程序菜单 | UART 日志 | smoke |
 | ST-09 | SoC | 寄存器连通：媒体 APB 槽 1、5–8 的 ID；预留槽回 SLVERR；PLIC 源 8、12–15 | 软件自检 | smoke |
@@ -58,5 +58,6 @@
 
 | 日期 | 版本 | 内容 |
 |---|---|---|
+| 2026-11-26 | v0.3 | 对应规格 v0.3：ST-01–03 按简化调度改写，ST-04、06 删除 L1 |
 | 2026-11-23 | v0.2 | ST-10 按 2 条渲染 |
 | 2026-11-23 | v0.1 | 初稿 |
