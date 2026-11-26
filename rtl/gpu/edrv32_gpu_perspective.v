@@ -107,7 +107,7 @@ module edrv32_gpu_perspective (
     reg [57:0] previous_v_r;
     wire [95:0] quad_span_w;
     reg [95:0] previous_span_r;
-    // Two input slots decouple acceptance; 128 result credits cover the 43-stage arithmetic pipeline.
+    // Two input slots decouple acceptance; 128 result credits cover the 44-stage arithmetic pipeline.
 
     assign advance_w = 1'b1;
     assign fragment_ready_o = input_count_r < 2 && outstanding_r < 64;

@@ -1197,11 +1197,11 @@ A4 核实为一个2×2组、4条边×2轴，共8个subtract；每两次advance�
 8→4个即算术本体省1948 FF、2832 LUT6，另可减少scale和最大值树，
 预留选择与对齐约1000 LUT6后仍超过1k LUT，决定实施。
 
-### T1 实现
+### T1 实现与重定时
 
 command 将同一 stop 状态并行写入16份带keep/syn_preserve的寄存器，各直接送一个
-使用单元；没有延迟一拍，也没有改变ABORT时序。texture先寄存每lane的96位span，
-LOD有效位、slot及地址发起全部顺延一拍。过滤fraction缓存提前计算256−fx/fy，
+使用单元；没有延迟一拍，也没有改变stop状态的生效时序。初版先在texture内寄存span，
+最终按下述吞吐回归结果将边界移到texture分配上下文之前。过滤fraction缓存提前计算256−fx/fy，
 mode/lane只选择已经寄存的权重，移除mode选择后的进位链，过滤流水长度不变。
 geometry输出FIFO改为注册head/tail，移除output_read选择器，输出延迟/吞吐不变；
 fan的next index与index一起推进，移除fan_index后的加一器，等待周期仍为5。
@@ -1246,5 +1246,70 @@ perspective仍16475 FF / 21725 LUT6 / 22 table。风格与顶层lint均0告警�
 旁路延迟从232位降至116位，4个table减为2个；scale短延迟由60位降至40位。
 
 A4后perspective为13058 FF / 17441 LUT6 / 20 table，较基线省3417 FF、4284 LUT6，
-超过1k LUT实施阈值。geometry保持A3结果。数值与吞吐的动态验收待仿真主机恢复；
-本节的II和拍数为RTL结构推导，不冒充仿真实测。
+超过1k LUT实施阈值。geometry保持A3结果；后文列出最终动态验收。
+
+### 分步资源与时序复核
+
+下列均为独立模块保留层次的FF / LUT6 / table实例，包含子模块，不能把clip/project
+再加到geometry。RAM/ROM内部不计入FF/LUT6；LUTRAM容量及Pango APM映射以PDS为准。
+
+| 模块 | 4426bf9e5 | T1（466aa8a99） | A3（fd34ce6ac） | 最终（5e8dc5edc及重定时收尾） |
+|---|---|---|---|---|
+| geometry | 38812 / 79989 / 34 | 38819 / 80769 / 34 | 27827 / 66692 / 43 | 27827 / 66692 / 43 |
+| perspective | 16475 / 21725 / 22 | 同前 | 同前 | 13058 / 17441 / 20 |
+| setup | 25996 / 42828 / 41 | 26009 / 42896 / 41 | 同T1 | 同T1 |
+| texture | 12373 / 25828 / 112 | 13019 / 26278 / 112 | 同T1 | 12629 / 26278 / 112 |
+| command | 2043 / 1235 / 0 | 2043 / 1234 / 0 | 同T1 | 同T1 |
+| 五模块合计（无父子重复） | 95699 / 171605 / 209 | 96365 / 172902 / 209 | 85373 / 158825 / 218 | 81566 / 154541 / 216 |
+| GPU table实例合计 | 225 | 225 | 234 | 232 |
+
+最终相对基线五模块合计减少14133 FF、17064 LUT6。GPU顶层本体另由43 FF / 892 LUT6
+变为893 FF / 898 LUT6，增量850 FF、6 LUT6来自sample寄存边界及其握手；
+将顶层本体一起计入，净省13283 FF、17058 LUT6。其他GPU模块RTL不变。
+command的相同stop位在Yosys完整LUT映射中被合并，故其FF数字没有反映PDS
+syn_preserve要求保留的区域副本；扇出用保留副本的粗网表分析，不能混用为PDS实测。
+
+扇出分析只在`build/s7/fanout.ys`中将GPU粗网表扁平化一次：先按模块综合至fine
+之前，RAM/ROM blackbox，reset_copy的cell加keep，再flatten/opt_clean。
+按DFF使能/复位位负载、mux选择位负载和其他输入引脚计数，时钟及常量不计。
+首次发现project的control_enable[1]仍有2148负载：其中倒数单元1956、其他192。
+将192负载移到已有control_enable[0]，使三份common CE为427/1956/350；
+不增加寄存器或周期。随后只重新综合geometry，将最终project粗网表按端口绑定
+替换到已扁平化图中做层次计数（`fanout_final.py`），未再次扁平化全GPU。
+最终sample重定时后，同法以独立root/texture粗网表替换这两个区域
+（`fanout_rebalanced.py`），最终最大控制扇出仍1956。
+最终无控制网超过2000：project倒数CE为1956，setup.area_enable为1955；
+project原有流水区域最大1902，setup三份common CE为1408/374/183。
+
+| 路径/控制 | 改前→改后寄存边界/拍数 | 改前扇出 | 改后扇出 |
+|---|---|---|---|
+| command stop→各使用区域 | 1拍→1拍，同拍状态副本 | 第9轮PDS stop_w直接4，长路径分布于texture/perspective | 粗网表16份分别1–305，texture85、perspective80 |
+| sample选择→LOD leading/amount | 1拍→2拍，选择后先寄存；texture内部拍数不变 | 852（粗网表；顶层sample mux未改） | 852（不变）；span先寄存后编码 |
+| geometry output_read→setup | 1拍→1拍，FIFO输出mux→注册head | 703（PDS）；778（Yosys LUT6直接引脚） | 0，output_read已删除 |
+| geometry fan_index→fan差分 | 1拍→1拍，next_index先寄存；fan等待仍5 | Yosys LUT6各位12/12/10 | index为8/10/9，next_index为11/10/9 |
+| texture mode→过滤权重 | 1拍→1拍，先形成互补权重再选择 | 第9轮6级；Yosys direct mode每位2 | direct mode每位2（不变）；选择后无256−fraction进位 |
+| project_input_ready/common CE | 1拍→1拍，同拍占用计数副本 | 3002（PDS） | common三份427/1956/350（粗网表） |
+| setup enable | 1拍→1拍，同拍占用计数副本 | 2097（PDS） | 三份1408/374/183（粗网表） |
+
+PDS与粗网表/LUT6计数分别注明，未把参考数字当作实际布线或时序收敛。
+新增span边界和权重预计算切开第9轮9级/6级路径；实际logic levels、WNS和
+复制寄存器是否保留，需要下一轮PDS验证。
+
+### 最近邻吞吐回归与最终sample边界
+
+初版在texture内部增加LOD一拍，功能数值均通过，但texture单元的第一项稳态
+检查发现512组最近邻输出间隔526拍，要求511拍；原始失败记录在
+`build/s7/texture-throughput-before.log`。原因是32项上下文原来恰好覆盖
+最近邻分配到回收的32拍，增加一拍后每次环回都会等一个空位，不是数值错误。
+没有放宽测试期望，也没有增加上下文项数。
+
+最终把选择寄存放在GPU顶层、texture分配上下文之前：一个支持同拍出队/入队的
+sample槽，849位负载按字段保存，384位span分为四份96位寄存器；
+texture内部的LOD valid、slot和地址发起恢复原拍数。该槽的finish只有在槽空时
+才传入texture，使其done仍表示所有已接收样本都排空；stop同拍清valid，数据不复位。
+这是一条流水边界的排空契约，没有新增错误检查或保护条件。
+样本仍每拍可出入一组，三角形/四边形共用同一寄存边界，texture端口不变。
+
+完整回归在这一问题出现前已跑过其余相关单元；修正只影响GPU顶层和texture，
+因此补跑texture并重建最终GT仿真程序，未重复整套单元。GT子场景在修正后才开始，
+所有GT使用同一个最终RTL程序。

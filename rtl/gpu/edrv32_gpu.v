@@ -431,6 +431,22 @@ module edrv32_gpu (
     reg [23:0] object_record_idx_r;
     reg sample_quad_select_r;
 
+    // Registered sample selection, before texture allocates a context.
+    wire sample_buffer_ready_w;
+    reg sample_buffer_valid_r;
+    wire [383:0] sample_buffer_span_w;
+    reg [7:0] sample_buffer_alpha_r;
+    reg [95:0] sample_buffer_color_r;
+    reg [63:0] sample_buffer_depth_r;
+    reg [3:0] sample_buffer_mask_r;
+    reg [3:0] sample_buffer_palette_r;
+    reg sample_buffer_quad_r;
+    reg [127:0] sample_buffer_u_r;
+    reg [127:0] sample_buffer_v_r;
+    reg [15:0] sample_buffer_x_r;
+    reg [15:0] sample_buffer_y_r;
+
+
     // One regional reset copy per independently placed unit.
     wire regs_rst_n_w;
     edrv32_reset_copy u_reset_regs (
@@ -616,6 +632,41 @@ module edrv32_gpu (
         ? quad_sample_y_w : perspective_sample_y_w;
     assign sample_valid_w = sample_quad_select_r
         ? quad_sample_valid_w : perspective_sample_valid_w;
+
+    // One elastic sample stage isolates the source mux from texture's LOD encoder.
+    // Keeping this stage before allocation preserves the 32-context nearest throughput.
+    assign sample_ready_w = !stop_region_w[15] &&
+        (!sample_buffer_valid_r || sample_buffer_ready_w);
+    always @(posedge clk_gpu_i or negedge texture_rst_n_w) begin
+        if (!texture_rst_n_w) sample_buffer_valid_r <= 0;
+        else if (stop_region_w[15]) sample_buffer_valid_r <= 0;
+        else if (sample_ready_w) sample_buffer_valid_r <= sample_valid_w;
+    end
+    always @(posedge clk_gpu_i) begin
+        if (sample_valid_w && sample_ready_w) begin
+            sample_buffer_alpha_r <= sample_alpha_w;
+            sample_buffer_color_r <= sample_color_w;
+            sample_buffer_depth_r <= sample_depth_w;
+            sample_buffer_mask_r <= sample_mask_w;
+            sample_buffer_palette_r <= sample_palette_w;
+            sample_buffer_quad_r <= sample_quad_w;
+            sample_buffer_u_r <= sample_u_w;
+            sample_buffer_v_r <= sample_v_w;
+            sample_buffer_x_r <= sample_x_w;
+            sample_buffer_y_r <= sample_y_w;
+        end
+    end
+    genvar sample_lane;
+    generate
+        for (sample_lane = 0; sample_lane < 4; sample_lane = sample_lane + 1) begin : g_sample
+            reg [95:0] span_r;
+            assign sample_buffer_span_w[sample_lane*96 +: 96] = span_r;
+            always @(posedge clk_gpu_i) begin
+                if (sample_valid_w && sample_ready_w)
+                    span_r <= sample_span_w[sample_lane*96 +: 96];
+            end
+        end
+    endgenerate
 
     // regs interface.
     edrv32_gpu_regs u_regs (
@@ -1574,7 +1625,7 @@ module edrv32_gpu (
         // Clock and command lifetime.
         .clk_i(clk_gpu_i),
         .rst_n_i(texture_rst_n_w),
-        .finish_i(texture_finish_w),
+        .finish_i(texture_finish_w && !sample_buffer_valid_r),
         .stop_i(stop_region_w[15]),
         .unit_done_o(texture_pipeline_done_w),
 
@@ -1587,19 +1638,19 @@ module edrv32_gpu (
         .render_state_wide_i(texture_render_state_wide_w),
 
         // Four ordered pixels from perspective.
-        .sample_valid_i(sample_valid_w),
-        .sample_ready_o(sample_ready_w),
-        .sample_x_i(sample_x_w),
-        .sample_y_i(sample_y_w),
-        .sample_mask_i(sample_mask_w),
-        .sample_quad_i(sample_quad_w),
-        .sample_u_i(sample_u_w),
-        .sample_v_i(sample_v_w),
-        .sample_span_i(sample_span_w),
-        .sample_depth_i(sample_depth_w),
-        .sample_color_i(sample_color_w),
-        .sample_palette_i(sample_palette_w),
-        .sample_alpha_i(sample_alpha_w),
+        .sample_valid_i(sample_buffer_valid_r),
+        .sample_ready_o(sample_buffer_ready_w),
+        .sample_x_i(sample_buffer_x_r),
+        .sample_y_i(sample_buffer_y_r),
+        .sample_mask_i(sample_buffer_mask_r),
+        .sample_quad_i(sample_buffer_quad_r),
+        .sample_u_i(sample_buffer_u_r),
+        .sample_v_i(sample_buffer_v_r),
+        .sample_span_i(sample_buffer_span_w),
+        .sample_depth_i(sample_buffer_depth_r),
+        .sample_color_i(sample_buffer_color_r),
+        .sample_palette_i(sample_buffer_palette_r),
+        .sample_alpha_i(sample_buffer_alpha_r),
 
         // Ordered group after filtering and shading.
         .shaded_valid_o(shaded_valid_w),

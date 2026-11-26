@@ -975,8 +975,8 @@ module edrv32_gpu_texture (
     endfunction
     // Four lanes: leading-one count, grouped shift, logarithm ROM and clamp.
     // Four-stage LOD path; only the eight fraction bits cross the shift boundary.
-    reg [4:0] lod_valid_r;
-    wire [4:0] lod_slot_r [0:4];
+    reg [3:0] lod_valid_r;
+    wire [4:0] lod_slot_r [0:3];
     reg [7:0] filter_valid_r;
     wire [4:0] filter_slot_r [0:7];
     wire [3:0] filter_done_r [0:7];
@@ -1057,7 +1057,7 @@ module edrv32_gpu_texture (
                 .wr_en_i(accept_w),
                 .wr_addr_i({1'b0, allocate_r[4:0]}),
                 .wr_data_i(uv_context_input_w[0 +: 72]),
-                .rd_addr_i({1'b0, lod_slot_r[3]}),
+                .rd_addr_i({1'b0, lod_slot_r[2]}),
                 .rd_data_o(unused_uv_context_read0_w[0 +: 72])
             );
             // Explicit LUTRAM lod_context: 1 slice(s) per combinational read port.
@@ -1066,8 +1066,8 @@ module edrv32_gpu_texture (
             wire [71:0] unused_lod_context_read0_w;
             edrv32_ram_gpu_table u_lod_context_p0_b0 (
                 .clk_i(clk_i),
-                .wr_en_i(lod_valid_r[3]),
-                .wr_addr_i({1'b0, lod_slot_r[3]}),
+                .wr_en_i(lod_valid_r[2]),
+                .wr_addr_i({1'b0, lod_slot_r[2]}),
                 .wr_data_i(lod_context_input_w[0 +: 72]),
                 .rd_addr_i({1'b0, schedule_even_index_w, 1'b0}),
                 .rd_data_o(unused_lod_context_read0_w[0 +: 72])
@@ -1075,8 +1075,8 @@ module edrv32_gpu_texture (
             wire [71:0] unused_lod_context_read1_w;
             edrv32_ram_gpu_table u_lod_context_p1_b0 (
                 .clk_i(clk_i),
-                .wr_en_i(lod_valid_r[3]),
-                .wr_addr_i({1'b0, lod_slot_r[3]}),
+                .wr_en_i(lod_valid_r[2]),
+                .wr_addr_i({1'b0, lod_slot_r[2]}),
                 .wr_data_i(lod_context_input_w[0 +: 72]),
                 .rd_addr_i({1'b0, schedule_odd_index_w, 1'b1}),
                 .rd_data_o(unused_lod_context_read1_w[0 +: 72])
@@ -1112,7 +1112,6 @@ module edrv32_gpu_texture (
                     result_mask_r[filter_slot_r[7]] <= shade_mask_r[lane];
                 end
             end
-            reg [95:0] span_r;
             wire high_w;
             wire [63:0] count_value_w;
             wire [7:0] group_w;
@@ -1126,9 +1125,9 @@ module edrv32_gpu_texture (
             reg zero_last_r;
             wire [63:0] unused_shifted_w;
             reg [7:0] fraction_r;
-            assign high_w = |span_r[64 +: 32];
-            assign count_value_w = high_w ? span_r[32 +: 64]
-                : span_r[0 +: 64];
+            assign high_w = |sample_span_i[lane*96+64 +: 32];
+            assign count_value_w = high_w ? sample_span_i[lane*96+32 +: 64]
+                : sample_span_i[lane*96 +: 64];
             assign unused_shifted_w = count_value_r << amount_r;
             genvar group_idx;
                 // Eight parallel 8-bit encoders and an eight-way group encoder.
@@ -1173,11 +1172,10 @@ module edrv32_gpu_texture (
                                 biased_w > maximum_w ? maximum_w[11:0] : biased_w[11:0];
             assign unused_address_input_lod_w[lane*4 +: 4] = clamped_w[11:8];
             always @(posedge clk_i) begin
-                span_r <= sample_span_i[lane*96 +: 96];
                 count_value_r <= count_value_w;
                 amount_r <= 6'd63 - leading_w;
                 shift_r <= (high_w ? 7'd0 : 7'd32) + 7'd63 - {1'b0, leading_w};
-                zero_r <= span_r == 0;
+                zero_r <= sample_span_i[lane*96 +: 96] == 0;
                 fraction_r <= unused_shifted_w[62:55];
                 shift_last_r <= shift_r;
                 zero_last_r <= zero_r;
@@ -2024,7 +2022,7 @@ module edrv32_gpu_texture (
             filter_valid_r <= 0;
             unit_done_o <= 1'b0;
         end else begin
-            lod_valid_r <= {lod_valid_r[3:0], accept_w};
+            lod_valid_r <= {lod_valid_r[2:0], accept_w};
             return_valid_r <= {return_valid_r[7:0], request_valid_r[1]};
             filter_valid_r <= {filter_valid_r[6:0], return_valid_r[8]};
             if (accept_w) begin
@@ -2110,7 +2108,7 @@ module edrv32_gpu_texture (
     // Metadata stages: independent local registers, one assignment per register.
     genvar pipe_stage;
     generate
-        for (pipe_stage = 0; pipe_stage < 5; pipe_stage = pipe_stage + 1) begin : g_lod_slot
+        for (pipe_stage = 0; pipe_stage < 4; pipe_stage = pipe_stage + 1) begin : g_lod_slot
             reg [4:0] data_r;
             wire [4:0] data_w;
             assign lod_slot_r[pipe_stage] = data_r;
@@ -2296,7 +2294,7 @@ module edrv32_gpu_texture (
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) address_valid_r <= 0;
         else if (stop_i) address_valid_r <= 0;
-        else address_valid_r <= {address_valid_r[5:0], lod_valid_r[3]};
+        else address_valid_r <= {address_valid_r[5:0], lod_valid_r[2]};
     end
     assign address_block_x0_0_0_w = format_r == 2 ? address_x0_0_0_r : address_x0_0_0_r >> 1;
     assign address_block_y0_0_0_w = format_r == 0 ? address_y0_0_0_r >> 1 : address_y0_0_0_r;
@@ -3796,10 +3794,10 @@ module edrv32_gpu_texture (
         end
     endgenerate
     always @(posedge clk_i) begin
-    address_slot_0_r <= lod_slot_r[3];
+    address_slot_0_r <= lod_slot_r[2];
     address_u0_r <= address_input_u_w[0 +: 32];
     address_v0_r <= address_input_v_w[0 +: 32];
-    address_level0_r <= quad_r[lod_slot_r[3]] ? 4'b0 : unused_address_input_lod_w[0 +: 4];
+    address_level0_r <= quad_r[lod_slot_r[2]] ? 4'b0 : unused_address_input_lod_w[0 +: 4];
     address_next_level0_r <= address_level0_r < levels_r - 4'd1 ? address_level0_r + 4'd1 :
             address_level0_r;
     address_scaled_u0_0_r <= unused_address_scaled_u0_0_wide_w[16:0];
@@ -3943,7 +3941,7 @@ module edrv32_gpu_texture (
     address_subword0_1_3_d5_r <= address_subword0_1_3_r;
     address_u1_r <= address_input_u_w[32 +: 32];
     address_v1_r <= address_input_v_w[32 +: 32];
-    address_level1_r <= quad_r[lod_slot_r[3]] ? 4'b0 : unused_address_input_lod_w[4 +: 4];
+    address_level1_r <= quad_r[lod_slot_r[2]] ? 4'b0 : unused_address_input_lod_w[4 +: 4];
     address_next_level1_r <= address_level1_r < levels_r - 4'd1 ? address_level1_r + 4'd1 :
             address_level1_r;
     address_scaled_u1_0_r <= unused_address_scaled_u1_0_wide_w[16:0];
@@ -4087,7 +4085,7 @@ module edrv32_gpu_texture (
     address_subword1_1_3_d5_r <= address_subword1_1_3_r;
     address_u2_r <= address_input_u_w[64 +: 32];
     address_v2_r <= address_input_v_w[64 +: 32];
-    address_level2_r <= quad_r[lod_slot_r[3]] ? 4'b0 : unused_address_input_lod_w[8 +: 4];
+    address_level2_r <= quad_r[lod_slot_r[2]] ? 4'b0 : unused_address_input_lod_w[8 +: 4];
     address_next_level2_r <= address_level2_r < levels_r - 4'd1 ? address_level2_r + 4'd1 :
             address_level2_r;
     address_scaled_u2_0_r <= unused_address_scaled_u2_0_wide_w[16:0];
@@ -4231,7 +4229,7 @@ module edrv32_gpu_texture (
     address_subword2_1_3_d5_r <= address_subword2_1_3_r;
     address_u3_r <= address_input_u_w[96 +: 32];
     address_v3_r <= address_input_v_w[96 +: 32];
-    address_level3_r <= quad_r[lod_slot_r[3]] ? 4'b0 : unused_address_input_lod_w[12 +: 4];
+    address_level3_r <= quad_r[lod_slot_r[2]] ? 4'b0 : unused_address_input_lod_w[12 +: 4];
     address_next_level3_r <= address_level3_r < levels_r - 4'd1 ? address_level3_r + 4'd1 :
             address_level3_r;
     address_scaled_u3_0_r <= unused_address_scaled_u3_0_wide_w[16:0];

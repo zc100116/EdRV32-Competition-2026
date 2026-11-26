@@ -499,7 +499,7 @@ module edrv32_gpu_project (
     end
     edrv32_ram_gpu_table u_input_delay_0 (
         .clk_i(clk_i),
-        .wr_en_i(control_enable_w[1]),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i(input_prefix_w[0 +: 72]),
         .rd_addr_i(input_delay_read_w),
@@ -523,7 +523,7 @@ module edrv32_gpu_project (
     reg [71:0] u_input_delay_2_data_r;
     assign unused_input_delay_w[144 +: 72] = u_input_delay_2_data_r;
     always @(posedge clk_i) begin
-        if (control_enable_w[1]) u_input_delay_2_data_r <= u_input_delay_2_data_w;
+        if (control_enable_w[0]) u_input_delay_2_data_r <= u_input_delay_2_data_w;
     end
     edrv32_ram_gpu_table u_input_delay_2 (
         .clk_i(clk_i),
@@ -541,7 +541,7 @@ module edrv32_gpu_project (
     end
     edrv32_ram_gpu_table u_input_delay_3 (
         .clk_i(clk_i),
-        .wr_en_i(control_enable_w[1]),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i({64'b0, input_prefix_w[223:216]}),
         .rd_addr_i(input_delay_read_w),
@@ -2397,7 +2397,7 @@ module edrv32_gpu_project (
         .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r[5:0]),
         .wr_data_i({240'b0, viewport_size0_r}),
-        .rd_en_i(control_enable_w[1]),
+        .rd_en_i(control_enable_w[0]),
         .rd_addr_i(viewport_size0_tags_read_w),
         .rd_data_o(unused_viewport_size0_tags_data_w)
     );
@@ -2426,7 +2426,7 @@ module edrv32_gpu_project (
     assign viewport_offset0_tags_read_w = input_delay_write_r[5:0] - 6'd41;
     edrv32_ram_gpu_read_pool u_viewport_offset0_tags (
         .clk_i(clk_i),
-        .wr_en_i(control_enable_w[1]),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r[5:0]),
         .wr_data_i({240'b0, viewport_offset0_r}),
         .rd_en_i(control_enable_w[2]),
@@ -2450,7 +2450,7 @@ module edrv32_gpu_project (
     assign viewport_offset1_tags_read_w = input_delay_write_r[5:0] - 6'd45;
     edrv32_ram_gpu_read_pool u_viewport_offset1_tags (
         .clk_i(clk_i),
-        .wr_en_i(control_enable_w[1]),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r[5:0]),
         .wr_data_i({240'b0, viewport_offset1_r}),
         .rd_en_i(control_enable_w[2]),
@@ -2479,7 +2479,7 @@ module edrv32_gpu_project (
     reg [71:0] u_payload_delay0_data_r;
     assign unused_payload_delay0_data_w = u_payload_delay0_data_r;
     always @(posedge clk_i) begin
-        if (control_enable_w[1]) u_payload_delay0_data_r <= u_payload_delay0_data_w;
+        if (control_enable_w[0]) u_payload_delay0_data_r <= u_payload_delay0_data_w;
     end
     edrv32_ram_gpu_table u_payload_delay0 (
         .clk_i(clk_i),
@@ -2506,7 +2506,7 @@ module edrv32_gpu_project (
     end
     edrv32_ram_gpu_table u_payload_delay1 (
         .clk_i(clk_i),
-        .wr_en_i(control_enable_w[1]),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i({uv_input1_r, uv_input0_r, position_input0_r}),
         .rd_addr_i(payload_delay1_read_w),
@@ -2540,7 +2540,7 @@ module edrv32_gpu_project (
     reg [71:0] u_payload_delay3_data_r;
     assign unused_payload_delay3_data_w = u_payload_delay3_data_r;
     always @(posedge clk_i) begin
-        if (control_enable_w[1]) u_payload_delay3_data_r <= u_payload_delay3_data_w;
+        if (control_enable_w[0]) u_payload_delay3_data_r <= u_payload_delay3_data_w;
     end
     edrv32_ram_gpu_table u_payload_delay3 (
         .clk_i(clk_i),
@@ -2560,7 +2560,7 @@ module edrv32_gpu_project (
         .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r[5:0]),
         .wr_data_i({240'b0, depth_clamp_r}),
-        .rd_en_i(control_enable_w[1]),
+        .rd_en_i(control_enable_w[0]),
         .rd_addr_i(payload_delay4_read_w),
         .rd_data_o(unused_payload_delay4_data_w)
     );
@@ -2587,7 +2587,7 @@ module edrv32_gpu_project (
     assign uv_product1_p2_d35_align12_r = unused_payload_delay6_data_w[51 +: 51];
     edrv32_ram_gpu_read_pool u_payload_delay6 (
         .clk_i(clk_i),
-        .wr_en_i(control_enable_w[1]),
+        .wr_en_i(control_enable_w[0]),
         .wr_addr_i(input_delay_write_r[5:0]),
         .wr_data_i({154'b0, uv_product1_p2_r, uv_product0_p2_r}),
         .rd_en_i(control_enable_w[2]),
