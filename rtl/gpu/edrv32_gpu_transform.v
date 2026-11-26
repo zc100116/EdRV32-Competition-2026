@@ -77,8 +77,6 @@ module edrv32_gpu_transform (
         {12'b0, matrix_product0_2_low_r[35]};
     reg [47:0] matrix_product0_2_p2_r;
     wire [49:0] matrix_extend0_2_w;
-    reg [31:0] translation0_r;
-    wire [49:0] translation_extend0_w;
     wire [34:0] matrix_pair0_0_a0_w;
     wire [34:0] matrix_pair0_0_b0_w;
     reg [35:0] matrix_pair0_0_part0_r;
@@ -91,9 +89,6 @@ module edrv32_gpu_transform (
     wire [14:0] matrix_pair0_0_low1_w;
     wire [49:0] matrix_pair0_0_w;
     reg [34:0] matrix_pair0_0_low0_w_d5_r;
-    reg [49:0] translation_extend0_w_d1_r;
-    reg [49:0] translation_extend0_w_d2_r;
-    reg [49:0] translation_extend0_w_d3_r;
     wire [34:0] matrix_pair0_1_a0_w;
     wire [34:0] matrix_pair0_1_b0_w;
     reg [35:0] matrix_pair0_1_part0_r;
@@ -170,8 +165,6 @@ module edrv32_gpu_transform (
         {12'b0, matrix_product1_2_low_r[35]};
     reg [47:0] matrix_product1_2_p2_r;
     wire [49:0] matrix_extend1_2_w;
-    reg [31:0] translation1_r;
-    wire [49:0] translation_extend1_w;
     wire [34:0] matrix_pair1_0_a0_w;
     wire [34:0] matrix_pair1_0_b0_w;
     reg [35:0] matrix_pair1_0_part0_r;
@@ -184,9 +177,6 @@ module edrv32_gpu_transform (
     wire [14:0] matrix_pair1_0_low1_w;
     wire [49:0] matrix_pair1_0_w;
     reg [34:0] matrix_pair1_0_low0_w_d5_r;
-    reg [49:0] translation_extend1_w_d1_r;
-    reg [49:0] translation_extend1_w_d2_r;
-    reg [49:0] translation_extend1_w_d3_r;
     wire [34:0] matrix_pair1_1_a0_w;
     wire [34:0] matrix_pair1_1_b0_w;
     reg [35:0] matrix_pair1_1_part0_r;
@@ -236,14 +226,9 @@ module edrv32_gpu_transform (
     reg [25:0] light_extend2_w_d4_r;
     reg [25:0] unused_light_sum_r;
     reg [23:0] light_dot_r;
+    // One local draw-light context; light_i is stable until idle_o (input contract).
     reg [7:0] direct0_r;
     reg [7:0] ambient0_r;
-    reg [7:0] direct0_r_d1_r;
-    reg [7:0] direct0_r_d2_r;
-    reg [7:0] direct0_r_d3_r;
-    reg [7:0] direct0_r_d4_r;
-    reg [7:0] direct0_r_d5_r;
-    reg [7:0] direct0_r_d6_r;
     reg [24:0] illumination_product0_partial0_r;
     wire [31:0] illumination_product0_term0_w;
     assign illumination_product0_term0_w = {7'b0, illumination_product0_partial0_r};
@@ -252,27 +237,7 @@ module edrv32_gpu_transform (
     assign illumination_product0_term1_w = {illumination_product0_partial1_r, 17'b0};
     reg [31:0] illumination_product0_sum_r;
     reg [31:0] illumination_product0_p2_r;
-    reg [7:0] ambient0_r_d1_r;
-    reg [7:0] ambient0_r_d2_r;
-    reg [7:0] ambient0_r_d3_r;
-    reg [7:0] ambient0_r_d4_r;
-    reg [7:0] ambient0_r_d5_r;
-    reg [7:0] ambient0_r_d6_r;
-    reg [7:0] ambient0_r_d7_r;
-    reg [7:0] ambient0_r_d8_r;
-    reg [7:0] ambient0_r_d9_r;
     reg [32:0] illumination0_r;
-    reg [7:0] base_color0_r;
-    reg [7:0] base_color0_r_d1_r;
-    reg [7:0] base_color0_r_d2_r;
-    reg [7:0] base_color0_r_d3_r;
-    reg [7:0] base_color0_r_d4_r;
-    reg [7:0] base_color0_r_d5_r;
-    reg [7:0] base_color0_r_d6_r;
-    reg [7:0] base_color0_r_d7_r;
-    reg [7:0] base_color0_r_d8_r;
-    reg [7:0] base_color0_r_d9_r;
-    reg [7:0] base_color0_r_d10_r;
     reg [24:0] color_product0_partial0_r;
     wire [40:0] color_product0_term0_w;
     assign color_product0_term0_w = {16'b0, color_product0_partial0_r};
@@ -306,12 +271,6 @@ module edrv32_gpu_transform (
     reg [23:0] color_clamp0_r;
     reg [7:0] direct1_r;
     reg [7:0] ambient1_r;
-    reg [7:0] direct1_r_d1_r;
-    reg [7:0] direct1_r_d2_r;
-    reg [7:0] direct1_r_d3_r;
-    reg [7:0] direct1_r_d4_r;
-    reg [7:0] direct1_r_d5_r;
-    reg [7:0] direct1_r_d6_r;
     reg [24:0] illumination_product1_partial0_r;
     wire [31:0] illumination_product1_term0_w;
     assign illumination_product1_term0_w = {7'b0, illumination_product1_partial0_r};
@@ -320,27 +279,7 @@ module edrv32_gpu_transform (
     assign illumination_product1_term1_w = {illumination_product1_partial1_r, 17'b0};
     reg [31:0] illumination_product1_sum_r;
     reg [31:0] illumination_product1_p2_r;
-    reg [7:0] ambient1_r_d1_r;
-    reg [7:0] ambient1_r_d2_r;
-    reg [7:0] ambient1_r_d3_r;
-    reg [7:0] ambient1_r_d4_r;
-    reg [7:0] ambient1_r_d5_r;
-    reg [7:0] ambient1_r_d6_r;
-    reg [7:0] ambient1_r_d7_r;
-    reg [7:0] ambient1_r_d8_r;
-    reg [7:0] ambient1_r_d9_r;
     reg [32:0] illumination1_r;
-    reg [7:0] base_color1_r;
-    reg [7:0] base_color1_r_d1_r;
-    reg [7:0] base_color1_r_d2_r;
-    reg [7:0] base_color1_r_d3_r;
-    reg [7:0] base_color1_r_d4_r;
-    reg [7:0] base_color1_r_d5_r;
-    reg [7:0] base_color1_r_d6_r;
-    reg [7:0] base_color1_r_d7_r;
-    reg [7:0] base_color1_r_d8_r;
-    reg [7:0] base_color1_r_d9_r;
-    reg [7:0] base_color1_r_d10_r;
     reg [24:0] color_product1_partial0_r;
     wire [40:0] color_product1_term0_w;
     assign color_product1_term0_w = {16'b0, color_product1_partial0_r};
@@ -374,12 +313,6 @@ module edrv32_gpu_transform (
     reg [23:0] color_clamp1_r;
     reg [7:0] direct2_r;
     reg [7:0] ambient2_r;
-    reg [7:0] direct2_r_d1_r;
-    reg [7:0] direct2_r_d2_r;
-    reg [7:0] direct2_r_d3_r;
-    reg [7:0] direct2_r_d4_r;
-    reg [7:0] direct2_r_d5_r;
-    reg [7:0] direct2_r_d6_r;
     reg [24:0] illumination_product2_partial0_r;
     wire [31:0] illumination_product2_term0_w;
     assign illumination_product2_term0_w = {7'b0, illumination_product2_partial0_r};
@@ -388,27 +321,7 @@ module edrv32_gpu_transform (
     assign illumination_product2_term1_w = {illumination_product2_partial1_r, 17'b0};
     reg [31:0] illumination_product2_sum_r;
     reg [31:0] illumination_product2_p2_r;
-    reg [7:0] ambient2_r_d1_r;
-    reg [7:0] ambient2_r_d2_r;
-    reg [7:0] ambient2_r_d3_r;
-    reg [7:0] ambient2_r_d4_r;
-    reg [7:0] ambient2_r_d5_r;
-    reg [7:0] ambient2_r_d6_r;
-    reg [7:0] ambient2_r_d7_r;
-    reg [7:0] ambient2_r_d8_r;
-    reg [7:0] ambient2_r_d9_r;
     reg [32:0] illumination2_r;
-    reg [7:0] base_color2_r;
-    reg [7:0] base_color2_r_d1_r;
-    reg [7:0] base_color2_r_d2_r;
-    reg [7:0] base_color2_r_d3_r;
-    reg [7:0] base_color2_r_d4_r;
-    reg [7:0] base_color2_r_d5_r;
-    reg [7:0] base_color2_r_d6_r;
-    reg [7:0] base_color2_r_d7_r;
-    reg [7:0] base_color2_r_d8_r;
-    reg [7:0] base_color2_r_d9_r;
-    reg [7:0] base_color2_r_d10_r;
     reg [24:0] color_product2_partial0_r;
     wire [40:0] color_product2_term0_w;
     assign color_product2_term0_w = {16'b0, color_product2_partial0_r};
@@ -440,86 +353,15 @@ module edrv32_gpu_transform (
     reg [16:0] unused_color_divide2_r;
     reg [20:0] color_integer2_d17_r;
     reg [23:0] color_clamp2_r;
-    reg [31:0] uv_input_r;
     wire [39:0] coordinate0_w;
     wire [39:0] coordinate1_w;
     wire [39:0] coordinate2_w;
     wire [39:0] coordinate3_w;
-    wire [15:0] uv0_w;
-    wire [15:0] uv1_w;
-    reg [39:0] coordinate0_w_d11_r;
-    reg [39:0] coordinate0_w_d12_r;
-    reg [39:0] coordinate0_w_d13_r;
-    reg [39:0] coordinate0_w_d14_r;
-    reg [39:0] coordinate0_w_d15_r;
-    reg [39:0] coordinate0_w_d16_r;
-    reg [39:0] coordinate0_w_d17_r;
-    reg [39:0] coordinate0_w_d18_r;
     reg [39:0] output_0_r [0:1];
-    reg [39:0] coordinate1_w_d11_r;
-    reg [39:0] coordinate1_w_d12_r;
-    reg [39:0] coordinate1_w_d13_r;
-    reg [39:0] coordinate1_w_d14_r;
-    reg [39:0] coordinate1_w_d15_r;
-    reg [39:0] coordinate1_w_d16_r;
-    reg [39:0] coordinate1_w_d17_r;
-    reg [39:0] coordinate1_w_d18_r;
     reg [39:0] output_1_r [0:1];
-    reg [39:0] coordinate2_w_d11_r;
-    reg [39:0] coordinate2_w_d12_r;
-    reg [39:0] coordinate2_w_d13_r;
-    reg [39:0] coordinate2_w_d14_r;
-    reg [39:0] coordinate2_w_d15_r;
-    reg [39:0] coordinate2_w_d16_r;
-    reg [39:0] coordinate2_w_d17_r;
-    reg [39:0] coordinate2_w_d18_r;
     reg [39:0] output_2_r [0:1];
-    reg [39:0] coordinate3_w_d11_r;
-    reg [39:0] coordinate3_w_d12_r;
-    reg [39:0] coordinate3_w_d13_r;
-    reg [39:0] coordinate3_w_d14_r;
-    reg [39:0] coordinate3_w_d15_r;
-    reg [39:0] coordinate3_w_d16_r;
-    reg [39:0] coordinate3_w_d17_r;
-    reg [39:0] coordinate3_w_d18_r;
     reg [39:0] output_3_r [0:1];
-    reg [15:0] uv0_w_d1_r;
-    reg [15:0] uv0_w_d2_r;
-    reg [15:0] uv0_w_d3_r;
-    reg [15:0] uv0_w_d4_r;
-    reg [15:0] uv0_w_d5_r;
-    reg [15:0] uv0_w_d6_r;
-    reg [15:0] uv0_w_d7_r;
-    reg [15:0] uv0_w_d8_r;
-    reg [15:0] uv0_w_d9_r;
-    reg [15:0] uv0_w_d10_r;
-    reg [15:0] uv0_w_d11_r;
-    reg [15:0] uv0_w_d12_r;
-    reg [15:0] uv0_w_d13_r;
-    reg [15:0] uv0_w_d14_r;
-    reg [15:0] uv0_w_d15_r;
-    reg [15:0] uv0_w_d16_r;
-    reg [15:0] uv0_w_d17_r;
-    reg [15:0] uv0_w_d18_r;
     reg [15:0] output_4_r [0:1];
-    reg [15:0] uv1_w_d1_r;
-    reg [15:0] uv1_w_d2_r;
-    reg [15:0] uv1_w_d3_r;
-    reg [15:0] uv1_w_d4_r;
-    reg [15:0] uv1_w_d5_r;
-    reg [15:0] uv1_w_d6_r;
-    reg [15:0] uv1_w_d7_r;
-    reg [15:0] uv1_w_d8_r;
-    reg [15:0] uv1_w_d9_r;
-    reg [15:0] uv1_w_d10_r;
-    reg [15:0] uv1_w_d11_r;
-    reg [15:0] uv1_w_d12_r;
-    reg [15:0] uv1_w_d13_r;
-    reg [15:0] uv1_w_d14_r;
-    reg [15:0] uv1_w_d15_r;
-    reg [15:0] uv1_w_d16_r;
-    reg [15:0] uv1_w_d17_r;
-    reg [15:0] uv1_w_d18_r;
     reg [15:0] output_5_r [0:1];
     reg [23:0] output_6_r [0:1];
     reg [23:0] output_7_r [0:1];
@@ -575,7 +417,6 @@ module edrv32_gpu_transform (
     assign matrix_extend0_0_w = {{2{matrix_product0_0_p2_r[47]}}, matrix_product0_0_p2_r};
     assign matrix_extend0_1_w = {{2{matrix_product0_1_p2_r[47]}}, matrix_product0_1_p2_r};
     assign matrix_extend0_2_w = {{2{matrix_product0_2_p2_r[47]}}, matrix_product0_2_p2_r};
-    assign translation_extend0_w = {{18{translation0_r[31]}}, translation0_r};
     assign matrix_pair0_0_a0_w = matrix_extend0_0_w[0 +: 35];
     assign matrix_pair0_0_b0_w = matrix_extend0_1_w[0 +: 35];
     assign matrix_pair0_0_low0_w = matrix_pair0_0_part0_r[34:0];
@@ -584,10 +425,10 @@ module edrv32_gpu_transform (
     assign matrix_pair0_0_low1_w = unused_matrix_pair0_0_part1_r[14:0];
     assign matrix_pair0_0_w = {matrix_pair0_0_low1_w, matrix_pair0_0_low0_w_d5_r};
     assign matrix_pair0_1_a0_w = matrix_extend0_2_w[0 +: 35];
-    assign matrix_pair0_1_b0_w = translation_extend0_w_d3_r[0 +: 35];
+    assign matrix_pair0_1_b0_w = translation0_context_w[0 +: 35];
     assign matrix_pair0_1_low0_w = matrix_pair0_1_part0_r[34:0];
     assign matrix_pair0_1_a1_w = matrix_extend0_2_w[35 +: 15];
-    assign matrix_pair0_1_b1_w = translation_extend0_w_d3_r[35 +: 15];
+    assign matrix_pair0_1_b1_w = translation0_context_w[35 +: 15];
     assign matrix_pair0_1_low1_w = unused_matrix_pair0_1_part1_r[14:0];
     assign matrix_pair0_1_w = {matrix_pair0_1_low1_w, matrix_pair0_1_low0_w_d5_r};
     assign matrix_total0_a0_w = matrix_pair0_0_w[0 +: 35];
@@ -600,7 +441,6 @@ module edrv32_gpu_transform (
     assign matrix_extend1_0_w = {{2{matrix_product1_0_p2_r[47]}}, matrix_product1_0_p2_r};
     assign matrix_extend1_1_w = {{2{matrix_product1_1_p2_r[47]}}, matrix_product1_1_p2_r};
     assign matrix_extend1_2_w = {{2{matrix_product1_2_p2_r[47]}}, matrix_product1_2_p2_r};
-    assign translation_extend1_w = {{18{translation1_r[31]}}, translation1_r};
     assign matrix_pair1_0_a0_w = matrix_extend1_0_w[0 +: 35];
     assign matrix_pair1_0_b0_w = matrix_extend1_1_w[0 +: 35];
     assign matrix_pair1_0_low0_w = matrix_pair1_0_part0_r[34:0];
@@ -609,10 +449,10 @@ module edrv32_gpu_transform (
     assign matrix_pair1_0_low1_w = unused_matrix_pair1_0_part1_r[14:0];
     assign matrix_pair1_0_w = {matrix_pair1_0_low1_w, matrix_pair1_0_low0_w_d5_r};
     assign matrix_pair1_1_a0_w = matrix_extend1_2_w[0 +: 35];
-    assign matrix_pair1_1_b0_w = translation_extend1_w_d3_r[0 +: 35];
+    assign matrix_pair1_1_b0_w = translation1_context_w[0 +: 35];
     assign matrix_pair1_1_low0_w = matrix_pair1_1_part0_r[34:0];
     assign matrix_pair1_1_a1_w = matrix_extend1_2_w[35 +: 15];
-    assign matrix_pair1_1_b1_w = translation_extend1_w_d3_r[35 +: 15];
+    assign matrix_pair1_1_b1_w = translation1_context_w[35 +: 15];
     assign matrix_pair1_1_low1_w = unused_matrix_pair1_1_part1_r[14:0];
     assign matrix_pair1_1_w = {matrix_pair1_1_low1_w, matrix_pair1_1_low0_w_d5_r};
     assign matrix_total1_a0_w = matrix_pair1_0_w[0 +: 35];
@@ -656,31 +496,29 @@ module edrv32_gpu_transform (
     assign coordinate1_w = coordinates_r[40 +: 40];
     assign coordinate2_w = coordinates_r[80 +: 40];
     assign coordinate3_w = coordinates_r[120 +: 40];
-    assign uv0_w = uv_input_r[0 +: 16];
-    assign uv1_w = uv_input_r[16 +: 16];
     assign transformed_data_o[0 +: 40] = output_0_r[read_r];
     always @(posedge clk_i) begin
-        if (push_w) output_0_r[write_r] <= coordinate0_w_d18_r;
+        if (push_w) output_0_r[write_r] <= coordinate_delay_w[0 +: 40];
     end
     assign transformed_data_o[40 +: 40] = output_1_r[read_r];
     always @(posedge clk_i) begin
-        if (push_w) output_1_r[write_r] <= coordinate1_w_d18_r;
+        if (push_w) output_1_r[write_r] <= coordinate_delay_w[40 +: 40];
     end
     assign transformed_data_o[80 +: 40] = output_2_r[read_r];
     always @(posedge clk_i) begin
-        if (push_w) output_2_r[write_r] <= coordinate2_w_d18_r;
+        if (push_w) output_2_r[write_r] <= coordinate_delay_w[80 +: 40];
     end
     assign transformed_data_o[120 +: 40] = output_3_r[read_r];
     always @(posedge clk_i) begin
-        if (push_w) output_3_r[write_r] <= coordinate3_w_d18_r;
+        if (push_w) output_3_r[write_r] <= coordinate_delay_w[120 +: 40];
     end
     assign transformed_data_o[160 +: 16] = output_4_r[read_r];
     always @(posedge clk_i) begin
-        if (push_w) output_4_r[write_r] <= uv0_w_d18_r;
+        if (push_w) output_4_r[write_r] <= vertex_uv_w[15:0];
     end
     assign transformed_data_o[176 +: 16] = output_5_r[read_r];
     always @(posedge clk_i) begin
-        if (push_w) output_5_r[write_r] <= uv1_w_d18_r;
+        if (push_w) output_5_r[write_r] <= vertex_uv_w[31:16];
     end
     assign transformed_data_o[192 +: 24] = output_6_r[read_r];
     always @(posedge clk_i) begin
@@ -696,6 +534,100 @@ module edrv32_gpu_transform (
     end
     // Each region owns the output-credit count used by its local clock enable.
     wire [5:0] pipeline_enable_w;
+    // Eight enabled clocks of coordinate alignment, packed into three existing 72-bit DRMs.
+    // The synchronous read supplies the eighth clock; seven addresses separate read/write.
+    reg [8:0] coordinate_write_r;
+    wire [8:0] coordinate_read_w;
+    wire [215:0] coordinate_store_w;
+    wire [215:0] coordinate_delay_w;
+    wire [55:0] unused_coordinate_padding_w;
+    assign coordinate_store_w = {56'b0, coordinate3_w, coordinate2_w,
+        coordinate1_w, coordinate0_w};
+    assign coordinate_read_w = coordinate_write_r - 9'd7;
+    assign unused_coordinate_padding_w = coordinate_delay_w[215:160];
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) coordinate_write_r <= 9'd0;
+        else if (stop_i) coordinate_write_r <= 9'd0;
+        else if (pipeline_enable_w[4]) coordinate_write_r <= coordinate_write_r + 9'd1;
+    end
+    genvar coordinate_ram_g;
+    generate
+        for (coordinate_ram_g = 0; coordinate_ram_g < 3;
+            coordinate_ram_g = coordinate_ram_g + 1) begin : g_coordinate_ram
+            edrv32_ram_gpu_delay u_delay (
+                .clk_i(clk_i),
+
+                .wr_en_i(pipeline_enable_w[4]),
+                .wr_addr_i(coordinate_write_r),
+                .wr_data_i(coordinate_store_w[coordinate_ram_g*72 +: 72]),
+
+                .rd_en_i(pipeline_enable_w[4]),
+                .rd_addr_i(coordinate_read_w),
+                .rd_data_o(coordinate_delay_w[coordinate_ram_g*72 +: 72])
+            );
+        end
+    endgenerate
+    // Input draw configuration is stable through drain; translation needs only the row tag.
+    reg [3:0] translation_phase_r;
+    wire [49:0] translation0_context_w;
+    wire [49:0] translation1_context_w;
+    assign translation0_context_w = translation_phase_r[3] ?
+        {{18{matrix_i[383]}}, matrix_i[352 +: 32]} :
+        {{18{matrix_i[127]}}, matrix_i[96 +: 32]};
+    assign translation1_context_w = translation_phase_r[3] ?
+        {{18{matrix_i[511]}}, matrix_i[480 +: 32]} :
+        {{18{matrix_i[255]}}, matrix_i[224 +: 32]};
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[0]) translation_phase_r <= {translation_phase_r[2:0], phase_r};
+    end
+    // At II=2, sixteen slots outlive the nineteen-clock vertex pipeline.
+    // Store each field once; tags select RGB at clock 10 and UV at clock 18.
+    reg [3:0] context_write_r;
+    reg [15:0] vertex_color_r [0:15];
+    reg [31:0] vertex_uv_r [0:15];
+    wire [75:0] context_tag_w;
+    wire [3:0] color_tag_w;
+    wire [3:0] uv_tag_w;
+    wire [15:0] vertex_color_w;
+    wire [31:0] vertex_uv_w;
+    wire [7:0] base_color0_w;
+    wire [7:0] base_color1_w;
+    wire [7:0] base_color2_w;
+    assign color_tag_w = context_tag_w[40 +: 4];
+    assign uv_tag_w = context_tag_w[72 +: 4];
+    assign vertex_color_w = vertex_color_r[color_tag_w];
+    assign vertex_uv_w = vertex_uv_r[uv_tag_w];
+    assign base_color0_w = {vertex_color_w[15:11], vertex_color_w[15:13]};
+    assign base_color1_w = {vertex_color_w[10:5], vertex_color_w[10:9]};
+    assign base_color2_w = {vertex_color_w[4:0], vertex_color_w[4:2]};
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) context_write_r <= 4'd0;
+        else if (stop_i) context_write_r <= 4'd0;
+        else if (accept_w) context_write_r <= context_write_r + 4'd1;
+    end
+    always @(posedge clk_i) begin
+        if (accept_w) begin
+            vertex_color_r[context_write_r] <= vertex_data_i[95:80];
+            vertex_uv_r[context_write_r] <= vertex_data_i[127:96];
+        end
+    end
+    genvar context_stage_g;
+    generate
+        for (context_stage_g = 0; context_stage_g < 19;
+            context_stage_g = context_stage_g + 1) begin : g_context_tag
+            reg [3:0] tag_r;
+            wire [3:0] source_w;
+            if (context_stage_g == 0) begin : g_input
+                assign source_w = context_write_r;
+            end else begin : g_previous
+                assign source_w = context_tag_w[(context_stage_g-1)*4 +: 4];
+            end
+            always @(posedge clk_i) begin
+                if (pipeline_enable_w[5]) tag_r <= source_w;
+            end
+            assign context_tag_w[context_stage_g*4 +: 4] = tag_r;
+        end
+    endgenerate
     genvar enable_region;
     generate
         for (enable_region = 0; enable_region < 6;
@@ -750,16 +682,12 @@ module edrv32_gpu_transform (
             matrix_product0_2_high0_r <= matrix_product0_2_term0_w[47:35];
             matrix_product0_2_high1_r <= matrix_product0_2_term1_w[47:35];
             matrix_product0_2_p2_r <= {matrix_product0_2_high_w, matrix_product0_2_low_r[34:0]};
-            translation0_r <= phase_r ? matrix_i[352 +: 32] : matrix_i[96 +: 32];
             matrix_pair0_0_part0_r <= {1'b0, matrix_pair0_0_a0_w} + {1'b0, matrix_pair0_0_b0_w};
             matrix_pair0_0_a1_w_d4_r <= matrix_pair0_0_a1_w;
             matrix_pair0_0_b1_w_d4_r <= matrix_pair0_0_b1_w;
             unused_matrix_pair0_0_part1_r <= {1'b0, matrix_pair0_0_a1_w_d4_r} + {1'b0,
                         matrix_pair0_0_b1_w_d4_r} + {15'b0, matrix_pair0_0_part0_r[35]};
             matrix_pair0_0_low0_w_d5_r <= matrix_pair0_0_low0_w;
-            translation_extend0_w_d1_r <= translation_extend0_w;
-            translation_extend0_w_d2_r <= translation_extend0_w_d1_r;
-            translation_extend0_w_d3_r <= translation_extend0_w_d2_r;
             matrix_pair0_1_part0_r <= {1'b0, matrix_pair0_1_a0_w} + {1'b0, matrix_pair0_1_b0_w};
             matrix_pair0_1_a1_w_d4_r <= matrix_pair0_1_a1_w;
             matrix_pair0_1_b1_w_d4_r <= matrix_pair0_1_b1_w;
@@ -812,16 +740,12 @@ module edrv32_gpu_transform (
             matrix_product1_2_high0_r <= matrix_product1_2_term0_w[47:35];
             matrix_product1_2_high1_r <= matrix_product1_2_term1_w[47:35];
             matrix_product1_2_p2_r <= {matrix_product1_2_high_w, matrix_product1_2_low_r[34:0]};
-            translation1_r <= phase_r ? matrix_i[480 +: 32] : matrix_i[224 +: 32];
             matrix_pair1_0_part0_r <= {1'b0, matrix_pair1_0_a0_w} + {1'b0, matrix_pair1_0_b0_w};
             matrix_pair1_0_a1_w_d4_r <= matrix_pair1_0_a1_w;
             matrix_pair1_0_b1_w_d4_r <= matrix_pair1_0_b1_w;
             unused_matrix_pair1_0_part1_r <= {1'b0, matrix_pair1_0_a1_w_d4_r} + {1'b0,
                         matrix_pair1_0_b1_w_d4_r} + {15'b0, matrix_pair1_0_part0_r[35]};
             matrix_pair1_0_low0_w_d5_r <= matrix_pair1_0_low0_w;
-            translation_extend1_w_d1_r <= translation_extend1_w;
-            translation_extend1_w_d2_r <= translation_extend1_w_d1_r;
-            translation_extend1_w_d3_r <= translation_extend1_w_d2_r;
             matrix_pair1_1_part0_r <= {1'b0, matrix_pair1_1_a0_w} + {1'b0, matrix_pair1_1_b0_w};
             matrix_pair1_1_a1_w_d4_r <= matrix_pair1_1_a1_w;
             matrix_pair1_1_b1_w_d4_r <= matrix_pair1_1_b1_w;
@@ -864,40 +788,14 @@ module edrv32_gpu_transform (
             light_dot_r <= unused_light_sum_r[25] ? 24'b0 : unused_light_sum_r[23:0];
             direct0_r <= light_i[64 +: 8];
             ambient0_r <= light_i[88 +: 8];
-            direct0_r_d1_r <= direct0_r;
-            direct0_r_d2_r <= direct0_r_d1_r;
-            direct0_r_d3_r <= direct0_r_d2_r;
-            direct0_r_d4_r <= direct0_r_d3_r;
-            direct0_r_d5_r <= direct0_r_d4_r;
-            direct0_r_d6_r <= direct0_r_d5_r;
-            illumination_product0_partial0_r <= light_dot_r[16:0] * direct0_r_d6_r;
-            illumination_product0_partial1_r <= light_dot_r[23:17] * direct0_r_d6_r;
+            illumination_product0_partial0_r <= light_dot_r[16:0] * direct0_r;
+            illumination_product0_partial1_r <= light_dot_r[23:17] * direct0_r;
             illumination_product0_sum_r <=
                 illumination_product0_term0_w + illumination_product0_term1_w;
             illumination_product0_p2_r <= illumination_product0_sum_r;
-            ambient0_r_d1_r <= ambient0_r;
-            ambient0_r_d2_r <= ambient0_r_d1_r;
-            ambient0_r_d3_r <= ambient0_r_d2_r;
-            ambient0_r_d4_r <= ambient0_r_d3_r;
-            ambient0_r_d5_r <= ambient0_r_d4_r;
-            ambient0_r_d6_r <= ambient0_r_d5_r;
-            ambient0_r_d7_r <= ambient0_r_d6_r;
-            ambient0_r_d8_r <= ambient0_r_d7_r;
-            ambient0_r_d9_r <= ambient0_r_d8_r;
-            illumination0_r <= {1'b0, illumination_product0_p2_r} + {4'b0, ambient0_r_d9_r, 21'b0};
-            base_color0_r <= {vertex_data_i[95:91], vertex_data_i[95:93]};
-            base_color0_r_d1_r <= base_color0_r;
-            base_color0_r_d2_r <= base_color0_r_d1_r;
-            base_color0_r_d3_r <= base_color0_r_d2_r;
-            base_color0_r_d4_r <= base_color0_r_d3_r;
-            base_color0_r_d5_r <= base_color0_r_d4_r;
-            base_color0_r_d6_r <= base_color0_r_d5_r;
-            base_color0_r_d7_r <= base_color0_r_d6_r;
-            base_color0_r_d8_r <= base_color0_r_d7_r;
-            base_color0_r_d9_r <= base_color0_r_d8_r;
-            base_color0_r_d10_r <= base_color0_r_d9_r;
-            color_product0_partial0_r <= illumination0_r[16:0] * base_color0_r_d10_r;
-            color_product0_partial1_r <= illumination0_r[32:17] * base_color0_r_d10_r;
+            illumination0_r <= {1'b0, illumination_product0_p2_r} + {4'b0, ambient0_r, 21'b0};
+            color_product0_partial0_r <= illumination0_r[16:0] * base_color0_w;
+            color_product0_partial1_r <= illumination0_r[32:17] * base_color0_w;
             color_product0_low_r <= {1'b0, color_product0_term0_w[34:0]} +
                 {1'b0, color_product0_term1_w[34:0]};
             color_product0_high0_r <= color_product0_term0_w[40:35];
@@ -922,40 +820,14 @@ module edrv32_gpu_transform (
                         {unused_color_divide0_r[15:8], 16'b0};
             direct1_r <= light_i[56 +: 8];
             ambient1_r <= light_i[80 +: 8];
-            direct1_r_d1_r <= direct1_r;
-            direct1_r_d2_r <= direct1_r_d1_r;
-            direct1_r_d3_r <= direct1_r_d2_r;
-            direct1_r_d4_r <= direct1_r_d3_r;
-            direct1_r_d5_r <= direct1_r_d4_r;
-            direct1_r_d6_r <= direct1_r_d5_r;
-            illumination_product1_partial0_r <= light_dot_r[16:0] * direct1_r_d6_r;
-            illumination_product1_partial1_r <= light_dot_r[23:17] * direct1_r_d6_r;
+            illumination_product1_partial0_r <= light_dot_r[16:0] * direct1_r;
+            illumination_product1_partial1_r <= light_dot_r[23:17] * direct1_r;
             illumination_product1_sum_r <=
                 illumination_product1_term0_w + illumination_product1_term1_w;
             illumination_product1_p2_r <= illumination_product1_sum_r;
-            ambient1_r_d1_r <= ambient1_r;
-            ambient1_r_d2_r <= ambient1_r_d1_r;
-            ambient1_r_d3_r <= ambient1_r_d2_r;
-            ambient1_r_d4_r <= ambient1_r_d3_r;
-            ambient1_r_d5_r <= ambient1_r_d4_r;
-            ambient1_r_d6_r <= ambient1_r_d5_r;
-            ambient1_r_d7_r <= ambient1_r_d6_r;
-            ambient1_r_d8_r <= ambient1_r_d7_r;
-            ambient1_r_d9_r <= ambient1_r_d8_r;
-            illumination1_r <= {1'b0, illumination_product1_p2_r} + {4'b0, ambient1_r_d9_r, 21'b0};
-            base_color1_r <= {vertex_data_i[90:85], vertex_data_i[90:89]};
-            base_color1_r_d1_r <= base_color1_r;
-            base_color1_r_d2_r <= base_color1_r_d1_r;
-            base_color1_r_d3_r <= base_color1_r_d2_r;
-            base_color1_r_d4_r <= base_color1_r_d3_r;
-            base_color1_r_d5_r <= base_color1_r_d4_r;
-            base_color1_r_d6_r <= base_color1_r_d5_r;
-            base_color1_r_d7_r <= base_color1_r_d6_r;
-            base_color1_r_d8_r <= base_color1_r_d7_r;
-            base_color1_r_d9_r <= base_color1_r_d8_r;
-            base_color1_r_d10_r <= base_color1_r_d9_r;
-            color_product1_partial0_r <= illumination1_r[16:0] * base_color1_r_d10_r;
-            color_product1_partial1_r <= illumination1_r[32:17] * base_color1_r_d10_r;
+            illumination1_r <= {1'b0, illumination_product1_p2_r} + {4'b0, ambient1_r, 21'b0};
+            color_product1_partial0_r <= illumination1_r[16:0] * base_color1_w;
+            color_product1_partial1_r <= illumination1_r[32:17] * base_color1_w;
             color_product1_low_r <= {1'b0, color_product1_term0_w[34:0]} +
                 {1'b0, color_product1_term1_w[34:0]};
             color_product1_high0_r <= color_product1_term0_w[40:35];
@@ -976,40 +848,14 @@ module edrv32_gpu_transform (
                         {unused_color_divide1_r[15:8], 16'b0};
             direct2_r <= light_i[48 +: 8];
             ambient2_r <= light_i[72 +: 8];
-            direct2_r_d1_r <= direct2_r;
-            direct2_r_d2_r <= direct2_r_d1_r;
-            direct2_r_d3_r <= direct2_r_d2_r;
-            direct2_r_d4_r <= direct2_r_d3_r;
-            direct2_r_d5_r <= direct2_r_d4_r;
-            direct2_r_d6_r <= direct2_r_d5_r;
-            illumination_product2_partial0_r <= light_dot_r[16:0] * direct2_r_d6_r;
-            illumination_product2_partial1_r <= light_dot_r[23:17] * direct2_r_d6_r;
+            illumination_product2_partial0_r <= light_dot_r[16:0] * direct2_r;
+            illumination_product2_partial1_r <= light_dot_r[23:17] * direct2_r;
             illumination_product2_sum_r <=
                 illumination_product2_term0_w + illumination_product2_term1_w;
             illumination_product2_p2_r <= illumination_product2_sum_r;
-            ambient2_r_d1_r <= ambient2_r;
-            ambient2_r_d2_r <= ambient2_r_d1_r;
-            ambient2_r_d3_r <= ambient2_r_d2_r;
-            ambient2_r_d4_r <= ambient2_r_d3_r;
-            ambient2_r_d5_r <= ambient2_r_d4_r;
-            ambient2_r_d6_r <= ambient2_r_d5_r;
-            ambient2_r_d7_r <= ambient2_r_d6_r;
-            ambient2_r_d8_r <= ambient2_r_d7_r;
-            ambient2_r_d9_r <= ambient2_r_d8_r;
-            illumination2_r <= {1'b0, illumination_product2_p2_r} + {4'b0, ambient2_r_d9_r, 21'b0};
-            base_color2_r <= {vertex_data_i[84:80], vertex_data_i[84:82]};
-            base_color2_r_d1_r <= base_color2_r;
-            base_color2_r_d2_r <= base_color2_r_d1_r;
-            base_color2_r_d3_r <= base_color2_r_d2_r;
-            base_color2_r_d4_r <= base_color2_r_d3_r;
-            base_color2_r_d5_r <= base_color2_r_d4_r;
-            base_color2_r_d6_r <= base_color2_r_d5_r;
-            base_color2_r_d7_r <= base_color2_r_d6_r;
-            base_color2_r_d8_r <= base_color2_r_d7_r;
-            base_color2_r_d9_r <= base_color2_r_d8_r;
-            base_color2_r_d10_r <= base_color2_r_d9_r;
-            color_product2_partial0_r <= illumination2_r[16:0] * base_color2_r_d10_r;
-            color_product2_partial1_r <= illumination2_r[32:17] * base_color2_r_d10_r;
+            illumination2_r <= {1'b0, illumination_product2_p2_r} + {4'b0, ambient2_r, 21'b0};
+            color_product2_partial0_r <= illumination2_r[16:0] * base_color2_w;
+            color_product2_partial1_r <= illumination2_r[32:17] * base_color2_w;
             color_product2_low_r <= {1'b0, color_product2_term0_w[34:0]} +
                 {1'b0, color_product2_term1_w[34:0]};
             color_product2_high0_r <= color_product2_term0_w[40:35];
@@ -1032,79 +878,10 @@ module edrv32_gpu_transform (
             color_integer2_d17_r <= color_integer2_r;
             color_clamp2_r <= color_integer2_d17_r >= 21'd65025 ? 24'hff0000 :
                         {unused_color_divide2_r[15:8], 16'b0};
-            uv_input_r <= vertex_data_i[127:96];
-            coordinate0_w_d11_r <= coordinate0_w;
-            coordinate0_w_d12_r <= coordinate0_w_d11_r;
-            coordinate0_w_d13_r <= coordinate0_w_d12_r;
-            coordinate0_w_d14_r <= coordinate0_w_d13_r;
-            coordinate0_w_d15_r <= coordinate0_w_d14_r;
-            coordinate0_w_d16_r <= coordinate0_w_d15_r;
-            coordinate0_w_d17_r <= coordinate0_w_d16_r;
-            coordinate0_w_d18_r <= coordinate0_w_d17_r;
-            coordinate1_w_d11_r <= coordinate1_w;
-            coordinate1_w_d12_r <= coordinate1_w_d11_r;
-            coordinate1_w_d13_r <= coordinate1_w_d12_r;
-            coordinate1_w_d14_r <= coordinate1_w_d13_r;
-            coordinate1_w_d15_r <= coordinate1_w_d14_r;
-            coordinate1_w_d16_r <= coordinate1_w_d15_r;
-            coordinate1_w_d17_r <= coordinate1_w_d16_r;
-            coordinate1_w_d18_r <= coordinate1_w_d17_r;
-            coordinate2_w_d11_r <= coordinate2_w;
-            coordinate2_w_d12_r <= coordinate2_w_d11_r;
-            coordinate2_w_d13_r <= coordinate2_w_d12_r;
-            coordinate2_w_d14_r <= coordinate2_w_d13_r;
-            coordinate2_w_d15_r <= coordinate2_w_d14_r;
-            coordinate2_w_d16_r <= coordinate2_w_d15_r;
-            coordinate2_w_d17_r <= coordinate2_w_d16_r;
-            coordinate2_w_d18_r <= coordinate2_w_d17_r;
-            coordinate3_w_d11_r <= coordinate3_w;
         end
     end
     always @(posedge clk_i) begin
         if (pipeline_enable_w[5]) begin
-            coordinate3_w_d12_r <= coordinate3_w_d11_r;
-            coordinate3_w_d13_r <= coordinate3_w_d12_r;
-            coordinate3_w_d14_r <= coordinate3_w_d13_r;
-            coordinate3_w_d15_r <= coordinate3_w_d14_r;
-            coordinate3_w_d16_r <= coordinate3_w_d15_r;
-            coordinate3_w_d17_r <= coordinate3_w_d16_r;
-            coordinate3_w_d18_r <= coordinate3_w_d17_r;
-            uv0_w_d1_r <= uv0_w;
-            uv0_w_d2_r <= uv0_w_d1_r;
-            uv0_w_d3_r <= uv0_w_d2_r;
-            uv0_w_d4_r <= uv0_w_d3_r;
-            uv0_w_d5_r <= uv0_w_d4_r;
-            uv0_w_d6_r <= uv0_w_d5_r;
-            uv0_w_d7_r <= uv0_w_d6_r;
-            uv0_w_d8_r <= uv0_w_d7_r;
-            uv0_w_d9_r <= uv0_w_d8_r;
-            uv0_w_d10_r <= uv0_w_d9_r;
-            uv0_w_d11_r <= uv0_w_d10_r;
-            uv0_w_d12_r <= uv0_w_d11_r;
-            uv0_w_d13_r <= uv0_w_d12_r;
-            uv0_w_d14_r <= uv0_w_d13_r;
-            uv0_w_d15_r <= uv0_w_d14_r;
-            uv0_w_d16_r <= uv0_w_d15_r;
-            uv0_w_d17_r <= uv0_w_d16_r;
-            uv0_w_d18_r <= uv0_w_d17_r;
-            uv1_w_d1_r <= uv1_w;
-            uv1_w_d2_r <= uv1_w_d1_r;
-            uv1_w_d3_r <= uv1_w_d2_r;
-            uv1_w_d4_r <= uv1_w_d3_r;
-            uv1_w_d5_r <= uv1_w_d4_r;
-            uv1_w_d6_r <= uv1_w_d5_r;
-            uv1_w_d7_r <= uv1_w_d6_r;
-            uv1_w_d8_r <= uv1_w_d7_r;
-            uv1_w_d9_r <= uv1_w_d8_r;
-            uv1_w_d10_r <= uv1_w_d9_r;
-            uv1_w_d11_r <= uv1_w_d10_r;
-            uv1_w_d12_r <= uv1_w_d11_r;
-            uv1_w_d13_r <= uv1_w_d12_r;
-            uv1_w_d14_r <= uv1_w_d13_r;
-            uv1_w_d15_r <= uv1_w_d14_r;
-            uv1_w_d16_r <= uv1_w_d15_r;
-            uv1_w_d17_r <= uv1_w_d16_r;
-            uv1_w_d18_r <= uv1_w_d17_r;
             if (accept_w) vertex_r <= vertex_data_i[47:0];
         end
     end
