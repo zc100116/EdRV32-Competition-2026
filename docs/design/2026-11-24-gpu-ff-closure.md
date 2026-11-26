@@ -1212,3 +1212,25 @@ setup 26009 FF / 42896 LUT6 / 41 table；texture与command见`build/s7/t1b-count
 前向声明整理也包含setup的edge值、系数和标签声明，语义不变。
 仿真主机首次只读检查后连接失效，协调者同意重建一次；重建仍连接超时，
 故本步先按协调者指示提交，相关单元仿真留待主机恢复后运行。
+
+### A3 实现与接口
+
+clip输出改为`polygon_valid_o/ready_i/data_o[263:0]/index_o[2:0]/last_o`，
+每次握手传一个顶点；index从0递增，last标识本多边形最后一个顶点。停顿保持负载，
+顺序仍为裁剪遍历顺序。geometry直接接project输入，不再捕获2112位多边形，
+在last握手时将index+1加入原count队列，project结果仍逐顶点写入原16项screen表，
+扇形输出和屏幕表的三个读口保持原契约。texture/pixel/target与SoC端口不变。
+
+clip九字段分别使用一个table，低4位地址为bank+vertex，两个工作集共用一个写口；
+S_LOAD三拍初始化前三个顶点，交点/内侧端点按原顺序逐项追加。只需一个读口：
+S_BEGIN读最后顶点以保存previous及其距离，随后读current；不用同时读取两项。
+两个多边形输出槽删除，裁剪结果从工作集串行输出；不裁剪时直接从输入捕获寄存器
+输出三个顶点，不访问工作集。无背压时，接收三角形t0，检查完成并发首顶点t3，
+余下两个t4/t5，t6可接下一三角形，保持每6拍三顶点；project本来支持II=1，
+因此三拍burst不降低每2拍一个源顶点的指标。裁剪路径允许增加装载/串行输出时间。
+所有交点算术、舍入点、平面顺序均未修改。
+
+A3后geometry为27827 FF / 66692 LUT6 / 43 table，相比T1省10992 FF、14077 LUT6；
+包含clip为4894 FF / 16970 LUT6 / 9 table（独立clip顶层16968 LUT6，ABC上下文差2）。
+perspective仍16475 FF / 21725 LUT6 / 22 table。风格与顶层lint均0告警；
+本步仿真因指定主机不可用待补，未在本机运行仿真。
