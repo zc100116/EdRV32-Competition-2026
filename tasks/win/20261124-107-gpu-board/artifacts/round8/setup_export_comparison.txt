@@ -1,0 +1,16 @@
+Card 107 round 8 | upstream 38095a12 | local run 18a9395f
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676
+ADS synthesis, slow corner, clk_gpu sequential setup paths.
+Independent report run from the round 8 Compile ADF and the original FDC.
+Options: -max_path 200 -nworst 1 -clock_group_limit {clk_gpu}.
+
+Metric | original GUI synthesis report | extended synthesis report
+LUT | 107295 | 107295
+FF | 185161 | 185161
+DRM | 332.0 | 332.0
+APM | 217.00 | 217.00
+clk_gpu estimated MHz | 114.9311 | 114.9311
+clk_gpu WNS ns | -3.145 | -3.145
+clk_gpu TNS ns | -10849.357 | -10849.357
+
+Verified setup paths: 200, distinct endpoints: 200.

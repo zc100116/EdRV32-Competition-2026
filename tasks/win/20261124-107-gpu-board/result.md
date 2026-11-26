@@ -37,7 +37,7 @@
 | `clk_mem` | 118.7790 | −0.419 | −15.351 |
 | `clk_aud` | 276.6247 | 77.765 | 0.000 |
 
-`clk_gpu` 综合估算从第 7 轮的 50.2539 MHz 提升至 114.9311 MHz。当前 ADS 综合报告只列出 3 条 GPU setup 路径，三条均从 `u_geometry/u_project/N788_m1/CLK` 到 `N788_m4/Z[19:21]` 的三个端点，WNS −3.145 ns，11 逻辑级。任务卡要求的前 200 条和前 20 条逐级明细尚未取得。此次回传保留现有 3 条完整明细。[全部时钟域估算](artifacts/round8/timing_summary.txt) · [GPU setup 路径](artifacts/round8/synthesis-clk_gpu-setup.txt)
+`clk_gpu` 综合估算从第 7 轮的 50.2539 MHz 提升至 114.9311 MHz。补跑时复用第 8 轮的 Compile ADF 和原 FDC，在独立 G 盘目录执行 ADS 综合，设置 `-max_path 200 -nworst 1 -clock_group_limit {clk_gpu}`。PDS 输出并核对了 200 条同域 setup 路径及 200 个不同端点，slack 从 −3.145 ns 到 −2.266 ns。最差路径仍为 `u_geometry/u_project/N788_m1/CLK` 到 `N788_m4/Z[19]`，11 逻辑级。时序和综合资源数字与原 GUI 综合报告一致。[全部时钟域估算](artifacts/round8/timing_summary.txt) · [GPU 最差 200 条 setup 路径](artifacts/round8/setup_top200_clk_gpu.txt) · [GPU 前 20 条逐级明细](artifacts/round8/setup_top20_detail.txt) · [补跑结果对照](artifacts/round8/setup_export_comparison.txt)
 
 综合报告记录 2,110 组控制集，`maximum fanout` 为 35,549，对应控制集表中的 `CLK(clk_gpu_w)` 单独时钟项。Device Map 的全局 GPU 时钟网 `ntclkbufg_0` 扇出为 155,587。Other 表中 GPU 非时钟信号包括 `u_palette/g_current[0].u_ram/rd_en_r`（2,592）和 `u_geometry/polygon_accept_w`（2,129）。Reset、CE 和 Other 三张原表均已回传。[高扇出报告](artifacts/round8/high_fanout.txt)
 
