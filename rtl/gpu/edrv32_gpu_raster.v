@@ -135,15 +135,14 @@ module edrv32_gpu_raster (
     wire [5:0] edge_negative_w;
     wire [2:0] edge_inclusive_w;
     wire [1:0] clip_w;
-    reg [8:0] delay_write_r;
+    reg [5:0] delay_write_r;
     wire [4:0] metadata_9_input_w;
     wire [71:0] unused_metadata_9_data_w;
-    wire [8:0] metadata_9_read_w;
     wire [2:0] pipe_inclusive_w;
     wire [1:0] pipe_clip_w;
     wire [105:0] metadata_10_input_w;
     wire [143:0] unused_metadata_10_data_w;
-    wire [8:0] metadata_10_read_w;
+    wire [5:0] metadata_10_read_w;
     wire [15:0] pipe_x_w;
     wire [15:0] pipe_y_w;
     wire [69:0] pipe_h_w;
@@ -257,21 +256,23 @@ module edrv32_gpu_raster (
         if (!rst_n_i) delay_write_r <= 0;
         else delay_write_r <= delay_write_r + 1'b1;
     end
-    assign metadata_9_read_w = delay_write_r - 9'd4;
     assign metadata_9_input_w[0 +: 3] = inclusive_r;
     assign pipe_inclusive_w = unused_metadata_9_data_w[0 +: 3];
     assign metadata_9_input_w[3 +: 2] = clip_w;
     assign pipe_clip_w = unused_metadata_9_data_w[3 +: 2];
-    edrv32_ram_gpu_delay u_metadata_9_0 (
-        .clk_i(clk_i),
-        .wr_en_i(1'b1),
-        .wr_addr_i(delay_write_r),
-        .wr_data_i({67'b0, metadata_9_input_w[0 +: 5]}),
-        .rd_en_i(1'b1),
-        .rd_addr_i(metadata_9_read_w),
-        .rd_data_o(unused_metadata_9_data_w[0 +: 72])
-    );
-    assign metadata_10_read_w = delay_write_r - 9'd5;
+    // 5 enabled stages, including the former RAM output register.
+    reg [4:0] metadata9_r [0:4];
+    integer metadata9_stage;
+    always @(posedge clk_i) begin
+        if (1'b1) begin
+            metadata9_r[0] <= metadata_9_input_w[0 +: 5];
+            for (metadata9_stage = 1; metadata9_stage < 5;
+                metadata9_stage = metadata9_stage + 1)
+                metadata9_r[metadata9_stage] <= metadata9_r[metadata9_stage-1];
+        end
+    end
+    assign unused_metadata_9_data_w[0 +: 72] = {67'b0, metadata9_r[4]};
+    assign metadata_10_read_w = delay_write_r - 6'd5;
     assign metadata_10_input_w[0 +: 16] = x_r[15:0];
     assign pipe_x_w = unused_metadata_10_data_w[0 +: 16];
     assign metadata_10_input_w[16 +: 16] = y_r[15:0];
@@ -280,23 +281,33 @@ module edrv32_gpu_raster (
     assign pipe_h_w = unused_metadata_10_data_w[32 +: 70];
     assign metadata_10_input_w[102 +: 4] = palette_r;
     assign pipe_palette_w = unused_metadata_10_data_w[102 +: 4];
-    edrv32_ram_gpu_delay u_metadata_10_0 (
+    wire [71:0] u_metadata_10_0_data_w;
+    reg [71:0] u_metadata_10_0_data_r;
+    assign unused_metadata_10_data_w[0 +: 72] = u_metadata_10_0_data_r;
+    always @(posedge clk_i) begin
+        if (1'b1) u_metadata_10_0_data_r <= u_metadata_10_0_data_w;
+    end
+    edrv32_ram_gpu_table u_metadata_10_0 (
         .clk_i(clk_i),
         .wr_en_i(1'b1),
         .wr_addr_i(delay_write_r),
         .wr_data_i(metadata_10_input_w[0 +: 72]),
-        .rd_en_i(1'b1),
         .rd_addr_i(metadata_10_read_w),
-        .rd_data_o(unused_metadata_10_data_w[0 +: 72])
+        .rd_data_o(u_metadata_10_0_data_w)
     );
-    edrv32_ram_gpu_delay u_metadata_10_1 (
+    wire [71:0] u_metadata_10_1_data_w;
+    reg [71:0] u_metadata_10_1_data_r;
+    assign unused_metadata_10_data_w[72 +: 72] = u_metadata_10_1_data_r;
+    always @(posedge clk_i) begin
+        if (1'b1) u_metadata_10_1_data_r <= u_metadata_10_1_data_w;
+    end
+    edrv32_ram_gpu_table u_metadata_10_1 (
         .clk_i(clk_i),
         .wr_en_i(1'b1),
         .wr_addr_i(delay_write_r),
         .wr_data_i({38'b0, metadata_10_input_w[72 +: 34]}),
-        .rd_en_i(1'b1),
         .rd_addr_i(metadata_10_read_w),
-        .rd_data_o(unused_metadata_10_data_w[72 +: 72])
+        .rd_data_o(u_metadata_10_1_data_w)
     );
     genvar attribute;
     genvar lane;

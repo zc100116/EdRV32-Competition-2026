@@ -536,34 +536,38 @@ module edrv32_gpu_transform (
     wire [5:0] pipeline_enable_w;
     // Eight enabled clocks of coordinate alignment, packed into three existing 72-bit DRMs.
     // The synchronous read supplies the eighth clock; seven addresses separate read/write.
-    reg [8:0] coordinate_write_r;
-    wire [8:0] coordinate_read_w;
+    reg [5:0] coordinate_write_r;
+    wire [5:0] coordinate_read_w;
     wire [215:0] coordinate_store_w;
     wire [215:0] coordinate_delay_w;
     wire [55:0] unused_coordinate_padding_w;
     assign coordinate_store_w = {56'b0, coordinate3_w, coordinate2_w,
         coordinate1_w, coordinate0_w};
-    assign coordinate_read_w = coordinate_write_r - 9'd7;
+    assign coordinate_read_w = coordinate_write_r - 6'd7;
     assign unused_coordinate_padding_w = coordinate_delay_w[215:160];
     always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) coordinate_write_r <= 9'd0;
-        else if (stop_i) coordinate_write_r <= 9'd0;
-        else if (pipeline_enable_w[4]) coordinate_write_r <= coordinate_write_r + 9'd1;
+        if (!rst_n_i) coordinate_write_r <= 6'd0;
+        else if (stop_i) coordinate_write_r <= 6'd0;
+        else if (pipeline_enable_w[4]) coordinate_write_r <= coordinate_write_r + 6'd1;
     end
     genvar coordinate_ram_g;
     generate
         for (coordinate_ram_g = 0; coordinate_ram_g < 3;
             coordinate_ram_g = coordinate_ram_g + 1) begin : g_coordinate_ram
-            edrv32_ram_gpu_delay u_delay (
+            wire [71:0] u_delay_data_w;
+            reg [71:0] u_delay_data_r;
+            assign coordinate_delay_w[coordinate_ram_g*72 +: 72] = u_delay_data_r;
+            always @(posedge clk_i) begin
+                if (pipeline_enable_w[4]) u_delay_data_r <= u_delay_data_w;
+            end
+            edrv32_ram_gpu_table u_delay (
                 .clk_i(clk_i),
 
                 .wr_en_i(pipeline_enable_w[4]),
                 .wr_addr_i(coordinate_write_r),
                 .wr_data_i(coordinate_store_w[coordinate_ram_g*72 +: 72]),
-
-                .rd_en_i(pipeline_enable_w[4]),
                 .rd_addr_i(coordinate_read_w),
-                .rd_data_o(coordinate_delay_w[coordinate_ram_g*72 +: 72])
+                .rd_data_o(u_delay_data_w)
             );
         end
     endgenerate
@@ -583,8 +587,7 @@ module edrv32_gpu_transform (
     // At II=2, sixteen slots outlive the nineteen-clock vertex pipeline.
     // Store each field once; tags select RGB at clock 10 and UV at clock 18.
     reg [3:0] context_write_r;
-    reg [15:0] vertex_color_r [0:15];
-    reg [31:0] vertex_uv_r [0:15];
+
     wire [75:0] context_tag_w;
     wire [3:0] color_tag_w;
     wire [3:0] uv_tag_w;
@@ -595,8 +598,8 @@ module edrv32_gpu_transform (
     wire [7:0] base_color2_w;
     assign color_tag_w = context_tag_w[40 +: 4];
     assign uv_tag_w = context_tag_w[72 +: 4];
-    assign vertex_color_w = vertex_color_r[color_tag_w];
-    assign vertex_uv_w = vertex_uv_r[uv_tag_w];
+    assign vertex_color_w = unused_vertex_color_read0_w[0 +: 16];
+    assign vertex_uv_w = unused_vertex_uv_read0_w[0 +: 32];
     assign base_color0_w = {vertex_color_w[15:11], vertex_color_w[15:13]};
     assign base_color1_w = {vertex_color_w[10:5], vertex_color_w[10:9]};
     assign base_color2_w = {vertex_color_w[4:0], vertex_color_w[4:2]};
@@ -604,12 +607,6 @@ module edrv32_gpu_transform (
         if (!rst_n_i) context_write_r <= 4'd0;
         else if (stop_i) context_write_r <= 4'd0;
         else if (accept_w) context_write_r <= context_write_r + 4'd1;
-    end
-    always @(posedge clk_i) begin
-        if (accept_w) begin
-            vertex_color_r[context_write_r] <= vertex_data_i[95:80];
-            vertex_uv_r[context_write_r] <= vertex_data_i[127:96];
-        end
     end
     genvar context_stage_g;
     generate
@@ -885,4 +882,28 @@ module edrv32_gpu_transform (
             if (accept_w) vertex_r <= vertex_data_i[47:0];
         end
     end
+    // Explicit LUTRAM vertex_color: 1 slice(s) per combinational read port.
+    wire [71:0] vertex_color_input_w;
+    assign vertex_color_input_w = {56'b0, vertex_data_i[95:80]};
+    wire [71:0] unused_vertex_color_read0_w;
+    edrv32_ram_gpu_table u_vertex_color_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(accept_w),
+        .wr_addr_i({2'b0, context_write_r}),
+        .wr_data_i(vertex_color_input_w[0 +: 72]),
+        .rd_addr_i({2'b0, color_tag_w}),
+        .rd_data_o(unused_vertex_color_read0_w[0 +: 72])
+    );
+    // Explicit LUTRAM vertex_uv: 1 slice(s) per combinational read port.
+    wire [71:0] vertex_uv_input_w;
+    assign vertex_uv_input_w = {40'b0, vertex_data_i[127:96]};
+    wire [71:0] unused_vertex_uv_read0_w;
+    edrv32_ram_gpu_table u_vertex_uv_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(accept_w),
+        .wr_addr_i({2'b0, context_write_r}),
+        .wr_data_i(vertex_uv_input_w[0 +: 72]),
+        .rd_addr_i({2'b0, uv_tag_w}),
+        .rd_data_o(unused_vertex_uv_read0_w[0 +: 72])
+    );
 endmodule

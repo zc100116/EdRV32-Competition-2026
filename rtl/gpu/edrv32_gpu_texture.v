@@ -683,12 +683,9 @@ module edrv32_gpu_texture (
     wire [4:0] schedule_slot_w;
     wire [31:0] lod_ready_w;
     wire [3:0] completed_w [0:31];
-    reg [15:0] x_r [0:31];
-    reg [15:0] y_r [0:31];
+
     reg [3:0] mask_r [0:31];
-    reg [63:0] depth_r [0:31];
-    reg [95:0] color_r [0:31];
-    reg [7:0] alpha_r [0:31];
+
     reg quad_r [0:31];
     reg [3:0] palette_r [0:31];
     reg [4:0] cfg_wait_r;
@@ -701,9 +698,9 @@ module edrv32_gpu_texture (
     assign shaded_valid_o = occupancy_w != 0 && completed_w[retire_r[4:0]] == 4'hf
                             && !stop_i;
     assign retire_w = shaded_valid_o && shaded_ready_i;
-    assign shaded_x_o = x_r[retire_r[4:0]];
-    assign shaded_y_o = y_r[retire_r[4:0]];
-    assign shaded_depth_o = depth_r[retire_r[4:0]];
+    assign shaded_x_o = unused_retire_context_read0_w[0 +: 16];
+    assign shaded_y_o = unused_retire_context_read0_w[16 +: 16];
+    assign shaded_depth_o = unused_retire_context_read0_w[32 +: 64];
     assign schedule_slot_w = schedule_r[4:0];
     assign schedule_valid_w = schedule_r != allocate_r
                                 && schedule_ready_w && !stop_i;
@@ -1043,32 +1040,70 @@ module edrv32_gpu_texture (
     genvar lane;
     generate
         for (lane = 0; lane < 4; lane = lane + 1) begin : g_lod
-            reg [31:0] u_r [0:31];
-            reg [31:0] v_r [0:31];
-            reg [11:0] lod_r [0:31];
-            reg [23:0] result_color_r [0:31];
-            reg [7:0] result_alpha_r [0:31];
+
             reg result_mask_r [0:31];
+            // Explicit LUTRAM uv_context: 1 slice(s) per combinational read port.
+            wire [71:0] uv_context_input_w;
+            assign uv_context_input_w =
+                {8'b0, sample_v_i[lane*32 +: 32], sample_u_i[lane*32 +: 32]};
+            wire [71:0] unused_uv_context_read0_w;
+            edrv32_ram_gpu_table u_uv_context_p0_b0 (
+                .clk_i(clk_i),
+                .wr_en_i(accept_w),
+                .wr_addr_i({1'b0, allocate_r[4:0]}),
+                .wr_data_i(uv_context_input_w[0 +: 72]),
+                .rd_addr_i({1'b0, lod_slot_r[2]}),
+                .rd_data_o(unused_uv_context_read0_w[0 +: 72])
+            );
+            // Explicit LUTRAM lod_context: 1 slice(s) per combinational read port.
+            wire [71:0] lod_context_input_w;
+            assign lod_context_input_w = {60'b0, clamped_w};
+            wire [71:0] unused_lod_context_read0_w;
+            edrv32_ram_gpu_table u_lod_context_p0_b0 (
+                .clk_i(clk_i),
+                .wr_en_i(lod_valid_r[2]),
+                .wr_addr_i({1'b0, lod_slot_r[2]}),
+                .wr_data_i(lod_context_input_w[0 +: 72]),
+                .rd_addr_i({1'b0, schedule_even_index_w, 1'b0}),
+                .rd_data_o(unused_lod_context_read0_w[0 +: 72])
+            );
+            wire [71:0] unused_lod_context_read1_w;
+            edrv32_ram_gpu_table u_lod_context_p1_b0 (
+                .clk_i(clk_i),
+                .wr_en_i(lod_valid_r[2]),
+                .wr_addr_i({1'b0, lod_slot_r[2]}),
+                .wr_data_i(lod_context_input_w[0 +: 72]),
+                .rd_addr_i({1'b0, schedule_odd_index_w, 1'b1}),
+                .rd_data_o(unused_lod_context_read1_w[0 +: 72])
+            );
+            // Explicit LUTRAM result_context: 1 slice(s) per combinational read port.
+            wire [71:0] result_context_input_w;
+            assign result_context_input_w =
+                {40'b0, modulated_alpha_w[lane*8 +: 8], modulated_color_w[lane*24 +: 24]};
+            wire [71:0] unused_result_context_read0_w;
+            edrv32_ram_gpu_table u_result_context_p0_b0 (
+                .clk_i(clk_i),
+                .wr_en_i(filter_valid_r[7] && filter_done_r[7][lane]),
+                .wr_addr_i({1'b0, filter_slot_r[7]}),
+                .wr_data_i(result_context_input_w[0 +: 72]),
+                .rd_addr_i({1'b0, retire_r[4:0]}),
+                .rd_data_o(unused_result_context_read0_w[0 +: 72])
+            );
             reg [11:0] lod_even_r;
             reg [11:0] lod_odd_r;
             assign lane_lod_w[lane] = schedule_slot_w[0] ? lod_odd_r : lod_even_r;
-            assign address_input_u_w[lane*32 +: 32] = u_r[lod_slot_r[2]];
-            assign address_input_v_w[lane*32 +: 32] = v_r[lod_slot_r[2]];
+            assign address_input_u_w[lane*32 +: 32] = unused_uv_context_read0_w[0 +: 32];
+            assign address_input_v_w[lane*32 +: 32] = unused_uv_context_read0_w[32 +: 32];
             always @(posedge clk_i) begin
-                lod_even_r <= lod_r[{schedule_even_index_w, 1'b0}];
-                lod_odd_r <= lod_r[{schedule_odd_index_w, 1'b1}];
+                lod_even_r <= unused_lod_context_read0_w[0 +: 12];
+                lod_odd_r <= unused_lod_context_read1_w[0 +: 12];
             end
-            assign shaded_color_o[lane*24 +: 24] = result_color_r[retire_r[4:0]];
-            assign shaded_alpha_o[lane*8 +: 8] = result_alpha_r[retire_r[4:0]];
+            assign shaded_color_o[lane*24 +: 24] = unused_result_context_read0_w[0 +: 24];
+            assign shaded_alpha_o[lane*8 +: 8] = unused_result_context_read0_w[24 +: 8];
             assign shaded_mask_o[lane] = result_mask_r[retire_r[4:0]];
             always @(posedge clk_i) begin
-                if (accept_w) begin
-                    u_r[allocate_r[4:0]] <= sample_u_i[lane*32 +: 32];
-                    v_r[allocate_r[4:0]] <= sample_v_i[lane*32 +: 32];
-                end
                 if (filter_valid_r[7] && filter_done_r[7][lane]) begin
-                    result_color_r[filter_slot_r[7]] <= modulated_color_w[lane*24 +: 24];
-                    result_alpha_r[filter_slot_r[7]] <= modulated_alpha_w[lane*8 +: 8];
+
                     result_mask_r[filter_slot_r[7]] <= shade_mask_r[lane];
                 end
             end
@@ -1143,7 +1178,7 @@ module edrv32_gpu_texture (
                 logarithm_r <= zero_last_r ? 16'sd0 :
                     (16'sd79 - $signed({9'b0, shift_last_r})) * 16'sd256
                     + $signed({7'b0, log_fraction(fraction_r)});
-                if (lod_valid_r[2]) lod_r[lod_slot_r[2]] <= clamped_w;
+
             end
         end
     endgenerate
@@ -1381,22 +1416,30 @@ module edrv32_gpu_texture (
     assign nearest_triple_w = nearest_compare_w[21:6];
     generate
         begin : g_nearest_compare
-            reg [21:0] even_r [0:15];
-            reg [21:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [21:0] even_cache_r;
             reg [21:0] odd_cache_r;
             assign nearest_compare_w = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({50'b0, nearest_compare_input_w}),
+                .rd_addr_i({2'b0, address_even_index0_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({50'b0, nearest_compare_input_w}),
+                .rd_addr_i({2'b0, address_odd_index0_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= nearest_compare_input_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= nearest_compare_input_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index0_w];
-                odd_cache_r <= odd_r[address_odd_index0_w];
+                even_cache_r <= unused_even_data_w[21:0];
+                odd_cache_r <= unused_odd_data_w[21:0];
             end
         end
     endgenerate
@@ -1686,12 +1729,12 @@ module edrv32_gpu_texture (
     wire [31:0] return_subword_r [0:4];
     wire [135:0] return_weight_w;
     wire [7:0] return_fraction_w;
-    // Nine-cycle filter metadata: one 144-bit circular RAM, split into two DRM banks.
-    reg [8:0] metadata_write_r;
-    wire [8:0] metadata_read_w;
+    // Nine-cycle filter metadata: one 144-bit circular table, split into two LUTRAM slices.
+    reg [5:0] metadata_write_r;
+    wire [5:0] metadata_read_w;
     wire [143:0] metadata_input_w;
     wire [143:0] metadata_data_w;
-    assign metadata_read_w = metadata_write_r - 9'd5;
+    assign metadata_read_w = metadata_write_r - 6'd5;
     assign metadata_input_w = {weight_fraction_pipe_r[24 +: 8], tap_weight_w};
     reg [143:0] metadata_input_r;
     always @(posedge clk_i) begin
@@ -1707,14 +1750,19 @@ module edrv32_gpu_texture (
     generate
         for (metadata_bank = 0; metadata_bank < 2;
             metadata_bank = metadata_bank + 1) begin : g_delay
-            edrv32_ram_gpu_delay u_metadata (
+            wire [71:0] u_metadata_data_w;
+            reg [71:0] u_metadata_data_r;
+            assign metadata_data_w[metadata_bank*72 +: 72] = u_metadata_data_r;
+            always @(posedge clk_i) begin
+                if (1'b1) u_metadata_data_r <= u_metadata_data_w;
+            end
+            edrv32_ram_gpu_table u_metadata (
                 .clk_i(clk_i),
                 .wr_en_i(1'b1),
                 .wr_addr_i(metadata_write_r),
                 .wr_data_i(metadata_input_r[metadata_bank*72 +: 72]),
-                .rd_en_i(1'b1),
                 .rd_addr_i(metadata_read_w),
-                .rd_data_o(metadata_data_w[metadata_bank*72 +: 72])
+                .rd_data_o(u_metadata_data_w)
             );
         end
     endgenerate
@@ -1910,7 +1958,7 @@ module edrv32_gpu_texture (
             assign alpha_w = selected_w[31:24];
             always @(posedge clk_i) begin
                 selected_input_r <= selected_w;
-                color_input_r <= color_r[filter_slot_r[5]][filter_pixel*24 +: 24];
+                color_input_r <= unused_shade_context_read0_w[filter_pixel*24 +: 24];
                 enabled_input_r <= enabled_w;
             end
             assign alpha_products_w[filter_pixel*16 +: 16] =
@@ -1949,7 +1997,7 @@ module edrv32_gpu_texture (
         filtered_r <= filtered_w;
         shade_products_r <= shade_products_w;
         alpha_products_r <= alpha_products_w;
-        global_alpha_input_r <= alpha_r[filter_slot_r[5]];
+        global_alpha_input_r <= unused_shade_context_read0_w[96 +: 8];
         shade_enabled_r <= shade_enabled_input_w;
         unmodulated_alpha_input_r <= unmodulated_alpha_w;
         unmodulated_alpha_r <= unmodulated_alpha_input_r;
@@ -2020,12 +2068,9 @@ module edrv32_gpu_texture (
             offset_r <= {render_state_tex_i[49:37], 5'b0};
         end
         if (accept_w) begin
-            x_r[allocate_r[4:0]] <= sample_x_i;
-            y_r[allocate_r[4:0]] <= sample_y_i;
+
             mask_r[allocate_r[4:0]] <= sample_mask_i;
-            depth_r[allocate_r[4:0]] <= sample_depth_i;
-            color_r[allocate_r[4:0]] <= sample_color_i;
-            alpha_r[allocate_r[4:0]] <= sample_alpha_i;
+
             quad_r[allocate_r[4:0]] <= sample_quad_i;
             palette_r[allocate_r[4:0]] <= sample_quad_i ? sample_palette_i : group_r;
         end
@@ -2402,232 +2447,320 @@ module edrv32_gpu_texture (
     end
     generate
         begin : g_address_pool_tap_0_0
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[0] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_0_0_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index0_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_0_0_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index0_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_0_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_0_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index0_w];
-                odd_cache_r <= odd_r[address_odd_index0_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_0_1
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[1] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_0_1_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index0_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_0_1_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index0_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_1_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_1_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index0_w];
-                odd_cache_r <= odd_r[address_odd_index0_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_0_2
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[2] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_0_2_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index0_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_0_2_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index0_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_2_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_2_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index0_w];
-                odd_cache_r <= odd_r[address_odd_index0_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_0_3
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[3] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_0_3_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index0_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_0_3_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index0_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_3_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_3_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index0_w];
-                odd_cache_r <= odd_r[address_odd_index0_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_0_4
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[4] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_1_0_w}),
+                .rd_addr_i({2'b0, address_even_index0_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_1_0_w}),
+                .rd_addr_i({2'b0, address_odd_index0_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_0_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_0_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index0_w];
-                odd_cache_r <= odd_r[address_odd_index0_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_0_5
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[5] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_1_1_w}),
+                .rd_addr_i({2'b0, address_even_index0_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_1_1_w}),
+                .rd_addr_i({2'b0, address_odd_index0_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_1_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_1_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index0_w];
-                odd_cache_r <= odd_r[address_odd_index0_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_0_6
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[6] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_1_2_w}),
+                .rd_addr_i({2'b0, address_even_index0_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_1_2_w}),
+                .rd_addr_i({2'b0, address_odd_index0_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_2_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_2_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index0_w];
-                odd_cache_r <= odd_r[address_odd_index0_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_0_7
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[7] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_1_3_w}),
+                .rd_addr_i({2'b0, address_even_index0_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_1_3_w}),
+                .rd_addr_i({2'b0, address_odd_index0_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_3_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_1_3_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index0_w];
-                odd_cache_r <= odd_r[address_odd_index0_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_0_8
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[8] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_0_4_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index0_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record0_0_4_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index0_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_4_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record0_0_4_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index0_w];
-                odd_cache_r <= odd_r[address_odd_index0_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_fraction_0_0
-            reg [15:0] even_r [0:15];
-            reg [15:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [15:0] even_cache_r;
             reg [15:0] odd_cache_r;
             assign fraction_cache_w[0] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction0_0_d5_r}),
+                .rd_addr_i({2'b0, address_even_index0_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction0_0_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index0_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction0_0_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction0_0_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index0_w];
-                odd_cache_r <= odd_r[address_odd_index0_w];
+                even_cache_r <= unused_even_data_w[15:0];
+                odd_cache_r <= unused_odd_data_w[15:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_fraction_0_1
-            reg [15:0] even_r [0:15];
-            reg [15:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [15:0] even_cache_r;
             reg [15:0] odd_cache_r;
             assign fraction_cache_w[1] = address_read_slot0_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction0_1_d5_r}),
+                .rd_addr_i({2'b0, address_even_index0_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction0_1_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index0_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction0_1_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction0_1_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index0_w];
-                odd_cache_r <= odd_r[address_odd_index0_w];
+                even_cache_r <= unused_even_data_w[15:0];
+                odd_cache_r <= unused_odd_data_w[15:0];
             end
         end
     endgenerate
@@ -2645,232 +2778,320 @@ module edrv32_gpu_texture (
     end
     generate
         begin : g_address_pool_tap_1_0
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[9] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_0_0_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index1_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_0_0_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index1_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_0_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_0_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index1_w];
-                odd_cache_r <= odd_r[address_odd_index1_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_1_1
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[10] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_0_1_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index1_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_0_1_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index1_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_1_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_1_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index1_w];
-                odd_cache_r <= odd_r[address_odd_index1_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_1_2
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[11] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_0_2_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index1_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_0_2_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index1_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_2_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_2_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index1_w];
-                odd_cache_r <= odd_r[address_odd_index1_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_1_3
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[12] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_0_3_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index1_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_0_3_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index1_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_3_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_3_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index1_w];
-                odd_cache_r <= odd_r[address_odd_index1_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_1_4
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[13] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_1_0_w}),
+                .rd_addr_i({2'b0, address_even_index1_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_1_0_w}),
+                .rd_addr_i({2'b0, address_odd_index1_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_0_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_0_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index1_w];
-                odd_cache_r <= odd_r[address_odd_index1_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_1_5
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[14] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_1_1_w}),
+                .rd_addr_i({2'b0, address_even_index1_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_1_1_w}),
+                .rd_addr_i({2'b0, address_odd_index1_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_1_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_1_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index1_w];
-                odd_cache_r <= odd_r[address_odd_index1_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_1_6
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[15] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_1_2_w}),
+                .rd_addr_i({2'b0, address_even_index1_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_1_2_w}),
+                .rd_addr_i({2'b0, address_odd_index1_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_2_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_2_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index1_w];
-                odd_cache_r <= odd_r[address_odd_index1_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_1_7
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[16] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_1_3_w}),
+                .rd_addr_i({2'b0, address_even_index1_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_1_3_w}),
+                .rd_addr_i({2'b0, address_odd_index1_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_3_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_1_3_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index1_w];
-                odd_cache_r <= odd_r[address_odd_index1_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_1_8
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[17] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_0_4_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index1_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record1_0_4_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index1_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_4_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record1_0_4_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index1_w];
-                odd_cache_r <= odd_r[address_odd_index1_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_fraction_1_0
-            reg [15:0] even_r [0:15];
-            reg [15:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [15:0] even_cache_r;
             reg [15:0] odd_cache_r;
             assign fraction_cache_w[2] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction1_0_d5_r}),
+                .rd_addr_i({2'b0, address_even_index1_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction1_0_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index1_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction1_0_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction1_0_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index1_w];
-                odd_cache_r <= odd_r[address_odd_index1_w];
+                even_cache_r <= unused_even_data_w[15:0];
+                odd_cache_r <= unused_odd_data_w[15:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_fraction_1_1
-            reg [15:0] even_r [0:15];
-            reg [15:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [15:0] even_cache_r;
             reg [15:0] odd_cache_r;
             assign fraction_cache_w[3] = address_read_slot1_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction1_1_d5_r}),
+                .rd_addr_i({2'b0, address_even_index1_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction1_1_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index1_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction1_1_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction1_1_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index1_w];
-                odd_cache_r <= odd_r[address_odd_index1_w];
+                even_cache_r <= unused_even_data_w[15:0];
+                odd_cache_r <= unused_odd_data_w[15:0];
             end
         end
     endgenerate
@@ -2888,232 +3109,320 @@ module edrv32_gpu_texture (
     end
     generate
         begin : g_address_pool_tap_2_0
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[18] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_0_0_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index2_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_0_0_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index2_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_0_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_0_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index2_w];
-                odd_cache_r <= odd_r[address_odd_index2_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_2_1
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[19] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_0_1_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index2_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_0_1_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index2_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_1_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_1_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index2_w];
-                odd_cache_r <= odd_r[address_odd_index2_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_2_2
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[20] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_0_2_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index2_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_0_2_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index2_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_2_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_2_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index2_w];
-                odd_cache_r <= odd_r[address_odd_index2_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_2_3
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[21] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_0_3_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index2_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_0_3_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index2_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_3_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_3_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index2_w];
-                odd_cache_r <= odd_r[address_odd_index2_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_2_4
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[22] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_1_0_w}),
+                .rd_addr_i({2'b0, address_even_index2_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_1_0_w}),
+                .rd_addr_i({2'b0, address_odd_index2_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_0_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_0_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index2_w];
-                odd_cache_r <= odd_r[address_odd_index2_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_2_5
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[23] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_1_1_w}),
+                .rd_addr_i({2'b0, address_even_index2_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_1_1_w}),
+                .rd_addr_i({2'b0, address_odd_index2_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_1_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_1_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index2_w];
-                odd_cache_r <= odd_r[address_odd_index2_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_2_6
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[24] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_1_2_w}),
+                .rd_addr_i({2'b0, address_even_index2_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_1_2_w}),
+                .rd_addr_i({2'b0, address_odd_index2_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_2_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_2_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index2_w];
-                odd_cache_r <= odd_r[address_odd_index2_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_2_7
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[25] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_1_3_w}),
+                .rd_addr_i({2'b0, address_even_index2_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_1_3_w}),
+                .rd_addr_i({2'b0, address_odd_index2_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_3_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_1_3_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index2_w];
-                odd_cache_r <= odd_r[address_odd_index2_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_2_8
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[26] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_0_4_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index2_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record2_0_4_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index2_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_4_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record2_0_4_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index2_w];
-                odd_cache_r <= odd_r[address_odd_index2_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_fraction_2_0
-            reg [15:0] even_r [0:15];
-            reg [15:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [15:0] even_cache_r;
             reg [15:0] odd_cache_r;
             assign fraction_cache_w[4] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction2_0_d5_r}),
+                .rd_addr_i({2'b0, address_even_index2_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction2_0_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index2_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction2_0_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction2_0_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index2_w];
-                odd_cache_r <= odd_r[address_odd_index2_w];
+                even_cache_r <= unused_even_data_w[15:0];
+                odd_cache_r <= unused_odd_data_w[15:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_fraction_2_1
-            reg [15:0] even_r [0:15];
-            reg [15:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [15:0] even_cache_r;
             reg [15:0] odd_cache_r;
             assign fraction_cache_w[5] = address_read_slot2_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction2_1_d5_r}),
+                .rd_addr_i({2'b0, address_even_index2_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction2_1_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index2_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction2_1_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction2_1_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index2_w];
-                odd_cache_r <= odd_r[address_odd_index2_w];
+                even_cache_r <= unused_even_data_w[15:0];
+                odd_cache_r <= unused_odd_data_w[15:0];
             end
         end
     endgenerate
@@ -3131,232 +3440,320 @@ module edrv32_gpu_texture (
     end
     generate
         begin : g_address_pool_tap_3_0
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[27] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_0_0_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index3_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_0_0_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index3_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_0_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_0_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index3_w];
-                odd_cache_r <= odd_r[address_odd_index3_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_3_1
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[28] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_0_1_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index3_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_0_1_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index3_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_1_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_1_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index3_w];
-                odd_cache_r <= odd_r[address_odd_index3_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_3_2
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[29] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_0_2_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index3_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_0_2_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index3_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_2_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_2_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index3_w];
-                odd_cache_r <= odd_r[address_odd_index3_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_3_3
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[30] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_0_3_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index3_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_0_3_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index3_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_3_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_3_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index3_w];
-                odd_cache_r <= odd_r[address_odd_index3_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_3_4
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[31] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_1_0_w}),
+                .rd_addr_i({2'b0, address_even_index3_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_1_0_w}),
+                .rd_addr_i({2'b0, address_odd_index3_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_0_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_0_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index3_w];
-                odd_cache_r <= odd_r[address_odd_index3_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_3_5
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[32] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_1_1_w}),
+                .rd_addr_i({2'b0, address_even_index3_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_1_1_w}),
+                .rd_addr_i({2'b0, address_odd_index3_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_1_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_1_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index3_w];
-                odd_cache_r <= odd_r[address_odd_index3_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_3_6
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[33] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_1_2_w}),
+                .rd_addr_i({2'b0, address_even_index3_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_1_2_w}),
+                .rd_addr_i({2'b0, address_odd_index3_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_2_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_2_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index3_w];
-                odd_cache_r <= odd_r[address_odd_index3_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_3_7
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[34] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_1_3_w}),
+                .rd_addr_i({2'b0, address_even_index3_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_1_3_w}),
+                .rd_addr_i({2'b0, address_odd_index3_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_3_w;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_1_3_w;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index3_w];
-                odd_cache_r <= odd_r[address_odd_index3_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_tap_3_8
-            reg [20:0] even_r [0:15];
-            reg [20:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [20:0] even_cache_r;
             reg [20:0] odd_cache_r;
             assign address_cache_w[35] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_0_4_w_d5_r}),
+                .rd_addr_i({2'b0, address_even_index3_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({51'b0, address_record3_0_4_w_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index3_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_4_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_record3_0_4_w_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index3_w];
-                odd_cache_r <= odd_r[address_odd_index3_w];
+                even_cache_r <= unused_even_data_w[20:0];
+                odd_cache_r <= unused_odd_data_w[20:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_fraction_3_0
-            reg [15:0] even_r [0:15];
-            reg [15:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [15:0] even_cache_r;
             reg [15:0] odd_cache_r;
             assign fraction_cache_w[6] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction3_0_d5_r}),
+                .rd_addr_i({2'b0, address_even_index3_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction3_0_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index3_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction3_0_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction3_0_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index3_w];
-                odd_cache_r <= odd_r[address_odd_index3_w];
+                even_cache_r <= unused_even_data_w[15:0];
+                odd_cache_r <= unused_odd_data_w[15:0];
             end
         end
     endgenerate
     generate
         begin : g_address_pool_fraction_3_1
-            reg [15:0] even_r [0:15];
-            reg [15:0] odd_r [0:15];
+            wire [71:0] unused_even_data_w;
+            wire [71:0] unused_odd_data_w;
             reg [15:0] even_cache_r;
             reg [15:0] odd_cache_r;
             assign fraction_cache_w[7] = address_read_slot3_r[0] ? odd_cache_r : even_cache_r;
+            edrv32_ram_gpu_table u_even (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && !address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction3_1_d5_r}),
+                .rd_addr_i({2'b0, address_even_index3_w}),
+                .rd_data_o(unused_even_data_w)
+            );
+            edrv32_ram_gpu_table u_odd (
+                .clk_i(clk_i),
+                .wr_en_i(address_valid_r[5] && address_slot_0_r_d5_r[0]),
+                .wr_addr_i({2'b0, address_slot_0_r_d5_r[4:1]}),
+                .wr_data_i({56'b0, address_fraction3_1_d5_r}),
+                .rd_addr_i({2'b0, address_odd_index3_w}),
+                .rd_data_o(unused_odd_data_w)
+            );
             always @(posedge clk_i) begin
-                if (address_valid_r[5] && !address_slot_0_r_d5_r[0])
-                    even_r[address_slot_0_r_d5_r[4:1]] <= address_fraction3_1_d5_r;
-            end
-            always @(posedge clk_i) begin
-                if (address_valid_r[5] && address_slot_0_r_d5_r[0])
-                    odd_r[address_slot_0_r_d5_r[4:1]] <= address_fraction3_1_d5_r;
-            end
-            always @(posedge clk_i) begin
-                even_cache_r <= even_r[address_even_index3_w];
-                odd_cache_r <= odd_r[address_odd_index3_w];
+                even_cache_r <= unused_even_data_w[15:0];
+                odd_cache_r <= unused_odd_data_w[15:0];
             end
         end
     endgenerate
@@ -4001,4 +4398,44 @@ module edrv32_gpu_texture (
     assign unused_address_scaled_v3_0_wide_w = $signed(address_v3_r) >>> address_level3_r;
     assign unused_address_scaled_u3_1_wide_w = $signed(address_u3_r_d1_r) >>> address_next_level3_r;
     assign unused_address_scaled_v3_1_wide_w = $signed(address_v3_r_d1_r) >>> address_next_level3_r;
+    // Explicit LUTRAM retire_context: 2 slice(s) per combinational read port.
+    wire [143:0] retire_context_input_w;
+    assign retire_context_input_w = {48'b0, sample_depth_i, sample_y_i, sample_x_i};
+    wire [143:0] unused_retire_context_read0_w;
+    edrv32_ram_gpu_table u_retire_context_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(accept_w),
+        .wr_addr_i({1'b0, allocate_r[4:0]}),
+        .wr_data_i(retire_context_input_w[0 +: 72]),
+        .rd_addr_i({1'b0, retire_r[4:0]}),
+        .rd_data_o(unused_retire_context_read0_w[0 +: 72])
+    );
+    edrv32_ram_gpu_table u_retire_context_p0_b1 (
+        .clk_i(clk_i),
+        .wr_en_i(accept_w),
+        .wr_addr_i({1'b0, allocate_r[4:0]}),
+        .wr_data_i(retire_context_input_w[72 +: 72]),
+        .rd_addr_i({1'b0, retire_r[4:0]}),
+        .rd_data_o(unused_retire_context_read0_w[72 +: 72])
+    );
+    // Explicit LUTRAM shade_context: 2 slice(s) per combinational read port.
+    wire [143:0] shade_context_input_w;
+    assign shade_context_input_w = {40'b0, sample_alpha_i, sample_color_i};
+    wire [143:0] unused_shade_context_read0_w;
+    edrv32_ram_gpu_table u_shade_context_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(accept_w),
+        .wr_addr_i({1'b0, allocate_r[4:0]}),
+        .wr_data_i(shade_context_input_w[0 +: 72]),
+        .rd_addr_i({1'b0, filter_slot_r[5]}),
+        .rd_data_o(unused_shade_context_read0_w[0 +: 72])
+    );
+    edrv32_ram_gpu_table u_shade_context_p0_b1 (
+        .clk_i(clk_i),
+        .wr_en_i(accept_w),
+        .wr_addr_i({1'b0, allocate_r[4:0]}),
+        .wr_data_i(shade_context_input_w[72 +: 72]),
+        .rd_addr_i({1'b0, filter_slot_r[5]}),
+        .rd_data_o(unused_shade_context_read0_w[72 +: 72])
+    );
 endmodule

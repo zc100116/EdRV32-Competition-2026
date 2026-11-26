@@ -31,14 +31,9 @@ module edrv32_gpu_setup_plane (
     // S-5: registered 18x18 APM partial products, sliced add trees and tagged context.
     reg [152:0] value_0_r;
     reg [6:0] tag_0_r;
-    reg [30:0] reciprocal_context_r [0:15];
+
     reg [5:0] exponent_context_r [0:15];
-    reg [17:0] delta_context0_r [0:15];
-    reg [17:0] delta_context1_r [0:15];
-    reg [17:0] delta_context2_r [0:15];
-    reg [17:0] delta_context3_r [0:15];
-    reg [17:0] offset_context0_r [0:15];
-    reg [17:0] offset_context1_r [0:15];
+
     wire [50:0] vertex0_w;
     wire [50:0] vertex1_w;
     wire [50:0] vertex2_w;
@@ -1361,7 +1356,6 @@ module edrv32_gpu_setup_plane (
     reg [50:0] maximum012_select_delay5_r;
     reg [50:0] maximum012_select_delay6_r;
     reg [50:0] maximum012_select_delay7_r;
-    wire [8:0] v52_0_w_d9_r_address_w;
     wire [71:0] unused_v52_0_w_d9_r_data_w;
     reg [51:0] v52_0_w_delay10_r;
     reg [51:0] v52_0_w_delay11_r;
@@ -1479,7 +1473,6 @@ module edrv32_gpu_setup_plane (
     reg [32:0] scale_left0_2_r_delay16_r;
     reg [32:0] scale_left0_2_r_delay17_r;
     reg [32:0] scale_left0_2_r_delay18_r;
-    wire [8:0] v52_1_w_d9_r_address_w;
     wire [71:0] unused_v52_1_w_d9_r_data_w;
     reg [51:0] v52_1_w_delay10_r;
     reg [51:0] v52_1_w_delay11_r;
@@ -1521,7 +1514,6 @@ module edrv32_gpu_setup_plane (
     reg [32:0] scale_left1_2_r_delay16_r;
     reg [32:0] scale_left1_2_r_delay17_r;
     reg [32:0] scale_left1_2_r_delay18_r;
-    wire [8:0] v52_2_w_d9_r_address_w;
     wire [71:0] unused_v52_2_w_d9_r_data_w;
     reg [51:0] v52_2_w_delay10_r;
     reg [51:0] v52_2_w_delay11_r;
@@ -1650,7 +1642,6 @@ module edrv32_gpu_setup_plane (
     reg [0:0] gradient_bias0_amt3_w_delay3_r;
     reg [0:0] gradient_bias0_amt3_w_delay4_r;
     reg [0:0] gradient_bias0_amt3_w_delay5_r;
-    wire [8:0] gradient_bias0_3_r_d40_r_address_w;
     wire [143:0] unused_gradient_bias0_3_r_d40_r_data_w;
     reg [34:0] gradient_round0_a1_w_delay41_r;
     reg [34:0] gradient_round0_b1_w_delay41_r;
@@ -2080,7 +2071,6 @@ module edrv32_gpu_setup_plane (
     reg [0:0] gradient_bias1_amt3_w_delay3_r;
     reg [0:0] gradient_bias1_amt3_w_delay4_r;
     reg [0:0] gradient_bias1_amt3_w_delay5_r;
-    wire [8:0] gradient_bias1_3_r_d40_r_address_w;
     wire [143:0] unused_gradient_bias1_3_r_d40_r_data_w;
     reg [34:0] gradient_round1_a1_w_delay41_r;
     reg [34:0] gradient_round1_b1_w_delay41_r;
@@ -2467,7 +2457,7 @@ module edrv32_gpu_setup_plane (
     reg [34:0] origin_signed_low1_w_delay72_r;
     reg [34:0] origin_signed_low0_w_delay71_r;
     reg [34:0] origin_signed_low0_w_delay72_r;
-    wire [8:0] start_base_w_d72_r_address_w;
+    wire [5:0] start_base_w_d72_r_address_w;
     wire [71:0] unused_start_base_w_d72_r_data_w;
     reg [34:0] start_sum_a1_w_delay73_r;
     reg [34:0] start_sum_b1_w_delay73_r;
@@ -2641,9 +2631,9 @@ module edrv32_gpu_setup_plane (
     reg [30:0] start_signed_a1_w_delay83_r;
     reg [30:0] start_signed_b1_w_delay83_r;
     reg [34:0] start_signed_low0_w_delay84_r;
-    wire [8:0] stored_signed1_w_d84_r_address_w;
+    wire [5:0] stored_signed1_w_d84_r_address_w;
     wire [71:0] unused_stored_signed1_w_d84_r_data_w;
-    wire [8:0] stored_signed0_w_d84_r_address_w;
+    wire [5:0] stored_signed0_w_d84_r_address_w;
     wire [71:0] unused_stored_signed0_w_d84_r_data_w;
     reg [84:0] valid_r;
     assign plane_valid_o = valid_r[84];
@@ -2653,42 +2643,14 @@ module edrv32_gpu_setup_plane (
         else if (enable_i) valid_r <= {valid_r[83:0], plane_valid_i};
     end
     // Enabled-cycle addresses keep RAM delays aligned through backpressure.
-    reg [8:0] delay_pointer_r;
+    reg [5:0] delay_pointer_r;
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) delay_pointer_r <= 0;
         else if (enable_i) delay_pointer_r <= delay_pointer_r + 1'b1;
     end
     always @(posedge clk_i) begin
         if (enable_i && plane_valid_i && plane_tag_i[2:0] == 0)
-            reciprocal_context_r[plane_tag_i[6:3]] <= plane_reciprocal_i;
-    end
-    always @(posedge clk_i) begin
-        if (enable_i && plane_valid_i && plane_tag_i[2:0] == 0)
             exponent_context_r[plane_tag_i[6:3]] <= plane_exponent_i;
-    end
-    always @(posedge clk_i) begin
-        if (enable_i && plane_valid_i && plane_tag_i[2:0] == 0)
-            delta_context0_r[plane_tag_i[6:3]] <= plane_delta_i[0 +: 18];
-    end
-    always @(posedge clk_i) begin
-        if (enable_i && plane_valid_i && plane_tag_i[2:0] == 0)
-            delta_context1_r[plane_tag_i[6:3]] <= plane_delta_i[18 +: 18];
-    end
-    always @(posedge clk_i) begin
-        if (enable_i && plane_valid_i && plane_tag_i[2:0] == 0)
-            delta_context2_r[plane_tag_i[6:3]] <= plane_delta_i[36 +: 18];
-    end
-    always @(posedge clk_i) begin
-        if (enable_i && plane_valid_i && plane_tag_i[2:0] == 0)
-            delta_context3_r[plane_tag_i[6:3]] <= plane_delta_i[54 +: 18];
-    end
-    always @(posedge clk_i) begin
-        if (enable_i && plane_valid_i && plane_tag_i[2:0] == 0)
-            offset_context0_r[plane_tag_i[6:3]] <= plane_offset_i[0 +: 18];
-    end
-    always @(posedge clk_i) begin
-        if (enable_i && plane_valid_i && plane_tag_i[2:0] == 0)
-            offset_context1_r[plane_tag_i[6:3]] <= plane_offset_i[18 +: 18];
     end
     assign vertex0_w = value_0_r[0 +: 51];
     assign vertex1_w = value_0_r[51 +: 51];
@@ -3821,16 +3783,6 @@ module edrv32_gpu_setup_plane (
     assign tag_0_r_d49_r = tag_0_r_delay49_r;
     assign tag_0_r_d84_r = tag_0_r_delay84_r;
     assign maximum012_select_d7_r = maximum012_select_delay7_r;
-    assign v52_0_w_d9_r_address_w = delay_pointer_r - 9'd8;
-    edrv32_ram_gpu_delay u_v52_0_w_d9_r_bank0 (
-        .clk_i(clk_i),
-        .wr_en_i(enable_i),
-        .wr_addr_i(delay_pointer_r),
-        .wr_data_i({20'b0, v52_0_w}),
-        .rd_en_i(enable_i),
-        .rd_addr_i(v52_0_w_d9_r_address_w),
-        .rd_data_o(unused_v52_0_w_d9_r_data_w[0 +: 72])
-    );
     assign v52_0_w_d9_r = unused_v52_0_w_d9_r_data_w[51:0];
     assign v52_0_w_d13_r = v52_0_w_delay13_r;
     assign scale_left0_amt1_w_d10_r = scale_left0_amt1_w_delay10_r;
@@ -3846,16 +3798,6 @@ module edrv32_gpu_setup_plane (
     assign h_d18_r = h_delay18_r;
     assign h_d84_r = h_delay84_r;
     assign scale_left0_2_r_d18_r = scale_left0_2_r_delay18_r;
-    assign v52_1_w_d9_r_address_w = delay_pointer_r - 9'd8;
-    edrv32_ram_gpu_delay u_v52_1_w_d9_r_bank0 (
-        .clk_i(clk_i),
-        .wr_en_i(enable_i),
-        .wr_addr_i(delay_pointer_r),
-        .wr_data_i({20'b0, v52_1_w}),
-        .rd_en_i(enable_i),
-        .rd_addr_i(v52_1_w_d9_r_address_w),
-        .rd_data_o(unused_v52_1_w_d9_r_data_w[0 +: 72])
-    );
     assign v52_1_w_d9_r = unused_v52_1_w_d9_r_data_w[51:0];
     assign v52_1_w_d13_r = v52_1_w_delay13_r;
     assign scale_left1_amt1_w_d10_r = scale_left1_amt1_w_delay10_r;
@@ -3869,16 +3811,6 @@ module edrv32_gpu_setup_plane (
     assign scale_rounded1_amt1_w_d16_r = scale_rounded1_amt1_w_delay16_r;
     assign scale_rounded1_amt2_w_d17_r = scale_rounded1_amt2_w_delay17_r;
     assign scale_left1_2_r_d18_r = scale_left1_2_r_delay18_r;
-    assign v52_2_w_d9_r_address_w = delay_pointer_r - 9'd8;
-    edrv32_ram_gpu_delay u_v52_2_w_d9_r_bank0 (
-        .clk_i(clk_i),
-        .wr_en_i(enable_i),
-        .wr_addr_i(delay_pointer_r),
-        .wr_data_i({20'b0, v52_2_w}),
-        .rd_en_i(enable_i),
-        .rd_addr_i(v52_2_w_d9_r_address_w),
-        .rd_data_o(unused_v52_2_w_d9_r_data_w[0 +: 72])
-    );
     assign v52_2_w_d9_r = unused_v52_2_w_d9_r_data_w[51:0];
     assign v52_2_w_d13_r = v52_2_w_delay13_r;
     assign scale_left2_amt1_w_d10_r = scale_left2_amt1_w_delay10_r;
@@ -3952,25 +3884,6 @@ module edrv32_gpu_setup_plane (
     assign gradient_bias0_amt1_w_d3_r = gradient_bias0_amt1_w_delay3_r;
     assign gradient_bias0_amt2_w_d4_r = gradient_bias0_amt2_w_delay4_r;
     assign gradient_bias0_amt3_w_d5_r = gradient_bias0_amt3_w_delay5_r;
-    assign gradient_bias0_3_r_d40_r_address_w = delay_pointer_r - 9'd33;
-    edrv32_ram_gpu_delay u_gradient_bias0_3_r_d40_r_bank0 (
-        .clk_i(clk_i),
-        .wr_en_i(enable_i),
-        .wr_addr_i(delay_pointer_r),
-        .wr_data_i(gradient_bias0_3_r[0 +: 72]),
-        .rd_en_i(enable_i),
-        .rd_addr_i(gradient_bias0_3_r_d40_r_address_w),
-        .rd_data_o(unused_gradient_bias0_3_r_d40_r_data_w[0 +: 72])
-    );
-    edrv32_ram_gpu_delay u_gradient_bias0_3_r_d40_r_bank1 (
-        .clk_i(clk_i),
-        .wr_en_i(enable_i),
-        .wr_addr_i(delay_pointer_r),
-        .wr_data_i({56'b0, gradient_bias0_3_r[72 +: 16]}),
-        .rd_en_i(enable_i),
-        .rd_addr_i(gradient_bias0_3_r_d40_r_address_w),
-        .rd_data_o(unused_gradient_bias0_3_r_d40_r_data_w[72 +: 72])
-    );
     assign gradient_bias0_3_r_d40_r = unused_gradient_bias0_3_r_d40_r_data_w[87:0];
     assign gradient_round0_a1_w_d41_r = gradient_round0_a1_w_delay41_r;
     assign gradient_round0_b1_w_d41_r = gradient_round0_b1_w_delay41_r;
@@ -4078,25 +3991,6 @@ module edrv32_gpu_setup_plane (
     assign gradient_bias1_amt1_w_d3_r = gradient_bias1_amt1_w_delay3_r;
     assign gradient_bias1_amt2_w_d4_r = gradient_bias1_amt2_w_delay4_r;
     assign gradient_bias1_amt3_w_d5_r = gradient_bias1_amt3_w_delay5_r;
-    assign gradient_bias1_3_r_d40_r_address_w = delay_pointer_r - 9'd33;
-    edrv32_ram_gpu_delay u_gradient_bias1_3_r_d40_r_bank0 (
-        .clk_i(clk_i),
-        .wr_en_i(enable_i),
-        .wr_addr_i(delay_pointer_r),
-        .wr_data_i(gradient_bias1_3_r[0 +: 72]),
-        .rd_en_i(enable_i),
-        .rd_addr_i(gradient_bias1_3_r_d40_r_address_w),
-        .rd_data_o(unused_gradient_bias1_3_r_d40_r_data_w[0 +: 72])
-    );
-    edrv32_ram_gpu_delay u_gradient_bias1_3_r_d40_r_bank1 (
-        .clk_i(clk_i),
-        .wr_en_i(enable_i),
-        .wr_addr_i(delay_pointer_r),
-        .wr_data_i({56'b0, gradient_bias1_3_r[72 +: 16]}),
-        .rd_en_i(enable_i),
-        .rd_addr_i(gradient_bias1_3_r_d40_r_address_w),
-        .rd_data_o(unused_gradient_bias1_3_r_d40_r_data_w[72 +: 72])
-    );
     assign gradient_bias1_3_r_d40_r = unused_gradient_bias1_3_r_d40_r_data_w[87:0];
     assign gradient_round1_a1_w_d41_r = gradient_round1_a1_w_delay41_r;
     assign gradient_round1_b1_w_d41_r = gradient_round1_b1_w_delay41_r;
@@ -4170,15 +4064,20 @@ module edrv32_gpu_setup_plane (
     assign origin_signed_b2_w_d71_r = origin_signed_b2_w_delay71_r;
     assign origin_signed_low1_w_d72_r = origin_signed_low1_w_delay72_r;
     assign origin_signed_low0_w_d72_r = origin_signed_low0_w_delay72_r;
-    assign start_base_w_d72_r_address_w = delay_pointer_r - 9'd52;
-    edrv32_ram_gpu_delay u_start_base_w_d72_r_bank0 (
+    assign start_base_w_d72_r_address_w = delay_pointer_r - 6'd52;
+    wire [71:0] u_start_base_w_d72_r_bank0_data_w;
+    reg [71:0] u_start_base_w_d72_r_bank0_data_r;
+    assign unused_start_base_w_d72_r_data_w[0 +: 72] = u_start_base_w_d72_r_bank0_data_r;
+    always @(posedge clk_i) begin
+        if (enable_i) u_start_base_w_d72_r_bank0_data_r <= u_start_base_w_d72_r_bank0_data_w;
+    end
+    edrv32_ram_gpu_table u_start_base_w_d72_r_bank0 (
         .clk_i(clk_i),
         .wr_en_i(enable_i),
         .wr_addr_i(delay_pointer_r),
         .wr_data_i({2'b0, start_base_w}),
-        .rd_en_i(enable_i),
         .rd_addr_i(start_base_w_d72_r_address_w),
-        .rd_data_o(unused_start_base_w_d72_r_data_w[0 +: 72])
+        .rd_data_o(u_start_base_w_d72_r_bank0_data_w)
     );
     assign start_base_w_d72_r = unused_start_base_w_d72_r_data_w[69:0];
     assign start_sum_a1_w_d73_r = start_sum_a1_w_delay73_r;
@@ -4197,26 +4096,38 @@ module edrv32_gpu_setup_plane (
     assign start_signed_a1_w_d83_r = start_signed_a1_w_delay83_r;
     assign start_signed_b1_w_d83_r = start_signed_b1_w_delay83_r;
     assign start_signed_low0_w_d84_r = start_signed_low0_w_delay84_r;
-    assign stored_signed1_w_d84_r_address_w = delay_pointer_r - 9'd23;
-    edrv32_ram_gpu_delay u_stored_signed1_w_d84_r_bank0 (
+    assign stored_signed1_w_d84_r_address_w = delay_pointer_r - 6'd23;
+    wire [71:0] u_stored_signed1_w_d84_r_bank0_data_w;
+    reg [71:0] u_stored_signed1_w_d84_r_bank0_data_r;
+    assign unused_stored_signed1_w_d84_r_data_w[0 +: 72] = u_stored_signed1_w_d84_r_bank0_data_r;
+    always @(posedge clk_i) begin
+        if (enable_i) u_stored_signed1_w_d84_r_bank0_data_r <=
+            u_stored_signed1_w_d84_r_bank0_data_w;
+    end
+    edrv32_ram_gpu_table u_stored_signed1_w_d84_r_bank0 (
         .clk_i(clk_i),
         .wr_en_i(enable_i),
         .wr_addr_i(delay_pointer_r),
         .wr_data_i({20'b0, stored_signed1_w}),
-        .rd_en_i(enable_i),
         .rd_addr_i(stored_signed1_w_d84_r_address_w),
-        .rd_data_o(unused_stored_signed1_w_d84_r_data_w[0 +: 72])
+        .rd_data_o(u_stored_signed1_w_d84_r_bank0_data_w)
     );
     assign stored_signed1_w_d84_r = unused_stored_signed1_w_d84_r_data_w[51:0];
-    assign stored_signed0_w_d84_r_address_w = delay_pointer_r - 9'd23;
-    edrv32_ram_gpu_delay u_stored_signed0_w_d84_r_bank0 (
+    assign stored_signed0_w_d84_r_address_w = delay_pointer_r - 6'd23;
+    wire [71:0] u_stored_signed0_w_d84_r_bank0_data_w;
+    reg [71:0] u_stored_signed0_w_d84_r_bank0_data_r;
+    assign unused_stored_signed0_w_d84_r_data_w[0 +: 72] = u_stored_signed0_w_d84_r_bank0_data_r;
+    always @(posedge clk_i) begin
+        if (enable_i) u_stored_signed0_w_d84_r_bank0_data_r <=
+            u_stored_signed0_w_d84_r_bank0_data_w;
+    end
+    edrv32_ram_gpu_table u_stored_signed0_w_d84_r_bank0 (
         .clk_i(clk_i),
         .wr_en_i(enable_i),
         .wr_addr_i(delay_pointer_r),
         .wr_data_i({20'b0, stored_signed0_w}),
-        .rd_en_i(enable_i),
         .rd_addr_i(stored_signed0_w_d84_r_address_w),
-        .rd_data_o(unused_stored_signed0_w_d84_r_data_w[0 +: 72])
+        .rd_data_o(u_stored_signed0_w_d84_r_bank0_data_w)
     );
     assign stored_signed0_w_d84_r = unused_stored_signed0_w_d84_r_data_w[51:0];
     // Local credit copies preserve the enable contract for each arithmetic region.
@@ -4354,7 +4265,7 @@ module edrv32_gpu_setup_plane (
             scale_left2_2_r_d18_r[32:0];
             difference0_r <= $signed({1'b0, scaled1_r}) - $signed({1'b0, scaled0_r});
             difference1_r <= $signed({1'b0, scaled2_r}) - $signed({1'b0, scaled0_r});
-            delta_context0_r_0_read20_r <= delta_context0_r[delta_context0_r_0_index20_w];
+            delta_context0_r_0_read20_r <= unused_delta_context0_read0_w[0 +: 18];
             product0_0_pp0_0_r <= $signed({1'b0, difference0_r[0 +: 17]}) *
             $signed(delta_context0_r_0_read20_r);
             product0_0_pp1_0_r <= $signed(difference0_r[17 +: 17]) *
@@ -4363,7 +4274,7 @@ module edrv32_gpu_setup_plane (
             product0_0_sum0_0_b0_w};
             product0_0_sum0_0_part1_r <= product0_0_sum0_0_a1_w_d22_r +
             product0_0_sum0_0_b1_w_d22_r + {16'b0, product0_0_sum0_0_part0_r[35]};
-            delta_context1_r_0_read20_r <= delta_context1_r[delta_context1_r_0_index20_w];
+            delta_context1_r_0_read20_r <= unused_delta_context1_read0_w[0 +: 18];
             product0_1_pp0_0_r <= $signed({1'b0, difference1_r[0 +: 17]}) *
             $signed(delta_context1_r_0_read20_r);
             product0_1_pp1_0_r <= $signed(difference1_r[17 +: 17]) *
@@ -4381,7 +4292,7 @@ module edrv32_gpu_setup_plane (
             numerator0_part0_r[35]};
             numerator_shift0_r <= numerator0_w << 4;
             reciprocal_context_r_0_read26_r <=
-            reciprocal_context_r[reciprocal_context_r_0_index26_w];
+            unused_reciprocal_context_read0_w[0 +: 31];
             inverse0_pp0_0_r <= $signed({1'b0, numerator_shift0_r[0 +: 17]}) * $signed({1'b0,
             reciprocal_context_r_0_read26_r[0 +: 17]});
             inverse0_pp0_1_r <= $signed({1'b0, numerator_shift0_r[0 +: 17]}) * $signed({1'b0,
@@ -4465,7 +4376,7 @@ module edrv32_gpu_setup_plane (
             gradient_signed0_b0_w};
             gradient_signed0_part1_r <= gradient_signed0_a1_w_d49_r +
             gradient_signed0_b1_w_d49_r + {20'b0, gradient_signed0_part0_r[35]};
-            offset_context0_r_0_read50_r <= offset_context0_r[offset_context0_r_0_index50_w];
+            offset_context0_r_0_read50_r <= unused_offset_context0_read0_w[0 +: 18];
             origin_product0_pp0_0_r <= $signed({1'b0, gradient_signed0_w[0 +: 17]}) *
             $signed(offset_context0_r_0_read50_r);
             origin_product0_pp1_0_r <= $signed({1'b0, gradient_signed0_w[17 +: 17]}) *
@@ -4513,7 +4424,7 @@ module edrv32_gpu_setup_plane (
             stored_signed0_part0_r <= {1'b0, stored_signed0_a0_w} + {1'b0, stored_signed0_b0_w};
             stored_signed0_part1_r <= stored_signed0_a1_w_d59_r + stored_signed0_b1_w_d59_r +
             {16'b0, stored_signed0_part0_r[35]};
-            delta_context2_r_0_read20_r <= delta_context2_r[delta_context2_r_0_index20_w];
+            delta_context2_r_0_read20_r <= unused_delta_context2_read0_w[0 +: 18];
             product1_0_pp0_0_r <= $signed({1'b0, difference0_r[0 +: 17]}) *
             $signed(delta_context2_r_0_read20_r);
             product1_0_pp1_0_r <= $signed(difference0_r[17 +: 17]) *
@@ -4522,7 +4433,7 @@ module edrv32_gpu_setup_plane (
             product1_0_sum0_0_b0_w};
             product1_0_sum0_0_part1_r <= product1_0_sum0_0_a1_w_d22_r +
             product1_0_sum0_0_b1_w_d22_r + {16'b0, product1_0_sum0_0_part0_r[35]};
-            delta_context3_r_0_read20_r <= delta_context3_r[delta_context3_r_0_index20_w];
+            delta_context3_r_0_read20_r <= unused_delta_context3_read0_w[0 +: 18];
             product1_1_pp0_0_r <= $signed({1'b0, difference1_r[0 +: 17]}) *
             $signed(delta_context3_r_0_read20_r);
             product1_1_pp1_0_r <= $signed(difference1_r[17 +: 17]) *
@@ -4621,7 +4532,7 @@ module edrv32_gpu_setup_plane (
             gradient_signed1_b0_w};
             gradient_signed1_part1_r <= gradient_signed1_a1_w_d49_r +
             gradient_signed1_b1_w_d49_r + {20'b0, gradient_signed1_part0_r[35]};
-            offset_context1_r_0_read50_r <= offset_context1_r[offset_context1_r_0_index50_w];
+            offset_context1_r_0_read50_r <= unused_offset_context1_read0_w[0 +: 18];
             origin_product1_pp0_0_r <= $signed({1'b0, gradient_signed1_w[0 +: 17]}) *
             $signed(offset_context1_r_0_read50_r);
             origin_product1_pp1_0_r <= $signed({1'b0, gradient_signed1_w[17 +: 17]}) *
@@ -6119,4 +6030,161 @@ module edrv32_gpu_setup_plane (
             start_signed_low0_w_delay84_r <= start_signed_low0_w;
         end
     end
+    // Explicit LUTRAM reciprocal_context: 1 slice(s) per combinational read port.
+    wire [71:0] reciprocal_context_input_w;
+    assign reciprocal_context_input_w = {41'b0, plane_reciprocal_i};
+    wire [71:0] unused_reciprocal_context_read0_w;
+    edrv32_ram_gpu_table u_reciprocal_context_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i && plane_valid_i && plane_tag_i[2:0] == 0),
+        .wr_addr_i({2'b0, plane_tag_i[6:3]}),
+        .wr_data_i(reciprocal_context_input_w[0 +: 72]),
+        .rd_addr_i({2'b0, reciprocal_context_r_0_index26_w}),
+        .rd_data_o(unused_reciprocal_context_read0_w[0 +: 72])
+    );
+    // Explicit LUTRAM delta_context0: 1 slice(s) per combinational read port.
+    wire [71:0] delta_context0_input_w;
+    assign delta_context0_input_w = {54'b0, plane_delta_i[0 +: 18]};
+    wire [71:0] unused_delta_context0_read0_w;
+    edrv32_ram_gpu_table u_delta_context0_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i && plane_valid_i && plane_tag_i[2:0] == 0),
+        .wr_addr_i({2'b0, plane_tag_i[6:3]}),
+        .wr_data_i(delta_context0_input_w[0 +: 72]),
+        .rd_addr_i({2'b0, delta_context0_r_0_index20_w}),
+        .rd_data_o(unused_delta_context0_read0_w[0 +: 72])
+    );
+    // Explicit LUTRAM delta_context1: 1 slice(s) per combinational read port.
+    wire [71:0] delta_context1_input_w;
+    assign delta_context1_input_w = {54'b0, plane_delta_i[18 +: 18]};
+    wire [71:0] unused_delta_context1_read0_w;
+    edrv32_ram_gpu_table u_delta_context1_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i && plane_valid_i && plane_tag_i[2:0] == 0),
+        .wr_addr_i({2'b0, plane_tag_i[6:3]}),
+        .wr_data_i(delta_context1_input_w[0 +: 72]),
+        .rd_addr_i({2'b0, delta_context1_r_0_index20_w}),
+        .rd_data_o(unused_delta_context1_read0_w[0 +: 72])
+    );
+    // Explicit LUTRAM delta_context2: 1 slice(s) per combinational read port.
+    wire [71:0] delta_context2_input_w;
+    assign delta_context2_input_w = {54'b0, plane_delta_i[36 +: 18]};
+    wire [71:0] unused_delta_context2_read0_w;
+    edrv32_ram_gpu_table u_delta_context2_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i && plane_valid_i && plane_tag_i[2:0] == 0),
+        .wr_addr_i({2'b0, plane_tag_i[6:3]}),
+        .wr_data_i(delta_context2_input_w[0 +: 72]),
+        .rd_addr_i({2'b0, delta_context2_r_0_index20_w}),
+        .rd_data_o(unused_delta_context2_read0_w[0 +: 72])
+    );
+    // Explicit LUTRAM delta_context3: 1 slice(s) per combinational read port.
+    wire [71:0] delta_context3_input_w;
+    assign delta_context3_input_w = {54'b0, plane_delta_i[54 +: 18]};
+    wire [71:0] unused_delta_context3_read0_w;
+    edrv32_ram_gpu_table u_delta_context3_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i && plane_valid_i && plane_tag_i[2:0] == 0),
+        .wr_addr_i({2'b0, plane_tag_i[6:3]}),
+        .wr_data_i(delta_context3_input_w[0 +: 72]),
+        .rd_addr_i({2'b0, delta_context3_r_0_index20_w}),
+        .rd_data_o(unused_delta_context3_read0_w[0 +: 72])
+    );
+    // Explicit LUTRAM offset_context0: 1 slice(s) per combinational read port.
+    wire [71:0] offset_context0_input_w;
+    assign offset_context0_input_w = {54'b0, plane_offset_i[0 +: 18]};
+    wire [71:0] unused_offset_context0_read0_w;
+    edrv32_ram_gpu_table u_offset_context0_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i && plane_valid_i && plane_tag_i[2:0] == 0),
+        .wr_addr_i({2'b0, plane_tag_i[6:3]}),
+        .wr_data_i(offset_context0_input_w[0 +: 72]),
+        .rd_addr_i({2'b0, offset_context0_r_0_index50_w}),
+        .rd_data_o(unused_offset_context0_read0_w[0 +: 72])
+    );
+    // Explicit LUTRAM offset_context1: 1 slice(s) per combinational read port.
+    wire [71:0] offset_context1_input_w;
+    assign offset_context1_input_w = {54'b0, plane_offset_i[18 +: 18]};
+    wire [71:0] unused_offset_context1_read0_w;
+    edrv32_ram_gpu_table u_offset_context1_p0_b0 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i && plane_valid_i && plane_tag_i[2:0] == 0),
+        .wr_addr_i({2'b0, plane_tag_i[6:3]}),
+        .wr_data_i(offset_context1_input_w[0 +: 72]),
+        .rd_addr_i({2'b0, offset_context1_r_0_index50_w}),
+        .rd_data_o(unused_offset_context1_read0_w[0 +: 72])
+    );
+    // Equal-distance fields share 3 72-bit table slices and their original read stage.
+    wire [215:0] vertex_delay_input_w;
+    wire [215:0] unused_vertex_delay_data_w;
+    reg [155:0] vertex_delay_data_r;
+    wire [5:0] vertex_delay_read_w;
+    assign vertex_delay_read_w = delay_pointer_r - 6'd8;
+    assign vertex_delay_input_w = {60'b0, v52_2_w, v52_1_w, v52_0_w};
+    always @(posedge clk_i) begin
+        if (enable_i) vertex_delay_data_r <= unused_vertex_delay_data_w[155:0];
+    end
+    assign unused_v52_0_w_d9_r_data_w = {20'b0, vertex_delay_data_r[0 +: 52]};
+    assign unused_v52_1_w_d9_r_data_w = {20'b0, vertex_delay_data_r[52 +: 52]};
+    assign unused_v52_2_w_d9_r_data_w = {20'b0, vertex_delay_data_r[104 +: 52]};
+    edrv32_ram_gpu_table u_vertex_delay_0 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i),
+        .wr_addr_i(delay_pointer_r),
+        .wr_data_i(vertex_delay_input_w[0 +: 72]),
+        .rd_addr_i(vertex_delay_read_w),
+        .rd_data_o(unused_vertex_delay_data_w[0 +: 72])
+    );
+    edrv32_ram_gpu_table u_vertex_delay_1 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i),
+        .wr_addr_i(delay_pointer_r),
+        .wr_data_i(vertex_delay_input_w[72 +: 72]),
+        .rd_addr_i(vertex_delay_read_w),
+        .rd_data_o(unused_vertex_delay_data_w[72 +: 72])
+    );
+    edrv32_ram_gpu_table u_vertex_delay_2 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i),
+        .wr_addr_i(delay_pointer_r),
+        .wr_data_i(vertex_delay_input_w[144 +: 72]),
+        .rd_addr_i(vertex_delay_read_w),
+        .rd_data_o(unused_vertex_delay_data_w[144 +: 72])
+    );
+    // Equal-distance fields share 3 72-bit table slices and their original read stage.
+    wire [215:0] gradient_bias_delay_input_w;
+    wire [215:0] unused_gradient_bias_delay_data_w;
+    reg [175:0] gradient_bias_delay_data_r;
+    wire [5:0] gradient_bias_delay_read_w;
+    assign gradient_bias_delay_read_w = delay_pointer_r - 6'd33;
+    assign gradient_bias_delay_input_w = {40'b0, gradient_bias1_3_r, gradient_bias0_3_r};
+    always @(posedge clk_i) begin
+        if (enable_i) gradient_bias_delay_data_r <= unused_gradient_bias_delay_data_w[175:0];
+    end
+    assign unused_gradient_bias0_3_r_d40_r_data_w = {56'b0, gradient_bias_delay_data_r[0 +: 88]};
+    assign unused_gradient_bias1_3_r_d40_r_data_w = {56'b0, gradient_bias_delay_data_r[88 +: 88]};
+    edrv32_ram_gpu_table u_gradient_bias_delay_0 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i),
+        .wr_addr_i(delay_pointer_r),
+        .wr_data_i(gradient_bias_delay_input_w[0 +: 72]),
+        .rd_addr_i(gradient_bias_delay_read_w),
+        .rd_data_o(unused_gradient_bias_delay_data_w[0 +: 72])
+    );
+    edrv32_ram_gpu_table u_gradient_bias_delay_1 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i),
+        .wr_addr_i(delay_pointer_r),
+        .wr_data_i(gradient_bias_delay_input_w[72 +: 72]),
+        .rd_addr_i(gradient_bias_delay_read_w),
+        .rd_data_o(unused_gradient_bias_delay_data_w[72 +: 72])
+    );
+    edrv32_ram_gpu_table u_gradient_bias_delay_2 (
+        .clk_i(clk_i),
+        .wr_en_i(enable_i),
+        .wr_addr_i(delay_pointer_r),
+        .wr_data_i(gradient_bias_delay_input_w[144 +: 72]),
+        .rd_addr_i(gradient_bias_delay_read_w),
+        .rd_data_o(unused_gradient_bias_delay_data_w[144 +: 72])
+    );
 endmodule

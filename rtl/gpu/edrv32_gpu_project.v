@@ -410,8 +410,8 @@ module edrv32_gpu_project (
     wire reciprocal_valid_w;
     wire [30:0] reciprocal_w;
     wire [5:0] exponent_w;
-    reg [8:0] input_delay_write_r;
-    wire [8:0] input_delay_read_w;
+    reg [5:0] input_delay_write_r;
+    wire [5:0] input_delay_read_w;
     wire [223:0] input_prefix_w;
     wire [287:0] unused_input_delay_w;
     wire [39:0] position_input_w [0:2];
@@ -464,46 +464,66 @@ module edrv32_gpu_project (
     );
 
     // Payload latency is 1+24; reciprocal metadata uses the same 24-cycle alignment.
-    assign input_delay_read_w = input_delay_write_r - 9'd23;
+    assign input_delay_read_w = input_delay_write_r - 6'd23;
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) input_delay_write_r <= 0;
         else if (enable_w) input_delay_write_r <= input_delay_write_r + 1'b1;
     end
-    edrv32_ram_gpu_delay u_input_delay_0 (
+    wire [71:0] u_input_delay_0_data_w;
+    reg [71:0] u_input_delay_0_data_r;
+    assign unused_input_delay_w[0 +: 72] = u_input_delay_0_data_r;
+    always @(posedge clk_i) begin
+        if (enable_w) u_input_delay_0_data_r <= u_input_delay_0_data_w;
+    end
+    edrv32_ram_gpu_table u_input_delay_0 (
         .clk_i(clk_i),
         .wr_en_i(enable_w),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i(input_prefix_w[0 +: 72]),
-        .rd_en_i(enable_w),
         .rd_addr_i(input_delay_read_w),
-        .rd_data_o(unused_input_delay_w[0 +: 72])
+        .rd_data_o(u_input_delay_0_data_w)
     );
-    edrv32_ram_gpu_delay u_input_delay_1 (
+    wire [71:0] u_input_delay_1_data_w;
+    reg [71:0] u_input_delay_1_data_r;
+    assign unused_input_delay_w[72 +: 72] = u_input_delay_1_data_r;
+    always @(posedge clk_i) begin
+        if (enable_w) u_input_delay_1_data_r <= u_input_delay_1_data_w;
+    end
+    edrv32_ram_gpu_table u_input_delay_1 (
         .clk_i(clk_i),
         .wr_en_i(enable_w),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i(input_prefix_w[72 +: 72]),
-        .rd_en_i(enable_w),
         .rd_addr_i(input_delay_read_w),
-        .rd_data_o(unused_input_delay_w[72 +: 72])
+        .rd_data_o(u_input_delay_1_data_w)
     );
-    edrv32_ram_gpu_delay u_input_delay_2 (
+    wire [71:0] u_input_delay_2_data_w;
+    reg [71:0] u_input_delay_2_data_r;
+    assign unused_input_delay_w[144 +: 72] = u_input_delay_2_data_r;
+    always @(posedge clk_i) begin
+        if (enable_w) u_input_delay_2_data_r <= u_input_delay_2_data_w;
+    end
+    edrv32_ram_gpu_table u_input_delay_2 (
         .clk_i(clk_i),
         .wr_en_i(enable_w),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i(input_prefix_w[144 +: 72]),
-        .rd_en_i(enable_w),
         .rd_addr_i(input_delay_read_w),
-        .rd_data_o(unused_input_delay_w[144 +: 72])
+        .rd_data_o(u_input_delay_2_data_w)
     );
-    edrv32_ram_gpu_delay u_input_delay_3 (
+    wire [71:0] u_input_delay_3_data_w;
+    reg [71:0] u_input_delay_3_data_r;
+    assign unused_input_delay_w[216 +: 72] = u_input_delay_3_data_r;
+    always @(posedge clk_i) begin
+        if (enable_w) u_input_delay_3_data_r <= u_input_delay_3_data_w;
+    end
+    edrv32_ram_gpu_table u_input_delay_3 (
         .clk_i(clk_i),
         .wr_en_i(enable_w),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i({64'b0, input_prefix_w[223:216]}),
-        .rd_en_i(enable_w),
         .rd_addr_i(input_delay_read_w),
-        .rd_data_o(unused_input_delay_w[216 +: 72])
+        .rd_data_o(u_input_delay_3_data_w)
     );
 
     genvar field_g;
@@ -2426,65 +2446,85 @@ module edrv32_gpu_project (
     wire [13:0] screen_offset1_b1_w_d33_align14_r;
     assign screen_offset1_b1_w_d33_align14_r = {14{viewport_offset1_tags_d47_r[0]}};
     // Circular enabled-cycle tags replace long payload and viewport delay chains.
-    wire [8:0] payload_delay0_read_w;
+    wire [5:0] payload_delay0_read_w;
     wire [71:0] unused_payload_delay0_data_w;
-    assign payload_delay0_read_w = input_delay_write_r - 9'd48;
+    assign payload_delay0_read_w = input_delay_write_r - 6'd48;
     wire [71:0] color_input_r_d35_align14_r;
     assign color_input_r_d35_align14_r = unused_payload_delay0_data_w[0 +: 72];
-    edrv32_ram_gpu_delay u_payload_delay0 (
+    wire [71:0] u_payload_delay0_data_w;
+    reg [71:0] u_payload_delay0_data_r;
+    assign unused_payload_delay0_data_w = u_payload_delay0_data_r;
+    always @(posedge clk_i) begin
+        if (enable_w) u_payload_delay0_data_r <= u_payload_delay0_data_w;
+    end
+    edrv32_ram_gpu_table u_payload_delay0 (
         .clk_i(clk_i),
         .wr_en_i(enable_w),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i(color_input_w),
-        .rd_en_i(enable_w),
         .rd_addr_i(payload_delay0_read_w),
-        .rd_data_o(unused_payload_delay0_data_w)
+        .rd_data_o(u_payload_delay0_data_w)
     );
-    wire [8:0] payload_delay1_read_w;
+    wire [5:0] payload_delay1_read_w;
     wire [71:0] unused_payload_delay1_data_w;
-    assign payload_delay1_read_w = input_delay_write_r - 9'd7;
+    assign payload_delay1_read_w = input_delay_write_r - 6'd7;
     wire [39:0] position_input0_r_d9_r;
     assign position_input0_r_d9_r = unused_payload_delay1_data_w[0 +: 40];
     wire [15:0] uv_input0_r_d9_r;
     assign uv_input0_r_d9_r = unused_payload_delay1_data_w[40 +: 16];
     wire [15:0] uv_input1_r_d9_r;
     assign uv_input1_r_d9_r = unused_payload_delay1_data_w[56 +: 16];
-    edrv32_ram_gpu_delay u_payload_delay1 (
+    wire [71:0] u_payload_delay1_data_w;
+    reg [71:0] u_payload_delay1_data_r;
+    assign unused_payload_delay1_data_w = u_payload_delay1_data_r;
+    always @(posedge clk_i) begin
+        if (enable_w) u_payload_delay1_data_r <= u_payload_delay1_data_w;
+    end
+    edrv32_ram_gpu_table u_payload_delay1 (
         .clk_i(clk_i),
         .wr_en_i(enable_w),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i({uv_input1_r, uv_input0_r, position_input0_r}),
-        .rd_en_i(enable_w),
         .rd_addr_i(payload_delay1_read_w),
-        .rd_data_o(unused_payload_delay1_data_w)
+        .rd_data_o(u_payload_delay1_data_w)
     );
-    wire [8:0] payload_delay2_read_w;
+    wire [5:0] payload_delay2_read_w;
     wire [71:0] unused_payload_delay2_data_w;
-    assign payload_delay2_read_w = input_delay_write_r - 9'd7;
+    assign payload_delay2_read_w = input_delay_write_r - 6'd7;
     wire [39:0] position_input1_r_d9_r;
     assign position_input1_r_d9_r = unused_payload_delay2_data_w[0 +: 40];
-    edrv32_ram_gpu_delay u_payload_delay2 (
+    wire [71:0] u_payload_delay2_data_w;
+    reg [71:0] u_payload_delay2_data_r;
+    assign unused_payload_delay2_data_w = u_payload_delay2_data_r;
+    always @(posedge clk_i) begin
+        if (enable_w) u_payload_delay2_data_r <= u_payload_delay2_data_w;
+    end
+    edrv32_ram_gpu_table u_payload_delay2 (
         .clk_i(clk_i),
         .wr_en_i(enable_w),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i({32'b0, position_input1_r}),
-        .rd_en_i(enable_w),
         .rd_addr_i(payload_delay2_read_w),
-        .rd_data_o(unused_payload_delay2_data_w)
+        .rd_data_o(u_payload_delay2_data_w)
     );
-    wire [8:0] payload_delay3_read_w;
+    wire [5:0] payload_delay3_read_w;
     wire [71:0] unused_payload_delay3_data_w;
-    assign payload_delay3_read_w = input_delay_write_r - 9'd7;
+    assign payload_delay3_read_w = input_delay_write_r - 6'd7;
     wire [39:0] position_input2_r_d9_r;
     assign position_input2_r_d9_r = unused_payload_delay3_data_w[0 +: 40];
-    edrv32_ram_gpu_delay u_payload_delay3 (
+    wire [71:0] u_payload_delay3_data_w;
+    reg [71:0] u_payload_delay3_data_r;
+    assign unused_payload_delay3_data_w = u_payload_delay3_data_r;
+    always @(posedge clk_i) begin
+        if (enable_w) u_payload_delay3_data_r <= u_payload_delay3_data_w;
+    end
+    edrv32_ram_gpu_table u_payload_delay3 (
         .clk_i(clk_i),
         .wr_en_i(enable_w),
         .wr_addr_i(input_delay_write_r),
         .wr_data_i({32'b0, position_input2_r}),
-        .rd_en_i(enable_w),
         .rd_addr_i(payload_delay3_read_w),
-        .rd_data_o(unused_payload_delay3_data_w)
+        .rd_data_o(u_payload_delay3_data_w)
     );
     wire [5:0] payload_delay4_read_w;
     wire [255:0] unused_payload_delay4_data_w;

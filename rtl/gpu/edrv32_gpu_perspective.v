@@ -50,7 +50,7 @@ module edrv32_gpu_perspective (
     reg [6:0] outstanding_r;
     reg output_valid_r;
     wire output_read_w;
-    wire [8:0] output_addr_w;
+    wire [5:0] output_addr_w;
     reg [4:0] output_read_r;
     reg [4:0] output_write_r;
     reg [42:0] valid_r;
@@ -77,31 +77,29 @@ module edrv32_gpu_perspective (
     wire [191:0] unused_raw_span_w;
     wire [31:0] raw_depth_w;
     wire [47:0] raw_color_w;
-    reg [8:0] delay_write_r;
+    reg [5:0] delay_write_r;
     wire [3:0] delay_sign_input_w;
     wire [71:0] unused_delay_sign_data_w;
-    wire [8:0] delay_sign_read_w;
     wire [23:0] delay_q_input_w;
     wire [71:0] unused_delay_q_data_w;
-    wire [8:0] delay_q_read_w;
+    wire [5:0] delay_q_read_w;
     wire [115:0] delay_uvq_input_w;
     wire [143:0] unused_delay_uvq_data_w;
-    wire [8:0] delay_uvq_read_w;
+    wire [5:0] delay_uvq_read_w;
     wire [127:0] delay_coordinate_input_w;
     wire [143:0] unused_delay_coordinate_data_w;
-    wire [8:0] delay_coordinate_read_w;
+    wire [5:0] delay_coordinate_read_w;
     wire [79:0] delay_shade_input_w;
     wire [143:0] unused_delay_shade_data_w;
-    wire [8:0] delay_shade_read_w;
+    wire [5:0] delay_shade_read_w;
     wire [48:0] delay_metadata_input_w;
     wire [71:0] unused_delay_metadata_data_w;
-    wire [8:0] delay_metadata_read_w;
+    wire [5:0] delay_metadata_read_w;
     wire [59:0] delay_scale_input_w;
     wire [71:0] unused_delay_scale_data_w;
-    wire [8:0] delay_scale_read_w;
     wire [231:0] delay_bypass_input_w;
     wire [287:0] unused_delay_bypass_data_w;
-    wire [8:0] delay_bypass_read_w;
+    wire [5:0] delay_bypass_read_w;
     reg pair_second_r;
     wire [57:0] u_normal_w;
     wire [57:0] v_normal_w;
@@ -122,7 +120,7 @@ module edrv32_gpu_perspective (
     // The RAM output holds the prefetched head during downstream backpressure.
     assign output_read_w = !stop_i && ((output_count_r != 0 && !output_valid_r) ||
         (output_pop_w && output_count_r > 1));
-    assign output_addr_w = {4'b0, output_read_r + {4'b0, output_pop_w}};
+    assign output_addr_w = {1'b0, output_read_r + {4'b0, output_pop_w}};
 
     assign pipe_x_w = unused_delay_metadata_data_w[0 +: 16];
     assign pipe_y_w = unused_delay_metadata_data_w[16 +: 16];
@@ -369,95 +367,145 @@ module edrv32_gpu_perspective (
     assign sample_depth_o = unused_output_data_w[497 +: 64];
     assign output_input_w[561 +: 96] = output_color_w;
     assign sample_color_o = unused_output_data_w[561 +: 96];
-    edrv32_ram_gpu_delay u_output_0 (
+    wire [71:0] u_output_0_data_w;
+    reg [71:0] u_output_0_data_r;
+    assign unused_output_data_w[0 +: 72] = u_output_0_data_r;
+    always @(posedge clk_i) begin
+        if (output_read_w) u_output_0_data_r <= u_output_0_data_w;
+    end
+    edrv32_ram_gpu_table u_output_0 (
         .clk_i(clk_i),
         .wr_en_i(output_push_w),
-        .wr_addr_i({4'b0, output_write_r}),
+        .wr_addr_i({1'b0, output_write_r}),
         .wr_data_i(output_input_w[0 +: 72]),
-        .rd_en_i(output_read_w),
         .rd_addr_i(output_addr_w),
-        .rd_data_o(unused_output_data_w[0 +: 72])
+        .rd_data_o(u_output_0_data_w)
     );
-    edrv32_ram_gpu_delay u_output_1 (
+    wire [71:0] u_output_1_data_w;
+    reg [71:0] u_output_1_data_r;
+    assign unused_output_data_w[72 +: 72] = u_output_1_data_r;
+    always @(posedge clk_i) begin
+        if (output_read_w) u_output_1_data_r <= u_output_1_data_w;
+    end
+    edrv32_ram_gpu_table u_output_1 (
         .clk_i(clk_i),
         .wr_en_i(output_push_w),
-        .wr_addr_i({4'b0, output_write_r}),
+        .wr_addr_i({1'b0, output_write_r}),
         .wr_data_i(output_input_w[72 +: 72]),
-        .rd_en_i(output_read_w),
         .rd_addr_i(output_addr_w),
-        .rd_data_o(unused_output_data_w[72 +: 72])
+        .rd_data_o(u_output_1_data_w)
     );
-    edrv32_ram_gpu_delay u_output_2 (
+    wire [71:0] u_output_2_data_w;
+    reg [71:0] u_output_2_data_r;
+    assign unused_output_data_w[144 +: 72] = u_output_2_data_r;
+    always @(posedge clk_i) begin
+        if (output_read_w) u_output_2_data_r <= u_output_2_data_w;
+    end
+    edrv32_ram_gpu_table u_output_2 (
         .clk_i(clk_i),
         .wr_en_i(output_push_w),
-        .wr_addr_i({4'b0, output_write_r}),
+        .wr_addr_i({1'b0, output_write_r}),
         .wr_data_i(output_input_w[144 +: 72]),
-        .rd_en_i(output_read_w),
         .rd_addr_i(output_addr_w),
-        .rd_data_o(unused_output_data_w[144 +: 72])
+        .rd_data_o(u_output_2_data_w)
     );
-    edrv32_ram_gpu_delay u_output_3 (
+    wire [71:0] u_output_3_data_w;
+    reg [71:0] u_output_3_data_r;
+    assign unused_output_data_w[216 +: 72] = u_output_3_data_r;
+    always @(posedge clk_i) begin
+        if (output_read_w) u_output_3_data_r <= u_output_3_data_w;
+    end
+    edrv32_ram_gpu_table u_output_3 (
         .clk_i(clk_i),
         .wr_en_i(output_push_w),
-        .wr_addr_i({4'b0, output_write_r}),
+        .wr_addr_i({1'b0, output_write_r}),
         .wr_data_i(output_input_w[216 +: 72]),
-        .rd_en_i(output_read_w),
         .rd_addr_i(output_addr_w),
-        .rd_data_o(unused_output_data_w[216 +: 72])
+        .rd_data_o(u_output_3_data_w)
     );
-    edrv32_ram_gpu_delay u_output_4 (
+    wire [71:0] u_output_4_data_w;
+    reg [71:0] u_output_4_data_r;
+    assign unused_output_data_w[288 +: 72] = u_output_4_data_r;
+    always @(posedge clk_i) begin
+        if (output_read_w) u_output_4_data_r <= u_output_4_data_w;
+    end
+    edrv32_ram_gpu_table u_output_4 (
         .clk_i(clk_i),
         .wr_en_i(output_push_w),
-        .wr_addr_i({4'b0, output_write_r}),
+        .wr_addr_i({1'b0, output_write_r}),
         .wr_data_i(output_input_w[288 +: 72]),
-        .rd_en_i(output_read_w),
         .rd_addr_i(output_addr_w),
-        .rd_data_o(unused_output_data_w[288 +: 72])
+        .rd_data_o(u_output_4_data_w)
     );
-    edrv32_ram_gpu_delay u_output_5 (
+    wire [71:0] u_output_5_data_w;
+    reg [71:0] u_output_5_data_r;
+    assign unused_output_data_w[360 +: 72] = u_output_5_data_r;
+    always @(posedge clk_i) begin
+        if (output_read_w) u_output_5_data_r <= u_output_5_data_w;
+    end
+    edrv32_ram_gpu_table u_output_5 (
         .clk_i(clk_i),
         .wr_en_i(output_push_w),
-        .wr_addr_i({4'b0, output_write_r}),
+        .wr_addr_i({1'b0, output_write_r}),
         .wr_data_i(output_input_w[360 +: 72]),
-        .rd_en_i(output_read_w),
         .rd_addr_i(output_addr_w),
-        .rd_data_o(unused_output_data_w[360 +: 72])
+        .rd_data_o(u_output_5_data_w)
     );
-    edrv32_ram_gpu_delay u_output_6 (
+    wire [71:0] u_output_6_data_w;
+    reg [71:0] u_output_6_data_r;
+    assign unused_output_data_w[432 +: 72] = u_output_6_data_r;
+    always @(posedge clk_i) begin
+        if (output_read_w) u_output_6_data_r <= u_output_6_data_w;
+    end
+    edrv32_ram_gpu_table u_output_6 (
         .clk_i(clk_i),
         .wr_en_i(output_push_w),
-        .wr_addr_i({4'b0, output_write_r}),
+        .wr_addr_i({1'b0, output_write_r}),
         .wr_data_i(output_input_w[432 +: 72]),
-        .rd_en_i(output_read_w),
         .rd_addr_i(output_addr_w),
-        .rd_data_o(unused_output_data_w[432 +: 72])
+        .rd_data_o(u_output_6_data_w)
     );
-    edrv32_ram_gpu_delay u_output_7 (
+    wire [71:0] u_output_7_data_w;
+    reg [71:0] u_output_7_data_r;
+    assign unused_output_data_w[504 +: 72] = u_output_7_data_r;
+    always @(posedge clk_i) begin
+        if (output_read_w) u_output_7_data_r <= u_output_7_data_w;
+    end
+    edrv32_ram_gpu_table u_output_7 (
         .clk_i(clk_i),
         .wr_en_i(output_push_w),
-        .wr_addr_i({4'b0, output_write_r}),
+        .wr_addr_i({1'b0, output_write_r}),
         .wr_data_i(output_input_w[504 +: 72]),
-        .rd_en_i(output_read_w),
         .rd_addr_i(output_addr_w),
-        .rd_data_o(unused_output_data_w[504 +: 72])
+        .rd_data_o(u_output_7_data_w)
     );
-    edrv32_ram_gpu_delay u_output_8 (
+    wire [71:0] u_output_8_data_w;
+    reg [71:0] u_output_8_data_r;
+    assign unused_output_data_w[576 +: 72] = u_output_8_data_r;
+    always @(posedge clk_i) begin
+        if (output_read_w) u_output_8_data_r <= u_output_8_data_w;
+    end
+    edrv32_ram_gpu_table u_output_8 (
         .clk_i(clk_i),
         .wr_en_i(output_push_w),
-        .wr_addr_i({4'b0, output_write_r}),
+        .wr_addr_i({1'b0, output_write_r}),
         .wr_data_i(output_input_w[576 +: 72]),
-        .rd_en_i(output_read_w),
         .rd_addr_i(output_addr_w),
-        .rd_data_o(unused_output_data_w[576 +: 72])
+        .rd_data_o(u_output_8_data_w)
     );
-    edrv32_ram_gpu_delay u_output_9 (
+    wire [71:0] u_output_9_data_w;
+    reg [71:0] u_output_9_data_r;
+    assign unused_output_data_w[648 +: 72] = u_output_9_data_r;
+    always @(posedge clk_i) begin
+        if (output_read_w) u_output_9_data_r <= u_output_9_data_w;
+    end
+    edrv32_ram_gpu_table u_output_9 (
         .clk_i(clk_i),
         .wr_en_i(output_push_w),
-        .wr_addr_i({4'b0, output_write_r}),
+        .wr_addr_i({1'b0, output_write_r}),
         .wr_data_i({63'b0, output_input_w[648 +: 9]}),
-        .rd_en_i(output_read_w),
         .rd_addr_i(output_addr_w),
-        .rd_data_o(unused_output_data_w[648 +: 72])
+        .rd_data_o(u_output_9_data_w)
     );
 
     // Fixed-distance circular RAM delays. The synchronous read is the last stage.
@@ -465,139 +513,203 @@ module edrv32_gpu_perspective (
         if (!rst_n_i) delay_write_r <= 0;
         else if (advance_w) delay_write_r <= delay_write_r + 1'b1;
     end
-    assign delay_sign_read_w = delay_write_r - 9'd3;
-    edrv32_ram_gpu_delay u_delay_sign_0 (
-        .clk_i(clk_i),
-        .wr_en_i(advance_w),
-        .wr_addr_i(delay_write_r),
-        .wr_data_i({68'b0, delay_sign_input_w[0 +: 4]}),
-        .rd_en_i(advance_w),
-        .rd_addr_i(delay_sign_read_w),
-        .rd_data_o(unused_delay_sign_data_w[0 +: 72])
-    );
-    assign delay_q_read_w = delay_write_r - 9'd11;
-    edrv32_ram_gpu_delay u_delay_q_0 (
+    // 4 enabled stages, including the former RAM output register.
+    reg [3:0] sign_r [0:3];
+    integer sign_stage;
+    always @(posedge clk_i) begin
+        if (advance_w) begin
+            sign_r[0] <= delay_sign_input_w[0 +: 4];
+            for (sign_stage = 1; sign_stage < 4;
+                sign_stage = sign_stage + 1)
+                sign_r[sign_stage] <= sign_r[sign_stage-1];
+        end
+    end
+    assign unused_delay_sign_data_w[0 +: 72] = {68'b0, sign_r[3]};
+    assign delay_q_read_w = delay_write_r - 6'd11;
+    wire [71:0] u_delay_q_0_data_w;
+    reg [71:0] u_delay_q_0_data_r;
+    assign unused_delay_q_data_w[0 +: 72] = u_delay_q_0_data_r;
+    always @(posedge clk_i) begin
+        if (advance_w) u_delay_q_0_data_r <= u_delay_q_0_data_w;
+    end
+    edrv32_ram_gpu_table u_delay_q_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
         .wr_data_i({48'b0, delay_q_input_w[0 +: 24]}),
-        .rd_en_i(advance_w),
         .rd_addr_i(delay_q_read_w),
-        .rd_data_o(unused_delay_q_data_w[0 +: 72])
+        .rd_data_o(u_delay_q_0_data_w)
     );
-    assign delay_uvq_read_w = delay_write_r - 9'd13;
-    edrv32_ram_gpu_delay u_delay_uvq_0 (
+    assign delay_uvq_read_w = delay_write_r - 6'd13;
+    wire [71:0] u_delay_uvq_0_data_w;
+    reg [71:0] u_delay_uvq_0_data_r;
+    assign unused_delay_uvq_data_w[0 +: 72] = u_delay_uvq_0_data_r;
+    always @(posedge clk_i) begin
+        if (advance_w) u_delay_uvq_0_data_r <= u_delay_uvq_0_data_w;
+    end
+    edrv32_ram_gpu_table u_delay_uvq_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
         .wr_data_i(delay_uvq_input_w[0 +: 72]),
-        .rd_en_i(advance_w),
         .rd_addr_i(delay_uvq_read_w),
-        .rd_data_o(unused_delay_uvq_data_w[0 +: 72])
+        .rd_data_o(u_delay_uvq_0_data_w)
     );
-    edrv32_ram_gpu_delay u_delay_uvq_1 (
+    wire [71:0] u_delay_uvq_1_data_w;
+    reg [71:0] u_delay_uvq_1_data_r;
+    assign unused_delay_uvq_data_w[72 +: 72] = u_delay_uvq_1_data_r;
+    always @(posedge clk_i) begin
+        if (advance_w) u_delay_uvq_1_data_r <= u_delay_uvq_1_data_w;
+    end
+    edrv32_ram_gpu_table u_delay_uvq_1 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
         .wr_data_i({28'b0, delay_uvq_input_w[72 +: 44]}),
-        .rd_en_i(advance_w),
         .rd_addr_i(delay_uvq_read_w),
-        .rd_data_o(unused_delay_uvq_data_w[72 +: 72])
+        .rd_data_o(u_delay_uvq_1_data_w)
     );
-    assign delay_coordinate_read_w = delay_write_r - 9'd12;
-    edrv32_ram_gpu_delay u_delay_coordinate_0 (
+    assign delay_coordinate_read_w = delay_write_r - 6'd12;
+    wire [71:0] u_delay_coordinate_0_data_w;
+    reg [71:0] u_delay_coordinate_0_data_r;
+    assign unused_delay_coordinate_data_w[0 +: 72] = u_delay_coordinate_0_data_r;
+    always @(posedge clk_i) begin
+        if (advance_w) u_delay_coordinate_0_data_r <= u_delay_coordinate_0_data_w;
+    end
+    edrv32_ram_gpu_table u_delay_coordinate_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
         .wr_data_i(delay_coordinate_input_w[0 +: 72]),
-        .rd_en_i(advance_w),
         .rd_addr_i(delay_coordinate_read_w),
-        .rd_data_o(unused_delay_coordinate_data_w[0 +: 72])
+        .rd_data_o(u_delay_coordinate_0_data_w)
     );
-    edrv32_ram_gpu_delay u_delay_coordinate_1 (
+    wire [71:0] u_delay_coordinate_1_data_w;
+    reg [71:0] u_delay_coordinate_1_data_r;
+    assign unused_delay_coordinate_data_w[72 +: 72] = u_delay_coordinate_1_data_r;
+    always @(posedge clk_i) begin
+        if (advance_w) u_delay_coordinate_1_data_r <= u_delay_coordinate_1_data_w;
+    end
+    edrv32_ram_gpu_table u_delay_coordinate_1 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
         .wr_data_i({16'b0, delay_coordinate_input_w[72 +: 56]}),
-        .rd_en_i(advance_w),
         .rd_addr_i(delay_coordinate_read_w),
-        .rd_data_o(unused_delay_coordinate_data_w[72 +: 72])
+        .rd_data_o(u_delay_coordinate_1_data_w)
     );
-    assign delay_shade_read_w = delay_write_r - 9'd40;
-    edrv32_ram_gpu_delay u_delay_shade_0 (
+    assign delay_shade_read_w = delay_write_r - 6'd40;
+    wire [71:0] u_delay_shade_0_data_w;
+    reg [71:0] u_delay_shade_0_data_r;
+    assign unused_delay_shade_data_w[0 +: 72] = u_delay_shade_0_data_r;
+    always @(posedge clk_i) begin
+        if (advance_w) u_delay_shade_0_data_r <= u_delay_shade_0_data_w;
+    end
+    edrv32_ram_gpu_table u_delay_shade_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
         .wr_data_i(delay_shade_input_w[0 +: 72]),
-        .rd_en_i(advance_w),
         .rd_addr_i(delay_shade_read_w),
-        .rd_data_o(unused_delay_shade_data_w[0 +: 72])
+        .rd_data_o(u_delay_shade_0_data_w)
     );
-    edrv32_ram_gpu_delay u_delay_shade_1 (
+    wire [71:0] u_delay_shade_1_data_w;
+    reg [71:0] u_delay_shade_1_data_r;
+    assign unused_delay_shade_data_w[72 +: 72] = u_delay_shade_1_data_r;
+    always @(posedge clk_i) begin
+        if (advance_w) u_delay_shade_1_data_r <= u_delay_shade_1_data_w;
+    end
+    edrv32_ram_gpu_table u_delay_shade_1 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
         .wr_data_i({64'b0, delay_shade_input_w[72 +: 8]}),
-        .rd_en_i(advance_w),
         .rd_addr_i(delay_shade_read_w),
-        .rd_data_o(unused_delay_shade_data_w[72 +: 72])
+        .rd_data_o(u_delay_shade_1_data_w)
     );
-    assign delay_metadata_read_w = delay_write_r - 9'd42;
-    edrv32_ram_gpu_delay u_delay_metadata_0 (
+    assign delay_metadata_read_w = delay_write_r - 6'd42;
+    wire [71:0] u_delay_metadata_0_data_w;
+    reg [71:0] u_delay_metadata_0_data_r;
+    assign unused_delay_metadata_data_w[0 +: 72] = u_delay_metadata_0_data_r;
+    always @(posedge clk_i) begin
+        if (advance_w) u_delay_metadata_0_data_r <= u_delay_metadata_0_data_w;
+    end
+    edrv32_ram_gpu_table u_delay_metadata_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
         .wr_data_i({23'b0, delay_metadata_input_w[0 +: 49]}),
-        .rd_en_i(advance_w),
         .rd_addr_i(delay_metadata_read_w),
-        .rd_data_o(unused_delay_metadata_data_w[0 +: 72])
+        .rd_data_o(u_delay_metadata_0_data_w)
     );
-    assign delay_scale_read_w = delay_write_r - 9'd2;
-    edrv32_ram_gpu_delay u_delay_scale_0 (
-        .clk_i(clk_i),
-        .wr_en_i(advance_w),
-        .wr_addr_i(delay_write_r),
-        .wr_data_i({12'b0, delay_scale_input_w[0 +: 60]}),
-        .rd_en_i(advance_w),
-        .rd_addr_i(delay_scale_read_w),
-        .rd_data_o(unused_delay_scale_data_w[0 +: 72])
-    );
-    assign delay_bypass_read_w = delay_write_r - 9'd9;
-    edrv32_ram_gpu_delay u_delay_bypass_0 (
+    // 3 enabled stages, including the former RAM output register.
+    reg [59:0] scale_r [0:2];
+    integer scale_stage;
+    always @(posedge clk_i) begin
+        if (advance_w) begin
+            scale_r[0] <= delay_scale_input_w[0 +: 60];
+            for (scale_stage = 1; scale_stage < 3;
+                scale_stage = scale_stage + 1)
+                scale_r[scale_stage] <= scale_r[scale_stage-1];
+        end
+    end
+    assign unused_delay_scale_data_w[0 +: 72] = {12'b0, scale_r[2]};
+    assign delay_bypass_read_w = delay_write_r - 6'd9;
+    wire [71:0] u_delay_bypass_0_data_w;
+    reg [71:0] u_delay_bypass_0_data_r;
+    assign unused_delay_bypass_data_w[0 +: 72] = u_delay_bypass_0_data_r;
+    always @(posedge clk_i) begin
+        if (advance_w) u_delay_bypass_0_data_r <= u_delay_bypass_0_data_w;
+    end
+    edrv32_ram_gpu_table u_delay_bypass_0 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
         .wr_data_i(delay_bypass_input_w[0 +: 72]),
-        .rd_en_i(advance_w),
         .rd_addr_i(delay_bypass_read_w),
-        .rd_data_o(unused_delay_bypass_data_w[0 +: 72])
+        .rd_data_o(u_delay_bypass_0_data_w)
     );
-    edrv32_ram_gpu_delay u_delay_bypass_1 (
+    wire [71:0] u_delay_bypass_1_data_w;
+    reg [71:0] u_delay_bypass_1_data_r;
+    assign unused_delay_bypass_data_w[72 +: 72] = u_delay_bypass_1_data_r;
+    always @(posedge clk_i) begin
+        if (advance_w) u_delay_bypass_1_data_r <= u_delay_bypass_1_data_w;
+    end
+    edrv32_ram_gpu_table u_delay_bypass_1 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
         .wr_data_i(delay_bypass_input_w[72 +: 72]),
-        .rd_en_i(advance_w),
         .rd_addr_i(delay_bypass_read_w),
-        .rd_data_o(unused_delay_bypass_data_w[72 +: 72])
+        .rd_data_o(u_delay_bypass_1_data_w)
     );
-    edrv32_ram_gpu_delay u_delay_bypass_2 (
+    wire [71:0] u_delay_bypass_2_data_w;
+    reg [71:0] u_delay_bypass_2_data_r;
+    assign unused_delay_bypass_data_w[144 +: 72] = u_delay_bypass_2_data_r;
+    always @(posedge clk_i) begin
+        if (advance_w) u_delay_bypass_2_data_r <= u_delay_bypass_2_data_w;
+    end
+    edrv32_ram_gpu_table u_delay_bypass_2 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
         .wr_data_i(delay_bypass_input_w[144 +: 72]),
-        .rd_en_i(advance_w),
         .rd_addr_i(delay_bypass_read_w),
-        .rd_data_o(unused_delay_bypass_data_w[144 +: 72])
+        .rd_data_o(u_delay_bypass_2_data_w)
     );
-    edrv32_ram_gpu_delay u_delay_bypass_3 (
+    wire [71:0] u_delay_bypass_3_data_w;
+    reg [71:0] u_delay_bypass_3_data_r;
+    assign unused_delay_bypass_data_w[216 +: 72] = u_delay_bypass_3_data_r;
+    always @(posedge clk_i) begin
+        if (advance_w) u_delay_bypass_3_data_r <= u_delay_bypass_3_data_w;
+    end
+    edrv32_ram_gpu_table u_delay_bypass_3 (
         .clk_i(clk_i),
         .wr_en_i(advance_w),
         .wr_addr_i(delay_write_r),
         .wr_data_i({56'b0, delay_bypass_input_w[216 +: 16]}),
-        .rd_en_i(advance_w),
         .rd_addr_i(delay_bypass_read_w),
-        .rd_data_o(unused_delay_bypass_data_w[216 +: 72])
+        .rd_data_o(u_delay_bypass_3_data_w)
     );
     assign delay_metadata_input_w[0 +: 49] =
         {input_alpha_r[input_read_r], input_palette_r[input_read_r],
