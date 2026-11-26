@@ -214,6 +214,31 @@ module edrv32_gpu_geometry (
             localparam WIDTH = field_g < 4 ? 40 : (field_g < 6 ? 16 : 24);
             localparam OFFSET = field_g < 4 ? field_g * 40
                 : (field_g < 6 ? 160 + (field_g - 4) * 16 : 192 + (field_g - 6) * 24);
+            // Each field owns its accept decode; preserved state prevents PDS merging.
+            (* keep = "true", syn_preserve = 1 *) reg polygon_sending_r;
+            (* keep = "true", syn_preserve = 1 *) reg [4:0] polygon_counts_count_r;
+            (* keep = "true", syn_preserve = 1 *) wire polygon_accept_region_w;
+            assign polygon_accept_region_w = polygon_valid_w && !polygon_sending_r
+                && polygon_counts_count_r != 16 && !stop_i;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    polygon_sending_r <= 1'b0;
+                    polygon_counts_count_r <= 5'd0;
+                end else if (stop_i) begin
+                    polygon_sending_r <= 1'b0;
+                    polygon_counts_count_r <= 5'd0;
+                end else begin
+                    if (project_input_valid_w && project_input_ready_w
+                        && {1'b0, send_index_r} + 4'd1 == send_count_r)
+                        polygon_sending_r <= 1'b0;
+                    if (polygon_accept_region_w) polygon_sending_r <= 1'b1;
+                    case ({polygon_accept_region_w, polygon_complete_w})
+                        2'b10: polygon_counts_count_r <= polygon_counts_count_r + 5'd1;
+                        2'b01: polygon_counts_count_r <= polygon_counts_count_r - 5'd1;
+                        default: polygon_counts_count_r <= polygon_counts_count_r;
+                    endcase
+                end
+            end
             wire [WIDTH*8-1:0] polygon_w;
             reg [WIDTH-1:0] selected_polygon_w;
             assign project_input_data_w[OFFSET +: WIDTH] = selected_polygon_w;
@@ -235,7 +260,7 @@ module edrv32_gpu_geometry (
                 reg [WIDTH-1:0] data_r;
                 assign polygon_w[WIDTH*vertex_g +: WIDTH] = data_r;
                 always @(posedge clk_i) begin
-                    if (polygon_accept_w)
+                    if (polygon_accept_region_w)
                         data_r <= polygon_data_w[vertex_g * 264 + OFFSET +: WIDTH];
                 end
             end

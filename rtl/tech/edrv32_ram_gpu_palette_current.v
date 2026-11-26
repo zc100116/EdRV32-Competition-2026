@@ -17,7 +17,7 @@ module edrv32_ram_gpu_palette_current (
     output reg [19:0] rd_data_o
 );
     reg [7:0] rd_addr_r;
-    reg rd_en_r;
+    reg select_en_r;
     wire [319:0] page_data_w;
     reg [319:0] page_data_r;
     reg [79:0] group_data_r;
@@ -26,6 +26,12 @@ module edrv32_ram_gpu_palette_current (
     genvar page;
     generate
         for (page = 0; page < 16; page = page + 1) begin : g_page
+            // One preserved enable per page, at the original read-index boundary.
+            (* keep = "true", syn_preserve = 1 *) reg rd_en_r;
+            always @(posedge clk_i) begin
+                rd_en_r <= rd_en_i;
+                if (rd_en_r) page_data_r[page*20 +: 20] <= page_data_w[page*20 +: 20];
+            end
 `ifdef EDRV32_FPGA_MEMORY_MODE
             ip_lutram_gpu_palette_current u_ip (
                 .wr_clk(clk_i),
@@ -50,14 +56,11 @@ module edrv32_ram_gpu_palette_current (
     endgenerate
     integer group_idx;
     always @(posedge clk_i) begin
-        rd_en_r <= rd_en_i;
         if (rd_en_i) begin
             rd_addr_r <= rd_addr_i;
         end
-        if (rd_en_r) begin
-            page_data_r <= page_data_w;
-            page_select_r <= rd_addr_r[7:4];
-        end
+        select_en_r <= rd_en_i;
+        if (select_en_r) page_select_r <= rd_addr_r[7:4];
         for (group_idx = 0; group_idx < 4; group_idx = group_idx + 1) begin
             group_data_r[group_idx*20 +: 20] <=
                 page_data_r[(group_idx*4 + {30'b0, page_select_r[1:0]})*20 +: 20];
