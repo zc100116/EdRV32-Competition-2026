@@ -1,5 +1,4 @@
 +incdir+../../../rtl/include
-../../../rtl/tech/edrv32_ram_gpu_delay.v
 ../../../rtl/tech/edrv32_ram_gpu_table.v
 ../../../rtl/tech/edrv32_ram_gpu_texture_segment.v
 ../../../rtl/tech/edrv32_ram_gpu_palette_segment.v

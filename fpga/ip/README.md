@@ -41,7 +41,6 @@
 | `ip_ram_rnd_window` | DRM 简单双口 RAM | 512 × 64（用256项） | `edrv32_ram_rnd_window` | AFFINE源窗口 ×4 | [ip_ram_rnd_window.md](ip_ram_rnd_window.md) | RND v2单独上板生成，不进卡21 |
 | `ip_ram_gpu_target_segment` | DRM 简单双口，输出寄存 | 2048 × 18 | `edrv32_ram_gpu_target_segment` | GPU target | [ip_ram_gpu_target_segment.md](ip_ram_gpu_target_segment.md) | 待生成 |
 | `ip_ram_gpu_target_tail` | DRM 简单双口，输出寄存 | 512 × 72 | `edrv32_ram_gpu_target_tail` | GPU target | [ip_ram_gpu_target_tail.md](ip_ram_gpu_target_tail.md) | 待生成 |
-| `ip_ram_gpu_delay` | DRM 简单双口 RAM | 512 × 72，读 1 拍 | `edrv32_ram_gpu_delay` | GPU 深延迟线和结果队列 | [ip_ram_gpu_delay.md](ip_ram_gpu_delay.md) | 待生成 |
 | `ip_lutram_gpu_table` | 分布式 RAM 简单双口 | 64 × 72，组合读 | `edrv32_ram_gpu_table` | GPU 深度 ≤ 64 的延迟线、队列、小表 | [ip_lutram_gpu_table.md](ip_lutram_gpu_table.md) | 待生成 |
 | `ip_ram_gpu_texture_segment` | True Dual Port DRM | 2048 × 16 | `edrv32_ram_gpu_texture_segment` | GPU texture/palette ×48 | [ip_ram_gpu_texture_segment.md](ip_ram_gpu_texture_segment.md) | 待生成 |
 | `ip_ram_gpu_palette_segment` | True Dual Port DRM | 1024 × 20 | `edrv32_ram_gpu_palette_segment` | GPU texture/palette ×8 | [ip_ram_gpu_palette_segment.md](ip_ram_gpu_palette_segment.md) | 待生成 |
