@@ -775,12 +775,12 @@ module edrv32_gpu_project (
         if (push_w) output_6_r[write_r] <= color_input_r_d35_align14_r;
     end
     // Each region owns the output-credit count used by its local clock enable.
-    wire [8:0] pipeline_enable_w;
+    wire [10:0] pipeline_enable_w;
     genvar enable_region;
     generate
-        for (enable_region = 0; enable_region < 9;
+        for (enable_region = 0; enable_region < 11;
             enable_region = enable_region + 1) begin : g_enable_region
-            (* keep = 1 *) reg [1:0] region_count_r /* synthesis syn_preserve=1 */;
+            (* keep = "true", syn_preserve = 1 *) reg [1:0] region_count_r;
             assign pipeline_enable_w[enable_region] = region_count_r != 2 && !stop_i;
             (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i) region_count_r <= 0;
@@ -1485,7 +1485,7 @@ module edrv32_gpu_project (
                 position_product1_l3n0_low0d1_r};
     assign position_product1_p2_r = unused_position_product1_l3n0_w;
     always @(posedge clk_i) begin
-        if (pipeline_enable_w[1]) begin
+        if (pipeline_enable_w[9]) begin
             position_product1_pp00_r <=
                 $signed({1'b0, position_product1_a_w[0 +: 17]}) * $signed({1'b0,
                 position_product1_b_w[0 +: 17]});
@@ -1749,7 +1749,7 @@ module edrv32_gpu_project (
                 position_product2_l3n0_low0d1_r};
     assign position_product2_p2_r = unused_position_product2_l3n0_w;
     always @(posedge clk_i) begin
-        if (pipeline_enable_w[2]) begin
+        if (pipeline_enable_w[10]) begin
             position_product2_pp00_r <=
                 $signed({1'b0, position_product2_a_w[0 +: 17]}) * $signed({1'b0,
                 position_product2_b_w[0 +: 17]});
