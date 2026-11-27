@@ -20,12 +20,45 @@ from tools.gpu.model.planes import PixelArithmetic as CurrentPixelArithmetic
 from tools.gpu.scene import Memory
 
 
-class PixelArithmetic(CurrentPixelArithmetic):
+class V05Arithmetic(CurrentPixelArithmetic):
+    """Historical v0.5 planes, retained only by precision research tools."""
+    WIDTHS = (62, 66, 66, 66, 58, 58, 58)
+
+    def __init__(self, vertices, area, domain=None):
+        self.origin = (min(v[0] for v in vertices) // 16,
+                       min(v[1] for v in vertices) // 16)
+        a, b, c = vertices
+        edges = ((b, c), (c, a), (a, b))
+        dx = [(start[1] - end[1]) * 16 for start, end in edges]
+        dy = [(end[0] - start[0]) * 16 for start, end in edges]
+        # One area reciprocal, normalized before Q30 so large areas never underflow.
+        area_exponent = area.bit_length() - 1
+        inverse_area = reciprocal(area, area_exponent)
+        self.coefficients = []
+        self.exponents = []
+        for channel in range(2, 9):
+            raw = [vertex[channel] for vertex in vertices]
+            # Depth and color have fixed output shifts, avoiding four extra lane shifters.
+            bits = (max(abs(value) for value in raw).bit_length() if channel in (3, 4, 5)
+                    else 16 if channel == 2 else 24)
+            exponent = bits - self.PLANE_BITS
+            values = [shift(value, exponent) for value in raw]
+            gradients = [shift(sum(w * v for w, v in zip(weights, values))
+                               * inverse_area, 30 + area_exponent) for weights in (dx, dy)]
+            start = values[0] + shift(
+                (16 * self.origin[0] + 8 - a[0]) * gradients[0]
+                + (16 * self.origin[1] + 8 - a[1]) * gradients[1], 4)
+            drop = self.DROPS[channel - 2]
+            self.coefficients.append(tuple(shift(value, drop) for value in (start, *gradients)))
+            # Physical plane units include the discarded coefficient bits.
+            self.exponents.append(exponent - (0, 30, 38, 38, 16, 16, 16)[channel - 2] + drop)
+
+class PixelArithmetic(V05Arithmetic):
     """Historical v0.3 baseline, retained only for numeric experiments."""
     DROPS = (0,) * 7
     LOD_QUAD = False
 
-    def __init__(self, vertices, area):
+    def __init__(self, vertices, area, domain=None):
         super().__init__(vertices, area)
         self.gradients = [[self.normal(self.coefficients[c][axis], self.exponents[c])
                            for c in (1, 2, 3)] for axis in (1, 2)]

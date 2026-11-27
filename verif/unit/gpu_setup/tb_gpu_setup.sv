@@ -15,10 +15,10 @@ module tb_gpu_setup;
     reg output_ready = 1;
     wire output_valid;
     reg [776:0] input_data;
-    wire [1751:0] output_data;
+    wire [1267:0] output_data;
     reg [776:0] inputs [0:263];
-    reg [1751:0] expected [0:261];
-    reg [1751:0] held;
+    reg [1267:0] expected [0:261];
+    reg [1267:0] held;
     reg holding = 0;
     integer sent = 0;
     integer received = 0;
@@ -28,9 +28,15 @@ module tb_gpu_setup;
     integer last_output = -1;
     reg [31:0] random_state = 32'h12345678;
 
+    reg render_state_valid_r = 0;
+    reg [95:0] target_r;
+    integer wide_r;
     edrv32_gpu_setup u_dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
+        .render_state_valid_i(render_state_valid_r),
+        .render_state_target_i(target_r),
+        .render_state_wide_i(wide_r != 0),
         .screen_triangle_valid_i(input_valid),
         .screen_triangle_ready_o(input_ready),
         .screen_triangle_x_i(input_data[0 +: 51]),
@@ -45,9 +51,9 @@ module tb_gpu_setup;
         .triangle_setup_bounds_o(output_data[0 +: 64]),
         .triangle_setup_edge_o(output_data[64 +: 480]),
         .triangle_setup_origin_o(output_data[544 +: 32]),
-        .triangle_setup_start_o(output_data[576 +: 434]),
-        .triangle_setup_gradient_o(output_data[1010 +: 672]),
-        .triangle_setup_h_o(output_data[1682 +: 70]),
+        .triangle_setup_start_o(output_data[576 +: 254]),
+        .triangle_setup_gradient_o(output_data[830 +: 368]),
+        .triangle_setup_h_o(output_data[1198 +: 70]),
         .finish_i(finish_i),
         .stop_i(stop_i),
         .unit_done_o(unit_done_o),
@@ -55,10 +61,17 @@ module tb_gpu_setup;
     );
 
     initial begin
+        if (!$value$plusargs("WIDE=%d", wide_r)) wide_r = 0;
+        target_r = {16'(wide_r != 0 ? 86 : 176), 16'(wide_r != 0 ? 1272 : 632),
+            16'd19, 16'd17, -16'sd4, -16'sd8};
         $readmemh("build/gpu_setup/input.hex", inputs);
         $readmemh("build/gpu_setup/expected.hex", expected);
         repeat (4) @(negedge clk_i);
         rst_n_i = 1;
+        render_state_valid_r = 1;
+        @(negedge clk_i);
+        render_state_valid_r = 0;
+        repeat (6) @(negedge clk_i);
         while (!unit_done_o) begin
             input_data = sent < 264 ? inputs[sent] : 777'd0;
             input_valid = sent < 264;

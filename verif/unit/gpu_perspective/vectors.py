@@ -14,10 +14,10 @@ from tools.gpu.model.planes import PixelArithmetic, pixel_seed
 from tools.gpu.model.renderer import GPU
 from types import SimpleNamespace
 
-FRAG = dict(x=16, y=16, mask=4, quad=1, plane=1736, h=70, palette=4, alpha=8)
+FRAG = dict(x=16, y=16, mask=4, quad=1, plane=1016, h=70, palette=4, alpha=8)
 SAMPLE = dict(x=16, y=16, mask=4, quad=1, u=128, v=128, span=384,
               depth=64, color=96, palette=4, alpha=8)
-SETUP = dict(bounds=64, edge=480, origin=32, start=434, gradient=672, h=70)
+SETUP = dict(bounds=64, edge=480, origin=32, start=254, gradient=368, h=70)
 QUAD = dict(data=128, x=17, y=17)
 
 
@@ -93,13 +93,13 @@ def quad_case(x, y, w, h, flip_h, flip_v, wide, serial):
                     assert (u << 8, v << 8, serial % 16, serial % 65536,
                             serial % 256) == (pu, pv, pal, z, alpha)
                     u, v = pu >> 8, pv >> 8
-                lanes.extend([serial % 65536 << 8, 1 << 26, u << 34, v << 34,
-                              255 << 12, 255 << 12, 255 << 12])
+                lanes.extend([serial % 65536, u << 8, v << 8])
             result.append(record(dict(x=gx, y=py, mask=mask, quad=1,
-                                      plane=packed(lanes, list(PixelArithmetic.WIDTHS)*4),
-                                      h=packed([-16, 0, 0, 0, -8, -8, -8], [10]*7),
+                                      u=packed(lanes[1::3], [32]*4),
+                                      v=packed(lanes[2::3], [32]*4), span=0,
+                                      depth=packed(lanes[0::3], [16]*4), color=(1 << 96)-1,
                                       palette=serial % 16,
-                                      alpha=serial % 256), FRAG))
+                                      alpha=serial % 256), SAMPLE))
     return item, result
 
 
@@ -144,7 +144,7 @@ def triangle_case(verts, wide):
     if area < 0:
         b, c = c, b
         area = -area
-    ar = PixelArithmetic((a, b, c), area)
+    ar = PixelArithmetic((a, b, c), area, limits(wide))
     x0 = (min(a[0], b[0], c[0])-8+15)//16//4*4
     y0 = (min(a[1], b[1], c[1])-8+15)//16
     x1 = (max(a[0], b[0], c[0])-8)//16+1
@@ -165,7 +165,7 @@ def triangle_case(verts, wide):
                        origin=packed(ar.origin, [16]*2),
                        start=packed([c[0] for c in ar.coefficients], ar.WIDTHS),
                        gradient=packed([v for coeff in ar.coefficients for v in coeff[1:]],
-                                       [w-14 for w in ar.WIDTHS for _ in range(2)]),
+                                       [w-10 for w in ar.WIDTHS for _ in range(2)]),
                        h=packed([e+f-d for e, f, d in zip(ar.exponents,
                                 [0, 30, 38, 38, 16, 16, 16], ar.DROPS)], [10]*7)), SETUP)
     cx0, cy0, cx1, cy1 = limits(wide)
@@ -186,7 +186,7 @@ def triangle_case(verts, wide):
                                           plane=packed([v for lane in range(4)
                                                         for v in ar.at(x+lane, y)],
                                                        list(ar.WIDTHS)*4),
-                                          h=(item >> (64+480+32+434+672)) & ((1 << 70)-1),
+                                          h=(item >> (64+480+32+254+368)) & ((1 << 70)-1),
                                           palette=0, alpha=255), FRAG))
             if any((row >> 32) & 15 for row in pair):
                 result.extend(pair)
@@ -225,23 +225,23 @@ def perspective_vectors():
     rng = random.Random(734199)
     for i in range(900):
         ar = PixelArithmetic.__new__(PixelArithmetic)
-        ar.exponents = [-8, rng.randrange(-61, -11), rng.randrange(-61, -11),
-                        rng.randrange(-61, -11), -12, -12, -12]
+        ar.exponents = [rng.randrange(-8, 25), rng.randrange(-61, -11), rng.randrange(-61, -11),
+                        rng.randrange(-61, -11), *[rng.randrange(-12, 21) for _ in range(3)]]
         quad = False
         rows = []
         for row in range(2):
             lanes = []
             for lane in range(4):
-                attrs = [rng.randrange(-(1 << 17), 1 << 34),
-                         rng.randrange(1 << 40, 1 << 52),
-                         rng.randrange(-(1 << 52), 1 << 52),
-                         rng.randrange(-(1 << 52), 1 << 52),
-                         *[rng.randrange(-(1 << 24), 1 << 34) for _ in range(3)]]
+                attrs = [rng.randrange(-(1 << 17), 1 << 31),
+                         rng.randrange(1 << 30, 1 << 41),
+                         rng.randrange(-(1 << 41), 1 << 41),
+                         rng.randrange(-(1 << 41), 1 << 41),
+                         *[rng.randrange(-(1 << 24), 1 << 31) for _ in range(3)]]
                 serial = i*2+row
                 if serial < 1024:
-                    attrs[1] = (131072 + serial*128 + 64) << 20
+                    attrs[1] = (131072 + serial*128 + 64) << 9
                 elif serial < 1060:
-                    attrs[1:4] = [(1 << 48)-1, -((1 << 48)-1), (1 << 48)-1]
+                    attrs[1:4] = [(1 << 41)-1, -((1 << 41)-1), (1 << 41)-1]
                 if i % 17 == 0 and lane in (1, 2):
                     attrs[1] = 0 if lane == 1 else -attrs[1]
                 if quad:
@@ -320,7 +320,7 @@ def run_normal():
 
 def half_fragments(groups):
     result = []
-    layout = dict(FRAG, plane=868)
+    layout = dict(FRAG, plane=508)
     for index in range(0, len(groups), 2):
         rows = []
         for value in groups[index:index+2]:
@@ -334,7 +334,7 @@ def half_fragments(groups):
             for row in rows:
                 result.append(record(dict(row, x=row['x']+half*2,
                     mask=(row['mask'] >> (half*2)) & 3,
-                    plane=(row['plane'] >> (half*868)) & ((1 << 868)-1)), layout))
+                    plane=(row['plane'] >> (half*508)) & ((1 << 508)-1)), layout))
     return result
 
 
@@ -371,27 +371,6 @@ def run(kind):
             inputs = half_fragments(inputs)
         if kind == 'raster':
             outputs = half_fragments(outputs)
-        if kind == 'quad':
-            converted = []
-            for value in outputs:
-                fields = {}
-                offset = 0
-                for key, width in FRAG.items():
-                    fields[key] = (value >> offset) & ((1 << width)-1)
-                    offset += width
-                uv = [[], []]
-                depth = []
-                for lane in range(4):
-                    plane = fields['plane'] >> (lane*434)
-                    depth.append((plane >> 8) & 65535)
-                    for axis, start in enumerate((128, 194)):
-                        coord = (plane >> (start+34)) & ((1 << 32)-1)
-                        uv[axis].append((coord << 8) & ((1 << 32)-1))
-                converted.append(record(dict(x=fields['x'], y=fields['y'],
-                    mask=fields['mask'], quad=1, u=packed(uv[0], [32]*4),
-                    v=packed(uv[1], [32]*4), span=0, depth=packed(depth, [16]*4),
-                    color=(1 << 96)-1, palette=fields['palette'], alpha=fields['alpha']), SAMPLE))
-            outputs = converted
         inp, out = build/'input.hex', build/'expected.hex'
         inp.write_text(''.join(f'{x:x}\n' for x in inputs))
         out.write_text(''.join(f'{x:x}\n' for x in outputs))

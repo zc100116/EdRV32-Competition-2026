@@ -325,8 +325,8 @@ class GPU:
         y1 = min(y1, (max(a[1], b[1], c[1]) - 8) // 16 + 1)
         edges = ((b, c), (c, a), (a, b))
         inclusive = [top_left(start, end) for start, end in edges]
-        arithmetic = self._pixel_arithmetic((a, b, c), area)
-        # Canonical origin is independent of target/scissor. No step is rounded.
+        arithmetic = self._pixel_arithmetic((a, b, c), area, self.bounds())
+        # P-A origin belongs to SC intersect TGT; no step is rounded.
         row = arithmetic.at(x0, y0)
         quad_row = None
         lod_cache = {}

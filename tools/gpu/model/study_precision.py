@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """study_precision.py — gpu-spec 2.4/2.13 output precision experiment.
-Standalone block-floating plane study and headless DDR replay; defaults unchanged.
+Standalone block-floating plane study and headless DDR replay; v0.5 baseline is isolated in study_v03.
 Host standard library only, seed 20261124; no clock domain.
 """
 import argparse
@@ -14,7 +14,7 @@ import zlib
 
 from study_v03 import (GPU, Memory, Metrics, FilterMetrics, corpus, screen_cases,
                        fixed_fragments, texture_levels, interleave_texture)
-from study_v03 import PixelArithmetic as HistoricalArithmetic
+from study_v03 import PixelArithmetic as HistoricalArithmetic, V05Arithmetic
 from tools.gpu.model.planes import PixelArithmetic
 from tools.gpu.model.arithmetic import divide, edge, shift, saturate
 from tools.gpu.model.texture import Texture
@@ -27,13 +27,13 @@ CASES = {'P-A': ((32, 42, 32), 4, 0), 'P-A+': ((36, 46, 36), 4, 0),
 FRAMES = ('canyon', 'world', 'world-dusk', 'rogue-slash')
 
 
-class Narrow(PixelArithmetic):
+class Narrow(V05Arithmetic):
     """Rebase existing rounded planes, then round to a bounded block exponent."""
     DOMAIN = (0, 0, 640, 360)
     LIMITS = (32, 42, 32)
     extra = [0] * 7
 
-    def __init__(self, vertices, area):
+    def __init__(self, vertices, area, domain=None):
         super().__init__(vertices, area)
         x, y, width, height = self.DOMAIN
         origin = (x // 4 * 4, y // 2 * 2)
@@ -105,9 +105,11 @@ class CandidateGPU(GPU):
 
 
 def engine(name, memory, size=None):
-    gpu = (GPU if name in ('default', 'pc-v03') else CandidateGPU)(memory, reference_size=size)
+    gpu = (GPU if name in ('default', 'pc-v03', 'v05') else CandidateGPU)(memory, reference_size=size)
     if name == 'pc-v03':
         gpu._pixel_arithmetic = HistoricalArithmetic
+    elif name == 'v05':
+        gpu._pixel_arithmetic = V05Arithmetic
     elif name != 'default':
         widths, gpu.guard, gpu.geometry_drop = CASES[name]
         gpu._pixel_arithmetic = type('Plane', (Narrow,), dict(LIMITS=widths, extra=[0]*7))
@@ -118,7 +120,7 @@ def synthetic():
     matrix = (255, 0, 0, 0, 0, 261, 0, 0, 0, 0, 128, -655, 0, 0, 256, 0)
     light = dict(LX=6000, LY=-4000, LZ=14700, AMB_RGB=0x202830, DIR_RGB=0xe0c090)
     levels = texture_levels()
-    engines = {n: engine(n, Memory(0, b''), (640, 360)) for n in ('default', *CASES)}
+    engines = {n: engine(n, Memory(0, b''), (640, 360)) for n in ('v05', 'default', *CASES)}
     for gpu in engines.values():
         gpu.matrix, gpu.light, gpu.pixel_state = matrix, light, {'CULL': 0}
         gpu.target = dict(TGT_X0=0, TGT_Y0=0, SC_X0=0, SC_Y0=0, SC_X1=640, SC_Y1=360,
@@ -127,25 +129,27 @@ def synthetic():
         gpu.texture = Texture(gpu.ram, gpu.palettes,
                               dict(LOG2_W=8, LOG2_H=8, LEVELS=9, FORMAT=2,
                                    OFFSET=0, SAMPLE=2, PAL_GROUP=0, LOD_BIAS=0))
-    metrics = {n: Metrics() for n in CASES}
-    filters = {n: FilterMetrics() for n in CASES}
+    metrics = {n: Metrics() for n in ('default', *CASES)}
+    filters = {n: FilterMetrics() for n in ('default', *CASES)}
     for _, vertices, screen in ([(n, v, False) for n, v in corpus()]
                                 + [(n, v, True) for n, v in screen_cases()]):
-        baseline = fixed_fragments(engines['default'], vertices, screen)
-        for name in CASES:
+        baseline = fixed_fragments(engines['v05'], vertices, screen)
+        for name in ('default', *CASES):
             fixed = fixed_fragments(engines[name], vertices, screen)
+            if name == 'default':
+                assert fixed == baseline
             metrics[name].add(fixed, baseline)
             if screen:
                 for point in fixed.keys() & baseline.keys():
                     samples = []
                     for fragments, gpu in ((fixed, engines[name]),
-                                           (baseline, engines['default'])):
+                                           (baseline, engines['v05'])):
                         f = fragments[point]
                         samples.append(gpu.texture.sample(round(f[0]*256), round(f[1]*256),
                                                           round(f[3]*256)))
                     filters[name].add(*samples)
     return {n: dict(delta=metrics[n].result(), filtered=filters[n].result(),
-                    extra=engines[n]._pixel_arithmetic.extra) for n in CASES}
+                    extra=None if n == 'default' else engines[n]._pixel_arithmetic.extra) for n in ('default', *CASES)}
 
 
 class TrackedGPU:
@@ -219,7 +223,7 @@ def real_frame(frame):
               (directory/'frame150-writes.txt').read_text().splitlines()]
     results = {}
     baseline = None
-    for name in ('pc-v03', 'default', *CASES):
+    for name in ('pc-v03', 'v05', 'default', *CASES):
         memory = Memory(0, initial)
         gpu = engine(name, memory)
         gpu.__class__ = type('Tracked', (TrackedGPU, type(gpu)), {})
@@ -252,15 +256,17 @@ def real_frame(frame):
         if gpu.regs['ERR_CODE']:
             raise AssertionError((frame, name, gpu.regs['ERR_CODE']))
         # Compare all DDR bytes: includes texture/object state and every resolve.
-        if name in ('pc-v03', 'default'):
+        if name in ('pc-v03', 'v05', 'default'):
             exact = memory.data == expected
             first = None
             if not exact:
                 first = next(i for i, (a, b) in enumerate(zip(memory.data, expected)) if a != b)
             if name == 'pc-v03':
                 assert exact, (frame, first)
-            else:
+            elif name == 'v05':
                 baseline = gpu
+            if name == 'default':
+                assert memory.data == baseline.memory.data, frame
             results[name] = dict(ddr_bit_exact=exact, first_pc_difference=first,
                                  primitives=gpu.primitive, resolves=len(gpu.resolves))
             print(frame, name, results[name], flush=True)

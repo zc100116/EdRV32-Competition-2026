@@ -1,10 +1,10 @@
 // File: edrv32_gpu_raster_prepare.v
 // Spec: gpu-spec 2.13.7; microarch 4.6, 4.10.
-// Description: One CSA stage followed by two registered carry stages.
+// Description: One CSA stage followed by two registered result clocks.
 // Clock domain: clk_gpu.
-// WIDTH values are fixed by gpu-spec v0.4 2.13.7 (62/66/58), or edge width 40.
+// Fixed widths: 32/42 attributes and 72 setup (gpu-spec v0.6 2.13).
 module edrv32_gpu_raster_prepare #(
-    parameter WIDTH = 66
+    parameter WIDTH = 42
 ) (
     // Clock and shared pipeline enable.
     input wire clk_i,

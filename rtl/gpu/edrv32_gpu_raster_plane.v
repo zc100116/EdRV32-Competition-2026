@@ -1,11 +1,11 @@
 // File: edrv32_gpu_raster_plane.v
 // Spec: gpu-spec 2.13.7; microarch 4.6, 4.10.
-// Description: Two interleaved group accumulators and two carry stages.
+// Description: Two interleaved group accumulators with two-clock feedback.
 //              Same-phase forwarding closes the two-cycle feedback recurrence.
 // Clock domain: clk_gpu.
-// WIDTH values are fixed by gpu-spec v0.4 2.13.7 (62/66/58), or edge width 40.
+// WIDTH values are fixed by gpu-spec v0.6 2.13.7 (32/42), or edge width 40.
 module edrv32_gpu_raster_plane #(
-    parameter WIDTH = 66
+    parameter WIDTH = 42
 ) (
     // Clock and pipeline enable.
     input wire clk_i,

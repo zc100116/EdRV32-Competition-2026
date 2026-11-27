@@ -20,4 +20,6 @@
 ../../../rtl/gpu/edrv32_gpu_project_recip.v
 ../../../rtl/gpu/edrv32_gpu_setup_plane.v
 ../../../rtl/gpu/edrv32_gpu_setup.v
+../../../rtl/gpu/edrv32_gpu_raster_add.v
+../../../rtl/gpu/edrv32_gpu_raster_prepare.v
 tb_gpu_setup.sv
