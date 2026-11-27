@@ -1,0 +1,1384 @@
+Card 107 round 11 | upstream b2a27314 | local run ced62bb5
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | capture 2026-11-27T15:30:41+08:00
+
+ADS synthesis slow corner; original .snr line numbers.
+
+Rank 1, .snr lines 33562-33655
+Startpoint  : u_soc/u_gpu/u_core/g_sample[0].span_r[79]/CLK (GTP_DFF_E)
+Endpoint    : u_soc/u_gpu/u_core/u_texture/g_lod[0].amount_r[0]/D (GTP_DFF)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/g_sample[0].span_r[79]/CLK (GTP_DFF_E)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/g_sample[0].span_r[79]/Q (GTP_DFF_E)
+                                   net (fanout=4)        0.489       5.560         u_soc/u_gpu/u_core/sample_buffer_span_w [79]
+                                                                                   u_soc/u_gpu/u_core/u_texture/N116_36/I1 (GTP_LUT6CARRY)
+                                   td                    0.213       5.773 r       u_soc/u_gpu/u_core/u_texture/N116_36/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       5.773         u_soc/u_gpu/u_core/u_texture/_N476829
+                                                                                   u_soc/u_gpu/u_core/u_texture/N116_35/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       5.795 f       u_soc/u_gpu/u_core/u_texture/N116_35/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       5.795         u_soc/u_gpu/u_core/u_texture/_N476828
+                                                                                   u_soc/u_gpu/u_core/u_texture/N116_34/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       5.817 f       u_soc/u_gpu/u_core/u_texture/N116_34/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       5.817         u_soc/u_gpu/u_core/u_texture/_N476827
+                                                                                   u_soc/u_gpu/u_core/u_texture/N116_33/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       5.839 f       u_soc/u_gpu/u_core/u_texture/N116_33/COUT (GTP_LUT6CARRY)
+                                   net (fanout=31)       0.642       6.481         u_soc/u_gpu/u_core/u_texture/_N454483
+                                                                                   u_soc/u_gpu/u_core/u_texture/N116_32/I2 (GTP_LUT3)
+                                   td                    0.179       6.660 r       u_soc/u_gpu/u_core/u_texture/N116_32/Z (GTP_LUT3)
+                                   net (fanout=7)        0.531       7.191         u_soc/u_gpu/u_core/u_texture/g_lod[0].high_w
+                                                                                   u_soc/u_gpu/u_core/u_texture/N174_6[1]_2/I4 (GTP_LUT5)
+                                   td                    0.096       7.287 r       u_soc/u_gpu/u_core/u_texture/N174_6[1]_2/Z (GTP_LUT5)
+                                   net (fanout=4)        0.489       7.776         u_soc/u_gpu/u_core/u_texture/_N422582
+                                                                                   u_soc/u_gpu/u_core/u_texture/N147_7/I0 (GTP_LUT4)
+                                   td                    0.185       7.961 r       u_soc/u_gpu/u_core/u_texture/N147_7/Z (GTP_LUT4)
+                                   net (fanout=1)        0.385       8.346         u_soc/u_gpu/u_core/u_texture/g_lod[0].group_w [1]
+                                                                                   u_soc/u_gpu/u_core/u_texture/N378_2[0]/S (GTP_MUX2LUT7)
+                                   td                    0.194       8.540 r       u_soc/u_gpu/u_core/u_texture/N378_2[0]/Z (GTP_MUX2LUT7)
+                                   net (fanout=1)        0.385       8.925         u_soc/u_gpu/u_core/u_texture/_N154043
+                                                                                   u_soc/u_gpu/u_core/u_texture/N378_3[0]/I4 (GTP_LUT6)
+                                   td                    0.074       8.999 r       u_soc/u_gpu/u_core/u_texture/N378_3[0]/Z (GTP_LUT6)
+                                   net (fanout=1)        0.000       8.999         u_soc/u_gpu/u_core/u_texture/_N154049
+                                                                                   u_soc/u_gpu/u_core/u_texture/N378_4[0]/I0 (GTP_MUX2LUT7)
+                                   td                    0.181       9.180 r       u_soc/u_gpu/u_core/u_texture/N378_4[0]/Z (GTP_MUX2LUT7)
+                                   net (fanout=1)        0.385       9.565         u_soc/u_gpu/u_core/u_texture/_N154055
+                                                                                   u_soc/u_gpu/u_core/u_texture/N378_5[0]/I4 (GTP_LUT6)
+                                   td                    0.074       9.639 r       u_soc/u_gpu/u_core/u_texture/N378_5[0]/Z (GTP_LUT6)
+                                   net (fanout=1)        0.000       9.639         u_soc/u_gpu/u_core/u_texture/_N154061
+                                                                                   u_soc/u_gpu/u_core/u_texture/N378_6[0]/I0 (GTP_MUX2LUT7)
+                                   td                    0.181       9.820 r       u_soc/u_gpu/u_core/u_texture/N378_6[0]/Z (GTP_MUX2LUT7)
+                                   net (fanout=1)        0.385      10.205         u_soc/u_gpu/u_core/u_texture/_N154067
+                                                                                   u_soc/u_gpu/u_core/u_texture/N378_inv/I5 (GTP_LUT6)
+                                   td                    0.074      10.279 r       u_soc/u_gpu/u_core/u_texture/N378_inv/Z (GTP_LUT6)
+                                   net (fanout=1)        0.000      10.279         u_soc/u_gpu/u_core/u_texture/N404 [0]
+                                                                           r       u_soc/u_gpu/u_core/u_texture/g_lod[0].amount_r[0]/D (GTP_DFF)
+
+ Data arrival time                                                  10.279         Logic Levels: 10
+                                                                                   Logic: 1.720ns(31.787%), Route: 3.691ns(68.213%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_texture/g_lod[0].amount_r[0]/CLK (GTP_DFF)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.136       9.737
+
+ Data required time                                                  9.737
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.737
+ Data arrival time                                                  10.279
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.542
+
+Rank 2, .snr lines 33660-33753
+Startpoint  : u_soc/u_gpu/u_core/g_sample[2].span_r[79]/CLK (GTP_DFF_E)
+Endpoint    : u_soc/u_gpu/u_core/u_texture/g_lod[2].amount_r[0]/D (GTP_DFF)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/g_sample[2].span_r[79]/CLK (GTP_DFF_E)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/g_sample[2].span_r[79]/Q (GTP_DFF_E)
+                                   net (fanout=4)        0.489       5.560         u_soc/u_gpu/u_core/sample_buffer_span_w [271]
+                                                                                   u_soc/u_gpu/u_core/u_texture/N2346_36/I1 (GTP_LUT6CARRY)
+                                   td                    0.213       5.773 r       u_soc/u_gpu/u_core/u_texture/N2346_36/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       5.773         u_soc/u_gpu/u_core/u_texture/_N477036
+                                                                                   u_soc/u_gpu/u_core/u_texture/N2346_35/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       5.795 f       u_soc/u_gpu/u_core/u_texture/N2346_35/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       5.795         u_soc/u_gpu/u_core/u_texture/_N477035
+                                                                                   u_soc/u_gpu/u_core/u_texture/N2346_34/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       5.817 f       u_soc/u_gpu/u_core/u_texture/N2346_34/COUT (GTP_LUT6CARRY)
+                                   net (fanout=1)        0.000       5.817         u_soc/u_gpu/u_core/u_texture/_N477034
+                                                                                   u_soc/u_gpu/u_core/u_texture/N2346_33/CIN (GTP_LUT6CARRY)
+                                   td                    0.022       5.839 f       u_soc/u_gpu/u_core/u_texture/N2346_33/COUT (GTP_LUT6CARRY)
+                                   net (fanout=28)       0.634       6.473         u_soc/u_gpu/u_core/u_texture/_N454535
+                                                                                   u_soc/u_gpu/u_core/u_texture/N2346_32/I2 (GTP_LUT3)
+                                   td                    0.179       6.652 r       u_soc/u_gpu/u_core/u_texture/N2346_32/Z (GTP_LUT3)
+                                   net (fanout=7)        0.531       7.183         u_soc/u_gpu/u_core/u_texture/g_lod[2].high_w
+                                                                                   u_soc/u_gpu/u_core/u_texture/N2404_6[1]_2/I4 (GTP_LUT5)
+                                   td                    0.096       7.279 r       u_soc/u_gpu/u_core/u_texture/N2404_6[1]_2/Z (GTP_LUT5)
+                                   net (fanout=4)        0.489       7.768         u_soc/u_gpu/u_core/u_texture/_N422603
+                                                                                   u_soc/u_gpu/u_core/u_texture/N2377_7/I0 (GTP_LUT4)
+                                   td                    0.185       7.953 r       u_soc/u_gpu/u_core/u_texture/N2377_7/Z (GTP_LUT4)
+                                   net (fanout=1)        0.385       8.338         u_soc/u_gpu/u_core/u_texture/g_lod[2].group_w [1]
+                                                                                   u_soc/u_gpu/u_core/u_texture/N2608_2[0]/S (GTP_MUX2LUT7)
+                                   td                    0.194       8.532 r       u_soc/u_gpu/u_core/u_texture/N2608_2[0]/Z (GTP_MUX2LUT7)
+                                   net (fanout=1)        0.385       8.917         u_soc/u_gpu/u_core/u_texture/_N154091
+                                                                                   u_soc/u_gpu/u_core/u_texture/N2608_3[0]/I4 (GTP_LUT6)
+                                   td                    0.074       8.991 r       u_soc/u_gpu/u_core/u_texture/N2608_3[0]/Z (GTP_LUT6)
+                                   net (fanout=1)        0.000       8.991         u_soc/u_gpu/u_core/u_texture/_N154097
+                                                                                   u_soc/u_gpu/u_core/u_texture/N2608_4[0]/I0 (GTP_MUX2LUT7)
+                                   td                    0.181       9.172 r       u_soc/u_gpu/u_core/u_texture/N2608_4[0]/Z (GTP_MUX2LUT7)
+                                   net (fanout=1)        0.385       9.557         u_soc/u_gpu/u_core/u_texture/_N154103
+                                                                                   u_soc/u_gpu/u_core/u_texture/N2608_5[0]/I4 (GTP_LUT6)
+                                   td                    0.074       9.631 r       u_soc/u_gpu/u_core/u_texture/N2608_5[0]/Z (GTP_LUT6)
+                                   net (fanout=1)        0.000       9.631         u_soc/u_gpu/u_core/u_texture/_N154109
+                                                                                   u_soc/u_gpu/u_core/u_texture/N2608_6[0]/I0 (GTP_MUX2LUT7)
+                                   td                    0.181       9.812 r       u_soc/u_gpu/u_core/u_texture/N2608_6[0]/Z (GTP_MUX2LUT7)
+                                   net (fanout=1)        0.385      10.197         u_soc/u_gpu/u_core/u_texture/_N154115
+                                                                                   u_soc/u_gpu/u_core/u_texture/N2608_inv/I5 (GTP_LUT6)
+                                   td                    0.074      10.271 r       u_soc/u_gpu/u_core/u_texture/N2608_inv/Z (GTP_LUT6)
+                                   net (fanout=1)        0.000      10.271         u_soc/u_gpu/u_core/u_texture/N2634 [0]
+                                                                           r       u_soc/u_gpu/u_core/u_texture/g_lod[2].amount_r[0]/D (GTP_DFF)
+
+ Data arrival time                                                  10.271         Logic Levels: 10
+                                                                                   Logic: 1.720ns(31.834%), Route: 3.683ns(68.166%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_texture/g_lod[2].amount_r[0]/CLK (GTP_DFF)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.136       9.737
+
+ Data required time                                                  9.737
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.737
+ Data arrival time                                                  10.271
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.534
+
+Rank 3, .snr lines 33758-33821
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][0]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][0]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][0]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 4, .snr lines 33826-33889
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][1]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][1]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][1]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 5, .snr lines 33894-33957
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][2]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][2]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][2]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 6, .snr lines 33962-34025
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][3]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][3]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][3]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 7, .snr lines 34030-34093
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][4]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][4]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][4]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 8, .snr lines 34098-34161
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][5]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][5]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][5]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 9, .snr lines 34166-34229
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][6]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][6]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][6]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 10, .snr lines 34234-34297
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][7]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][7]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][7]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 11, .snr lines 34302-34365
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][8]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][8]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][8]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 12, .snr lines 34370-34433
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][9]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][9]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][9]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 13, .snr lines 34438-34501
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][10]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][10]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][10]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 14, .snr lines 34506-34569
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][11]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][11]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][11]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 15, .snr lines 34574-34637
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][12]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][12]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][12]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 16, .snr lines 34642-34705
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][13]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][13]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][13]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 17, .snr lines 34710-34773
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][14]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][14]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][14]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 18, .snr lines 34778-34841
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][15]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][15]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][15]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 19, .snr lines 34846-34909
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][16]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][16]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][16]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288
+
+Rank 20, .snr lines 34914-34977
+Startpoint  : u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+Endpoint    : u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][17]/CE (GTP_DFF_E)
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.868
+  Launch Clock Delay      :  4.868
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ clk_i                                                   0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.000       0.000         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       2.384         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.448 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420       4.868         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/CLK (GTP_DFF_CE)
+
+                                   tco                   0.203       5.071 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[2]/Q (GTP_DFF_CE)
+                                   net (fanout=847)      1.354       6.425         u_soc/u_gpu/u_core/u_setup/pa_clock_r [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/I0 (GTP_LUT1)
+                                   td                    0.229       6.654 r       u_soc/u_gpu/u_core/u_setup/pa_clock_r[5:0]_inv_2/Z (GTP_LUT1)
+                                   net (fanout=306)      1.235       7.889         u_soc/u_gpu/u_core/u_setup/pa_snapshot_read_w [2]
+                                                                                   u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/RADDR[2] (GTP_RAM64X1DP)
+                                   td                    0.229       8.118 r       u_soc/u_gpu/u_core/u_setup/u_pa_snapshot_6/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu_table/mem_10/DO (GTP_RAM64X1DP)
+                                   net (fanout=23)       0.620       8.738         u_soc/u_gpu/u_core/u_setup/unused_pa_snapshot_w [459]
+                                                                                   u_soc/u_gpu/u_core/u_setup/N3309_2/I4 (GTP_LUT6)
+                                   td                    0.074       8.812 r       u_soc/u_gpu/u_core/u_setup/N3309_2/Z (GTP_LUT6)
+                                   net (fanout=997)      1.123       9.935         u_soc/u_gpu/u_core/u_setup/N3309
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][17]/CE (GTP_DFF_E)
+
+ Data arrival time                                                   9.935         Logic Levels: 3
+                                                                                   Logic: 0.735ns(14.506%), Route: 4.332ns(85.494%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ clk_i                                                   0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.000       5.555         clk_i
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       6.515 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=4)        1.424       7.939         nt_clk_i
+                                                                                   u_pll_gpu/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       8.003 r       u_pll_gpu/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=124721)
+                                                         2.420      10.423         clk_gpu_w
+                                                                           r       u_soc/u_gpu/u_core/u_setup/g_attribute[0].output_gradient_r[0][17]/CLK (GTP_DFF_E)
+ clock pessimism                                         0.000      10.423
+ clock uncertainty                                      -0.550       9.873
+
+ Setup time                                             -0.226       9.647
+
+ Data required time                                                  9.647
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.647
+ Data arrival time                                                   9.935
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.288

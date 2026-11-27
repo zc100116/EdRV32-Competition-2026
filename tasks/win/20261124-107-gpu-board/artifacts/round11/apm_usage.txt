@@ -1,0 +1,44 @@
+Card 107 round 11 | upstream b2a27314 | local run ced62bb5
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | capture 2026-11-27T15:30:41+08:00
+
+Device Map whole-chip APM count: 212 / 740.
+GPU inclusive APM count from synthesis hierarchy: 208.
+GPU core direct children (inclusive counts):
+
+Module | APM
+u_texture | 69
+u_geometry | 64
+u_setup | 42
+u_pixel | 24
+u_perspective | 8
+u_resolve | 1
+u_command | 0
+u_list_pack | 0
+u_object | 0
+u_palette | 0
+u_quad | 0
+u_raster | 0
+u_read_dma | 0
+u_regs | 0
+u_reset_command | 0
+u_reset_geometry | 0
+u_reset_list_pack | 0
+u_reset_object | 0
+u_reset_palette | 0
+u_reset_perspective | 0
+u_reset_pixel | 0
+u_reset_quad | 0
+u_reset_raster | 0
+u_reset_read_dma | 0
+u_reset_regs | 0
+u_reset_resolve | 0
+u_reset_setup | 0
+u_reset_target | 0
+u_reset_texture | 0
+u_reset_texture_ram | 0
+u_reset_unpack | 0
+u_reset_write_dma | 0
+u_target | 0
+u_texture_ram | 0
+u_unpack | 0
+u_write_dma | 0

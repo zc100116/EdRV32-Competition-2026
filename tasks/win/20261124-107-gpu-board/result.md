@@ -1,5 +1,58 @@
 # 卡 107 结果
 
+## 第 11 轮 Device Map 结果
+
+| 项 | 内容 |
+|---|---|
+| 实测版本 | 本地 `ced62bb5`，RTL 与任务卡 `b2a27314` 一致 |
+| 环境 | Windows PDS 2022.2-SP6.1 build 138931，ADS 综合，Logos2 PG2L200H-6 FBB676 |
+| 阶段用时 | Compile 通过（2 分 20 秒），Synthesize 通过（8 分 52 秒），Device Map 通过（1 分 53 秒） |
+| 布线门槛 | `clk_gpu` 综合估算 **163.9989 MHz**，WNS **−0.542 ns**，达到 150 MHz 门槛 |
+| 回传范围 | A、B 共用的 Compile、Synthesize 和 Device Map。 |
+
+GUI 第一笔 Compile 报 `Flow-0245: There is no top module`；随后重试通过，综合及 Device Map 完成。阶段日志保留该错误原文，未见 APM 级联或列放置错误。[阶段日志](artifacts/round11/flow-excerpts.log)
+
+### Device Map 资源和 APM
+
+| 资源 | 第 10 轮用量 | 第 11 轮用量 | 容量 | 第 11 轮 PDS 占用 |
+|---|---:|---:|---:|---:|
+| LUT | 103,239 | 98,019 | 159,800 | 62% |
+| FF | 157,260 | 143,342 | 319,600 | 45% |
+| DRM（36K 等效） | 250 | 250 | 415 | 61% |
+| APM | 236 | 212 | 740 | 29% |
+| 分布式 RAM | 12,145 | 13,089 | 39,500 | 34% |
+| I/O | 115 | 115 | 400 | 29% |
+| GPLL | 7 | 7 | 10 | 70% |
+| PPLL | 2 | 2 | 10 | 20% |
+
+相较第 10 轮，LUT 少 **5,220**、FF 少 **13,918**、APM 少 **24**，分布式 RAM 增加 **944**。GPU 综合层次为 61,741 LUT、112,575 FF、208 APM。GPU 各子模块中，`u_geometry` 64、`u_setup` 42、`u_texture` 69、`u_pixel` 24、`u_perspective` 8、`u_resolve` 1。[Device Map 资源](artifacts/round11/resource_summary.txt) · [GPU、mem、DISP、AUD 综合层次](artifacts/round11/resource_hier.txt) · [GPU APM 用量](artifacts/round11/apm_usage.txt)
+
+### 综合预估时序
+
+| 时钟域 | 估算 MHz | WNS（ns） | TNS（ns） | WHS（ns） | THS（ns） |
+|---|---:|---:|---:|---:|---:|
+| `clk_gpu` | 163.9989 | −0.542 | −621.546 | 0.324 | 0.000 |
+| `clk_sys` | 112.6621 | −0.876 | −441.123 | 0.324 | 0.000 |
+| `clk_mem` | 131.2164 | +0.379 | 0.000 | −0.006 | −0.942 |
+| `clk_aud` | 276.6247 | 77.765 | 0.000 | 0.619 | 0.000 |
+
+`clk_mem` 同域 setup WNS 从第 10 轮 **−1.731 ns** 改善至 **+0.379 ns**。两域各有 200 个不同 setup 端点。GPU 最差为 `g_sample[0].span_r[79]/CLK` 到 `u_texture/g_lod[0].amount_r[0]/D`，10 逻辑级。mem 最差为 `u_xbar/u_rbuf/received_r[2][1]/CLK` 到 `u_xbar/u_rbuf/u_ram` 下的 DRM 地址输入，9 逻辑级。[时序汇总](artifacts/round11/timing_summary.txt) · [clk_gpu 200 条](artifacts/round11/setup_top200_clk_gpu.txt) · [clk_mem 200 条](artifacts/round11/setup_top200_clk_mem.txt) · [GPU 前 20 条逐级明细](artifacts/round11/setup_top20_detail.txt)
+
+综合报告记录 **1,953 组 control set**。其 `maximum fanout` 为 31,185，对应控制集表中 `CLK(clk_gpu_w)` 单独时钟项。Device Map 的 GPU 全局时钟网 `ntclkbufg_0` 扇出为 124,721，Other 表中的 GPU 非时钟网 `u_setup/control_enable_w[0]` 为 1,750。[高扇出原表](artifacts/round11/high_fanout.txt)
+
+### A、B 布线设置
+
+| 设置 | A（原工程） | B（副本） |
+|---|---:|---:|
+| Placement Decongestion | 2 | 4 |
+| Slack Weight | 40 | 10 |
+| Design Cells Duplication | 开 | 关 |
+| Pin Cost Increasing Speed | 600 | 600 |
+| LUT6D Packing Strategy | 0 | 0 |
+| Dump Router Congestion Plot | 开 | 开 |
+
+A 入口为 `G:/codex_project/EdRV32-FPGA/board_gpu/board_gpu.pds`，B 入口为 `G:/codex_project/EdRV32-FPGA/board_gpu_round11_B/board_gpu_round11_B.pds`。已逐字节核对两份 `_map.adf`、`dmr.db` 和 `.pcf` 一致，两组各自生成 P&R 输出。第 11 轮原始报告快照在 `G:/codex_project/edrv32-card107/build/card107-pds-check/logbackup/round11-device-map`。
+
 ## 第 10 轮 Device Map 结果
 
 | 项 | 内容 |

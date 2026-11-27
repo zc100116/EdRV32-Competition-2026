@@ -1,0 +1,53 @@
+Card 107 round 11 | upstream b2a27314 | local run ced62bb5
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | capture 2026-11-27T15:30:41+08:00
+
+Device Map .dmr, original lines 9456-9485
+Device Utilization Summary:
++--------------------------------------------------------------------------+
+| Logic Utilization     | Used       | Available     | Utilization(%)
++--------------------------------------------------------------------------+
+| APM                   | 212        | 740           | 29
+| FF                    | 143342     | 319600        | 45
+| LUT                   | 98019      | 159800        | 62
+| Distributed RAM       | 13089      | 39500         | 34
+| DRM                   | 250        | 415           | 61
+| IO                    | 115        | 400           | 29
+| RCKB                  | 2          | 40            | 5
+| SCANCHAIN             | 0          | 1             | 0
+| USCM                  | 8          | 32            | 25
+| CCS                   | 1          | 1             | 100
+| ADC                   | 0          | 1             | 0
+| DDR_PHY               | 7          | 40            | 18
+| HSSTLP                | 0          | 2             | 0
+| GPLL                  | 7          | 10            | 70
+| PPLL                  | 2          | 10            | 20
+| DDRPHY_CPD            | 1          | 20            | 5
+| HCKB                  | 0          | 120           | 0
+| IOCKB                 | 0          | 40            | 0
+| MRCKB                 | 1          | 20            | 5
+| PCIE                  | 0          | 1             | 0
+| DDRPHY_IOCLK_DIV      | 2          | 10            | 20
+| ANALOG                | 0          | 1             | 0
+| TSERDES               | 14         | 80            | 18
+| KEYRAM                | 0          | 1             | 0
++--------------------------------------------------------------------------+
+
+Synthesis .snr, original lines 61-76
+Mapping Summary:
+Total LUTs: 98023 of 159800 (61.34%)
+	LUTs as dram: 13089 of 39500 (33.14%)
+	LUTs as logic: 84934
+Total Registers: 143393 of 319600 (44.87%)
+Total Latches: 0
+
+DRM36K/FIFO:
+Total DRM = 250.0 of 415 (60.24%)
+
+APMs:
+Total APMs = 212.00 of 740 (28.65%)
+
+Total I/O ports = 115 of 400 (28.75%)
+
+
+Control sets (synthesis):
+Number of unique control sets : 1953
