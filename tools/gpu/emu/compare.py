@@ -53,7 +53,7 @@ def library():
                 'test_matrix': ([ptr, ptr], None),
         'test_op': ([ptr, C.c_int, ptr, ptr], C.c_int),
         'test_sample': ([ptr,C.c_int64,C.c_int64,C.c_int,C.c_int,C.c_int,ptr],None),
-        'test_planes': ([ptr,C.c_int64],ptr),
+        'test_planes': ([ptr,C.c_int64,ptr],ptr),
         'test_at': ([ptr,C.c_int,C.c_int,ptr],None),
         'test_free': ([ptr],None),
         'test_clip': ([ptr,C.c_int],C.c_int),
@@ -276,12 +276,18 @@ def selftests(lib):
             return super().sample(*args,**kwargs)
     renderer.Texture = DifferentialTexture
     class DifferentialPlanes(st.PixelArithmetic):
-        def __init__(self,vertices,area):
-            super().__init__(vertices,area)
-            self.native = lib.test_planes((C.c_int64*27)(*(x for v in vertices for x in v)),area)
+        def __init__(self,vertices,area,domain=(0,0,640,360)):
+            self.native = lib.test_planes((C.c_int64*27)(*(x for v in vertices for x in v)),
+                                          area,(C.c_int*4)(*domain))
+            self.initializing = True
+            super().__init__(vertices,area,domain)
+            self.initializing = False
         def __del__(self): lib.test_free(self.native)
         def at(self,x,y):
             result = super().at(x,y)
+            # P-A setup evaluates the d-rounded planes before relocation.
+            if self.initializing:
+                return result
             data = C.create_string_buffer(112)
             lib.test_at(self.native,x,y,data)
             actual = [int.from_bytes(data.raw[i:i+16],'little',signed=True)
@@ -375,12 +381,55 @@ def profile(lib, scene):
     return phases
 
 
+def demo(directory):
+    """Replay CPU DDR edits and verify every exported submission against v0.6."""
+    directory = Path(directory)
+    previous = (directory/'frame150-input.bin').read_bytes()
+    gpu = GPU(Memory(0,previous))
+    submission = 0
+    writes = (directory/'frame150-writes.txt').read_text().splitlines()
+    for line in writes:
+        offset, value = map(int,line.split())
+        if offset == REGS['DOORBELL']:
+            stem = directory/f'submit{submission:04d}'
+            current = Path(str(stem)+'-input.bin').read_bytes()
+            # Only CPU-modified bytes replace GPU state between submissions.
+            for page in range(0,len(current),4096):
+                if current[page:page+4096] != previous[page:page+4096]:
+                    for i in range(page,min(page+4096,len(current))):
+                        if current[i] != previous[i]:
+                            gpu.memory.data[i] = current[i]
+            gpu.write_register(offset,value)
+            previous = Path(str(stem)+'-output.bin').read_bytes()
+            compare_bytes(str(stem)+' DDR',gpu.memory.data,previous)
+            registers = dict(tuple(map(int,row.split())) for row in
+                             Path(str(stem)+'-output-regs.txt').read_text().splitlines())
+            for name, address in REGS.items():
+                assert gpu.regs[name] == registers[address], (
+                    str(stem),name,gpu.regs[name],registers[address])
+            print(f'{stem.name}: PASS {len(previous)} DDR bytes, all registers '
+                  f'(including PERF/OBJ; ERR_CODE={gpu.regs["ERR_CODE"]})',flush=True)
+            submission += 1
+        else:
+            gpu.write_register(offset,value)
+    compare_bytes(str(directory)+' final DDR',gpu.memory.data,
+                  (directory/'frame150-output.bin').read_bytes())
+    perf = list(map(int,(directory/'frame150-perf.txt').read_text().splitlines()))
+    assert perf == [gpu.regs[f'PERF[{i}]'] for i in range(len(perf))]
+    print(f'{directory.name}: PASS {submission} submissions, {len(writes)} register writes',
+          flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--gt-only',action='store_true')
     parser.add_argument('--selftest-only',action='store_true')
     parser.add_argument('--threads',type=int,default=3)
+    parser.add_argument('--demo',type=Path,help='replay one headless --export directory')
     args = parser.parse_args()
+    if args.demo:
+        demo(args.demo)
+        return
     build(args.threads)
     # Set the test allocator origin before importing scene builders or selftests.
     original_init = Scene.__init__

@@ -1,4 +1,4 @@
-/* gpu_emu.c — gpu-spec 2–6: functional C reference implementation.
+/* gpu_emu.c — gpu-spec v0.6, 2–6: functional C reference implementation.
  * Integer geometry, planes, textures, pixels, objects and DMA; no clock domain.
  */
 #include "gpu_emu.h"
@@ -45,6 +45,7 @@ struct gpu_emu {
     struct rgba palette_texels[16][256];
     uint32_t palette_quads[16][256]; /* RGB565 plus expanded alpha in bits 16..23 */
     int width, height;
+    int draw_section; /* Zero for the caller; workers own sections 1..GPU_EMU_THREADS. */
     int32_t matrix[16];
     struct cmd_set_light light;
     struct cmd_set_tex texture;
@@ -56,9 +57,8 @@ struct gpu_emu {
 struct vec { int64_t c[9]; };
 struct number { int64_t m; int e; };
 struct planes {
-    wide coeff[7][3];
+    int64_t coeff[7][3]; /* W = [32,42,42,42,32,32,32], spec 2.13.7. */
     int exp[7], x, y;
-    struct number grad[2][3];
 };
 static wide absw(wide a) { return a < 0 ? -a : a; }
 static wide div_round(wide a, wide b)
@@ -115,7 +115,7 @@ static int logarithm(wide value)
 }
 /* gpu-spec 2.13.8–11: normalized products have at most 36 magnitude bits;
  * alignment uses 23 signed bits and Newton products at most 36. Only plane
- * accumulators (70 signed bits, 2.13.7) still need the wide normal(). */
+ * setup intermediate values need wide arithmetic; W-bit pixel values fit int64_t. */
 static int64_t shift64(int64_t value, int bits)
 {
     uint64_t mag = (value < 0 ? -(uint64_t)value : (uint64_t)value);
@@ -154,12 +154,14 @@ static struct number subtract(struct number a, struct number b)
 }
 static struct number inverse(struct number a)
 {
-    int64_t index = (a.m-(1<<17)) >> 7;
+    if (!a.m) return (struct number){0,0};
+    int64_t magnitude = llabs(a.m);
+    int64_t index = (magnitude-(1<<17)) >> 7;
     int64_t midpoint = (1<<11)+2*index+1;
     int64_t seed = ((1<<28)+midpoint/2)/midpoint;
-    int64_t product = shift64(a.m*seed, 17);
+    int64_t product = shift64(magnitude*seed, 17);
     int64_t result = shift64(seed*((2<<17)-product), 17);
-    return normal64(result, -34-a.e);
+    return normal64(a.m < 0 ? -result : result, -34-a.e);
 }
 static void fail(struct gpu_emu *e, int code) { longjmp(e->fault, code); }
 static uint8_t *memory(struct gpu_emu *e, uint64_t addr, uint64_t bytes)
@@ -181,6 +183,14 @@ static void bounds(struct gpu_emu *e, int *x0, int *y0, int *x1, int *y1)
 }
 static int address(const struct gpu_emu *e, int x, int y)
 { return (y-e->target.tgt_y0)*e->width + x-e->target.tgt_x0; }
+static void section_bounds(struct gpu_emu *e, int *y0, int *y1)
+{
+    if (e->draw_section) {
+        int rows = imax(0,*y1-*y0), start = *y0;
+        *y0 = start+rows*(e->draw_section-1)/GPU_EMU_THREADS;
+        *y1 = start+rows*e->draw_section/GPU_EMU_THREADS;
+    }
+}
 static void stencil_op(struct gpu_emu *e, int i, int op)
 {
     if (!op || !e->pixel.st_wmask) return;
@@ -370,6 +380,7 @@ static void quad(struct gpu_emu *e, struct quad q)
     ++PERF(e,3);
     int x0, y0, x1, y1;
     bounds(e,&x0,&y0,&x1,&y1);
+    section_bounds(e,&y0,&y1);
     x0 = imax(x0,q.x); x1 = imin(x1,q.x+q.w);
     y0 = imax(y0,q.y); y1 = imin(y1,q.y+q.h);
     if (x0 >= x1 || y0 >= y1) return;
@@ -443,7 +454,8 @@ static void quad(struct gpu_emu *e, struct quad q)
 }
 static int64_t edge(struct vec a, struct vec b, int64_t x, int64_t y)
 { return (b.c[0]-a.c[0])*(y-a.c[1]) - (b.c[1]-a.c[1])*(x-a.c[0]); }
-static void setup(struct planes *p, struct vec *v, int64_t area)
+static void setup(struct planes *p, struct vec *v, int64_t area,
+                  int x0, int y0, int x1, int y1)
 {
     p->x = imin(v[0].c[0],imin(v[1].c[0],v[2].c[0])) >> 4;
     p->y = imin(v[0].c[1],imin(v[1].c[1],v[2].c[1])) >> 4;
@@ -455,9 +467,14 @@ static void setup(struct planes *p, struct vec *v, int64_t area)
     int ae = bit_length(area)-1;
     int64_t inv = reciprocal(area,ae);
     const int fractions[] = {0,30,38,38,16,16,16};
+    const int drops[] = {8,4,4,4,12,12,12};
+    const int widths[] = {32,42,42,42,32,32,32};
+    int ox = (x0 >> 2)*4, oy = (y0 >> 1)*2;
+    wide span = (wide)1 << imax(10,bit_length(x1-x0+y1-y0+8));
     for (int c = 0; c < 7; ++c) {
-        int64_t maximum = v[0].c[c+2];
-        for (int i = 1; i < 3; ++i) if (v[i].c[c+2] > maximum) maximum = v[i].c[c+2];
+        wide maximum = absw(v[0].c[c+2]);
+        for (int i = 1; i < 3; ++i)
+            if (absw(v[i].c[c+2]) > maximum) maximum = absw(v[i].c[c+2]);
         int bits = c >= 1 && c <= 3 ? bit_length(maximum) : c == 0 ? 16 : 24;
         int exp = bits-32;
         wide values[3], gx = 0, gy = 0;
@@ -466,13 +483,44 @@ static void setup(struct planes *p, struct vec *v, int64_t area)
             gx += dx[i]*values[i]; gy += dy[i]*values[i];
         }
         gx = shift(gx*inv,30+ae); gy = shift(gy*inv,30+ae);
-        p->coeff[c][0] = values[0]+shift((16*p->x+8-v[0].c[0])*gx
-                                      +(16*p->y+8-v[0].c[1])*gy,4);
-        p->coeff[c][1] = gx; p->coeff[c][2] = gy;
-        p->exp[c] = exp-fractions[c];
+        wide start = values[0]+shift((16*p->x+8-v[0].c[0])*gx
+                                    +(16*p->y+8-v[0].c[1])*gy,4);
+        /* 2.13.5–6a: d rounding precedes exact relocation and kappa rounding. */
+        start = shift(start,drops[c]);
+        gx = shift(gx,drops[c]); gy = shift(gy,drops[c]);
+        start += (ox-p->x)*gx+(oy-p->y)*gy;
+        wide gradient = absw(gx) > absw(gy) ? absw(gx) : absw(gy);
+        wide bound = absw(start)+span*gradient;
+        wide allowance = ((wide)1 << (widths[c]-1))-(span+2)/2-1;
+        int kappa = bit_length((bound > 0 ? bound-1 : 0)/allowance);
+        p->coeff[c][0] = (int64_t)shift(start,kappa);
+        p->coeff[c][1] = (int64_t)shift(gx,kappa);
+        p->coeff[c][2] = (int64_t)shift(gy,kappa);
+        p->exp[c] = exp-fractions[c]+drops[c]+kappa;
     }
-    for (int a = 0; a < 2; ++a) for (int c = 0; c < 3; ++c)
-        p->grad[a][c] = normal(p->coeff[c+1][a+1],p->exp[c+1]);
+    p->x = ox; p->y = oy;
+}
+static int quad_lod(const struct planes *p, int x, int y)
+{
+    struct number uv[4][2];
+    x = (x >> 1)*2; y = (y >> 1)*2;
+    for (int i = 0; i < 4; ++i) {
+        int64_t attrs[3];
+        for (int c = 0; c < 3; ++c)
+            attrs[c] = p->coeff[c+1][0]+(x+(i&1)-p->x)*p->coeff[c+1][1]
+                       +(y+(i>>1)-p->y)*p->coeff[c+1][2];
+        struct number w = inverse(normal64(attrs[0],p->exp[1]));
+        for (int c = 0; c < 2; ++c)
+            uv[i][c] = multiply(normal64(attrs[c+1],p->exp[c+2]),w);
+    }
+    const int pairs[4][2] = {{0,1},{2,3},{0,2},{1,3}};
+    wide span = 0;
+    for (int i = 0; i < 4; ++i) for (int c = 0; c < 2; ++c) {
+        struct number n = subtract(uv[pairs[i][1]][c],uv[pairs[i][0]][c]);
+        wide value = shift(absw(n.m),-n.e-16);
+        if (value > span) span = value;
+    }
+    return span ? logarithm(span) : 0;
 }
 static void triangle(struct gpu_emu *e, struct vec a, struct vec b, struct vec c)
 {
@@ -484,6 +532,8 @@ static void triangle(struct gpu_emu *e, struct vec a, struct vec b, struct vec c
     struct vec v[] = {a,b,c};
     int x0,y0,x1,y1;
     bounds(e,&x0,&y0,&x1,&y1);
+    int domain[] = {x0,y0,x1,y1};
+    section_bounds(e,&y0,&y1);
     x0 = imax(x0,(imin(a.c[0],imin(b.c[0],c.c[0]))+7)>>4);
     y0 = imax(y0,(imin(a.c[1],imin(b.c[1],c.c[1]))+7)>>4);
     x1 = imin(x1,((imax(a.c[0],imax(b.c[0],c.c[0]))-8)>>4)+1);
@@ -496,7 +546,7 @@ static void triangle(struct gpu_emu *e, struct vec a, struct vec b, struct vec c
         inclusive[i] = t.c[1] < s.c[1] || (t.c[1] == s.c[1] && t.c[0] > s.c[0]);
     }
     struct planes p;
-    setup(&p,v,area);
+    setup(&p,v,area,domain[0],domain[1],domain[2],domain[3]);
     /* s12.4 endpoints differ by < 2^17; edge products and increments fit
      * signed 36 bits. Coverage stepping is exact in int64_t (spec 2.13.1). */
     int64_t edge_row[3], edge_dx[3], edge_dy[3];
@@ -522,11 +572,13 @@ static void triangle(struct gpu_emu *e, struct vec a, struct vec b, struct vec c
     int only_uv = fixed[0] && fixed[1] && fixed[4] && fixed[5] && fixed[6];
     struct number fixed_w = {0,0};
     if (fixed[1]) fixed_w = inverse(normal(p.coeff[1][0],p.exp[1]));
-    wide row[7];
+    int64_t row[7];
     for (int k = 0; k < 7; ++k)
         row[k] = p.coeff[k][0]+(x0-p.x)*p.coeff[k][1]+(y0-p.y)*p.coeff[k][2];
+    int lods[(x1-x0)/2+1], lod_valid[(x1-x0)/2+1];
     for (int y = y0; y < y1; ++y) {
-        wide attrs[7]; memcpy(attrs,row,sizeof attrs);
+        if (y == y0 || !(y&1)) memset(lod_valid,0,sizeof lod_valid);
+        int64_t attrs[7]; memcpy(attrs,row,sizeof attrs);
         int64_t weights[3]; memcpy(weights,edge_row,sizeof weights);
         int index = address(e,x0,y);
         for (int x = x0; x < x1; ++x, ++index) {
@@ -542,17 +594,17 @@ static void triangle(struct gpu_emu *e, struct vec a, struct vec b, struct vec c
                     /* 2.13.12: coordinate outputs fit signed 32-bit Q8. */
                     coords[k] = shift64(uv[k].m,-uv[k].e-8);
                 }
-                wide span = 0;
+                int lod = 0;
                 /* A single mip level makes LOD immaterial to all sampling modes. */
-                if (e->texture.levels > 1)
-                for (int axis = 0; axis < 2; ++axis) for (int k = 0; k < 2; ++k) {
-                    struct number delta = subtract(p.grad[axis][k+1],
-                                                   multiply(uv[k],p.grad[axis][0]));
-                    struct number n = multiply(delta,w);
-                    wide s = shift(absw(n.m),-n.e-16);
-                    if (s > span) span = s;
+                if (e->texture.levels > 1) {
+                    int key = (x >> 1)-(x0 >> 1);
+                    if (!lod_valid[key]) {
+                        lods[key] = quad_lod(&p,x,y);
+                        lod_valid[key] = 1;
+                    }
+                    lod = lods[key];
                 }
-                struct rgba rgba = sample(e,coords[0],coords[1],span ? logarithm(span) : 0,
+                struct rgba rgba = sample(e,coords[0],coords[1],lod,
                                           e->texture.pal_group,0);
                 int transparent = !rgba.c[3];
                 if (!white) for (int k = 0; k < 3; ++k)
@@ -876,14 +928,11 @@ static void parallel_draw(struct gpu_emu *e, uint32_t addr, int count, int trian
     /* Every section reads the same descriptor and palette. Decode once before
      * publishing jobs; the next command cannot change the cache until joins. */
     prepare_texture(e,triangles && e->texture.sample ? e->texture.pal_group : -1);
-    int x0,y0,x1,y1;
-    bounds(e,&x0,&y0,&x1,&y1);
-    int rows = imax(0,y1-y0);
     for (int i = 0; i < GPU_EMU_THREADS; ++i) {
         struct draw_job *j = &e->jobs[i];
         memcpy(&j->local,e,sizeof *e);
-        j->local.target.sc_y0 = y0+rows*i/GPU_EMU_THREADS;
-        j->local.target.sc_y1 = y0+rows*(i+1)/GPU_EMU_THREADS;
+        /* Partition coverage only: P-A setup must retain the command's SC/TGT domain. */
+        j->local.draw_section = i+1;
         j->addr = addr; j->count = count; j->triangles = triangles;
         if (i == GPU_EMU_THREADS-1)
             draw_batch(&j->local,addr,count,triangles);

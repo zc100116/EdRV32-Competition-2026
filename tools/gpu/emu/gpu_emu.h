@@ -1,4 +1,4 @@
-/* gpu_emu.h — gpu-spec 2–6: synchronous C11 functional reference API.
+/* gpu_emu.h — gpu-spec v0.6, 2–6: synchronous C11 functional reference API.
  * DDR addresses are physical offsets into caller-owned memory. No clock domain.
  */
 #ifndef GPU_EMU_H

@@ -58,11 +58,12 @@ void test_sample(struct gpu_emu *e, int64_t u, int64_t v, int lod, int group,
     struct rgba a = sample(e,u,v,lod,group,nearest);
     for (int i = 0; i < 4; ++i) out[i] = a.c[i];
 }
-void *test_planes(const int64_t *v, int64_t area)
+void *test_planes(const int64_t *v, int64_t area, const int *domain)
 {
     struct planes *p = malloc(sizeof *p);
     if (!p) abort();
-    struct vec a[3]; memcpy(a,v,sizeof a); setup(p,a,area);
+    struct vec a[3]; memcpy(a,v,sizeof a);
+    setup(p,a,area,domain[0],domain[1],domain[2],domain[3]);
     return p;
 }
 void test_at(const struct planes *p, int x, int y, wide *out)
