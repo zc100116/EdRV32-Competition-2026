@@ -25,6 +25,51 @@ module edrv32_gpu_clip (
     input wire stop_i,
     output wire idle_o
 );
+    // The clip bypass emits three consecutive vertices every six clocks.
+    // Two elastic slots absorb this burst while project accepts strictly at II=2.
+    wire polygon_source_valid_w;
+    wire polygon_source_ready_w;
+    wire [263:0] polygon_source_data_w;
+    wire [2:0] polygon_source_index_w;
+    wire polygon_source_last_w;
+    reg [1:0] polygon_queue_count_r;
+    reg polygon_queue_read_r;
+    reg polygon_queue_write_r;
+    reg [2:0] polygon_queue_index_r [0:1];
+    reg polygon_queue_last_r [0:1];
+    wire polygon_queue_pop_w;
+    assign polygon_valid_o = polygon_queue_count_r != 0 && !stop_i;
+    assign polygon_index_o = polygon_queue_index_r[polygon_queue_read_r];
+    assign polygon_last_o = polygon_queue_last_r[polygon_queue_read_r];
+    assign polygon_queue_pop_w = polygon_valid_o && polygon_ready_i;
+    assign polygon_source_ready_w = polygon_queue_count_r != 2 || polygon_queue_pop_w;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            polygon_queue_count_r <= 0;
+            polygon_queue_read_r <= 0;
+            polygon_queue_write_r <= 0;
+        end else if (stop_i) begin
+            polygon_queue_count_r <= 0;
+            polygon_queue_read_r <= 0;
+            polygon_queue_write_r <= 0;
+        end else begin
+            if (pop_w) polygon_queue_write_r <= !polygon_queue_write_r;
+            if (polygon_queue_pop_w) polygon_queue_read_r <= !polygon_queue_read_r;
+            case ({pop_w, polygon_queue_pop_w})
+                2'b10: polygon_queue_count_r <= polygon_queue_count_r + 2'd1;
+                2'b01: polygon_queue_count_r <= polygon_queue_count_r - 2'd1;
+                default: polygon_queue_count_r <= polygon_queue_count_r;
+            endcase
+        end
+    end
+    // Queue payload only writes on an actual enqueue; no data reset or extra delay bank.
+    always @(posedge clk_i) begin
+        if (pop_w) polygon_queue_index_r[polygon_queue_write_r] <= polygon_source_index_w;
+    end
+    always @(posedge clk_i) begin
+        if (pop_w) polygon_queue_last_r[polygon_queue_write_r] <= polygon_source_last_w;
+    end
+
     wire [791:0] triangle_saved_w;
     wire source_accept_w;
     reg [4:0] wait_r;
@@ -82,13 +127,13 @@ module edrv32_gpu_clip (
     assign triangle_ready_o = state_r == S_IDLE && !stop_i;
     assign source_accept_w = triangle_valid_i && triangle_ready_o;
     assign accept_w = state_r == S_CHECK && wait_r == 0;
-    assign polygon_valid_o = !stop_i && (state_r == S_OUTPUT || state_r == S_BYPASS
+    assign polygon_source_valid_w = !stop_i && (state_r == S_OUTPUT || state_r == S_BYPASS
         || (state_r == S_CHECK && wait_r == 0 && all_inside_w));
-    assign polygon_index_o = vertex_index_r;
-    assign polygon_last_o = state_r == S_OUTPUT
+    assign polygon_source_index_w = vertex_index_r;
+    assign polygon_source_last_w = state_r == S_OUTPUT
         ? {1'b0, vertex_index_r} + 4'd1 == input_count_r : vertex_index_r == 2;
-    assign pop_w = polygon_valid_o && polygon_ready_i;
-    assign idle_o = state_r == S_IDLE;
+    assign pop_w = polygon_source_valid_w && polygon_source_ready_w;
+    assign idle_o = state_r == S_IDLE && polygon_queue_count_r == 0;
     assign remainder_shift_w = {remainder_r[43:0], quotient_r[83]};
     assign last_distance_w = edge_distance_w[0];
     assign current_distance_w = edge_distance_w[1];
@@ -353,15 +398,8 @@ module edrv32_gpu_clip (
     reg [39:0] current_component_r;
     reg [42:0] current_distance_r;
     reg [42:0] previous_distance_input_r;
-    // Two 40x43 signed products: nine registered native signed <=18x18 APMs each.
-    // Four balanced tree levels settle within three clocks each; +10 per component.
-    // S_MULTIPLY holds each component/distance constant throughout its 22-clock wait;
-    // the result is sampled only after that wait. Finished low/middle fields remain
-    // in their own registers instead of being delayed to align with the high field.
-    // Every carry crosses a register: all paths remain single-clock paths, with no
-    // multicycle timing exceptions. The thirteen-clock settling bound is unchanged.
-    // Store only each node's live signed range: constant low zeros and sign copies
-    // are reconstructed at its consumer, never shifted through data registers.
+    // Two fully registered native APM cascade chains, eight clocks each.
+    // The existing component wait also covers the downstream numerator pipeline.
     wire [82:0] previous_product_w;
     wire [82:0] current_product_w;
     wire [165:0] product_result_w;
@@ -374,263 +412,13 @@ module edrv32_gpu_clip (
             wire [42:0] distance_w;
             assign component_w = product_g == 0 ? previous_component_r : current_component_r;
             assign distance_w = product_g == 0 ? current_distance_r : previous_distance_input_r;
-            wire [35:0] node0_w;
-            wire [35:0] node1_w;
-            wire [26:0] node2_w;
-            wire [35:0] node3_w;
-            wire [35:0] node4_w;
-            wire [26:0] node5_w;
-            wire [23:0] node6_w;
-            wire [23:0] node7_w;
-            wire [14:0] node8_w;
-            wire [53:0] node9_w;
-            wire [44:0] node10_w;
-            wire [44:0] node11_w;
-            wire [41:0] node12_w;
-            wire [14:0] node13_w;
-            wire [62:0] node14_w;
-            wire [45:0] node15_w;
-            wire [14:0] node16_w;
-            wire [80:0] node17_w;
-            wire [14:0] node18_w;
-            wire [82:0] node19_w;
-            begin : g_node_0
-                wire signed [17:0] a_w;
-                wire signed [17:0] b_w;
-                reg signed [35:0] partial_r;
-                assign a_w = {1'b0, component_w[0 +: 17]};
-                assign b_w = {1'b0, distance_w[0 +: 17]};
-                always @(posedge clk_i) begin
-                    partial_r <= a_w * b_w;
-                end
-                assign node0_w = partial_r;
-            end
-            begin : g_node_1
-                wire signed [17:0] a_w;
-                wire signed [17:0] b_w;
-                reg signed [35:0] partial_r;
-                assign a_w = {1'b0, component_w[0 +: 17]};
-                assign b_w = {1'b0, distance_w[17 +: 17]};
-                always @(posedge clk_i) begin
-                    partial_r <= a_w * b_w;
-                end
-                assign node1_w = partial_r;
-            end
-            begin : g_node_2
-                wire signed [17:0] a_w;
-                wire signed [8:0] b_w;
-                reg signed [26:0] partial_r;
-                assign a_w = {1'b0, component_w[0 +: 17]};
-                assign b_w = distance_w[42:34];
-                always @(posedge clk_i) begin
-                    partial_r <= a_w * b_w;
-                end
-                assign node2_w = partial_r;
-            end
-            begin : g_node_3
-                wire signed [17:0] a_w;
-                wire signed [17:0] b_w;
-                reg signed [35:0] partial_r;
-                assign a_w = {1'b0, component_w[17 +: 17]};
-                assign b_w = {1'b0, distance_w[0 +: 17]};
-                always @(posedge clk_i) begin
-                    partial_r <= a_w * b_w;
-                end
-                assign node3_w = partial_r;
-            end
-            begin : g_node_4
-                wire signed [17:0] a_w;
-                wire signed [17:0] b_w;
-                reg signed [35:0] partial_r;
-                assign a_w = {1'b0, component_w[17 +: 17]};
-                assign b_w = {1'b0, distance_w[17 +: 17]};
-                always @(posedge clk_i) begin
-                    partial_r <= a_w * b_w;
-                end
-                assign node4_w = partial_r;
-            end
-            begin : g_node_5
-                wire signed [17:0] a_w;
-                wire signed [8:0] b_w;
-                reg signed [26:0] partial_r;
-                assign a_w = {1'b0, component_w[17 +: 17]};
-                assign b_w = distance_w[42:34];
-                always @(posedge clk_i) begin
-                    partial_r <= a_w * b_w;
-                end
-                assign node5_w = partial_r;
-            end
-            begin : g_node_6
-                wire signed [5:0] a_w;
-                wire signed [17:0] b_w;
-                reg signed [23:0] partial_r;
-                assign a_w = component_w[39:34];
-                assign b_w = {1'b0, distance_w[0 +: 17]};
-                always @(posedge clk_i) begin
-                    partial_r <= a_w * b_w;
-                end
-                assign node6_w = partial_r;
-            end
-            begin : g_node_7
-                wire signed [5:0] a_w;
-                wire signed [17:0] b_w;
-                reg signed [23:0] partial_r;
-                assign a_w = component_w[39:34];
-                assign b_w = {1'b0, distance_w[17 +: 17]};
-                always @(posedge clk_i) begin
-                    partial_r <= a_w * b_w;
-                end
-                assign node7_w = partial_r;
-            end
-            begin : g_node_8
-                wire signed [5:0] a_w;
-                wire signed [8:0] b_w;
-                reg signed [14:0] partial_r;
-                assign a_w = component_w[39:34];
-                assign b_w = distance_w[42:34];
-                always @(posedge clk_i) begin
-                    partial_r <= a_w * b_w;
-                end
-                assign node8_w = partial_r;
-            end
-            begin : g_node_9
-                wire [53:0] a_w;
-                wire [53:0] b_w;
-                assign a_w =
-                    {{18{node0_w[35]}}, node0_w};
-                assign b_w =
-                    {{1{node1_w[35]}}, node1_w, 17'b0};
-                reg [35:0] low_r;
-                reg [18:0] high_r;
-                always @(posedge clk_i) begin
-                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
-                    high_r <= a_w[53:35] + b_w[53:35] + {18'b0, low_r[35]};
-                end
-                assign node9_w = {high_r, low_r[34:0]};
-            end
-            begin : g_node_10
-                wire [44:0] a_w;
-                wire [44:0] b_w;
-                assign a_w =
-                    {{1{node2_w[26]}}, node2_w, 17'b0};
-                assign b_w =
-                    {{9{node3_w[35]}}, node3_w};
-                reg [35:0] low_r;
-                reg [9:0] high_r;
-                always @(posedge clk_i) begin
-                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
-                    high_r <= a_w[44:35] + b_w[44:35] + {9'b0, low_r[35]};
-                end
-                assign node10_w = {high_r, low_r[34:0]};
-            end
-            begin : g_node_11
-                wire [44:0] a_w;
-                wire [44:0] b_w;
-                assign a_w =
-                    {{9{node4_w[35]}}, node4_w};
-                assign b_w =
-                    {{1{node5_w[26]}}, node5_w, 17'b0};
-                reg [35:0] low_r;
-                reg [9:0] high_r;
-                always @(posedge clk_i) begin
-                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
-                    high_r <= a_w[44:35] + b_w[44:35] + {9'b0, low_r[35]};
-                end
-                assign node11_w = {high_r, low_r[34:0]};
-            end
-            begin : g_node_12
-                wire [41:0] a_w;
-                wire [41:0] b_w;
-                assign a_w =
-                    {{18{node6_w[23]}}, node6_w};
-                assign b_w =
-                    {{1{node7_w[23]}}, node7_w, 17'b0};
-                reg [35:0] low_r;
-                reg [6:0] high_r;
-                always @(posedge clk_i) begin
-                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
-                    high_r <= a_w[41:35] + b_w[41:35] + {6'b0, low_r[35]};
-                end
-                assign node12_w = {high_r, low_r[34:0]};
-            end
-            begin : g_node_13
-                assign node13_w = node8_w;
-            end
-            begin : g_node_14
-                wire [62:0] a_w;
-                wire [62:0] b_w;
-                assign a_w =
-                    {{9{node9_w[53]}}, node9_w};
-                assign b_w =
-                    {{1{node10_w[44]}}, node10_w, 17'b0};
-                reg [35:0] low_r;
-                reg [27:0] high_r;
-                always @(posedge clk_i) begin
-                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
-                    high_r <= a_w[62:35] + b_w[62:35] + {27'b0, low_r[35]};
-                end
-                assign node14_w = {high_r, low_r[34:0]};
-            end
-            begin : g_node_15
-                wire [45:0] a_w;
-                wire [45:0] b_w;
-                assign a_w =
-                    {{1{node11_w[44]}}, node11_w};
-                assign b_w =
-                    {{4{node12_w[41]}}, node12_w};
-                reg [35:0] low_r;
-                reg [10:0] high_r;
-                always @(posedge clk_i) begin
-                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
-                    high_r <= a_w[45:35] + b_w[45:35] + {10'b0, low_r[35]};
-                end
-                assign node15_w = {high_r, low_r[34:0]};
-            end
-            begin : g_node_16
-                assign node16_w = node13_w;
-            end
-            begin : g_node_17
-                wire [80:0] a_w;
-                wire [80:0] b_w;
-                assign a_w =
-                    {{18{node14_w[62]}}, node14_w};
-                assign b_w =
-                    {{1{node15_w[45]}}, node15_w, 34'b0};
-                reg [35:0] low_r;
-                reg [35:0] middle_r;
-                reg [10:0] top_r;
-                always @(posedge clk_i) begin
-                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
-                    middle_r <= {1'b0, a_w[69:35]} +
-                        {1'b0, b_w[69:35]} + {35'b0, low_r[35]};
-                    top_r <= a_w[80:70] + b_w[80:70] +
-                        {10'b0, middle_r[35]};
-                end
-                assign node17_w = {top_r, middle_r[34:0], low_r[34:0]};
-            end
-            begin : g_node_18
-                assign node18_w = node16_w;
-            end
-            begin : g_node_19
-                wire [82:0] a_w;
-                wire [82:0] b_w;
-                assign a_w =
-                    {{2{node17_w[80]}}, node17_w};
-                assign b_w =
-                    {node18_w, 68'b0};
-                reg [35:0] low_r;
-                reg [35:0] middle_r;
-                reg [12:0] top_r;
-                always @(posedge clk_i) begin
-                    low_r <= {1'b0, a_w[34:0]} + {1'b0, b_w[34:0]};
-                    middle_r <= {1'b0, a_w[69:35]} +
-                        {1'b0, b_w[69:35]} + {35'b0, low_r[35]};
-                    top_r <= a_w[82:70] + b_w[82:70] +
-                        {12'b0, middle_r[35]};
-                end
-                assign node19_w = {top_r, middle_r[34:0], low_r[34:0]};
-            end
-            assign product_result_w[product_g*83 +: 83] = node19_w;
+            edrv32_apm_gpu_s40xs43 u_multiply (
+                .clk_i(clk_i),
+                .enable_i(1'b1),
+                .a_i(component_w),
+                .b_i(distance_w),
+                .p_o(product_result_w[product_g*83 +: 83])
+            );
         end
     endgenerate
     wire [83:0] previous_product_ext_w;
@@ -1047,7 +835,7 @@ module edrv32_gpu_clip (
                 else if (pop_w) state_next_w = S_BYPASS;
             end
             S_LOAD: if (vertex_index_r == 2) state_next_w = S_BEGIN;
-            S_BYPASS: if (pop_w && polygon_last_o) state_next_w = S_IDLE;
+            S_BYPASS: if (pop_w && polygon_source_last_w) state_next_w = S_IDLE;
             S_BEGIN: if (wait_r == 0) state_next_w = S_EDGE;
             S_EDGE: if (wait_r == 0) begin
                 if (previous_distance_r[42] != current_distance_w[42])
@@ -1068,7 +856,7 @@ module edrv32_gpu_clip (
                         plane_r == 4 ? S_OUTPUT : S_BEGIN;
                 else state_next_w = S_EDGE;
             end
-            S_OUTPUT: if (pop_w && polygon_last_o) state_next_w = S_IDLE;
+            S_OUTPUT: if (pop_w && polygon_source_last_w) state_next_w = S_IDLE;
             default: state_next_w = state_r;
         endcase
     end
@@ -1161,7 +949,14 @@ module edrv32_gpu_clip (
                     default: begin end
                 endcase
             end
-            assign polygon_data_o[OFFSET +: WIDTH] = state_r == S_OUTPUT ? current_w : source_w;
+            assign polygon_source_data_w[OFFSET +: WIDTH] =
+                state_r == S_OUTPUT ? current_w : source_w;
+            reg [WIDTH-1:0] polygon_queue_data_r [0:1];
+            assign polygon_data_o[OFFSET +: WIDTH] = polygon_queue_data_r[polygon_queue_read_r];
+            always @(posedge clk_i) begin
+                if (pop_w) polygon_queue_data_r[polygon_queue_write_r] <=
+                    polygon_source_data_w[OFFSET +: WIDTH];
+            end
             edrv32_ram_gpu_table u_workset (
                 .clk_i(clk_i),
                 .wr_en_i(load_w || append_w),

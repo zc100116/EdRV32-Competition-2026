@@ -2,7 +2,7 @@
 // Spec: gpu-spec 2.4, 2.12; GPU microarchitecture 4.3.
 // Description: Q30 perspective division with full coordinate and viewport products.
 //              Only the final screen coordinate and depth conversions round and saturate.
-//              24 reciprocal stages + 50 projection stages + one output FIFO write, II=1.
+//              24 reciprocal stages + 50 projection stages + one output FIFO write, II=2.
 // Clock domain: clk_gpu.
 module edrv32_gpu_project (
     // Clock and reset.
@@ -62,14 +62,14 @@ module edrv32_gpu_project (
     reg [1:0] restore_shift_right_amt1_w_d6_r;
     reg [39:0] restore_shift_right_1_r;
     wire [1:0] restore_shift_right_amt2_w;
-    reg [39:0] restore_shift_right_2_w;
+    reg [39:0] unused_restore_shift_right_2_w;
     reg [1:0] restore_shift_right_amt2_w_d2_r;
     reg [1:0] restore_shift_right_amt2_w_d3_r;
     reg [1:0] restore_shift_right_amt2_w_d4_r;
     reg [1:0] restore_shift_right_amt2_w_d5_r;
     reg [1:0] restore_shift_right_amt2_w_d6_r;
     reg [1:0] restore_shift_right_amt2_w_d7_r;
-    reg [39:0] unused_restore_shift_right_2_r;
+    reg [34:0] unused_restore_shift_right_2_r;
     wire [1:0] restore_shift_left_amt0_w;
     reg [39:0] restore_shift_left_0_w;
     reg [39:0] restore_shift_left_0_r;
@@ -78,10 +78,10 @@ module edrv32_gpu_project (
     reg [1:0] restore_shift_left_amt1_w_d2_r;
     reg [39:0] restore_shift_left_1_r;
     wire [1:0] restore_shift_left_amt2_w;
-    reg [39:0] restore_shift_left_2_w;
+    reg [39:0] unused_restore_shift_left_2_w;
     reg [1:0] restore_shift_left_amt2_w_d2_r;
     reg [1:0] restore_shift_left_amt2_w_d3_r;
-    reg [39:0] restore_shift_left_2_r;
+    reg [34:0] restore_shift_left_2_r;
     reg [5:0] restore_exponent_r_d1_r;
     reg [5:0] restore_exponent_r_d2_r;
     reg [5:0] restore_exponent_r_d3_r;
@@ -90,10 +90,10 @@ module edrv32_gpu_project (
     reg [5:0] restore_exponent_r_d6_r;
     reg [5:0] restore_exponent_r_d7_r;
     reg [5:0] restore_exponent_r_d8_r;
-    reg [39:0] restore_shift_left_2_r_d5_r;
-    reg [39:0] restore_shift_left_2_r_d6_r;
-    reg [39:0] restore_shift_left_2_r_d7_r;
-    reg [39:0] unused_restore_shift_left_2_r_d8_r;
+    reg [34:0] restore_shift_left_2_r_d5_r;
+    reg [34:0] restore_shift_left_2_r_d6_r;
+    reg [34:0] restore_shift_left_2_r_d7_r;
+    reg [34:0] unused_restore_shift_left_2_r_d8_r;
     reg [34:0] restored_r;
     reg [39:0] position_input0_r;
     reg [39:0] position_input1_r;
@@ -226,7 +226,7 @@ module edrv32_gpu_project (
     reg [23:0] depth_subtract_b2_w_d18_r;
     reg [24:0] unused_depth_subtract_part2_r;
     wire [23:0] depth_subtract_low2_w;
-    wire [93:0] depth_subtract_w;
+    wire [93:0] unused_depth_subtract_w;
     reg [34:0] depth_subtract_low1_w_d19_r;
     reg [34:0] depth_subtract_low0_w_d18_r;
     reg [34:0] depth_subtract_low0_w_d19_r;
@@ -384,8 +384,8 @@ module edrv32_gpu_project (
     wire [13:0] depth_round_low1_w;
     wire [48:0] depth_round_w;
     reg [34:0] depth_round_low0_w_d21_r;
-    reg [93:0] depth_subtract_w_d20_r;
-    reg [93:0] unused_depth_subtract_w_d21_r;
+    reg depth_negative_d20_r;
+    reg depth_negative_d21_r;
     reg [15:0] depth_clamp_r;
     reg [16:0] screen_clamp0_d32_r;
     reg [16:0] screen_clamp0_d33_r;
@@ -440,7 +440,7 @@ module edrv32_gpu_project (
     wire [15:0] uv_input_w [0:1];
     wire [71:0] color_input_w;
     assign enable_w = count_r != 2 && !stop_i;
-    assign clipped_ready_o = enable_w;
+    assign clipped_ready_o = enable_w && !issue_second_r;
     assign accept_w = clipped_valid_i && clipped_ready_o;
     assign projected_valid_o = count_r != 0;
     assign push_w = enable_w && valid_r[49];
@@ -603,13 +603,13 @@ module edrv32_gpu_project (
     end
     assign restore_shift_right_amt2_w = restore_right_r[4 +: 2];
     always @(*) begin
-        restore_shift_right_2_w = restore_shift_right_1_r;
+        unused_restore_shift_right_2_w = restore_shift_right_1_r;
         case (restore_shift_right_amt2_w_d7_r)
-            2'd0: restore_shift_right_2_w = restore_shift_right_1_r >> 0;
-            2'd1: restore_shift_right_2_w = restore_shift_right_1_r >> 16;
-            2'd2: restore_shift_right_2_w = restore_shift_right_1_r >> 32;
-            2'd3: restore_shift_right_2_w = restore_shift_right_1_r >> 48;
-            default: restore_shift_right_2_w = restore_shift_right_1_r;
+            2'd0: unused_restore_shift_right_2_w = restore_shift_right_1_r >> 0;
+            2'd1: unused_restore_shift_right_2_w = restore_shift_right_1_r >> 16;
+            2'd2: unused_restore_shift_right_2_w = restore_shift_right_1_r >> 32;
+            2'd3: unused_restore_shift_right_2_w = restore_shift_right_1_r >> 48;
+            default: unused_restore_shift_right_2_w = restore_shift_right_1_r;
         endcase
     end
     assign restore_shift_left_amt0_w = restore_left_r[0 +: 2];
@@ -636,13 +636,13 @@ module edrv32_gpu_project (
     end
     assign restore_shift_left_amt2_w = restore_left_r[4 +: 2];
     always @(*) begin
-        restore_shift_left_2_w = restore_shift_left_1_r;
+        unused_restore_shift_left_2_w = restore_shift_left_1_r;
         case (restore_shift_left_amt2_w_d3_r)
-            2'd0: restore_shift_left_2_w = restore_shift_left_1_r << 0;
-            2'd1: restore_shift_left_2_w = restore_shift_left_1_r << 16;
-            2'd2: restore_shift_left_2_w = restore_shift_left_1_r << 32;
-            2'd3: restore_shift_left_2_w = restore_shift_left_1_r << 48;
-            default: restore_shift_left_2_w = restore_shift_left_1_r;
+            2'd0: unused_restore_shift_left_2_w = restore_shift_left_1_r << 0;
+            2'd1: unused_restore_shift_left_2_w = restore_shift_left_1_r << 16;
+            2'd2: unused_restore_shift_left_2_w = restore_shift_left_1_r << 32;
+            2'd3: unused_restore_shift_left_2_w = restore_shift_left_1_r << 48;
+            default: unused_restore_shift_left_2_w = restore_shift_left_1_r;
         endcase
     end
     assign position_ext0_w = {{19{position_product0_p2_r[74]}}, position_product0_p2_r};
@@ -709,7 +709,7 @@ module edrv32_gpu_project (
     assign depth_subtract_a2_w = depth_left_w_d16_r[70 +: 24];
     assign depth_subtract_b2_w = depth_negate_w[70 +: 24];
     assign depth_subtract_low2_w = unused_depth_subtract_part2_r[23:0];
-    assign depth_subtract_w =
+    assign unused_depth_subtract_w =
                 {depth_subtract_low2_w, depth_subtract_low1_w_d19_r, depth_subtract_low0_w_d19_r};
     assign screen_abs0_carry_w = {93'b0, screen_abs0_sign_r};
     assign screen_abs0_a0_w = screen_abs0_invert_r[0 +: 35];
@@ -779,8 +779,8 @@ module edrv32_gpu_project (
     assign screen_offset1_a1_w = screen_signed1_w[35 +: 14];
     assign screen_offset1_low1_w = unused_screen_offset1_part1_r[13:0];
     assign screen_offset1_w = {screen_offset1_low1_w, screen_offset1_low0_w_d34_r};
-    assign depth_high_w = {1'b0, depth_subtract_w[93:46]};
-    assign depth_bit_w = {48'b0, depth_subtract_w[45]};
+    assign depth_high_w = {1'b0, unused_depth_subtract_w[93:46]};
+    assign depth_bit_w = {48'b0, unused_depth_subtract_w[45]};
     assign depth_round_a0_w = depth_high_w[0 +: 35];
     assign depth_round_b0_w = depth_bit_w[0 +: 35];
     assign depth_round_low0_w = depth_round_part0_r[34:0];
@@ -817,10 +817,10 @@ module edrv32_gpu_project (
         if (push_w) output_6_r[write_r] <= color_input_r_d35_align14_r;
     end
     // Each region owns the output-credit count used by its local clock enable.
-    wire [10:0] pipeline_enable_w;
+    wire [8:0] pipeline_enable_w;
     genvar enable_region;
     generate
-        for (enable_region = 0; enable_region < 11;
+        for (enable_region = 0; enable_region < 9;
             enable_region = enable_region + 1) begin : g_enable_region
             (* keep = "true", syn_preserve = 1 *) reg [1:0] region_count_r;
             assign pipeline_enable_w[enable_region] = region_count_r != 2 && !stop_i;
@@ -872,13 +872,13 @@ module edrv32_gpu_project (
             restore_shift_right_amt2_w_d5_r <= restore_shift_right_amt2_w_d4_r;
             restore_shift_right_amt2_w_d6_r <= restore_shift_right_amt2_w_d5_r;
             restore_shift_right_amt2_w_d7_r <= restore_shift_right_amt2_w_d6_r;
-            unused_restore_shift_right_2_r <= restore_shift_right_2_w;
+            unused_restore_shift_right_2_r <= unused_restore_shift_right_2_w[34:0];
             restore_shift_left_0_r <= restore_shift_left_0_w;
             restore_shift_left_amt1_w_d2_r <= restore_shift_left_amt1_w;
             restore_shift_left_1_r <= restore_shift_left_1_w;
             restore_shift_left_amt2_w_d2_r <= restore_shift_left_amt2_w;
             restore_shift_left_amt2_w_d3_r <= restore_shift_left_amt2_w_d2_r;
-            restore_shift_left_2_r <= restore_shift_left_2_w;
+            restore_shift_left_2_r <= unused_restore_shift_left_2_w[34:0];
             restore_exponent_r_d1_r <= restore_exponent_r;
             restore_exponent_r_d2_r <= restore_exponent_r_d1_r;
             restore_exponent_r_d3_r <= restore_exponent_r_d2_r;
@@ -887,7 +887,7 @@ module edrv32_gpu_project (
             restore_exponent_r_d6_r <= restore_exponent_r_d5_r;
             restore_exponent_r_d7_r <= restore_exponent_r_d6_r;
             restore_exponent_r_d8_r <= restore_exponent_r_d7_r;
-            restore_shift_left_2_r_d5_r <= restore_shift_left_2_r;
+            restore_shift_left_2_r_d5_r <= restore_shift_left_2_r[34:0];
             restore_shift_left_2_r_d6_r <= restore_shift_left_2_r_d5_r;
             restore_shift_left_2_r_d7_r <= restore_shift_left_2_r_d6_r;
             unused_restore_shift_left_2_r_d8_r <= restore_shift_left_2_r_d7_r;
@@ -1115,10 +1115,10 @@ module edrv32_gpu_project (
                 {1'b0, depth_round_a1_w_d20_r} + {1'b0, depth_round_b1_w_d20_r} + {14'b0,
                 depth_round_part0_r[35]};
             depth_round_low0_w_d21_r <= depth_round_low0_w;
-            depth_subtract_w_d20_r <= depth_subtract_w;
-            unused_depth_subtract_w_d21_r <= depth_subtract_w_d20_r;
+            depth_negative_d20_r <= unused_depth_subtract_w[93];
+            depth_negative_d21_r <= depth_negative_d20_r;
             depth_clamp_r <=
-                unused_depth_subtract_w_d21_r[93] ? 16'b0 : (|depth_round_w[48:16]) ? 16'hffff :
+                depth_negative_d21_r ? 16'b0 : (|depth_round_w[48:16]) ? 16'hffff :
                 depth_round_w[15:0];
             screen_clamp0_d32_r <= screen_clamp0_r;
             screen_clamp0_d33_r <= screen_clamp0_d32_r;
@@ -1127,1267 +1127,6 @@ module edrv32_gpu_project (
         end
     end
 
-    // position_product0: 40x35, 9 registered APM products; 11 enabled stages.
-    wire [39:0] position_product0_a_w;
-    assign position_product0_a_w = position_input0_r_d9_r;
-    wire [34:0] position_product0_b_w;
-    assign position_product0_b_w = restored_r;
-    reg [33:0] position_product0_pp00_r;
-    wire [74:0] unused_position_product0_term00_w;
-    assign unused_position_product0_term00_w = {41'b0, position_product0_pp00_r} << 0;
-    reg [33:0] position_product0_pp01_r;
-    wire [74:0] unused_position_product0_term01_w;
-    assign unused_position_product0_term01_w = {41'b0, position_product0_pp01_r} << 17;
-    reg [17:0] position_product0_pp02_r;
-    wire [74:0] unused_position_product0_term02_w;
-    assign unused_position_product0_term02_w = {57'b0, position_product0_pp02_r} << 34;
-    reg [33:0] position_product0_pp10_r;
-    wire [74:0] unused_position_product0_term10_w;
-    assign unused_position_product0_term10_w = {41'b0, position_product0_pp10_r} << 17;
-    reg [33:0] position_product0_pp11_r;
-    wire [74:0] unused_position_product0_term11_w;
-    assign unused_position_product0_term11_w = {41'b0, position_product0_pp11_r} << 34;
-    reg [17:0] position_product0_pp12_r;
-    wire [74:0] unused_position_product0_term12_w;
-    assign unused_position_product0_term12_w = {57'b0, position_product0_pp12_r} << 51;
-    reg [22:0] position_product0_pp20_r;
-    wire [74:0] unused_position_product0_term20_w;
-    assign unused_position_product0_term20_w =
-                {{52{position_product0_pp20_r[22]}}, position_product0_pp20_r} << 34;
-    reg [22:0] position_product0_pp21_r;
-    wire [74:0] unused_position_product0_term21_w;
-    assign unused_position_product0_term21_w =
-                {{52{position_product0_pp21_r[22]}}, position_product0_pp21_r} << 51;
-    reg [6:0] position_product0_pp22_r;
-    wire [74:0] unused_position_product0_term22_w;
-    assign unused_position_product0_term22_w =
-                {{68{position_product0_pp22_r[6]}}, position_product0_pp22_r} << 68;
-    reg [35:0] unused_position_product0_l0n0_part0_r;
-    reg [34:0] position_product0_l0n0_low0d0_r;
-    reg [16:0] position_product0_l0n0_a1d0_r;
-    reg [16:0] position_product0_l0n0_b1d0_r;
-    reg [17:0] unused_position_product0_l0n0_part1_r;
-    wire [74:0] unused_position_product0_l0n0_w;
-    assign unused_position_product0_l0n0_w =
-                {23'b0, {unused_position_product0_l0n0_part1_r[16:0],
-                position_product0_l0n0_low0d0_r}};
-    reg [35:0] unused_position_product0_l0n1_part0_r;
-    reg [34:0] position_product0_l0n1_low0d0_r;
-    reg [0:0] position_product0_l0n1_a1d0_r;
-    reg [0:0] position_product0_l0n1_b1d0_r;
-    reg [1:0] unused_position_product0_l0n1_part1_r;
-    wire [74:0] unused_position_product0_l0n1_w;
-    assign unused_position_product0_l0n1_w =
-                {22'b0, {unused_position_product0_l0n1_part1_r[0:0],
-                position_product0_l0n1_low0d0_r}, 17'b0};
-    reg [35:0] unused_position_product0_l0n2_part0_r;
-    reg [34:0] position_product0_l0n2_low0d0_r;
-    reg [0:0] position_product0_l0n2_a1d0_r;
-    reg [0:0] position_product0_l0n2_b1d0_r;
-    reg [1:0] unused_position_product0_l0n2_part1_r;
-    wire [74:0] unused_position_product0_l0n2_w;
-    assign unused_position_product0_l0n2_w =
-                {5'b0, {unused_position_product0_l0n2_part1_r[0:0],
-                position_product0_l0n2_low0d0_r}, 34'b0};
-    reg [35:0] unused_position_product0_l0n3_part0_r;
-    reg [34:0] position_product0_l0n3_low0d0_r;
-    reg [5:0] position_product0_l0n3_a1d0_r;
-    reg [5:0] position_product0_l0n3_b1d0_r;
-    reg [6:0] unused_position_product0_l0n3_part1_r;
-    wire [74:0] unused_position_product0_l0n3_w;
-    assign unused_position_product0_l0n3_w =
-                {{unused_position_product0_l0n3_part1_r[5:0], position_product0_l0n3_low0d0_r},
-                34'b0};
-    reg [6:0] position_product0_l0n4_d0_r;
-    reg [6:0] position_product0_l0n4_d1_r;
-    wire [74:0] unused_position_product0_l0n4_w;
-    assign unused_position_product0_l0n4_w = {position_product0_l0n4_d1_r, 68'b0};
-    reg [35:0] unused_position_product0_l1n0_part0_r;
-    reg [34:0] position_product0_l1n0_low0d0_r;
-    reg [18:0] position_product0_l1n0_a1d0_r;
-    reg [18:0] position_product0_l1n0_b1d0_r;
-    reg [19:0] unused_position_product0_l1n0_part1_r;
-    wire [74:0] unused_position_product0_l1n0_w;
-    assign unused_position_product0_l1n0_w =
-                {21'b0, {unused_position_product0_l1n0_part1_r[18:0],
-                position_product0_l1n0_low0d0_r}};
-    reg [35:0] unused_position_product0_l1n1_part0_r;
-    reg [34:0] position_product0_l1n1_low0d0_r;
-    reg [5:0] position_product0_l1n1_a1d0_r;
-    reg [5:0] position_product0_l1n1_b1d0_r;
-    reg [6:0] unused_position_product0_l1n1_part1_r;
-    wire [74:0] unused_position_product0_l1n1_w;
-    assign unused_position_product0_l1n1_w =
-                {{unused_position_product0_l1n1_part1_r[5:0], position_product0_l1n1_low0d0_r},
-                34'b0};
-    reg [6:0] position_product0_l1n2_d0_r;
-    reg [6:0] position_product0_l1n2_d1_r;
-    wire [74:0] unused_position_product0_l1n2_w;
-    assign unused_position_product0_l1n2_w = {position_product0_l1n2_d1_r, 68'b0};
-    reg [35:0] unused_position_product0_l2n0_part0_r;
-    reg [34:0] position_product0_l2n0_low0d0_r;
-    reg [34:0] position_product0_l2n0_low0d1_r;
-    reg [34:0] position_product0_l2n0_a1d0_r;
-    reg [34:0] position_product0_l2n0_b1d0_r;
-    reg [35:0] unused_position_product0_l2n0_part1_r;
-    reg [34:0] position_product0_l2n0_low1d0_r;
-    reg [4:0] position_product0_l2n0_a2d0_r;
-    reg [4:0] position_product0_l2n0_a2d1_r;
-    reg [4:0] position_product0_l2n0_b2d0_r;
-    reg [4:0] position_product0_l2n0_b2d1_r;
-    reg [5:0] unused_position_product0_l2n0_part2_r;
-    wire [74:0] unused_position_product0_l2n0_w;
-    assign unused_position_product0_l2n0_w =
-                {unused_position_product0_l2n0_part2_r[4:0], position_product0_l2n0_low1d0_r,
-                position_product0_l2n0_low0d1_r};
-    reg [6:0] position_product0_l2n1_d0_r;
-    reg [6:0] position_product0_l2n1_d1_r;
-    reg [6:0] position_product0_l2n1_d2_r;
-    wire [74:0] unused_position_product0_l2n1_w;
-    assign unused_position_product0_l2n1_w = {position_product0_l2n1_d2_r, 68'b0};
-    reg [35:0] unused_position_product0_l3n0_part0_r;
-    reg [34:0] position_product0_l3n0_low0d0_r;
-    reg [34:0] position_product0_l3n0_low0d1_r;
-    reg [34:0] position_product0_l3n0_a1d0_r;
-    reg [34:0] position_product0_l3n0_b1d0_r;
-    reg [35:0] unused_position_product0_l3n0_part1_r;
-    reg [34:0] position_product0_l3n0_low1d0_r;
-    reg [4:0] position_product0_l3n0_a2d0_r;
-    reg [4:0] position_product0_l3n0_a2d1_r;
-    reg [4:0] position_product0_l3n0_b2d0_r;
-    reg [4:0] position_product0_l3n0_b2d1_r;
-    reg [5:0] unused_position_product0_l3n0_part2_r;
-    wire [74:0] unused_position_product0_l3n0_w;
-    assign unused_position_product0_l3n0_w =
-                {unused_position_product0_l3n0_part2_r[4:0], position_product0_l3n0_low1d0_r,
-                position_product0_l3n0_low0d1_r};
-    assign position_product0_p2_r = unused_position_product0_l3n0_w;
-    always @(posedge clk_i) begin
-        if (pipeline_enable_w[1]) begin
-            position_product0_pp00_r <=
-                $signed({1'b0, position_product0_a_w[0 +: 17]}) * $signed({1'b0,
-                position_product0_b_w[0 +: 17]});
-            position_product0_pp01_r <=
-                $signed({1'b0, position_product0_a_w[0 +: 17]}) * $signed({1'b0,
-                position_product0_b_w[17 +: 17]});
-            position_product0_pp02_r <=
-                $signed({1'b0, position_product0_a_w[0 +: 17]}) * $signed({1'b0,
-                position_product0_b_w[34 +: 1]});
-            position_product0_pp10_r <=
-                $signed({1'b0, position_product0_a_w[17 +: 17]}) * $signed({1'b0,
-                position_product0_b_w[0 +: 17]});
-            position_product0_pp11_r <=
-                $signed({1'b0, position_product0_a_w[17 +: 17]}) * $signed({1'b0,
-                position_product0_b_w[17 +: 17]});
-            position_product0_pp12_r <=
-                $signed({1'b0, position_product0_a_w[17 +: 17]}) * $signed({1'b0,
-                position_product0_b_w[34 +: 1]});
-            position_product0_pp20_r <=
-                $signed(position_product0_a_w[34 +: 6]) * $signed({1'b0,
-                position_product0_b_w[0 +: 17]});
-            position_product0_pp21_r <=
-                $signed(position_product0_a_w[34 +: 6]) * $signed({1'b0,
-                position_product0_b_w[17 +: 17]});
-            position_product0_pp22_r <=
-                $signed(position_product0_a_w[34 +: 6]) * $signed({1'b0,
-                position_product0_b_w[34 +: 1]});
-            unused_position_product0_l0n0_part0_r <=
-                {1'b0, unused_position_product0_term00_w[0 +: 35]} + {1'b0,
-                unused_position_product0_term01_w[0 +: 35]};
-            position_product0_l0n0_low0d0_r <= unused_position_product0_l0n0_part0_r[34:0];
-            position_product0_l0n0_a1d0_r <= unused_position_product0_term00_w[35 +: 17];
-            position_product0_l0n0_b1d0_r <= unused_position_product0_term01_w[35 +: 17];
-            unused_position_product0_l0n0_part1_r <=
-                {1'b0, position_product0_l0n0_a1d0_r} + {1'b0, position_product0_l0n0_b1d0_r} +
-                {17'b0, unused_position_product0_l0n0_part0_r[35]};
-            unused_position_product0_l0n1_part0_r <=
-                {1'b0, unused_position_product0_term02_w[17 +: 35]} + {1'b0,
-                unused_position_product0_term10_w[17 +: 35]};
-            position_product0_l0n1_low0d0_r <= unused_position_product0_l0n1_part0_r[34:0];
-            position_product0_l0n1_a1d0_r <= unused_position_product0_term02_w[52 +: 1];
-            position_product0_l0n1_b1d0_r <= unused_position_product0_term10_w[52 +: 1];
-            unused_position_product0_l0n1_part1_r <=
-                {1'b0, position_product0_l0n1_a1d0_r} + {1'b0, position_product0_l0n1_b1d0_r} +
-                {1'b0, unused_position_product0_l0n1_part0_r[35]};
-            unused_position_product0_l0n2_part0_r <=
-                {1'b0, unused_position_product0_term11_w[34 +: 35]} + {1'b0,
-                unused_position_product0_term12_w[34 +: 35]};
-            position_product0_l0n2_low0d0_r <= unused_position_product0_l0n2_part0_r[34:0];
-            position_product0_l0n2_a1d0_r <= unused_position_product0_term11_w[69 +: 1];
-            position_product0_l0n2_b1d0_r <= unused_position_product0_term12_w[69 +: 1];
-            unused_position_product0_l0n2_part1_r <=
-                {1'b0, position_product0_l0n2_a1d0_r} + {1'b0, position_product0_l0n2_b1d0_r} +
-                {1'b0, unused_position_product0_l0n2_part0_r[35]};
-            unused_position_product0_l0n3_part0_r <=
-                {1'b0, unused_position_product0_term20_w[34 +: 35]} + {1'b0,
-                unused_position_product0_term21_w[34 +: 35]};
-            position_product0_l0n3_low0d0_r <= unused_position_product0_l0n3_part0_r[34:0];
-            position_product0_l0n3_a1d0_r <= unused_position_product0_term20_w[69 +: 6];
-            position_product0_l0n3_b1d0_r <= unused_position_product0_term21_w[69 +: 6];
-            unused_position_product0_l0n3_part1_r <=
-                {1'b0, position_product0_l0n3_a1d0_r} + {1'b0, position_product0_l0n3_b1d0_r} +
-                {6'b0, unused_position_product0_l0n3_part0_r[35]};
-            position_product0_l0n4_d0_r <= unused_position_product0_term22_w[68 +: 7];
-            position_product0_l0n4_d1_r <= position_product0_l0n4_d0_r;
-            unused_position_product0_l1n0_part0_r <=
-                {1'b0, unused_position_product0_l0n0_w[0 +: 35]} + {1'b0,
-                unused_position_product0_l0n1_w[0 +: 35]};
-            position_product0_l1n0_low0d0_r <= unused_position_product0_l1n0_part0_r[34:0];
-            position_product0_l1n0_a1d0_r <= unused_position_product0_l0n0_w[35 +: 19];
-            position_product0_l1n0_b1d0_r <= unused_position_product0_l0n1_w[35 +: 19];
-            unused_position_product0_l1n0_part1_r <=
-                {1'b0, position_product0_l1n0_a1d0_r} + {1'b0, position_product0_l1n0_b1d0_r} +
-                {19'b0, unused_position_product0_l1n0_part0_r[35]};
-            unused_position_product0_l1n1_part0_r <=
-                {1'b0, unused_position_product0_l0n2_w[34 +: 35]} + {1'b0,
-                unused_position_product0_l0n3_w[34 +: 35]};
-            position_product0_l1n1_low0d0_r <= unused_position_product0_l1n1_part0_r[34:0];
-            position_product0_l1n1_a1d0_r <= unused_position_product0_l0n2_w[69 +: 6];
-            position_product0_l1n1_b1d0_r <= unused_position_product0_l0n3_w[69 +: 6];
-            unused_position_product0_l1n1_part1_r <=
-                {1'b0, position_product0_l1n1_a1d0_r} + {1'b0, position_product0_l1n1_b1d0_r} +
-                {6'b0, unused_position_product0_l1n1_part0_r[35]};
-            position_product0_l1n2_d0_r <= unused_position_product0_l0n4_w[68 +: 7];
-            position_product0_l1n2_d1_r <= position_product0_l1n2_d0_r;
-            unused_position_product0_l2n0_part0_r <=
-                {1'b0, unused_position_product0_l1n0_w[0 +: 35]} + {1'b0,
-                unused_position_product0_l1n1_w[0 +: 35]};
-            position_product0_l2n0_low0d0_r <= unused_position_product0_l2n0_part0_r[34:0];
-            position_product0_l2n0_low0d1_r <= position_product0_l2n0_low0d0_r;
-            position_product0_l2n0_a1d0_r <= unused_position_product0_l1n0_w[35 +: 35];
-            position_product0_l2n0_b1d0_r <= unused_position_product0_l1n1_w[35 +: 35];
-            unused_position_product0_l2n0_part1_r <=
-                {1'b0, position_product0_l2n0_a1d0_r} + {1'b0, position_product0_l2n0_b1d0_r} +
-                {35'b0, unused_position_product0_l2n0_part0_r[35]};
-            position_product0_l2n0_low1d0_r <= unused_position_product0_l2n0_part1_r[34:0];
-            position_product0_l2n0_a2d0_r <= unused_position_product0_l1n0_w[70 +: 5];
-            position_product0_l2n0_a2d1_r <= position_product0_l2n0_a2d0_r;
-            position_product0_l2n0_b2d0_r <= unused_position_product0_l1n1_w[70 +: 5];
-            position_product0_l2n0_b2d1_r <= position_product0_l2n0_b2d0_r;
-            unused_position_product0_l2n0_part2_r <=
-                {1'b0, position_product0_l2n0_a2d1_r} + {1'b0, position_product0_l2n0_b2d1_r} +
-                {5'b0, unused_position_product0_l2n0_part1_r[35]};
-            position_product0_l2n1_d0_r <= unused_position_product0_l1n2_w[68 +: 7];
-            position_product0_l2n1_d1_r <= position_product0_l2n1_d0_r;
-            position_product0_l2n1_d2_r <= position_product0_l2n1_d1_r;
-            unused_position_product0_l3n0_part0_r <=
-                {1'b0, unused_position_product0_l2n0_w[0 +: 35]} + {1'b0,
-                unused_position_product0_l2n1_w[0 +: 35]};
-            position_product0_l3n0_low0d0_r <= unused_position_product0_l3n0_part0_r[34:0];
-            position_product0_l3n0_low0d1_r <= position_product0_l3n0_low0d0_r;
-            position_product0_l3n0_a1d0_r <= unused_position_product0_l2n0_w[35 +: 35];
-            position_product0_l3n0_b1d0_r <= unused_position_product0_l2n1_w[35 +: 35];
-            unused_position_product0_l3n0_part1_r <=
-                {1'b0, position_product0_l3n0_a1d0_r} + {1'b0, position_product0_l3n0_b1d0_r} +
-                {35'b0, unused_position_product0_l3n0_part0_r[35]};
-            position_product0_l3n0_low1d0_r <= unused_position_product0_l3n0_part1_r[34:0];
-            position_product0_l3n0_a2d0_r <= unused_position_product0_l2n0_w[70 +: 5];
-            position_product0_l3n0_a2d1_r <= position_product0_l3n0_a2d0_r;
-            position_product0_l3n0_b2d0_r <= unused_position_product0_l2n1_w[70 +: 5];
-            position_product0_l3n0_b2d1_r <= position_product0_l3n0_b2d0_r;
-            unused_position_product0_l3n0_part2_r <=
-                {1'b0, position_product0_l3n0_a2d1_r} + {1'b0, position_product0_l3n0_b2d1_r} +
-                {5'b0, unused_position_product0_l3n0_part1_r[35]};
-        end
-    end
-
-    // position_product1: 40x35, 9 registered APM products; 11 enabled stages.
-    wire [39:0] position_product1_a_w;
-    assign position_product1_a_w = position_input1_r_d9_r;
-    wire [34:0] position_product1_b_w;
-    assign position_product1_b_w = restored_r;
-    reg [33:0] position_product1_pp00_r;
-    wire [74:0] unused_position_product1_term00_w;
-    assign unused_position_product1_term00_w = {41'b0, position_product1_pp00_r} << 0;
-    reg [33:0] position_product1_pp01_r;
-    wire [74:0] unused_position_product1_term01_w;
-    assign unused_position_product1_term01_w = {41'b0, position_product1_pp01_r} << 17;
-    reg [17:0] position_product1_pp02_r;
-    wire [74:0] unused_position_product1_term02_w;
-    assign unused_position_product1_term02_w = {57'b0, position_product1_pp02_r} << 34;
-    reg [33:0] position_product1_pp10_r;
-    wire [74:0] unused_position_product1_term10_w;
-    assign unused_position_product1_term10_w = {41'b0, position_product1_pp10_r} << 17;
-    reg [33:0] position_product1_pp11_r;
-    wire [74:0] unused_position_product1_term11_w;
-    assign unused_position_product1_term11_w = {41'b0, position_product1_pp11_r} << 34;
-    reg [17:0] position_product1_pp12_r;
-    wire [74:0] unused_position_product1_term12_w;
-    assign unused_position_product1_term12_w = {57'b0, position_product1_pp12_r} << 51;
-    reg [22:0] position_product1_pp20_r;
-    wire [74:0] unused_position_product1_term20_w;
-    assign unused_position_product1_term20_w =
-                {{52{position_product1_pp20_r[22]}}, position_product1_pp20_r} << 34;
-    reg [22:0] position_product1_pp21_r;
-    wire [74:0] unused_position_product1_term21_w;
-    assign unused_position_product1_term21_w =
-                {{52{position_product1_pp21_r[22]}}, position_product1_pp21_r} << 51;
-    reg [6:0] position_product1_pp22_r;
-    wire [74:0] unused_position_product1_term22_w;
-    assign unused_position_product1_term22_w =
-                {{68{position_product1_pp22_r[6]}}, position_product1_pp22_r} << 68;
-    reg [35:0] unused_position_product1_l0n0_part0_r;
-    reg [34:0] position_product1_l0n0_low0d0_r;
-    reg [16:0] position_product1_l0n0_a1d0_r;
-    reg [16:0] position_product1_l0n0_b1d0_r;
-    reg [17:0] unused_position_product1_l0n0_part1_r;
-    wire [74:0] unused_position_product1_l0n0_w;
-    assign unused_position_product1_l0n0_w =
-                {23'b0, {unused_position_product1_l0n0_part1_r[16:0],
-                position_product1_l0n0_low0d0_r}};
-    reg [35:0] unused_position_product1_l0n1_part0_r;
-    reg [34:0] position_product1_l0n1_low0d0_r;
-    reg [0:0] position_product1_l0n1_a1d0_r;
-    reg [0:0] position_product1_l0n1_b1d0_r;
-    reg [1:0] unused_position_product1_l0n1_part1_r;
-    wire [74:0] unused_position_product1_l0n1_w;
-    assign unused_position_product1_l0n1_w =
-                {22'b0, {unused_position_product1_l0n1_part1_r[0:0],
-                position_product1_l0n1_low0d0_r}, 17'b0};
-    reg [35:0] unused_position_product1_l0n2_part0_r;
-    reg [34:0] position_product1_l0n2_low0d0_r;
-    reg [0:0] position_product1_l0n2_a1d0_r;
-    reg [0:0] position_product1_l0n2_b1d0_r;
-    reg [1:0] unused_position_product1_l0n2_part1_r;
-    wire [74:0] unused_position_product1_l0n2_w;
-    assign unused_position_product1_l0n2_w =
-                {5'b0, {unused_position_product1_l0n2_part1_r[0:0],
-                position_product1_l0n2_low0d0_r}, 34'b0};
-    reg [35:0] unused_position_product1_l0n3_part0_r;
-    reg [34:0] position_product1_l0n3_low0d0_r;
-    reg [5:0] position_product1_l0n3_a1d0_r;
-    reg [5:0] position_product1_l0n3_b1d0_r;
-    reg [6:0] unused_position_product1_l0n3_part1_r;
-    wire [74:0] unused_position_product1_l0n3_w;
-    assign unused_position_product1_l0n3_w =
-                {{unused_position_product1_l0n3_part1_r[5:0], position_product1_l0n3_low0d0_r},
-                34'b0};
-    reg [6:0] position_product1_l0n4_d0_r;
-    reg [6:0] position_product1_l0n4_d1_r;
-    wire [74:0] unused_position_product1_l0n4_w;
-    assign unused_position_product1_l0n4_w = {position_product1_l0n4_d1_r, 68'b0};
-    reg [35:0] unused_position_product1_l1n0_part0_r;
-    reg [34:0] position_product1_l1n0_low0d0_r;
-    reg [18:0] position_product1_l1n0_a1d0_r;
-    reg [18:0] position_product1_l1n0_b1d0_r;
-    reg [19:0] unused_position_product1_l1n0_part1_r;
-    wire [74:0] unused_position_product1_l1n0_w;
-    assign unused_position_product1_l1n0_w =
-                {21'b0, {unused_position_product1_l1n0_part1_r[18:0],
-                position_product1_l1n0_low0d0_r}};
-    reg [35:0] unused_position_product1_l1n1_part0_r;
-    reg [34:0] position_product1_l1n1_low0d0_r;
-    reg [5:0] position_product1_l1n1_a1d0_r;
-    reg [5:0] position_product1_l1n1_b1d0_r;
-    reg [6:0] unused_position_product1_l1n1_part1_r;
-    wire [74:0] unused_position_product1_l1n1_w;
-    assign unused_position_product1_l1n1_w =
-                {{unused_position_product1_l1n1_part1_r[5:0], position_product1_l1n1_low0d0_r},
-                34'b0};
-    reg [6:0] position_product1_l1n2_d0_r;
-    reg [6:0] position_product1_l1n2_d1_r;
-    wire [74:0] unused_position_product1_l1n2_w;
-    assign unused_position_product1_l1n2_w = {position_product1_l1n2_d1_r, 68'b0};
-    reg [35:0] unused_position_product1_l2n0_part0_r;
-    reg [34:0] position_product1_l2n0_low0d0_r;
-    reg [34:0] position_product1_l2n0_low0d1_r;
-    reg [34:0] position_product1_l2n0_a1d0_r;
-    reg [34:0] position_product1_l2n0_b1d0_r;
-    reg [35:0] unused_position_product1_l2n0_part1_r;
-    reg [34:0] position_product1_l2n0_low1d0_r;
-    reg [4:0] position_product1_l2n0_a2d0_r;
-    reg [4:0] position_product1_l2n0_a2d1_r;
-    reg [4:0] position_product1_l2n0_b2d0_r;
-    reg [4:0] position_product1_l2n0_b2d1_r;
-    reg [5:0] unused_position_product1_l2n0_part2_r;
-    wire [74:0] unused_position_product1_l2n0_w;
-    assign unused_position_product1_l2n0_w =
-                {unused_position_product1_l2n0_part2_r[4:0], position_product1_l2n0_low1d0_r,
-                position_product1_l2n0_low0d1_r};
-    reg [6:0] position_product1_l2n1_d0_r;
-    reg [6:0] position_product1_l2n1_d1_r;
-    reg [6:0] position_product1_l2n1_d2_r;
-    wire [74:0] unused_position_product1_l2n1_w;
-    assign unused_position_product1_l2n1_w = {position_product1_l2n1_d2_r, 68'b0};
-    reg [35:0] unused_position_product1_l3n0_part0_r;
-    reg [34:0] position_product1_l3n0_low0d0_r;
-    reg [34:0] position_product1_l3n0_low0d1_r;
-    reg [34:0] position_product1_l3n0_a1d0_r;
-    reg [34:0] position_product1_l3n0_b1d0_r;
-    reg [35:0] unused_position_product1_l3n0_part1_r;
-    reg [34:0] position_product1_l3n0_low1d0_r;
-    reg [4:0] position_product1_l3n0_a2d0_r;
-    reg [4:0] position_product1_l3n0_a2d1_r;
-    reg [4:0] position_product1_l3n0_b2d0_r;
-    reg [4:0] position_product1_l3n0_b2d1_r;
-    reg [5:0] unused_position_product1_l3n0_part2_r;
-    wire [74:0] unused_position_product1_l3n0_w;
-    assign unused_position_product1_l3n0_w =
-                {unused_position_product1_l3n0_part2_r[4:0], position_product1_l3n0_low1d0_r,
-                position_product1_l3n0_low0d1_r};
-    assign position_product1_p2_r = unused_position_product1_l3n0_w;
-    always @(posedge clk_i) begin
-        if (pipeline_enable_w[9]) begin
-            position_product1_pp00_r <=
-                $signed({1'b0, position_product1_a_w[0 +: 17]}) * $signed({1'b0,
-                position_product1_b_w[0 +: 17]});
-            position_product1_pp01_r <=
-                $signed({1'b0, position_product1_a_w[0 +: 17]}) * $signed({1'b0,
-                position_product1_b_w[17 +: 17]});
-            position_product1_pp02_r <=
-                $signed({1'b0, position_product1_a_w[0 +: 17]}) * $signed({1'b0,
-                position_product1_b_w[34 +: 1]});
-            position_product1_pp10_r <=
-                $signed({1'b0, position_product1_a_w[17 +: 17]}) * $signed({1'b0,
-                position_product1_b_w[0 +: 17]});
-            position_product1_pp11_r <=
-                $signed({1'b0, position_product1_a_w[17 +: 17]}) * $signed({1'b0,
-                position_product1_b_w[17 +: 17]});
-            position_product1_pp12_r <=
-                $signed({1'b0, position_product1_a_w[17 +: 17]}) * $signed({1'b0,
-                position_product1_b_w[34 +: 1]});
-            position_product1_pp20_r <=
-                $signed(position_product1_a_w[34 +: 6]) * $signed({1'b0,
-                position_product1_b_w[0 +: 17]});
-            position_product1_pp21_r <=
-                $signed(position_product1_a_w[34 +: 6]) * $signed({1'b0,
-                position_product1_b_w[17 +: 17]});
-            position_product1_pp22_r <=
-                $signed(position_product1_a_w[34 +: 6]) * $signed({1'b0,
-                position_product1_b_w[34 +: 1]});
-            unused_position_product1_l0n0_part0_r <=
-                {1'b0, unused_position_product1_term00_w[0 +: 35]} + {1'b0,
-                unused_position_product1_term01_w[0 +: 35]};
-            position_product1_l0n0_low0d0_r <= unused_position_product1_l0n0_part0_r[34:0];
-            position_product1_l0n0_a1d0_r <= unused_position_product1_term00_w[35 +: 17];
-            position_product1_l0n0_b1d0_r <= unused_position_product1_term01_w[35 +: 17];
-            unused_position_product1_l0n0_part1_r <=
-                {1'b0, position_product1_l0n0_a1d0_r} + {1'b0, position_product1_l0n0_b1d0_r} +
-                {17'b0, unused_position_product1_l0n0_part0_r[35]};
-            unused_position_product1_l0n1_part0_r <=
-                {1'b0, unused_position_product1_term02_w[17 +: 35]} + {1'b0,
-                unused_position_product1_term10_w[17 +: 35]};
-            position_product1_l0n1_low0d0_r <= unused_position_product1_l0n1_part0_r[34:0];
-            position_product1_l0n1_a1d0_r <= unused_position_product1_term02_w[52 +: 1];
-            position_product1_l0n1_b1d0_r <= unused_position_product1_term10_w[52 +: 1];
-            unused_position_product1_l0n1_part1_r <=
-                {1'b0, position_product1_l0n1_a1d0_r} + {1'b0, position_product1_l0n1_b1d0_r} +
-                {1'b0, unused_position_product1_l0n1_part0_r[35]};
-            unused_position_product1_l0n2_part0_r <=
-                {1'b0, unused_position_product1_term11_w[34 +: 35]} + {1'b0,
-                unused_position_product1_term12_w[34 +: 35]};
-            position_product1_l0n2_low0d0_r <= unused_position_product1_l0n2_part0_r[34:0];
-            position_product1_l0n2_a1d0_r <= unused_position_product1_term11_w[69 +: 1];
-            position_product1_l0n2_b1d0_r <= unused_position_product1_term12_w[69 +: 1];
-            unused_position_product1_l0n2_part1_r <=
-                {1'b0, position_product1_l0n2_a1d0_r} + {1'b0, position_product1_l0n2_b1d0_r} +
-                {1'b0, unused_position_product1_l0n2_part0_r[35]};
-            unused_position_product1_l0n3_part0_r <=
-                {1'b0, unused_position_product1_term20_w[34 +: 35]} + {1'b0,
-                unused_position_product1_term21_w[34 +: 35]};
-            position_product1_l0n3_low0d0_r <= unused_position_product1_l0n3_part0_r[34:0];
-            position_product1_l0n3_a1d0_r <= unused_position_product1_term20_w[69 +: 6];
-            position_product1_l0n3_b1d0_r <= unused_position_product1_term21_w[69 +: 6];
-            unused_position_product1_l0n3_part1_r <=
-                {1'b0, position_product1_l0n3_a1d0_r} + {1'b0, position_product1_l0n3_b1d0_r} +
-                {6'b0, unused_position_product1_l0n3_part0_r[35]};
-            position_product1_l0n4_d0_r <= unused_position_product1_term22_w[68 +: 7];
-            position_product1_l0n4_d1_r <= position_product1_l0n4_d0_r;
-            unused_position_product1_l1n0_part0_r <=
-                {1'b0, unused_position_product1_l0n0_w[0 +: 35]} + {1'b0,
-                unused_position_product1_l0n1_w[0 +: 35]};
-            position_product1_l1n0_low0d0_r <= unused_position_product1_l1n0_part0_r[34:0];
-            position_product1_l1n0_a1d0_r <= unused_position_product1_l0n0_w[35 +: 19];
-            position_product1_l1n0_b1d0_r <= unused_position_product1_l0n1_w[35 +: 19];
-            unused_position_product1_l1n0_part1_r <=
-                {1'b0, position_product1_l1n0_a1d0_r} + {1'b0, position_product1_l1n0_b1d0_r} +
-                {19'b0, unused_position_product1_l1n0_part0_r[35]};
-            unused_position_product1_l1n1_part0_r <=
-                {1'b0, unused_position_product1_l0n2_w[34 +: 35]} + {1'b0,
-                unused_position_product1_l0n3_w[34 +: 35]};
-            position_product1_l1n1_low0d0_r <= unused_position_product1_l1n1_part0_r[34:0];
-            position_product1_l1n1_a1d0_r <= unused_position_product1_l0n2_w[69 +: 6];
-            position_product1_l1n1_b1d0_r <= unused_position_product1_l0n3_w[69 +: 6];
-            unused_position_product1_l1n1_part1_r <=
-                {1'b0, position_product1_l1n1_a1d0_r} + {1'b0, position_product1_l1n1_b1d0_r} +
-                {6'b0, unused_position_product1_l1n1_part0_r[35]};
-            position_product1_l1n2_d0_r <= unused_position_product1_l0n4_w[68 +: 7];
-            position_product1_l1n2_d1_r <= position_product1_l1n2_d0_r;
-            unused_position_product1_l2n0_part0_r <=
-                {1'b0, unused_position_product1_l1n0_w[0 +: 35]} + {1'b0,
-                unused_position_product1_l1n1_w[0 +: 35]};
-            position_product1_l2n0_low0d0_r <= unused_position_product1_l2n0_part0_r[34:0];
-            position_product1_l2n0_low0d1_r <= position_product1_l2n0_low0d0_r;
-            position_product1_l2n0_a1d0_r <= unused_position_product1_l1n0_w[35 +: 35];
-            position_product1_l2n0_b1d0_r <= unused_position_product1_l1n1_w[35 +: 35];
-            unused_position_product1_l2n0_part1_r <=
-                {1'b0, position_product1_l2n0_a1d0_r} + {1'b0, position_product1_l2n0_b1d0_r} +
-                {35'b0, unused_position_product1_l2n0_part0_r[35]};
-            position_product1_l2n0_low1d0_r <= unused_position_product1_l2n0_part1_r[34:0];
-            position_product1_l2n0_a2d0_r <= unused_position_product1_l1n0_w[70 +: 5];
-            position_product1_l2n0_a2d1_r <= position_product1_l2n0_a2d0_r;
-            position_product1_l2n0_b2d0_r <= unused_position_product1_l1n1_w[70 +: 5];
-            position_product1_l2n0_b2d1_r <= position_product1_l2n0_b2d0_r;
-            unused_position_product1_l2n0_part2_r <=
-                {1'b0, position_product1_l2n0_a2d1_r} + {1'b0, position_product1_l2n0_b2d1_r} +
-                {5'b0, unused_position_product1_l2n0_part1_r[35]};
-            position_product1_l2n1_d0_r <= unused_position_product1_l1n2_w[68 +: 7];
-            position_product1_l2n1_d1_r <= position_product1_l2n1_d0_r;
-            position_product1_l2n1_d2_r <= position_product1_l2n1_d1_r;
-            unused_position_product1_l3n0_part0_r <=
-                {1'b0, unused_position_product1_l2n0_w[0 +: 35]} + {1'b0,
-                unused_position_product1_l2n1_w[0 +: 35]};
-            position_product1_l3n0_low0d0_r <= unused_position_product1_l3n0_part0_r[34:0];
-            position_product1_l3n0_low0d1_r <= position_product1_l3n0_low0d0_r;
-            position_product1_l3n0_a1d0_r <= unused_position_product1_l2n0_w[35 +: 35];
-            position_product1_l3n0_b1d0_r <= unused_position_product1_l2n1_w[35 +: 35];
-            unused_position_product1_l3n0_part1_r <=
-                {1'b0, position_product1_l3n0_a1d0_r} + {1'b0, position_product1_l3n0_b1d0_r} +
-                {35'b0, unused_position_product1_l3n0_part0_r[35]};
-            position_product1_l3n0_low1d0_r <= unused_position_product1_l3n0_part1_r[34:0];
-            position_product1_l3n0_a2d0_r <= unused_position_product1_l2n0_w[70 +: 5];
-            position_product1_l3n0_a2d1_r <= position_product1_l3n0_a2d0_r;
-            position_product1_l3n0_b2d0_r <= unused_position_product1_l2n1_w[70 +: 5];
-            position_product1_l3n0_b2d1_r <= position_product1_l3n0_b2d0_r;
-            unused_position_product1_l3n0_part2_r <=
-                {1'b0, position_product1_l3n0_a2d1_r} + {1'b0, position_product1_l3n0_b2d1_r} +
-                {5'b0, unused_position_product1_l3n0_part1_r[35]};
-        end
-    end
-
-    // position_product2: 40x35, 9 registered APM products; 11 enabled stages.
-    wire [39:0] position_product2_a_w;
-    assign position_product2_a_w = position_input2_r_d9_r;
-    wire [34:0] position_product2_b_w;
-    assign position_product2_b_w = restored_r;
-    reg [33:0] position_product2_pp00_r;
-    wire [74:0] unused_position_product2_term00_w;
-    assign unused_position_product2_term00_w = {41'b0, position_product2_pp00_r} << 0;
-    reg [33:0] position_product2_pp01_r;
-    wire [74:0] unused_position_product2_term01_w;
-    assign unused_position_product2_term01_w = {41'b0, position_product2_pp01_r} << 17;
-    reg [17:0] position_product2_pp02_r;
-    wire [74:0] unused_position_product2_term02_w;
-    assign unused_position_product2_term02_w = {57'b0, position_product2_pp02_r} << 34;
-    reg [33:0] position_product2_pp10_r;
-    wire [74:0] unused_position_product2_term10_w;
-    assign unused_position_product2_term10_w = {41'b0, position_product2_pp10_r} << 17;
-    reg [33:0] position_product2_pp11_r;
-    wire [74:0] unused_position_product2_term11_w;
-    assign unused_position_product2_term11_w = {41'b0, position_product2_pp11_r} << 34;
-    reg [17:0] position_product2_pp12_r;
-    wire [74:0] unused_position_product2_term12_w;
-    assign unused_position_product2_term12_w = {57'b0, position_product2_pp12_r} << 51;
-    reg [22:0] position_product2_pp20_r;
-    wire [74:0] unused_position_product2_term20_w;
-    assign unused_position_product2_term20_w =
-                {{52{position_product2_pp20_r[22]}}, position_product2_pp20_r} << 34;
-    reg [22:0] position_product2_pp21_r;
-    wire [74:0] unused_position_product2_term21_w;
-    assign unused_position_product2_term21_w =
-                {{52{position_product2_pp21_r[22]}}, position_product2_pp21_r} << 51;
-    reg [6:0] position_product2_pp22_r;
-    wire [74:0] unused_position_product2_term22_w;
-    assign unused_position_product2_term22_w =
-                {{68{position_product2_pp22_r[6]}}, position_product2_pp22_r} << 68;
-    reg [35:0] unused_position_product2_l0n0_part0_r;
-    reg [34:0] position_product2_l0n0_low0d0_r;
-    reg [16:0] position_product2_l0n0_a1d0_r;
-    reg [16:0] position_product2_l0n0_b1d0_r;
-    reg [17:0] unused_position_product2_l0n0_part1_r;
-    wire [74:0] unused_position_product2_l0n0_w;
-    assign unused_position_product2_l0n0_w =
-                {23'b0, {unused_position_product2_l0n0_part1_r[16:0],
-                position_product2_l0n0_low0d0_r}};
-    reg [35:0] unused_position_product2_l0n1_part0_r;
-    reg [34:0] position_product2_l0n1_low0d0_r;
-    reg [0:0] position_product2_l0n1_a1d0_r;
-    reg [0:0] position_product2_l0n1_b1d0_r;
-    reg [1:0] unused_position_product2_l0n1_part1_r;
-    wire [74:0] unused_position_product2_l0n1_w;
-    assign unused_position_product2_l0n1_w =
-                {22'b0, {unused_position_product2_l0n1_part1_r[0:0],
-                position_product2_l0n1_low0d0_r}, 17'b0};
-    reg [35:0] unused_position_product2_l0n2_part0_r;
-    reg [34:0] position_product2_l0n2_low0d0_r;
-    reg [0:0] position_product2_l0n2_a1d0_r;
-    reg [0:0] position_product2_l0n2_b1d0_r;
-    reg [1:0] unused_position_product2_l0n2_part1_r;
-    wire [74:0] unused_position_product2_l0n2_w;
-    assign unused_position_product2_l0n2_w =
-                {5'b0, {unused_position_product2_l0n2_part1_r[0:0],
-                position_product2_l0n2_low0d0_r}, 34'b0};
-    reg [35:0] unused_position_product2_l0n3_part0_r;
-    reg [34:0] position_product2_l0n3_low0d0_r;
-    reg [5:0] position_product2_l0n3_a1d0_r;
-    reg [5:0] position_product2_l0n3_b1d0_r;
-    reg [6:0] unused_position_product2_l0n3_part1_r;
-    wire [74:0] unused_position_product2_l0n3_w;
-    assign unused_position_product2_l0n3_w =
-                {{unused_position_product2_l0n3_part1_r[5:0], position_product2_l0n3_low0d0_r},
-                34'b0};
-    reg [6:0] position_product2_l0n4_d0_r;
-    reg [6:0] position_product2_l0n4_d1_r;
-    wire [74:0] unused_position_product2_l0n4_w;
-    assign unused_position_product2_l0n4_w = {position_product2_l0n4_d1_r, 68'b0};
-    reg [35:0] unused_position_product2_l1n0_part0_r;
-    reg [34:0] position_product2_l1n0_low0d0_r;
-    reg [18:0] position_product2_l1n0_a1d0_r;
-    reg [18:0] position_product2_l1n0_b1d0_r;
-    reg [19:0] unused_position_product2_l1n0_part1_r;
-    wire [74:0] unused_position_product2_l1n0_w;
-    assign unused_position_product2_l1n0_w =
-                {21'b0, {unused_position_product2_l1n0_part1_r[18:0],
-                position_product2_l1n0_low0d0_r}};
-    reg [35:0] unused_position_product2_l1n1_part0_r;
-    reg [34:0] position_product2_l1n1_low0d0_r;
-    reg [5:0] position_product2_l1n1_a1d0_r;
-    reg [5:0] position_product2_l1n1_b1d0_r;
-    reg [6:0] unused_position_product2_l1n1_part1_r;
-    wire [74:0] unused_position_product2_l1n1_w;
-    assign unused_position_product2_l1n1_w =
-                {{unused_position_product2_l1n1_part1_r[5:0], position_product2_l1n1_low0d0_r},
-                34'b0};
-    reg [6:0] position_product2_l1n2_d0_r;
-    reg [6:0] position_product2_l1n2_d1_r;
-    wire [74:0] unused_position_product2_l1n2_w;
-    assign unused_position_product2_l1n2_w = {position_product2_l1n2_d1_r, 68'b0};
-    reg [35:0] unused_position_product2_l2n0_part0_r;
-    reg [34:0] position_product2_l2n0_low0d0_r;
-    reg [34:0] position_product2_l2n0_low0d1_r;
-    reg [34:0] position_product2_l2n0_a1d0_r;
-    reg [34:0] position_product2_l2n0_b1d0_r;
-    reg [35:0] unused_position_product2_l2n0_part1_r;
-    reg [34:0] position_product2_l2n0_low1d0_r;
-    reg [4:0] position_product2_l2n0_a2d0_r;
-    reg [4:0] position_product2_l2n0_a2d1_r;
-    reg [4:0] position_product2_l2n0_b2d0_r;
-    reg [4:0] position_product2_l2n0_b2d1_r;
-    reg [5:0] unused_position_product2_l2n0_part2_r;
-    wire [74:0] unused_position_product2_l2n0_w;
-    assign unused_position_product2_l2n0_w =
-                {unused_position_product2_l2n0_part2_r[4:0], position_product2_l2n0_low1d0_r,
-                position_product2_l2n0_low0d1_r};
-    reg [6:0] position_product2_l2n1_d0_r;
-    reg [6:0] position_product2_l2n1_d1_r;
-    reg [6:0] position_product2_l2n1_d2_r;
-    wire [74:0] unused_position_product2_l2n1_w;
-    assign unused_position_product2_l2n1_w = {position_product2_l2n1_d2_r, 68'b0};
-    reg [35:0] unused_position_product2_l3n0_part0_r;
-    reg [34:0] position_product2_l3n0_low0d0_r;
-    reg [34:0] position_product2_l3n0_low0d1_r;
-    reg [34:0] position_product2_l3n0_a1d0_r;
-    reg [34:0] position_product2_l3n0_b1d0_r;
-    reg [35:0] unused_position_product2_l3n0_part1_r;
-    reg [34:0] position_product2_l3n0_low1d0_r;
-    reg [4:0] position_product2_l3n0_a2d0_r;
-    reg [4:0] position_product2_l3n0_a2d1_r;
-    reg [4:0] position_product2_l3n0_b2d0_r;
-    reg [4:0] position_product2_l3n0_b2d1_r;
-    reg [5:0] unused_position_product2_l3n0_part2_r;
-    wire [74:0] unused_position_product2_l3n0_w;
-    assign unused_position_product2_l3n0_w =
-                {unused_position_product2_l3n0_part2_r[4:0], position_product2_l3n0_low1d0_r,
-                position_product2_l3n0_low0d1_r};
-    assign position_product2_p2_r = unused_position_product2_l3n0_w;
-    always @(posedge clk_i) begin
-        if (pipeline_enable_w[10]) begin
-            position_product2_pp00_r <=
-                $signed({1'b0, position_product2_a_w[0 +: 17]}) * $signed({1'b0,
-                position_product2_b_w[0 +: 17]});
-            position_product2_pp01_r <=
-                $signed({1'b0, position_product2_a_w[0 +: 17]}) * $signed({1'b0,
-                position_product2_b_w[17 +: 17]});
-            position_product2_pp02_r <=
-                $signed({1'b0, position_product2_a_w[0 +: 17]}) * $signed({1'b0,
-                position_product2_b_w[34 +: 1]});
-            position_product2_pp10_r <=
-                $signed({1'b0, position_product2_a_w[17 +: 17]}) * $signed({1'b0,
-                position_product2_b_w[0 +: 17]});
-            position_product2_pp11_r <=
-                $signed({1'b0, position_product2_a_w[17 +: 17]}) * $signed({1'b0,
-                position_product2_b_w[17 +: 17]});
-            position_product2_pp12_r <=
-                $signed({1'b0, position_product2_a_w[17 +: 17]}) * $signed({1'b0,
-                position_product2_b_w[34 +: 1]});
-            position_product2_pp20_r <=
-                $signed(position_product2_a_w[34 +: 6]) * $signed({1'b0,
-                position_product2_b_w[0 +: 17]});
-            position_product2_pp21_r <=
-                $signed(position_product2_a_w[34 +: 6]) * $signed({1'b0,
-                position_product2_b_w[17 +: 17]});
-            position_product2_pp22_r <=
-                $signed(position_product2_a_w[34 +: 6]) * $signed({1'b0,
-                position_product2_b_w[34 +: 1]});
-            unused_position_product2_l0n0_part0_r <=
-                {1'b0, unused_position_product2_term00_w[0 +: 35]} + {1'b0,
-                unused_position_product2_term01_w[0 +: 35]};
-            position_product2_l0n0_low0d0_r <= unused_position_product2_l0n0_part0_r[34:0];
-            position_product2_l0n0_a1d0_r <= unused_position_product2_term00_w[35 +: 17];
-            position_product2_l0n0_b1d0_r <= unused_position_product2_term01_w[35 +: 17];
-            unused_position_product2_l0n0_part1_r <=
-                {1'b0, position_product2_l0n0_a1d0_r} + {1'b0, position_product2_l0n0_b1d0_r} +
-                {17'b0, unused_position_product2_l0n0_part0_r[35]};
-            unused_position_product2_l0n1_part0_r <=
-                {1'b0, unused_position_product2_term02_w[17 +: 35]} + {1'b0,
-                unused_position_product2_term10_w[17 +: 35]};
-            position_product2_l0n1_low0d0_r <= unused_position_product2_l0n1_part0_r[34:0];
-            position_product2_l0n1_a1d0_r <= unused_position_product2_term02_w[52 +: 1];
-            position_product2_l0n1_b1d0_r <= unused_position_product2_term10_w[52 +: 1];
-            unused_position_product2_l0n1_part1_r <=
-                {1'b0, position_product2_l0n1_a1d0_r} + {1'b0, position_product2_l0n1_b1d0_r} +
-                {1'b0, unused_position_product2_l0n1_part0_r[35]};
-            unused_position_product2_l0n2_part0_r <=
-                {1'b0, unused_position_product2_term11_w[34 +: 35]} + {1'b0,
-                unused_position_product2_term12_w[34 +: 35]};
-            position_product2_l0n2_low0d0_r <= unused_position_product2_l0n2_part0_r[34:0];
-            position_product2_l0n2_a1d0_r <= unused_position_product2_term11_w[69 +: 1];
-            position_product2_l0n2_b1d0_r <= unused_position_product2_term12_w[69 +: 1];
-            unused_position_product2_l0n2_part1_r <=
-                {1'b0, position_product2_l0n2_a1d0_r} + {1'b0, position_product2_l0n2_b1d0_r} +
-                {1'b0, unused_position_product2_l0n2_part0_r[35]};
-            unused_position_product2_l0n3_part0_r <=
-                {1'b0, unused_position_product2_term20_w[34 +: 35]} + {1'b0,
-                unused_position_product2_term21_w[34 +: 35]};
-            position_product2_l0n3_low0d0_r <= unused_position_product2_l0n3_part0_r[34:0];
-            position_product2_l0n3_a1d0_r <= unused_position_product2_term20_w[69 +: 6];
-            position_product2_l0n3_b1d0_r <= unused_position_product2_term21_w[69 +: 6];
-            unused_position_product2_l0n3_part1_r <=
-                {1'b0, position_product2_l0n3_a1d0_r} + {1'b0, position_product2_l0n3_b1d0_r} +
-                {6'b0, unused_position_product2_l0n3_part0_r[35]};
-            position_product2_l0n4_d0_r <= unused_position_product2_term22_w[68 +: 7];
-            position_product2_l0n4_d1_r <= position_product2_l0n4_d0_r;
-            unused_position_product2_l1n0_part0_r <=
-                {1'b0, unused_position_product2_l0n0_w[0 +: 35]} + {1'b0,
-                unused_position_product2_l0n1_w[0 +: 35]};
-            position_product2_l1n0_low0d0_r <= unused_position_product2_l1n0_part0_r[34:0];
-            position_product2_l1n0_a1d0_r <= unused_position_product2_l0n0_w[35 +: 19];
-            position_product2_l1n0_b1d0_r <= unused_position_product2_l0n1_w[35 +: 19];
-            unused_position_product2_l1n0_part1_r <=
-                {1'b0, position_product2_l1n0_a1d0_r} + {1'b0, position_product2_l1n0_b1d0_r} +
-                {19'b0, unused_position_product2_l1n0_part0_r[35]};
-            unused_position_product2_l1n1_part0_r <=
-                {1'b0, unused_position_product2_l0n2_w[34 +: 35]} + {1'b0,
-                unused_position_product2_l0n3_w[34 +: 35]};
-            position_product2_l1n1_low0d0_r <= unused_position_product2_l1n1_part0_r[34:0];
-            position_product2_l1n1_a1d0_r <= unused_position_product2_l0n2_w[69 +: 6];
-            position_product2_l1n1_b1d0_r <= unused_position_product2_l0n3_w[69 +: 6];
-            unused_position_product2_l1n1_part1_r <=
-                {1'b0, position_product2_l1n1_a1d0_r} + {1'b0, position_product2_l1n1_b1d0_r} +
-                {6'b0, unused_position_product2_l1n1_part0_r[35]};
-            position_product2_l1n2_d0_r <= unused_position_product2_l0n4_w[68 +: 7];
-            position_product2_l1n2_d1_r <= position_product2_l1n2_d0_r;
-            unused_position_product2_l2n0_part0_r <=
-                {1'b0, unused_position_product2_l1n0_w[0 +: 35]} + {1'b0,
-                unused_position_product2_l1n1_w[0 +: 35]};
-            position_product2_l2n0_low0d0_r <= unused_position_product2_l2n0_part0_r[34:0];
-            position_product2_l2n0_low0d1_r <= position_product2_l2n0_low0d0_r;
-            position_product2_l2n0_a1d0_r <= unused_position_product2_l1n0_w[35 +: 35];
-            position_product2_l2n0_b1d0_r <= unused_position_product2_l1n1_w[35 +: 35];
-            unused_position_product2_l2n0_part1_r <=
-                {1'b0, position_product2_l2n0_a1d0_r} + {1'b0, position_product2_l2n0_b1d0_r} +
-                {35'b0, unused_position_product2_l2n0_part0_r[35]};
-            position_product2_l2n0_low1d0_r <= unused_position_product2_l2n0_part1_r[34:0];
-            position_product2_l2n0_a2d0_r <= unused_position_product2_l1n0_w[70 +: 5];
-            position_product2_l2n0_a2d1_r <= position_product2_l2n0_a2d0_r;
-            position_product2_l2n0_b2d0_r <= unused_position_product2_l1n1_w[70 +: 5];
-            position_product2_l2n0_b2d1_r <= position_product2_l2n0_b2d0_r;
-            unused_position_product2_l2n0_part2_r <=
-                {1'b0, position_product2_l2n0_a2d1_r} + {1'b0, position_product2_l2n0_b2d1_r} +
-                {5'b0, unused_position_product2_l2n0_part1_r[35]};
-            position_product2_l2n1_d0_r <= unused_position_product2_l1n2_w[68 +: 7];
-            position_product2_l2n1_d1_r <= position_product2_l2n1_d0_r;
-            position_product2_l2n1_d2_r <= position_product2_l2n1_d1_r;
-            unused_position_product2_l3n0_part0_r <=
-                {1'b0, unused_position_product2_l2n0_w[0 +: 35]} + {1'b0,
-                unused_position_product2_l2n1_w[0 +: 35]};
-            position_product2_l3n0_low0d0_r <= unused_position_product2_l3n0_part0_r[34:0];
-            position_product2_l3n0_low0d1_r <= position_product2_l3n0_low0d0_r;
-            position_product2_l3n0_a1d0_r <= unused_position_product2_l2n0_w[35 +: 35];
-            position_product2_l3n0_b1d0_r <= unused_position_product2_l2n1_w[35 +: 35];
-            unused_position_product2_l3n0_part1_r <=
-                {1'b0, position_product2_l3n0_a1d0_r} + {1'b0, position_product2_l3n0_b1d0_r} +
-                {35'b0, unused_position_product2_l3n0_part0_r[35]};
-            position_product2_l3n0_low1d0_r <= unused_position_product2_l3n0_part1_r[34:0];
-            position_product2_l3n0_a2d0_r <= unused_position_product2_l2n0_w[70 +: 5];
-            position_product2_l3n0_a2d1_r <= position_product2_l3n0_a2d0_r;
-            position_product2_l3n0_b2d0_r <= unused_position_product2_l2n1_w[70 +: 5];
-            position_product2_l3n0_b2d1_r <= position_product2_l3n0_b2d0_r;
-            unused_position_product2_l3n0_part2_r <=
-                {1'b0, position_product2_l3n0_a2d1_r} + {1'b0, position_product2_l3n0_b2d1_r} +
-                {5'b0, unused_position_product2_l3n0_part1_r[35]};
-        end
-    end
-
-    // uv_product0: 16x35, 3 registered APM products; 5 enabled stages.
-    wire [15:0] uv_product0_a_w;
-    assign uv_product0_a_w = uv_input0_r_d9_r;
-    wire [34:0] uv_product0_b_w;
-    assign uv_product0_b_w = restored_r;
-    reg [32:0] uv_product0_pp00_r;
-    wire [50:0] unused_uv_product0_term00_w;
-    assign unused_uv_product0_term00_w = {18'b0, uv_product0_pp00_r} << 0;
-    reg [32:0] uv_product0_pp01_r;
-    wire [50:0] unused_uv_product0_term01_w;
-    assign unused_uv_product0_term01_w = {18'b0, uv_product0_pp01_r} << 17;
-    reg [16:0] uv_product0_pp02_r;
-    wire [50:0] unused_uv_product0_term02_w;
-    assign unused_uv_product0_term02_w = {34'b0, uv_product0_pp02_r} << 34;
-    reg [35:0] unused_uv_product0_l0n0_part0_r;
-    reg [34:0] uv_product0_l0n0_low0d0_r;
-    reg [15:0] uv_product0_l0n0_a1d0_r;
-    reg [15:0] uv_product0_l0n0_b1d0_r;
-    reg [16:0] unused_uv_product0_l0n0_part1_r;
-    wire [50:0] unused_uv_product0_l0n0_w;
-    assign unused_uv_product0_l0n0_w =
-                {unused_uv_product0_l0n0_part1_r[15:0], uv_product0_l0n0_low0d0_r};
-    reg [16:0] uv_product0_l0n1_d0_r;
-    reg [16:0] uv_product0_l0n1_d1_r;
-    wire [50:0] unused_uv_product0_l0n1_w;
-    assign unused_uv_product0_l0n1_w = {uv_product0_l0n1_d1_r, 34'b0};
-    reg [35:0] unused_uv_product0_l1n0_part0_r;
-    reg [34:0] uv_product0_l1n0_low0d0_r;
-    reg [15:0] uv_product0_l1n0_a1d0_r;
-    reg [15:0] uv_product0_l1n0_b1d0_r;
-    reg [16:0] unused_uv_product0_l1n0_part1_r;
-    wire [50:0] unused_uv_product0_l1n0_w;
-    assign unused_uv_product0_l1n0_w =
-                {unused_uv_product0_l1n0_part1_r[15:0], uv_product0_l1n0_low0d0_r};
-    assign uv_product0_p2_r = unused_uv_product0_l1n0_w;
-    always @(posedge clk_i) begin
-        if (pipeline_enable_w[2]) begin
-            uv_product0_pp00_r <=
-                $signed({1'b0, uv_product0_a_w[0 +: 16]}) * $signed({1'b0, uv_product0_b_w[0 +: 17]
-                });
-            uv_product0_pp01_r <=
-                $signed({1'b0, uv_product0_a_w[0 +: 16]}) * $signed({1'b0,
-                uv_product0_b_w[17 +: 17]});
-            uv_product0_pp02_r <=
-                $signed({1'b0, uv_product0_a_w[0 +: 16]}) * $signed({1'b0, uv_product0_b_w[34 +: 1]
-                });
-            unused_uv_product0_l0n0_part0_r <=
-                {1'b0, unused_uv_product0_term00_w[0 +: 35]} + {1'b0,
-                unused_uv_product0_term01_w[0 +: 35]};
-            uv_product0_l0n0_low0d0_r <= unused_uv_product0_l0n0_part0_r[34:0];
-            uv_product0_l0n0_a1d0_r <= unused_uv_product0_term00_w[35 +: 16];
-            uv_product0_l0n0_b1d0_r <= unused_uv_product0_term01_w[35 +: 16];
-            unused_uv_product0_l0n0_part1_r <=
-                {1'b0, uv_product0_l0n0_a1d0_r} + {1'b0, uv_product0_l0n0_b1d0_r} + {16'b0,
-                unused_uv_product0_l0n0_part0_r[35]};
-            uv_product0_l0n1_d0_r <= unused_uv_product0_term02_w[34 +: 17];
-            uv_product0_l0n1_d1_r <= uv_product0_l0n1_d0_r;
-            unused_uv_product0_l1n0_part0_r <=
-                {1'b0, unused_uv_product0_l0n0_w[0 +: 35]} + {1'b0,
-                unused_uv_product0_l0n1_w[0 +: 35]};
-            uv_product0_l1n0_low0d0_r <= unused_uv_product0_l1n0_part0_r[34:0];
-            uv_product0_l1n0_a1d0_r <= unused_uv_product0_l0n0_w[35 +: 16];
-            uv_product0_l1n0_b1d0_r <= unused_uv_product0_l0n1_w[35 +: 16];
-            unused_uv_product0_l1n0_part1_r <=
-                {1'b0, uv_product0_l1n0_a1d0_r} + {1'b0, uv_product0_l1n0_b1d0_r} + {16'b0,
-                unused_uv_product0_l1n0_part0_r[35]};
-        end
-    end
-
-    // uv_product1: 16x35, 3 registered APM products; 5 enabled stages.
-    wire [15:0] uv_product1_a_w;
-    assign uv_product1_a_w = uv_input1_r_d9_r;
-    wire [34:0] uv_product1_b_w;
-    assign uv_product1_b_w = restored_r;
-    reg [32:0] uv_product1_pp00_r;
-    wire [50:0] unused_uv_product1_term00_w;
-    assign unused_uv_product1_term00_w = {18'b0, uv_product1_pp00_r} << 0;
-    reg [32:0] uv_product1_pp01_r;
-    wire [50:0] unused_uv_product1_term01_w;
-    assign unused_uv_product1_term01_w = {18'b0, uv_product1_pp01_r} << 17;
-    reg [16:0] uv_product1_pp02_r;
-    wire [50:0] unused_uv_product1_term02_w;
-    assign unused_uv_product1_term02_w = {34'b0, uv_product1_pp02_r} << 34;
-    reg [35:0] unused_uv_product1_l0n0_part0_r;
-    reg [34:0] uv_product1_l0n0_low0d0_r;
-    reg [15:0] uv_product1_l0n0_a1d0_r;
-    reg [15:0] uv_product1_l0n0_b1d0_r;
-    reg [16:0] unused_uv_product1_l0n0_part1_r;
-    wire [50:0] unused_uv_product1_l0n0_w;
-    assign unused_uv_product1_l0n0_w =
-                {unused_uv_product1_l0n0_part1_r[15:0], uv_product1_l0n0_low0d0_r};
-    reg [16:0] uv_product1_l0n1_d0_r;
-    reg [16:0] uv_product1_l0n1_d1_r;
-    wire [50:0] unused_uv_product1_l0n1_w;
-    assign unused_uv_product1_l0n1_w = {uv_product1_l0n1_d1_r, 34'b0};
-    reg [35:0] unused_uv_product1_l1n0_part0_r;
-    reg [34:0] uv_product1_l1n0_low0d0_r;
-    reg [15:0] uv_product1_l1n0_a1d0_r;
-    reg [15:0] uv_product1_l1n0_b1d0_r;
-    reg [16:0] unused_uv_product1_l1n0_part1_r;
-    wire [50:0] unused_uv_product1_l1n0_w;
-    assign unused_uv_product1_l1n0_w =
-                {unused_uv_product1_l1n0_part1_r[15:0], uv_product1_l1n0_low0d0_r};
-    assign uv_product1_p2_r = unused_uv_product1_l1n0_w;
-    always @(posedge clk_i) begin
-        if (pipeline_enable_w[2]) begin
-            uv_product1_pp00_r <=
-                $signed({1'b0, uv_product1_a_w[0 +: 16]}) * $signed({1'b0, uv_product1_b_w[0 +: 17]
-                });
-            uv_product1_pp01_r <=
-                $signed({1'b0, uv_product1_a_w[0 +: 16]}) * $signed({1'b0,
-                uv_product1_b_w[17 +: 17]});
-            uv_product1_pp02_r <=
-                $signed({1'b0, uv_product1_a_w[0 +: 16]}) * $signed({1'b0, uv_product1_b_w[34 +: 1]
-                });
-            unused_uv_product1_l0n0_part0_r <=
-                {1'b0, unused_uv_product1_term00_w[0 +: 35]} + {1'b0,
-                unused_uv_product1_term01_w[0 +: 35]};
-            uv_product1_l0n0_low0d0_r <= unused_uv_product1_l0n0_part0_r[34:0];
-            uv_product1_l0n0_a1d0_r <= unused_uv_product1_term00_w[35 +: 16];
-            uv_product1_l0n0_b1d0_r <= unused_uv_product1_term01_w[35 +: 16];
-            unused_uv_product1_l0n0_part1_r <=
-                {1'b0, uv_product1_l0n0_a1d0_r} + {1'b0, uv_product1_l0n0_b1d0_r} + {16'b0,
-                unused_uv_product1_l0n0_part0_r[35]};
-            uv_product1_l0n1_d0_r <= unused_uv_product1_term02_w[34 +: 17];
-            uv_product1_l0n1_d1_r <= uv_product1_l0n1_d0_r;
-            unused_uv_product1_l1n0_part0_r <=
-                {1'b0, unused_uv_product1_l0n0_w[0 +: 35]} + {1'b0,
-                unused_uv_product1_l0n1_w[0 +: 35]};
-            uv_product1_l1n0_low0d0_r <= unused_uv_product1_l1n0_part0_r[34:0];
-            uv_product1_l1n0_a1d0_r <= unused_uv_product1_l0n0_w[35 +: 16];
-            uv_product1_l1n0_b1d0_r <= unused_uv_product1_l0n1_w[35 +: 16];
-            unused_uv_product1_l1n0_part1_r <=
-                {1'b0, uv_product1_l1n0_a1d0_r} + {1'b0, uv_product1_l1n0_b1d0_r} + {16'b0,
-                unused_uv_product1_l1n0_part0_r[35]};
-        end
-    end
-
-    // viewport_product0: 94x16, 6 registered APM products; 9 enabled stages.
-    wire [93:0] viewport_product0_a_w;
-    assign viewport_product0_a_w = viewport_adjust0_w;
-    reg [32:0] viewport_product0_pp00_r;
-    wire [93:0] unused_viewport_product0_term00_w;
-    assign unused_viewport_product0_term00_w = {61'b0, viewport_product0_pp00_r} << 0;
-    reg [32:0] viewport_product0_pp10_r;
-    wire [93:0] unused_viewport_product0_term10_w;
-    assign unused_viewport_product0_term10_w = {61'b0, viewport_product0_pp10_r} << 17;
-    reg [32:0] viewport_product0_pp20_r;
-    wire [93:0] unused_viewport_product0_term20_w;
-    assign unused_viewport_product0_term20_w = {61'b0, viewport_product0_pp20_r} << 34;
-    reg [32:0] viewport_product0_pp30_r;
-    wire [93:0] unused_viewport_product0_term30_w;
-    assign unused_viewport_product0_term30_w = {61'b0, viewport_product0_pp30_r} << 51;
-    reg [32:0] viewport_product0_pp40_r;
-    wire [93:0] unused_viewport_product0_term40_w;
-    assign unused_viewport_product0_term40_w = {61'b0, viewport_product0_pp40_r} << 68;
-    reg [24:0] viewport_product0_pp50_r;
-    wire [93:0] unused_viewport_product0_term50_w;
-    assign unused_viewport_product0_term50_w =
-                {{69{viewport_product0_pp50_r[24]}}, viewport_product0_pp50_r} << 85;
-    reg [35:0] unused_viewport_product0_l0n0_part0_r;
-    reg [34:0] viewport_product0_l0n0_low0d0_r;
-    reg [15:0] viewport_product0_l0n0_a1d0_r;
-    reg [15:0] viewport_product0_l0n0_b1d0_r;
-    reg [16:0] unused_viewport_product0_l0n0_part1_r;
-    wire [93:0] unused_viewport_product0_l0n0_w;
-    assign unused_viewport_product0_l0n0_w =
-                {43'b0, {unused_viewport_product0_l0n0_part1_r[15:0],
-                viewport_product0_l0n0_low0d0_r}};
-    reg [35:0] unused_viewport_product0_l0n1_part0_r;
-    reg [34:0] viewport_product0_l0n1_low0d0_r;
-    reg [15:0] viewport_product0_l0n1_a1d0_r;
-    reg [15:0] viewport_product0_l0n1_b1d0_r;
-    reg [16:0] unused_viewport_product0_l0n1_part1_r;
-    wire [93:0] unused_viewport_product0_l0n1_w;
-    assign unused_viewport_product0_l0n1_w =
-                {9'b0, {unused_viewport_product0_l0n1_part1_r[15:0],
-                viewport_product0_l0n1_low0d0_r}, 34'b0};
-    reg [26:0] unused_viewport_product0_l0n2_part0_r;
-    reg [25:0] viewport_product0_l0n2_hold0_r;
-    wire [93:0] unused_viewport_product0_l0n2_w;
-    assign unused_viewport_product0_l0n2_w = {viewport_product0_l0n2_hold0_r, 68'b0};
-    reg [35:0] unused_viewport_product0_l1n0_part0_r;
-    reg [34:0] viewport_product0_l1n0_low0d0_r;
-    reg [34:0] viewport_product0_l1n0_low0d1_r;
-    reg [34:0] viewport_product0_l1n0_a1d0_r;
-    reg [34:0] viewport_product0_l1n0_b1d0_r;
-    reg [35:0] unused_viewport_product0_l1n0_part1_r;
-    reg [34:0] viewport_product0_l1n0_low1d0_r;
-    reg [15:0] viewport_product0_l1n0_a2d0_r;
-    reg [15:0] viewport_product0_l1n0_a2d1_r;
-    reg [15:0] viewport_product0_l1n0_b2d0_r;
-    reg [15:0] viewport_product0_l1n0_b2d1_r;
-    reg [16:0] unused_viewport_product0_l1n0_part2_r;
-    wire [93:0] unused_viewport_product0_l1n0_w;
-    assign unused_viewport_product0_l1n0_w =
-                {8'b0, {unused_viewport_product0_l1n0_part2_r[15:0],
-                viewport_product0_l1n0_low1d0_r, viewport_product0_l1n0_low0d1_r}};
-    reg [25:0] viewport_product0_l1n1_d0_r;
-    reg [25:0] viewport_product0_l1n1_d1_r;
-    reg [25:0] viewport_product0_l1n1_d2_r;
-    wire [93:0] unused_viewport_product0_l1n1_w;
-    assign unused_viewport_product0_l1n1_w = {viewport_product0_l1n1_d2_r, 68'b0};
-    reg [35:0] unused_viewport_product0_l2n0_part0_r;
-    reg [34:0] viewport_product0_l2n0_low0d0_r;
-    reg [34:0] viewport_product0_l2n0_low0d1_r;
-    reg [34:0] viewport_product0_l2n0_a1d0_r;
-    reg [34:0] viewport_product0_l2n0_b1d0_r;
-    reg [35:0] unused_viewport_product0_l2n0_part1_r;
-    reg [34:0] viewport_product0_l2n0_low1d0_r;
-    reg [23:0] viewport_product0_l2n0_a2d0_r;
-    reg [23:0] viewport_product0_l2n0_a2d1_r;
-    reg [23:0] viewport_product0_l2n0_b2d0_r;
-    reg [23:0] viewport_product0_l2n0_b2d1_r;
-    reg [24:0] unused_viewport_product0_l2n0_part2_r;
-    wire [93:0] unused_viewport_product0_l2n0_w;
-    assign unused_viewport_product0_l2n0_w =
-                {unused_viewport_product0_l2n0_part2_r[23:0], viewport_product0_l2n0_low1d0_r,
-                viewport_product0_l2n0_low0d1_r};
-    assign viewport_product0_p2_r = unused_viewport_product0_l2n0_w;
-    always @(posedge clk_i) begin
-        if (pipeline_enable_w[3]) begin
-            viewport_product0_pp00_r <=
-                $signed({1'b0, viewport_product0_a_w[0 +: 17]}) * $signed({1'b0,
-                viewport_product0_b_w[0 +: 16]});
-            viewport_product0_pp10_r <=
-                $signed({1'b0, viewport_product0_a_w[17 +: 17]}) * $signed({1'b0,
-                viewport_product0_b_w[0 +: 16]});
-            viewport_product0_pp20_r <=
-                $signed({1'b0, viewport_product0_a_w[34 +: 17]}) * $signed({1'b0,
-                viewport_product0_b_w[0 +: 16]});
-            viewport_product0_pp30_r <=
-                $signed({1'b0, viewport_product0_a_w[51 +: 17]}) * $signed({1'b0,
-                viewport_product0_b_w[0 +: 16]});
-            viewport_product0_pp40_r <=
-                $signed({1'b0, viewport_product0_a_w[68 +: 17]}) * $signed({1'b0,
-                viewport_product0_b_w[0 +: 16]});
-            viewport_product0_pp50_r <=
-                $signed(viewport_product0_a_w[85 +: 9]) * $signed({1'b0,
-                viewport_product0_b_w[0 +: 16]});
-            unused_viewport_product0_l0n0_part0_r <=
-                {1'b0, unused_viewport_product0_term00_w[0 +: 35]} + {1'b0,
-                unused_viewport_product0_term10_w[0 +: 35]};
-            viewport_product0_l0n0_low0d0_r <= unused_viewport_product0_l0n0_part0_r[34:0];
-            viewport_product0_l0n0_a1d0_r <= unused_viewport_product0_term00_w[35 +: 16];
-            viewport_product0_l0n0_b1d0_r <= unused_viewport_product0_term10_w[35 +: 16];
-            unused_viewport_product0_l0n0_part1_r <=
-                {1'b0, viewport_product0_l0n0_a1d0_r} + {1'b0, viewport_product0_l0n0_b1d0_r} +
-                {16'b0, unused_viewport_product0_l0n0_part0_r[35]};
-            unused_viewport_product0_l0n1_part0_r <=
-                {1'b0, unused_viewport_product0_term20_w[34 +: 35]} + {1'b0,
-                unused_viewport_product0_term30_w[34 +: 35]};
-            viewport_product0_l0n1_low0d0_r <= unused_viewport_product0_l0n1_part0_r[34:0];
-            viewport_product0_l0n1_a1d0_r <= unused_viewport_product0_term20_w[69 +: 16];
-            viewport_product0_l0n1_b1d0_r <= unused_viewport_product0_term30_w[69 +: 16];
-            unused_viewport_product0_l0n1_part1_r <=
-                {1'b0, viewport_product0_l0n1_a1d0_r} + {1'b0, viewport_product0_l0n1_b1d0_r} +
-                {16'b0, unused_viewport_product0_l0n1_part0_r[35]};
-            unused_viewport_product0_l0n2_part0_r <=
-                {1'b0, unused_viewport_product0_term40_w[68 +: 26]} + {1'b0,
-                unused_viewport_product0_term50_w[68 +: 26]};
-            viewport_product0_l0n2_hold0_r <= {unused_viewport_product0_l0n2_part0_r[25:0]};
-            unused_viewport_product0_l1n0_part0_r <=
-                {1'b0, unused_viewport_product0_l0n0_w[0 +: 35]} + {1'b0,
-                unused_viewport_product0_l0n1_w[0 +: 35]};
-            viewport_product0_l1n0_low0d0_r <= unused_viewport_product0_l1n0_part0_r[34:0];
-            viewport_product0_l1n0_low0d1_r <= viewport_product0_l1n0_low0d0_r;
-            viewport_product0_l1n0_a1d0_r <= unused_viewport_product0_l0n0_w[35 +: 35];
-            viewport_product0_l1n0_b1d0_r <= unused_viewport_product0_l0n1_w[35 +: 35];
-            unused_viewport_product0_l1n0_part1_r <=
-                {1'b0, viewport_product0_l1n0_a1d0_r} + {1'b0, viewport_product0_l1n0_b1d0_r} +
-                {35'b0, unused_viewport_product0_l1n0_part0_r[35]};
-            viewport_product0_l1n0_low1d0_r <= unused_viewport_product0_l1n0_part1_r[34:0];
-            viewport_product0_l1n0_a2d0_r <= unused_viewport_product0_l0n0_w[70 +: 16];
-            viewport_product0_l1n0_a2d1_r <= viewport_product0_l1n0_a2d0_r;
-            viewport_product0_l1n0_b2d0_r <= unused_viewport_product0_l0n1_w[70 +: 16];
-            viewport_product0_l1n0_b2d1_r <= viewport_product0_l1n0_b2d0_r;
-            unused_viewport_product0_l1n0_part2_r <=
-                {1'b0, viewport_product0_l1n0_a2d1_r} + {1'b0, viewport_product0_l1n0_b2d1_r} +
-                {16'b0, unused_viewport_product0_l1n0_part1_r[35]};
-            viewport_product0_l1n1_d0_r <= unused_viewport_product0_l0n2_w[68 +: 26];
-            viewport_product0_l1n1_d1_r <= viewport_product0_l1n1_d0_r;
-            viewport_product0_l1n1_d2_r <= viewport_product0_l1n1_d1_r;
-            unused_viewport_product0_l2n0_part0_r <=
-                {1'b0, unused_viewport_product0_l1n0_w[0 +: 35]} + {1'b0,
-                unused_viewport_product0_l1n1_w[0 +: 35]};
-            viewport_product0_l2n0_low0d0_r <= unused_viewport_product0_l2n0_part0_r[34:0];
-            viewport_product0_l2n0_low0d1_r <= viewport_product0_l2n0_low0d0_r;
-            viewport_product0_l2n0_a1d0_r <= unused_viewport_product0_l1n0_w[35 +: 35];
-            viewport_product0_l2n0_b1d0_r <= unused_viewport_product0_l1n1_w[35 +: 35];
-            unused_viewport_product0_l2n0_part1_r <=
-                {1'b0, viewport_product0_l2n0_a1d0_r} + {1'b0, viewport_product0_l2n0_b1d0_r} +
-                {35'b0, unused_viewport_product0_l2n0_part0_r[35]};
-            viewport_product0_l2n0_low1d0_r <= unused_viewport_product0_l2n0_part1_r[34:0];
-            viewport_product0_l2n0_a2d0_r <= unused_viewport_product0_l1n0_w[70 +: 24];
-            viewport_product0_l2n0_a2d1_r <= viewport_product0_l2n0_a2d0_r;
-            viewport_product0_l2n0_b2d0_r <= unused_viewport_product0_l1n1_w[70 +: 24];
-            viewport_product0_l2n0_b2d1_r <= viewport_product0_l2n0_b2d0_r;
-            unused_viewport_product0_l2n0_part2_r <=
-                {1'b0, viewport_product0_l2n0_a2d1_r} + {1'b0, viewport_product0_l2n0_b2d1_r} +
-                {24'b0, unused_viewport_product0_l2n0_part1_r[35]};
-        end
-    end
-
-    // viewport_product1: 94x16, 6 registered APM products; 9 enabled stages.
-    wire [93:0] viewport_product1_a_w;
-    assign viewport_product1_a_w = viewport_adjust1_w;
-    reg [32:0] viewport_product1_pp00_r;
-    wire [93:0] unused_viewport_product1_term00_w;
-    assign unused_viewport_product1_term00_w = {61'b0, viewport_product1_pp00_r} << 0;
-    reg [32:0] viewport_product1_pp10_r;
-    wire [93:0] unused_viewport_product1_term10_w;
-    assign unused_viewport_product1_term10_w = {61'b0, viewport_product1_pp10_r} << 17;
-    reg [32:0] viewport_product1_pp20_r;
-    wire [93:0] unused_viewport_product1_term20_w;
-    assign unused_viewport_product1_term20_w = {61'b0, viewport_product1_pp20_r} << 34;
-    reg [32:0] viewport_product1_pp30_r;
-    wire [93:0] unused_viewport_product1_term30_w;
-    assign unused_viewport_product1_term30_w = {61'b0, viewport_product1_pp30_r} << 51;
-    reg [32:0] viewport_product1_pp40_r;
-    wire [93:0] unused_viewport_product1_term40_w;
-    assign unused_viewport_product1_term40_w = {61'b0, viewport_product1_pp40_r} << 68;
-    reg [24:0] viewport_product1_pp50_r;
-    wire [93:0] unused_viewport_product1_term50_w;
-    assign unused_viewport_product1_term50_w =
-                {{69{viewport_product1_pp50_r[24]}}, viewport_product1_pp50_r} << 85;
-    reg [35:0] unused_viewport_product1_l0n0_part0_r;
-    reg [34:0] viewport_product1_l0n0_low0d0_r;
-    reg [15:0] viewport_product1_l0n0_a1d0_r;
-    reg [15:0] viewport_product1_l0n0_b1d0_r;
-    reg [16:0] unused_viewport_product1_l0n0_part1_r;
-    wire [93:0] unused_viewport_product1_l0n0_w;
-    assign unused_viewport_product1_l0n0_w =
-                {43'b0, {unused_viewport_product1_l0n0_part1_r[15:0],
-                viewport_product1_l0n0_low0d0_r}};
-    reg [35:0] unused_viewport_product1_l0n1_part0_r;
-    reg [34:0] viewport_product1_l0n1_low0d0_r;
-    reg [15:0] viewport_product1_l0n1_a1d0_r;
-    reg [15:0] viewport_product1_l0n1_b1d0_r;
-    reg [16:0] unused_viewport_product1_l0n1_part1_r;
-    wire [93:0] unused_viewport_product1_l0n1_w;
-    assign unused_viewport_product1_l0n1_w =
-                {9'b0, {unused_viewport_product1_l0n1_part1_r[15:0],
-                viewport_product1_l0n1_low0d0_r}, 34'b0};
-    reg [26:0] unused_viewport_product1_l0n2_part0_r;
-    reg [25:0] viewport_product1_l0n2_hold0_r;
-    wire [93:0] unused_viewport_product1_l0n2_w;
-    assign unused_viewport_product1_l0n2_w = {viewport_product1_l0n2_hold0_r, 68'b0};
-    reg [35:0] unused_viewport_product1_l1n0_part0_r;
-    reg [34:0] viewport_product1_l1n0_low0d0_r;
-    reg [34:0] viewport_product1_l1n0_low0d1_r;
-    reg [34:0] viewport_product1_l1n0_a1d0_r;
-    reg [34:0] viewport_product1_l1n0_b1d0_r;
-    reg [35:0] unused_viewport_product1_l1n0_part1_r;
-    reg [34:0] viewport_product1_l1n0_low1d0_r;
-    reg [15:0] viewport_product1_l1n0_a2d0_r;
-    reg [15:0] viewport_product1_l1n0_a2d1_r;
-    reg [15:0] viewport_product1_l1n0_b2d0_r;
-    reg [15:0] viewport_product1_l1n0_b2d1_r;
-    reg [16:0] unused_viewport_product1_l1n0_part2_r;
-    wire [93:0] unused_viewport_product1_l1n0_w;
-    assign unused_viewport_product1_l1n0_w =
-                {8'b0, {unused_viewport_product1_l1n0_part2_r[15:0],
-                viewport_product1_l1n0_low1d0_r, viewport_product1_l1n0_low0d1_r}};
-    reg [25:0] viewport_product1_l1n1_d0_r;
-    reg [25:0] viewport_product1_l1n1_d1_r;
-    reg [25:0] viewport_product1_l1n1_d2_r;
-    wire [93:0] unused_viewport_product1_l1n1_w;
-    assign unused_viewport_product1_l1n1_w = {viewport_product1_l1n1_d2_r, 68'b0};
-    reg [35:0] unused_viewport_product1_l2n0_part0_r;
-    reg [34:0] viewport_product1_l2n0_low0d0_r;
-    reg [34:0] viewport_product1_l2n0_low0d1_r;
-    reg [34:0] viewport_product1_l2n0_a1d0_r;
-    reg [34:0] viewport_product1_l2n0_b1d0_r;
-    reg [35:0] unused_viewport_product1_l2n0_part1_r;
-    reg [34:0] viewport_product1_l2n0_low1d0_r;
-    reg [23:0] viewport_product1_l2n0_a2d0_r;
-    reg [23:0] viewport_product1_l2n0_a2d1_r;
-    reg [23:0] viewport_product1_l2n0_b2d0_r;
-    reg [23:0] viewport_product1_l2n0_b2d1_r;
-    reg [24:0] unused_viewport_product1_l2n0_part2_r;
-    wire [93:0] unused_viewport_product1_l2n0_w;
-    assign unused_viewport_product1_l2n0_w =
-                {unused_viewport_product1_l2n0_part2_r[23:0], viewport_product1_l2n0_low1d0_r,
-                viewport_product1_l2n0_low0d1_r};
-    assign viewport_product1_p2_r = unused_viewport_product1_l2n0_w;
-    always @(posedge clk_i) begin
-        if (pipeline_enable_w[5]) begin
-            viewport_product1_pp00_r <=
-                $signed({1'b0, viewport_product1_a_w[0 +: 17]}) * $signed({1'b0,
-                viewport_product1_b_w[0 +: 16]});
-            viewport_product1_pp10_r <=
-                $signed({1'b0, viewport_product1_a_w[17 +: 17]}) * $signed({1'b0,
-                viewport_product1_b_w[0 +: 16]});
-            viewport_product1_pp20_r <=
-                $signed({1'b0, viewport_product1_a_w[34 +: 17]}) * $signed({1'b0,
-                viewport_product1_b_w[0 +: 16]});
-            viewport_product1_pp30_r <=
-                $signed({1'b0, viewport_product1_a_w[51 +: 17]}) * $signed({1'b0,
-                viewport_product1_b_w[0 +: 16]});
-            viewport_product1_pp40_r <=
-                $signed({1'b0, viewport_product1_a_w[68 +: 17]}) * $signed({1'b0,
-                viewport_product1_b_w[0 +: 16]});
-            viewport_product1_pp50_r <=
-                $signed(viewport_product1_a_w[85 +: 9]) * $signed({1'b0,
-                viewport_product1_b_w[0 +: 16]});
-            unused_viewport_product1_l0n0_part0_r <=
-                {1'b0, unused_viewport_product1_term00_w[0 +: 35]} + {1'b0,
-                unused_viewport_product1_term10_w[0 +: 35]};
-            viewport_product1_l0n0_low0d0_r <= unused_viewport_product1_l0n0_part0_r[34:0];
-            viewport_product1_l0n0_a1d0_r <= unused_viewport_product1_term00_w[35 +: 16];
-            viewport_product1_l0n0_b1d0_r <= unused_viewport_product1_term10_w[35 +: 16];
-            unused_viewport_product1_l0n0_part1_r <=
-                {1'b0, viewport_product1_l0n0_a1d0_r} + {1'b0, viewport_product1_l0n0_b1d0_r} +
-                {16'b0, unused_viewport_product1_l0n0_part0_r[35]};
-            unused_viewport_product1_l0n1_part0_r <=
-                {1'b0, unused_viewport_product1_term20_w[34 +: 35]} + {1'b0,
-                unused_viewport_product1_term30_w[34 +: 35]};
-            viewport_product1_l0n1_low0d0_r <= unused_viewport_product1_l0n1_part0_r[34:0];
-            viewport_product1_l0n1_a1d0_r <= unused_viewport_product1_term20_w[69 +: 16];
-            viewport_product1_l0n1_b1d0_r <= unused_viewport_product1_term30_w[69 +: 16];
-            unused_viewport_product1_l0n1_part1_r <=
-                {1'b0, viewport_product1_l0n1_a1d0_r} + {1'b0, viewport_product1_l0n1_b1d0_r} +
-                {16'b0, unused_viewport_product1_l0n1_part0_r[35]};
-            unused_viewport_product1_l0n2_part0_r <=
-                {1'b0, unused_viewport_product1_term40_w[68 +: 26]} + {1'b0,
-                unused_viewport_product1_term50_w[68 +: 26]};
-            viewport_product1_l0n2_hold0_r <= {unused_viewport_product1_l0n2_part0_r[25:0]};
-            unused_viewport_product1_l1n0_part0_r <=
-                {1'b0, unused_viewport_product1_l0n0_w[0 +: 35]} + {1'b0,
-                unused_viewport_product1_l0n1_w[0 +: 35]};
-            viewport_product1_l1n0_low0d0_r <= unused_viewport_product1_l1n0_part0_r[34:0];
-            viewport_product1_l1n0_low0d1_r <= viewport_product1_l1n0_low0d0_r;
-            viewport_product1_l1n0_a1d0_r <= unused_viewport_product1_l0n0_w[35 +: 35];
-            viewport_product1_l1n0_b1d0_r <= unused_viewport_product1_l0n1_w[35 +: 35];
-            unused_viewport_product1_l1n0_part1_r <=
-                {1'b0, viewport_product1_l1n0_a1d0_r} + {1'b0, viewport_product1_l1n0_b1d0_r} +
-                {35'b0, unused_viewport_product1_l1n0_part0_r[35]};
-            viewport_product1_l1n0_low1d0_r <= unused_viewport_product1_l1n0_part1_r[34:0];
-            viewport_product1_l1n0_a2d0_r <= unused_viewport_product1_l0n0_w[70 +: 16];
-            viewport_product1_l1n0_a2d1_r <= viewport_product1_l1n0_a2d0_r;
-            viewport_product1_l1n0_b2d0_r <= unused_viewport_product1_l0n1_w[70 +: 16];
-            viewport_product1_l1n0_b2d1_r <= viewport_product1_l1n0_b2d0_r;
-            unused_viewport_product1_l1n0_part2_r <=
-                {1'b0, viewport_product1_l1n0_a2d1_r} + {1'b0, viewport_product1_l1n0_b2d1_r} +
-                {16'b0, unused_viewport_product1_l1n0_part1_r[35]};
-            viewport_product1_l1n1_d0_r <= unused_viewport_product1_l0n2_w[68 +: 26];
-            viewport_product1_l1n1_d1_r <= viewport_product1_l1n1_d0_r;
-            viewport_product1_l1n1_d2_r <= viewport_product1_l1n1_d1_r;
-            unused_viewport_product1_l2n0_part0_r <=
-                {1'b0, unused_viewport_product1_l1n0_w[0 +: 35]} + {1'b0,
-                unused_viewport_product1_l1n1_w[0 +: 35]};
-            viewport_product1_l2n0_low0d0_r <= unused_viewport_product1_l2n0_part0_r[34:0];
-            viewport_product1_l2n0_low0d1_r <= viewport_product1_l2n0_low0d0_r;
-            viewport_product1_l2n0_a1d0_r <= unused_viewport_product1_l1n0_w[35 +: 35];
-            viewport_product1_l2n0_b1d0_r <= unused_viewport_product1_l1n1_w[35 +: 35];
-            unused_viewport_product1_l2n0_part1_r <=
-                {1'b0, viewport_product1_l2n0_a1d0_r} + {1'b0, viewport_product1_l2n0_b1d0_r} +
-                {35'b0, unused_viewport_product1_l2n0_part0_r[35]};
-            viewport_product1_l2n0_low1d0_r <= unused_viewport_product1_l2n0_part1_r[34:0];
-            viewport_product1_l2n0_a2d0_r <= unused_viewport_product1_l1n0_w[70 +: 24];
-            viewport_product1_l2n0_a2d1_r <= viewport_product1_l2n0_a2d0_r;
-            viewport_product1_l2n0_b2d0_r <= unused_viewport_product1_l1n1_w[70 +: 24];
-            viewport_product1_l2n0_b2d1_r <= viewport_product1_l2n0_b2d0_r;
-            unused_viewport_product1_l2n0_part2_r <=
-                {1'b0, viewport_product1_l2n0_a2d1_r} + {1'b0, viewport_product1_l2n0_b2d1_r} +
-                {24'b0, unused_viewport_product1_l2n0_part1_r[35]};
-        end
-    end
     // Viewport snapshots stay in a tag-indexed LUTRAM until their consuming stage.
     wire [5:0] viewport_size0_tags_read_w;
     wire [255:0] unused_viewport_size0_tags_data_w;
@@ -2594,4 +1333,134 @@ module edrv32_gpu_project (
         .rd_addr_i(payload_delay6_read_w),
         .rd_data_o(unused_payload_delay6_data_w)
     );
+    // A vertex occupies two enabled issue clocks. Bubbles retain this cadence.
+    reg issue_second_r;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) issue_second_r <= 1'b0;
+        else if (stop_i) issue_second_r <= 1'b0;
+        else if (enable_w) issue_second_r <= !issue_second_r;
+    end
+
+    // Position: X/Y issue together; Z reuses X on the following clock.
+    // Native chains take eight clocks; residue alignment preserves the old eleven.
+    wire [39:0] position_shared_a_w;
+    wire [34:0] position_shared_b_w;
+    reg [39:0] position_z_saved_r;
+    reg [34:0] position_q_saved_r;
+    wire [74:0] position_shared_w;
+    wire [74:0] position_y_w;
+    assign position_shared_a_w = valid_r[9] ? position_input0_r_d9_r : position_z_saved_r;
+    assign position_shared_b_w = valid_r[9] ? restored_r : position_q_saved_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[1]) begin
+            position_z_saved_r <= position_input2_r_d9_r;
+            position_q_saved_r <= restored_r;
+        end
+    end
+    edrv32_apm_gpu_s40xu35 u_position_xz (
+        .clk_i(clk_i),
+        .enable_i(pipeline_enable_w[1]),
+        .a_i(position_shared_a_w),
+        .b_i(position_shared_b_w),
+        .p_o(position_shared_w)
+    );
+    edrv32_apm_gpu_s40xu35 u_position_y (
+        .clk_i(clk_i),
+        .enable_i(pipeline_enable_w[1]),
+        .a_i(position_input1_r_d9_r),
+        .b_i(restored_r),
+        .p_o(position_y_w)
+    );
+    reg [74:0] position_x_d0_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[1]) position_x_d0_r <= position_shared_w;
+    end
+    reg [74:0] position_x_d1_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[1]) position_x_d1_r <= position_x_d0_r;
+    end
+    reg [74:0] position_x_d2_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[1]) position_x_d2_r <= position_x_d1_r;
+    end
+    assign position_product0_p2_r = position_x_d2_r;
+    assign position_product2_p2_r = position_x_d1_r;
+    reg [74:0] position_y_d0_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[1]) position_y_d0_r <= position_y_w;
+    end
+    reg [74:0] position_y_d1_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[1]) position_y_d1_r <= position_y_d0_r;
+    end
+    reg [74:0] position_y_d2_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[1]) position_y_d2_r <= position_y_d1_r;
+    end
+    assign position_product1_p2_r = position_y_d2_r;
+
+    // UV: swap native operand roles (35-bit X, 16-bit Y), U then V.
+    reg [15:0] uv_v_saved_r;
+    reg [34:0] uv_q_saved_r;
+    wire [34:0] uv_shared_a_w;
+    wire [15:0] uv_shared_b_w;
+    wire [50:0] uv_shared_w;
+    assign uv_shared_a_w = valid_r[9] ? restored_r : uv_q_saved_r;
+    assign uv_shared_b_w = valid_r[9] ? uv_input0_r_d9_r : uv_v_saved_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[2]) begin
+            uv_v_saved_r <= uv_input1_r_d9_r;
+            uv_q_saved_r <= restored_r;
+        end
+    end
+    edrv32_apm_gpu_u35xu16 u_uv (
+        .clk_i(clk_i),
+        .enable_i(pipeline_enable_w[2]),
+        .a_i(uv_shared_a_w),
+        .b_i(uv_shared_b_w),
+        .p_o(uv_shared_w)
+    );
+    reg [50:0] uv_u_d0_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[2]) uv_u_d0_r <= uv_shared_w;
+    end
+    assign uv_product0_p2_r = uv_u_d0_r;
+    assign uv_product1_p2_r = uv_shared_w;
+
+    // Viewport: X and Y reach this pool four clocks apart. Delay Y by one clock
+    // to occupy the opposite issue phase, then align both to the old nine clocks.
+    reg [93:0] viewport_y_saved_r;
+    reg [15:0] viewport_height_saved_r;
+    wire [93:0] viewport_shared_a_w;
+    wire [15:0] viewport_shared_b_w;
+    wire [93:0] viewport_shared_w;
+    assign viewport_shared_a_w = valid_r[23] ? viewport_adjust0_w : viewport_y_saved_r;
+    assign viewport_shared_b_w = valid_r[23] ? viewport_product0_b_w : viewport_height_saved_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[3]) begin
+            viewport_y_saved_r <= viewport_adjust1_w;
+            viewport_height_saved_r <= viewport_product1_b_w;
+        end
+    end
+    edrv32_apm_gpu_s94xu16 u_viewport (
+        .clk_i(clk_i),
+        .enable_i(pipeline_enable_w[3]),
+        .a_i(viewport_shared_a_w),
+        .b_i(viewport_shared_b_w),
+        .p_o(viewport_shared_w)
+    );
+    reg [93:0] viewport_x_d0_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[3]) viewport_x_d0_r <= viewport_shared_w;
+    end
+    reg [93:0] viewport_x_d1_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[3]) viewport_x_d1_r <= viewport_x_d0_r;
+    end
+    reg [93:0] viewport_x_d2_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[3]) viewport_x_d2_r <= viewport_x_d1_r;
+    end
+    assign viewport_product0_p2_r = viewport_x_d2_r;
+    assign viewport_product1_p2_r = viewport_x_d1_r;
 endmodule
