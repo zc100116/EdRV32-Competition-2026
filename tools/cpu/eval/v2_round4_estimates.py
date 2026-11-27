@@ -92,8 +92,9 @@ def estimate(base, name):
         lut -= 1125 if base == 'small' else 2235
         ff -= 992
         # 4 reads x 2 write-owner banks; 31-bit FF LVT, youngest write wins.
-        # Four 32-bit bank selects128 + WB bypass128 + decode64 + LVT ctrl32.
-        lut += 128 + 128 + 64 + 32
+        # Bank selects128 + WB bypass128 + decode64 + LVT ctrl32,
+        # plus four 32:1 single-bit owner lookups at eleven LUT each.
+        lut += 128 + 128 + 64 + 32 + 44
         ff += 31 + 64 + 32
         if rf in ('async', 'head'):
             lut += 8 * 32  # Eight 32x32 async LUTRAM copies (not arithmetic tricks).
@@ -104,9 +105,10 @@ def estimate(base, name):
             if rf == 'head':
                 entries = (8 if base == 'full' else 4) + 2
                 # Four source/WB comparisons per queued instruction, each
-                # 5-bit compare3; two owner enables; four F2 LVT muxes11;
-                # local WB distribution32 and four head-owner selects.
-                lut += 12 * entries + 2 * entries + 44 + 32 + 4
+                # 5-bit compare3; two owner enables; local WB distribution32
+                # and four head-owner selects. The 44 LVT lookup LUT move
+                # from D to F2 and are already included in the common budget.
+                lut += 12 * entries + 2 * entries + 32 + 4
                 # Retain both pre-alignment bank owner candidates per source,
                 # plus bank select: five bits/instruction; WB copies14.
                 ff += 5 * entries + 14
@@ -119,7 +121,7 @@ def estimate(base, name):
             critical = max(critical, HDRM + 2 * MUX + ADD32, HFF + 4 * Q)
         if base == 'small' and rf == 'async':
             # Two reads, one write: two copies; no LVT or owner bank mux.
-            lut += (2 * 32 + 64 + 32) - (352 + 256)
+            lut += (2 * 32 + 64 + 32) - (396 + 256)
             ff += 64 - 127
             # One writer needs neither LVT lookup nor owner selection.
             critical = a['period'] - .450
