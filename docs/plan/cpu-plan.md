@@ -148,6 +148,8 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | N-FRZ | 冻结 CPU v0.21（用户 2026-11-08）：RTL 恢复为 9fa3f649，规格回退为 cpu-spec v0.23 / cache-spec v0.14 / cache-testplan v0.6，I$ 数据 IP 回到 64 位 | 协调者 | N-PDS6 | 树与 9fa3f649 一致 | cpu-n16 | [x] 224fb4b7 + 规格提交 |
 | N-SPEC | 投机补偿的流水切分评估（用户 2026-11-08）：C3 + 地址预测 / W 基址 / 编译器重排，ALU 环分簇旁路等，组合 C6-line、C1，估等效跑分；只做模型 | Codex sol（task_283409578182 / ctx_4e278ab607c4） | N-FRZ | 等效跑分比 v0.21 高 ≥5% 才考虑 RTL | task-cpu-spec-eval | [x] 4c11b0cd（分支 zc100116/task-cpu-spec-eval，不合入）：最佳组合 S2+C1+C6-line+L2 估计 141 MHz、等效 CoreMark 0.955×v0.21；无组合 ≥ +5%，CPU 停在 v0.21 |
 | N-SOC | 冻结 CPU 并入整片 SoC，整片时钟目标待定 | — | N-FRZ | 整片 P&R、上板 | — | [ ] 待讨论 |
+| C2-I | CPU v2 整数核架构评估（用户 2026-11-27：作为作品集 IP，自身时序/性能/资源最优）：v0.21+ CPI 栈、5 级双发射等候选、关键环路时序与资源、推荐配置和参数；只做模型和设计记录 | Codex sol（ctx_045f516f7293） | — | `docs/design/2026-11-27-cpu-v2-architecture.md`；test_pipe_model 通过 | zc100116/gpu-dev | [~] 进行中 |
+| C2-F | CPU v2 浮点单元设计：F 必选、D 可配置（用户 2026-11-27），FMA/APM 方案、除法开方、资源与负载加速比、验证方案；只做模型和设计记录 | Codex sol（ctx_dfd9ed38a61e） | 接口待 C2-I | `docs/design/2026-11-27-cpu-v2-fpu.md` | zc100116/gpu-dev | [~] 进行中 |
 
 ## 6. 变更记录
 
