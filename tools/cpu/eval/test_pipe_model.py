@@ -26,6 +26,50 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_round2_divider_operands_ignore_hex_memory_text(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+        from run_v2_round2 import divider_cycles
+        program = {pc: instruction(pc) for pc in range(0, 16, 4)}
+        program[12] = replace(instruction(12, 'div'), bits=0x02c5c533)
+        log = ('core 0: 3 0x00000000 (0x00000013) x11 0x00000100\n'
+               'core 0: 3 0x00000004 (0x00000013) x12 0x00000004\n'
+               'core 0: 3 0x00000008 (0x00000013) mem 0x80000000 0x12345678\n'
+               'core 0: 3 0x0000000c (0x02c5c533) x10 0x00000040\n')
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'spike.log').write_text(log)
+            self.assertEqual(divider_cycles(root, program, list(program), 'radix4'), {3: 17})
+            self.assertEqual(divider_cycles(root, program, list(program), 'early-div'), {3: 8})
+            self.assertEqual(divider_cycles(root, program, list(program), 'radix4-early'),
+                             {3: 5})
+
+    def test_round2_rf_wb_address_rejects_live_ex_base(self):
+        stream = [instruction(0, rd=4), instruction(4, 'load', rd=5, sources=(4,)),
+                  instruction(8, 'load', rd=6, sources=(0,)),
+                  instruction(12, sources=(5, 6))]
+        result = run(stream, 'V3s', early_address='rf_wb', perfect_frontend=True,
+                     perfect_prediction=True)
+        self.assertEqual(result['early_loads'], 1)
+        self.assertEqual(result['loads'], 2)
+
+    def test_round2_late_alu_hides_load_but_not_multiply(self):
+        for kind, expected in (('load', 1), ('mul', 0)):
+            stream = [instruction(0, kind, rd=4), instruction(4, rd=5, sources=(4,)),
+                      instruction(8, sources=(5,))]
+            result = run(stream, 'V3s', late_execute='alu', perfect_frontend=True,
+                         perfect_prediction=True, mul_latency=2)
+            self.assertEqual(result['late_alu'], expected)
+
+    def test_round2_division_latency_reduces_real_serial_wait(self):
+        stream = [instruction(pc) for pc in range(0, 32, 4)] + [
+            instruction(32, 'div', rd=4), instruction(36, sources=(4,))]
+        baseline = run(stream, 'V3s', perfect_frontend=True, perfect_prediction=True)
+        fast = run(stream, 'V3s', perfect_frontend=True, perfect_prediction=True,
+                   division_cycles={8: 17})
+        self.assertEqual(baseline['cycles'] - fast['cycles'], 16)
+        self.assertEqual(baseline['instructions'], fast['instructions'])
+
     def test_control_fusion_preserves_prediction_when_entering_second_member(self):
         program = {pc: instruction(pc) for pc in range(0, 128, 4)}
         program[0] = replace(instruction(0, rd=3, sources=(1, 2)), bits=0x0020a1b3)

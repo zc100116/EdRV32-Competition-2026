@@ -288,7 +288,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
              alu_latency=1, shift_latency=None, compare_latency=None,
              decode_split=False, branch_register=False, memory_probe=None,
              line_predictor=False, memory_capture=False, capture_early='registered',
-             csr_latency=None, system_capture=True, issue_width=2):
+             csr_latency=None, system_capture=True, issue_width=2,
+             late_execute=None, division_cycles=None):
     if fusion:
         program, trace = fuse_program(program, trace, fusion, begin, end)
     changes = INORDER_VARIANTS.get(variant, {})
@@ -297,9 +298,9 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     mul_latency = changes.get('mul_latency', mul_latency)
     swap = variant in {'V1', 'V3', 'V3s', 'V3+V4a', 'V3+V4b', 'V3+V5'}
     swap |= changes.get('swap', False)
-    late_backend = variant.startswith('L')
-    late_both = variant in {'L2', 'L2+V5', 'L2b', 'L2b+V5', 'L2s', 'L2s+V5'}
-    late_branch = variant in {'L2b', 'L2b+V5'}
+    late_backend = variant.startswith('L') or bool(late_execute)
+    late_both = bool(late_execute) or variant in {'L2', 'L2+V5', 'L2b', 'L2b+V5', 'L2s', 'L2s+V5'}
+    late_branch = late_execute == 'alu_branch' or variant in {'L2b', 'L2b+V5'}
     late_store = variant in {'L2s', 'L2s+V5'}
     branch_lane = late_backend or variant in {
         'V2', 'V2s', 'V2s+V5', 'V3', 'V3s', 'V3+V4a', 'V3+V4b', 'V3+V5'}
@@ -387,6 +388,16 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 needs.append(ready_in.get(source, 0))
         if not any(needs):
             return True, False, False
+        if late_execute:
+            # Only hide an existing load dependency; no same-pair RAW forwarding.
+            if older and older.rd and older.rd in instruction.sources:
+                return False, False, False
+            if any(wait_kind.get(s, 0) == 2 for s in instruction.sources):
+                return False, False, False
+            if instruction.kind == 'alu' and operation(instruction) not in {
+                    'addi', 'add', 'sub', 'andi', 'ori', 'xori', 'and', 'or', 'xor',
+                    'slt', 'sltu', 'slti', 'sltiu'}:
+                return False, False, False
         if (instruction.kind == 'alu' and (lane == 1 or late_both)) or (
                 instruction.kind in late_controls and late_branch):
             if max(needs) <= 1:
@@ -808,7 +819,14 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     if instruction.kind == 'load' and early_address:
                         base = instruction.sources[-1] if instruction.sources else 0
                         recent = last_writes.get(base)
-                        if early_address == 'v017':
+                        if early_address == 'rf_wb':
+                            early = not base or not any(
+                                base in destinations(r.instruction) for r in issued + e + m)
+                            early &= not base or not any(
+                                base in destinations(r.instruction) and
+                                (r.result_latency or latencies.get(r.instruction.kind, 1)) > 3
+                                for r in w)
+                        elif early_address == 'v017':
                             if decode_split:
                                 # Query is in D2 next cycle: present D2/E/M become E/M/W.
                                 early = early_address_allowed(
@@ -839,7 +857,10 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     previous_instruction = instruction, tick
                     issued.append(record)
                 if any(r.instruction.kind == 'div' for r in issued):
-                    division_left = 33
+                    record = next(r for r in issued if r.instruction.kind == 'div')
+                    division_left = (division_cycles[record.trace_index] if
+                                     division_cycles is not None and record.trace_index >= 0
+                                     else 33)
 
         # F2 can append the arriving hit and drain two instructions into IB in the same cycle.
         decision = m_redirect or redirect or d_redirect
