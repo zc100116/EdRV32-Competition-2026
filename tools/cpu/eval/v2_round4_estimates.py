@@ -38,6 +38,7 @@ def estimate(base, name):
     rf = c.get('rf', name.removeprefix('rf-') if name.startswith('rf-') else None)
     predictor_bits = 21004 if base == 'full' or name == 'tournament4096' else 8204
     metadata_bits = 0
+    training_bits = 0
     if name == 'tournament4096' and base == 'default':
         lut += 1010
         ff += 186
@@ -56,8 +57,15 @@ def estimate(base, name):
         lut += 2 * key_width
         ff += max(HISTORIES[count]) + count * 32 + 64
         drm += (count + 1) * .5  # Separate base/tag RAM18K allocations.
+        # Independent D-stage current-row reads use a mirrored 1R1W training
+        # copy. One pending resolved update is forwarded to F1/D, including
+        # the occasional simultaneous older-M/younger-E resolution.
+        lut += 64 * count
+        ff += 32 * count + 64
+        drm += (count + 1) * .5
+        training_bits = 8192 + count * entries * 16
         predictor_bits = 8192 + 12 + 8192 + count * entries * 16 + max(HISTORIES[count])
-        critical = max(critical, HDRM + 4 * Q, HFF + 3 * Q)
+        critical = max(critical, HDRM + 4 * Q, HFF + 6 * Q)
     if bank:
         # Two 32-bit data banks, two parity-banked BTB lookups, registered
         # address+4 and lane exchange; same data capacity and one target/group.
@@ -133,6 +141,7 @@ def estimate(base, name):
     period = critical + .450
     return dict(lut=lut, ff=ff, drm=drm, apm=a['apm'], predictor_bits=predictor_bits,
                 metadata_bits=metadata_bits,
+                training_bits=training_bits,
                 clm=math.ceil(max(lut / 4, ff / 8) / .70), period=period,
                 plan=5 * math.floor(1000 / period / 1.05 / 5),
                 stress=5 * math.floor(1000 / period / 1.182 / 5))
@@ -170,7 +179,8 @@ def tables(root):
                   f'{a["period"]:.3f}；{a["plan"]}/{a["stress"]} | ' + '/'.join(
                       f'{p * a[k]:.2f}' for k in ('plan', 'stress')) + ' | ' + '/'.join(
                       f'{p * a[k] / (a["lut"] / 1000):.2f}' for k in ('plan', 'stress')) + ' |')
-        print('\n| 方案 | 状态/新增查询侧表位（含F1，不含BTB/RAS） | CM/视觉/LVGL控制误预测（方向） | '
+        print('\n| 方案 | 状态/查询侧表/训练副本bit（含F1，不含BTB/RAS） | '
+              'CM/视觉/LVGL控制误预测（方向） | '
               'pair_one CPI CM/视觉/LVGL | F2纠正 CM/视觉/LVGL |')
         print('|---|---:|---:|---:|---:|')
         for name in ('base', 'tournament4096', 'tage3-128', 'tage3-256', 'tage3-512',
@@ -179,7 +189,8 @@ def tables(root):
             rows = [by[w, base, name] for w in ('coremark', 'vision', 'render')]
             a = estimate(base, name)
             misses = '/'.join(f'{r["control_misses"]} ({r["direction_misses"]})' for r in rows)
-            print(f'| {name} | {a["predictor_bits"]}/{a["metadata_bits"]} | ' +
+            print(f'| {name} | {a["predictor_bits"]}/{a["metadata_bits"]}/'
+                  f'{a["training_bits"]} | ' +
                   misses + ' | ' +
                   '/'.join(f'{r["slots_pair_one"] / (2 * r["instructions"]):.6f}' for r in rows) +
                   ' | ' + '/'.join(str(r['f2_corrections']) for r in rows) + ' |')

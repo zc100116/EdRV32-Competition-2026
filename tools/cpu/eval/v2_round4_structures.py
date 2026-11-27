@@ -117,7 +117,9 @@ class LoadMerge:
 
     Hit-only D$ as in round three. No MMIO merging; both accesses must fit the
     same aligned RAM read chunk. A mismatch serializes the second read with one
-    full-pipeline hold cycle. Paired loads both have ordinary latency two.
+    full-pipeline hold cycle. The registered variant gives both loads latency
+    two; preserve_early reuses an older ID-addressed E read after EX qualifies
+    the younger address, with its longer EX timing budget reported separately.
     """
     def __init__(self, addresses, read_bytes, preserve_early=False):
         self.addresses = addresses
