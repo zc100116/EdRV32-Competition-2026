@@ -107,3 +107,29 @@ git diff --check
   用模型表宣布满足资源目标。完整结论见设计记录末尾第8节“M-6”。
 
 没有改RTL，不运行无关RTL lint或CPU回归；没有改规格、驱动或加入运行保护路径。
+
+## M-7 性能档压缩、窄流接口和双帧槽
+
+```sh
+python3 tools/gpu/study/m7_model.py
+PYTHONPYCACHEPREFIX=build/gpu/m7/pycache python3 -m py_compile tools/gpu/study/m7_model.py
+git diff --check
+```
+
+输出 `build/gpu/m7/m7-model.json` 和 `tables.md`；单进程、标准库，不重跑C模拟器，
+不依赖M-6生成物。输入锁定M-6第8.7节的资源、场景计数与纹理微码周期；源码HEAD写入JSON。
+
+- 对11/16属性各跑512三角形，在M-6依赖图上为乘/加/规格化/输入读增加同步取数一拍，
+  保持算术口/II和4在途，输出首包、平均及最小/最大退休间隔；不模拟物理bank冲突。
+- 迁setup 3输入bank/32 scratch bank和SFU16 bank；按512×72 SDP宽度切分，
+  不按总bit容量除36K。RF 3R1W复制和同拍结果旁路单列为128bit备选。
+- 逐项分离流数据的可缩额与固定控制，比较256/128/64bit资源和位宽×相对长度布线代理；
+  xbar边界转换、双帧控制的面积已加回。命中采样口、算术精度不缩。
+- 帧表区分首帧串行、`max(G,P)+D`跨帧规划值和`max(G,P,D)`理想下界，
+  共48条（3档×4负载×UI开关×10%/50% miss）；共享DDR收费一次。
+  UI补计M-6附加式遗漏的4000×16B bin流量，双槽容量按4KiB对齐另算。
+- 输出GPU/整片CLM、LR要求的CLMS最低/70%规划当量；不冒充实际CLMS占用。
+
+主候选43570 LUT/44549 FF/147 APM/123 DRM/6487 LR；仅为结构估算，±40%原始
+分配额误差仍有效。建议GPU DRM规划额160；未落实宽深/端口的v2 LR预算明确保留，
+不凭空迁移扣面积。模型条件、GL同步语义候选及所有未验证事项见设计记录第9节。
