@@ -12,7 +12,7 @@
 | 顶层 | `edrv32_fpga_board_gpu_top`（`fpga/rtl/edrv32_fpga_board_gpu_top.v`） |
 | 约束 | `fpga/constraints/edrv32_fpga_board_gpu_top.fdc` |
 | 导入脚本 | `fpga/scripts/import_board_gpu_top.tcl` |
-| 程序 | `src/gpu_hello.elf`（旋转立方体 + 100 个弹跳精灵 + 帧号文字 + 方波声音）；`src/gpu_render.elf`（ST-10 渲染测试）；`src/gpu_audio.elf`（ST-12 放音测试）。三者都链接在 DDR，用 BIOS 的 UART 或 ETH 加载 |
+| 程序 | `src/gpu_hello.elf`（旋转立方体 + 100 个弹跳精灵 + 帧号文字 + 方波声音）；`src/gpu_render.elf`（ST-10 渲染测试）；`src/gpu_audio.elf`（ST-12 放音测试）；`src/gpu_test.elf`（四合一测试游戏，第 6j 节）。四者都链接在 DDR，用 BIOS 的 UART 或 ETH 加载 |
 | 准备报告 | `docs/reports/2026-11-24-board-gpu-prep.md`（IP 清单、PLL、引脚、跨时钟域对照） |
 
 ## 3. 环境
@@ -232,6 +232,22 @@
   5. APM 级联或 APM 列放置相关的告警或错误，回传原文。
 - 上板步骤（第 5 节第 5～8 步）本轮先不做，等协调者看过布线结果再定。
 
+## 6j. 第 11 轮 B 组上板（2026-11-27，用户决定带违例试跑）
+
+- **用哪个比特流**：第 11 轮 B 组工程 `G:/codex_project/EdRV32-FPGA/board_gpu_round11_B/board_gpu_round11_B.pds`。还没生成比特流的话，在该工程里只做 Generate Bitstream，不要重新综合或布线。A 组如果还在跑，不用等它。
+- **已知违例**（Slow Corner，按目标频率运行）：clk_gpu 目标 180 MHz、估算 135 MHz（WNS −1.852 ns）；clk_sys 目标 125 MHz、估算 109 MHz（WNS −1.152 ns）；clk_mem 目标 125 MHz、估算 114 MHz（WNS −0.764 ns）；`clk_rgmii_ref → clk_eth` hold −0.361 ns。所以画面错乱、死机、ETH 不通都可能出现。这次的目的就是看会出什么现象，**照实记录，不要改工程或参数重跑**。
+- **ETH 不通时**：程序改用 BIOS 的 UART 加载；游戏可以只用板上 4 个按键操作。把 ETH 失败时的串口输出原文记下来。
+- **步骤**：
+  1. 第 5 节第 5～8 步照做（BIOS、`gpu_render.elf`、`gpu_audio.elf`、`gpu_hello.elf`）。任何一步卡住或死机，记下现象和串口输出，按板上复位后继续下一步。
+  2. **新增：加载 `src/gpu_test.elf`**（四合一测试游戏，`zc100116/gpu-dev` 上的 `sw/apps/gpu_test`，链接在 DDR，入口 0x8000_0000）。开机菜单用左右键选择，enter 进入，bit3（ETH 为 Esc）回到菜单。四个场景依次进入：
+     - 2D：Prism Patrol（弹幕射击，自动开火，左右移动）；
+     - 3D：Candy Canyon（峡谷穿环飞行）；
+     - 2D：棱炉地宫（肉鸽地牢；bit0/bit1 转向、自动前进，bit2 短按翻滚）；
+     - 3D：云脊漫游（岛屿探索；bit0/bit1 转向、默认前进，bit2 短按停驻）。
+  3. 每个场景玩 1～2 分钟，各录一段约 30 秒的视频。记录：画面是否正常（错乱、闪烁、缺块、花屏）、是否卡死、左下角那一行的 FPS 和 CPU/GPU 耗时数字（拍照或抄下）、有无声音。
+  4. 在 Prism Patrol 和 Candy Canyon 里各试一次控制菜单（enter 打开），把“模式”切到压测，记下 FPS 数字后回到正常模式。
+- **回传**：`uart/round11B-<步骤>.log`、`photo/round11B-*`、`video/round11B-*`（单个视频超过 100 MB 的只写 Windows 本地路径，不提交）；result.md 的“上板”表按步骤填写结果和观察，`gpu_test` 四个场景各占一行。
+
 ## 7. 通过判据
 
 - 布局布线完成（时序不满足也要完整回传报告，不判失败）。
@@ -272,6 +288,10 @@
 | 6 gpu_render | | |
 | 7 gpu_audio | | |
 | 8 gpu_hello | | |
+| 6j gpu_test Prism Patrol | | |
+| 6j gpu_test Candy Canyon | | |
+| 6j gpu_test 棱炉地宫 | | |
+| 6j gpu_test 云脊漫游 | | |
 
 ## 问题与偏离
 ```
