@@ -160,3 +160,18 @@ git diff --check
 最小已评估达标档53066 LUT/53052 FF/151 APM/215 DRM/5719 LR：D1为29.750拍，
 11属性setup为29.714拍，均在150MHz超过5M/s；quad开为54029 LUT/54973 FF。
 周期为条件排程模型、资源为结构估算（非PDS），具体条件与待定项见设计记录第10节。
+
+## M-9 DDR流量与分块/条带选择
+
+```sh
+python3 -B tools/gpu/study/m9_model.py
+PYTHONPYCACHEPREFIX=build/gpu/m9/pycache python3 -m py_compile tools/gpu/study/m9_model.py
+git diff --check
+```
+
+标准库轻量单进程，输出`build/gpu/m9/m9-model.json`和`tables.md`，不需要前轮生成物。
+按M-7宽度资源加回W256，对比M-8基线、64B顶点/逐tile setup、2/3/4条重放、
+位置先行及M-8专用setup；分别报告v=3/1和冷读/理想tile重用，不将cache假设冒充trace。
+带宽1.0/1.5/1.8GB/s、150/200MHz的几何上限与1k/5k/10k帧时间均可复现。
+JSON另含首帧串行/理想下界、同比过绘；所有结果是模型/资源估算，条件见设计记录第11节。
+尤其29.75拍的单位是顶点，不能据此宣称独立三角形5M/s；未修改RTL、规格或驱动。
