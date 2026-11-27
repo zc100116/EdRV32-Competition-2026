@@ -7,6 +7,7 @@
 
 ```sh
 . ~/.local/opt/edrv32/env.sh
+python3 tools/cpu/eval/fpu_timing.py
 python3 tools/cpu/eval/fpu_model.py
 python3 tools/cpu/eval/fpu_resources.py
 python3 tools/cpu/eval/fpu_eval.py run
@@ -21,8 +22,8 @@ python3 tools/cpu/eval/fpu_eval.py measure
 
 依赖：xPack `riscv-none-elf-gcc` 15.2.0（含 newlib、libm、libgcc 及 RV32
 ilp32/ilp32f/ilp32d multilib）、同前缀的 objdump/nm/size、Spike 1.1.1-dev、Python 3
-标准库。本次输入基线为 `f63071ea077abec8eff013b194ec3d27dde2885d`，在包含本目录与
-三个 `fpu_*.py` 的交付提交上执行上述命令；汇总会记录执行时的 git commit 和 GCC
+标准库。C2-F2 输入为第一版 `84c6bb7ff` 与 C2-I `ba4afff65`，工作起点 `069f00855`，在包含本目录与
+四个 `fpu_*.py` 的交付提交上执行上述命令；汇总会记录执行时的 git commit 和 GCC
 版本。`commands.txt` 保存每个 ELF 的原始编译/Spike 命令，不依赖外部下载源码。
 
 每个负载运行三版：`soft`（rv32im/ilp32）、`F`（rv32imf/ilp32f）、`FD`
@@ -54,8 +55,15 @@ Spike 加载本目录 `start.S` 与上一级 `spike.ld`，在 M 模式 RAM 运�
 - `commands.txt`、`build.log`、`debug.cmd`、`console.log`、`spike.log`：复现和原始 trace。
 - `results.json`：实际动态指令分类与各方案的**周期模型估算**。
 
-`build/c2f/results.json` 为汇总，`table.md` 为默认方案的体积/加速比表。
-模型比较统一 FMA、ADD 短路、独立 ADD、共享 FP64、Newton、D II=1，还给出
-3R FRF 与 4 项提交窗口的敏感度。`fpu_model.py` 自检覆盖相关性、双发射、FMA
+`build/c2f/results.json` 为汇总，`table.md` 为默认方案的体积/加速比表，comparison.md、queues.md、
+accounting.md分别为微架构、端口/队列、互斥周期分解表。
+FD 同一 trace 比较统一 FMA、ADD/MUL 旁路、独立 ADD、共享 FP64、Newton、
+D II=1 与串行复用 S 的 D；F 版只比较端口/队列，不运行无关 FD 微架构替代。
+默认 2R、8 项，另给出 3R 和 16 项敏感度；NONE 使用整数-only 4 项。
+另给出仅末级/提交头旁路、禁止队列任意项转发的8/16项周期对照，
+结果多读副本的LUTRAM开销由fpu_resources.py计算；head-only.md为对照表。
+results.json 的 components 是按实际日程互斥计数的 integer/structure/dependency/
+writeback/fd_beat，五项之和等于 cycles；重叠等待不重复相加。
+fpu_timing.py 只读导入 C2-I 常数，打印逐段组成和估算 ns。`fpu_model.py` 自检覆盖相关性、双发射、FMA
 读相位、长操作并行、LSU 双 beat、写回/尾端竞争；`fpu_resources.py` 验证 APM
 分块完整积并打印资源公式的结果。它们都不替代 SoftFloat/TestFloat 的 RTL 验证。

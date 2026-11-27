@@ -86,17 +86,76 @@ def measure(workload, arch):
     (out / 'size.txt').write_text(size)
     counts = [int(v) for v in size.splitlines()[1].split()[:3]]
     if arch == 'soft':
-        baseline = simulate(program, trace)
+        baseline = simulate(program, trace, queue_depth=4)
         results = {scheme: baseline for scheme in SCHEMES}
+        results.update(bypass_3r=baseline, bypass_q16=baseline, bypass_3r_q16=baseline,
+                       head_only_q8=baseline, head_only_q16=baseline)
     else:
-        results = {scheme: simulate(program, trace, scheme) for scheme in SCHEMES}
-    results['bypass_3r'] = (baseline if arch == 'soft'
-                            else simulate(program, trace, 'bypass', reads=3))
-    results['bypass_q4'] = simulate(program, trace, 'bypass', queue_depth=4)
+        baseline = simulate(program, trace)
+        results = {'bypass': baseline}
+        # Architecture alternatives are compared on the same FD binary.
+        for scheme in SCHEMES:
+            if scheme != 'bypass':
+                results[scheme] = simulate(program, trace, scheme) if arch == 'FD' else baseline
+        fused = any(program[pc].name.startswith(('fmadd.', 'fmsub.', 'fnmadd.', 'fnmsub.'))
+                    for pc in set(trace))
+        results['bypass_3r'] = simulate(program, trace, reads=3) if fused else baseline
+        results['bypass_q16'] = simulate(program, trace, queue_depth=16)
+        results['bypass_3r_q16'] = (simulate(program, trace, reads=3, queue_depth=16)
+                                      if fused else results['bypass_q16'])
+        fp_sources = any(any(r.startswith('f') for r in program[pc].sources)
+                         for pc in set(trace))
+        results['head_only_q8'] = (simulate(program, trace, queue_forward=False)
+                                   if fp_sources else baseline)
+        results['head_only_q16'] = (simulate(program, trace, queue_depth=16,
+                                            queue_forward=False) if fp_sources
+                                    else results['bypass_q16'])
     result = dict(workload=workload, arch=arch, text=counts[0], data=counts[1], bss=counts[2],
                   operations=dict(Counter(program[pc].name for pc in trace)), estimates=results)
     (out / 'results.json').write_text(json.dumps(result, indent=2) + '\n')
     return result
+
+
+def write_sensitivity(rows):
+    fd = [row for row in rows if row['arch'] == 'FD']
+    lines = ['|负载（同一FD trace）|统一FMA|旁路|独立ADD|共享D宽核|Newton|D II=1|串行D|',
+             '|---|---:|---:|---:|---:|---:|---:|---:|']
+    for row in fd:
+        keys = ('unified', 'bypass', 'split', 'wide', 'newton', 'parallel_d', 'serial_d')
+        lines.append('|' + row['workload'] + '|' + '|'.join(
+            str(row['estimates'][key]['cycles']) for key in keys) + '|')
+    (OUT / 'comparison.md').write_text('\n'.join(lines) + '\n')
+    lines = ['|负载/配置|2R/8项|2R/16项|3R/8项|3R/16项|16项相对8项减周期|',
+             '|---|---:|---:|---:|---:|---:|']
+    for row in rows:
+        if row['arch'] == 'soft':
+            continue
+        values = [row['estimates'][key]['cycles'] for key in
+                  ('bypass', 'bypass_q16', 'bypass_3r', 'bypass_3r_q16')]
+        lines.append('|' + row['workload'] + '/' + row['arch'] + '|' +
+                     '|'.join(str(value) for value in values) +
+                     f'|{100*(1-values[1]/values[0]):.2f}%|')
+    (OUT / 'queues.md').write_text('\n'.join(lines) + '\n')
+    lines = ['|负载/配置|任意项转发8项|仅末级/头旁路8项|增加周期|任意项转发16项|仅末级/头旁路16项|增加周期|',
+             '|---|---:|---:|---:|---:|---:|---:|']
+    for row in rows:
+        if row['arch'] == 'soft':
+            continue
+        values = [row['estimates'][key]['cycles'] for key in
+                  ('bypass', 'head_only_q8', 'bypass_q16', 'head_only_q16')]
+        lines.append(f'|{row["workload"]}/{row["arch"]}|{values[0]}|{values[1]}|'
+                     f'{100*(values[1]/values[0]-1):.2f}%|{values[2]}|{values[3]}|'
+                     f'{100*(values[3]/values[2]-1):.2f}%|')
+    (OUT / 'head-only.md').write_text('\n'.join(lines) + '\n')
+    lines = ['|负载/配置|C_integer|源捕获/结构|依赖|写回|FD额外beat|总计|',
+             '|---|---:|---:|---:|---:|---:|---:|']
+    for row in rows:
+        result = row['estimates']['bypass']
+        values = [result['components'].get(key, 0) for key in
+                  ('integer', 'structure', 'dependency', 'writeback', 'fd_beat')]
+        lines.append('|' + row['workload'] + '/' + row['arch'] + '|' +
+                     '|'.join(str(value) for value in (*values, result['cycles'])) + '|')
+    (OUT / 'accounting.md').write_text('\n'.join(lines) + '\n')
 
 
 def main():
@@ -126,6 +185,7 @@ def main():
         lines.append(f'|{workload}|{sizes}|{cycles[0]}|{cycles[1]} / {cycles[0]/cycles[1]:.2f}×|'
                      f'{cycles[2]} / {cycles[0]/cycles[2]:.2f}×|')
     (OUT / 'table.md').write_text('\n'.join(lines) + '\n')
+    write_sensitivity(rows)
 
 
 if __name__ == '__main__':

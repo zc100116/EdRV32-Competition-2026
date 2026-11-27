@@ -4,6 +4,7 @@
 """Print explicit datapath and RAM estimates; excludes the C2-I integer-core baseline."""
 from math import ceil, log2
 from random import Random
+from v2_estimates import estimate
 
 
 def datapath(p):
@@ -12,7 +13,7 @@ def datapath(p):
     # add/sign logic, rounding, control/forward muxes, recurrence, simple ops.
     lut = (2*width*ceil(log2(width)) + 3*p*ceil(log2(p)) + 6*p
            + 3*width + p + 600 + 6*(p+4) + 6*p)
-    ff = (ceil(width/36)+3)*width + 5*p + 256 + 3*(p+4) + 128
+    ff = (ceil(width/84)+2)*width + 5*p + 256 + 3*(p+4) + 128
     return lut, ff
 
 
@@ -47,30 +48,63 @@ def verify_cascade():
     print('PASS: 2006 exact unsigned products, including the zero-shift D cascade stage')
 
 
+def resources(fmt, depth=8, reads=2, scheme='bypass', queue_forward=True):
+    """Increment from integer-only four-entry FF queue; RAM LUTs counted once."""
+    if fmt == 'NONE':
+        return dict(logic=0, ff=0, apm=0, ram=0, bits=0)
+    width = 32 if fmt == 'F' else 64
+    precisions = (24,) if fmt == 'F' else (24, 53)
+    if scheme == 'wide':
+        precisions = (53,)
+    logic = sum(datapath(p)[0] for p in precisions)
+    ff = sum(datapath(p)[1] + sum(cascade(p)[1:]) for p in precisions)
+    apm = sum(len(cascade(p)[0]) for p in precisions)
+    if scheme == 'unified':
+        logic -= 200 * len(precisions)
+        ff -= 96 * len(precisions)
+    if scheme == 'split':
+        logic += datapath(24)[0] // 3
+        ff += datapath(24)[1] // 3
+    if scheme == 'serial_d':
+        apm = 2
+        ff -= sum(cascade(53)[1:]) - (106 + 96)
+    # C2-I two interleaved banks, result+PC; no redundant FP-only completion RAM.
+    copies = reads + 1 if queue_forward else 1
+    ram = reads * width + 2 * (copies * width + 32)
+    bits = reads * 32 * width + depth * (copies * width + 32)
+    tag = ceil(log2(depth))
+    scoreboard_ff = 32 * (1 + tag)
+    scoreboard_lut = 32 * (1 + tag) + 10 * depth
+    logic += 6 * (width + 32) + scoreboard_lut + 48
+    ff += 18 * depth + 32 - 4 * 77 + scoreboard_ff + 10
+    return dict(logic=logic, ff=ff, apm=apm, ram=ram, bits=bits)
+
+
 def main():
     verify_cascade()
-    f_lut, f_ff = datapath(24)
-    d_lut, d_ff = datapath(53)
+    base = estimate('V5-default')
     for p in (24, 53):
         terms, src, residual = cascade(p)
-        print(f'p={p}: weights={[t[0] for t in terms]}, APM={len(terms)}, '
-              f'multiply latency={len(terms)+2}, source FF={src}, residual FF={residual}')
-    print('|配置|逻辑 LUT 估算|CLM FF 估算|APM|分布式 RAM 物理位/逻辑位|LUTRAM 单元估算|')
-    print('|---|---:|---:|---:|---:|---:|')
-    print('|无 FPU（增量）|0|0|0|0/0|0|')
-    # All APM cascade alignment stays in FF: conservative, no assumed packing.
-    f_align = sum(cascade(24)[1:])
-    d_align = sum(cascade(53)[1:])
-    for name, width, lut, ff, apm in (
-            ('F', 32, f_lut, f_ff+f_align, 2),
-            ('F+D', 64, f_lut+d_lut, f_ff+d_ff+f_align+d_align, 14)):
-        # 32xFLEN RF, two replicas; 16x(FLEN+5) completion RAM, three replicas.
-        cells = 2*width + 3*(width+5)
-        logical_bits = 2*32*width + 3*16*(width+5)
-        print(f'|{name}|{lut}|{ff}|{apm}|{cells*64}/{logical_bits}|{cells}|')
-    print(f'额外完整 FADD 管线（split）≈ LUT {datapath(24)[0]//3}, '
-          f'FF {datapath(24)[1]//3}；共享 FP64（wide）≈ LUT {d_lut}, '
-          f'FF {d_ff+d_align}, APM 12。')
+        print(f'p={p}, L/Q={datapath(p)}, weights={[t[0] for t in terms]}, '
+              f'APM={len(terms)}, internal cycles={len(terms)+2}, '
+              f'external source/residual FF={src}/{residual}')
+    print('|配置/队列|增量总LUT/逻辑LUT|增量FF|增量APM|LUTRAM/逻辑bit|增量CLM|CPU LUT/FF/APM/CLM|')
+    print('|---|---:|---:|---:|---:|---:|---|')
+    for fmt, depth in (('NONE', 4), ('F', 8), ('F', 16), ('FD', 8), ('FD', 16)):
+        row = resources(fmt, depth)
+        lut = row['logic'] + row['ram']
+        clm = ceil(max(lut / 4, row['ff'] / 8) / .70)
+        total_lut, total_ff = base['lut'] + lut, base['ff'] + row['ff']
+        total_clm = ceil(max(total_lut / 4, total_ff / 8) / .70)
+        print(f'|{fmt}/{depth}|{lut}/{row["logic"]}|{row["ff"]}|{row["apm"]}|'
+              f'{row["ram"]}/{row["bits"]}|{clm}|'
+              f'{total_lut}/{total_ff}/{base["apm"]+row["apm"]}/{total_clm}|')
+    for fmt in ('F', 'FD'):
+        for reads in (2, 3):
+            print(fmt, f'{reads}R head-only:',
+                  resources(fmt, reads=reads, queue_forward=False))
+    for scheme in ('unified', 'bypass', 'split', 'wide', 'serial_d'):
+        print(scheme, 'FD/8:', resources('FD', scheme=scheme))
 
 
 if __name__ == '__main__':
