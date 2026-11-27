@@ -10,7 +10,7 @@ from analyze import Instruction
 from pipe_model import (INORDER_VARIANTS, Predictor, Record, SLOT_CAUSES, fill_ib,
                         simulate, early_address_allowed, lcb_allowed)
 from collections import deque
-from v2_round4_structures import LoadMerge, RamTage, fold
+from v2_round4_structures import LoadMerge, QueuedOwners, RamTage, fold
 
 
 def instruction(pc, kind='alu', rd=0, sources=(), size=4, target=0):
@@ -27,6 +27,23 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_round4_queued_lvt_tracks_wb_while_head_waits(self):
+        rf = QueuedOwners()
+        rf.write([(0, 4, 10), (1, 5, 20)])
+        head = rf.enqueue((4, 5, 0))
+        for value in range(4):
+            bank = value & 1
+            writes = [(bank, 4, 30 + value), (1 - bank, 5, 40 + value)]
+            self.assertEqual(rf.read(head, writes), [30 + value, 40 + value, 0])
+            rf.write(writes)
+            self.assertEqual(rf.read(head), [30 + value, 40 + value, 0])
+        writes = [(0, 4, 100), (1, 4, 200)]
+        self.assertEqual(rf.read(head, writes)[0], 200)
+        rf.write(writes)
+        incoming = rf.enqueue((4, 5))
+        self.assertEqual(rf.read(head)[0], 200)
+        self.assertEqual(rf.read(incoming), [200, 43])
+
     def test_round4_sync_rf_qualifies_early_address_at_d2(self):
         prefix = [instruction(pc) for pc in range(0, 24, 4)]
         producer = [instruction(24, rd=4), instruction(28)]

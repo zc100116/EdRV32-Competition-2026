@@ -13,6 +13,13 @@ from v2_round3_estimates import estimate as third
 from v2_round2_estimates import estimate as second
 from v2_round4_structures import HISTORIES
 
+# These retain the exact asynchronous RF cycle model; only placement and
+# queued-owner tracking differ. Explicit aliases never substitute missing data.
+HEAD_ALIASES = {'rf-head': 'rf-async'}
+for number in (3, 4, 5):
+    HEAD_ALIASES[f'combo{number}-head'] = f'combo{number}'
+    HEAD_ALIASES[f'combo{number}-zba-head'] = f'combo{number}-zba'
+
 
 def estimate(base, name):
     a = third('default2-early-div' if base == 'default' else 'full2-no-late',
@@ -20,7 +27,10 @@ def estimate(base, name):
     if base == 'small':
         old = second('small2-early-div')
         a.update(lut=old['lut'], ff=old['ff'], period=old['probe_period_ns'])
-    c = EXPERIMENTS[name]
+    source = HEAD_ALIASES.get(name, name)
+    c = dict(EXPERIMENTS[source])
+    if name in HEAD_ALIASES:
+        c['rf'] = 'head'
     lut, ff, drm = a['lut'], a['ff'], a['drm']
     critical = a['period'] - .450
     tage = c.get('tage')
@@ -85,12 +95,24 @@ def estimate(base, name):
         # Four 32-bit bank selects128 + WB bypass128 + decode64 + LVT ctrl32.
         lut += 128 + 128 + 64 + 32
         ff += 31 + 64 + 32
-        if rf == 'async':
+        if rf in ('async', 'head'):
             lut += 8 * 32  # Eight 32x32 async LUTRAM copies (not arithmetic tricks).
             # Assumed async RAM read1.2 + route0.5; LVT/bank/WB and ID AGU.
             # LVT is a 31-bit FF array with four 32:1 owner reads. Its
             # three mux levels are parallel with RAM, then owner/WB/AGU.
             critical = max(critical, HFF + max(1.700, 3 * MUX) + 2 * MUX + ADD32)
+            if rf == 'head':
+                entries = (8 if base == 'full' else 4) + 2
+                # Four source/WB comparisons per queued instruction, each
+                # 5-bit compare3; two owner enables; four F2 LVT muxes11;
+                # local WB distribution32 and four head-owner selects.
+                lut += 12 * entries + 2 * entries + 44 + 32 + 4
+                # Retain both pre-alignment bank owner candidates per source,
+                # plus bank select: five bits/instruction; WB copies14.
+                ff += 5 * entries + 14
+                critical = max(a['period'] - .450,
+                               HFF + 1.700 + 2 * MUX + ADD32,
+                               HDRM + 3 * MUX + MUX)
         else:
             drm += 4  # Eight dedicated RAM18K macros, severe shallow-depth waste.
             ff += 128 + 80  # Four read outputs + added decode/operand stage.
@@ -111,10 +133,15 @@ def estimate(base, name):
 
 
 def load(root):
-    return {(r['workload'], r['base'], r['name']): r
+    rows = {(r['workload'], r['base'], r['name']): r
             for w in ('coremark', 'vision', 'render')
             for line in (root / (w + '.jsonl')).read_text().splitlines()
             if (r := json.loads(line))}
+    for w in ('coremark', 'vision', 'render'):
+        for base in ('default', 'full'):
+            for name, source in HEAD_ALIASES.items():
+                rows[w, base, name] = dict(rows[w, base, source], name=name)
+    return rows
 
 
 def tables(root):
@@ -124,7 +151,7 @@ def tables(root):
         print('| 方案 | CM/视觉/LVGL周期 | ΔCPI CM/视觉/LVGL | CM/MHz | '
               'LUT/FF/CLM | DRM/APM | ns；F规划/压力 | P×F规划/压力 | P×F/kLUT规划/压力 |')
         print('|---|---:|---:|---:|---:|---:|---:|---:|---:|')
-        for name in EXPERIMENTS:
+        for name in (*EXPERIMENTS, *HEAD_ALIASES):
             rows = [by[w, base, name] for w in ('coremark', 'vision', 'render')]
             refs = [by[w, base, 'base'] for w in ('coremark', 'vision', 'render')]
             a = estimate(base, name)

@@ -10,6 +10,44 @@ from ooo_model import memory_width
 HISTORIES = {3: (4, 16, 64), 4: (4, 12, 32, 96), 5: (4, 10, 24, 60, 144)}
 
 
+class QueuedOwners:
+    """Functional contract for F2 LVT predecode and WB-snooped queued owners.
+
+    Each entry retains owners while waiting in IB. Two writes are applied in
+    age order; current WB data bypasses RAM, including when owners change at
+    that edge. Physical F2 bank-alignment replicas are a timing/area budget.
+    """
+    def __init__(self):
+        self.live = [0] * 32
+        self.banks = [[None] * 32 for _ in range(2)]
+        self.queue = []
+
+    def enqueue(self, sources):
+        entry = [[reg, self.live[reg]] for reg in sources]
+        self.queue.append(entry)
+        return entry
+
+    def read(self, entry, writes=()):
+        values = []
+        for reg, owner in entry:
+            value = self.banks[owner][reg] if reg else 0
+            for bank, rd, data in writes:
+                if reg and reg == rd:
+                    value = data
+            values.append(value)
+        return values
+
+    def write(self, writes):
+        for bank, rd, data in writes:
+            if rd:
+                self.banks[bank][rd] = data
+                self.live[rd] = bank
+                for entry in self.queue:
+                    for operand in entry:
+                        if operand[0] == rd:
+                            operand[1] = bank
+
+
 def fold(value, width):
     result = 0
     while value:
