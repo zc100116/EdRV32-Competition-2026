@@ -45,9 +45,9 @@ module edrv32_cpu2_tage (
     assign query_pc_w[1] = f1_pc_i + 32'd4;
     reg [95:0] history_r;
     reg [95:0] history_next_w;
-    reg [8:0] fold_index_r [0:3];
-    reg [9:0] fold_tag_r [0:3];
-    reg [8:0] fold_shift_r [0:3];
+    wire [35:0] fold_index_flat_w;
+    wire [39:0] fold_tag_flat_w;
+    wire [35:0] fold_shift_flat_w;
     reg ex_token_r;
     reg mem_token_r;
     reg [35:0] ex_indices_r;
@@ -227,18 +227,18 @@ module edrv32_cpu2_tage (
     );
     wire [63:0] prediction_rows_w [0:1];
     wire [1:0] prediction_base_w [0:1];
-    reg [35:0] f2_indices_r [0:1];
-    reg [39:0] f2_tags_r [0:1];
-    reg [11:0] f2_base_index_r [0:1];
-    reg [3:0] f2_shadow_index_r [0:1];
-    reg [3:0] f2_shadow_tag_r [0:1];
-    reg [3:0] f2_shadow_direction_r [0:1];
-    reg f2_base_shadow_r [0:1];
-    reg f2_base_direction_r [0:1];
+    wire [71:0] f2_indices_flat_w;
+    wire [79:0] f2_tags_flat_w;
+    wire [23:0] f2_base_index_flat_w;
+    wire [7:0] f2_shadow_index_flat_w;
+    wire [7:0] f2_shadow_tag_flat_w;
+    wire [7:0] f2_shadow_direction_flat_w;
+    wire [1:0] f2_base_shadow_flat_w;
+    wire [1:0] f2_base_direction_flat_w;
+    wire [5:0] provider_flat_w;
+    wire [1:0] prediction_flat_w;
+    wire [1:0] alternate_flat_w;
     reg f2_valid_r;
-    reg [2:0] provider_w [0:1];
-    reg prediction_w [0:1];
-    reg alternate_w [0:1];
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i)
             f2_valid_r <= 1'b0;
@@ -251,6 +251,12 @@ module edrv32_cpu2_tage (
     genvar bank;
     generate
         for (table_num = 0; table_num < 4; table_num = table_num + 1) begin : g_table
+            reg [8:0] fold_shift_r;
+            assign fold_shift_flat_w[9*table_num +: 9] = fold_shift_r;
+            reg [9:0] fold_tag_r;
+            assign fold_tag_flat_w[10*table_num +: 10] = fold_tag_r;
+            reg [8:0] fold_index_r;
+            assign fold_index_flat_w[9*table_num +: 9] = fold_index_r;
             localparam LENGTH = (table_num == 0) ? 4 : (table_num == 1) ? 12 :
                 (table_num == 2) ? 32 : 96;
             wire [107:0] history_index_w;
@@ -301,13 +307,13 @@ module edrv32_cpu2_tage (
                 history_shift_w[99 +: 9];
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i) begin
-                    fold_index_r[table_num] <= 9'd0;
-                    fold_tag_r[table_num] <= 10'd0;
-                    fold_shift_r[table_num] <= 9'd0;
+                    fold_index_r <= 9'd0;
+                    fold_tag_r <= 10'd0;
+                    fold_shift_r <= 9'd0;
                 end else begin
-                    fold_index_r[table_num] <= folded_index_w;
-                    fold_tag_r[table_num] <= folded_tag_w;
-                    fold_shift_r[table_num] <= folded_shift_w;
+                    fold_index_r <= folded_index_w;
+                    fold_tag_r <= folded_tag_w;
+                    fold_shift_r <= folded_shift_w;
                 end
             end
             wire [8:0] ex_index_w;
@@ -403,6 +409,22 @@ module edrv32_cpu2_tage (
             assign base_parity_w[bank] = parity_r;
         end
         for (query = 0; query < 2; query = query + 1) begin : g_query
+            reg alternate_w;
+            assign alternate_flat_w[query] = alternate_w;
+            reg prediction_w;
+            assign prediction_flat_w[query] = prediction_w;
+            reg [2:0] provider_w;
+            assign provider_flat_w[3*query +: 3] = provider_w;
+            reg f2_base_direction_r;
+            assign f2_base_direction_flat_w[query] = f2_base_direction_r;
+            reg f2_base_shadow_r;
+            assign f2_base_shadow_flat_w[query] = f2_base_shadow_r;
+            reg [11:0] f2_base_index_r;
+            assign f2_base_index_flat_w[12*query +: 12] = f2_base_index_r;
+            reg [39:0] f2_tags_r;
+            assign f2_tags_flat_w[40*query +: 40] = f2_tags_r;
+            reg [35:0] f2_indices_r;
+            assign f2_indices_flat_w[36*query +: 36] = f2_indices_r;
             wire [31:0] pc_w;
             wire [35:0] indices_w;
             wire [39:0] tags_w;
@@ -419,6 +441,12 @@ module edrv32_cpu2_tage (
             wire unused_pc_w;
             assign unused_pc_w = ^{pc_w[31:21], pc_w[1:0]};
             for (table_num = 0; table_num < 4; table_num = table_num + 1) begin : g_key
+                reg f2_shadow_direction_r;
+                assign f2_shadow_direction_flat_w[4*query+table_num] = f2_shadow_direction_r;
+                reg f2_shadow_tag_r;
+                assign f2_shadow_tag_flat_w[4*query+table_num] = f2_shadow_tag_r;
+                reg f2_shadow_index_r;
+                assign f2_shadow_index_flat_w[4*query+table_num] = f2_shadow_index_r;
                 wire [8:0] index_w;
                 wire [9:0] tag_w;
                 wire [8:0] write_index_w;
@@ -429,9 +457,9 @@ module edrv32_cpu2_tage (
                 wire [9:0] saved_tag_w;
                 wire pending_match_w;
                 wire write_match_w;
-                assign index_w = pc_w[10:2] ^ fold_index_r[table_num];
-                assign tag_w = pc_w[20:11] ^ fold_tag_r[table_num] ^
-                    {1'b0, fold_shift_r[table_num]};
+                assign index_w = pc_w[10:2] ^ fold_index_flat_w[9*table_num +: 9];
+                assign tag_w = pc_w[20:11] ^ fold_tag_flat_w[10*table_num +: 10] ^
+                    {1'b0, fold_shift_flat_w[9*table_num +: 9]};
                 assign indices_w[9*table_num +: 9] = index_w;
                 assign tags_w[10*table_num +: 10] = tag_w;
                 assign write_index_w = write_indices_w[9*table_num +: 9];
@@ -444,53 +472,53 @@ module edrv32_cpu2_tage (
                     (write_index_w == index_w);
                 // F1 index AND tag compare is registered, not placed after the F2 row mux.
                 always @(posedge clk_i) begin
-                    f2_shadow_index_r[query][table_num] <= pending_match_w || write_match_w;
-                    f2_shadow_tag_r[query][table_num] <= pending_match_w ?
+                    f2_shadow_index_r <= pending_match_w || write_match_w;
+                    f2_shadow_tag_r <= pending_match_w ?
                         (pending_row_w[15] && (pending_row_w[14:5] == tag_w)) :
                         (write_row_w[15] && (write_row_w[14:5] == tag_w));
-                    f2_shadow_direction_r[query][table_num] <= pending_match_w ?
+                    f2_shadow_direction_r <= pending_match_w ?
                         pending_row_w[4] : write_row_w[4];
                 end
                 assign row_w = rows_w[16*table_num +: 16];
-                assign saved_tag_w = f2_tags_r[query][10*table_num +: 10];
-                assign hits_w[table_num] = f2_shadow_index_r[query][table_num] ?
-                    f2_shadow_tag_r[query][table_num] :
+                assign saved_tag_w = f2_tags_flat_w[40*query+10*table_num +: 10];
+                assign hits_w[table_num] = f2_shadow_index_flat_w[4*query+table_num] ?
+                    f2_shadow_tag_flat_w[4*query+table_num] :
                     (row_w[15] && (row_w[14:5] == saved_tag_w));
-                assign directions_w[table_num] = f2_shadow_index_r[query][table_num] ?
-                    f2_shadow_direction_r[query][table_num] : row_w[4];
+                assign directions_w[table_num] = f2_shadow_index_flat_w[4*query+table_num] ?
+                    f2_shadow_direction_flat_w[4*query+table_num] : row_w[4];
                 wire unused_row_w;
                 assign unused_row_w = ^{row_w[3:0], pending_row_w[3:0], write_row_w[3:0]};
             end
             always @(posedge clk_i) begin
-                f2_indices_r[query] <= indices_w;
-                f2_tags_r[query] <= tags_w;
-                f2_base_index_r[query] <= base_index_w;
-                f2_base_shadow_r[query] <=
+                f2_indices_r <= indices_w;
+                f2_tags_r <= tags_w;
+                f2_base_index_r <= base_index_w;
+                f2_base_shadow_r <=
                     (pending_next_valid_w && (pending_next_base_index_w == base_index_w)) ||
                     (write_valid_w && (write_base_index_w == base_index_w));
-                f2_base_direction_r[query] <=
+                f2_base_direction_r <=
                     (pending_next_valid_w && (pending_next_base_index_w == base_index_w)) ?
                     pending_next_base_w[1] : write_base_w[1];
             end
             always @(*) begin
-                provider_w[query] = 3'd0;
-                prediction_w[query] = f2_base_shadow_r[query] ? f2_base_direction_r[query] :
+                provider_w = 3'd0;
+                prediction_w = f2_base_shadow_flat_w[query] ? f2_base_direction_flat_w[query] :
                     prediction_base_w[query][1];
-                alternate_w[query] = prediction_w[query];
+                alternate_w = prediction_w;
                 for (select_num = 0; select_num < 4; select_num = select_num + 1) begin
                     if (hits_w[select_num]) begin
-                        alternate_w[query] = prediction_w[query];
-                        prediction_w[query] = directions_w[select_num];
-                        provider_w[query] = select_num[2:0] + 3'd1;
+                        alternate_w = prediction_w;
+                        prediction_w = directions_w[select_num];
+                        provider_w = select_num[2:0] + 3'd1;
                     end
                 end
             end
-            assign f2_prediction_o[query] = prediction_w[query];
-            assign f2_alternate_o[query] = alternate_w[query];
-            assign f2_provider_o[3*query +: 3] = provider_w[query];
-            assign f2_indices_o[36*query +: 36] = f2_indices_r[query];
-            assign f2_tags_o[40*query +: 40] = f2_tags_r[query];
-            assign f2_base_indices_o[12*query +: 12] = f2_base_index_r[query];
+            assign f2_prediction_o[query] = prediction_flat_w[query];
+            assign f2_alternate_o[query] = alternate_flat_w[query];
+            assign f2_provider_o[3*query +: 3] = provider_flat_w[3*query +: 3];
+            assign f2_indices_o[36*query +: 36] = f2_indices_flat_w[36*query +: 36];
+            assign f2_tags_o[40*query +: 40] = f2_tags_flat_w[40*query +: 40];
+            assign f2_base_indices_o[12*query +: 12] = f2_base_index_flat_w[12*query +: 12];
         end
     endgenerate
     wire [3:0] base_physical_w;

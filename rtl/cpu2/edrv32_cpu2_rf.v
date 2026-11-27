@@ -17,23 +17,25 @@ module edrv32_cpu2_rf (
     output wire [31:1] lvt_o,
     output wire [127:0] id_data_o
 );
-    reg [31:1] lvt_r;
+    wire [31:1] lvt_flat_w;
     wire [1:0] wb_write_w;
     assign wb_write_w[0] = wb_valid_i[0] && (wb_rd_i[4:0] != 5'd0);
     assign wb_write_w[1] = wb_valid_i[1] && (wb_rd_i[9:5] != 5'd0);
-    assign lvt_o = lvt_r;
+    assign lvt_o = lvt_flat_w;
     // Each architectural LVT bit has one writer; younger WB wins a WAW.
     genvar regnum;
     generate
         for (regnum = 1; regnum < 32; regnum = regnum + 1) begin : g_lvt
+            reg lvt_r;
+            assign lvt_flat_w[regnum] = lvt_r;
             localparam [4:0] REGNUM = regnum;
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i)
-                    lvt_r[regnum] <= 1'b0;
+                    lvt_r <= 1'b0;
                 else if (wb_write_w[1] && (wb_rd_i[9:5] == REGNUM))
-                    lvt_r[regnum] <= 1'b1;
+                    lvt_r <= 1'b1;
                 else if (wb_write_w[0] && (wb_rd_i[4:0] == REGNUM))
-                    lvt_r[regnum] <= 1'b0;
+                    lvt_r <= 1'b0;
             end
         end
     endgenerate

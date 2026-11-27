@@ -84,3 +84,7 @@ LUTRAM按32bit/LUT估算：(10×32×32+2×64×59+12×1024×2)/32=1324 LUT，含�
 风格：`python3 tools/check/verilog_style.py rtl/cpu2/edrv32_cpu2_*.v rtl/tech/edrv32_ram_cpu2_*.v fpga/rtl/edrv32_fpga_probe_cpu2_int_top.v`，零告警。
 lint：`(cd rtl/filelists && ../../tools/check/lint.sh -DSIM_MODE --top-module edrv32_fpga_probe_cpu2_int_top -f cpu2_probe_int.f)`，零告警。
 影响/状态：RTL/测试/IP说明/导入文件已就绪；PDS由协调者另发Windows任务卡，频率和真实DRM/LUTRAM尚未实测。
+
+PDS 2022.2-SP6.1 在 rtl-infer/DFF-inference 崩溃：generate 展开的多个 always 写同一模块级 reg 数组。
+整数探针改为每次迭代独占局部 reg，由同作用域 assign 接到模块级扁平 wire，读取使用常量位段。
+RF LVT 同样拆为局部位寄存器；不跨 generate 层次引用、不切片局部数组，保持原有行为与拍边界。

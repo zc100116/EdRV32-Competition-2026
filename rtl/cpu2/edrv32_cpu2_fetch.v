@@ -185,8 +185,8 @@ module edrv32_cpu2_fetch (
         else
             ib_count_r <= retained_count_w + {2'b0, enqueue_count_w};
     end
-    reg [31:0] ib_instr_r [0:11];
-    reg [4:0] ib_candidates_r [0:11];
+    wire [383:0] ib_instr_flat_w;
+    wire [59:0] ib_candidates_flat_w;
     wire [31:0] shifted_instr_w [0:11];
     wire [4:0] shifted_candidates_w [0:11];
     genvar slot;
@@ -196,6 +196,10 @@ module edrv32_cpu2_fetch (
                 physical_owner_w};
         end
         for (slot = 0; slot < 12; slot = slot + 1) begin : g_ib
+            reg [4:0] ib_candidates_r;
+            assign ib_candidates_flat_w[5*slot +: 5] = ib_candidates_r;
+            reg [31:0] ib_instr_r;
+            assign ib_instr_flat_w[32*slot +: 32] = ib_instr_r;
             wire [1:0] wb_valid_w;
             wire [9:0] wb_rd_w;
             // Region 0 covers six entries plus two incoming words (16 operands).
@@ -220,23 +224,23 @@ module edrv32_cpu2_fetch (
             wire [1:0] next_owner1_w;
             wire [1:0] next_owner2_w;
             if (slot < 11) begin : g_next1
-                assign next1_instr_w = ib_instr_r[slot+1];
-                assign next1_candidates_w = ib_candidates_r[slot+1];
+                assign next1_instr_w = ib_instr_flat_w[32*(slot+1) +: 32];
+                assign next1_candidates_w = ib_candidates_flat_w[5*(slot+1) +: 5];
             end else begin : g_end1
                 assign next1_instr_w = 32'd0;
                 assign next1_candidates_w = 5'd0;
             end
             if (slot < 10) begin : g_next2
-                assign next2_instr_w = ib_instr_r[slot+2];
-                assign next2_candidates_w = ib_candidates_r[slot+2];
+                assign next2_instr_w = ib_instr_flat_w[32*(slot+2) +: 32];
+                assign next2_candidates_w = ib_candidates_flat_w[5*(slot+2) +: 5];
             end else begin : g_end2
                 assign next2_instr_w = 32'd0;
                 assign next2_candidates_w = 5'd0;
             end
             assign shifted_instr_w[slot] = (ib_remove_i == 2'd2) ? next2_instr_w :
-                (ib_remove_i == 2'd1) ? next1_instr_w : ib_instr_r[slot];
+                (ib_remove_i == 2'd1) ? next1_instr_w : ib_instr_flat_w[32*slot +: 32];
             assign shifted_candidates_w[slot] = (ib_remove_i == 2'd2) ? next2_candidates_w :
-                (ib_remove_i == 2'd1) ? next1_candidates_w : ib_candidates_r[slot];
+                (ib_remove_i == 2'd1) ? next1_candidates_w : ib_candidates_flat_w[5*slot +: 5];
             assign insert0_w = enqueue0_w && (retained_count_w == SLOT);
             assign insert1_w = enqueue1_w && ((retained_count_w + 4'd1) == SLOT);
             assign next_instr_w = insert0_w ? aligned_instr_w[0] :
@@ -255,13 +259,13 @@ module edrv32_cpu2_fetch (
                 (wb_valid_w[0] && (wb_rd_w[4:0] == next_rs2_w)) ? 2'b00 :
                 {selected_candidates_w[3], selected_candidates_w[1]};
             always @(posedge clk_i) begin
-                ib_instr_r[slot] <= next_instr_w;
-                ib_candidates_r[slot] <= {selected_candidates_w[4],
+                ib_instr_r <= next_instr_w;
+                ib_candidates_r <= {selected_candidates_w[4],
                     next_owner2_w[1], next_owner1_w[1], next_owner2_w[0], next_owner1_w[0]};
             end
         end
     endgenerate
     assign id_valid_o = {ib_count_r >= 4'd2, ib_count_r != 4'd0};
-    assign id_instr_o = {ib_instr_r[1], ib_instr_r[0]};
-    assign id_candidates_o = {ib_candidates_r[1], ib_candidates_r[0]};
+    assign id_instr_o = ib_instr_flat_w[63:0];
+    assign id_candidates_o = ib_candidates_flat_w[9:0];
 endmodule
