@@ -180,6 +180,29 @@ def test_plane_steps():
         assert product == arithmetic.normal(1)
 
 
+def test_plane_pa():
+    # Area-one cancellation and translated stripes exercise nonzero block exponents.
+    points = ((-65536, -65536), (65535, 65534), (65534, 65533))
+    vertices = [[*p, z, q, 65535*q, 32768*q, *([color << 16]*3)]
+                for p, z, q, color in zip(points, (0, 65535, 17),
+                                          (1, 1 << 34, 1 << 20), (0, 255, 128))]
+    vertices[1], vertices[2] = vertices[2], vertices[1]
+    area = edge(*vertices[:2], *vertices[2][:2])
+    for domain in ((0, 0, 640, 180), (0, 180, 640, 360),
+                   (-32768, -32768, -31488, -32678), (17, 19, 18, 20)):
+        plane = PixelArithmetic(vertices, area, domain)
+        x0, y0, x1, y1 = domain
+        assert plane.origin == (x0 // 4 * 4, y0 // 2 * 2)
+        assert all(k > 0 for k in plane.kappas)
+        for (_, gx, gy), width in zip(plane.coefficients, plane.WIDTHS):
+            assert -(1 << (width-11)) <= min(gx, gy)
+            assert max(gx, gy) < 1 << (width-11)
+        for y in (plane.origin[1], y1+1):
+            for x in (plane.origin[0], x1+3):
+                assert all(-(1 << (w-1)) <= v < 1 << (w-1)
+                           for v, w in zip(plane.at(x, y), plane.WIDTHS))
+
+
 def test_quad_lod():
     vertices = [[0, 0, 17, 1 << 30, 0, 0, *([77 << 16] * 3)],
                 [64, 0, 17, 1 << 30, 4 << 38, 0, *([77 << 16] * 3)],
@@ -487,8 +510,8 @@ def test_clipping_and_arithmetic():
 
 def main():
     start = time.perf_counter()
-    for test in (test_shared_edges, test_hand_computed, test_strips, test_plane_steps, test_quad_lod, test_objects,
-                 test_texture, test_bilinear_triangle, test_viewport, test_texture_layout,
+    for test in (test_shared_edges, test_hand_computed, test_strips, test_plane_steps,
+                 test_plane_pa, test_quad_lod, test_objects, test_texture, test_bilinear_triangle, test_viewport, test_texture_layout,
                  test_command_stream, test_stencil_blend_and_aa,
                  test_clipping_and_arithmetic):
         test()

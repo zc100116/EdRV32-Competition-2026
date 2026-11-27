@@ -26,7 +26,7 @@ def pack_widths(values, widths):
     return value
 
 
-def vectors():
+def vectors(wide):
     rng = random.Random(0x5232)
     incoming, expected = [], []
     for index in range(264):
@@ -60,12 +60,15 @@ def vectors():
         incoming.append(f'{value:0195x}\n')
         if area == 0:
             continue
-        arithmetic = PixelArithmetic(vertices, area)
+        arithmetic = PixelArithmetic(vertices, area,
+                                     (17, 19, 1272 if wide else 632, 86 if wide else 176))
         xr, yr = arithmetic.origin
         x0 = ((min(v[0] for v in vertices) + 7) // 16 // 4) * 4
         y0 = (min(v[1] for v in vertices) + 7) // 32 * 2
         x1 = (max(v[0] for v in vertices) - 8) // 16 + 1
         y1 = (max(v[1] for v in vertices) - 8) // 16 + 1
+        x0, y0 = max(x0, xr), max(y0, yr)
+        x1, y1 = min(x1, 1272 if wide else 632), min(y1, 86 if wide else 176)
         a, b, c = vertices
         edges = []
         for start, end in ((b,c), (c,a), (a,b)):
@@ -74,16 +77,16 @@ def vectors():
                       0 if top_left(start, end) else -1]
         fields = [(pack([x0,y0,x1,y1],16),64), (pack(edges,40),480),
                   (pack([xr,yr],16),32),
-                  (pack_widths([c[0] for c in arithmetic.coefficients], arithmetic.WIDTHS),434),
+                  (pack_widths([c[0] for c in arithmetic.coefficients], arithmetic.WIDTHS),254),
                   (pack_widths([v for c in arithmetic.coefficients for v in c[1:]],
-                               [w-14 for w in arithmetic.WIDTHS for _ in range(2)]),672),
+                               [w-10 for w in arithmetic.WIDTHS for _ in range(2)]),368),
                   (pack([e+f-d for e,f,d in zip(arithmetic.exponents,
                         (0,30,38,38,16,16,16), arithmetic.DROPS)],10),70)]
         value, offset = 0, 0
         for field, width in fields:
             value |= field << offset
             offset += width
-        expected.append(f'{value:0438x}\n')
+        expected.append(f'{value:0317x}\n')
     out = ROOT / 'build/gpu_setup'
     out.mkdir(parents=True, exist_ok=True)
     (out / 'input.hex').write_text(''.join(incoming))
@@ -91,12 +94,14 @@ def vectors():
 
 
 def main():
-    vectors()
     out = ROOT / 'build/gpu_setup'
+    out.mkdir(parents=True, exist_ok=True)
     subprocess.run(['verilator', '-DSIM_MODE', '--binary', '--timing', '-j', '1',
                     '--top-module', 'tb_gpu_setup', '--Mdir', str(out / 'obj'),
                     '-o', 'sim', '-f', 'files.f'], cwd=Path(__file__).resolve().parent, check=True)
-    subprocess.run([str(out / 'obj/sim')], cwd=ROOT, check=True)
+    for wide in (0, 1):
+        vectors(wide)
+        subprocess.run([str(out / 'obj/sim'), f'+WIDE={wide}'], cwd=ROOT, check=True)
 
 
 if __name__ == '__main__':

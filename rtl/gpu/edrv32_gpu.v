@@ -281,7 +281,7 @@ module edrv32_gpu (
     wire [69:0] raster_fragment_h_w;
     wire [1:0] raster_fragment_mask_w;
     wire [3:0] raster_fragment_palette_w;
-    wire [867:0] raster_fragment_plane_w;
+    wire [507:0] raster_fragment_plane_w;
     wire raster_fragment_ready_w;
     wire raster_fragment_valid_w;
     wire [15:0] raster_fragment_x_w;
@@ -395,11 +395,11 @@ module edrv32_gpu (
     wire texture_unit_done_w;
     wire [63:0] triangle_setup_bounds_w;
     wire [479:0] triangle_setup_edge_w;
-    wire [671:0] triangle_setup_gradient_w;
+    wire [367:0] triangle_setup_gradient_w;
     wire [69:0] triangle_setup_h_w;
     wire [31:0] triangle_setup_origin_w;
     wire triangle_setup_ready_w;
-    wire [433:0] triangle_setup_start_w;
+    wire [253:0] triangle_setup_start_w;
     wire triangle_setup_valid_w;
     wire [255:0] unpack_command_w;
     wire unpack_done_w;
@@ -1460,6 +1460,11 @@ module edrv32_gpu (
         // Clock and reset.
         .clk_i(clk_gpu_i),
         .rst_n_i(setup_rst_n_w),
+
+        // Shared draw snapshot of the target/scissor domain.
+        .render_state_valid_i(raster_render_state_valid_w),
+        .render_state_target_i(raster_render_state_target_w[32 +: 96]),
+        .render_state_wide_i(raster_render_state_wide_w),
 
         // Screen triangle stream.
         .screen_triangle_valid_i(screen_triangle_valid_w),

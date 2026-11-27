@@ -50,10 +50,10 @@ module edrv32_gpu_project_recip (
     reg [1:0] normalize_right_amt1_w_d5_r;
     reg [39:0] normalize_right_1_r;
     wire [1:0] normalize_right_amt2_w;
-    reg [39:0] normalize_right_2_w;
+    reg [39:0] unused_normalize_right_2_w;
     reg [1:0] normalize_right_amt2_w_d5_r;
     reg [1:0] normalize_right_amt2_w_d6_r;
-    reg [39:0] unused_normalize_right_2_r;
+    reg [30:0] unused_normalize_right_2_r;
     wire [1:0] normalize_left_amt0_w;
     reg [39:0] normalize_left_0_w;
     reg [39:0] normalize_left_0_r;
@@ -62,10 +62,10 @@ module edrv32_gpu_project_recip (
     reg [1:0] normalize_left_amt1_w_d5_r;
     reg [39:0] normalize_left_1_r;
     wire [1:0] normalize_left_amt2_w;
-    reg [39:0] normalize_left_2_w;
+    reg [39:0] unused_normalize_left_2_w;
     reg [1:0] normalize_left_amt2_w_d5_r;
     reg [1:0] normalize_left_amt2_w_d6_r;
-    reg [39:0] unused_normalize_left_2_r;
+    reg [30:0] unused_normalize_left_2_r;
     reg [5:0] exponent_d4_r;
     reg [5:0] exponent_d5_r;
     reg [5:0] exponent_d6_r;
@@ -74,13 +74,12 @@ module edrv32_gpu_project_recip (
     wire [29:0] seed_data_w;
     reg [29:0] seed_output_r;
     reg [30:0] mantissa_d9_r;
-    reg [30:0] mantissa_d10_r;
 
     wire [60:0] unused_newton_product_p2_r;
     wire [31:0] newton_high_w;
     wire [31:0] newton_bit_w;
     reg [31:0] newton_round_r;
-    reg [31:0] newton_correction_r;
+
     reg [29:0] seed_output_r_d11_r;
     reg [29:0] seed_output_r_d12_r;
     reg [29:0] seed_output_r_d13_r;
@@ -132,13 +131,13 @@ module edrv32_gpu_project_recip (
     end
     assign normalize_right_amt2_w = right_amount_r[4 +: 2];
     always @(*) begin
-        normalize_right_2_w = normalize_right_1_r;
+        unused_normalize_right_2_w = normalize_right_1_r;
         case (normalize_right_amt2_w_d6_r)
-            2'd0: normalize_right_2_w = normalize_right_1_r >> 0;
-            2'd1: normalize_right_2_w = normalize_right_1_r >> 16;
-            2'd2: normalize_right_2_w = normalize_right_1_r >> 32;
-            2'd3: normalize_right_2_w = normalize_right_1_r >> 48;
-            default: normalize_right_2_w = normalize_right_1_r;
+            2'd0: unused_normalize_right_2_w = normalize_right_1_r >> 0;
+            2'd1: unused_normalize_right_2_w = normalize_right_1_r >> 16;
+            2'd2: unused_normalize_right_2_w = normalize_right_1_r >> 32;
+            2'd3: unused_normalize_right_2_w = normalize_right_1_r >> 48;
+            default: unused_normalize_right_2_w = normalize_right_1_r;
         endcase
     end
     assign normalize_left_amt0_w = left_amount_r[0 +: 2];
@@ -165,13 +164,13 @@ module edrv32_gpu_project_recip (
     end
     assign normalize_left_amt2_w = left_amount_r[4 +: 2];
     always @(*) begin
-        normalize_left_2_w = normalize_left_1_r;
+        unused_normalize_left_2_w = normalize_left_1_r;
         case (normalize_left_amt2_w_d6_r)
-            2'd0: normalize_left_2_w = normalize_left_1_r << 0;
-            2'd1: normalize_left_2_w = normalize_left_1_r << 16;
-            2'd2: normalize_left_2_w = normalize_left_1_r << 32;
-            2'd3: normalize_left_2_w = normalize_left_1_r << 48;
-            default: normalize_left_2_w = normalize_left_1_r;
+            2'd0: unused_normalize_left_2_w = normalize_left_1_r << 0;
+            2'd1: unused_normalize_left_2_w = normalize_left_1_r << 16;
+            2'd2: unused_normalize_left_2_w = normalize_left_1_r << 32;
+            2'd3: unused_normalize_left_2_w = normalize_left_1_r << 48;
+            default: unused_normalize_left_2_w = normalize_left_1_r;
         endcase
     end
     edrv32_rom_gpu_recip_q30 u_seed (
@@ -249,13 +248,13 @@ module edrv32_gpu_project_recip (
             normalize_right_1_r <= normalize_right_1_w;
             normalize_right_amt2_w_d5_r <= normalize_right_amt2_w;
             normalize_right_amt2_w_d6_r <= normalize_right_amt2_w_d5_r;
-            unused_normalize_right_2_r <= normalize_right_2_w;
+            unused_normalize_right_2_r <= unused_normalize_right_2_w[30:0];
             normalize_left_0_r <= normalize_left_0_w;
             normalize_left_amt1_w_d5_r <= normalize_left_amt1_w;
             normalize_left_1_r <= normalize_left_1_w;
             normalize_left_amt2_w_d5_r <= normalize_left_amt2_w;
             normalize_left_amt2_w_d6_r <= normalize_left_amt2_w_d5_r;
-            unused_normalize_left_2_r <= normalize_left_2_w;
+            unused_normalize_left_2_r <= unused_normalize_left_2_w[30:0];
             exponent_d4_r <= exponent_r;
             exponent_d5_r <= exponent_d4_r;
             exponent_d6_r <= exponent_d5_r;
@@ -265,9 +264,9 @@ module edrv32_gpu_project_recip (
                 unused_normalize_left_2_r[30:0] ;
             seed_output_r <= seed_data_w;
             mantissa_d9_r <= mantissa_r;
-            mantissa_d10_r <= mantissa_d9_r;
+
             newton_round_r <= newton_high_w + newton_bit_w;
-            newton_correction_r <= 32'd2147483648 - newton_round_r;
+
             seed_output_r_d11_r <= seed_output_r;
             seed_output_r_d12_r <= seed_output_r_d11_r;
             seed_output_r_d13_r <= seed_output_r_d12_r;
@@ -291,185 +290,14 @@ module edrv32_gpu_project_recip (
     end
     // Alignment registers compensate only for the added multiplier stages.
     reg [29:0] seed_output_r_d15_align1_r;
-    reg [29:0] seed_output_r_d15_align2_r;
+
     always @(posedge clk_i) begin
         if (enable_i) begin
             seed_output_r_d15_align1_r <= seed_output_r_d15_r;
-            seed_output_r_d15_align2_r <= seed_output_r_d15_align1_r;
+
         end
     end
 
-    // newton_product: 31x30, 4 registered APM products; 5 enabled stages.
-    wire [30:0] newton_product_a_w;
-    assign newton_product_a_w = mantissa_d10_r;
-    wire [29:0] newton_product_b_w;
-    assign newton_product_b_w = seed_output_r;
-    reg [33:0] newton_product_pp00_r;
-    wire [60:0] unused_newton_product_term00_w;
-    assign unused_newton_product_term00_w = {27'b0, newton_product_pp00_r} << 0;
-    reg [29:0] newton_product_pp01_r;
-    wire [60:0] unused_newton_product_term01_w;
-    assign unused_newton_product_term01_w = {31'b0, newton_product_pp01_r} << 17;
-    reg [30:0] newton_product_pp10_r;
-    wire [60:0] unused_newton_product_term10_w;
-    assign unused_newton_product_term10_w = {30'b0, newton_product_pp10_r} << 17;
-    reg [26:0] newton_product_pp11_r;
-    wire [60:0] unused_newton_product_term11_w;
-    assign unused_newton_product_term11_w = {34'b0, newton_product_pp11_r} << 34;
-    reg [35:0] unused_newton_product_l0n0_part0_r;
-    reg [34:0] newton_product_l0n0_low0d0_r;
-    reg [12:0] newton_product_l0n0_a1d0_r;
-    reg [12:0] newton_product_l0n0_b1d0_r;
-    reg [13:0] unused_newton_product_l0n0_part1_r;
-    wire [60:0] unused_newton_product_l0n0_w;
-    assign unused_newton_product_l0n0_w =
-                {13'b0, {unused_newton_product_l0n0_part1_r[12:0], newton_product_l0n0_low0d0_r}};
-    reg [35:0] unused_newton_product_l0n1_part0_r;
-    reg [34:0] newton_product_l0n1_low0d0_r;
-    reg [8:0] newton_product_l0n1_a1d0_r;
-    reg [8:0] newton_product_l0n1_b1d0_r;
-    reg [9:0] unused_newton_product_l0n1_part1_r;
-    wire [60:0] unused_newton_product_l0n1_w;
-    assign unused_newton_product_l0n1_w =
-                {{unused_newton_product_l0n1_part1_r[8:0], newton_product_l0n1_low0d0_r}, 17'b0};
-    reg [35:0] unused_newton_product_l1n0_part0_r;
-    reg [34:0] newton_product_l1n0_low0d0_r;
-    reg [25:0] newton_product_l1n0_a1d0_r;
-    reg [25:0] newton_product_l1n0_b1d0_r;
-    reg [26:0] unused_newton_product_l1n0_part1_r;
-    wire [60:0] unused_newton_product_l1n0_w;
-    assign unused_newton_product_l1n0_w =
-                {unused_newton_product_l1n0_part1_r[25:0], newton_product_l1n0_low0d0_r};
-    assign unused_newton_product_p2_r = unused_newton_product_l1n0_w;
-    always @(posedge clk_i) begin
-        if (enable_i) begin
-            newton_product_pp00_r <=
-                $signed({1'b0, newton_product_a_w[0 +: 17] }) * $signed({1'b0,
-                newton_product_b_w[0 +: 17] });
-            newton_product_pp01_r <=
-                $signed({1'b0, newton_product_a_w[0 +: 17] }) * $signed({1'b0,
-                newton_product_b_w[17 +: 13] });
-            newton_product_pp10_r <=
-                $signed({1'b0, newton_product_a_w[17 +: 14] }) * $signed({1'b0,
-                newton_product_b_w[0 +: 17] });
-            newton_product_pp11_r <=
-                $signed({1'b0, newton_product_a_w[17 +: 14] }) * $signed({1'b0,
-                newton_product_b_w[17 +: 13] });
-            unused_newton_product_l0n0_part0_r <=
-                {1'b0, unused_newton_product_term00_w[0 +: 35] } + {1'b0,
-                unused_newton_product_term01_w[0 +: 35] };
-            newton_product_l0n0_low0d0_r <= unused_newton_product_l0n0_part0_r[34:0];
-            newton_product_l0n0_a1d0_r <= unused_newton_product_term00_w[35 +: 13];
-            newton_product_l0n0_b1d0_r <= unused_newton_product_term01_w[35 +: 13];
-            unused_newton_product_l0n0_part1_r <=
-                {1'b0, newton_product_l0n0_a1d0_r} + {1'b0, newton_product_l0n0_b1d0_r} + {13'b0,
-                unused_newton_product_l0n0_part0_r[35] };
-            unused_newton_product_l0n1_part0_r <=
-                {1'b0, unused_newton_product_term10_w[17 +: 35] } + {1'b0,
-                unused_newton_product_term11_w[17 +: 35] };
-            newton_product_l0n1_low0d0_r <= unused_newton_product_l0n1_part0_r[34:0];
-            newton_product_l0n1_a1d0_r <= unused_newton_product_term10_w[52 +: 9];
-            newton_product_l0n1_b1d0_r <= unused_newton_product_term11_w[52 +: 9];
-            unused_newton_product_l0n1_part1_r <=
-                {1'b0, newton_product_l0n1_a1d0_r} + {1'b0, newton_product_l0n1_b1d0_r} + {9'b0,
-                unused_newton_product_l0n1_part0_r[35] };
-            unused_newton_product_l1n0_part0_r <=
-                {1'b0, unused_newton_product_l0n0_w[0 +: 35] } + {1'b0,
-                unused_newton_product_l0n1_w[0 +: 35] };
-            newton_product_l1n0_low0d0_r <= unused_newton_product_l1n0_part0_r[34:0];
-            newton_product_l1n0_a1d0_r <= unused_newton_product_l0n0_w[35 +: 26];
-            newton_product_l1n0_b1d0_r <= unused_newton_product_l0n1_w[35 +: 26];
-            unused_newton_product_l1n0_part1_r <=
-                {1'b0, newton_product_l1n0_a1d0_r} + {1'b0, newton_product_l1n0_b1d0_r} + {26'b0,
-                unused_newton_product_l1n0_part0_r[35] };
-        end
-    end
-
-    // newton_result: 30x32, 4 registered APM products; 5 enabled stages.
-    wire [29:0] newton_result_a_w;
-    assign newton_result_a_w = seed_output_r_d15_align2_r;
-    wire [31:0] newton_result_b_w;
-    assign newton_result_b_w = newton_correction_r;
-    reg [33:0] newton_result_pp00_r;
-    wire [61:0] unused_newton_result_term00_w;
-    assign unused_newton_result_term00_w = {28'b0, newton_result_pp00_r} << 0;
-    reg [31:0] newton_result_pp01_r;
-    wire [61:0] unused_newton_result_term01_w;
-    assign unused_newton_result_term01_w = {30'b0, newton_result_pp01_r} << 17;
-    reg [29:0] newton_result_pp10_r;
-    wire [61:0] unused_newton_result_term10_w;
-    assign unused_newton_result_term10_w = {32'b0, newton_result_pp10_r} << 17;
-    reg [27:0] newton_result_pp11_r;
-    wire [61:0] unused_newton_result_term11_w;
-    assign unused_newton_result_term11_w = {34'b0, newton_result_pp11_r} << 34;
-    reg [35:0] unused_newton_result_l0n0_part0_r;
-    reg [34:0] newton_result_l0n0_low0d0_r;
-    reg [14:0] newton_result_l0n0_a1d0_r;
-    reg [14:0] newton_result_l0n0_b1d0_r;
-    reg [15:0] unused_newton_result_l0n0_part1_r;
-    wire [61:0] unused_newton_result_l0n0_w;
-    assign unused_newton_result_l0n0_w =
-                {12'b0, {unused_newton_result_l0n0_part1_r[14:0], newton_result_l0n0_low0d0_r}};
-    reg [35:0] unused_newton_result_l0n1_part0_r;
-    reg [34:0] newton_result_l0n1_low0d0_r;
-    reg [9:0] newton_result_l0n1_a1d0_r;
-    reg [9:0] newton_result_l0n1_b1d0_r;
-    reg [10:0] unused_newton_result_l0n1_part1_r;
-    wire [61:0] unused_newton_result_l0n1_w;
-    assign unused_newton_result_l0n1_w =
-                {{unused_newton_result_l0n1_part1_r[9:0], newton_result_l0n1_low0d0_r}, 17'b0};
-    reg [35:0] unused_newton_result_l1n0_part0_r;
-    reg [34:0] newton_result_l1n0_low0d0_r;
-    reg [26:0] newton_result_l1n0_a1d0_r;
-    reg [26:0] newton_result_l1n0_b1d0_r;
-    reg [27:0] unused_newton_result_l1n0_part1_r;
-    wire [61:0] unused_newton_result_l1n0_w;
-    assign unused_newton_result_l1n0_w =
-                {unused_newton_result_l1n0_part1_r[26:0], newton_result_l1n0_low0d0_r};
-    assign unused_newton_result_p2_r = unused_newton_result_l1n0_w;
-    always @(posedge clk_i) begin
-        if (enable_i) begin
-            newton_result_pp00_r <=
-                $signed({1'b0, newton_result_a_w[0 +: 17] }) * $signed({1'b0,
-                newton_result_b_w[0 +: 17] });
-            newton_result_pp01_r <=
-                $signed({1'b0, newton_result_a_w[0 +: 17] }) * $signed({1'b0,
-                newton_result_b_w[17 +: 15] });
-            newton_result_pp10_r <=
-                $signed({1'b0, newton_result_a_w[17 +: 13] }) * $signed({1'b0,
-                newton_result_b_w[0 +: 17] });
-            newton_result_pp11_r <=
-                $signed({1'b0, newton_result_a_w[17 +: 13] }) * $signed({1'b0,
-                newton_result_b_w[17 +: 15] });
-            unused_newton_result_l0n0_part0_r <=
-                {1'b0, unused_newton_result_term00_w[0 +: 35] } + {1'b0,
-                unused_newton_result_term01_w[0 +: 35] };
-            newton_result_l0n0_low0d0_r <= unused_newton_result_l0n0_part0_r[34:0];
-            newton_result_l0n0_a1d0_r <= unused_newton_result_term00_w[35 +: 15];
-            newton_result_l0n0_b1d0_r <= unused_newton_result_term01_w[35 +: 15];
-            unused_newton_result_l0n0_part1_r <=
-                {1'b0, newton_result_l0n0_a1d0_r} + {1'b0, newton_result_l0n0_b1d0_r} + {15'b0,
-                unused_newton_result_l0n0_part0_r[35] };
-            unused_newton_result_l0n1_part0_r <=
-                {1'b0, unused_newton_result_term10_w[17 +: 35] } + {1'b0,
-                unused_newton_result_term11_w[17 +: 35] };
-            newton_result_l0n1_low0d0_r <= unused_newton_result_l0n1_part0_r[34:0];
-            newton_result_l0n1_a1d0_r <= unused_newton_result_term10_w[52 +: 10];
-            newton_result_l0n1_b1d0_r <= unused_newton_result_term11_w[52 +: 10];
-            unused_newton_result_l0n1_part1_r <=
-                {1'b0, newton_result_l0n1_a1d0_r} + {1'b0, newton_result_l0n1_b1d0_r} + {10'b0,
-                unused_newton_result_l0n1_part0_r[35] };
-            unused_newton_result_l1n0_part0_r <=
-                {1'b0, unused_newton_result_l0n0_w[0 +: 35] } + {1'b0,
-                unused_newton_result_l0n1_w[0 +: 35] };
-            newton_result_l1n0_low0d0_r <= unused_newton_result_l1n0_part0_r[34:0];
-            newton_result_l1n0_a1d0_r <= unused_newton_result_l0n0_w[35 +: 27];
-            newton_result_l1n0_b1d0_r <= unused_newton_result_l0n1_w[35 +: 27];
-            unused_newton_result_l1n0_part1_r <=
-                {1'b0, newton_result_l1n0_a1d0_r} + {1'b0, newton_result_l1n0_b1d0_r} + {27'b0,
-                unused_newton_result_l1n0_part0_r[35] };
-        end
-    end
     reg [5:0] exponent_extra0_r;
     reg [5:0] exponent_extra1_r;
     reg [5:0] exponent_extra2_r;
@@ -482,4 +310,21 @@ module edrv32_gpu_project_recip (
             exponent_extra3_r <= exponent_extra2_r;
         end
     end
+    // The X/Y banks replace mantissa/seed and correction input registers.
+    wire [31:0] correction_apm_w;
+    assign correction_apm_w = 32'd2147483648 - newton_round_r;
+    edrv32_apm_gpu_u31xu30 u_newton_product (
+        .clk_i(clk_i),
+        .enable_i(enable_i),
+        .a_i(mantissa_d9_r),
+        .b_i(seed_data_w),
+        .p_o(unused_newton_product_p2_r)
+    );
+    edrv32_apm_gpu_u30xu32 u_newton_result (
+        .clk_i(clk_i),
+        .enable_i(enable_i),
+        .a_i(seed_output_r_d15_align1_r),
+        .b_i(correction_apm_w),
+        .p_o(unused_newton_result_p2_r)
+    );
 endmodule

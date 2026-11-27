@@ -14,7 +14,7 @@ module edrv32_gpu_perspective (
     input wire [15:0] fragment_x_i,
     input wire [15:0] fragment_y_i,
     input wire [1:0] fragment_mask_i,
-    input wire [867:0] fragment_plane_i,
+    input wire [507:0] fragment_plane_i,
     input wire [69:0] fragment_h_i,
     input wire [3:0] fragment_palette_i,
     input wire [7:0] fragment_alpha_i,
@@ -598,7 +598,7 @@ module edrv32_gpu_perspective (
         .rd_addr_i(delay_coordinate_read_w),
         .rd_data_o(u_delay_coordinate_1_data_w)
     );
-    assign delay_shade_read_w = delay_write_r - 6'd41;
+    assign delay_shade_read_w = delay_write_r - 6'd40;
     wire [71:0] u_delay_shade_0_data_w;
     reg [71:0] u_delay_shade_0_data_r;
     assign unused_delay_shade_data_w[0 +: 72] = u_delay_shade_0_data_r;
@@ -696,30 +696,31 @@ module edrv32_gpu_perspective (
             wire [70*7-1:0] unused_plane_w;
             genvar attribute;
             for (attribute = 0; attribute < 7; attribute = attribute + 1) begin : g_plane
-                localparam WIDTH = attribute == 0 ? 62 : attribute < 4 ? 66 : 58;
+                localparam WIDTH = attribute == 0 ? 32 : attribute < 4 ? 42 : 32;
                 localparam OFFSET = attribute == 0 ? 0 : attribute < 4 ?
-                    62 + (attribute-1)*66 : 260 + (attribute-4)*58;
-                reg [69:0] input_plane_r [0:1];
+                    32 + (attribute-1)*42 : 158 + (attribute-4)*32;
+                reg [WIDTH-1:0] input_plane_r [0:1];
                 always @(posedge clk_i) begin
                     if (input_push_w) begin
                         input_plane_r[input_write_r] <=
-                            {{(70-WIDTH){fragment_plane_i[lane*434+OFFSET+WIDTH-1]}},
-                            fragment_plane_i[lane*434+OFFSET +: WIDTH]};
+                            fragment_plane_i[lane*254+OFFSET +: WIDTH];
                     end
                 end
-                assign unused_plane_w[70*attribute +: 70] = input_plane_r[input_read_r];
+                assign unused_plane_w[70*attribute +: 70] =
+                    {{(70-WIDTH){input_plane_r[input_read_r][WIDTH-1]}},
+                    input_plane_r[input_read_r]};
             end
 
             // Two short register delays stay local; deep delays share RAM across lanes.
-            wire [65:0] q_absolute_w;
+            wire [41:0] q_absolute_w;
             wire [0:0] q_sign_w;
             wire [9:0] q_exponent_w;
             wire [28:0] unused_q_w;
-            wire [65:0] uq_absolute_w;
+            wire [41:0] uq_absolute_w;
             wire [0:0] uq_sign_w;
             wire [9:0] uq_exponent_w;
             wire [28:0] uq_w;
-            wire [65:0] vq_absolute_w;
+            wire [41:0] vq_absolute_w;
             wire [0:0] vq_sign_w;
             wire [9:0] vq_exponent_w;
             wire [28:0] vq_w;
@@ -789,61 +790,89 @@ module edrv32_gpu_perspective (
             wire [31:0] delay_sign_w;
             assign delay_sign_w = unused_delay_coordinate_data_w[64+lane*32 +: 32];
             assign delay_coordinate_input_w[64+lane*32 +: 32] = v_coordinate_w;
-            wire [69:0] unused_depth_raw_w;
-            assign unused_depth_raw_w = unused_plane_w[0 +: 70];
-            reg [16:0] unused_depth_rounded_r;
-            reg [0:0] depth_overflow_r;
-            reg [0:0] depth_negative_r;
-            reg [15:0] depth_clamped_r;
+            wire [15:0] depth_clamped_w;
             wire [15:0] delay_22_w;
             assign delay_22_w = unused_delay_shade_data_w[0+lane*16 +: 16];
-            assign delay_shade_input_w[0+lane*16 +: 16] = depth_clamped_r;
+            assign delay_shade_input_w[0+lane*16 +: 16] = depth_clamped_w;
             wire [15:0] final_depth_w;
             assign final_depth_w = delay_22_w;
-            wire [69:0] unused_red_raw_w;
-            assign unused_red_raw_w = unused_plane_w[280 +: 70];
-            reg [8:0] unused_red_rounded_r;
-            reg [0:0] red_overflow_r;
-            reg [0:0] red_negative_r;
-            reg [7:0] red_clamped_r;
+            wire [7:0] red_clamped_w;
             wire [7:0] delay_23_w;
             assign delay_23_w = unused_delay_shade_data_w[32+lane*8 +: 8];
-            assign delay_shade_input_w[32+lane*8 +: 8] = red_clamped_r;
+            assign delay_shade_input_w[32+lane*8 +: 8] = red_clamped_w;
             wire [7:0] final_red_w;
             assign final_red_w = delay_23_w;
-            wire [69:0] unused_green_raw_w;
-            assign unused_green_raw_w = unused_plane_w[350 +: 70];
-            reg [8:0] unused_green_rounded_r;
-            reg [0:0] green_overflow_r;
-            reg [0:0] green_negative_r;
-            reg [7:0] green_clamped_r;
+            wire [7:0] green_clamped_w;
             wire [7:0] delay_24_w;
             assign delay_24_w = unused_delay_shade_data_w[48+lane*8 +: 8];
-            assign delay_shade_input_w[48+lane*8 +: 8] = green_clamped_r;
+            assign delay_shade_input_w[48+lane*8 +: 8] = green_clamped_w;
             wire [7:0] final_green_w;
             assign final_green_w = delay_24_w;
-            wire [69:0] unused_blue_raw_w;
-            assign unused_blue_raw_w = unused_plane_w[420 +: 70];
-            reg [8:0] unused_blue_rounded_r;
-            reg [0:0] blue_overflow_r;
-            reg [0:0] blue_negative_r;
-            reg [7:0] blue_clamped_r;
+            wire [7:0] blue_clamped_w;
             wire [7:0] delay_bypass_w;
             assign delay_bypass_w = unused_delay_shade_data_w[64+lane*8 +: 8];
-            assign delay_shade_input_w[64+lane*8 +: 8] = blue_clamped_r;
+            assign delay_shade_input_w[64+lane*8 +: 8] = blue_clamped_w;
             wire [7:0] final_blue_w;
             assign final_blue_w = delay_bypass_w;
+            wire [39:0] shade_w;
+            assign depth_clamped_w = shade_w[15:0];
+            assign red_clamped_w = shade_w[23:16];
+            assign green_clamped_w = shade_w[31:24];
+            assign blue_clamped_w = shade_w[39:32];
+            genvar shade_channel;
+            for (shade_channel = 0; shade_channel < 4;
+                shade_channel = shade_channel + 1) begin : g_shade
+                localparam ATTRIBUTE = shade_channel == 0 ? 0 : shade_channel + 3;
+                localparam OUTPUT_WIDTH = shade_channel == 0 ? 16 : 8;
+                localparam OFFSET = shade_channel == 0 ? 0 : 16 + (shade_channel-1)*8;
+                wire [31:0] value_w;
+                wire signed [9:0] h_w;
+                wire signed [10:0] unused_amount_w;
+                wire [48:0] shifted_0_w;
+                wire [48:0] shifted_1_w;
+                reg [48:0] shifted_r;
+                reg [3:0] amount_r;
+                reg zero_r;
+                reg saturate_r;
+                reg [OUTPUT_WIDTH:0] rounded_input_r;
+                reg overflow_r;
+                reg [OUTPUT_WIDTH-1:0] result_r;
+                wire [OUTPUT_WIDTH:0] rounded_w;
+                assign value_w = unused_plane_w[ATTRIBUTE*70 +: 32];
+                // h carries h+kappa. Units are h-f+d for every attribute.
+                assign h_w = $signed(input_h_r[input_read_r][ATTRIBUTE*10 +: 10]);
+                assign unused_amount_w = (shade_channel == 0 ? 11'sd8 : 11'sd20)
+                    - {h_w[9], h_w};
+                assign shifted_0_w = {value_w, 17'b0} >> unused_amount_w[1:0];
+                assign shifted_1_w = shifted_r >> {amount_r, 2'b0};
+                assign rounded_w = {1'b0, rounded_input_r[OUTPUT_WIDTH:1]}
+                    + {{OUTPUT_WIDTH{1'b0}}, rounded_input_r[0]};
+                assign shade_w[OFFSET +: OUTPUT_WIDTH] = result_r;
+                always @(posedge clk_i) begin
+                    shifted_r <= shifted_0_w;
+                    amount_r <= unused_amount_w[5:2];
+                    zero_r <= value_w[31] || value_w == 0 ||
+                        h_w < (shade_channel == 0 ? -10'sd40 : -10'sd28);
+                    saturate_r <= h_w > (shade_channel == 0 ? 10'sd8 : 10'sd20);
+                    rounded_input_r <= zero_r ? 0 :
+                        shifted_1_w[OUTPUT_WIDTH:0];
+                    overflow_r <= !zero_r && (saturate_r ||
+                        (|shifted_1_w[48:OUTPUT_WIDTH+1]));
+                    result_r <= overflow_r || rounded_w[OUTPUT_WIDTH] ?
+                        {OUTPUT_WIDTH{1'b1}} : rounded_w[OUTPUT_WIDTH-1:0];
+                end
+            end
             edrv32_gpu_perspective_absolute u_q_absolute (
                 .clk_i(clk_i),
                 .en_i(advance_w),
-                .value_i(unused_plane_w[70 +: 66]),
+                .value_i(unused_plane_w[70 +: 42]),
                 .exponent_i(input_h_r[input_read_r][10 +: 10] - 10'd26),
                 .magnitude_o(q_absolute_w),
                 .sign_o(q_sign_w),
                 .exponent_o(q_exponent_w)
             );
             edrv32_gpu_perspective_normal #(
-                .WIDTH(66)
+                .WIDTH(42)
             ) u_q (
                 .clk_i(clk_i),
                 .en_i(advance_w),
@@ -855,14 +884,14 @@ module edrv32_gpu_perspective (
             edrv32_gpu_perspective_absolute u_uq_absolute (
                 .clk_i(clk_i),
                 .en_i(advance_w),
-                .value_i(unused_plane_w[140 +: 66]),
+                .value_i(unused_plane_w[140 +: 42]),
                 .exponent_i(input_h_r[input_read_r][20 +: 10] - 10'd34),
                 .magnitude_o(uq_absolute_w),
                 .sign_o(uq_sign_w),
                 .exponent_o(uq_exponent_w)
             );
             edrv32_gpu_perspective_normal #(
-                .WIDTH(66)
+                .WIDTH(42)
             ) u_uq (
                 .clk_i(clk_i),
                 .en_i(advance_w),
@@ -874,14 +903,14 @@ module edrv32_gpu_perspective (
             edrv32_gpu_perspective_absolute u_vq_absolute (
                 .clk_i(clk_i),
                 .en_i(advance_w),
-                .value_i(unused_plane_w[210 +: 66]),
+                .value_i(unused_plane_w[210 +: 42]),
                 .exponent_i(input_h_r[input_read_r][30 +: 10] - 10'd34),
                 .magnitude_o(vq_absolute_w),
                 .sign_o(vq_sign_w),
                 .exponent_o(vq_exponent_w)
             );
             edrv32_gpu_perspective_normal #(
-                .WIDTH(66)
+                .WIDTH(42)
             ) u_vq (
                 .clk_i(clk_i),
                 .en_i(advance_w),
@@ -1013,30 +1042,7 @@ module edrv32_gpu_perspective (
                     inverse_sign_r <= delay_3_w[11];
                     inverse_r <= inverse_mantissa_r == 0 ? 29'b0
                         : {inverse_exponent_r, inverse_sign_r, inverse_mantissa_r};
-                    unused_depth_rounded_r <= {1'b0, unused_depth_raw_w[8 +: 16]}
-                        + {16'b0, unused_depth_raw_w[7]};
-                    depth_overflow_r <= unused_depth_raw_w[69:24] != 0;
-                    depth_negative_r <= unused_depth_raw_w[69];
-                    depth_clamped_r <= depth_negative_r ? 16'b0 : (depth_overflow_r
-                        || unused_depth_rounded_r[16]) ? 16'd65535 : unused_depth_rounded_r[15:0];
-                    unused_red_rounded_r <= {1'b0, unused_red_raw_w[12 +: 8]}
-                        + {8'b0, unused_red_raw_w[11]};
-                    red_overflow_r <= unused_red_raw_w[69:20] != 0;
-                    red_negative_r <= unused_red_raw_w[69];
-                    red_clamped_r <= red_negative_r ? 8'b0 : (red_overflow_r
-                        || unused_red_rounded_r[8]) ? 8'd255 : unused_red_rounded_r[7:0];
-                    unused_green_rounded_r <= {1'b0, unused_green_raw_w[12 +: 8]}
-                        + {8'b0, unused_green_raw_w[11]};
-                    green_overflow_r <= unused_green_raw_w[69:20] != 0;
-                    green_negative_r <= unused_green_raw_w[69];
-                    green_clamped_r <= green_negative_r ? 8'b0 : (green_overflow_r
-                        || unused_green_rounded_r[8]) ? 8'd255 : unused_green_rounded_r[7:0];
-                    unused_blue_rounded_r <= {1'b0, unused_blue_raw_w[12 +: 8]}
-                        + {8'b0, unused_blue_raw_w[11]};
-                    blue_overflow_r <= unused_blue_raw_w[69:20] != 0;
-                    blue_negative_r <= unused_blue_raw_w[69];
-                    blue_clamped_r <= blue_negative_r ? 8'b0 : (blue_overflow_r
-                        || unused_blue_rounded_r[8]) ? 8'd255 : unused_blue_rounded_r[7:0];
+
                 end
             end
             assign raw_u_w[lane*32 +: 32] = delay_7_w;

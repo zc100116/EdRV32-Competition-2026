@@ -189,6 +189,46 @@
   - 低于 150 MHz：不跑布局布线，推送第一段的结果即可。
 - **跑布局布线之前必须关闭仿真虚拟机。** 虚拟机和 PDS 共用 Windows 内存：第 9 轮虚拟机一直开着，布局一个阶段就跑了半小时；正常情况下第 7 轮整个布局只用了 5.5 分钟。布局布线结束后再打开虚拟机。
 - 上板步骤（第 5 节第 5～8 步）本轮先不做，等协调者看过布线后的时序再定。
+- **补充（2026-11-26 23:10）**：要定位拥塞在哪个模块，请 Windows Codex 回传以下内容。
+  1. **第 9 轮未布网的模块分布**：用已经备份的第 9 轮未布网清单（`logbackup/before-round10/place_route`），按网名的层次前缀统计条数，输出到 `artifacts/round9/unrouted-by-module.txt`，每行一个前缀和条数，按条数从多到少排序。统计两级：
+     - 先按 `u_soc/u_gpu/u_core/` 下一级（`u_texture`、`u_setup` 等）和 `u_soc/` 下一级（`u_cpu`、`u_mem` 等）；
+     - 再对条数最多的 3 个模块展开下一级。
+     另附 50 条未布网的原名作为样例。
+  2. **第 10 轮**：布线结束后（不管成功还是失败），按同样的方法统计未布网；回传失败报告中的 `Use of CLMA`、`Use of CLMS` 等全部 `Use of` 行；如果布通了，回传第 6e 节的全部时序内容。
+  3. **第 10 轮 clk_mem**：最差 50 条 setup 路径（起点、终点、裕量、逻辑级数），用综合报告或布局后报告都可以。
+
+## 6i. 第 11 轮（2026-11-27，R-6a + R-6b + R-7 整改后：先综合，再布局布线）
+
+- **第 10 轮**：如果已经跑完，先按第 6h 节的补充要求，把结果提交推送：是否布通、全部 `Use of` 行、未布网的模块分布。还在跑的话就停掉，不用等。
+- **本轮改动**（规格 gpu-spec v0.6；仿真回归全部通过）：
+  - R-6a（c6eb850d3..d632b2c55）：geometry 和 setup 的宽乘法全部改为 **APM 原语级联**。原语是 `GTP_APM_E2`，25×18，打开内部寄存器，用带移位的 CPI/CPO 级联。部分积在硬核内求和，不再用 LUT 加法树。project 改为每 2 拍处理 1 个顶点，乘法器两拍复用。
+  - R-6b（74a1a5674..ac20072b8）：平面累加位宽从 62/66/58 降到 32/42/32（P-A）；raster 少存平面拷贝；扫描范围裁到画面以内。
+  - R-7（7d992dc3f）：clk_mem 的两条最差路径切拍，分别是 AUD DMA 地址使能和 mem_xbar 读返回缓冲。
+  - Yosys 参考估算：GPU 的 FF 约少 1.7～1.9 万。以本轮 PDS 为准。
+- **IP**：
+  - 没有新增需要生成的 IP，沿用第 10 轮的全部 IP。
+  - 新增的 `edrv32_apm_gpu_*` 包装在 FPGA 模式下直接例化 PDS 器件库的 `GTP_APM_E2` 原语，**不需要在 IP Compiler 中生成**。说明见 `fpga/ip/apm_gpu_cascade.md`。
+  - 导入脚本会按 `rtl/filelists/gpu.f` 带入这些新文件。如果 Compile 报 `GTP_APM_E2` 相关错误，把报错原文提交推送，不要改 RTL。
+- 取本卡最新提交，步骤同第 6a 节：沿用原工程，移除旧源文件，重新执行导入脚本，从 Compile 开始。
+- **第一段：Compile → 综合 → Device Map**，提交并推送以下内容：
+  1. 资源汇总，包括分布式 RAM；按层次的资源表，GPU 各子模块单列，另列 mem、DISP、AUD；
+  2. **APM 用量**：总数和 GPU 各子模块的数量；
+  3. **控制组合（control set）数量**：取综合或 Device Map 报告中的原文；
+  4. 综合预估时序汇总：各时钟域的 WNS、TNS、估算频率；
+  5. clk_gpu、clk_mem 各最差 200 条 setup 路径，一行一条：起点、终点、裕量、逻辑级数；clk_gpu 最差 20 条路径的逐级明细；
+  6. 高扇出表。
+- **第二段：布局布线，两组参数并行跑**。只要综合估算的 clk_gpu ≥ 150 MHz 就跑。前几轮布局布线用的都是 GUI 默认参数；本轮改用下面两组。参数含义见 `docs/guides/pds-floorplan.md` 3.1 节。
+  - 做法：Device Map 完成后，把工程目录整个复制一份，原工程跑 A、副本跑 B，两个同时跑。两边都用同一个 Device Map 结果，不要重新综合。命令行写法参照卡 74 第 5 节第 3 步：`pds_shell.exe -action place_route -project_file <工程 .pds> <参数> <device_map 下的 _map.adf>`。用 GUI 跑也可以，在 Place & Route 的属性里设置相同的取值。
+  - **A 组（视觉 SoC 卡 68 R2 布通时用的参数）**：`-plc_decongestion 2 -slack_weight 40 -pin_cost_increasing_speed 600 -logic_optimize_lut6d_combing_strategy 0 -dump_router_congestion_plot true`
+  - **B 组（布通优先）**：`-plc_decongestion 4 -slack_weight 10 -pin_cost_increasing_speed 600 -logic_optimize_lut6d_combing_strategy 0 -dump_router_congestion_plot true`，再在 GUI 中**取消勾选 Design Cells Duplication**（`-dc_duplication`，默认开：布局时为时序复制单元，会增加 LUT/FF）。B 组的时序预计会差一些，它的作用是回答"放宽时序以后能不能布通"。PDS 没有单独的"关闭时序驱动"开关，B 组就是用来代替它的。
+  - 如果某个参数名 PDS 不接受，把报错原文写进 result.md，去掉这个参数继续跑，不要自行换成别的参数。
+- **两组分别回传**：
+  1. 布局报告中的全部 `Use of` 行，**特别是 `Use of CLMA`、`Use of CLMS`**；
+  2. 是否布通；每次布线迭代的未布通数和用时；拥塞摘要；
+  3. 布通的那组：第 6e 节的全部时序内容；
+  4. 布不通的那组：按第 6h 节补充要求第 1 条的方法，统计未布网的模块分布；
+  5. APM 级联或 APM 列放置相关的告警或错误，回传原文。
+- 上板步骤（第 5 节第 5～8 步）本轮先不做，等协调者看过布线结果再定。
 
 ## 7. 通过判据
 

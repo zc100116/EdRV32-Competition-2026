@@ -39,39 +39,40 @@ module edrv32_aud_dma (
     input wire m_axi_rlast_i,
     input wire m_axi_rid_i
 );
-    localparam S_IDLE = 2'd0;
-    localparam S_ADDR = 2'd1;
-    localparam S_READ = 2'd2;
-    localparam S_EMIT = 2'd3;
-    reg [1:0] state_r;
+    localparam S_IDLE = 3'd0;
+    localparam S_ADDR = 3'd1;
+    localparam S_READ = 3'd2;
+    localparam S_EMIT = 3'd3;
+    localparam S_LIMIT = 3'd4;
+    localparam S_PLAN = 3'd5;
+    localparam S_CHECK = 3'd6;
+    reg [2:0] state_r;
     reg stopped_r;
     reg last_r;
     reg [2:0] sample_idx_r;
     reg [255:0] beat_r;
-    wire [31:0] addr_w;
-    wire [23:0] ring_left_w;
-    wire [12:0] page_left_w;
-    reg [23:0] bytes_w;
+    reg [31:0] addr_r;
+    reg [3:0] ring_left_r;
+    reg ring_full_r;
+    reg [3:0] forward_r;
+    reg forward_full_r;
+    reg wrapped_r;
+    reg [4:0] ring_beats_r;
+    reg [4:0] page_beats_r;
+    reg [4:0] beats_r;
+    reg [23:0] next_ptr_r;
+    reg wrap_r;
+    reg [23:0] ring_last_r;
+    wire [18:0] ring_left_w;
+    wire [18:0] forward_w;
     wire unused_rid_w;
 
+    assign ring_left_w = ring_size_i[23:5] - rd_ptr_o[23:5];
+    assign forward_w = wr_ptr_i[23:5] - rd_ptr_o[23:5];
     assign unused_rid_w = m_axi_rid_i;
     assign avail_o = wr_ptr_i >= rd_ptr_o ? wr_ptr_i - rd_ptr_o :
         ring_size_i - rd_ptr_o + wr_ptr_i;
-    assign addr_w = ring_base_i + {8'd0, rd_ptr_o};
-    assign ring_left_w = ring_size_i - rd_ptr_o;
-    assign page_left_w = 13'd4096 - {1'b0, addr_w[11:0]};
-    always @(*) begin
-        bytes_w = 24'd512;
-        if (avail_o < bytes_w) begin
-            bytes_w = avail_o;
-        end
-        if (ring_left_w < bytes_w) begin
-            bytes_w = ring_left_w;
-        end
-        if ({11'd0, page_left_w} < bytes_w) begin
-            bytes_w = {11'd0, page_left_w};
-        end
-    end
+    // If WR has wrapped, ring end is the tighter bound; otherwise WR is tighter.
 
     assign m_axi_arvalid_o = (state_r == S_ADDR);
     assign m_axi_arid_o = 1'b0;
@@ -100,9 +101,19 @@ module edrv32_aud_dma (
             end
             case (state_r)
                 S_IDLE: begin
-                    if (enable_i && !restart_i && !stopped_r && (bytes_w != 0) &&
-                        ({14'd0, free_i} >= (bytes_w >> 2))) begin
+                    if (enable_i && !restart_i && !stopped_r) begin
+                        state_r <= S_LIMIT;
+                    end
+                end
+                S_LIMIT: state_r <= S_PLAN;
+                S_PLAN: state_r <= S_CHECK;
+                S_CHECK: begin
+                    if (!enable_i || restart_i || stopped_r || beats_r == 0) begin
+                        state_r <= S_IDLE;
+                    end else if (free_i >= {2'b0, beats_r, 3'b0}) begin
                         state_r <= S_ADDR;
+                    end else begin
+                        state_r <= S_IDLE;
                     end
                 end
                 S_ADDR: begin
@@ -112,10 +123,10 @@ module edrv32_aud_dma (
                 end
                 S_READ: begin
                     if (m_axi_rvalid_i) begin
-                        if (rd_ptr_o + 24'd32 == ring_size_i) begin
+                        if (wrap_r) begin
                             rd_ptr_o <= 24'd0;
                         end else begin
-                            rd_ptr_o <= rd_ptr_o + 24'd32;
+                            rd_ptr_o <= next_ptr_r;
                         end
                         last_r <= m_axi_rlast_i;
                         sample_idx_r <= 3'd0;
@@ -138,12 +149,36 @@ module edrv32_aud_dma (
     end
 
     always @(posedge clk_i) begin
-        if ((state_r == S_IDLE) && enable_i && !restart_i && !stopped_r &&
-            (bytes_w != 0) && ({14'd0, free_i} >= (bytes_w >> 2))) begin
-            m_axi_araddr_o <= addr_w;
-            m_axi_arlen_o <= bytes_w[8:5] - 1'b1;
+        // Preparation stages keep each wide operation on its own register boundary.
+        // Configuration and RD remain stable until this single outstanding burst starts.
+        ring_last_r <= ring_size_i - 24'd32;
+        if (state_r == S_IDLE) begin
+            next_ptr_r <= rd_ptr_o + 24'd32;
+            wrap_r <= rd_ptr_o == ring_last_r;
+            addr_r <= ring_base_i + {8'd0, rd_ptr_o};
+            ring_left_r <= ring_left_w[3:0];
+            ring_full_r <= |ring_left_w[18:4];
+            forward_r <= forward_w[3:0];
+            forward_full_r <= |forward_w[18:4];
+            wrapped_r <= wr_ptr_i < rd_ptr_o;
+        end
+        if (state_r == S_LIMIT) begin
+            ring_beats_r <= wrapped_r ?
+                (ring_full_r ? 5'd16 : {1'b0, ring_left_r}) :
+                (forward_full_r ? 5'd16 : {1'b0, forward_r});
+            page_beats_r <= (&addr_r[11:9]) ? 5'd16 - {1'b0, addr_r[8:5]} : 5'd16;
+        end
+        if (state_r == S_PLAN) begin
+            beats_r <= ring_beats_r < page_beats_r ? ring_beats_r : page_beats_r;
+        end
+        if (state_r == S_CHECK) begin
+            m_axi_araddr_o <= addr_r;
+            m_axi_arlen_o <= beats_r[3:0] - 1'b1;
         end
         if (m_axi_rvalid_i && m_axi_rready_o) begin
+            // Error draining may accept consecutive beats without the eight emit cycles.
+            next_ptr_r <= wrap_r ? 24'd32 : next_ptr_r + 24'd32;
+            wrap_r <= next_ptr_r == ring_last_r;
             beat_r <= m_axi_rdata_i;
         end
     end

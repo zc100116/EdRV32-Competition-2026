@@ -1,6 +1,6 @@
-"""planes.py — gpu-spec v0.4, 2.5/2.6/2.13 pixel arithmetic.
+"""planes.py — gpu-spec v0.6, 2.5/2.6/2.13 pixel arithmetic.
 Integer plane stepping and normalized sign/magnitude products; host, no clock domain.
-Precision G coefficients and screen-aligned 2x2 difference LOD.
+P-A block-floating coefficients and screen-aligned 2x2 difference LOD.
 """
 from functools import lru_cache
 
@@ -17,7 +17,7 @@ class PixelArithmetic:
     PLANE_BITS = 32
     MANTISSA_BITS = 18
     DROPS = (8, 4, 4, 4, 12, 12, 12)
-    WIDTHS = (62, 66, 66, 66, 58, 58, 58)
+    WIDTHS = (32, 42, 42, 42, 32, 32, 32)
     LOD_QUAD = True
 
     def normal(self, value, exponent=0):
@@ -57,7 +57,7 @@ class PixelArithmetic:
         result = shift(seed * ((2 << fraction) - product), fraction)
         return self.normal(-result if negative else result, -2 * fraction - exponent)
 
-    def __init__(self, vertices, area):
+    def __init__(self, vertices, area, domain=(0, 0, 640, 360)):
         self.origin = (min(v[0] for v in vertices) // 16,
                        min(v[1] for v in vertices) // 16)
         a, b, c = vertices
@@ -85,6 +85,22 @@ class PixelArithmetic:
             self.coefficients.append(tuple(shift(value, drop) for value in (start, *gradients)))
             # Physical plane units include the discarded coefficient bits.
             self.exponents.append(exponent - (0, 30, 38, 38, 16, 16, 16)[channel - 2] + drop)
+
+        # gpu-spec 2.13.6a: round d first, relocate exactly, then round kappa.
+        x0, y0, x1, y1 = domain
+        origin = (x0 // 4 * 4, y0 // 2 * 2)
+        starts = self.at(*origin)
+        self.origin = origin
+        span = 1 << max(10, (x1 - x0 + y1 - y0 + 8).bit_length())
+        self.kappas = []
+        for channel, ((_, gx, gy), start, width) in enumerate(
+                zip(self.coefficients, starts, self.WIDTHS)):
+            bound = abs(start) + span * max(abs(gx), abs(gy))
+            allowance = (1 << (width - 1)) - (span + 2) // 2 - 1
+            kappa = (max(0, bound - 1) // allowance).bit_length()
+            self.kappas.append(kappa)
+            self.coefficients[channel] = tuple(shift(v, kappa) for v in (start, gx, gy))
+            self.exponents[channel] += kappa
 
     def at(self, x, y):
         """Exact integer expression: stepping must retain these same accumulator bits."""

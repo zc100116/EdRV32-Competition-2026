@@ -46,6 +46,8 @@ static FILE *trace;
 static int trace_pending;
 static void trace_snapshot(void);
 static const char *trace_directory;
+static unsigned trace_submission;
+static void trace_submit(const char *phase);
 struct reg_info { uint32_t offset, reset, mask; unsigned writable; };
 static const struct reg_info disp_gpu_registers[] = {
     {D(ID_OFFSET), D(ID_RESET),
@@ -413,7 +415,12 @@ void mmio_write32(uintptr_t address, uint32_t value)
         uint32_t offset = (uint32_t)(address - EDRV32_GPU_BASE);
         if (trace_pending) trace_snapshot();
         if (trace) fprintf(trace, "%u %u\n", offset, value);
+        if (trace && offset == EDRV32_GPU_DOORBELL_OFFSET) trace_submit("input");
         gpu_emu_write(gpu, offset, value);
+        if (trace && offset == EDRV32_GPU_DOORBELL_OFFSET) {
+            trace_submit("output");
+            ++trace_submission;
+        }
     } else if (address >= EDRV32_DISP_BASE &&
                address < EDRV32_DISP_BASE + EDRV32_APB_SLOT_SIZE) {
         uint32_t offset = (uint32_t)(address - EDRV32_DISP_BASE);
@@ -445,6 +452,20 @@ void pc_soc_trace_begin(const char *directory)
 {
     trace_directory = directory;
     trace_pending = 1;
+    trace_submission = 0;
+}
+static void trace_submit(const char *phase)
+{
+    char name[80];
+    snprintf(name, sizeof(name), "submit%04u-%s.bin", trace_submission, phase);
+    FILE *file = trace_file(name, "wb");
+    if (fwrite(ddr, 1, DDR_BYTES, file) != DDR_BYTES) { perror("trace submission"); abort(); }
+    fclose(file);
+    snprintf(name, sizeof(name), "submit%04u-%s-regs.txt", trace_submission, phase);
+    file = trace_file(name, "w");
+    for (unsigned offset = 0; offset < EDRV32_APB_SLOT_SIZE; offset += 4)
+        fprintf(file, "%u %u\n", offset, gpu_emu_read(gpu, offset));
+    fclose(file);
 }
 static void trace_snapshot(void)
 {

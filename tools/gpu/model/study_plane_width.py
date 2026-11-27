@@ -51,7 +51,7 @@ class Reduced(PixelArithmetic):
     QUAD = False
     widths = [0] * 7
 
-    def __init__(self, vertices, area):
+    def __init__(self, vertices, area, domain=None):
         drops = self.DROPS
         self.DROPS = (0,) * 7
         super().__init__(vertices, area)

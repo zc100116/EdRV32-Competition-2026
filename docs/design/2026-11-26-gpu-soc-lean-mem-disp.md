@@ -187,3 +187,196 @@ subprocess.run(['verilator', '--lint-only', '-Wall', '+define+SIM_MODE',
 
 已实现并完成本次范围的回归；独立仿真目录和本任务进程已清理。
 完整系统上板测试、PDS 物理资源和布线结果留给后续板级任务确认。
+
+## R-7：clk_mem 的 AUD 与 GPU 读返回缓冲流水（2026-11-27）
+
+背景：卡 107 round10 的 AUD RD→AR 路径为 19 级、−1.73 ns，GPU mem_xbar
+读返回 credit/地址选择路径为 10–14 级、−0.36～−1.01 ns。约束是端口、事务顺序、
+FIFO 阈值与全局 128 beat 预留/按序归还规则不变；视觉版 mem_xbar 不修改。
+本节改前基线为 `2659df37969d7d37ae3c48e2050b85aeafc2fa6c`，改后为包含本节的提交。
+
+### 方案与决策
+
+AUD 原来一拍串接回绕可用量、环尾、页尾、最小值、FIFO 比较及 AR 使能。
+选择把地址和两个独立的 19 位 beat 差值先寄存，避免把完整 avail 的环形算式送入
+AR 控制。WR 已回绕时，环尾比 avail 更紧；未回绕时，WR−RD 比环尾更紧，
+所以这两种情况分别使用 ring_left 与 forward，结果等于原来的边界最小值。
+各差值只传低 4 位与“至少 16 beat”标志；大数归约在减法所在级结束。
+512 B 对齐的基址使页内低 9 位等于 RD 的低 9 位，页内第八个 512 B 段才需要截短。
+
+AUD 现在依次经过 IDLE（快照）、LIMIT（512 B/4 KiB 限幅）、PLAN（两者取小）、
+CHECK（当前 FIFO 空位比较及 AR 负载寄存），然后进入 ADDR。
+相对原来每次 AR 准备增加 **3 拍**；协调者已通过本任务 ask 明确同意此延迟，
+以逐级预算优先。CHECK 仍比较 `free >= beats × 8`，空数据、禁用、重启或 FIFO
+空位不足都返回 IDLE 重新采样；整个准备过程只有一个状态机，没有重复提交入口。
+AR 发出后地址和长度保持到握手。RD 的下一 beat 地址和回绕标志也提前保存，
+每个 R 握手更新预测值，因此错误排空中连续接收 R beat 也不依赖八拍样本输出间隔。
+以每 beat 至少 1 拍接收和 8 拍输出估算，16-beat 突发原最短 146 拍，现为 149 拍，
+周期增量约 `3/146 = 2.05%`；实际流量仍为规格的 192 KB/s。
+
+GPU rbuf 将 DDR 返回对当前各口 head 的命中先寄存为 port_return，正常 credit
+下一拍才加一；fetch 扣除仍发生在原拍，所以只有保守少算一拍，不会超发。
+分配新 head 时清掉属于旧 head 的延迟命中，避免同时有别口 DDR 返回时误加 credit。
+每描述符另存“已实际返回/合成的 beat − 已 fetch 的 beat”，随原 DDR/fetch 边沿更新，
+错误描述符分配时直接初始化为长度。它提供切换 head 时的完整 credit 快照。
+
+最后一个 beat 被上游接收时，仅寄存下个 head 的二进制与 one-hot 选择；下一拍
+加载其地址和 credit，加载拍不参与 fetch。one-hot 使描述符数据经过并行 AND/OR
+选择；避免二进制 8 选 1 后再做进位运算。每口描述符计数随 reserve/last_take 更新，
+用于判断同拍新事务是否直接成为 head；不再把旧的长优先选择树接到地址/credit CE。
+各口还同步维护 credit 非零标志，递增时置位、递减时判断旧值是否大于一；
+描述符也保存相同标志供 head 加载。仲裁只读该标志，把 port_available 的归约
+与 RAM 地址选择分开，未增加气泡。全局 free_cnt 的预留、释放边沿及 DDR 无反压接口不变。
+
+相比原实现，首次返回的可见 credit 最多晚一拍，同口后续描述符之间多一个加载气泡；
+16-beat、单口持续输出且其余条件理想时，计入原有 head 切换空拍，描述符间隔
+从 17 拍变为 18 拍（约下降 5.56%），其他端口可使用加载拍。该数字是结构估算，
+不是实测带宽。
+没有增加端口、参数、错误检查或兜底路径。
+
+### 验证与深度参考
+
+复现命令（在指定仿真环境中逐项执行，单任务 `-j 1`，没有运行 SoC 仿真）：
+
+```sh
+python3 tools/regress.py full --path verif/unit/aud_dma -j 1
+python3 tools/regress.py full --path verif/unit/aud_fifo -j 1
+python3 tools/regress.py full --path verif/unit/aud_control -j 1
+python3 tools/regress.py full --path verif/unit/mem_xbar_gpu -j 1
+```
+
+风格与 lint：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+python3 - <<'PY_LINT'
+from pathlib import Path
+import subprocess
+from verif.soc.gpu_common.run import sources
+rtl = sources(Path('rtl/filelists/gpu_soc.f').resolve())
+for top in ['edrv32_aud', 'edrv32_mem_xbar_gpu', 'edrv32_gpu_soc_top']:
+    subprocess.run(['verilator', '--lint-only', '-Wall', '+define+SIM_MODE',
+                    '--top-module', top, *rtl], cwd='rtl/filelists', check=True)
+subprocess.run(['python3', 'tools/check/verilog_style.py',
+                *[f for f in rtl if f.endswith(('.v', '.vh'))]], check=True)
+PY_LINT
+```
+
+Yosys 使用 0.70+219（5053d0e26），XC7 LUT6/CARRY4 代理，不等同于 PDS 物理时序。
+测量保留被跟踪的公共信号名，不对正式 RTL 增加用于测量的寄存器。
+下面两段保存为 `build/r7/synth.py`、`build/r7/depth.py` 后依次执行即可复现；
+JSON、综合日志与逐级路径均放在 `build/r7/`，仿真摘要为
+`build/r7/remote-tests.log`、`build/r7/final-tests.log` 与 `build/r7/mem-final.log`，
+lint 摘要为 `build/r7/lint.log`。
+
+```sh
+mkdir -p build/r7
+. ~/.local/opt/edrv32/env.sh
+python3 build/r7/synth.py > build/r7/synth-run.log 2>&1
+python3 build/r7/depth.py > build/r7/depth.txt
+```
+
+综合脚本：
+
+```python
+from pathlib import Path
+import subprocess
+out=Path('build/r7')
+for stem,source in [('aud','rtl/media/aud/edrv32_aud_dma.v'),('rbuf','rtl/mem/edrv32_mem_xbar_rbuf_gpu.v')]:
+    top=Path(source).stem
+    old=out/(stem+'-before.v')
+    old.write_bytes(subprocess.check_output(['git','show','2659df379:'+source]))
+    for version,path in [('before',old),('after',Path(source))]:
+        prefix=out/(stem+'-'+version)
+        commands=[]
+        if stem=='rbuf':
+            commands.append('read_verilog -lib -D SIM_MODE -Irtl/include rtl/tech/edrv32_ram_mem_xbar_r.v')
+        commands += ['read_verilog '+str(path),'proc','setattr -set keep 1 w:port_* w:sent_r* w:received_r* w:port_return_r w:available_r* w:addr_r w:ring_full_r w:forward_full_r w:ring_last_r w:wrap_r w:ring_left_r w:forward_r w:wrapped_r w:ring_beats_r w:page_beats_r w:beats_r w:next_ptr_r w:rd_ptr_o w:m_axi_araddr_o w:m_axi_arlen_o',f'synth_xilinx -top {top} -family xc7 -flatten -noiopad -noclkbuf',f'write_json {prefix}.json','stat','ltp -noff']
+        script=prefix.with_suffix('.ys');script.write_text('\n'.join(commands)+'\n')
+        subprocess.run(['yosys','-Q','-T','-l',str(prefix)+'.log','-s',str(script)],stdout=subprocess.DEVNULL,check=True)
+        print(prefix,flush=True)
+```
+
+路径脚本在 FD/LD 寄存器处停止，分别统计 LUT/INV/MUX 与 CARRY4；进位块数
+不能直接当 LUT 级数，也不把一个 CARRY4 内部当四个 LUT。结果包含目标寄存器
+D、CE 与同步复位置位输入，不跨寄存器拼接路径。
+
+```python
+import json
+from pathlib import Path
+from functools import lru_cache
+for stem in ['aud','rbuf']:
+ for version in ['before','after']:
+    m=json.loads(Path(f'build/r7/{stem}-{version}.json').read_text())['modules']['edrv32_aud_dma' if stem=='aud' else 'edrv32_mem_xbar_rbuf_gpu']
+    cells=m['cells']; nets=m['netnames']; graph={}; ff=[]
+    for name,c in cells.items():
+        t=c['type']; con=c['connections']
+        if t.startswith(('FD','LD')):
+            ff.append((name,c));continue
+        if not t.startswith(('LUT','MUXF','CARRY','INV')):continue
+        ins=[b for p,bs in con.items() if c['port_directions'][p]=='input' for b in bs if isinstance(b,int)]
+        for p,bs in con.items():
+            if c['port_directions'][p]=='output':
+                for b in bs: graph[b]=(ins,t,name)
+    def run(sources,targets):
+        src=set(b for n,v in nets.items() if any(n.startswith(x) for x in sources) for b in v['bits'] if isinstance(b,int))
+        @lru_cache(None)
+        def walk(b):
+            if b in src:return (0,0,[])
+            if b not in graph:return None
+            ins,t,name=graph[b]; paths=[v for i in ins if (v:=walk(i)) is not None]
+            if not paths:return None
+            best=max(paths,key=lambda v:v[0]+v[1]);return(best[0]+(not t.startswith('CARRY')),best[1]+t.startswith('CARRY'),best[2]+[(t,name)])
+        results=[]
+        for name,c in ff:
+            q=set(c['connections']['Q'])
+            dst=[n for n,v in nets.items() if q.intersection(v['bits']) and any(n.startswith(x) for x in targets)]
+            if not dst:continue
+            for port in ['D','CE','R','S']:
+                for b in c['connections'].get(port,[]):
+                    if (r:=walk(b)) is not None:results.append((r[0]+r[1],r[0],r[1],dst[0],port,r[2]))
+        if targets == ['RAM.rd_addr_i']:
+            for b in cells['u_ram']['connections']['rd_addr_i']:
+                if (r:=walk(b)) is not None: results.append((r[0]+r[1],r[0],r[1],'u_ram.rd_addr_i','input',r[2]))
+        if results:
+            r=max(results);print(stem,version,sources,'->',targets,':',r[:5]);print(r[5])
+        else:print(stem,version,sources,'->',targets,': no combinational path')
+    if stem=='aud':
+        run(['rd_ptr_o'],['m_axi_araddr_o','m_axi_arlen_o','state_r'])
+        for x,y in [(['rd_ptr_o'],['addr_r','ring_left_r','ring_full_r','forward_r','forward_full_r','wrapped_r','next_ptr_r','wrap_r']),(['ring_left_r','ring_full_r','forward_r','forward_full_r','wrapped_r','addr_r'],['ring_beats_r','page_beats_r']),(['ring_beats_r','page_beats_r'],['beats_r']),(['beats_r'],['state_r','m_axi_arlen_o'])]:run(x,y)
+    else:
+        run(['sent_r','received_r'],['port_available_r','port_addr_r'])
+        run(['port_head_r','port_head_mask_r'],['port_available_r','port_addr_r'])
+        run(['available_r','start_r','port_return_r'],['port_available_r','port_addr_r'])
+        run(['port_available_r'],['RAM.rd_addr_i'])
+        run(['port_ready_r'],['RAM.rd_addr_i'])
+```
+
+深度结果（非进位逻辑级 + CARRY4 个数）：
+
+| 路径 | 改前 | 改后 |
+|---|---:|---:|
+| AUD RD→AR 负载/状态使能 | 14 + 13 | 原组合通路已被寄存器切断 |
+| AUD RD→地址快照（32 位加法） | — | 1 + 8（单段 32 位进位链） |
+| AUD 边界快照→限幅 | — | 1 + 2 |
+| AUD 限幅→最小长度 | — | 3 + 0 |
+| AUD 最小长度→ARLEN/状态 | — | 1 + 1 |
+| rbuf sent/received→port_available/port_addr | 13 + 2 | 原组合通路已被寄存器切断 |
+| rbuf 寄存的 head 选择→port_available/port_addr | 11 + 2 | 3 + 0 |
+| rbuf 描述符 available/start、延迟返回脉冲→port_available/port_addr | 4 + 0 | 3 + 2 |
+| rbuf port_available→RAM 读地址 | 8 + 0 | 原组合通路已被非零标志寄存器切断 |
+| rbuf port_ready→原有读仲裁→RAM 读地址 | — | **7 + 0，仍超过 3 LUT 预算** |
+
+以上针对原最差路径及其新的相邻分段，不能由此宣称模块所有寄存器间路径均满足预算。
+
+协调者在本任务第二次 ask 中明确接受保留返回仲裁策略，把上述 **Yosys 代理 7 级**
+余段列为已知限制，交卡 107 第 11 轮 PDS 再判断；本次不继续扩大返回仲裁改造范围。
+
+验证结果：AUD DMA、FIFO、control 各 1 PASS；mem_xbar_gpu full、ST-02、常规单元
+三个 Verilator 入口及常规 Icarus 入口共 4 PASS。AUD、mem_xbar_gpu 与 GPU SoC
+顶层 Verilator `-Wall` 均 0 告警，完整 GPU SoC 文件列表 154 个 RTL 的风格检查
+0 告警。仿真工具为 Verilator 5.051 devel（v5.050-99-gf8fb1d664）及 Icarus；
+未运行 SoC 级仿真。指定的独立仿真副本在收集日志后清理。
+
+状态：已实现；本次范围的单元回归和静态检查完成。PDS 物理时序，特别是上述返回仲裁
+余段，以及完整系统的上板测试留待后续板级任务。
