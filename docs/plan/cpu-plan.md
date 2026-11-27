@@ -153,6 +153,7 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | C2-I2 | 整数核第二轮：B0-fix 对照；V5 + ID 提前地址 / 次级 ALU / 编译调度隐藏 load-use；gshare4096 默认；快速除法器；更新三档推荐 | Codex sol（ctx_a7c1fcb5c881） | C2-I | 架构记录追加第二轮；test_pipe_model 通过 | zc100116/gpu-dev | [x] c469ee04a：推荐默认 V5 + ID 级 RF/WB 提前地址 + gshare4096 LUTRAM + BTB128 + 基 2 提前结束除法，5.629 CM/MHz、9.5k LUT/5.3k FF（估算），每 MHz 相对 B0 +1.7%/+12.5%/+11.9%；满配 11.7k LUT；B0 无气泡修补 15.9k LUT、140 MHz 规划，劣于新默认；编译调度无净收益。待用户批准 CPU v2 方向后写规格 |
 | C2-F2 | FPU 按 C2-I 校准的段预算（约 carry32+4 级）重新切拍；ADD/MUL 旁路取舍；队列 8/16 项（LUTRAM）；NONE/F/FD 资源与加速比 | Codex sol（ctx_e78bf0f97d1e） | C2-I | FPU 记录第二版 | zc100116/gpu-dev | [x] b9446ae8b：S ADD/MUL/FMA 5/7/8、D 6/18/20 拍（估算）；F 增量 3.7k LUT/0.9k FF/2 APM，FD 9.9k/4.6k/14；单精度 11.5–13×、FD 双精度 9.6–10.7×（模型）。协调者评审：保留任意项转发（仅末级旁路省 128 LUTRAM 却慢 4.6–9.8%）；F 用 3R 只多 96 LUTRAM、图形核快 7–10%，建议 F 默认 3R；实现阶段再评估 RF 存重编码格式（省 FMA 前两级）和 D 乘法并行级联 |
 | C2-I3 | 整数核第三轮（用户 2026-11-27 要求每 MHz 再提升）：上限分析；早/晚双 ALU 吃同组 RAW；配对类型/结构放宽；取指宽度；不降频前提下的组合推荐 | Codex sol（ctx_d4ff03691d57） | C2-I2 | 架构记录追加第三轮；test_pipe_model 通过 | zc100116/gpu-dev | [x] fd91a07b1：不降频（150 规划 / 135 压力）最高 5.94 CM/MHz（满配 + 早/晚 ALU + 晚分支 + MUL/JALR 双槽 + 8 条 IB，12.9k LUT）；默认基点加晚分支等为 5.83（10.45k LUT）；面积效率最优仍是 5.63 的默认（9.5k）。6.14 需双 LSU + 128 位取指，频率降到 135/120，P×F 反而更低。单独的晚 ALU 只省 0.57%（等待被推给后继指令） |
+| C2-I4 | 整数核第四轮（用户 2026-11-27：不考虑依赖 FPGA LUT/进位链的运算技巧）：TAGE 类预测器、同字/同行双 load、双 bank 非对齐取指、Zba 重估、RAM 寄存器堆（tech 包装）、组合冲 6 CM/MHz | Codex sol（ctx_9dfe961f3b41） | C2-I3 | 架构记录追加第四轮；test_pipe_model 通过 | zc100116/gpu-dev | [~] 进行中 |
 
 ## 6. 变更记录
 
