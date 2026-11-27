@@ -28,7 +28,7 @@ module edrv32_gpu_setup_plane (
     output wire [103:0] plane_gradient_o,
     output wire [9:0] plane_h_o
 );
-    // S-5: registered 18x18 APM partial products, sliced add trees and tagged context.
+    // Fully registered native APM cascades retain the tagged-context result clocks.
     reg [152:0] value_0_r;
     reg [6:0] tag_0_r;
 
@@ -231,49 +231,12 @@ module edrv32_gpu_setup_plane (
     reg [32:0] scale_rounded2_2_r;
     wire [32:0] scale_left2_2_r_d18_r;
     reg [32:0] scaled2_r;
-    reg [33:0] difference0_r;
-    reg [33:0] difference1_r;
+
     wire [6:0] tag_0_r_d19_r;
     wire [3:0] delta_context0_r_0_index20_w;
-    reg [17:0] delta_context0_r_0_read20_r;
-    reg [35:0] product0_0_pp0_0_r;
-    wire [51:0] product0_0_pp0_0_extend_w;
-    wire [51:0] product0_0_pp0_0_aligned_w;
-    reg [34:0] product0_0_pp1_0_r;
-    wire [51:0] product0_0_pp1_0_extend_w;
-    wire [51:0] product0_0_pp1_0_aligned_w;
-    wire [34:0] product0_0_sum0_0_a0_w;
-    wire [34:0] product0_0_sum0_0_b0_w;
-    reg [35:0] product0_0_sum0_0_part0_r;
-    wire [34:0] product0_0_sum0_0_low0_w;
-    wire [16:0] product0_0_sum0_0_a1_w;
-    wire [16:0] product0_0_sum0_0_b1_w;
-    wire [16:0] product0_0_sum0_0_a1_w_d22_r;
-    wire [16:0] product0_0_sum0_0_b1_w_d22_r;
-    reg [16:0] product0_0_sum0_0_part1_r;
-    wire [16:0] product0_0_sum0_0_low1_w;
-    wire [51:0] product0_0_sum0_0_w;
-    wire [34:0] product0_0_sum0_0_low0_w_d23_r;
+
     wire [3:0] delta_context1_r_0_index20_w;
-    reg [17:0] delta_context1_r_0_read20_r;
-    reg [35:0] product0_1_pp0_0_r;
-    wire [51:0] product0_1_pp0_0_extend_w;
-    wire [51:0] product0_1_pp0_0_aligned_w;
-    reg [34:0] product0_1_pp1_0_r;
-    wire [51:0] product0_1_pp1_0_extend_w;
-    wire [51:0] product0_1_pp1_0_aligned_w;
-    wire [34:0] product0_1_sum0_0_a0_w;
-    wire [34:0] product0_1_sum0_0_b0_w;
-    reg [35:0] product0_1_sum0_0_part0_r;
-    wire [34:0] product0_1_sum0_0_low0_w;
-    wire [16:0] product0_1_sum0_0_a1_w;
-    wire [16:0] product0_1_sum0_0_b1_w;
-    wire [16:0] product0_1_sum0_0_a1_w_d22_r;
-    wire [16:0] product0_1_sum0_0_b1_w_d22_r;
-    reg [16:0] product0_1_sum0_0_part1_r;
-    wire [16:0] product0_1_sum0_0_low1_w;
-    wire [51:0] product0_1_sum0_0_w;
-    wire [34:0] product0_1_sum0_0_low0_w_d23_r;
+
     wire [55:0] product_ext0_0_w;
     wire [55:0] product_ext0_1_w;
     wire [34:0] numerator0_a0_w;
@@ -292,163 +255,7 @@ module edrv32_gpu_setup_plane (
     wire [6:0] tag_0_r_d25_r;
     wire [3:0] reciprocal_context_r_0_index26_w;
     reg [30:0] reciprocal_context_r_0_read26_r;
-    reg [35:0] inverse0_pp0_0_r;
-    wire [86:0] inverse0_pp0_0_extend_w;
-    wire [86:0] inverse0_pp0_0_aligned_w;
-    reg [32:0] inverse0_pp0_1_r;
-    wire [86:0] inverse0_pp0_1_extend_w;
-    wire [86:0] inverse0_pp0_1_aligned_w;
-    reg [35:0] inverse0_pp1_0_r;
-    wire [86:0] inverse0_pp1_0_extend_w;
-    wire [86:0] inverse0_pp1_0_aligned_w;
-    reg [32:0] inverse0_pp1_1_r;
-    wire [86:0] inverse0_pp1_1_extend_w;
-    wire [86:0] inverse0_pp1_1_aligned_w;
-    reg [35:0] inverse0_pp2_0_r;
-    wire [86:0] inverse0_pp2_0_extend_w;
-    wire [86:0] inverse0_pp2_0_aligned_w;
-    reg [32:0] inverse0_pp2_1_r;
-    wire [86:0] inverse0_pp2_1_extend_w;
-    wire [86:0] inverse0_pp2_1_aligned_w;
-    reg [22:0] inverse0_pp3_0_r;
-    wire [86:0] inverse0_pp3_0_extend_w;
-    wire [86:0] inverse0_pp3_0_aligned_w;
-    reg [19:0] inverse0_pp3_1_r;
-    wire [86:0] inverse0_pp3_1_extend_w;
-    wire [86:0] inverse0_pp3_1_aligned_w;
-    wire [34:0] inverse0_sum0_0_a0_w;
-    wire [34:0] inverse0_sum0_0_b0_w;
-    reg [35:0] inverse0_sum0_0_part0_r;
-    wire [34:0] inverse0_sum0_0_low0_w;
-    wire [34:0] inverse0_sum0_0_a1_w;
-    wire [34:0] inverse0_sum0_0_b1_w;
-    wire [34:0] inverse0_sum0_0_a1_w_d28_r;
-    wire [34:0] inverse0_sum0_0_b1_w_d28_r;
-    reg [35:0] inverse0_sum0_0_part1_r;
-    wire [34:0] inverse0_sum0_0_low1_w;
-    wire [16:0] inverse0_sum0_0_a2_w;
-    wire [16:0] inverse0_sum0_0_b2_w;
-    wire [16:0] inverse0_sum0_0_a2_w_d29_r;
-    wire [16:0] inverse0_sum0_0_b2_w_d29_r;
-    reg [16:0] inverse0_sum0_0_part2_r;
-    wire [16:0] inverse0_sum0_0_low2_w;
-    wire [86:0] inverse0_sum0_0_w;
-    wire [34:0] inverse0_sum0_0_low1_w_d30_r;
-    wire [34:0] inverse0_sum0_0_low0_w_d30_r;
-    wire [34:0] inverse0_sum0_1_a0_w;
-    wire [34:0] inverse0_sum0_1_b0_w;
-    reg [35:0] inverse0_sum0_1_part0_r;
-    wire [34:0] inverse0_sum0_1_low0_w;
-    wire [34:0] inverse0_sum0_1_a1_w;
-    wire [34:0] inverse0_sum0_1_b1_w;
-    wire [34:0] inverse0_sum0_1_a1_w_d28_r;
-    wire [34:0] inverse0_sum0_1_b1_w_d28_r;
-    reg [35:0] inverse0_sum0_1_part1_r;
-    wire [34:0] inverse0_sum0_1_low1_w;
-    wire [16:0] inverse0_sum0_1_a2_w;
-    wire [16:0] inverse0_sum0_1_b2_w;
-    wire [16:0] inverse0_sum0_1_a2_w_d29_r;
-    wire [16:0] inverse0_sum0_1_b2_w_d29_r;
-    reg [16:0] inverse0_sum0_1_part2_r;
-    wire [16:0] inverse0_sum0_1_low2_w;
-    wire [86:0] inverse0_sum0_1_w;
-    wire [34:0] inverse0_sum0_1_low1_w_d30_r;
-    wire [34:0] inverse0_sum0_1_low0_w_d30_r;
-    wire [34:0] inverse0_sum0_2_a0_w;
-    wire [34:0] inverse0_sum0_2_b0_w;
-    reg [35:0] inverse0_sum0_2_part0_r;
-    wire [34:0] inverse0_sum0_2_low0_w;
-    wire [34:0] inverse0_sum0_2_a1_w;
-    wire [34:0] inverse0_sum0_2_b1_w;
-    wire [34:0] inverse0_sum0_2_a1_w_d28_r;
-    wire [34:0] inverse0_sum0_2_b1_w_d28_r;
-    reg [35:0] inverse0_sum0_2_part1_r;
-    wire [34:0] inverse0_sum0_2_low1_w;
-    wire [16:0] inverse0_sum0_2_a2_w;
-    wire [16:0] inverse0_sum0_2_b2_w;
-    wire [16:0] inverse0_sum0_2_a2_w_d29_r;
-    wire [16:0] inverse0_sum0_2_b2_w_d29_r;
-    reg [16:0] inverse0_sum0_2_part2_r;
-    wire [16:0] inverse0_sum0_2_low2_w;
-    wire [86:0] inverse0_sum0_2_w;
-    wire [34:0] inverse0_sum0_2_low1_w_d30_r;
-    wire [34:0] inverse0_sum0_2_low0_w_d30_r;
-    wire [34:0] inverse0_sum0_3_a0_w;
-    wire [34:0] inverse0_sum0_3_b0_w;
-    reg [35:0] inverse0_sum0_3_part0_r;
-    wire [34:0] inverse0_sum0_3_low0_w;
-    wire [34:0] inverse0_sum0_3_a1_w;
-    wire [34:0] inverse0_sum0_3_b1_w;
-    wire [34:0] inverse0_sum0_3_a1_w_d28_r;
-    wire [34:0] inverse0_sum0_3_b1_w_d28_r;
-    reg [35:0] inverse0_sum0_3_part1_r;
-    wire [34:0] inverse0_sum0_3_low1_w;
-    wire [16:0] inverse0_sum0_3_a2_w;
-    wire [16:0] inverse0_sum0_3_b2_w;
-    wire [16:0] inverse0_sum0_3_a2_w_d29_r;
-    wire [16:0] inverse0_sum0_3_b2_w_d29_r;
-    reg [16:0] inverse0_sum0_3_part2_r;
-    wire [16:0] inverse0_sum0_3_low2_w;
-    wire [86:0] inverse0_sum0_3_w;
-    wire [34:0] inverse0_sum0_3_low1_w_d30_r;
-    wire [34:0] inverse0_sum0_3_low0_w_d30_r;
-    wire [34:0] inverse0_sum1_0_a0_w;
-    wire [34:0] inverse0_sum1_0_b0_w;
-    reg [35:0] inverse0_sum1_0_part0_r;
-    wire [34:0] inverse0_sum1_0_low0_w;
-    wire [34:0] inverse0_sum1_0_a1_w;
-    wire [34:0] inverse0_sum1_0_b1_w;
-    wire [34:0] inverse0_sum1_0_a1_w_d31_r;
-    wire [34:0] inverse0_sum1_0_b1_w_d31_r;
-    reg [35:0] inverse0_sum1_0_part1_r;
-    wire [34:0] inverse0_sum1_0_low1_w;
-    wire [16:0] inverse0_sum1_0_a2_w;
-    wire [16:0] inverse0_sum1_0_b2_w;
-    wire [16:0] inverse0_sum1_0_a2_w_d32_r;
-    wire [16:0] inverse0_sum1_0_b2_w_d32_r;
-    reg [16:0] inverse0_sum1_0_part2_r;
-    wire [16:0] inverse0_sum1_0_low2_w;
-    wire [86:0] inverse0_sum1_0_w;
-    wire [34:0] inverse0_sum1_0_low1_w_d33_r;
-    wire [34:0] inverse0_sum1_0_low0_w_d33_r;
-    wire [34:0] inverse0_sum1_1_a0_w;
-    wire [34:0] inverse0_sum1_1_b0_w;
-    reg [35:0] inverse0_sum1_1_part0_r;
-    wire [34:0] inverse0_sum1_1_low0_w;
-    wire [34:0] inverse0_sum1_1_a1_w;
-    wire [34:0] inverse0_sum1_1_b1_w;
-    wire [34:0] inverse0_sum1_1_a1_w_d31_r;
-    wire [34:0] inverse0_sum1_1_b1_w_d31_r;
-    reg [35:0] inverse0_sum1_1_part1_r;
-    wire [34:0] inverse0_sum1_1_low1_w;
-    wire [16:0] inverse0_sum1_1_a2_w;
-    wire [16:0] inverse0_sum1_1_b2_w;
-    wire [16:0] inverse0_sum1_1_a2_w_d32_r;
-    wire [16:0] inverse0_sum1_1_b2_w_d32_r;
-    reg [16:0] inverse0_sum1_1_part2_r;
-    wire [16:0] inverse0_sum1_1_low2_w;
-    wire [86:0] inverse0_sum1_1_w;
-    wire [34:0] inverse0_sum1_1_low1_w_d33_r;
-    wire [34:0] inverse0_sum1_1_low0_w_d33_r;
-    wire [34:0] inverse0_sum2_0_a0_w;
-    wire [34:0] inverse0_sum2_0_b0_w;
-    reg [35:0] inverse0_sum2_0_part0_r;
-    wire [34:0] inverse0_sum2_0_low0_w;
-    wire [34:0] inverse0_sum2_0_a1_w;
-    wire [34:0] inverse0_sum2_0_b1_w;
-    wire [34:0] inverse0_sum2_0_a1_w_d34_r;
-    wire [34:0] inverse0_sum2_0_b1_w_d34_r;
-    reg [35:0] inverse0_sum2_0_part1_r;
-    wire [34:0] inverse0_sum2_0_low1_w;
-    wire [16:0] inverse0_sum2_0_a2_w;
-    wire [16:0] inverse0_sum2_0_b2_w;
-    wire [16:0] inverse0_sum2_0_a2_w_d35_r;
-    wire [16:0] inverse0_sum2_0_b2_w_d35_r;
-    reg [16:0] inverse0_sum2_0_part2_r;
-    wire [16:0] inverse0_sum2_0_low2_w;
-    wire [86:0] inverse0_sum2_0_w;
-    wire [34:0] inverse0_sum2_0_low1_w_d36_r;
-    wire [34:0] inverse0_sum2_0_low0_w_d36_r;
+
     reg [0:0] inverse_abs0_sign_r;
     reg [86:0] inverse_abs0_invert_r;
     wire [86:0] inverse_abs0_carry_w;
@@ -548,75 +355,7 @@ module edrv32_gpu_setup_plane (
     wire [6:0] tag_0_r_d49_r;
     wire [3:0] offset_context0_r_0_index50_w;
     reg [17:0] offset_context0_r_0_read50_r;
-    reg [35:0] origin_product0_pp0_0_r;
-    wire [73:0] origin_product0_pp0_0_extend_w;
-    wire [73:0] origin_product0_pp0_0_aligned_w;
-    reg [35:0] origin_product0_pp1_0_r;
-    wire [73:0] origin_product0_pp1_0_extend_w;
-    wire [73:0] origin_product0_pp1_0_aligned_w;
-    reg [35:0] origin_product0_pp2_0_r;
-    wire [73:0] origin_product0_pp2_0_extend_w;
-    wire [73:0] origin_product0_pp2_0_aligned_w;
-    reg [22:0] origin_product0_pp3_0_r;
-    wire [73:0] origin_product0_pp3_0_extend_w;
-    wire [73:0] origin_product0_pp3_0_aligned_w;
-    wire [34:0] origin_product0_sum0_0_a0_w;
-    wire [34:0] origin_product0_sum0_0_b0_w;
-    reg [35:0] origin_product0_sum0_0_part0_r;
-    wire [34:0] origin_product0_sum0_0_low0_w;
-    wire [34:0] origin_product0_sum0_0_a1_w;
-    wire [34:0] origin_product0_sum0_0_b1_w;
-    wire [34:0] origin_product0_sum0_0_a1_w_d52_r;
-    wire [34:0] origin_product0_sum0_0_b1_w_d52_r;
-    reg [35:0] origin_product0_sum0_0_part1_r;
-    wire [34:0] origin_product0_sum0_0_low1_w;
-    wire [3:0] origin_product0_sum0_0_a2_w;
-    wire [3:0] origin_product0_sum0_0_b2_w;
-    wire [3:0] origin_product0_sum0_0_a2_w_d53_r;
-    wire [3:0] origin_product0_sum0_0_b2_w_d53_r;
-    reg [3:0] origin_product0_sum0_0_part2_r;
-    wire [3:0] origin_product0_sum0_0_low2_w;
-    wire [73:0] origin_product0_sum0_0_w;
-    wire [34:0] origin_product0_sum0_0_low1_w_d54_r;
-    wire [34:0] origin_product0_sum0_0_low0_w_d54_r;
-    wire [34:0] origin_product0_sum0_1_a0_w;
-    wire [34:0] origin_product0_sum0_1_b0_w;
-    reg [35:0] origin_product0_sum0_1_part0_r;
-    wire [34:0] origin_product0_sum0_1_low0_w;
-    wire [34:0] origin_product0_sum0_1_a1_w;
-    wire [34:0] origin_product0_sum0_1_b1_w;
-    wire [34:0] origin_product0_sum0_1_a1_w_d52_r;
-    wire [34:0] origin_product0_sum0_1_b1_w_d52_r;
-    reg [35:0] origin_product0_sum0_1_part1_r;
-    wire [34:0] origin_product0_sum0_1_low1_w;
-    wire [3:0] origin_product0_sum0_1_a2_w;
-    wire [3:0] origin_product0_sum0_1_b2_w;
-    wire [3:0] origin_product0_sum0_1_a2_w_d53_r;
-    wire [3:0] origin_product0_sum0_1_b2_w_d53_r;
-    reg [3:0] origin_product0_sum0_1_part2_r;
-    wire [3:0] origin_product0_sum0_1_low2_w;
-    wire [73:0] origin_product0_sum0_1_w;
-    wire [34:0] origin_product0_sum0_1_low1_w_d54_r;
-    wire [34:0] origin_product0_sum0_1_low0_w_d54_r;
-    wire [34:0] origin_product0_sum1_0_a0_w;
-    wire [34:0] origin_product0_sum1_0_b0_w;
-    reg [35:0] origin_product0_sum1_0_part0_r;
-    wire [34:0] origin_product0_sum1_0_low0_w;
-    wire [34:0] origin_product0_sum1_0_a1_w;
-    wire [34:0] origin_product0_sum1_0_b1_w;
-    wire [34:0] origin_product0_sum1_0_a1_w_d55_r;
-    wire [34:0] origin_product0_sum1_0_b1_w_d55_r;
-    reg [35:0] origin_product0_sum1_0_part1_r;
-    wire [34:0] origin_product0_sum1_0_low1_w;
-    wire [3:0] origin_product0_sum1_0_a2_w;
-    wire [3:0] origin_product0_sum1_0_b2_w;
-    wire [3:0] origin_product0_sum1_0_a2_w_d56_r;
-    wire [3:0] origin_product0_sum1_0_b2_w_d56_r;
-    reg [3:0] origin_product0_sum1_0_part2_r;
-    wire [3:0] origin_product0_sum1_0_low2_w;
-    wire [73:0] origin_product0_sum1_0_w;
-    wire [34:0] origin_product0_sum1_0_low1_w_d57_r;
-    wire [34:0] origin_product0_sum1_0_low0_w_d57_r;
+
     reg [3:0] drop_gradient0_r;
     reg [0:0] gradient_abs0_sign_r;
     reg [55:0] gradient_abs0_invert_r;
@@ -672,45 +411,9 @@ module edrv32_gpu_setup_plane (
     wire [51:0] stored_signed0_w;
     wire [34:0] stored_signed0_low0_w_d60_r;
     wire [3:0] delta_context2_r_0_index20_w;
-    reg [17:0] delta_context2_r_0_read20_r;
-    reg [35:0] product1_0_pp0_0_r;
-    wire [51:0] product1_0_pp0_0_extend_w;
-    wire [51:0] product1_0_pp0_0_aligned_w;
-    reg [34:0] product1_0_pp1_0_r;
-    wire [51:0] product1_0_pp1_0_extend_w;
-    wire [51:0] product1_0_pp1_0_aligned_w;
-    wire [34:0] product1_0_sum0_0_a0_w;
-    wire [34:0] product1_0_sum0_0_b0_w;
-    reg [35:0] product1_0_sum0_0_part0_r;
-    wire [34:0] product1_0_sum0_0_low0_w;
-    wire [16:0] product1_0_sum0_0_a1_w;
-    wire [16:0] product1_0_sum0_0_b1_w;
-    wire [16:0] product1_0_sum0_0_a1_w_d22_r;
-    wire [16:0] product1_0_sum0_0_b1_w_d22_r;
-    reg [16:0] product1_0_sum0_0_part1_r;
-    wire [16:0] product1_0_sum0_0_low1_w;
-    wire [51:0] product1_0_sum0_0_w;
-    wire [34:0] product1_0_sum0_0_low0_w_d23_r;
+
     wire [3:0] delta_context3_r_0_index20_w;
-    reg [17:0] delta_context3_r_0_read20_r;
-    reg [35:0] product1_1_pp0_0_r;
-    wire [51:0] product1_1_pp0_0_extend_w;
-    wire [51:0] product1_1_pp0_0_aligned_w;
-    reg [34:0] product1_1_pp1_0_r;
-    wire [51:0] product1_1_pp1_0_extend_w;
-    wire [51:0] product1_1_pp1_0_aligned_w;
-    wire [34:0] product1_1_sum0_0_a0_w;
-    wire [34:0] product1_1_sum0_0_b0_w;
-    reg [35:0] product1_1_sum0_0_part0_r;
-    wire [34:0] product1_1_sum0_0_low0_w;
-    wire [16:0] product1_1_sum0_0_a1_w;
-    wire [16:0] product1_1_sum0_0_b1_w;
-    wire [16:0] product1_1_sum0_0_a1_w_d22_r;
-    wire [16:0] product1_1_sum0_0_b1_w_d22_r;
-    reg [16:0] product1_1_sum0_0_part1_r;
-    wire [16:0] product1_1_sum0_0_low1_w;
-    wire [51:0] product1_1_sum0_0_w;
-    wire [34:0] product1_1_sum0_0_low0_w_d23_r;
+
     wire [55:0] product_ext1_0_w;
     wire [55:0] product_ext1_1_w;
     wire [34:0] numerator1_a0_w;
@@ -726,163 +429,7 @@ module edrv32_gpu_setup_plane (
     wire [55:0] numerator1_w;
     wire [34:0] numerator1_low0_w_d25_r;
     reg [55:0] numerator_shift1_r;
-    reg [35:0] inverse1_pp0_0_r;
-    wire [86:0] inverse1_pp0_0_extend_w;
-    wire [86:0] inverse1_pp0_0_aligned_w;
-    reg [32:0] inverse1_pp0_1_r;
-    wire [86:0] inverse1_pp0_1_extend_w;
-    wire [86:0] inverse1_pp0_1_aligned_w;
-    reg [35:0] inverse1_pp1_0_r;
-    wire [86:0] inverse1_pp1_0_extend_w;
-    wire [86:0] inverse1_pp1_0_aligned_w;
-    reg [32:0] inverse1_pp1_1_r;
-    wire [86:0] inverse1_pp1_1_extend_w;
-    wire [86:0] inverse1_pp1_1_aligned_w;
-    reg [35:0] inverse1_pp2_0_r;
-    wire [86:0] inverse1_pp2_0_extend_w;
-    wire [86:0] inverse1_pp2_0_aligned_w;
-    reg [32:0] inverse1_pp2_1_r;
-    wire [86:0] inverse1_pp2_1_extend_w;
-    wire [86:0] inverse1_pp2_1_aligned_w;
-    reg [22:0] inverse1_pp3_0_r;
-    wire [86:0] inverse1_pp3_0_extend_w;
-    wire [86:0] inverse1_pp3_0_aligned_w;
-    reg [19:0] inverse1_pp3_1_r;
-    wire [86:0] inverse1_pp3_1_extend_w;
-    wire [86:0] inverse1_pp3_1_aligned_w;
-    wire [34:0] inverse1_sum0_0_a0_w;
-    wire [34:0] inverse1_sum0_0_b0_w;
-    reg [35:0] inverse1_sum0_0_part0_r;
-    wire [34:0] inverse1_sum0_0_low0_w;
-    wire [34:0] inverse1_sum0_0_a1_w;
-    wire [34:0] inverse1_sum0_0_b1_w;
-    wire [34:0] inverse1_sum0_0_a1_w_d28_r;
-    wire [34:0] inverse1_sum0_0_b1_w_d28_r;
-    reg [35:0] inverse1_sum0_0_part1_r;
-    wire [34:0] inverse1_sum0_0_low1_w;
-    wire [16:0] inverse1_sum0_0_a2_w;
-    wire [16:0] inverse1_sum0_0_b2_w;
-    wire [16:0] inverse1_sum0_0_a2_w_d29_r;
-    wire [16:0] inverse1_sum0_0_b2_w_d29_r;
-    reg [16:0] inverse1_sum0_0_part2_r;
-    wire [16:0] inverse1_sum0_0_low2_w;
-    wire [86:0] inverse1_sum0_0_w;
-    wire [34:0] inverse1_sum0_0_low1_w_d30_r;
-    wire [34:0] inverse1_sum0_0_low0_w_d30_r;
-    wire [34:0] inverse1_sum0_1_a0_w;
-    wire [34:0] inverse1_sum0_1_b0_w;
-    reg [35:0] inverse1_sum0_1_part0_r;
-    wire [34:0] inverse1_sum0_1_low0_w;
-    wire [34:0] inverse1_sum0_1_a1_w;
-    wire [34:0] inverse1_sum0_1_b1_w;
-    wire [34:0] inverse1_sum0_1_a1_w_d28_r;
-    wire [34:0] inverse1_sum0_1_b1_w_d28_r;
-    reg [35:0] inverse1_sum0_1_part1_r;
-    wire [34:0] inverse1_sum0_1_low1_w;
-    wire [16:0] inverse1_sum0_1_a2_w;
-    wire [16:0] inverse1_sum0_1_b2_w;
-    wire [16:0] inverse1_sum0_1_a2_w_d29_r;
-    wire [16:0] inverse1_sum0_1_b2_w_d29_r;
-    reg [16:0] inverse1_sum0_1_part2_r;
-    wire [16:0] inverse1_sum0_1_low2_w;
-    wire [86:0] inverse1_sum0_1_w;
-    wire [34:0] inverse1_sum0_1_low1_w_d30_r;
-    wire [34:0] inverse1_sum0_1_low0_w_d30_r;
-    wire [34:0] inverse1_sum0_2_a0_w;
-    wire [34:0] inverse1_sum0_2_b0_w;
-    reg [35:0] inverse1_sum0_2_part0_r;
-    wire [34:0] inverse1_sum0_2_low0_w;
-    wire [34:0] inverse1_sum0_2_a1_w;
-    wire [34:0] inverse1_sum0_2_b1_w;
-    wire [34:0] inverse1_sum0_2_a1_w_d28_r;
-    wire [34:0] inverse1_sum0_2_b1_w_d28_r;
-    reg [35:0] inverse1_sum0_2_part1_r;
-    wire [34:0] inverse1_sum0_2_low1_w;
-    wire [16:0] inverse1_sum0_2_a2_w;
-    wire [16:0] inverse1_sum0_2_b2_w;
-    wire [16:0] inverse1_sum0_2_a2_w_d29_r;
-    wire [16:0] inverse1_sum0_2_b2_w_d29_r;
-    reg [16:0] inverse1_sum0_2_part2_r;
-    wire [16:0] inverse1_sum0_2_low2_w;
-    wire [86:0] inverse1_sum0_2_w;
-    wire [34:0] inverse1_sum0_2_low1_w_d30_r;
-    wire [34:0] inverse1_sum0_2_low0_w_d30_r;
-    wire [34:0] inverse1_sum0_3_a0_w;
-    wire [34:0] inverse1_sum0_3_b0_w;
-    reg [35:0] inverse1_sum0_3_part0_r;
-    wire [34:0] inverse1_sum0_3_low0_w;
-    wire [34:0] inverse1_sum0_3_a1_w;
-    wire [34:0] inverse1_sum0_3_b1_w;
-    wire [34:0] inverse1_sum0_3_a1_w_d28_r;
-    wire [34:0] inverse1_sum0_3_b1_w_d28_r;
-    reg [35:0] inverse1_sum0_3_part1_r;
-    wire [34:0] inverse1_sum0_3_low1_w;
-    wire [16:0] inverse1_sum0_3_a2_w;
-    wire [16:0] inverse1_sum0_3_b2_w;
-    wire [16:0] inverse1_sum0_3_a2_w_d29_r;
-    wire [16:0] inverse1_sum0_3_b2_w_d29_r;
-    reg [16:0] inverse1_sum0_3_part2_r;
-    wire [16:0] inverse1_sum0_3_low2_w;
-    wire [86:0] inverse1_sum0_3_w;
-    wire [34:0] inverse1_sum0_3_low1_w_d30_r;
-    wire [34:0] inverse1_sum0_3_low0_w_d30_r;
-    wire [34:0] inverse1_sum1_0_a0_w;
-    wire [34:0] inverse1_sum1_0_b0_w;
-    reg [35:0] inverse1_sum1_0_part0_r;
-    wire [34:0] inverse1_sum1_0_low0_w;
-    wire [34:0] inverse1_sum1_0_a1_w;
-    wire [34:0] inverse1_sum1_0_b1_w;
-    wire [34:0] inverse1_sum1_0_a1_w_d31_r;
-    wire [34:0] inverse1_sum1_0_b1_w_d31_r;
-    reg [35:0] inverse1_sum1_0_part1_r;
-    wire [34:0] inverse1_sum1_0_low1_w;
-    wire [16:0] inverse1_sum1_0_a2_w;
-    wire [16:0] inverse1_sum1_0_b2_w;
-    wire [16:0] inverse1_sum1_0_a2_w_d32_r;
-    wire [16:0] inverse1_sum1_0_b2_w_d32_r;
-    reg [16:0] inverse1_sum1_0_part2_r;
-    wire [16:0] inverse1_sum1_0_low2_w;
-    wire [86:0] inverse1_sum1_0_w;
-    wire [34:0] inverse1_sum1_0_low1_w_d33_r;
-    wire [34:0] inverse1_sum1_0_low0_w_d33_r;
-    wire [34:0] inverse1_sum1_1_a0_w;
-    wire [34:0] inverse1_sum1_1_b0_w;
-    reg [35:0] inverse1_sum1_1_part0_r;
-    wire [34:0] inverse1_sum1_1_low0_w;
-    wire [34:0] inverse1_sum1_1_a1_w;
-    wire [34:0] inverse1_sum1_1_b1_w;
-    wire [34:0] inverse1_sum1_1_a1_w_d31_r;
-    wire [34:0] inverse1_sum1_1_b1_w_d31_r;
-    reg [35:0] inverse1_sum1_1_part1_r;
-    wire [34:0] inverse1_sum1_1_low1_w;
-    wire [16:0] inverse1_sum1_1_a2_w;
-    wire [16:0] inverse1_sum1_1_b2_w;
-    wire [16:0] inverse1_sum1_1_a2_w_d32_r;
-    wire [16:0] inverse1_sum1_1_b2_w_d32_r;
-    reg [16:0] inverse1_sum1_1_part2_r;
-    wire [16:0] inverse1_sum1_1_low2_w;
-    wire [86:0] inverse1_sum1_1_w;
-    wire [34:0] inverse1_sum1_1_low1_w_d33_r;
-    wire [34:0] inverse1_sum1_1_low0_w_d33_r;
-    wire [34:0] inverse1_sum2_0_a0_w;
-    wire [34:0] inverse1_sum2_0_b0_w;
-    reg [35:0] inverse1_sum2_0_part0_r;
-    wire [34:0] inverse1_sum2_0_low0_w;
-    wire [34:0] inverse1_sum2_0_a1_w;
-    wire [34:0] inverse1_sum2_0_b1_w;
-    wire [34:0] inverse1_sum2_0_a1_w_d34_r;
-    wire [34:0] inverse1_sum2_0_b1_w_d34_r;
-    reg [35:0] inverse1_sum2_0_part1_r;
-    wire [34:0] inverse1_sum2_0_low1_w;
-    wire [16:0] inverse1_sum2_0_a2_w;
-    wire [16:0] inverse1_sum2_0_b2_w;
-    wire [16:0] inverse1_sum2_0_a2_w_d35_r;
-    wire [16:0] inverse1_sum2_0_b2_w_d35_r;
-    reg [16:0] inverse1_sum2_0_part2_r;
-    wire [16:0] inverse1_sum2_0_low2_w;
-    wire [86:0] inverse1_sum2_0_w;
-    wire [34:0] inverse1_sum2_0_low1_w_d36_r;
-    wire [34:0] inverse1_sum2_0_low0_w_d36_r;
+
     reg [0:0] inverse_abs1_sign_r;
     reg [86:0] inverse_abs1_invert_r;
     wire [86:0] inverse_abs1_carry_w;
@@ -979,75 +526,7 @@ module edrv32_gpu_setup_plane (
     wire [34:0] gradient_signed1_low0_w_d50_r;
     wire [3:0] offset_context1_r_0_index50_w;
     reg [17:0] offset_context1_r_0_read50_r;
-    reg [35:0] origin_product1_pp0_0_r;
-    wire [73:0] origin_product1_pp0_0_extend_w;
-    wire [73:0] origin_product1_pp0_0_aligned_w;
-    reg [35:0] origin_product1_pp1_0_r;
-    wire [73:0] origin_product1_pp1_0_extend_w;
-    wire [73:0] origin_product1_pp1_0_aligned_w;
-    reg [35:0] origin_product1_pp2_0_r;
-    wire [73:0] origin_product1_pp2_0_extend_w;
-    wire [73:0] origin_product1_pp2_0_aligned_w;
-    reg [22:0] origin_product1_pp3_0_r;
-    wire [73:0] origin_product1_pp3_0_extend_w;
-    wire [73:0] origin_product1_pp3_0_aligned_w;
-    wire [34:0] origin_product1_sum0_0_a0_w;
-    wire [34:0] origin_product1_sum0_0_b0_w;
-    reg [35:0] origin_product1_sum0_0_part0_r;
-    wire [34:0] origin_product1_sum0_0_low0_w;
-    wire [34:0] origin_product1_sum0_0_a1_w;
-    wire [34:0] origin_product1_sum0_0_b1_w;
-    wire [34:0] origin_product1_sum0_0_a1_w_d52_r;
-    wire [34:0] origin_product1_sum0_0_b1_w_d52_r;
-    reg [35:0] origin_product1_sum0_0_part1_r;
-    wire [34:0] origin_product1_sum0_0_low1_w;
-    wire [3:0] origin_product1_sum0_0_a2_w;
-    wire [3:0] origin_product1_sum0_0_b2_w;
-    wire [3:0] origin_product1_sum0_0_a2_w_d53_r;
-    wire [3:0] origin_product1_sum0_0_b2_w_d53_r;
-    reg [3:0] origin_product1_sum0_0_part2_r;
-    wire [3:0] origin_product1_sum0_0_low2_w;
-    wire [73:0] origin_product1_sum0_0_w;
-    wire [34:0] origin_product1_sum0_0_low1_w_d54_r;
-    wire [34:0] origin_product1_sum0_0_low0_w_d54_r;
-    wire [34:0] origin_product1_sum0_1_a0_w;
-    wire [34:0] origin_product1_sum0_1_b0_w;
-    reg [35:0] origin_product1_sum0_1_part0_r;
-    wire [34:0] origin_product1_sum0_1_low0_w;
-    wire [34:0] origin_product1_sum0_1_a1_w;
-    wire [34:0] origin_product1_sum0_1_b1_w;
-    wire [34:0] origin_product1_sum0_1_a1_w_d52_r;
-    wire [34:0] origin_product1_sum0_1_b1_w_d52_r;
-    reg [35:0] origin_product1_sum0_1_part1_r;
-    wire [34:0] origin_product1_sum0_1_low1_w;
-    wire [3:0] origin_product1_sum0_1_a2_w;
-    wire [3:0] origin_product1_sum0_1_b2_w;
-    wire [3:0] origin_product1_sum0_1_a2_w_d53_r;
-    wire [3:0] origin_product1_sum0_1_b2_w_d53_r;
-    reg [3:0] origin_product1_sum0_1_part2_r;
-    wire [3:0] origin_product1_sum0_1_low2_w;
-    wire [73:0] origin_product1_sum0_1_w;
-    wire [34:0] origin_product1_sum0_1_low1_w_d54_r;
-    wire [34:0] origin_product1_sum0_1_low0_w_d54_r;
-    wire [34:0] origin_product1_sum1_0_a0_w;
-    wire [34:0] origin_product1_sum1_0_b0_w;
-    reg [35:0] origin_product1_sum1_0_part0_r;
-    wire [34:0] origin_product1_sum1_0_low0_w;
-    wire [34:0] origin_product1_sum1_0_a1_w;
-    wire [34:0] origin_product1_sum1_0_b1_w;
-    wire [34:0] origin_product1_sum1_0_a1_w_d55_r;
-    wire [34:0] origin_product1_sum1_0_b1_w_d55_r;
-    reg [35:0] origin_product1_sum1_0_part1_r;
-    wire [34:0] origin_product1_sum1_0_low1_w;
-    wire [3:0] origin_product1_sum1_0_a2_w;
-    wire [3:0] origin_product1_sum1_0_b2_w;
-    wire [3:0] origin_product1_sum1_0_a2_w_d56_r;
-    wire [3:0] origin_product1_sum1_0_b2_w_d56_r;
-    reg [3:0] origin_product1_sum1_0_part2_r;
-    wire [3:0] origin_product1_sum1_0_low2_w;
-    wire [73:0] origin_product1_sum1_0_w;
-    wire [34:0] origin_product1_sum1_0_low1_w_d57_r;
-    wire [34:0] origin_product1_sum1_0_low0_w_d57_r;
+
     reg [3:0] drop_gradient1_r;
     reg [0:0] gradient_abs1_sign_r;
     reg [55:0] gradient_abs1_invert_r;
@@ -1555,78 +1034,11 @@ module edrv32_gpu_setup_plane (
     reg [32:0] scale_left2_2_r_delay16_r;
     reg [32:0] scale_left2_2_r_delay17_r;
     reg [32:0] scale_left2_2_r_delay18_r;
-    reg [16:0] product0_0_sum0_0_a1_w_delay22_r;
-    reg [16:0] product0_0_sum0_0_b1_w_delay22_r;
-    reg [34:0] product0_0_sum0_0_low0_w_delay23_r;
-    reg [16:0] product0_1_sum0_0_a1_w_delay22_r;
-    reg [16:0] product0_1_sum0_0_b1_w_delay22_r;
-    reg [34:0] product0_1_sum0_0_low0_w_delay23_r;
+
     reg [20:0] numerator0_a1_w_delay24_r;
     reg [20:0] numerator0_b1_w_delay24_r;
     reg [34:0] numerator0_low0_w_delay25_r;
-    reg [34:0] inverse0_sum0_0_a1_w_delay28_r;
-    reg [34:0] inverse0_sum0_0_b1_w_delay28_r;
-    reg [16:0] inverse0_sum0_0_a2_w_delay28_r;
-    reg [16:0] inverse0_sum0_0_a2_w_delay29_r;
-    reg [16:0] inverse0_sum0_0_b2_w_delay28_r;
-    reg [16:0] inverse0_sum0_0_b2_w_delay29_r;
-    reg [34:0] inverse0_sum0_0_low1_w_delay30_r;
-    reg [34:0] inverse0_sum0_0_low0_w_delay29_r;
-    reg [34:0] inverse0_sum0_0_low0_w_delay30_r;
-    reg [34:0] inverse0_sum0_1_a1_w_delay28_r;
-    reg [34:0] inverse0_sum0_1_b1_w_delay28_r;
-    reg [16:0] inverse0_sum0_1_a2_w_delay28_r;
-    reg [16:0] inverse0_sum0_1_a2_w_delay29_r;
-    reg [16:0] inverse0_sum0_1_b2_w_delay28_r;
-    reg [16:0] inverse0_sum0_1_b2_w_delay29_r;
-    reg [34:0] inverse0_sum0_1_low1_w_delay30_r;
-    reg [34:0] inverse0_sum0_1_low0_w_delay29_r;
-    reg [34:0] inverse0_sum0_1_low0_w_delay30_r;
-    reg [34:0] inverse0_sum0_2_a1_w_delay28_r;
-    reg [34:0] inverse0_sum0_2_b1_w_delay28_r;
-    reg [16:0] inverse0_sum0_2_a2_w_delay28_r;
-    reg [16:0] inverse0_sum0_2_a2_w_delay29_r;
-    reg [16:0] inverse0_sum0_2_b2_w_delay28_r;
-    reg [16:0] inverse0_sum0_2_b2_w_delay29_r;
-    reg [34:0] inverse0_sum0_2_low1_w_delay30_r;
-    reg [34:0] inverse0_sum0_2_low0_w_delay29_r;
-    reg [34:0] inverse0_sum0_2_low0_w_delay30_r;
-    reg [34:0] inverse0_sum0_3_a1_w_delay28_r;
-    reg [34:0] inverse0_sum0_3_b1_w_delay28_r;
-    reg [16:0] inverse0_sum0_3_a2_w_delay28_r;
-    reg [16:0] inverse0_sum0_3_a2_w_delay29_r;
-    reg [16:0] inverse0_sum0_3_b2_w_delay28_r;
-    reg [16:0] inverse0_sum0_3_b2_w_delay29_r;
-    reg [34:0] inverse0_sum0_3_low1_w_delay30_r;
-    reg [34:0] inverse0_sum0_3_low0_w_delay29_r;
-    reg [34:0] inverse0_sum0_3_low0_w_delay30_r;
-    reg [34:0] inverse0_sum1_0_a1_w_delay31_r;
-    reg [34:0] inverse0_sum1_0_b1_w_delay31_r;
-    reg [16:0] inverse0_sum1_0_a2_w_delay31_r;
-    reg [16:0] inverse0_sum1_0_a2_w_delay32_r;
-    reg [16:0] inverse0_sum1_0_b2_w_delay31_r;
-    reg [16:0] inverse0_sum1_0_b2_w_delay32_r;
-    reg [34:0] inverse0_sum1_0_low1_w_delay33_r;
-    reg [34:0] inverse0_sum1_0_low0_w_delay32_r;
-    reg [34:0] inverse0_sum1_0_low0_w_delay33_r;
-    reg [34:0] inverse0_sum1_1_a1_w_delay31_r;
-    reg [34:0] inverse0_sum1_1_b1_w_delay31_r;
-    reg [16:0] inverse0_sum1_1_a2_w_delay31_r;
-    reg [16:0] inverse0_sum1_1_a2_w_delay32_r;
-    reg [16:0] inverse0_sum1_1_b2_w_delay31_r;
-    reg [16:0] inverse0_sum1_1_b2_w_delay32_r;
-    reg [34:0] inverse0_sum1_1_low1_w_delay33_r;
-    reg [34:0] inverse0_sum1_1_low0_w_delay32_r;
-    reg [34:0] inverse0_sum1_1_low0_w_delay33_r;
-    reg [34:0] inverse0_sum2_0_a1_w_delay34_r;
-    reg [34:0] inverse0_sum2_0_b1_w_delay34_r;
-    reg [16:0] inverse0_sum2_0_a2_w_delay34_r;
-    reg [16:0] inverse0_sum2_0_a2_w_delay35_r;
-    reg [16:0] inverse0_sum2_0_b2_w_delay34_r;
-    reg [16:0] inverse0_sum2_0_b2_w_delay35_r;
-    reg [34:0] inverse0_sum2_0_low1_w_delay36_r;
-    reg [34:0] inverse0_sum2_0_low0_w_delay35_r;
-    reg [34:0] inverse0_sum2_0_low0_w_delay36_r;
+
     reg [34:0] inverse_abs0_a1_w_delay38_r;
     reg [34:0] inverse_abs0_b1_w_delay38_r;
     reg [16:0] inverse_abs0_a2_w_delay38_r;
@@ -1836,33 +1248,7 @@ module edrv32_gpu_setup_plane (
     reg [20:0] gradient_signed0_a1_w_delay49_r;
     reg [20:0] gradient_signed0_b1_w_delay49_r;
     reg [34:0] gradient_signed0_low0_w_delay50_r;
-    reg [34:0] origin_product0_sum0_0_a1_w_delay52_r;
-    reg [34:0] origin_product0_sum0_0_b1_w_delay52_r;
-    reg [3:0] origin_product0_sum0_0_a2_w_delay52_r;
-    reg [3:0] origin_product0_sum0_0_a2_w_delay53_r;
-    reg [3:0] origin_product0_sum0_0_b2_w_delay52_r;
-    reg [3:0] origin_product0_sum0_0_b2_w_delay53_r;
-    reg [34:0] origin_product0_sum0_0_low1_w_delay54_r;
-    reg [34:0] origin_product0_sum0_0_low0_w_delay53_r;
-    reg [34:0] origin_product0_sum0_0_low0_w_delay54_r;
-    reg [34:0] origin_product0_sum0_1_a1_w_delay52_r;
-    reg [34:0] origin_product0_sum0_1_b1_w_delay52_r;
-    reg [3:0] origin_product0_sum0_1_a2_w_delay52_r;
-    reg [3:0] origin_product0_sum0_1_a2_w_delay53_r;
-    reg [3:0] origin_product0_sum0_1_b2_w_delay52_r;
-    reg [3:0] origin_product0_sum0_1_b2_w_delay53_r;
-    reg [34:0] origin_product0_sum0_1_low1_w_delay54_r;
-    reg [34:0] origin_product0_sum0_1_low0_w_delay53_r;
-    reg [34:0] origin_product0_sum0_1_low0_w_delay54_r;
-    reg [34:0] origin_product0_sum1_0_a1_w_delay55_r;
-    reg [34:0] origin_product0_sum1_0_b1_w_delay55_r;
-    reg [3:0] origin_product0_sum1_0_a2_w_delay55_r;
-    reg [3:0] origin_product0_sum1_0_a2_w_delay56_r;
-    reg [3:0] origin_product0_sum1_0_b2_w_delay55_r;
-    reg [3:0] origin_product0_sum1_0_b2_w_delay56_r;
-    reg [34:0] origin_product0_sum1_0_low1_w_delay57_r;
-    reg [34:0] origin_product0_sum1_0_low0_w_delay56_r;
-    reg [34:0] origin_product0_sum1_0_low0_w_delay57_r;
+
     reg [20:0] gradient_abs0_a1_w_delay52_r;
     reg [20:0] gradient_abs0_b1_w_delay52_r;
     reg [34:0] gradient_abs0_low0_w_delay53_r;
@@ -1984,78 +1370,11 @@ module edrv32_gpu_setup_plane (
     reg [16:0] stored_signed0_a1_w_delay59_r;
     reg [16:0] stored_signed0_b1_w_delay59_r;
     reg [34:0] stored_signed0_low0_w_delay60_r;
-    reg [16:0] product1_0_sum0_0_a1_w_delay22_r;
-    reg [16:0] product1_0_sum0_0_b1_w_delay22_r;
-    reg [34:0] product1_0_sum0_0_low0_w_delay23_r;
-    reg [16:0] product1_1_sum0_0_a1_w_delay22_r;
-    reg [16:0] product1_1_sum0_0_b1_w_delay22_r;
-    reg [34:0] product1_1_sum0_0_low0_w_delay23_r;
+
     reg [20:0] numerator1_a1_w_delay24_r;
     reg [20:0] numerator1_b1_w_delay24_r;
     reg [34:0] numerator1_low0_w_delay25_r;
-    reg [34:0] inverse1_sum0_0_a1_w_delay28_r;
-    reg [34:0] inverse1_sum0_0_b1_w_delay28_r;
-    reg [16:0] inverse1_sum0_0_a2_w_delay28_r;
-    reg [16:0] inverse1_sum0_0_a2_w_delay29_r;
-    reg [16:0] inverse1_sum0_0_b2_w_delay28_r;
-    reg [16:0] inverse1_sum0_0_b2_w_delay29_r;
-    reg [34:0] inverse1_sum0_0_low1_w_delay30_r;
-    reg [34:0] inverse1_sum0_0_low0_w_delay29_r;
-    reg [34:0] inverse1_sum0_0_low0_w_delay30_r;
-    reg [34:0] inverse1_sum0_1_a1_w_delay28_r;
-    reg [34:0] inverse1_sum0_1_b1_w_delay28_r;
-    reg [16:0] inverse1_sum0_1_a2_w_delay28_r;
-    reg [16:0] inverse1_sum0_1_a2_w_delay29_r;
-    reg [16:0] inverse1_sum0_1_b2_w_delay28_r;
-    reg [16:0] inverse1_sum0_1_b2_w_delay29_r;
-    reg [34:0] inverse1_sum0_1_low1_w_delay30_r;
-    reg [34:0] inverse1_sum0_1_low0_w_delay29_r;
-    reg [34:0] inverse1_sum0_1_low0_w_delay30_r;
-    reg [34:0] inverse1_sum0_2_a1_w_delay28_r;
-    reg [34:0] inverse1_sum0_2_b1_w_delay28_r;
-    reg [16:0] inverse1_sum0_2_a2_w_delay28_r;
-    reg [16:0] inverse1_sum0_2_a2_w_delay29_r;
-    reg [16:0] inverse1_sum0_2_b2_w_delay28_r;
-    reg [16:0] inverse1_sum0_2_b2_w_delay29_r;
-    reg [34:0] inverse1_sum0_2_low1_w_delay30_r;
-    reg [34:0] inverse1_sum0_2_low0_w_delay29_r;
-    reg [34:0] inverse1_sum0_2_low0_w_delay30_r;
-    reg [34:0] inverse1_sum0_3_a1_w_delay28_r;
-    reg [34:0] inverse1_sum0_3_b1_w_delay28_r;
-    reg [16:0] inverse1_sum0_3_a2_w_delay28_r;
-    reg [16:0] inverse1_sum0_3_a2_w_delay29_r;
-    reg [16:0] inverse1_sum0_3_b2_w_delay28_r;
-    reg [16:0] inverse1_sum0_3_b2_w_delay29_r;
-    reg [34:0] inverse1_sum0_3_low1_w_delay30_r;
-    reg [34:0] inverse1_sum0_3_low0_w_delay29_r;
-    reg [34:0] inverse1_sum0_3_low0_w_delay30_r;
-    reg [34:0] inverse1_sum1_0_a1_w_delay31_r;
-    reg [34:0] inverse1_sum1_0_b1_w_delay31_r;
-    reg [16:0] inverse1_sum1_0_a2_w_delay31_r;
-    reg [16:0] inverse1_sum1_0_a2_w_delay32_r;
-    reg [16:0] inverse1_sum1_0_b2_w_delay31_r;
-    reg [16:0] inverse1_sum1_0_b2_w_delay32_r;
-    reg [34:0] inverse1_sum1_0_low1_w_delay33_r;
-    reg [34:0] inverse1_sum1_0_low0_w_delay32_r;
-    reg [34:0] inverse1_sum1_0_low0_w_delay33_r;
-    reg [34:0] inverse1_sum1_1_a1_w_delay31_r;
-    reg [34:0] inverse1_sum1_1_b1_w_delay31_r;
-    reg [16:0] inverse1_sum1_1_a2_w_delay31_r;
-    reg [16:0] inverse1_sum1_1_a2_w_delay32_r;
-    reg [16:0] inverse1_sum1_1_b2_w_delay31_r;
-    reg [16:0] inverse1_sum1_1_b2_w_delay32_r;
-    reg [34:0] inverse1_sum1_1_low1_w_delay33_r;
-    reg [34:0] inverse1_sum1_1_low0_w_delay32_r;
-    reg [34:0] inverse1_sum1_1_low0_w_delay33_r;
-    reg [34:0] inverse1_sum2_0_a1_w_delay34_r;
-    reg [34:0] inverse1_sum2_0_b1_w_delay34_r;
-    reg [16:0] inverse1_sum2_0_a2_w_delay34_r;
-    reg [16:0] inverse1_sum2_0_a2_w_delay35_r;
-    reg [16:0] inverse1_sum2_0_b2_w_delay34_r;
-    reg [16:0] inverse1_sum2_0_b2_w_delay35_r;
-    reg [34:0] inverse1_sum2_0_low1_w_delay36_r;
-    reg [34:0] inverse1_sum2_0_low0_w_delay35_r;
-    reg [34:0] inverse1_sum2_0_low0_w_delay36_r;
+
     reg [34:0] inverse_abs1_a1_w_delay38_r;
     reg [34:0] inverse_abs1_b1_w_delay38_r;
     reg [16:0] inverse_abs1_a2_w_delay38_r;
@@ -2265,33 +1584,7 @@ module edrv32_gpu_setup_plane (
     reg [20:0] gradient_signed1_a1_w_delay49_r;
     reg [20:0] gradient_signed1_b1_w_delay49_r;
     reg [34:0] gradient_signed1_low0_w_delay50_r;
-    reg [34:0] origin_product1_sum0_0_a1_w_delay52_r;
-    reg [34:0] origin_product1_sum0_0_b1_w_delay52_r;
-    reg [3:0] origin_product1_sum0_0_a2_w_delay52_r;
-    reg [3:0] origin_product1_sum0_0_a2_w_delay53_r;
-    reg [3:0] origin_product1_sum0_0_b2_w_delay52_r;
-    reg [3:0] origin_product1_sum0_0_b2_w_delay53_r;
-    reg [34:0] origin_product1_sum0_0_low1_w_delay54_r;
-    reg [34:0] origin_product1_sum0_0_low0_w_delay53_r;
-    reg [34:0] origin_product1_sum0_0_low0_w_delay54_r;
-    reg [34:0] origin_product1_sum0_1_a1_w_delay52_r;
-    reg [34:0] origin_product1_sum0_1_b1_w_delay52_r;
-    reg [3:0] origin_product1_sum0_1_a2_w_delay52_r;
-    reg [3:0] origin_product1_sum0_1_a2_w_delay53_r;
-    reg [3:0] origin_product1_sum0_1_b2_w_delay52_r;
-    reg [3:0] origin_product1_sum0_1_b2_w_delay53_r;
-    reg [34:0] origin_product1_sum0_1_low1_w_delay54_r;
-    reg [34:0] origin_product1_sum0_1_low0_w_delay53_r;
-    reg [34:0] origin_product1_sum0_1_low0_w_delay54_r;
-    reg [34:0] origin_product1_sum1_0_a1_w_delay55_r;
-    reg [34:0] origin_product1_sum1_0_b1_w_delay55_r;
-    reg [3:0] origin_product1_sum1_0_a2_w_delay55_r;
-    reg [3:0] origin_product1_sum1_0_a2_w_delay56_r;
-    reg [3:0] origin_product1_sum1_0_b2_w_delay55_r;
-    reg [3:0] origin_product1_sum1_0_b2_w_delay56_r;
-    reg [34:0] origin_product1_sum1_0_low1_w_delay57_r;
-    reg [34:0] origin_product1_sum1_0_low0_w_delay56_r;
-    reg [34:0] origin_product1_sum1_0_low0_w_delay57_r;
+
     reg [20:0] gradient_abs1_a1_w_delay52_r;
     reg [20:0] gradient_abs1_b1_w_delay52_r;
     reg [34:0] gradient_abs1_low0_w_delay53_r;
@@ -2980,31 +2273,11 @@ module edrv32_gpu_setup_plane (
         endcase
     end
     assign delta_context0_r_0_index20_w = tag_0_r_d19_r[6:3];
-    assign product0_0_pp0_0_extend_w = {{16{product0_0_pp0_0_r[35]}}, product0_0_pp0_0_r};
-    assign product0_0_pp0_0_aligned_w = product0_0_pp0_0_extend_w << 0;
-    assign product0_0_pp1_0_extend_w = {{17{product0_0_pp1_0_r[34]}}, product0_0_pp1_0_r};
-    assign product0_0_pp1_0_aligned_w = product0_0_pp1_0_extend_w << 17;
-    // product0_0: 34 x 18, 2 registered APM products; sliced adder tree.
-    assign product0_0_sum0_0_a0_w = product0_0_pp0_0_aligned_w[0 +: 35];
-    assign product0_0_sum0_0_b0_w = product0_0_pp1_0_aligned_w[0 +: 35];
-    assign product0_0_sum0_0_low0_w = product0_0_sum0_0_part0_r[34:0];
-    assign product0_0_sum0_0_a1_w = product0_0_pp0_0_aligned_w[35 +: 17];
-    assign product0_0_sum0_0_b1_w = product0_0_pp1_0_aligned_w[35 +: 17];
-    assign product0_0_sum0_0_low1_w = product0_0_sum0_0_part1_r[16:0];
-    assign product0_0_sum0_0_w = {product0_0_sum0_0_low1_w, product0_0_sum0_0_low0_w_d23_r};
+
+
     assign delta_context1_r_0_index20_w = tag_0_r_d19_r[6:3];
-    assign product0_1_pp0_0_extend_w = {{16{product0_1_pp0_0_r[35]}}, product0_1_pp0_0_r};
-    assign product0_1_pp0_0_aligned_w = product0_1_pp0_0_extend_w << 0;
-    assign product0_1_pp1_0_extend_w = {{17{product0_1_pp1_0_r[34]}}, product0_1_pp1_0_r};
-    assign product0_1_pp1_0_aligned_w = product0_1_pp1_0_extend_w << 17;
-    // product0_1: 34 x 18, 2 registered APM products; sliced adder tree.
-    assign product0_1_sum0_0_a0_w = product0_1_pp0_0_aligned_w[0 +: 35];
-    assign product0_1_sum0_0_b0_w = product0_1_pp1_0_aligned_w[0 +: 35];
-    assign product0_1_sum0_0_low0_w = product0_1_sum0_0_part0_r[34:0];
-    assign product0_1_sum0_0_a1_w = product0_1_pp0_0_aligned_w[35 +: 17];
-    assign product0_1_sum0_0_b1_w = product0_1_pp1_0_aligned_w[35 +: 17];
-    assign product0_1_sum0_0_low1_w = product0_1_sum0_0_part1_r[16:0];
-    assign product0_1_sum0_0_w = {product0_1_sum0_0_low1_w, product0_1_sum0_0_low0_w_d23_r};
+
+
     assign product_ext0_0_w = {{4{product0_0_sum0_0_w[51]}}, product0_0_sum0_0_w};
     assign product_ext0_1_w = {{4{product0_1_sum0_0_w[51]}}, product0_1_sum0_0_w};
     assign numerator0_a0_w = product_ext0_0_w[0 +: 35];
@@ -3015,100 +2288,8 @@ module edrv32_gpu_setup_plane (
     assign numerator0_low1_w = numerator0_part1_r[20:0];
     assign numerator0_w = {numerator0_low1_w, numerator0_low0_w_d25_r};
     assign reciprocal_context_r_0_index26_w = tag_0_r_d25_r[6:3];
-    assign inverse0_pp0_0_extend_w = {{51{inverse0_pp0_0_r[35]}}, inverse0_pp0_0_r};
-    assign inverse0_pp0_0_aligned_w = inverse0_pp0_0_extend_w << 0;
-    assign inverse0_pp0_1_extend_w = {{54{inverse0_pp0_1_r[32]}}, inverse0_pp0_1_r};
-    assign inverse0_pp0_1_aligned_w = inverse0_pp0_1_extend_w << 17;
-    assign inverse0_pp1_0_extend_w = {{51{inverse0_pp1_0_r[35]}}, inverse0_pp1_0_r};
-    assign inverse0_pp1_0_aligned_w = inverse0_pp1_0_extend_w << 17;
-    assign inverse0_pp1_1_extend_w = {{54{inverse0_pp1_1_r[32]}}, inverse0_pp1_1_r};
-    assign inverse0_pp1_1_aligned_w = inverse0_pp1_1_extend_w << 34;
-    assign inverse0_pp2_0_extend_w = {{51{inverse0_pp2_0_r[35]}}, inverse0_pp2_0_r};
-    assign inverse0_pp2_0_aligned_w = inverse0_pp2_0_extend_w << 34;
-    assign inverse0_pp2_1_extend_w = {{54{inverse0_pp2_1_r[32]}}, inverse0_pp2_1_r};
-    assign inverse0_pp2_1_aligned_w = inverse0_pp2_1_extend_w << 51;
-    assign inverse0_pp3_0_extend_w = {{64{inverse0_pp3_0_r[22]}}, inverse0_pp3_0_r};
-    assign inverse0_pp3_0_aligned_w = inverse0_pp3_0_extend_w << 51;
-    assign inverse0_pp3_1_extend_w = {{67{inverse0_pp3_1_r[19]}}, inverse0_pp3_1_r};
-    assign inverse0_pp3_1_aligned_w = inverse0_pp3_1_extend_w << 68;
-    // inverse0: 56 x 31, 8 registered APM products; sliced adder tree.
-    assign inverse0_sum0_0_a0_w = inverse0_pp0_0_aligned_w[0 +: 35];
-    assign inverse0_sum0_0_b0_w = inverse0_pp0_1_aligned_w[0 +: 35];
-    assign inverse0_sum0_0_low0_w = inverse0_sum0_0_part0_r[34:0];
-    assign inverse0_sum0_0_a1_w = inverse0_pp0_0_aligned_w[35 +: 35];
-    assign inverse0_sum0_0_b1_w = inverse0_pp0_1_aligned_w[35 +: 35];
-    assign inverse0_sum0_0_low1_w = inverse0_sum0_0_part1_r[34:0];
-    assign inverse0_sum0_0_a2_w = inverse0_pp0_0_aligned_w[70 +: 17];
-    assign inverse0_sum0_0_b2_w = inverse0_pp0_1_aligned_w[70 +: 17];
-    assign inverse0_sum0_0_low2_w = inverse0_sum0_0_part2_r[16:0];
-    assign inverse0_sum0_0_w = {inverse0_sum0_0_low2_w, inverse0_sum0_0_low1_w_d30_r,
-            inverse0_sum0_0_low0_w_d30_r};
-    assign inverse0_sum0_1_a0_w = inverse0_pp1_0_aligned_w[0 +: 35];
-    assign inverse0_sum0_1_b0_w = inverse0_pp1_1_aligned_w[0 +: 35];
-    assign inverse0_sum0_1_low0_w = inverse0_sum0_1_part0_r[34:0];
-    assign inverse0_sum0_1_a1_w = inverse0_pp1_0_aligned_w[35 +: 35];
-    assign inverse0_sum0_1_b1_w = inverse0_pp1_1_aligned_w[35 +: 35];
-    assign inverse0_sum0_1_low1_w = inverse0_sum0_1_part1_r[34:0];
-    assign inverse0_sum0_1_a2_w = inverse0_pp1_0_aligned_w[70 +: 17];
-    assign inverse0_sum0_1_b2_w = inverse0_pp1_1_aligned_w[70 +: 17];
-    assign inverse0_sum0_1_low2_w = inverse0_sum0_1_part2_r[16:0];
-    assign inverse0_sum0_1_w = {inverse0_sum0_1_low2_w, inverse0_sum0_1_low1_w_d30_r,
-            inverse0_sum0_1_low0_w_d30_r};
-    assign inverse0_sum0_2_a0_w = inverse0_pp2_0_aligned_w[0 +: 35];
-    assign inverse0_sum0_2_b0_w = inverse0_pp2_1_aligned_w[0 +: 35];
-    assign inverse0_sum0_2_low0_w = inverse0_sum0_2_part0_r[34:0];
-    assign inverse0_sum0_2_a1_w = inverse0_pp2_0_aligned_w[35 +: 35];
-    assign inverse0_sum0_2_b1_w = inverse0_pp2_1_aligned_w[35 +: 35];
-    assign inverse0_sum0_2_low1_w = inverse0_sum0_2_part1_r[34:0];
-    assign inverse0_sum0_2_a2_w = inverse0_pp2_0_aligned_w[70 +: 17];
-    assign inverse0_sum0_2_b2_w = inverse0_pp2_1_aligned_w[70 +: 17];
-    assign inverse0_sum0_2_low2_w = inverse0_sum0_2_part2_r[16:0];
-    assign inverse0_sum0_2_w = {inverse0_sum0_2_low2_w, inverse0_sum0_2_low1_w_d30_r,
-            inverse0_sum0_2_low0_w_d30_r};
-    assign inverse0_sum0_3_a0_w = inverse0_pp3_0_aligned_w[0 +: 35];
-    assign inverse0_sum0_3_b0_w = inverse0_pp3_1_aligned_w[0 +: 35];
-    assign inverse0_sum0_3_low0_w = inverse0_sum0_3_part0_r[34:0];
-    assign inverse0_sum0_3_a1_w = inverse0_pp3_0_aligned_w[35 +: 35];
-    assign inverse0_sum0_3_b1_w = inverse0_pp3_1_aligned_w[35 +: 35];
-    assign inverse0_sum0_3_low1_w = inverse0_sum0_3_part1_r[34:0];
-    assign inverse0_sum0_3_a2_w = inverse0_pp3_0_aligned_w[70 +: 17];
-    assign inverse0_sum0_3_b2_w = inverse0_pp3_1_aligned_w[70 +: 17];
-    assign inverse0_sum0_3_low2_w = inverse0_sum0_3_part2_r[16:0];
-    assign inverse0_sum0_3_w = {inverse0_sum0_3_low2_w, inverse0_sum0_3_low1_w_d30_r,
-            inverse0_sum0_3_low0_w_d30_r};
-    assign inverse0_sum1_0_a0_w = inverse0_sum0_0_w[0 +: 35];
-    assign inverse0_sum1_0_b0_w = inverse0_sum0_1_w[0 +: 35];
-    assign inverse0_sum1_0_low0_w = inverse0_sum1_0_part0_r[34:0];
-    assign inverse0_sum1_0_a1_w = inverse0_sum0_0_w[35 +: 35];
-    assign inverse0_sum1_0_b1_w = inverse0_sum0_1_w[35 +: 35];
-    assign inverse0_sum1_0_low1_w = inverse0_sum1_0_part1_r[34:0];
-    assign inverse0_sum1_0_a2_w = inverse0_sum0_0_w[70 +: 17];
-    assign inverse0_sum1_0_b2_w = inverse0_sum0_1_w[70 +: 17];
-    assign inverse0_sum1_0_low2_w = inverse0_sum1_0_part2_r[16:0];
-    assign inverse0_sum1_0_w = {inverse0_sum1_0_low2_w, inverse0_sum1_0_low1_w_d33_r,
-            inverse0_sum1_0_low0_w_d33_r};
-    assign inverse0_sum1_1_a0_w = inverse0_sum0_2_w[0 +: 35];
-    assign inverse0_sum1_1_b0_w = inverse0_sum0_3_w[0 +: 35];
-    assign inverse0_sum1_1_low0_w = inverse0_sum1_1_part0_r[34:0];
-    assign inverse0_sum1_1_a1_w = inverse0_sum0_2_w[35 +: 35];
-    assign inverse0_sum1_1_b1_w = inverse0_sum0_3_w[35 +: 35];
-    assign inverse0_sum1_1_low1_w = inverse0_sum1_1_part1_r[34:0];
-    assign inverse0_sum1_1_a2_w = inverse0_sum0_2_w[70 +: 17];
-    assign inverse0_sum1_1_b2_w = inverse0_sum0_3_w[70 +: 17];
-    assign inverse0_sum1_1_low2_w = inverse0_sum1_1_part2_r[16:0];
-    assign inverse0_sum1_1_w = {inverse0_sum1_1_low2_w, inverse0_sum1_1_low1_w_d33_r,
-            inverse0_sum1_1_low0_w_d33_r};
-    assign inverse0_sum2_0_a0_w = inverse0_sum1_0_w[0 +: 35];
-    assign inverse0_sum2_0_b0_w = inverse0_sum1_1_w[0 +: 35];
-    assign inverse0_sum2_0_low0_w = inverse0_sum2_0_part0_r[34:0];
-    assign inverse0_sum2_0_a1_w = inverse0_sum1_0_w[35 +: 35];
-    assign inverse0_sum2_0_b1_w = inverse0_sum1_1_w[35 +: 35];
-    assign inverse0_sum2_0_low1_w = inverse0_sum2_0_part1_r[34:0];
-    assign inverse0_sum2_0_a2_w = inverse0_sum1_0_w[70 +: 17];
-    assign inverse0_sum2_0_b2_w = inverse0_sum1_1_w[70 +: 17];
-    assign inverse0_sum2_0_low2_w = inverse0_sum2_0_part2_r[16:0];
-    assign inverse0_sum2_0_w = {inverse0_sum2_0_low2_w, inverse0_sum2_0_low1_w_d36_r,
-            inverse0_sum2_0_low0_w_d36_r};
+
+
     assign inverse_abs0_carry_w = {86'b0, inverse_abs0_sign_r};
     assign inverse_abs0_a0_w = inverse_abs0_invert_r[0 +: 35];
     assign inverse_abs0_b0_w = inverse_abs0_carry_w[0 +: 35];
@@ -3229,52 +2410,8 @@ module edrv32_gpu_setup_plane (
     assign gradient_signed0_low1_w = gradient_signed0_part1_r[20:0];
     assign gradient_signed0_w = {gradient_signed0_low1_w, gradient_signed0_low0_w_d50_r};
     assign offset_context0_r_0_index50_w = tag_0_r_d49_r[6:3];
-    assign origin_product0_pp0_0_extend_w = {{38{origin_product0_pp0_0_r[35]}},
-            origin_product0_pp0_0_r};
-    assign origin_product0_pp0_0_aligned_w = origin_product0_pp0_0_extend_w << 0;
-    assign origin_product0_pp1_0_extend_w = {{38{origin_product0_pp1_0_r[35]}},
-            origin_product0_pp1_0_r};
-    assign origin_product0_pp1_0_aligned_w = origin_product0_pp1_0_extend_w << 17;
-    assign origin_product0_pp2_0_extend_w = {{38{origin_product0_pp2_0_r[35]}},
-            origin_product0_pp2_0_r};
-    assign origin_product0_pp2_0_aligned_w = origin_product0_pp2_0_extend_w << 34;
-    assign origin_product0_pp3_0_extend_w = {{51{origin_product0_pp3_0_r[22]}},
-            origin_product0_pp3_0_r};
-    assign origin_product0_pp3_0_aligned_w = origin_product0_pp3_0_extend_w << 51;
-    // origin_product0: 56 x 18, 4 registered APM products; sliced adder tree.
-    assign origin_product0_sum0_0_a0_w = origin_product0_pp0_0_aligned_w[0 +: 35];
-    assign origin_product0_sum0_0_b0_w = origin_product0_pp1_0_aligned_w[0 +: 35];
-    assign origin_product0_sum0_0_low0_w = origin_product0_sum0_0_part0_r[34:0];
-    assign origin_product0_sum0_0_a1_w = origin_product0_pp0_0_aligned_w[35 +: 35];
-    assign origin_product0_sum0_0_b1_w = origin_product0_pp1_0_aligned_w[35 +: 35];
-    assign origin_product0_sum0_0_low1_w = origin_product0_sum0_0_part1_r[34:0];
-    assign origin_product0_sum0_0_a2_w = origin_product0_pp0_0_aligned_w[70 +: 4];
-    assign origin_product0_sum0_0_b2_w = origin_product0_pp1_0_aligned_w[70 +: 4];
-    assign origin_product0_sum0_0_low2_w = origin_product0_sum0_0_part2_r[3:0];
-    assign origin_product0_sum0_0_w = {origin_product0_sum0_0_low2_w,
-            origin_product0_sum0_0_low1_w_d54_r, origin_product0_sum0_0_low0_w_d54_r};
-    assign origin_product0_sum0_1_a0_w = origin_product0_pp2_0_aligned_w[0 +: 35];
-    assign origin_product0_sum0_1_b0_w = origin_product0_pp3_0_aligned_w[0 +: 35];
-    assign origin_product0_sum0_1_low0_w = origin_product0_sum0_1_part0_r[34:0];
-    assign origin_product0_sum0_1_a1_w = origin_product0_pp2_0_aligned_w[35 +: 35];
-    assign origin_product0_sum0_1_b1_w = origin_product0_pp3_0_aligned_w[35 +: 35];
-    assign origin_product0_sum0_1_low1_w = origin_product0_sum0_1_part1_r[34:0];
-    assign origin_product0_sum0_1_a2_w = origin_product0_pp2_0_aligned_w[70 +: 4];
-    assign origin_product0_sum0_1_b2_w = origin_product0_pp3_0_aligned_w[70 +: 4];
-    assign origin_product0_sum0_1_low2_w = origin_product0_sum0_1_part2_r[3:0];
-    assign origin_product0_sum0_1_w = {origin_product0_sum0_1_low2_w,
-            origin_product0_sum0_1_low1_w_d54_r, origin_product0_sum0_1_low0_w_d54_r};
-    assign origin_product0_sum1_0_a0_w = origin_product0_sum0_0_w[0 +: 35];
-    assign origin_product0_sum1_0_b0_w = origin_product0_sum0_1_w[0 +: 35];
-    assign origin_product0_sum1_0_low0_w = origin_product0_sum1_0_part0_r[34:0];
-    assign origin_product0_sum1_0_a1_w = origin_product0_sum0_0_w[35 +: 35];
-    assign origin_product0_sum1_0_b1_w = origin_product0_sum0_1_w[35 +: 35];
-    assign origin_product0_sum1_0_low1_w = origin_product0_sum1_0_part1_r[34:0];
-    assign origin_product0_sum1_0_a2_w = origin_product0_sum0_0_w[70 +: 4];
-    assign origin_product0_sum1_0_b2_w = origin_product0_sum0_1_w[70 +: 4];
-    assign origin_product0_sum1_0_low2_w = origin_product0_sum1_0_part2_r[3:0];
-    assign origin_product0_sum1_0_w = {origin_product0_sum1_0_low2_w,
-            origin_product0_sum1_0_low1_w_d57_r, origin_product0_sum1_0_low0_w_d57_r};
+
+
     assign gradient_abs0_carry_w = {55'b0, gradient_abs0_sign_r};
     assign gradient_abs0_a0_w = gradient_abs0_invert_r[0 +: 35];
     assign gradient_abs0_b0_w = gradient_abs0_carry_w[0 +: 35];
@@ -3323,31 +2460,11 @@ module edrv32_gpu_setup_plane (
     assign stored_signed0_low1_w = stored_signed0_part1_r[16:0];
     assign stored_signed0_w = {stored_signed0_low1_w, stored_signed0_low0_w_d60_r};
     assign delta_context2_r_0_index20_w = tag_0_r_d19_r[6:3];
-    assign product1_0_pp0_0_extend_w = {{16{product1_0_pp0_0_r[35]}}, product1_0_pp0_0_r};
-    assign product1_0_pp0_0_aligned_w = product1_0_pp0_0_extend_w << 0;
-    assign product1_0_pp1_0_extend_w = {{17{product1_0_pp1_0_r[34]}}, product1_0_pp1_0_r};
-    assign product1_0_pp1_0_aligned_w = product1_0_pp1_0_extend_w << 17;
-    // product1_0: 34 x 18, 2 registered APM products; sliced adder tree.
-    assign product1_0_sum0_0_a0_w = product1_0_pp0_0_aligned_w[0 +: 35];
-    assign product1_0_sum0_0_b0_w = product1_0_pp1_0_aligned_w[0 +: 35];
-    assign product1_0_sum0_0_low0_w = product1_0_sum0_0_part0_r[34:0];
-    assign product1_0_sum0_0_a1_w = product1_0_pp0_0_aligned_w[35 +: 17];
-    assign product1_0_sum0_0_b1_w = product1_0_pp1_0_aligned_w[35 +: 17];
-    assign product1_0_sum0_0_low1_w = product1_0_sum0_0_part1_r[16:0];
-    assign product1_0_sum0_0_w = {product1_0_sum0_0_low1_w, product1_0_sum0_0_low0_w_d23_r};
+
+
     assign delta_context3_r_0_index20_w = tag_0_r_d19_r[6:3];
-    assign product1_1_pp0_0_extend_w = {{16{product1_1_pp0_0_r[35]}}, product1_1_pp0_0_r};
-    assign product1_1_pp0_0_aligned_w = product1_1_pp0_0_extend_w << 0;
-    assign product1_1_pp1_0_extend_w = {{17{product1_1_pp1_0_r[34]}}, product1_1_pp1_0_r};
-    assign product1_1_pp1_0_aligned_w = product1_1_pp1_0_extend_w << 17;
-    // product1_1: 34 x 18, 2 registered APM products; sliced adder tree.
-    assign product1_1_sum0_0_a0_w = product1_1_pp0_0_aligned_w[0 +: 35];
-    assign product1_1_sum0_0_b0_w = product1_1_pp1_0_aligned_w[0 +: 35];
-    assign product1_1_sum0_0_low0_w = product1_1_sum0_0_part0_r[34:0];
-    assign product1_1_sum0_0_a1_w = product1_1_pp0_0_aligned_w[35 +: 17];
-    assign product1_1_sum0_0_b1_w = product1_1_pp1_0_aligned_w[35 +: 17];
-    assign product1_1_sum0_0_low1_w = product1_1_sum0_0_part1_r[16:0];
-    assign product1_1_sum0_0_w = {product1_1_sum0_0_low1_w, product1_1_sum0_0_low0_w_d23_r};
+
+
     assign product_ext1_0_w = {{4{product1_0_sum0_0_w[51]}}, product1_0_sum0_0_w};
     assign product_ext1_1_w = {{4{product1_1_sum0_0_w[51]}}, product1_1_sum0_0_w};
     assign numerator1_a0_w = product_ext1_0_w[0 +: 35];
@@ -3357,100 +2474,8 @@ module edrv32_gpu_setup_plane (
     assign numerator1_b1_w = product_ext1_1_w[35 +: 21];
     assign numerator1_low1_w = numerator1_part1_r[20:0];
     assign numerator1_w = {numerator1_low1_w, numerator1_low0_w_d25_r};
-    assign inverse1_pp0_0_extend_w = {{51{inverse1_pp0_0_r[35]}}, inverse1_pp0_0_r};
-    assign inverse1_pp0_0_aligned_w = inverse1_pp0_0_extend_w << 0;
-    assign inverse1_pp0_1_extend_w = {{54{inverse1_pp0_1_r[32]}}, inverse1_pp0_1_r};
-    assign inverse1_pp0_1_aligned_w = inverse1_pp0_1_extend_w << 17;
-    assign inverse1_pp1_0_extend_w = {{51{inverse1_pp1_0_r[35]}}, inverse1_pp1_0_r};
-    assign inverse1_pp1_0_aligned_w = inverse1_pp1_0_extend_w << 17;
-    assign inverse1_pp1_1_extend_w = {{54{inverse1_pp1_1_r[32]}}, inverse1_pp1_1_r};
-    assign inverse1_pp1_1_aligned_w = inverse1_pp1_1_extend_w << 34;
-    assign inverse1_pp2_0_extend_w = {{51{inverse1_pp2_0_r[35]}}, inverse1_pp2_0_r};
-    assign inverse1_pp2_0_aligned_w = inverse1_pp2_0_extend_w << 34;
-    assign inverse1_pp2_1_extend_w = {{54{inverse1_pp2_1_r[32]}}, inverse1_pp2_1_r};
-    assign inverse1_pp2_1_aligned_w = inverse1_pp2_1_extend_w << 51;
-    assign inverse1_pp3_0_extend_w = {{64{inverse1_pp3_0_r[22]}}, inverse1_pp3_0_r};
-    assign inverse1_pp3_0_aligned_w = inverse1_pp3_0_extend_w << 51;
-    assign inverse1_pp3_1_extend_w = {{67{inverse1_pp3_1_r[19]}}, inverse1_pp3_1_r};
-    assign inverse1_pp3_1_aligned_w = inverse1_pp3_1_extend_w << 68;
-    // inverse1: 56 x 31, 8 registered APM products; sliced adder tree.
-    assign inverse1_sum0_0_a0_w = inverse1_pp0_0_aligned_w[0 +: 35];
-    assign inverse1_sum0_0_b0_w = inverse1_pp0_1_aligned_w[0 +: 35];
-    assign inverse1_sum0_0_low0_w = inverse1_sum0_0_part0_r[34:0];
-    assign inverse1_sum0_0_a1_w = inverse1_pp0_0_aligned_w[35 +: 35];
-    assign inverse1_sum0_0_b1_w = inverse1_pp0_1_aligned_w[35 +: 35];
-    assign inverse1_sum0_0_low1_w = inverse1_sum0_0_part1_r[34:0];
-    assign inverse1_sum0_0_a2_w = inverse1_pp0_0_aligned_w[70 +: 17];
-    assign inverse1_sum0_0_b2_w = inverse1_pp0_1_aligned_w[70 +: 17];
-    assign inverse1_sum0_0_low2_w = inverse1_sum0_0_part2_r[16:0];
-    assign inverse1_sum0_0_w = {inverse1_sum0_0_low2_w, inverse1_sum0_0_low1_w_d30_r,
-            inverse1_sum0_0_low0_w_d30_r};
-    assign inverse1_sum0_1_a0_w = inverse1_pp1_0_aligned_w[0 +: 35];
-    assign inverse1_sum0_1_b0_w = inverse1_pp1_1_aligned_w[0 +: 35];
-    assign inverse1_sum0_1_low0_w = inverse1_sum0_1_part0_r[34:0];
-    assign inverse1_sum0_1_a1_w = inverse1_pp1_0_aligned_w[35 +: 35];
-    assign inverse1_sum0_1_b1_w = inverse1_pp1_1_aligned_w[35 +: 35];
-    assign inverse1_sum0_1_low1_w = inverse1_sum0_1_part1_r[34:0];
-    assign inverse1_sum0_1_a2_w = inverse1_pp1_0_aligned_w[70 +: 17];
-    assign inverse1_sum0_1_b2_w = inverse1_pp1_1_aligned_w[70 +: 17];
-    assign inverse1_sum0_1_low2_w = inverse1_sum0_1_part2_r[16:0];
-    assign inverse1_sum0_1_w = {inverse1_sum0_1_low2_w, inverse1_sum0_1_low1_w_d30_r,
-            inverse1_sum0_1_low0_w_d30_r};
-    assign inverse1_sum0_2_a0_w = inverse1_pp2_0_aligned_w[0 +: 35];
-    assign inverse1_sum0_2_b0_w = inverse1_pp2_1_aligned_w[0 +: 35];
-    assign inverse1_sum0_2_low0_w = inverse1_sum0_2_part0_r[34:0];
-    assign inverse1_sum0_2_a1_w = inverse1_pp2_0_aligned_w[35 +: 35];
-    assign inverse1_sum0_2_b1_w = inverse1_pp2_1_aligned_w[35 +: 35];
-    assign inverse1_sum0_2_low1_w = inverse1_sum0_2_part1_r[34:0];
-    assign inverse1_sum0_2_a2_w = inverse1_pp2_0_aligned_w[70 +: 17];
-    assign inverse1_sum0_2_b2_w = inverse1_pp2_1_aligned_w[70 +: 17];
-    assign inverse1_sum0_2_low2_w = inverse1_sum0_2_part2_r[16:0];
-    assign inverse1_sum0_2_w = {inverse1_sum0_2_low2_w, inverse1_sum0_2_low1_w_d30_r,
-            inverse1_sum0_2_low0_w_d30_r};
-    assign inverse1_sum0_3_a0_w = inverse1_pp3_0_aligned_w[0 +: 35];
-    assign inverse1_sum0_3_b0_w = inverse1_pp3_1_aligned_w[0 +: 35];
-    assign inverse1_sum0_3_low0_w = inverse1_sum0_3_part0_r[34:0];
-    assign inverse1_sum0_3_a1_w = inverse1_pp3_0_aligned_w[35 +: 35];
-    assign inverse1_sum0_3_b1_w = inverse1_pp3_1_aligned_w[35 +: 35];
-    assign inverse1_sum0_3_low1_w = inverse1_sum0_3_part1_r[34:0];
-    assign inverse1_sum0_3_a2_w = inverse1_pp3_0_aligned_w[70 +: 17];
-    assign inverse1_sum0_3_b2_w = inverse1_pp3_1_aligned_w[70 +: 17];
-    assign inverse1_sum0_3_low2_w = inverse1_sum0_3_part2_r[16:0];
-    assign inverse1_sum0_3_w = {inverse1_sum0_3_low2_w, inverse1_sum0_3_low1_w_d30_r,
-            inverse1_sum0_3_low0_w_d30_r};
-    assign inverse1_sum1_0_a0_w = inverse1_sum0_0_w[0 +: 35];
-    assign inverse1_sum1_0_b0_w = inverse1_sum0_1_w[0 +: 35];
-    assign inverse1_sum1_0_low0_w = inverse1_sum1_0_part0_r[34:0];
-    assign inverse1_sum1_0_a1_w = inverse1_sum0_0_w[35 +: 35];
-    assign inverse1_sum1_0_b1_w = inverse1_sum0_1_w[35 +: 35];
-    assign inverse1_sum1_0_low1_w = inverse1_sum1_0_part1_r[34:0];
-    assign inverse1_sum1_0_a2_w = inverse1_sum0_0_w[70 +: 17];
-    assign inverse1_sum1_0_b2_w = inverse1_sum0_1_w[70 +: 17];
-    assign inverse1_sum1_0_low2_w = inverse1_sum1_0_part2_r[16:0];
-    assign inverse1_sum1_0_w = {inverse1_sum1_0_low2_w, inverse1_sum1_0_low1_w_d33_r,
-            inverse1_sum1_0_low0_w_d33_r};
-    assign inverse1_sum1_1_a0_w = inverse1_sum0_2_w[0 +: 35];
-    assign inverse1_sum1_1_b0_w = inverse1_sum0_3_w[0 +: 35];
-    assign inverse1_sum1_1_low0_w = inverse1_sum1_1_part0_r[34:0];
-    assign inverse1_sum1_1_a1_w = inverse1_sum0_2_w[35 +: 35];
-    assign inverse1_sum1_1_b1_w = inverse1_sum0_3_w[35 +: 35];
-    assign inverse1_sum1_1_low1_w = inverse1_sum1_1_part1_r[34:0];
-    assign inverse1_sum1_1_a2_w = inverse1_sum0_2_w[70 +: 17];
-    assign inverse1_sum1_1_b2_w = inverse1_sum0_3_w[70 +: 17];
-    assign inverse1_sum1_1_low2_w = inverse1_sum1_1_part2_r[16:0];
-    assign inverse1_sum1_1_w = {inverse1_sum1_1_low2_w, inverse1_sum1_1_low1_w_d33_r,
-            inverse1_sum1_1_low0_w_d33_r};
-    assign inverse1_sum2_0_a0_w = inverse1_sum1_0_w[0 +: 35];
-    assign inverse1_sum2_0_b0_w = inverse1_sum1_1_w[0 +: 35];
-    assign inverse1_sum2_0_low0_w = inverse1_sum2_0_part0_r[34:0];
-    assign inverse1_sum2_0_a1_w = inverse1_sum1_0_w[35 +: 35];
-    assign inverse1_sum2_0_b1_w = inverse1_sum1_1_w[35 +: 35];
-    assign inverse1_sum2_0_low1_w = inverse1_sum2_0_part1_r[34:0];
-    assign inverse1_sum2_0_a2_w = inverse1_sum1_0_w[70 +: 17];
-    assign inverse1_sum2_0_b2_w = inverse1_sum1_1_w[70 +: 17];
-    assign inverse1_sum2_0_low2_w = inverse1_sum2_0_part2_r[16:0];
-    assign inverse1_sum2_0_w = {inverse1_sum2_0_low2_w, inverse1_sum2_0_low1_w_d36_r,
-            inverse1_sum2_0_low0_w_d36_r};
+
+
     assign inverse_abs1_carry_w = {86'b0, inverse_abs1_sign_r};
     assign inverse_abs1_a0_w = inverse_abs1_invert_r[0 +: 35];
     assign inverse_abs1_b0_w = inverse_abs1_carry_w[0 +: 35];
@@ -3570,52 +2595,8 @@ module edrv32_gpu_setup_plane (
     assign gradient_signed1_low1_w = gradient_signed1_part1_r[20:0];
     assign gradient_signed1_w = {gradient_signed1_low1_w, gradient_signed1_low0_w_d50_r};
     assign offset_context1_r_0_index50_w = tag_0_r_d49_r[6:3];
-    assign origin_product1_pp0_0_extend_w = {{38{origin_product1_pp0_0_r[35]}},
-            origin_product1_pp0_0_r};
-    assign origin_product1_pp0_0_aligned_w = origin_product1_pp0_0_extend_w << 0;
-    assign origin_product1_pp1_0_extend_w = {{38{origin_product1_pp1_0_r[35]}},
-            origin_product1_pp1_0_r};
-    assign origin_product1_pp1_0_aligned_w = origin_product1_pp1_0_extend_w << 17;
-    assign origin_product1_pp2_0_extend_w = {{38{origin_product1_pp2_0_r[35]}},
-            origin_product1_pp2_0_r};
-    assign origin_product1_pp2_0_aligned_w = origin_product1_pp2_0_extend_w << 34;
-    assign origin_product1_pp3_0_extend_w = {{51{origin_product1_pp3_0_r[22]}},
-            origin_product1_pp3_0_r};
-    assign origin_product1_pp3_0_aligned_w = origin_product1_pp3_0_extend_w << 51;
-    // origin_product1: 56 x 18, 4 registered APM products; sliced adder tree.
-    assign origin_product1_sum0_0_a0_w = origin_product1_pp0_0_aligned_w[0 +: 35];
-    assign origin_product1_sum0_0_b0_w = origin_product1_pp1_0_aligned_w[0 +: 35];
-    assign origin_product1_sum0_0_low0_w = origin_product1_sum0_0_part0_r[34:0];
-    assign origin_product1_sum0_0_a1_w = origin_product1_pp0_0_aligned_w[35 +: 35];
-    assign origin_product1_sum0_0_b1_w = origin_product1_pp1_0_aligned_w[35 +: 35];
-    assign origin_product1_sum0_0_low1_w = origin_product1_sum0_0_part1_r[34:0];
-    assign origin_product1_sum0_0_a2_w = origin_product1_pp0_0_aligned_w[70 +: 4];
-    assign origin_product1_sum0_0_b2_w = origin_product1_pp1_0_aligned_w[70 +: 4];
-    assign origin_product1_sum0_0_low2_w = origin_product1_sum0_0_part2_r[3:0];
-    assign origin_product1_sum0_0_w = {origin_product1_sum0_0_low2_w,
-            origin_product1_sum0_0_low1_w_d54_r, origin_product1_sum0_0_low0_w_d54_r};
-    assign origin_product1_sum0_1_a0_w = origin_product1_pp2_0_aligned_w[0 +: 35];
-    assign origin_product1_sum0_1_b0_w = origin_product1_pp3_0_aligned_w[0 +: 35];
-    assign origin_product1_sum0_1_low0_w = origin_product1_sum0_1_part0_r[34:0];
-    assign origin_product1_sum0_1_a1_w = origin_product1_pp2_0_aligned_w[35 +: 35];
-    assign origin_product1_sum0_1_b1_w = origin_product1_pp3_0_aligned_w[35 +: 35];
-    assign origin_product1_sum0_1_low1_w = origin_product1_sum0_1_part1_r[34:0];
-    assign origin_product1_sum0_1_a2_w = origin_product1_pp2_0_aligned_w[70 +: 4];
-    assign origin_product1_sum0_1_b2_w = origin_product1_pp3_0_aligned_w[70 +: 4];
-    assign origin_product1_sum0_1_low2_w = origin_product1_sum0_1_part2_r[3:0];
-    assign origin_product1_sum0_1_w = {origin_product1_sum0_1_low2_w,
-            origin_product1_sum0_1_low1_w_d54_r, origin_product1_sum0_1_low0_w_d54_r};
-    assign origin_product1_sum1_0_a0_w = origin_product1_sum0_0_w[0 +: 35];
-    assign origin_product1_sum1_0_b0_w = origin_product1_sum0_1_w[0 +: 35];
-    assign origin_product1_sum1_0_low0_w = origin_product1_sum1_0_part0_r[34:0];
-    assign origin_product1_sum1_0_a1_w = origin_product1_sum0_0_w[35 +: 35];
-    assign origin_product1_sum1_0_b1_w = origin_product1_sum0_1_w[35 +: 35];
-    assign origin_product1_sum1_0_low1_w = origin_product1_sum1_0_part1_r[34:0];
-    assign origin_product1_sum1_0_a2_w = origin_product1_sum0_0_w[70 +: 4];
-    assign origin_product1_sum1_0_b2_w = origin_product1_sum0_1_w[70 +: 4];
-    assign origin_product1_sum1_0_low2_w = origin_product1_sum1_0_part2_r[3:0];
-    assign origin_product1_sum1_0_w = {origin_product1_sum1_0_low2_w,
-            origin_product1_sum1_0_low1_w_d57_r, origin_product1_sum1_0_low0_w_d57_r};
+
+
     assign gradient_abs1_carry_w = {55'b0, gradient_abs1_sign_r};
     assign gradient_abs1_a0_w = gradient_abs1_invert_r[0 +: 35];
     assign gradient_abs1_b0_w = gradient_abs1_carry_w[0 +: 35];
@@ -3824,57 +2805,11 @@ module edrv32_gpu_setup_plane (
     assign scale_rounded2_amt1_w_d16_r = scale_rounded2_amt1_w_delay16_r;
     assign scale_rounded2_amt2_w_d17_r = scale_rounded2_amt2_w_delay17_r;
     assign scale_left2_2_r_d18_r = scale_left2_2_r_delay18_r;
-    assign product0_0_sum0_0_a1_w_d22_r = product0_0_sum0_0_a1_w_delay22_r;
-    assign product0_0_sum0_0_b1_w_d22_r = product0_0_sum0_0_b1_w_delay22_r;
-    assign product0_0_sum0_0_low0_w_d23_r = product0_0_sum0_0_low0_w_delay23_r;
-    assign product0_1_sum0_0_a1_w_d22_r = product0_1_sum0_0_a1_w_delay22_r;
-    assign product0_1_sum0_0_b1_w_d22_r = product0_1_sum0_0_b1_w_delay22_r;
-    assign product0_1_sum0_0_low0_w_d23_r = product0_1_sum0_0_low0_w_delay23_r;
+
     assign numerator0_a1_w_d24_r = numerator0_a1_w_delay24_r;
     assign numerator0_b1_w_d24_r = numerator0_b1_w_delay24_r;
     assign numerator0_low0_w_d25_r = numerator0_low0_w_delay25_r;
-    assign inverse0_sum0_0_a1_w_d28_r = inverse0_sum0_0_a1_w_delay28_r;
-    assign inverse0_sum0_0_b1_w_d28_r = inverse0_sum0_0_b1_w_delay28_r;
-    assign inverse0_sum0_0_a2_w_d29_r = inverse0_sum0_0_a2_w_delay29_r;
-    assign inverse0_sum0_0_b2_w_d29_r = inverse0_sum0_0_b2_w_delay29_r;
-    assign inverse0_sum0_0_low1_w_d30_r = inverse0_sum0_0_low1_w_delay30_r;
-    assign inverse0_sum0_0_low0_w_d30_r = inverse0_sum0_0_low0_w_delay30_r;
-    assign inverse0_sum0_1_a1_w_d28_r = inverse0_sum0_1_a1_w_delay28_r;
-    assign inverse0_sum0_1_b1_w_d28_r = inverse0_sum0_1_b1_w_delay28_r;
-    assign inverse0_sum0_1_a2_w_d29_r = inverse0_sum0_1_a2_w_delay29_r;
-    assign inverse0_sum0_1_b2_w_d29_r = inverse0_sum0_1_b2_w_delay29_r;
-    assign inverse0_sum0_1_low1_w_d30_r = inverse0_sum0_1_low1_w_delay30_r;
-    assign inverse0_sum0_1_low0_w_d30_r = inverse0_sum0_1_low0_w_delay30_r;
-    assign inverse0_sum0_2_a1_w_d28_r = inverse0_sum0_2_a1_w_delay28_r;
-    assign inverse0_sum0_2_b1_w_d28_r = inverse0_sum0_2_b1_w_delay28_r;
-    assign inverse0_sum0_2_a2_w_d29_r = inverse0_sum0_2_a2_w_delay29_r;
-    assign inverse0_sum0_2_b2_w_d29_r = inverse0_sum0_2_b2_w_delay29_r;
-    assign inverse0_sum0_2_low1_w_d30_r = inverse0_sum0_2_low1_w_delay30_r;
-    assign inverse0_sum0_2_low0_w_d30_r = inverse0_sum0_2_low0_w_delay30_r;
-    assign inverse0_sum0_3_a1_w_d28_r = inverse0_sum0_3_a1_w_delay28_r;
-    assign inverse0_sum0_3_b1_w_d28_r = inverse0_sum0_3_b1_w_delay28_r;
-    assign inverse0_sum0_3_a2_w_d29_r = inverse0_sum0_3_a2_w_delay29_r;
-    assign inverse0_sum0_3_b2_w_d29_r = inverse0_sum0_3_b2_w_delay29_r;
-    assign inverse0_sum0_3_low1_w_d30_r = inverse0_sum0_3_low1_w_delay30_r;
-    assign inverse0_sum0_3_low0_w_d30_r = inverse0_sum0_3_low0_w_delay30_r;
-    assign inverse0_sum1_0_a1_w_d31_r = inverse0_sum1_0_a1_w_delay31_r;
-    assign inverse0_sum1_0_b1_w_d31_r = inverse0_sum1_0_b1_w_delay31_r;
-    assign inverse0_sum1_0_a2_w_d32_r = inverse0_sum1_0_a2_w_delay32_r;
-    assign inverse0_sum1_0_b2_w_d32_r = inverse0_sum1_0_b2_w_delay32_r;
-    assign inverse0_sum1_0_low1_w_d33_r = inverse0_sum1_0_low1_w_delay33_r;
-    assign inverse0_sum1_0_low0_w_d33_r = inverse0_sum1_0_low0_w_delay33_r;
-    assign inverse0_sum1_1_a1_w_d31_r = inverse0_sum1_1_a1_w_delay31_r;
-    assign inverse0_sum1_1_b1_w_d31_r = inverse0_sum1_1_b1_w_delay31_r;
-    assign inverse0_sum1_1_a2_w_d32_r = inverse0_sum1_1_a2_w_delay32_r;
-    assign inverse0_sum1_1_b2_w_d32_r = inverse0_sum1_1_b2_w_delay32_r;
-    assign inverse0_sum1_1_low1_w_d33_r = inverse0_sum1_1_low1_w_delay33_r;
-    assign inverse0_sum1_1_low0_w_d33_r = inverse0_sum1_1_low0_w_delay33_r;
-    assign inverse0_sum2_0_a1_w_d34_r = inverse0_sum2_0_a1_w_delay34_r;
-    assign inverse0_sum2_0_b1_w_d34_r = inverse0_sum2_0_b1_w_delay34_r;
-    assign inverse0_sum2_0_a2_w_d35_r = inverse0_sum2_0_a2_w_delay35_r;
-    assign inverse0_sum2_0_b2_w_d35_r = inverse0_sum2_0_b2_w_delay35_r;
-    assign inverse0_sum2_0_low1_w_d36_r = inverse0_sum2_0_low1_w_delay36_r;
-    assign inverse0_sum2_0_low0_w_d36_r = inverse0_sum2_0_low0_w_delay36_r;
+
     assign inverse_abs0_a1_w_d38_r = inverse_abs0_a1_w_delay38_r;
     assign inverse_abs0_b1_w_d38_r = inverse_abs0_b1_w_delay38_r;
     assign inverse_abs0_a2_w_d39_r = inverse_abs0_a2_w_delay39_r;
@@ -3900,24 +2835,7 @@ module edrv32_gpu_setup_plane (
     assign gradient_signed0_a1_w_d49_r = gradient_signed0_a1_w_delay49_r;
     assign gradient_signed0_b1_w_d49_r = gradient_signed0_b1_w_delay49_r;
     assign gradient_signed0_low0_w_d50_r = gradient_signed0_low0_w_delay50_r;
-    assign origin_product0_sum0_0_a1_w_d52_r = origin_product0_sum0_0_a1_w_delay52_r;
-    assign origin_product0_sum0_0_b1_w_d52_r = origin_product0_sum0_0_b1_w_delay52_r;
-    assign origin_product0_sum0_0_a2_w_d53_r = origin_product0_sum0_0_a2_w_delay53_r;
-    assign origin_product0_sum0_0_b2_w_d53_r = origin_product0_sum0_0_b2_w_delay53_r;
-    assign origin_product0_sum0_0_low1_w_d54_r = origin_product0_sum0_0_low1_w_delay54_r;
-    assign origin_product0_sum0_0_low0_w_d54_r = origin_product0_sum0_0_low0_w_delay54_r;
-    assign origin_product0_sum0_1_a1_w_d52_r = origin_product0_sum0_1_a1_w_delay52_r;
-    assign origin_product0_sum0_1_b1_w_d52_r = origin_product0_sum0_1_b1_w_delay52_r;
-    assign origin_product0_sum0_1_a2_w_d53_r = origin_product0_sum0_1_a2_w_delay53_r;
-    assign origin_product0_sum0_1_b2_w_d53_r = origin_product0_sum0_1_b2_w_delay53_r;
-    assign origin_product0_sum0_1_low1_w_d54_r = origin_product0_sum0_1_low1_w_delay54_r;
-    assign origin_product0_sum0_1_low0_w_d54_r = origin_product0_sum0_1_low0_w_delay54_r;
-    assign origin_product0_sum1_0_a1_w_d55_r = origin_product0_sum1_0_a1_w_delay55_r;
-    assign origin_product0_sum1_0_b1_w_d55_r = origin_product0_sum1_0_b1_w_delay55_r;
-    assign origin_product0_sum1_0_a2_w_d56_r = origin_product0_sum1_0_a2_w_delay56_r;
-    assign origin_product0_sum1_0_b2_w_d56_r = origin_product0_sum1_0_b2_w_delay56_r;
-    assign origin_product0_sum1_0_low1_w_d57_r = origin_product0_sum1_0_low1_w_delay57_r;
-    assign origin_product0_sum1_0_low0_w_d57_r = origin_product0_sum1_0_low0_w_delay57_r;
+
     assign gradient_abs0_a1_w_d52_r = gradient_abs0_a1_w_delay52_r;
     assign gradient_abs0_b1_w_d52_r = gradient_abs0_b1_w_delay52_r;
     assign gradient_abs0_low0_w_d53_r = gradient_abs0_low0_w_delay53_r;
@@ -3931,57 +2849,11 @@ module edrv32_gpu_setup_plane (
     assign stored_signed0_a1_w_d59_r = stored_signed0_a1_w_delay59_r;
     assign stored_signed0_b1_w_d59_r = stored_signed0_b1_w_delay59_r;
     assign stored_signed0_low0_w_d60_r = stored_signed0_low0_w_delay60_r;
-    assign product1_0_sum0_0_a1_w_d22_r = product1_0_sum0_0_a1_w_delay22_r;
-    assign product1_0_sum0_0_b1_w_d22_r = product1_0_sum0_0_b1_w_delay22_r;
-    assign product1_0_sum0_0_low0_w_d23_r = product1_0_sum0_0_low0_w_delay23_r;
-    assign product1_1_sum0_0_a1_w_d22_r = product1_1_sum0_0_a1_w_delay22_r;
-    assign product1_1_sum0_0_b1_w_d22_r = product1_1_sum0_0_b1_w_delay22_r;
-    assign product1_1_sum0_0_low0_w_d23_r = product1_1_sum0_0_low0_w_delay23_r;
+
     assign numerator1_a1_w_d24_r = numerator1_a1_w_delay24_r;
     assign numerator1_b1_w_d24_r = numerator1_b1_w_delay24_r;
     assign numerator1_low0_w_d25_r = numerator1_low0_w_delay25_r;
-    assign inverse1_sum0_0_a1_w_d28_r = inverse1_sum0_0_a1_w_delay28_r;
-    assign inverse1_sum0_0_b1_w_d28_r = inverse1_sum0_0_b1_w_delay28_r;
-    assign inverse1_sum0_0_a2_w_d29_r = inverse1_sum0_0_a2_w_delay29_r;
-    assign inverse1_sum0_0_b2_w_d29_r = inverse1_sum0_0_b2_w_delay29_r;
-    assign inverse1_sum0_0_low1_w_d30_r = inverse1_sum0_0_low1_w_delay30_r;
-    assign inverse1_sum0_0_low0_w_d30_r = inverse1_sum0_0_low0_w_delay30_r;
-    assign inverse1_sum0_1_a1_w_d28_r = inverse1_sum0_1_a1_w_delay28_r;
-    assign inverse1_sum0_1_b1_w_d28_r = inverse1_sum0_1_b1_w_delay28_r;
-    assign inverse1_sum0_1_a2_w_d29_r = inverse1_sum0_1_a2_w_delay29_r;
-    assign inverse1_sum0_1_b2_w_d29_r = inverse1_sum0_1_b2_w_delay29_r;
-    assign inverse1_sum0_1_low1_w_d30_r = inverse1_sum0_1_low1_w_delay30_r;
-    assign inverse1_sum0_1_low0_w_d30_r = inverse1_sum0_1_low0_w_delay30_r;
-    assign inverse1_sum0_2_a1_w_d28_r = inverse1_sum0_2_a1_w_delay28_r;
-    assign inverse1_sum0_2_b1_w_d28_r = inverse1_sum0_2_b1_w_delay28_r;
-    assign inverse1_sum0_2_a2_w_d29_r = inverse1_sum0_2_a2_w_delay29_r;
-    assign inverse1_sum0_2_b2_w_d29_r = inverse1_sum0_2_b2_w_delay29_r;
-    assign inverse1_sum0_2_low1_w_d30_r = inverse1_sum0_2_low1_w_delay30_r;
-    assign inverse1_sum0_2_low0_w_d30_r = inverse1_sum0_2_low0_w_delay30_r;
-    assign inverse1_sum0_3_a1_w_d28_r = inverse1_sum0_3_a1_w_delay28_r;
-    assign inverse1_sum0_3_b1_w_d28_r = inverse1_sum0_3_b1_w_delay28_r;
-    assign inverse1_sum0_3_a2_w_d29_r = inverse1_sum0_3_a2_w_delay29_r;
-    assign inverse1_sum0_3_b2_w_d29_r = inverse1_sum0_3_b2_w_delay29_r;
-    assign inverse1_sum0_3_low1_w_d30_r = inverse1_sum0_3_low1_w_delay30_r;
-    assign inverse1_sum0_3_low0_w_d30_r = inverse1_sum0_3_low0_w_delay30_r;
-    assign inverse1_sum1_0_a1_w_d31_r = inverse1_sum1_0_a1_w_delay31_r;
-    assign inverse1_sum1_0_b1_w_d31_r = inverse1_sum1_0_b1_w_delay31_r;
-    assign inverse1_sum1_0_a2_w_d32_r = inverse1_sum1_0_a2_w_delay32_r;
-    assign inverse1_sum1_0_b2_w_d32_r = inverse1_sum1_0_b2_w_delay32_r;
-    assign inverse1_sum1_0_low1_w_d33_r = inverse1_sum1_0_low1_w_delay33_r;
-    assign inverse1_sum1_0_low0_w_d33_r = inverse1_sum1_0_low0_w_delay33_r;
-    assign inverse1_sum1_1_a1_w_d31_r = inverse1_sum1_1_a1_w_delay31_r;
-    assign inverse1_sum1_1_b1_w_d31_r = inverse1_sum1_1_b1_w_delay31_r;
-    assign inverse1_sum1_1_a2_w_d32_r = inverse1_sum1_1_a2_w_delay32_r;
-    assign inverse1_sum1_1_b2_w_d32_r = inverse1_sum1_1_b2_w_delay32_r;
-    assign inverse1_sum1_1_low1_w_d33_r = inverse1_sum1_1_low1_w_delay33_r;
-    assign inverse1_sum1_1_low0_w_d33_r = inverse1_sum1_1_low0_w_delay33_r;
-    assign inverse1_sum2_0_a1_w_d34_r = inverse1_sum2_0_a1_w_delay34_r;
-    assign inverse1_sum2_0_b1_w_d34_r = inverse1_sum2_0_b1_w_delay34_r;
-    assign inverse1_sum2_0_a2_w_d35_r = inverse1_sum2_0_a2_w_delay35_r;
-    assign inverse1_sum2_0_b2_w_d35_r = inverse1_sum2_0_b2_w_delay35_r;
-    assign inverse1_sum2_0_low1_w_d36_r = inverse1_sum2_0_low1_w_delay36_r;
-    assign inverse1_sum2_0_low0_w_d36_r = inverse1_sum2_0_low0_w_delay36_r;
+
     assign inverse_abs1_a1_w_d38_r = inverse_abs1_a1_w_delay38_r;
     assign inverse_abs1_b1_w_d38_r = inverse_abs1_b1_w_delay38_r;
     assign inverse_abs1_a2_w_d39_r = inverse_abs1_a2_w_delay39_r;
@@ -4007,24 +2879,7 @@ module edrv32_gpu_setup_plane (
     assign gradient_signed1_a1_w_d49_r = gradient_signed1_a1_w_delay49_r;
     assign gradient_signed1_b1_w_d49_r = gradient_signed1_b1_w_delay49_r;
     assign gradient_signed1_low0_w_d50_r = gradient_signed1_low0_w_delay50_r;
-    assign origin_product1_sum0_0_a1_w_d52_r = origin_product1_sum0_0_a1_w_delay52_r;
-    assign origin_product1_sum0_0_b1_w_d52_r = origin_product1_sum0_0_b1_w_delay52_r;
-    assign origin_product1_sum0_0_a2_w_d53_r = origin_product1_sum0_0_a2_w_delay53_r;
-    assign origin_product1_sum0_0_b2_w_d53_r = origin_product1_sum0_0_b2_w_delay53_r;
-    assign origin_product1_sum0_0_low1_w_d54_r = origin_product1_sum0_0_low1_w_delay54_r;
-    assign origin_product1_sum0_0_low0_w_d54_r = origin_product1_sum0_0_low0_w_delay54_r;
-    assign origin_product1_sum0_1_a1_w_d52_r = origin_product1_sum0_1_a1_w_delay52_r;
-    assign origin_product1_sum0_1_b1_w_d52_r = origin_product1_sum0_1_b1_w_delay52_r;
-    assign origin_product1_sum0_1_a2_w_d53_r = origin_product1_sum0_1_a2_w_delay53_r;
-    assign origin_product1_sum0_1_b2_w_d53_r = origin_product1_sum0_1_b2_w_delay53_r;
-    assign origin_product1_sum0_1_low1_w_d54_r = origin_product1_sum0_1_low1_w_delay54_r;
-    assign origin_product1_sum0_1_low0_w_d54_r = origin_product1_sum0_1_low0_w_delay54_r;
-    assign origin_product1_sum1_0_a1_w_d55_r = origin_product1_sum1_0_a1_w_delay55_r;
-    assign origin_product1_sum1_0_b1_w_d55_r = origin_product1_sum1_0_b1_w_delay55_r;
-    assign origin_product1_sum1_0_a2_w_d56_r = origin_product1_sum1_0_a2_w_delay56_r;
-    assign origin_product1_sum1_0_b2_w_d56_r = origin_product1_sum1_0_b2_w_delay56_r;
-    assign origin_product1_sum1_0_low1_w_d57_r = origin_product1_sum1_0_low1_w_delay57_r;
-    assign origin_product1_sum1_0_low0_w_d57_r = origin_product1_sum1_0_low0_w_delay57_r;
+
     assign gradient_abs1_a1_w_d52_r = gradient_abs1_a1_w_delay52_r;
     assign gradient_abs1_b1_w_d52_r = gradient_abs1_b1_w_delay52_r;
     assign gradient_abs1_low0_w_d53_r = gradient_abs1_low0_w_delay53_r;
@@ -4131,10 +2986,10 @@ module edrv32_gpu_setup_plane (
     );
     assign stored_signed0_w_d84_r = unused_stored_signed0_w_d84_r_data_w[51:0];
     // Local credit copies preserve the enable contract for each arithmetic region.
-    wire [18:0] pipeline_enable_w;
+    wire [17:0] pipeline_enable_w;
     genvar enable_region;
     generate
-        for (enable_region = 0; enable_region < 19;
+        for (enable_region = 0; enable_region < 18;
             enable_region = enable_region + 1) begin : g_enable_region
             (* keep = "true", syn_preserve = 1 *) reg [1:0] region_count_r;
             assign pipeline_enable_w[enable_region] = region_count_r != 2 && !stop_i;
@@ -4263,26 +3118,7 @@ module edrv32_gpu_setup_plane (
             scale_rounded2_2_r <= unused_scale_rounded2_2_w[32:0];
             scaled2_r <= $signed(h_d18_r) > 0 ? scale_rounded2_2_r[32:0] :
             scale_left2_2_r_d18_r[32:0];
-            difference0_r <= $signed({1'b0, scaled1_r}) - $signed({1'b0, scaled0_r});
-            difference1_r <= $signed({1'b0, scaled2_r}) - $signed({1'b0, scaled0_r});
-            delta_context0_r_0_read20_r <= unused_delta_context0_read0_w[0 +: 18];
-            product0_0_pp0_0_r <= $signed({1'b0, difference0_r[0 +: 17]}) *
-            $signed(delta_context0_r_0_read20_r);
-            product0_0_pp1_0_r <= $signed(difference0_r[17 +: 17]) *
-            $signed(delta_context0_r_0_read20_r);
-            product0_0_sum0_0_part0_r <= {1'b0, product0_0_sum0_0_a0_w} + {1'b0,
-            product0_0_sum0_0_b0_w};
-            product0_0_sum0_0_part1_r <= product0_0_sum0_0_a1_w_d22_r +
-            product0_0_sum0_0_b1_w_d22_r + {16'b0, product0_0_sum0_0_part0_r[35]};
-            delta_context1_r_0_read20_r <= unused_delta_context1_read0_w[0 +: 18];
-            product0_1_pp0_0_r <= $signed({1'b0, difference1_r[0 +: 17]}) *
-            $signed(delta_context1_r_0_read20_r);
-            product0_1_pp1_0_r <= $signed(difference1_r[17 +: 17]) *
-            $signed(delta_context1_r_0_read20_r);
-            product0_1_sum0_0_part0_r <= {1'b0, product0_1_sum0_0_a0_w} + {1'b0,
-            product0_1_sum0_0_b0_w};
-            product0_1_sum0_0_part1_r <= product0_1_sum0_0_a1_w_d22_r +
-            product0_1_sum0_0_b1_w_d22_r + {16'b0, product0_1_sum0_0_part0_r[35]};
+
             numerator0_part0_r <= {1'b0, numerator0_a0_w} + {1'b0, numerator0_b0_w};
         end
     end
@@ -4293,57 +3129,7 @@ module edrv32_gpu_setup_plane (
             numerator_shift0_r <= numerator0_w << 4;
             reciprocal_context_r_0_read26_r <=
             unused_reciprocal_context_read0_w[0 +: 31];
-            inverse0_pp0_0_r <= $signed({1'b0, numerator_shift0_r[0 +: 17]}) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[0 +: 17]});
-            inverse0_pp0_1_r <= $signed({1'b0, numerator_shift0_r[0 +: 17]}) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[17 +: 14]});
-            inverse0_pp1_0_r <= $signed({1'b0, numerator_shift0_r[17 +: 17]}) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[0 +: 17]});
-            inverse0_pp1_1_r <= $signed({1'b0, numerator_shift0_r[17 +: 17]}) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[17 +: 14]});
-            inverse0_pp2_0_r <= $signed({1'b0, numerator_shift0_r[34 +: 17]}) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[0 +: 17]});
-            inverse0_pp2_1_r <= $signed({1'b0, numerator_shift0_r[34 +: 17]}) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[17 +: 14]});
-            inverse0_pp3_0_r <= $signed(numerator_shift0_r[51 +: 5]) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[0 +: 17]});
-            inverse0_pp3_1_r <= $signed(numerator_shift0_r[51 +: 5]) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[17 +: 14]});
-            inverse0_sum0_0_part0_r <= {1'b0, inverse0_sum0_0_a0_w} + {1'b0, inverse0_sum0_0_b0_w};
-            inverse0_sum0_0_part1_r <= {1'b0, inverse0_sum0_0_a1_w_d28_r} + {1'b0,
-            inverse0_sum0_0_b1_w_d28_r} + {35'b0, inverse0_sum0_0_part0_r[35]};
-            inverse0_sum0_0_part2_r <= inverse0_sum0_0_a2_w_d29_r + inverse0_sum0_0_b2_w_d29_r
-            + {16'b0, inverse0_sum0_0_part1_r[35]};
-            inverse0_sum0_1_part0_r <= {1'b0, inverse0_sum0_1_a0_w} + {1'b0, inverse0_sum0_1_b0_w};
-            inverse0_sum0_1_part1_r <= {1'b0, inverse0_sum0_1_a1_w_d28_r} + {1'b0,
-            inverse0_sum0_1_b1_w_d28_r} + {35'b0, inverse0_sum0_1_part0_r[35]};
-            inverse0_sum0_1_part2_r <= inverse0_sum0_1_a2_w_d29_r + inverse0_sum0_1_b2_w_d29_r
-            + {16'b0, inverse0_sum0_1_part1_r[35]};
-            inverse0_sum0_2_part0_r <= {1'b0, inverse0_sum0_2_a0_w} + {1'b0, inverse0_sum0_2_b0_w};
-            inverse0_sum0_2_part1_r <= {1'b0, inverse0_sum0_2_a1_w_d28_r} + {1'b0,
-            inverse0_sum0_2_b1_w_d28_r} + {35'b0, inverse0_sum0_2_part0_r[35]};
-            inverse0_sum0_2_part2_r <= inverse0_sum0_2_a2_w_d29_r + inverse0_sum0_2_b2_w_d29_r
-            + {16'b0, inverse0_sum0_2_part1_r[35]};
-            inverse0_sum0_3_part0_r <= {1'b0, inverse0_sum0_3_a0_w} + {1'b0, inverse0_sum0_3_b0_w};
-            inverse0_sum0_3_part1_r <= {1'b0, inverse0_sum0_3_a1_w_d28_r} + {1'b0,
-            inverse0_sum0_3_b1_w_d28_r} + {35'b0, inverse0_sum0_3_part0_r[35]};
-            inverse0_sum0_3_part2_r <= inverse0_sum0_3_a2_w_d29_r + inverse0_sum0_3_b2_w_d29_r
-            + {16'b0, inverse0_sum0_3_part1_r[35]};
-            inverse0_sum1_0_part0_r <= {1'b0, inverse0_sum1_0_a0_w} + {1'b0, inverse0_sum1_0_b0_w};
-            inverse0_sum1_0_part1_r <= {1'b0, inverse0_sum1_0_a1_w_d31_r} + {1'b0,
-            inverse0_sum1_0_b1_w_d31_r} + {35'b0, inverse0_sum1_0_part0_r[35]};
-            inverse0_sum1_0_part2_r <= inverse0_sum1_0_a2_w_d32_r + inverse0_sum1_0_b2_w_d32_r
-            + {16'b0, inverse0_sum1_0_part1_r[35]};
-            inverse0_sum1_1_part0_r <= {1'b0, inverse0_sum1_1_a0_w} + {1'b0, inverse0_sum1_1_b0_w};
-            inverse0_sum1_1_part1_r <= {1'b0, inverse0_sum1_1_a1_w_d31_r} + {1'b0,
-            inverse0_sum1_1_b1_w_d31_r} + {35'b0, inverse0_sum1_1_part0_r[35]};
-            inverse0_sum1_1_part2_r <= inverse0_sum1_1_a2_w_d32_r + inverse0_sum1_1_b2_w_d32_r
-            + {16'b0, inverse0_sum1_1_part1_r[35]};
-            inverse0_sum2_0_part0_r <= {1'b0, inverse0_sum2_0_a0_w} + {1'b0, inverse0_sum2_0_b0_w};
-            inverse0_sum2_0_part1_r <= {1'b0, inverse0_sum2_0_a1_w_d34_r} + {1'b0,
-            inverse0_sum2_0_b1_w_d34_r} + {35'b0, inverse0_sum2_0_part0_r[35]};
-            inverse0_sum2_0_part2_r <= inverse0_sum2_0_a2_w_d35_r + inverse0_sum2_0_b2_w_d35_r
-            + {16'b0, inverse0_sum2_0_part1_r[35]};
+
             inverse_abs0_sign_r <= inverse0_sum2_0_w[86];
             inverse_abs0_invert_r <= inverse0_sum2_0_w[86] ? ~inverse0_sum2_0_w : inverse0_sum2_0_w;
             inverse_abs0_part0_r <= {1'b0, inverse_abs0_a0_w} + {1'b0, inverse_abs0_b0_w};
@@ -4377,36 +3163,12 @@ module edrv32_gpu_setup_plane (
             gradient_signed0_part1_r <= gradient_signed0_a1_w_d49_r +
             gradient_signed0_b1_w_d49_r + {20'b0, gradient_signed0_part0_r[35]};
             offset_context0_r_0_read50_r <= unused_offset_context0_read0_w[0 +: 18];
-            origin_product0_pp0_0_r <= $signed({1'b0, gradient_signed0_w[0 +: 17]}) *
-            $signed(offset_context0_r_0_read50_r);
-            origin_product0_pp1_0_r <= $signed({1'b0, gradient_signed0_w[17 +: 17]}) *
-            $signed(offset_context0_r_0_read50_r);
-            origin_product0_pp2_0_r <= $signed({1'b0, gradient_signed0_w[34 +: 17]}) *
-            $signed(offset_context0_r_0_read50_r);
-            origin_product0_pp3_0_r <= $signed(gradient_signed0_w[51 +: 5]) *
-            $signed(offset_context0_r_0_read50_r);
-            origin_product0_sum0_0_part0_r <= {1'b0, origin_product0_sum0_0_a0_w} + {1'b0,
-            origin_product0_sum0_0_b0_w};
-            origin_product0_sum0_0_part1_r <= {1'b0, origin_product0_sum0_0_a1_w_d52_r} +
-            {1'b0, origin_product0_sum0_0_b1_w_d52_r} + {35'b0, origin_product0_sum0_0_part0_r[35]};
-            origin_product0_sum0_0_part2_r <= origin_product0_sum0_0_a2_w_d53_r +
-            origin_product0_sum0_0_b2_w_d53_r + {3'b0, origin_product0_sum0_0_part1_r[35]};
-            origin_product0_sum0_1_part0_r <= {1'b0, origin_product0_sum0_1_a0_w} + {1'b0,
-            origin_product0_sum0_1_b0_w};
-            origin_product0_sum0_1_part1_r <= {1'b0, origin_product0_sum0_1_a1_w_d52_r} +
-            {1'b0, origin_product0_sum0_1_b1_w_d52_r} + {35'b0, origin_product0_sum0_1_part0_r[35]};
-            origin_product0_sum0_1_part2_r <= origin_product0_sum0_1_a2_w_d53_r +
-            origin_product0_sum0_1_b2_w_d53_r + {3'b0, origin_product0_sum0_1_part1_r[35]};
+
         end
     end
     always @(posedge clk_i) begin
         if (pipeline_enable_w[4]) begin
-            origin_product0_sum1_0_part0_r <= {1'b0, origin_product0_sum1_0_a0_w} + {1'b0,
-            origin_product0_sum1_0_b0_w};
-            origin_product0_sum1_0_part1_r <= {1'b0, origin_product0_sum1_0_a1_w_d55_r} +
-            {1'b0, origin_product0_sum1_0_b1_w_d55_r} + {35'b0, origin_product0_sum1_0_part0_r[35]};
-            origin_product0_sum1_0_part2_r <= origin_product0_sum1_0_a2_w_d56_r +
-            origin_product0_sum1_0_b2_w_d56_r + {3'b0, origin_product0_sum1_0_part1_r[35]};
+
             drop_gradient0_r <= tag_0_r[2:0] == 0 ? 4'd7 : tag_0_r[2:0] < 4 ? 4'd3 : 4'd11;
             gradient_abs0_sign_r <= gradient_signed0_w[55];
             gradient_abs0_invert_r <= gradient_signed0_w[55] ? ~gradient_signed0_w :
@@ -4424,83 +3186,17 @@ module edrv32_gpu_setup_plane (
             stored_signed0_part0_r <= {1'b0, stored_signed0_a0_w} + {1'b0, stored_signed0_b0_w};
             stored_signed0_part1_r <= stored_signed0_a1_w_d59_r + stored_signed0_b1_w_d59_r +
             {16'b0, stored_signed0_part0_r[35]};
-            delta_context2_r_0_read20_r <= unused_delta_context2_read0_w[0 +: 18];
-            product1_0_pp0_0_r <= $signed({1'b0, difference0_r[0 +: 17]}) *
-            $signed(delta_context2_r_0_read20_r);
-            product1_0_pp1_0_r <= $signed(difference0_r[17 +: 17]) *
-            $signed(delta_context2_r_0_read20_r);
-            product1_0_sum0_0_part0_r <= {1'b0, product1_0_sum0_0_a0_w} + {1'b0,
-            product1_0_sum0_0_b0_w};
-            product1_0_sum0_0_part1_r <= product1_0_sum0_0_a1_w_d22_r +
-            product1_0_sum0_0_b1_w_d22_r + {16'b0, product1_0_sum0_0_part0_r[35]};
-            delta_context3_r_0_read20_r <= unused_delta_context3_read0_w[0 +: 18];
-            product1_1_pp0_0_r <= $signed({1'b0, difference1_r[0 +: 17]}) *
-            $signed(delta_context3_r_0_read20_r);
-            product1_1_pp1_0_r <= $signed(difference1_r[17 +: 17]) *
-            $signed(delta_context3_r_0_read20_r);
-            product1_1_sum0_0_part0_r <= {1'b0, product1_1_sum0_0_a0_w} + {1'b0,
-            product1_1_sum0_0_b0_w};
-            product1_1_sum0_0_part1_r <= product1_1_sum0_0_a1_w_d22_r +
-            product1_1_sum0_0_b1_w_d22_r + {16'b0, product1_1_sum0_0_part0_r[35]};
+
             numerator1_part0_r <= {1'b0, numerator1_a0_w} + {1'b0, numerator1_b0_w};
             numerator1_part1_r <= numerator1_a1_w_d24_r + numerator1_b1_w_d24_r + {20'b0,
             numerator1_part0_r[35]};
             numerator_shift1_r <= numerator1_w << 4;
-            inverse1_pp0_0_r <= $signed({1'b0, numerator_shift1_r[0 +: 17]}) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[0 +: 17]});
-            inverse1_pp0_1_r <= $signed({1'b0, numerator_shift1_r[0 +: 17]}) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[17 +: 14]});
-            inverse1_pp1_0_r <= $signed({1'b0, numerator_shift1_r[17 +: 17]}) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[0 +: 17]});
-            inverse1_pp1_1_r <= $signed({1'b0, numerator_shift1_r[17 +: 17]}) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[17 +: 14]});
-            inverse1_pp2_0_r <= $signed({1'b0, numerator_shift1_r[34 +: 17]}) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[0 +: 17]});
-            inverse1_pp2_1_r <= $signed({1'b0, numerator_shift1_r[34 +: 17]}) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[17 +: 14]});
-            inverse1_pp3_0_r <= $signed(numerator_shift1_r[51 +: 5]) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[0 +: 17]});
-            inverse1_pp3_1_r <= $signed(numerator_shift1_r[51 +: 5]) * $signed({1'b0,
-            reciprocal_context_r_0_read26_r[17 +: 14]});
-            inverse1_sum0_0_part0_r <= {1'b0, inverse1_sum0_0_a0_w} + {1'b0, inverse1_sum0_0_b0_w};
-            inverse1_sum0_0_part1_r <= {1'b0, inverse1_sum0_0_a1_w_d28_r} + {1'b0,
-            inverse1_sum0_0_b1_w_d28_r} + {35'b0, inverse1_sum0_0_part0_r[35]};
-            inverse1_sum0_0_part2_r <= inverse1_sum0_0_a2_w_d29_r + inverse1_sum0_0_b2_w_d29_r
-            + {16'b0, inverse1_sum0_0_part1_r[35]};
+
         end
     end
     always @(posedge clk_i) begin
         if (pipeline_enable_w[5]) begin
-            inverse1_sum0_1_part0_r <= {1'b0, inverse1_sum0_1_a0_w} + {1'b0, inverse1_sum0_1_b0_w};
-            inverse1_sum0_1_part1_r <= {1'b0, inverse1_sum0_1_a1_w_d28_r} + {1'b0,
-            inverse1_sum0_1_b1_w_d28_r} + {35'b0, inverse1_sum0_1_part0_r[35]};
-            inverse1_sum0_1_part2_r <= inverse1_sum0_1_a2_w_d29_r + inverse1_sum0_1_b2_w_d29_r
-            + {16'b0, inverse1_sum0_1_part1_r[35]};
-            inverse1_sum0_2_part0_r <= {1'b0, inverse1_sum0_2_a0_w} + {1'b0, inverse1_sum0_2_b0_w};
-            inverse1_sum0_2_part1_r <= {1'b0, inverse1_sum0_2_a1_w_d28_r} + {1'b0,
-            inverse1_sum0_2_b1_w_d28_r} + {35'b0, inverse1_sum0_2_part0_r[35]};
-            inverse1_sum0_2_part2_r <= inverse1_sum0_2_a2_w_d29_r + inverse1_sum0_2_b2_w_d29_r
-            + {16'b0, inverse1_sum0_2_part1_r[35]};
-            inverse1_sum0_3_part0_r <= {1'b0, inverse1_sum0_3_a0_w} + {1'b0, inverse1_sum0_3_b0_w};
-            inverse1_sum0_3_part1_r <= {1'b0, inverse1_sum0_3_a1_w_d28_r} + {1'b0,
-            inverse1_sum0_3_b1_w_d28_r} + {35'b0, inverse1_sum0_3_part0_r[35]};
-            inverse1_sum0_3_part2_r <= inverse1_sum0_3_a2_w_d29_r + inverse1_sum0_3_b2_w_d29_r
-            + {16'b0, inverse1_sum0_3_part1_r[35]};
-            inverse1_sum1_0_part0_r <= {1'b0, inverse1_sum1_0_a0_w} + {1'b0, inverse1_sum1_0_b0_w};
-            inverse1_sum1_0_part1_r <= {1'b0, inverse1_sum1_0_a1_w_d31_r} + {1'b0,
-            inverse1_sum1_0_b1_w_d31_r} + {35'b0, inverse1_sum1_0_part0_r[35]};
-            inverse1_sum1_0_part2_r <= inverse1_sum1_0_a2_w_d32_r + inverse1_sum1_0_b2_w_d32_r
-            + {16'b0, inverse1_sum1_0_part1_r[35]};
-            inverse1_sum1_1_part0_r <= {1'b0, inverse1_sum1_1_a0_w} + {1'b0, inverse1_sum1_1_b0_w};
-            inverse1_sum1_1_part1_r <= {1'b0, inverse1_sum1_1_a1_w_d31_r} + {1'b0,
-            inverse1_sum1_1_b1_w_d31_r} + {35'b0, inverse1_sum1_1_part0_r[35]};
-            inverse1_sum1_1_part2_r <= inverse1_sum1_1_a2_w_d32_r + inverse1_sum1_1_b2_w_d32_r
-            + {16'b0, inverse1_sum1_1_part1_r[35]};
-            inverse1_sum2_0_part0_r <= {1'b0, inverse1_sum2_0_a0_w} + {1'b0, inverse1_sum2_0_b0_w};
-            inverse1_sum2_0_part1_r <= {1'b0, inverse1_sum2_0_a1_w_d34_r} + {1'b0,
-            inverse1_sum2_0_b1_w_d34_r} + {35'b0, inverse1_sum2_0_part0_r[35]};
-            inverse1_sum2_0_part2_r <= inverse1_sum2_0_a2_w_d35_r + inverse1_sum2_0_b2_w_d35_r
-            + {16'b0, inverse1_sum2_0_part1_r[35]};
+
             inverse_abs1_sign_r <= inverse1_sum2_0_w[86];
             inverse_abs1_invert_r <= inverse1_sum2_0_w[86] ? ~inverse1_sum2_0_w : inverse1_sum2_0_w;
             inverse_abs1_part0_r <= {1'b0, inverse_abs1_a0_w} + {1'b0, inverse_abs1_b0_w};
@@ -4533,32 +3229,7 @@ module edrv32_gpu_setup_plane (
             gradient_signed1_part1_r <= gradient_signed1_a1_w_d49_r +
             gradient_signed1_b1_w_d49_r + {20'b0, gradient_signed1_part0_r[35]};
             offset_context1_r_0_read50_r <= unused_offset_context1_read0_w[0 +: 18];
-            origin_product1_pp0_0_r <= $signed({1'b0, gradient_signed1_w[0 +: 17]}) *
-            $signed(offset_context1_r_0_read50_r);
-            origin_product1_pp1_0_r <= $signed({1'b0, gradient_signed1_w[17 +: 17]}) *
-            $signed(offset_context1_r_0_read50_r);
-            origin_product1_pp2_0_r <= $signed({1'b0, gradient_signed1_w[34 +: 17]}) *
-            $signed(offset_context1_r_0_read50_r);
-            origin_product1_pp3_0_r <= $signed(gradient_signed1_w[51 +: 5]) *
-            $signed(offset_context1_r_0_read50_r);
-            origin_product1_sum0_0_part0_r <= {1'b0, origin_product1_sum0_0_a0_w} + {1'b0,
-            origin_product1_sum0_0_b0_w};
-            origin_product1_sum0_0_part1_r <= {1'b0, origin_product1_sum0_0_a1_w_d52_r} +
-            {1'b0, origin_product1_sum0_0_b1_w_d52_r} + {35'b0, origin_product1_sum0_0_part0_r[35]};
-            origin_product1_sum0_0_part2_r <= origin_product1_sum0_0_a2_w_d53_r +
-            origin_product1_sum0_0_b2_w_d53_r + {3'b0, origin_product1_sum0_0_part1_r[35]};
-            origin_product1_sum0_1_part0_r <= {1'b0, origin_product1_sum0_1_a0_w} + {1'b0,
-            origin_product1_sum0_1_b0_w};
-            origin_product1_sum0_1_part1_r <= {1'b0, origin_product1_sum0_1_a1_w_d52_r} +
-            {1'b0, origin_product1_sum0_1_b1_w_d52_r} + {35'b0, origin_product1_sum0_1_part0_r[35]};
-            origin_product1_sum0_1_part2_r <= origin_product1_sum0_1_a2_w_d53_r +
-            origin_product1_sum0_1_b2_w_d53_r + {3'b0, origin_product1_sum0_1_part1_r[35]};
-            origin_product1_sum1_0_part0_r <= {1'b0, origin_product1_sum1_0_a0_w} + {1'b0,
-            origin_product1_sum1_0_b0_w};
-            origin_product1_sum1_0_part1_r <= {1'b0, origin_product1_sum1_0_a1_w_d55_r} +
-            {1'b0, origin_product1_sum1_0_b1_w_d55_r} + {35'b0, origin_product1_sum1_0_part0_r[35]};
-            origin_product1_sum1_0_part2_r <= origin_product1_sum1_0_a2_w_d56_r +
-            origin_product1_sum1_0_b2_w_d56_r + {3'b0, origin_product1_sum1_0_part1_r[35]};
+
             drop_gradient1_r <= tag_0_r[2:0] == 0 ? 4'd7 : tag_0_r[2:0] < 4 ? 4'd3 : 4'd11;
             gradient_abs1_sign_r <= gradient_signed1_w[55];
             gradient_abs1_invert_r <= gradient_signed1_w[55] ? ~gradient_signed1_w :
@@ -4924,12 +3595,7 @@ module edrv32_gpu_setup_plane (
             scale_left2_2_r_delay16_r <= scale_left2_2_r_delay15_r;
             scale_left2_2_r_delay17_r <= scale_left2_2_r_delay16_r;
             scale_left2_2_r_delay18_r <= scale_left2_2_r_delay17_r;
-            product0_0_sum0_0_a1_w_delay22_r <= product0_0_sum0_0_a1_w;
-            product0_0_sum0_0_b1_w_delay22_r <= product0_0_sum0_0_b1_w;
-            product0_0_sum0_0_low0_w_delay23_r <= product0_0_sum0_0_low0_w;
-            product0_1_sum0_0_a1_w_delay22_r <= product0_1_sum0_0_a1_w;
-            product0_1_sum0_0_b1_w_delay22_r <= product0_1_sum0_0_b1_w;
-            product0_1_sum0_0_low0_w_delay23_r <= product0_1_sum0_0_low0_w;
+
             numerator0_a1_w_delay24_r <= numerator0_a1_w;
             numerator0_b1_w_delay24_r <= numerator0_b1_w;
             numerator0_low0_w_delay25_r <= numerator0_low0_w;
@@ -4937,73 +3603,7 @@ module edrv32_gpu_setup_plane (
     end
     always @(posedge clk_i) begin
         if (pipeline_enable_w[11]) begin
-            inverse0_sum0_0_a1_w_delay28_r <= inverse0_sum0_0_a1_w;
-            inverse0_sum0_0_b1_w_delay28_r <= inverse0_sum0_0_b1_w;
-            inverse0_sum0_0_a2_w_delay28_r <= inverse0_sum0_0_a2_w;
-            inverse0_sum0_0_a2_w_delay29_r <= inverse0_sum0_0_a2_w_delay28_r;
-            inverse0_sum0_0_b2_w_delay28_r <= inverse0_sum0_0_b2_w;
-            inverse0_sum0_0_b2_w_delay29_r <= inverse0_sum0_0_b2_w_delay28_r;
-            inverse0_sum0_0_low1_w_delay30_r <= inverse0_sum0_0_low1_w;
-            inverse0_sum0_0_low0_w_delay29_r <= inverse0_sum0_0_low0_w;
-            inverse0_sum0_0_low0_w_delay30_r <= inverse0_sum0_0_low0_w_delay29_r;
-            inverse0_sum0_1_a1_w_delay28_r <= inverse0_sum0_1_a1_w;
-            inverse0_sum0_1_b1_w_delay28_r <= inverse0_sum0_1_b1_w;
-            inverse0_sum0_1_a2_w_delay28_r <= inverse0_sum0_1_a2_w;
-            inverse0_sum0_1_a2_w_delay29_r <= inverse0_sum0_1_a2_w_delay28_r;
-            inverse0_sum0_1_b2_w_delay28_r <= inverse0_sum0_1_b2_w;
-            inverse0_sum0_1_b2_w_delay29_r <= inverse0_sum0_1_b2_w_delay28_r;
-            inverse0_sum0_1_low1_w_delay30_r <= inverse0_sum0_1_low1_w;
-            inverse0_sum0_1_low0_w_delay29_r <= inverse0_sum0_1_low0_w;
-            inverse0_sum0_1_low0_w_delay30_r <= inverse0_sum0_1_low0_w_delay29_r;
-            inverse0_sum0_2_a1_w_delay28_r <= inverse0_sum0_2_a1_w;
-            inverse0_sum0_2_b1_w_delay28_r <= inverse0_sum0_2_b1_w;
-            inverse0_sum0_2_a2_w_delay28_r <= inverse0_sum0_2_a2_w;
-            inverse0_sum0_2_a2_w_delay29_r <= inverse0_sum0_2_a2_w_delay28_r;
-            inverse0_sum0_2_b2_w_delay28_r <= inverse0_sum0_2_b2_w;
-            inverse0_sum0_2_b2_w_delay29_r <= inverse0_sum0_2_b2_w_delay28_r;
-            inverse0_sum0_2_low1_w_delay30_r <= inverse0_sum0_2_low1_w;
-            inverse0_sum0_2_low0_w_delay29_r <= inverse0_sum0_2_low0_w;
-            inverse0_sum0_2_low0_w_delay30_r <= inverse0_sum0_2_low0_w_delay29_r;
-            inverse0_sum0_3_a1_w_delay28_r <= inverse0_sum0_3_a1_w;
-            inverse0_sum0_3_b1_w_delay28_r <= inverse0_sum0_3_b1_w;
-            inverse0_sum0_3_a2_w_delay28_r <= inverse0_sum0_3_a2_w;
-            inverse0_sum0_3_a2_w_delay29_r <= inverse0_sum0_3_a2_w_delay28_r;
-            inverse0_sum0_3_b2_w_delay28_r <= inverse0_sum0_3_b2_w;
-            inverse0_sum0_3_b2_w_delay29_r <= inverse0_sum0_3_b2_w_delay28_r;
-            inverse0_sum0_3_low1_w_delay30_r <= inverse0_sum0_3_low1_w;
-            inverse0_sum0_3_low0_w_delay29_r <= inverse0_sum0_3_low0_w;
-            inverse0_sum0_3_low0_w_delay30_r <= inverse0_sum0_3_low0_w_delay29_r;
-            inverse0_sum1_0_a1_w_delay31_r <= inverse0_sum1_0_a1_w;
-            inverse0_sum1_0_b1_w_delay31_r <= inverse0_sum1_0_b1_w;
-            inverse0_sum1_0_a2_w_delay31_r <= inverse0_sum1_0_a2_w;
-            inverse0_sum1_0_a2_w_delay32_r <= inverse0_sum1_0_a2_w_delay31_r;
-            inverse0_sum1_0_b2_w_delay31_r <= inverse0_sum1_0_b2_w;
-            inverse0_sum1_0_b2_w_delay32_r <= inverse0_sum1_0_b2_w_delay31_r;
-            inverse0_sum1_0_low1_w_delay33_r <= inverse0_sum1_0_low1_w;
-            inverse0_sum1_0_low0_w_delay32_r <= inverse0_sum1_0_low0_w;
-        end
-    end
-    always @(posedge clk_i) begin
-        if (pipeline_enable_w[12]) begin
-            inverse0_sum1_0_low0_w_delay33_r <= inverse0_sum1_0_low0_w_delay32_r;
-            inverse0_sum1_1_a1_w_delay31_r <= inverse0_sum1_1_a1_w;
-            inverse0_sum1_1_b1_w_delay31_r <= inverse0_sum1_1_b1_w;
-            inverse0_sum1_1_a2_w_delay31_r <= inverse0_sum1_1_a2_w;
-            inverse0_sum1_1_a2_w_delay32_r <= inverse0_sum1_1_a2_w_delay31_r;
-            inverse0_sum1_1_b2_w_delay31_r <= inverse0_sum1_1_b2_w;
-            inverse0_sum1_1_b2_w_delay32_r <= inverse0_sum1_1_b2_w_delay31_r;
-            inverse0_sum1_1_low1_w_delay33_r <= inverse0_sum1_1_low1_w;
-            inverse0_sum1_1_low0_w_delay32_r <= inverse0_sum1_1_low0_w;
-            inverse0_sum1_1_low0_w_delay33_r <= inverse0_sum1_1_low0_w_delay32_r;
-            inverse0_sum2_0_a1_w_delay34_r <= inverse0_sum2_0_a1_w;
-            inverse0_sum2_0_b1_w_delay34_r <= inverse0_sum2_0_b1_w;
-            inverse0_sum2_0_a2_w_delay34_r <= inverse0_sum2_0_a2_w;
-            inverse0_sum2_0_a2_w_delay35_r <= inverse0_sum2_0_a2_w_delay34_r;
-            inverse0_sum2_0_b2_w_delay34_r <= inverse0_sum2_0_b2_w;
-            inverse0_sum2_0_b2_w_delay35_r <= inverse0_sum2_0_b2_w_delay34_r;
-            inverse0_sum2_0_low1_w_delay36_r <= inverse0_sum2_0_low1_w;
-            inverse0_sum2_0_low0_w_delay35_r <= inverse0_sum2_0_low0_w;
-            inverse0_sum2_0_low0_w_delay36_r <= inverse0_sum2_0_low0_w_delay35_r;
+
             inverse_abs0_a1_w_delay38_r <= inverse_abs0_a1_w;
             inverse_abs0_b1_w_delay38_r <= inverse_abs0_b1_w;
             inverse_abs0_a2_w_delay38_r <= inverse_abs0_a2_w;
@@ -5121,7 +3721,7 @@ module edrv32_gpu_setup_plane (
         end
     end
     always @(posedge clk_i) begin
-        if (pipeline_enable_w[13]) begin
+        if (pipeline_enable_w[12]) begin
             gradient_shift0_amt2_w_delay10_r <= gradient_shift0_amt2_w_delay9_r;
             gradient_shift0_amt2_w_delay11_r <= gradient_shift0_amt2_w_delay10_r;
             gradient_shift0_amt2_w_delay12_r <= gradient_shift0_amt2_w_delay11_r;
@@ -5216,33 +3816,7 @@ module edrv32_gpu_setup_plane (
             gradient_signed0_a1_w_delay49_r <= gradient_signed0_a1_w;
             gradient_signed0_b1_w_delay49_r <= gradient_signed0_b1_w;
             gradient_signed0_low0_w_delay50_r <= gradient_signed0_low0_w;
-            origin_product0_sum0_0_a1_w_delay52_r <= origin_product0_sum0_0_a1_w;
-            origin_product0_sum0_0_b1_w_delay52_r <= origin_product0_sum0_0_b1_w;
-            origin_product0_sum0_0_a2_w_delay52_r <= origin_product0_sum0_0_a2_w;
-            origin_product0_sum0_0_a2_w_delay53_r <= origin_product0_sum0_0_a2_w_delay52_r;
-            origin_product0_sum0_0_b2_w_delay52_r <= origin_product0_sum0_0_b2_w;
-            origin_product0_sum0_0_b2_w_delay53_r <= origin_product0_sum0_0_b2_w_delay52_r;
-            origin_product0_sum0_0_low1_w_delay54_r <= origin_product0_sum0_0_low1_w;
-            origin_product0_sum0_0_low0_w_delay53_r <= origin_product0_sum0_0_low0_w;
-            origin_product0_sum0_0_low0_w_delay54_r <= origin_product0_sum0_0_low0_w_delay53_r;
-            origin_product0_sum0_1_a1_w_delay52_r <= origin_product0_sum0_1_a1_w;
-            origin_product0_sum0_1_b1_w_delay52_r <= origin_product0_sum0_1_b1_w;
-            origin_product0_sum0_1_a2_w_delay52_r <= origin_product0_sum0_1_a2_w;
-            origin_product0_sum0_1_a2_w_delay53_r <= origin_product0_sum0_1_a2_w_delay52_r;
-            origin_product0_sum0_1_b2_w_delay52_r <= origin_product0_sum0_1_b2_w;
-            origin_product0_sum0_1_b2_w_delay53_r <= origin_product0_sum0_1_b2_w_delay52_r;
-            origin_product0_sum0_1_low1_w_delay54_r <= origin_product0_sum0_1_low1_w;
-            origin_product0_sum0_1_low0_w_delay53_r <= origin_product0_sum0_1_low0_w;
-            origin_product0_sum0_1_low0_w_delay54_r <= origin_product0_sum0_1_low0_w_delay53_r;
-            origin_product0_sum1_0_a1_w_delay55_r <= origin_product0_sum1_0_a1_w;
-            origin_product0_sum1_0_b1_w_delay55_r <= origin_product0_sum1_0_b1_w;
-            origin_product0_sum1_0_a2_w_delay55_r <= origin_product0_sum1_0_a2_w;
-            origin_product0_sum1_0_a2_w_delay56_r <= origin_product0_sum1_0_a2_w_delay55_r;
-            origin_product0_sum1_0_b2_w_delay55_r <= origin_product0_sum1_0_b2_w;
-            origin_product0_sum1_0_b2_w_delay56_r <= origin_product0_sum1_0_b2_w_delay55_r;
-            origin_product0_sum1_0_low1_w_delay57_r <= origin_product0_sum1_0_low1_w;
-            origin_product0_sum1_0_low0_w_delay56_r <= origin_product0_sum1_0_low0_w;
-            origin_product0_sum1_0_low0_w_delay57_r <= origin_product0_sum1_0_low0_w_delay56_r;
+
             gradient_abs0_a1_w_delay52_r <= gradient_abs0_a1_w;
             gradient_abs0_b1_w_delay52_r <= gradient_abs0_b1_w;
             gradient_abs0_low0_w_delay53_r <= gradient_abs0_low0_w;
@@ -5366,84 +3940,18 @@ module edrv32_gpu_setup_plane (
         end
     end
     always @(posedge clk_i) begin
-        if (pipeline_enable_w[14]) begin
+        if (pipeline_enable_w[13]) begin
             stored_signed0_low0_w_delay60_r <= stored_signed0_low0_w;
-            product1_0_sum0_0_a1_w_delay22_r <= product1_0_sum0_0_a1_w;
-            product1_0_sum0_0_b1_w_delay22_r <= product1_0_sum0_0_b1_w;
-            product1_0_sum0_0_low0_w_delay23_r <= product1_0_sum0_0_low0_w;
-            product1_1_sum0_0_a1_w_delay22_r <= product1_1_sum0_0_a1_w;
-            product1_1_sum0_0_b1_w_delay22_r <= product1_1_sum0_0_b1_w;
-            product1_1_sum0_0_low0_w_delay23_r <= product1_1_sum0_0_low0_w;
+
             numerator1_a1_w_delay24_r <= numerator1_a1_w;
             numerator1_b1_w_delay24_r <= numerator1_b1_w;
             numerator1_low0_w_delay25_r <= numerator1_low0_w;
-            inverse1_sum0_0_a1_w_delay28_r <= inverse1_sum0_0_a1_w;
-            inverse1_sum0_0_b1_w_delay28_r <= inverse1_sum0_0_b1_w;
-            inverse1_sum0_0_a2_w_delay28_r <= inverse1_sum0_0_a2_w;
-            inverse1_sum0_0_a2_w_delay29_r <= inverse1_sum0_0_a2_w_delay28_r;
-            inverse1_sum0_0_b2_w_delay28_r <= inverse1_sum0_0_b2_w;
-            inverse1_sum0_0_b2_w_delay29_r <= inverse1_sum0_0_b2_w_delay28_r;
-            inverse1_sum0_0_low1_w_delay30_r <= inverse1_sum0_0_low1_w;
-            inverse1_sum0_0_low0_w_delay29_r <= inverse1_sum0_0_low0_w;
-            inverse1_sum0_0_low0_w_delay30_r <= inverse1_sum0_0_low0_w_delay29_r;
-            inverse1_sum0_1_a1_w_delay28_r <= inverse1_sum0_1_a1_w;
-            inverse1_sum0_1_b1_w_delay28_r <= inverse1_sum0_1_b1_w;
-            inverse1_sum0_1_a2_w_delay28_r <= inverse1_sum0_1_a2_w;
-            inverse1_sum0_1_a2_w_delay29_r <= inverse1_sum0_1_a2_w_delay28_r;
-            inverse1_sum0_1_b2_w_delay28_r <= inverse1_sum0_1_b2_w;
-            inverse1_sum0_1_b2_w_delay29_r <= inverse1_sum0_1_b2_w_delay28_r;
-            inverse1_sum0_1_low1_w_delay30_r <= inverse1_sum0_1_low1_w;
-            inverse1_sum0_1_low0_w_delay29_r <= inverse1_sum0_1_low0_w;
-            inverse1_sum0_1_low0_w_delay30_r <= inverse1_sum0_1_low0_w_delay29_r;
-            inverse1_sum0_2_a1_w_delay28_r <= inverse1_sum0_2_a1_w;
-            inverse1_sum0_2_b1_w_delay28_r <= inverse1_sum0_2_b1_w;
-            inverse1_sum0_2_a2_w_delay28_r <= inverse1_sum0_2_a2_w;
-            inverse1_sum0_2_a2_w_delay29_r <= inverse1_sum0_2_a2_w_delay28_r;
-            inverse1_sum0_2_b2_w_delay28_r <= inverse1_sum0_2_b2_w;
-            inverse1_sum0_2_b2_w_delay29_r <= inverse1_sum0_2_b2_w_delay28_r;
-            inverse1_sum0_2_low1_w_delay30_r <= inverse1_sum0_2_low1_w;
-            inverse1_sum0_2_low0_w_delay29_r <= inverse1_sum0_2_low0_w;
-            inverse1_sum0_2_low0_w_delay30_r <= inverse1_sum0_2_low0_w_delay29_r;
-            inverse1_sum0_3_a1_w_delay28_r <= inverse1_sum0_3_a1_w;
-            inverse1_sum0_3_b1_w_delay28_r <= inverse1_sum0_3_b1_w;
-            inverse1_sum0_3_a2_w_delay28_r <= inverse1_sum0_3_a2_w;
-            inverse1_sum0_3_a2_w_delay29_r <= inverse1_sum0_3_a2_w_delay28_r;
-            inverse1_sum0_3_b2_w_delay28_r <= inverse1_sum0_3_b2_w;
-            inverse1_sum0_3_b2_w_delay29_r <= inverse1_sum0_3_b2_w_delay28_r;
-            inverse1_sum0_3_low1_w_delay30_r <= inverse1_sum0_3_low1_w;
-            inverse1_sum0_3_low0_w_delay29_r <= inverse1_sum0_3_low0_w;
+
         end
     end
     always @(posedge clk_i) begin
-        if (pipeline_enable_w[15]) begin
-            inverse1_sum0_3_low0_w_delay30_r <= inverse1_sum0_3_low0_w_delay29_r;
-            inverse1_sum1_0_a1_w_delay31_r <= inverse1_sum1_0_a1_w;
-            inverse1_sum1_0_b1_w_delay31_r <= inverse1_sum1_0_b1_w;
-            inverse1_sum1_0_a2_w_delay31_r <= inverse1_sum1_0_a2_w;
-            inverse1_sum1_0_a2_w_delay32_r <= inverse1_sum1_0_a2_w_delay31_r;
-            inverse1_sum1_0_b2_w_delay31_r <= inverse1_sum1_0_b2_w;
-            inverse1_sum1_0_b2_w_delay32_r <= inverse1_sum1_0_b2_w_delay31_r;
-            inverse1_sum1_0_low1_w_delay33_r <= inverse1_sum1_0_low1_w;
-            inverse1_sum1_0_low0_w_delay32_r <= inverse1_sum1_0_low0_w;
-            inverse1_sum1_0_low0_w_delay33_r <= inverse1_sum1_0_low0_w_delay32_r;
-            inverse1_sum1_1_a1_w_delay31_r <= inverse1_sum1_1_a1_w;
-            inverse1_sum1_1_b1_w_delay31_r <= inverse1_sum1_1_b1_w;
-            inverse1_sum1_1_a2_w_delay31_r <= inverse1_sum1_1_a2_w;
-            inverse1_sum1_1_a2_w_delay32_r <= inverse1_sum1_1_a2_w_delay31_r;
-            inverse1_sum1_1_b2_w_delay31_r <= inverse1_sum1_1_b2_w;
-            inverse1_sum1_1_b2_w_delay32_r <= inverse1_sum1_1_b2_w_delay31_r;
-            inverse1_sum1_1_low1_w_delay33_r <= inverse1_sum1_1_low1_w;
-            inverse1_sum1_1_low0_w_delay32_r <= inverse1_sum1_1_low0_w;
-            inverse1_sum1_1_low0_w_delay33_r <= inverse1_sum1_1_low0_w_delay32_r;
-            inverse1_sum2_0_a1_w_delay34_r <= inverse1_sum2_0_a1_w;
-            inverse1_sum2_0_b1_w_delay34_r <= inverse1_sum2_0_b1_w;
-            inverse1_sum2_0_a2_w_delay34_r <= inverse1_sum2_0_a2_w;
-            inverse1_sum2_0_a2_w_delay35_r <= inverse1_sum2_0_a2_w_delay34_r;
-            inverse1_sum2_0_b2_w_delay34_r <= inverse1_sum2_0_b2_w;
-            inverse1_sum2_0_b2_w_delay35_r <= inverse1_sum2_0_b2_w_delay34_r;
-            inverse1_sum2_0_low1_w_delay36_r <= inverse1_sum2_0_low1_w;
-            inverse1_sum2_0_low0_w_delay35_r <= inverse1_sum2_0_low0_w;
-            inverse1_sum2_0_low0_w_delay36_r <= inverse1_sum2_0_low0_w_delay35_r;
+        if (pipeline_enable_w[14]) begin
+
             inverse_abs1_a1_w_delay38_r <= inverse_abs1_a1_w;
             inverse_abs1_b1_w_delay38_r <= inverse_abs1_b1_w;
             inverse_abs1_a2_w_delay38_r <= inverse_abs1_a2_w;
@@ -5469,7 +3977,7 @@ module edrv32_gpu_setup_plane (
         end
     end
     always @(posedge clk_i) begin
-        if (pipeline_enable_w[16]) begin
+        if (pipeline_enable_w[15]) begin
             gradient_round1_low0_w_delay42_r <= gradient_round1_low0_w;
             gradient_round1_low0_w_delay43_r <= gradient_round1_low0_w_delay42_r;
             gradient_shift1_amt0_w_delay3_r <= gradient_shift1_amt0_w;
@@ -5656,33 +4164,7 @@ module edrv32_gpu_setup_plane (
             gradient_signed1_a1_w_delay49_r <= gradient_signed1_a1_w;
             gradient_signed1_b1_w_delay49_r <= gradient_signed1_b1_w;
             gradient_signed1_low0_w_delay50_r <= gradient_signed1_low0_w;
-            origin_product1_sum0_0_a1_w_delay52_r <= origin_product1_sum0_0_a1_w;
-            origin_product1_sum0_0_b1_w_delay52_r <= origin_product1_sum0_0_b1_w;
-            origin_product1_sum0_0_a2_w_delay52_r <= origin_product1_sum0_0_a2_w;
-            origin_product1_sum0_0_a2_w_delay53_r <= origin_product1_sum0_0_a2_w_delay52_r;
-            origin_product1_sum0_0_b2_w_delay52_r <= origin_product1_sum0_0_b2_w;
-            origin_product1_sum0_0_b2_w_delay53_r <= origin_product1_sum0_0_b2_w_delay52_r;
-            origin_product1_sum0_0_low1_w_delay54_r <= origin_product1_sum0_0_low1_w;
-            origin_product1_sum0_0_low0_w_delay53_r <= origin_product1_sum0_0_low0_w;
-            origin_product1_sum0_0_low0_w_delay54_r <= origin_product1_sum0_0_low0_w_delay53_r;
-            origin_product1_sum0_1_a1_w_delay52_r <= origin_product1_sum0_1_a1_w;
-            origin_product1_sum0_1_b1_w_delay52_r <= origin_product1_sum0_1_b1_w;
-            origin_product1_sum0_1_a2_w_delay52_r <= origin_product1_sum0_1_a2_w;
-            origin_product1_sum0_1_a2_w_delay53_r <= origin_product1_sum0_1_a2_w_delay52_r;
-            origin_product1_sum0_1_b2_w_delay52_r <= origin_product1_sum0_1_b2_w;
-            origin_product1_sum0_1_b2_w_delay53_r <= origin_product1_sum0_1_b2_w_delay52_r;
-            origin_product1_sum0_1_low1_w_delay54_r <= origin_product1_sum0_1_low1_w;
-            origin_product1_sum0_1_low0_w_delay53_r <= origin_product1_sum0_1_low0_w;
-            origin_product1_sum0_1_low0_w_delay54_r <= origin_product1_sum0_1_low0_w_delay53_r;
-            origin_product1_sum1_0_a1_w_delay55_r <= origin_product1_sum1_0_a1_w;
-            origin_product1_sum1_0_b1_w_delay55_r <= origin_product1_sum1_0_b1_w;
-            origin_product1_sum1_0_a2_w_delay55_r <= origin_product1_sum1_0_a2_w;
-            origin_product1_sum1_0_a2_w_delay56_r <= origin_product1_sum1_0_a2_w_delay55_r;
-            origin_product1_sum1_0_b2_w_delay55_r <= origin_product1_sum1_0_b2_w;
-            origin_product1_sum1_0_b2_w_delay56_r <= origin_product1_sum1_0_b2_w_delay55_r;
-            origin_product1_sum1_0_low1_w_delay57_r <= origin_product1_sum1_0_low1_w;
-            origin_product1_sum1_0_low0_w_delay56_r <= origin_product1_sum1_0_low0_w;
-            origin_product1_sum1_0_low0_w_delay57_r <= origin_product1_sum1_0_low0_w_delay56_r;
+
             gradient_abs1_a1_w_delay52_r <= gradient_abs1_a1_w;
             gradient_abs1_b1_w_delay52_r <= gradient_abs1_b1_w;
             gradient_abs1_low0_w_delay53_r <= gradient_abs1_low0_w;
@@ -5737,7 +4219,7 @@ module edrv32_gpu_setup_plane (
         end
     end
     always @(posedge clk_i) begin
-        if (pipeline_enable_w[17]) begin
+        if (pipeline_enable_w[16]) begin
             gradient_drop1_amt0_w_delay50_r <= gradient_drop1_amt0_w_delay49_r;
             gradient_drop1_amt0_w_delay51_r <= gradient_drop1_amt0_w_delay50_r;
             gradient_drop1_amt0_w_delay52_r <= gradient_drop1_amt0_w_delay51_r;
@@ -5859,7 +4341,7 @@ module edrv32_gpu_setup_plane (
         end
     end
     always @(posedge clk_i) begin
-        if (pipeline_enable_w[18]) begin
+        if (pipeline_enable_w[17]) begin
             start_absolute_b1_w_delay76_r <= start_absolute_b1_w;
             start_absolute_low0_w_delay77_r <= start_absolute_low0_w;
             start_drop_amt0_w_delay2_r <= start_drop_amt0_w;
@@ -6187,4 +4669,115 @@ module edrv32_gpu_setup_plane (
         .rd_addr_i(gradient_bias_delay_read_w),
         .rd_data_o(unused_gradient_bias_delay_data_w[144 +: 72])
     );
+    // Difference and context read registers are absorbed by the APM X/Y input bank.
+    wire [51:0] product0_0_sum0_0_w;
+    edrv32_apm_gpu_s34xs18 u_product0_0 (
+        .clk_i(clk_i),
+        .enable_i(pipeline_enable_w[1]),
+        .a_i(difference0_apm_w),
+        .b_i(unused_delta_context0_read0_w[17:0]),
+        .p_o(product0_0_sum0_0_w)
+    );
+    wire [51:0] product0_1_sum0_0_w;
+    edrv32_apm_gpu_s34xs18 u_product0_1 (
+        .clk_i(clk_i),
+        .enable_i(pipeline_enable_w[1]),
+        .a_i(difference1_apm_w),
+        .b_i(unused_delta_context1_read0_w[17:0]),
+        .p_o(product0_1_sum0_0_w)
+    );
+    wire [51:0] product1_0_sum0_0_w;
+    edrv32_apm_gpu_s34xs18 u_product1_0 (
+        .clk_i(clk_i),
+        .enable_i(pipeline_enable_w[4]),
+        .a_i(difference0_apm_w),
+        .b_i(unused_delta_context2_read0_w[17:0]),
+        .p_o(product1_0_sum0_0_w)
+    );
+    wire [51:0] product1_1_sum0_0_w;
+    edrv32_apm_gpu_s34xs18 u_product1_1 (
+        .clk_i(clk_i),
+        .enable_i(pipeline_enable_w[4]),
+        .a_i(difference1_apm_w),
+        .b_i(unused_delta_context3_read0_w[17:0]),
+        .p_o(product1_1_sum0_0_w)
+    );
+    wire [33:0] difference0_apm_w;
+    assign difference0_apm_w =
+        $signed({1'b0, scaled1_r}) - $signed({1'b0, scaled0_r});
+    wire [33:0] difference1_apm_w;
+    assign difference1_apm_w =
+        $signed({1'b0, scaled2_r}) - $signed({1'b0, scaled0_r});
+    wire [86:0] inverse0_sum2_0_w;
+    wire [86:0] inverse0_apm_w;
+    edrv32_apm_gpu_s56xu31 u_inverse0 (
+        .clk_i(clk_i),
+        .enable_i(pipeline_enable_w[2]),
+        .a_i(numerator_shift0_r),
+        .b_i(reciprocal_context_r_0_read26_r),
+        .p_o(inverse0_apm_w)
+    );
+    reg [86:0] inverse0_align_d0_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[2]) inverse0_align_d0_r <= inverse0_apm_w;
+    end
+    reg [86:0] inverse0_align_d1_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[2]) inverse0_align_d1_r <= inverse0_align_d0_r;
+    end
+    assign inverse0_sum2_0_w = inverse0_align_d1_r;
+    wire [86:0] inverse1_sum2_0_w;
+    wire [86:0] inverse1_apm_w;
+    edrv32_apm_gpu_s56xu31 u_inverse1 (
+        .clk_i(clk_i),
+        .enable_i(pipeline_enable_w[5]),
+        .a_i(numerator_shift1_r),
+        .b_i(reciprocal_context_r_0_read26_r),
+        .p_o(inverse1_apm_w)
+    );
+    reg [86:0] inverse1_align_d0_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[5]) inverse1_align_d0_r <= inverse1_apm_w;
+    end
+    reg [86:0] inverse1_align_d1_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[5]) inverse1_align_d1_r <= inverse1_align_d0_r;
+    end
+    assign inverse1_sum2_0_w = inverse1_align_d1_r;
+    wire [73:0] origin_product0_sum1_0_w;
+    wire [73:0] origin_product0_apm_w;
+    edrv32_apm_gpu_s56xs18 u_origin_product0 (
+        .clk_i(clk_i),
+        .enable_i(pipeline_enable_w[3]),
+        .a_i(gradient_signed0_w),
+        .b_i(offset_context0_r_0_read50_r),
+        .p_o(origin_product0_apm_w)
+    );
+    reg [73:0] origin_product0_align_d0_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[3]) origin_product0_align_d0_r <= origin_product0_apm_w;
+    end
+    reg [73:0] origin_product0_align_d1_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[3]) origin_product0_align_d1_r <= origin_product0_align_d0_r;
+    end
+    assign origin_product0_sum1_0_w = origin_product0_align_d1_r;
+    wire [73:0] origin_product1_sum1_0_w;
+    wire [73:0] origin_product1_apm_w;
+    edrv32_apm_gpu_s56xs18 u_origin_product1 (
+        .clk_i(clk_i),
+        .enable_i(pipeline_enable_w[6]),
+        .a_i(gradient_signed1_w),
+        .b_i(offset_context1_r_0_read50_r),
+        .p_o(origin_product1_apm_w)
+    );
+    reg [73:0] origin_product1_align_d0_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[6]) origin_product1_align_d0_r <= origin_product1_apm_w;
+    end
+    reg [73:0] origin_product1_align_d1_r;
+    always @(posedge clk_i) begin
+        if (pipeline_enable_w[6]) origin_product1_align_d1_r <= origin_product1_align_d0_r;
+    end
+    assign origin_product1_sum1_0_w = origin_product1_align_d1_r;
 endmodule
