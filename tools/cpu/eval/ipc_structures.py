@@ -19,6 +19,8 @@ def operation(inst):
         return {0: 'addi', 1: 'slli', 4: 'xori', 5: 'srli' if bits >> 30 == 0 else 'srai',
                 6: 'ori', 7: 'andi'}.get(funct, 'other')
     if opcode == 0x33:
+        if bits >> 25 == 0x10 and funct in (2, 4, 6):
+            return {2: 'sh1add', 4: 'sh2add', 6: 'sh3add'}[funct]
         if funct in (2, 3) and bits >> 25 == 0:
             return 'compare'
         return {0: 'add' if bits >> 25 == 0 else 'other', 1: 'sll', 4: 'xor',

@@ -69,7 +69,7 @@ class Predictor:
         self.btb = [None] * btb_size
         self.pht = [1] * pht_size
         self.history = 0
-        self.direction = Direction(direction) if direction else None
+        self.direction = Direction(direction) if isinstance(direction, str) else direction
         self.gshare_pc_shift = gshare_pc_shift
         self.shift = group_bytes.bit_length() - 1
         self.stack = [0] * ras_size
@@ -89,10 +89,13 @@ class Predictor:
             self.count = min(len(self.stack), self.count + 1)
 
     def restore(self, record):
-        self.pointer, self.count, top = record.checkpoint
+        self.restore_snapshot(record.checkpoint)
+        self.action(record.instruction)
+
+    def restore_snapshot(self, checkpoint):
+        self.pointer, self.count, top = checkpoint
         if self.count:
             self.stack[(self.pointer - 1) % len(self.stack)] = top
-        self.action(record.instruction)
 
     def query(self, pc):
         entry = self.btb[(pc >> self.shift) & (len(self.btb) - 1)]
@@ -183,20 +186,38 @@ def program_and_trace(out):
 
 
 def fetch_request(predictor, pc, cross, group_bytes=8, dual_query=False,
-                  query_override=None):
+                  query_override=None, unaligned=False, bank_queries=None):
     """F1 hit request, including group truncation and a crossing instruction tail."""
     query = predictor.query(pc)
     first_query = query
     second_query = None
-    midpoint = (pc & -group_bytes) + 8
+    midpoint = pc + 4 if unaligned else (pc & -group_bytes) + 8
+    dual_query |= unaligned
     if dual_query and pc < midpoint and cross is None:
         second_query = predictor.query(midpoint)
         if not query[1] and second_query[1]:
             query = second_query
-    group_end = (pc & -group_bytes) + group_bytes
+    if bank_queries is not None:
+        first_query, second_query = bank_queries
+        query = first_query if first_query[1] or not second_query[1] else second_query
+    if unaligned and second_query:
+        # Retain both simultaneous RAM reads even when the first taken branch
+        # truncates the returned instructions. F2 corrects both saved decisions.
+        saved = SavedHistory(first_query[3])
+        saved.__dict__.update(getattr(first_query[3], '__dict__', {}))
+        saved.banks = (first_query, second_query)
+        first_query = (*first_query[:3], saved, first_query[4])
+    group_end = pc + group_bytes if unaligned else (pc & -group_bytes) + group_bytes
     if query_override is not None:
-        query = first_query = query_override
-        second_query = None
+        if unaligned and second_query:
+            if query_override[0][0].pc >= midpoint:
+                second_query = query_override
+            else:
+                first_query = query_override
+            query = first_query if first_query[1] or not second_query[1] else second_query
+        else:
+            query = first_query = query_override
+            second_query = None
     entry, taken, target, history, checkpoint = query
     request_end = group_end
     next_cross = None
@@ -293,7 +314,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
              slot1_mul=False, slot1_lsu=False, control_slots=1, slot1_control=False,
              ideal_pairing=False,
              fetch_bytes=None, queue_depth=None, prediction_capture=None,
-             fixed_predictions=None):
+             fixed_predictions=None, unaligned_fetch=False, load_merge=None):
     if fusion:
         program, trace = fuse_program(program, trace, fusion, begin, end)
     changes = INORDER_VARIANTS.get(variant, {})
@@ -322,12 +343,12 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     btb = btb if btb_entries is None else btb_entries
     pht = pht if gshare_entries is None else gshare_entries
     ras = ras if ras_entries is None else ras_entries
-    predictor = Predictor(btb, pht, 8 if dual_query else group_bytes, ras,
+    predictor = Predictor(btb, pht, 4 if unaligned_fetch else 8 if dual_query else group_bytes, ras,
                           gshare_pc_shift, direction_predictor, registered_control, second_level)
     experimental = dict(lcb_branches=0, lcb_misses=0, fused=0, early_loads=0,
                         loads=0, adjacent_load_base=0, serial_pairs=0,
                         cache_instructions=0, cache_hits=0, branches=0, direction_misses=0,
-                        f2_corrections=0)
+                        f2_corrections=0, control_misses=0)
     retired_instructions = 0
     last_writes = {}
     previous_instruction = None
@@ -415,7 +436,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 return False, False, False
             if instruction.kind == 'alu' and operation(instruction) not in {
                     'addi', 'add', 'sub', 'andi', 'ori', 'xori', 'and', 'or', 'xor',
-                    'slt', 'sltu', 'slti', 'sltiu'}:
+                    'slt', 'sltu', 'slti', 'sltiu', 'sh1add', 'sh2add', 'sh3add'}:
                 return False, False, False
         if (instruction.kind == 'alu' and (lane == 1 or late_both)) or (
                 instruction.kind in late_controls and late_branch):
@@ -431,8 +452,10 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         nonlocal oracle_cursor, fetch_delay
         if frontend_probe is not None:
             fetch_delay += frontend_probe.query(pc, active)
+            if unaligned_fetch and pc // 32 != (pc + 7) // 32:
+                fetch_delay += frontend_probe.query(pc + 4, active)
         query = None
-        group_end = (pc & -group_bytes) + group_bytes
+        group_end = pc + group_bytes if unaligned_fetch else (pc & -group_bytes) + group_bytes
         if perfect_prediction and cross is None:
             query = (None, False, 0, predictor.history, predictor.snapshot())
             while oracle_cursor < len(trace) and trace[oracle_cursor] < group_end:
@@ -445,7 +468,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     query = ((instruction, next_pc), True, next_pc,
                              predictor.history, predictor.snapshot())
                     break
-        return fetch_request(predictor, pc, cross, group_bytes, dual_query, query)
+        return fetch_request(predictor, pc, cross, group_bytes, dual_query, query,
+                             unaligned_fetch)
 
     def refill_ideal():
         nonlocal front_cursor, ideal_group, ideal_query, tail_pc
@@ -565,6 +589,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 experimental['lcb_branches'] += record.lcb
                 taken = record.next_pc != pc + inst.size
                 wrong = record.taken != taken or (taken and record.target != record.next_pc)
+                experimental['control_misses'] += inst.kind in CONTROL and wrong
                 experimental['lcb_misses'] += record.lcb and wrong
                 if inst.kind == 'branch':
                     experimental['branches'] += 1
@@ -645,6 +670,13 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             len(training_pending) + len(m_training) + len(e_training) > 2)
         if e_stall:
             redirect = None
+        if load_merge is not None and not (m_redirect or applied_redirect or e_stall):
+            # EX has both addresses. A rejected pair occupies the single LSU for
+            # one additional registered hold; no address compare feeds ID/RF.
+            extra = load_merge.resolve(surviving, active)
+            tick += extra
+            cycles += extra * active
+            slots['other_result'] += 2 * extra * active
         div_wait = bool(not m_redirect and not e_stall and division_left and
                         any(r.instruction.kind == 'div' for r in surviving))
         events[10] = int(div_wait)
@@ -772,6 +804,9 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                         from wide_model import fits
                         supported = fits([older, younger], 2, 2, 2, 1, False)
                         structural = bool(hazard(younger, forwarded))
+                    if load_merge is not None and older.kind == younger.kind == 'load':
+                        supported = True
+                        structural = bool(hazard(younger, forwarded))
                     if control_slots == 2 and younger.kind in CONTROL:
                         supported = True
                     if single_control and older.kind in CONTROL and younger.kind in CONTROL:
@@ -897,6 +932,12 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                             last_writes[destination] = tick
                     previous_instruction = instruction, tick
                     issued.append(record)
+                if load_merge is not None and len(issued) == 2 and all(
+                        r.instruction.kind == 'load' for r in issued):
+                    for record in issued:
+                        # Both AGUs are in EX, so neither uses ID early-return.
+                        record.early_load = False
+                        record.result_latency = load_latency
                 if any(r.instruction.kind == 'div' for r in issued):
                     record = next(r for r in issued if r.instruction.kind == 'div')
                     division_left = (division_cycles[record.trace_index] if
@@ -931,13 +972,35 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         if not flush and not perfect_frontend and replay is None:
             correction = False
             if second_level and pending:
-                pc, meta = pending[0]
+                pc = pending[0][0]
+                meta = pending[0][1]
+                if unaligned_fetch:
+                    meta = next((m for _, m in pending if m[0] and
+                                 getattr(m[3], 'second', m[1]) != m[1]), meta)
+                    banks = getattr(pending[0][1][3], 'banks', None)
+                    if banks:
+                        correction = any(q[0] and getattr(q[3], 'second', q[1]) != q[1]
+                                         for q in banks)
+                        if correction:
+                            corrected_banks = tuple((q[0], getattr(q[3], 'second', q[1]),
+                                                     *q[2:]) for q in banks)
+                            pending, fetch_pc, cross_target, corrected_query = fetch_request(
+                                predictor, pc, None, group_bytes, unaligned=True,
+                                bank_queries=corrected_banks)
+                            # A first-word correction can expose or discard a
+                            # second-word call/return. Replace its F1 RAS action.
+                            predictor.restore_snapshot(banks[0][4])
+                            if corrected_query[1]:
+                                predictor.action(corrected_query[0][0])
+                            if active:
+                                experimental['f2_corrections'] += 1
                 entry, taken, target, history, checkpoint = meta
                 second = getattr(history, 'second', taken)
-                if entry and second != taken:
+                if entry and second != taken and not correction:
                     corrected = (entry, second, target, history, checkpoint)
                     pending, fetch_pc, cross_target, _ = fetch_request(
-                        predictor, pc, None, group_bytes, query_override=corrected)
+                        predictor, pc, None, group_bytes, query_override=corrected,
+                        unaligned=unaligned_fetch)
                     correction = True
                     if active:
                         experimental['f2_corrections'] += 1

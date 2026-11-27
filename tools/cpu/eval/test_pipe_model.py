@@ -10,6 +10,7 @@ from analyze import Instruction
 from pipe_model import (INORDER_VARIANTS, Predictor, Record, SLOT_CAUSES, fill_ib,
                         simulate, early_address_allowed, lcb_allowed)
 from collections import deque
+from v2_round4_structures import LoadMerge, RamTage, fold
 
 
 def instruction(pc, kind='alu', rd=0, sources=(), size=4, target=0):
@@ -26,6 +27,116 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_round4_zba_constant_shift_add_can_execute_late(self):
+        zba = replace(instruction(4, rd=5, sources=(4, 6)), bits=0x206222b3)
+        stream = [instruction(0, 'load', rd=4), zba]
+        result = run(stream, 'V3s', early_address='rf_wb', late_execute='alu',
+                     late_pair=True, perfect_frontend=True, perfect_prediction=True)
+        self.assertEqual(result['late_alu'], 1)
+        self.assertEqual(result['hpm1'], 1)
+
+    def test_round4_merge_checks_ex_and_serializes_different_chunks(self):
+        stream = [instruction(pc) for pc in range(0, 16, 4)] + [
+                  replace(instruction(16, 'load', rd=4), bits=0x2003),
+                  replace(instruction(20, 'load', rd=5), bits=0x2003),
+                  instruction(24, sources=(4, 5))]
+        options = dict(perfect_frontend=True, perfect_prediction=True,
+                       early_address='rf_wb')
+        same = LoadMerge([0] * 4 + [0x80000000, 0x80000004, 0, 0], 8)
+        different = LoadMerge([0] * 4 + [0x80000000, 0x80000008, 0, 0], 8)
+        a = run(stream, 'V3s', load_merge=same, **options)
+        b = run(stream, 'V3s', load_merge=different, **options)
+        self.assertEqual((same.candidates, same.merged, same.replays), (1, 1, 0))
+        self.assertEqual((different.merged, different.replays), (0, 1))
+        self.assertEqual(b['cycles'], a['cycles'] + 1)
+        self.assertEqual(a['early_loads'], 0)
+        self.assertEqual(a['slots_load_use'], 2)
+
+    def test_round4_merge_does_not_pair_raw_or_merge_mmio(self):
+        stream = [instruction(0, 'load', rd=4), instruction(4, 'load', sources=(4,))]
+        merge = LoadMerge([0x80000000, 0x80000000, 0], 8)
+        run(stream, 'V3s', load_merge=merge, perfect_frontend=True, perfect_prediction=True)
+        self.assertEqual(merge.candidates, 0)
+        records = [Record(replace(instruction(i * 4, 'load'), bits=0x2003),
+                          False, False, 0, 0, (), trace_index=i) for i in range(2)]
+        self.assertEqual(LoadMerge([0x40000000, 0x40000004], 8).resolve(records, True), 1)
+        self.assertEqual(LoadMerge([0x80000006, 0x80000004], 8).resolve(records, True), 1)
+
+    def test_round4_unaligned_fetch_reads_across_64bit_boundary(self):
+        from pipe_model import fetch_request
+        predictor = Predictor(128, 4096, 4)
+        response, next_pc, cross, _ = fetch_request(predictor, 4, None, unaligned=True)
+        self.assertEqual([pc for pc, _ in response], [4, 6, 8, 10])
+        self.assertEqual((next_pc, cross), (12, None))
+        branch = instruction(8, 'branch', target=64)
+        predictor.btb[2] = (branch, 64)
+        predictor.pht[4] = 3
+        response, next_pc, _, _ = fetch_request(predictor, 4, None, unaligned=True)
+        self.assertEqual(next_pc, 64)
+        self.assertEqual(response[-1][1][0][0].pc, 8)
+
+    def test_round4_tage_saved_provider_and_full_history_fold(self):
+        self.assertEqual(fold((1 << 130) | 1, 8), 5)
+        tage = RamTage(5, 512)
+        predicted, token = tage.predict(0x1000, False, 0)
+        self.assertFalse(predicted)
+        tage.update(0x1000, True, token)
+        tage.history = 0
+        predicted, token = tage.predict(0x1000, False, 0)
+        self.assertTrue(predicted)
+        self.assertEqual(token[1], 0)
+        self.assertEqual(tage.bits, 8192 + 12 + 8192 + 5 * 512 * 16 + 144)
+
+    def test_round4_bank_f2_keeps_truncated_second_query(self):
+        from pipe_model import fetch_request
+
+        class Opposite:
+            def predict(self, pc, taken, index):
+                return not taken, None
+
+        predictor = Predictor(128, 4096, 4, gshare_pc_shift=2,
+                              direction=Opposite(), second_level=True)
+        predictor.btb[0] = (instruction(0, 'branch', target=64), 64)
+        predictor.btb[1] = (instruction(4, 'branch', target=80), 80)
+        predictor.pht[0] = 3
+        response, target, _, _ = fetch_request(predictor, 0, None, unaligned=True)
+        self.assertEqual((len(response), target), (2, 64))
+        banks = response[0][1][3].banks
+        corrected = tuple((q[0], q[3].second, *q[2:]) for q in banks)
+        response, target, _, _ = fetch_request(predictor, 0, None, unaligned=True,
+                                               bank_queries=corrected)
+        self.assertEqual((len(response), target), (4, 80))
+
+    def test_round4_f2_exposed_call_updates_ras(self):
+        from unittest.mock import patch
+
+        class Opposite:
+            bits = 0
+
+            def predict(self, pc, taken, index):
+                return not taken, None
+
+            def update(self, pc, taken, token):
+                pass
+
+        branch = instruction(0, 'branch', target=32)
+        call = replace(instruction(4, 'jal', rd=1, target=16), push=True)
+        ret = replace(instruction(16, 'jalr', sources=(1,)), pop=True)
+
+        class WarmPredictor(Predictor):
+            def __init__(self, *args):
+                super().__init__(*args)
+                self.btb[0], self.btb[1], self.btb[4] = (branch, 32), (call, 16), (ret, 64)
+                self.pht[0] = 3
+
+        program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+        program.update({0: branch, 4: call, 16: ret, 8: instruction(8, 'serial')})
+        with patch('pipe_model.Predictor', WarmPredictor):
+            result = simulate(program, [0, 4, 16, 8], 0, 8, 'V3s', unaligned_fetch=True,
+                              direction_predictor=Opposite(), second_level=True,
+                              btb_entries=128, gshare_entries=4096, gshare_pc_shift=2)
+        self.assertEqual(result['control_misses'], 0)
+
     def test_round3_ideal_supplier_keeps_baseline_predictions(self):
         program = {pc: instruction(pc) for pc in range(0, 64, 4)}
         program[0] = instruction(0, 'branch', target=16)
