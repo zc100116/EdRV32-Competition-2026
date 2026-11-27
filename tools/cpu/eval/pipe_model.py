@@ -289,7 +289,11 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
              decode_split=False, branch_register=False, memory_probe=None,
              line_predictor=False, memory_capture=False, capture_early='registered',
              csr_latency=None, system_capture=True, issue_width=2,
-             late_execute=None, division_cycles=None):
+             late_execute=None, division_cycles=None, late_pair=False,
+             slot1_mul=False, slot1_lsu=False, control_slots=1, slot1_control=False,
+             ideal_pairing=False,
+             fetch_bytes=None, queue_depth=None, prediction_capture=None,
+             fixed_predictions=None):
     if fusion:
         program, trace = fuse_program(program, trace, fusion, begin, end)
     changes = INORDER_VARIANTS.get(variant, {})
@@ -305,11 +309,12 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     branch_lane = late_backend or variant in {
         'V2', 'V2s', 'V2s+V5', 'V3', 'V3s', 'V3+V4a', 'V3+V4b', 'V3+V5'}
     single_control = late_backend or variant in {'V2s', 'V2s+V5', 'V3s'}
-    single_control &= not changes.get('dual_control', False)
+    single_control &= not changes.get('dual_control', False) and control_slots == 1
     late_controls = {'branch', 'jalr'} if changes.get('late_jalr') else {'branch'}
     dual_query = variant in {'V4b', 'V3+V4b'}
     group_bytes = 16 if variant in {'V4a', 'V3+V4a', 'V4b', 'V3+V4b'} else 8
-    depth = 8 if group_bytes == 16 else 4
+    group_bytes = fetch_bytes or group_bytes
+    depth = queue_depth or (8 if group_bytes == 16 else 4)
     large_predictor = variant in {'V5', 'V3+V5', 'V2s+V5'} or (
         late_backend and variant.endswith('+V5'))
     btb, pht = (64, 1024) if large_predictor else (32, 512)
@@ -346,6 +351,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     tick = 0
     counters = [0] * 17
     late_retired = [0, 0, 0]
+    pair_breakdown = {}
+    one_breakdown = {}
     training_pending = deque()
     training_conflicts = 0
     training_peak = 0
@@ -377,22 +384,34 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 waits |= wait_kind.get(source, 0)
         return waits
 
+    def id_early_load(instruction, issued):
+        base = instruction.sources[-1] if instruction.sources else 0
+        return (not base or not any(
+            base in destinations(r.instruction) for r in issued + e + m)) and (
+            not base or not any(base in destinations(r.instruction) and
+                (r.result_latency or latencies.get(r.instruction.kind, 1)) > 3 for r in w))
+
     def schedule(instruction, lane, older=None, older_late=False):
         needs = []
         for source in instruction.sources:
             if older and older.rd and source == older.rd:
                 latency = 2 if older_late and older.kind == 'alu' else latencies.get(
                     older.kind, 1)
+                if late_pair and older.kind == 'load' and early_address == 'rf_wb' and (
+                        id_early_load(older, [])):
+                    latency = 1
                 needs.append(0 if relax_raw else latency)
             else:
                 needs.append(ready_in.get(source, 0))
         if not any(needs):
             return True, False, False
         if late_execute:
-            # Only hide an existing load dependency; no same-pair RAW forwarding.
-            if older and older.rd and older.rd in instruction.sources:
+            # Round two hides prior loads; round three also registers same-group EX results.
+            if not late_pair and older and older.rd and older.rd in instruction.sources:
                 return False, False, False
-            if any(wait_kind.get(s, 0) == 2 for s in instruction.sources):
+            if any(wait_kind.get(s, 0) == 2 for s in instruction.sources
+                   if not (older and s == older.rd) and
+                   not (late_pair and producer_kind.get(s) == 'alu')):
                 return False, False, False
             if instruction.kind == 'alu' and operation(instruction) not in {
                     'addi', 'add', 'sub', 'andi', 'ori', 'xori', 'and', 'or', 'xor',
@@ -453,6 +472,9 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 hit = True
                 taken = instruction.kind != 'branch' or next_pc != pc + instruction.size
                 target = next_pc
+            if fixed_predictions is not None and front_cursor < len(trace) and (
+                    instruction.kind in CONTROL):
+                hit, taken, target = fixed_predictions[front_cursor]
             ib.append(Record(instruction, hit, hit and taken, target,
                              ((prediction_pc >> gshare_pc_shift) ^ history) & (pht - 1),
                              checkpoint))
@@ -464,9 +486,10 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 ideal_group = None
 
     while True:
-        # T2 FE option: reserve from the eight physical IB/stream entries at
-        # cycle start, including the outstanding response; D pops are not credits yet.
-        frontend_margin = 8 - len(ib) - (len(halfwords) + len(pending)) // 2
+        # T2 FE option: reserve IB plus two fetch groups at cycle start, including
+        # the outstanding response; D pops are not registered credits yet.
+        frontend_margin = (depth + group_bytes // 2 - len(ib) -
+                           (len(halfwords) + len(pending)) // 2)
         applied_redirect = registered_redirect
         registered_redirect = extra_redirect
         extra_redirect = None
@@ -522,6 +545,9 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         retirement = w2 if registered_control else w
         for record in retirement:
             pc = record.instruction.pc
+            if prediction_capture is not None and record.trace_index >= 0 and (
+                    record.instruction.kind in CONTROL):
+                prediction_capture[record.trace_index] = (record.hit, record.taken, record.target)
             if frontend_probe is not None and record.instruction.bits == 0x0000100f:
                 frontend_probe.invalidate()
             ending |= pc == end
@@ -586,7 +612,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                         break
         m_training = [r for r in m_surviving if (
             r.late and r.instruction.kind in late_controls) or r.deferred_control or r.lcb]
-        bounded_training = changes.get('training_capacity') == 1
+        bounded_training = changes.get('training_capacity') == 1 or control_slots == 2
         m_stall = bounded_training and len(training_pending) + len(m_training) > 2
         if m_stall:
             m_redirect = None
@@ -638,9 +664,12 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         d_redirect = None
         reason = 0
         pair_event = 0
+        pair_kinds = None
+        one_kind = None
         # Build closest-producer readiness once, including younger WAW priority.
         wait_kind = {}
         ready_in = {}
+        producer_kind = {}
         stages = (((4, w), (3, m), (2, m1), (1, e)) if memory_capture else
                   ((3, w), (2, m), (1, e)) if long_results else ((2, m), (1, e)))
         if decode_split:
@@ -659,6 +688,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                                                        else latencies.get(producer.kind, 1))
                     if isinstance(producer, Macro) and destination != producer.rd:
                         latency = 1
+                    producer_kind[destination] = producer.kind
                     wait_kind[destination] = code if latency > age else 0
                     if late_backend:
                         ready_in[destination] = max(0, latency - age)
@@ -695,9 +725,14 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             if not older_waits and not csr_wait:
                 count = 1
                 reason = 8
+                one_kind = ('taken_target' if previous_instruction and
+                            previous_instruction[0].kind in CONTROL and
+                            older.pc != previous_instruction[0].pc +
+                            previous_instruction[0].size else 'sequential')
                 younger_late = younger_store = younger_lcb = False
                 if len(ib) >= 2 and issue_width == 2:
                     younger = ib[1].instruction
+                    pair_kinds = older.kind + "+" + younger.kind
                     chain = serial_alu and older.kind == 'alu' and (
                         serial_alu == 'any' or operation(older) in {
                             'addi', 'lui', 'andi', 'ori', 'xori', 'and', 'or', 'xor',
@@ -721,23 +756,31 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     if all_slot1_types and younger.kind in {'csr', 'serial'}:
                         structural = True
                     supported = (younger.kind == 'alu' or
-                                 (branch_lane and younger.kind in {'branch', 'jal'}))
-                    if younger.kind in changes.get('lsu', ()):
+                                 (branch_lane and younger.kind in {'branch', 'jal'}) or
+                                 (slot1_control and younger.kind in CONTROL))
+                    if younger.kind in changes.get('lsu', ()) or (
+                            (slot1_lsu or dual_lsu) and younger.kind in {'load', 'store'}):
                         supported = True
                         structural |= older.kind in {'load', 'store'}
-                    if younger.kind == 'mul' and changes.get('mul'):
+                    if younger.kind == 'mul' and (changes.get('mul') or slot1_mul):
                         supported = True
-                        structural |= older.kind == 'mul'
+                        structural |= older.kind == 'mul' and slot1_mul != 'dual'
                     if all_slot1_types:
                         supported = younger.kind != 'illegal'
                     if dual_lsu and older.kind in {'load', 'store'} and (
                             younger.kind in {'load', 'store'}):
                         from wide_model import fits
                         supported = fits([older, younger], 2, 2, 2, 1, False)
+                        structural = bool(hazard(younger, forwarded))
+                    if control_slots == 2 and younger.kind in CONTROL:
+                        supported = True
                     if single_control and older.kind in CONTROL and younger.kind in CONTROL:
                         supported = False
                     older_supported = older.kind == 'alu' or (
-                        branch_lane and older.kind in {'branch', 'jal'})
+                        branch_lane and older.kind in {'branch', 'jal'}) or (
+                            slot1_control and older.kind in CONTROL) or (
+                            slot1_mul and older.kind == 'mul') or (
+                            (slot1_lsu or dual_lsu) and older.kind in {'load', 'store'})
                     exchanged = swap and older_supported and not supported
                     exchanged = exchanged and younger.kind not in {'csr', 'serial', 'illegal'}
                     if single_control and older.kind in CONTROL and younger.kind in CONTROL:
@@ -747,6 +790,9 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     if ((ib[0].cache_group >= 0 or ib[1].cache_group >= 0) and
                             ib[0].cache_group != ib[1].cache_group):
                         supported = exchanged = False
+                    if ideal_pairing:
+                        supported = True
+                        structural = bool(hazard(younger, forwarded))
                     reason = 5 if raw else 6 if structural else 7 if not (
                         supported or exchanged) else 0
                     if not reason:
@@ -820,12 +866,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                         base = instruction.sources[-1] if instruction.sources else 0
                         recent = last_writes.get(base)
                         if early_address == 'rf_wb':
-                            early = not base or not any(
-                                base in destinations(r.instruction) for r in issued + e + m)
-                            early &= not base or not any(
-                                base in destinations(r.instruction) and
-                                (r.result_latency or latencies.get(r.instruction.kind, 1)) > 3
-                                for r in w)
+                            early = id_early_load(instruction, issued)
                         elif early_address == 'v017':
                             if decode_split:
                                 # Query is in D2 next cycle: present D2/E/M become E/M/W.
@@ -936,7 +977,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     e_updates.append(record)
         if lcb == 'v017':
             updates = m_updates + e_updates
-        elif late_branch or lcb:
+        elif late_branch or lcb or control_slots == 2:
             training_pending.extend(m_updates)
             training_pending.extend(e_updates)
             updates = [training_pending.popleft()] if training_pending else []
@@ -1095,6 +1136,13 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 else:
                     cause = PAIR_CAUSES[reason]
                 slots[cause] += empty
+                if cause in {'pair_type', 'pair_structural'} and pair_kinds:
+                    detail = ('operand' if cause == 'pair_structural' and
+                              hazard(younger, forwarded) else 'unit')
+                    key = cause + ':' + pair_kinds + ':' + detail
+                    pair_breakdown[key] = pair_breakdown.get(key, 0) + empty
+                if cause == 'pair_one':
+                    one_breakdown[one_kind] = one_breakdown.get(one_kind, 0) + empty
                 if cause == 'load_use' and statistics is not None:
                     consumer = ib[0].instruction
                     if consumer.kind in {'load', 'store'} and (
@@ -1122,6 +1170,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     result.update(late_alu=late_retired[0], late_branch=late_retired[1],
                   late_store_data=late_retired[2], late_instructions=sum(late_retired))
     result['late_share'] = result['late_instructions'] / result['instructions']
+    result['pair_breakdown'] = pair_breakdown
+    result['one_breakdown'] = one_breakdown
     result['training_conflicts'] = training_conflicts
     result['training_peak'] = training_peak
     result['training_over_one'] = training_over_one

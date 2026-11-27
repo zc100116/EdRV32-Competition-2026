@@ -26,6 +26,76 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_round3_ideal_supplier_keeps_baseline_predictions(self):
+        program = {pc: instruction(pc) for pc in range(0, 64, 4)}
+        program[0] = instruction(0, 'branch', target=16)
+        program[20] = instruction(20, 'serial')
+        captured = {}
+        trace = [0, 16, 20]
+        base = simulate(program, trace, 0, 20, 'V3s', prediction_capture=captured)
+        ideal = simulate(program, trace, 0, 20, 'V3s', perfect_frontend=True,
+                         fixed_predictions=captured)
+        self.assertEqual(base['direction_misses'], 1)
+        self.assertEqual(ideal['direction_misses'], base['direction_misses'])
+        self.assertLessEqual(ideal['cycles'], base['cycles'])
+
+    def test_round3_late_pair_uses_two_cycles_without_cascade(self):
+        stream = [instruction(0, rd=4), instruction(4, rd=5, sources=(4,)),
+                  instruction(8, 'load', rd=6, sources=(5,))]
+        options = dict(perfect_frontend=True, perfect_prediction=True,
+                       late_execute='alu', late_pair=True)
+        result = run(stream, 'V3s', **options)
+        self.assertEqual(result['late_alu'], 1)
+        self.assertEqual(result['hpm1'], 1)
+        self.assertEqual(result['cycles'], 3)
+
+    def test_round3_same_group_load_needs_early_return(self):
+        stream = [instruction(0, 'load', rd=4), instruction(4, sources=(4,))]
+        options = dict(perfect_frontend=True, perfect_prediction=True,
+                       late_execute='alu', late_pair=True)
+        normal = run(stream, 'V3s', **options)
+        early = run(stream, 'V3s', early_address='rf_wb', **options)
+        self.assertEqual(normal['hpm1'], 0)
+        self.assertEqual(early['hpm1'], 1)
+        self.assertEqual(early['late_alu'], 1)
+
+    def test_round3_mul_slots_keep_one_multiplier(self):
+        options = dict(perfect_frontend=True, perfect_prediction=True, slot1_mul=True)
+        for kinds in (('load', 'mul'), ('mul', 'load')):
+            mixed = [instruction(0, kinds[0]), instruction(4, kinds[1])]
+            self.assertEqual(run(mixed, 'V3s', **options)['hpm1'], 1)
+            lsu_options = dict(options, slot1_mul=False, slot1_lsu=True)
+            self.assertEqual(run(mixed, 'V3s', **lsu_options)['hpm1'], 1)
+        both_memory = [instruction(0, 'load'), instruction(4, 'store')]
+        self.assertEqual(run(both_memory, 'V3s', **lsu_options)['hpm1'], 0)
+        both = [instruction(0, 'mul'), instruction(4, 'mul')]
+        self.assertEqual(run(both, 'V3s', **options)['hpm1'], 0)
+        options['slot1_mul'] = 'dual'
+        self.assertEqual(run(both, 'V3s', **options)['hpm1'], 1)
+
+    def test_round3_two_controls_serialize_training(self):
+        stream = [instruction(pc, 'branch') for pc in range(0, 48, 4)]
+        result = run(stream, 'V3s', control_slots=2, perfect_frontend=True,
+                     perfect_prediction=True)
+        self.assertEqual(result['instructions'], 12)
+        self.assertLessEqual(result['training_peak'], 1)
+        self.assertGreater(result['slots_training_structural'], 0)
+
+    def test_round3_late_branch_resolves_in_mem(self):
+        stream = [instruction(0, rd=4), instruction(4, 'branch', sources=(4,)),
+                  instruction(8)]
+        result = run(stream, 'V3s', late_execute='alu_branch', late_pair=True,
+                     perfect_frontend=True, perfect_prediction=True)
+        self.assertEqual(result['late_branch'], 1)
+        self.assertEqual(result['hpm1'], 1)
+
+    def test_round3_jalr_can_exchange_with_single_lsu(self):
+        options = dict(perfect_frontend=True, perfect_prediction=True)
+        for kinds in (('load', 'jalr'), ('jalr', 'load')):
+            stream = [instruction(0, kinds[0]), instruction(4, kinds[1])]
+            self.assertEqual(run(stream, 'V3s', **options)['hpm1'], 0)
+            self.assertEqual(run(stream, 'V3s', slot1_control=True, **options)['hpm1'], 1)
+
     def test_round2_divider_operands_ignore_hex_memory_text(self):
         from pathlib import Path
         from tempfile import TemporaryDirectory
