@@ -29,17 +29,17 @@
 
 | 编号 | 内容 | 执行者 | 依赖 | 验收标准 | 拟Task/任务卡、分支 | 状态 |
 |---|---|---|---|---|---|---|
-| P00 | 冻结五探针边界、输入/输出寄存和测量条件，编制任务卡/IP说明 | C | 用户规格阶段授权 | 每探针有完整端口、时序约束/器件、产物模板；不改整核功能 | task-cpu-v2-probe-contract / 派发时分支 | [~] 用户 2026-11-27 同意按 v0.1 做探针；整数四探针合一个 PDS 工程（P-INT），FMA 单独工程（P-FMA）；任务卡待 RTL 完成后写 |
-| P01 | ID RF/WB→AGU独立探针RTL和单元激励 | D | P00 | 资格规则、RF读/选择/加法边界可仿真，风格/lint0 | task-cpu-v2-probe-id / 派发时分支 | [~] 合并为 P-INT（ctx_db19ba699d05），zc100116/gpu-dev |
-| P02 | ID提前地址探针PDS | W | P01 | 最差setup/hold、资源/扇出/路径；与5.736/5.796ns估算对照，原始报告路径齐全 | tasks/win/待协调者编号-id-agu / win分支待派发 | [ ] |
-| P03 | TAGE F2探针RTL，含训练副本和待写前置命中旁路 | D | P00 | 当前行更新/碰撞和四表512端口模型自检，lint0 | task-cpu-v2-probe-tage / 派发时分支 | [~] 合并为 P-INT（ctx_db19ba699d05），zc100116/gpu-dev |
-| P04 | TAGE F2探针PDS | W | P03 | 比较/优先、训练副本、单待写旁路和双查询路径实测，RAM碎片计数 | tasks/win/待协调者编号-tage / win分支待派发 | [ ] |
-| P05 | 双bank取指拼合探针RTL，含行尾两行、最老taken和owner前置入口 | D | P00 | 任意4B起点、拼合/恢复功能自检，固定头边界明确 | task-cpu-v2-probe-fetch / 派发时分支 | [~] 合并为 P-INT（ctx_db19ba699d05），zc100116/gpu-dev |
-| P06 | 双bank取指拼合探针PDS | W | P05 | bank→拼合/owner路径setup/hold和真实宏端口几何 | tasks/win/待协调者编号-fetch / win分支待派发 | [ ] |
-| P07 | LVT RF探针RTL：4R2W F2候选owner与小2R1W，技术包装行为模型 | D | P00 | 同址双写/IB等待owner修正/WB逐口检查，lint0 | task-cpu-v2-probe-rf / 派发时分支 | [~] 合并为 P-INT（ctx_db19ba699d05），zc100116/gpu-dev |
-| P08 | LVT RF探针PDS/厂商RAM等价 | W | P07 | 异步读/候选owner/WB更新时序、LUTRAM打包及ASIC等价宏接口记录 | tasks/win/待协调者编号-rf / win分支待派发 | [ ] |
-| P09 | FP32 FMA探针RTL及APM包装行为测试 | D | P00 | 完整积和X/Y捕获、4拍链/8拍FMA初值、77位carry/LZA逐拍证据 | task-cpu-v2-probe-fma / 派发时分支 | [~] P-FMA（ctx_32270fc19859），zc100116/gpu-dev |
-| P10 | FP32 FMA探针PDS/厂商APM逐拍等价 | W | P09 | X/Y、MULT/P/CPO级联和carry77段实测，setup/hold/资源报告 | tasks/win/待协调者编号-fma / win分支待派发 | [ ] |
+| P00 | 冻结五探针边界、输入/输出寄存和测量条件，编制任务卡/IP说明 | C | 用户规格阶段授权 | 每探针有完整端口、时序约束/器件、产物模板；不改整核功能 | task-cpu-v2-probe-contract / 派发时分支 | [x] 卡 110 已下发； 用户 2026-11-27 同意按 v0.1 做探针；整数四探针合一个 PDS 工程（P-INT），FMA 单独工程（P-FMA） |
+| P01 | ID RF/WB→AGU独立探针RTL和单元激励 | D | P00 | 资格规则、RF读/选择/加法边界可仿真，风格/lint0 | task-cpu-v2-probe-id / 派发时分支 | [x] P-INT 完成（04753dba1），四项 smoke 通过 |
+| P02 | ID提前地址探针PDS | W | P01 | 最差setup/hold、资源/扇出/路径；与5.736/5.796ns估算对照，原始报告路径齐全 | tasks/win/20261127-110-cpu2-probes（工程A） | [~] 卡 110 已下发 |
+| P03 | TAGE F2探针RTL，含训练副本和待写前置命中旁路 | D | P00 | 当前行更新/碰撞和四表512端口模型自检，lint0 | task-cpu-v2-probe-tage / 派发时分支 | [x] P-INT 完成（04753dba1），四项 smoke 通过 |
+| P04 | TAGE F2探针PDS | W | P03 | 比较/优先、训练副本、单待写旁路和双查询路径实测，RAM碎片计数 | tasks/win/20261127-110-cpu2-probes（工程A） | [~] 卡 110 已下发 |
+| P05 | 双bank取指拼合探针RTL，含行尾两行、最老taken和owner前置入口 | D | P00 | 任意4B起点、拼合/恢复功能自检，固定头边界明确 | task-cpu-v2-probe-fetch / 派发时分支 | [x] P-INT 完成（04753dba1），四项 smoke 通过 |
+| P06 | 双bank取指拼合探针PDS | W | P05 | bank→拼合/owner路径setup/hold和真实宏端口几何 | tasks/win/20261127-110-cpu2-probes（工程A） | [~] 卡 110 已下发 |
+| P07 | LVT RF探针RTL：4R2W F2候选owner与小2R1W，技术包装行为模型 | D | P00 | 同址双写/IB等待owner修正/WB逐口检查，lint0 | task-cpu-v2-probe-rf / 派发时分支 | [x] P-INT 完成（04753dba1），四项 smoke 通过 |
+| P08 | LVT RF探针PDS/厂商RAM等价 | W | P07 | 异步读/候选owner/WB更新时序、LUTRAM打包及ASIC等价宏接口记录 | tasks/win/20261127-110-cpu2-probes（工程A） | [~] 卡 110 已下发 |
+| P09 | FP32 FMA探针RTL及APM包装行为测试 | D | P00 | 完整积和X/Y捕获、4拍链/8拍FMA初值、77位carry/LZA逐拍证据 | task-cpu-v2-probe-fma / 派发时分支 | [x] P-FMA 完成（e1fd27d5c），112 万向量逐位通过；Yosys 参考 E7/E8 超预算，待 PDS |
+| P10 | FP32 FMA探针PDS/厂商APM逐拍等价 | W | P09 | X/Y、MULT/P/CPO级联和carry77段实测，setup/hold/资源报告 | tasks/win/20261127-110-cpu2-probes（工程B） | [~] 卡 110 已下发 |
 | P11 | 五探针评审、修订延迟/资源/频率初值并重放性能模型 | C | P02/P04/P06/P08/P10 | 接口与可实现边界明确；不通过假设有显式修订，更新正式规格需用户确认 | task-cpu-v2-probe-review / 协调者分支 | [ ] |
 
 ### 3.2 接口冻结与验证基础设施
