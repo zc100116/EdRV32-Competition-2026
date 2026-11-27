@@ -1,0 +1,16 @@
++incdir+../include
+../tech/edrv32_ram_cpu2_base.v
+../tech/edrv32_ram_cpu2_base_train.v
+../tech/edrv32_ram_cpu2_btb.v
+../tech/edrv32_ram_cpu2_cache_data.v
+../tech/edrv32_ram_cpu2_cache_tag.v
+../tech/edrv32_ram_cpu2_fast.v
+../tech/edrv32_ram_cpu2_rf.v
+../tech/edrv32_ram_cpu2_tage.v
+../tech/edrv32_ram_cpu2_tage_train.v
+../cpu2/edrv32_cpu2_rf.v
+../cpu2/edrv32_cpu2_fetch.v
+../cpu2/edrv32_cpu2_tage_update.v
+../cpu2/edrv32_cpu2_tage.v
+../cpu2/edrv32_cpu2_id_agu.v
+../../fpga/rtl/edrv32_fpga_probe_cpu2_int_top.v
