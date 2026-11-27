@@ -151,7 +151,7 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | C2-I | CPU v2 整数核架构评估（用户 2026-11-27：作为作品集 IP，自身时序/性能/资源最优）：v0.21+ CPI 栈、5 级双发射等候选、关键环路时序与资源、推荐配置和参数；只做模型和设计记录 | Codex sol（ctx_045f516f7293） | — | `docs/design/2026-11-27-cpu-v2-architecture.md`；test_pipe_model 通过 | zc100116/gpu-dev | [x] 第一版（ba4afff65）：B0 模型误差 −0.014%；V5-default 5.265 CM/MHz、8.8k LUT/5.2k FF（估算），整片规划 135 MHz。协调者评审：V5 视觉 −21%/MHz 全部来自 load-use（B0 提前 load 延迟 1 被取消），缺 B0 修时序对照、ID 提前访存的干净版本和编译调度对照，默认 gshare1024 性价比差；第二轮见 C2-I2 |
 | C2-F | CPU v2 浮点单元设计：F 必选、D 可配置（用户 2026-11-27），FMA/APM 方案、除法开方、资源与负载加速比、验证方案；只做模型和设计记录 | Codex sol（ctx_dfd9ed38a61e） | 接口待 C2-I | `docs/design/2026-11-27-cpu-v2-fpu.md` | zc100116/gpu-dev | [x] 第一版（84c6bb7ff）：短路 FMA 核心 + 独立 SRT；F 增量约 2.7k LUT/1.1k FF/2 APM，F+D 约 8.5k/5.5k/14；单精度负载较软浮点 7.5–9.1×（模型）。协调者评审：按 3 级 LUT 预算切拍，S 延迟 ADD 8/MUL 10/FMA 14、D 30 偏长，待 C2-I 给出 CPU 实测级数预算后重估（C2-F2） |
 | C2-I2 | 整数核第二轮：B0-fix 对照；V5 + ID 提前地址 / 次级 ALU / 编译调度隐藏 load-use；gshare4096 默认；快速除法器；更新三档推荐 | Codex sol（ctx_a7c1fcb5c881） | C2-I | 架构记录追加第二轮；test_pipe_model 通过 | zc100116/gpu-dev | [~] 进行中 |
-| C2-F2 | FPU 按 C2-I 校准的段预算（约 carry32+4 级）重新切拍；ADD/MUL 旁路取舍；队列 8/16 项（LUTRAM）；NONE/F/FD 资源与加速比 | Codex sol（ctx_e78bf0f97d1e） | C2-I | FPU 记录第二版 | zc100116/gpu-dev | [~] 进行中 |
+| C2-F2 | FPU 按 C2-I 校准的段预算（约 carry32+4 级）重新切拍；ADD/MUL 旁路取舍；队列 8/16 项（LUTRAM）；NONE/F/FD 资源与加速比 | Codex sol（ctx_e78bf0f97d1e） | C2-I | FPU 记录第二版 | zc100116/gpu-dev | [x] b9446ae8b：S ADD/MUL/FMA 5/7/8、D 6/18/20 拍（估算）；F 增量 3.7k LUT/0.9k FF/2 APM，FD 9.9k/4.6k/14；单精度 11.5–13×、FD 双精度 9.6–10.7×（模型）。协调者评审：保留任意项转发（仅末级旁路省 128 LUTRAM 却慢 4.6–9.8%）；F 用 3R 只多 96 LUTRAM、图形核快 7–10%，建议 F 默认 3R；实现阶段再评估 RF 存重编码格式（省 FMA 前两级）和 D 乘法并行级联 |
 
 ## 6. 变更记录
 
