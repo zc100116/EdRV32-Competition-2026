@@ -50,7 +50,17 @@ module edrv32_mem_xbar_rbuf_gpu (
     reg [6:0] write_ptr_r;
     reg [4:0] read_mask_r;
     reg [4:0] port_active_r;
+    reg [4:0] port_load_r;
+    reg [3:0] port_count_r [0:4];
+    reg [4:0] port_return_r;
+    reg [4:0] port_ready_r;
+    reg [7:0] available_nonzero_r;
+    reg [4:0] load_ready_w;
+    reg [4:0] available_r [0:7];
     reg [2:0] port_head_r [0:4];
+    reg [7:0] port_head_mask_r [0:4];
+    wire [4:0] load_available_w [0:4];
+    wire [6:0] load_addr_w [0:4];
     reg [4:0] port_available_r [0:4];
     reg [6:0] port_addr_r [0:4];
     wire [4:0] last_take_w;
@@ -94,6 +104,7 @@ module edrv32_mem_xbar_rbuf_gpu (
     integer skid_idx;
     genvar p;
     genvar data_slice;
+    genvar pair;
 
     function [2:0] first8;
         input [7:0] mask_i;
@@ -113,6 +124,27 @@ module edrv32_mem_xbar_rbuf_gpu (
             else first8 = choice_w[7] ? 3'd7 : 3'd0;
         end
     endfunction
+
+    // Four pair terms bound the one-hot table mux to two LUT levels before update control.
+    generate
+        for (p = 0; p < 5; p = p + 1) begin : g_head_load
+            (* keep = "true" *) wire [19:0] available_pair_w;
+            (* keep = "true" *) wire [27:0] addr_pair_w;
+            for (pair = 0; pair < 4; pair = pair + 1) begin : g_pair
+                assign available_pair_w[pair*5 +: 5] =
+                    (available_r[pair*2] & {5{port_head_mask_r[p][pair*2]}}) |
+                    (available_r[pair*2+1] & {5{port_head_mask_r[p][pair*2+1]}});
+                assign addr_pair_w[pair*7 +: 7] =
+                    (start_r[pair*2] & {7{port_head_mask_r[p][pair*2]}}) |
+                    (start_r[pair*2+1] & {7{port_head_mask_r[p][pair*2+1]}});
+            end
+            assign load_available_w[p] = available_pair_w[4:0] |
+                available_pair_w[9:5] | available_pair_w[14:10] |
+                available_pair_w[19:15];
+            assign load_addr_w[p] = addr_pair_w[6:0] | addr_pair_w[13:7] |
+                addr_pair_w[20:14] | addr_pair_w[27:21];
+        end
+    endgenerate
 
     assign pending_r = |pending_valid_r;
     // mem-subsys 6: illegal beats override response/last; payload is unspecified.
@@ -206,6 +238,7 @@ module edrv32_mem_xbar_rbuf_gpu (
         return_slot_w = 3'b0;
         ready_ports_w = 5'b0;
         fetch_w = 1'b0;
+        load_ready_w = 5'b0;
         fetch_port_w = 3'b0;
         fetch_slot_w = 3'b0;
         fetch_addr_w = 7'b0;
@@ -217,6 +250,8 @@ module edrv32_mem_xbar_rbuf_gpu (
             return_match_w[match_idx] = valid_r[match_idx] && !error_r[match_idx] &&
                 id_r[match_idx] == ddr_rid_i && received_r[match_idx] < length_r[match_idx];
             for (match_port = 0; match_port < 5; match_port = match_port + 1) begin
+                load_ready_w[match_port] = load_ready_w[match_port] |
+                    (available_nonzero_r[match_idx] && port_head_mask_r[match_port][match_idx]);
                 port_match_w[match_port][match_idx] = valid_r[match_idx] &&
                     {29'b0, id_r[match_idx][3:1]} == match_port &&
                     sent_r[match_idx] < length_r[match_idx] &&
@@ -227,7 +262,8 @@ module edrv32_mem_xbar_rbuf_gpu (
         for (match_port = 0; match_port < 5; match_port = match_port + 1) begin
             port_slot_w[match_port] = first8(port_match_w[match_port], head_r);
             ready_ports_w[match_port] = port_active_r[match_port] &&
-                port_available_r[match_port] != 0 &&
+                !port_load_r[match_port] &&
+                port_ready_r[match_port] &&
                 (!rvalid_o[match_port] || rready_i[match_port]);
         end
         fetch_w = |ready_ports_w;
@@ -252,8 +288,13 @@ module edrv32_mem_xbar_rbuf_gpu (
             pending_valid_r <= 5'b0;
             skid_valid_r <= 5'b0;
             port_active_r <= 5'b0;
+            port_load_r <= 5'b0;
+            port_return_r <= 5'b0;
+            port_ready_r <= 5'b0;
             for (skid_idx = 0; skid_idx < 5; skid_idx = skid_idx + 1) begin
                 port_head_r[skid_idx] <= 3'b0;
+                port_head_mask_r[skid_idx] <= 8'b0;
+                port_count_r[skid_idx] <= 4'b0;
                 port_available_r[skid_idx] <= 5'b0;
             end
         end else begin
@@ -269,29 +310,51 @@ module edrv32_mem_xbar_rbuf_gpu (
                 write_ptr_r <= write_ptr_r + {2'b0, reserve_beats_i};
             end
             pending_valid_r <= fetch_select_w;
+            // Return credit is delayed one cycle; it can only understate stored data.
+            port_load_r <= 5'b0;
             for (skid_idx = 0; skid_idx < 5; skid_idx = skid_idx + 1) begin
+                port_return_r[skid_idx] <= ddr_rvalid_i &&
+                    return_slot_w == port_head_r[skid_idx];
+                if ((reserve_i && reserve_port_i == skid_idx[2:0]) &&
+                    !last_take_w[skid_idx]) begin
+                    port_count_r[skid_idx] <= port_count_r[skid_idx] + 4'd1;
+                end else if (!(reserve_i && reserve_port_i == skid_idx[2:0]) &&
+                    last_take_w[skid_idx]) begin
+                    port_count_r[skid_idx] <= port_count_r[skid_idx] - 4'd1;
+                end
                 if (fetch_select_w[skid_idx]) begin
                     read_mask_r <= skid_idx == 4 ? 5'h1f : (5'h1f << (skid_idx + 1));
                 end
-                // X-F1 path 1: keep the head's available-beat count before arbitration.
-                port_available_r[skid_idx] <= port_available_r[skid_idx] +
-                    ((ddr_rvalid_i && ddr_rid_i[3:1] == skid_idx[2:0] &&
-                        return_slot_w == port_head_r[skid_idx]) ?
-                        5'd1 : 5'd0) -
-                    ((fetch_w && fetch_port_w == skid_idx[2:0]) ? 5'd1 : 5'd0);
+                // A registered descriptor selection precedes credit/address loading.
+                if (port_return_r[skid_idx] && !fetch_select_w[skid_idx]) begin
+                    port_available_r[skid_idx] <= port_available_r[skid_idx] + 5'd1;
+                    port_ready_r[skid_idx] <= 1'b1;
+                end else if (!port_return_r[skid_idx] &&
+                    fetch_select_w[skid_idx]) begin
+                    port_available_r[skid_idx] <= port_available_r[skid_idx] - 5'd1;
+                    port_ready_r[skid_idx] <= |port_available_r[skid_idx][4:1];
+                end
+                if (port_load_r[skid_idx]) begin
+                    port_available_r[skid_idx] <= load_available_w[skid_idx];
+                    port_ready_r[skid_idx] <= load_ready_w[skid_idx];
+                end
                 if (last_take_w[skid_idx]) begin
                     port_active_r[skid_idx] <= |port_match_w[skid_idx];
+                    port_load_r[skid_idx] <= |port_match_w[skid_idx];
                     port_head_r[skid_idx] <= port_slot_w[skid_idx];
-                    port_available_r[skid_idx] <= received_r[port_slot_w[skid_idx]] +
-                        ((ddr_rvalid_i && return_slot_w == port_slot_w[skid_idx]) ?
-                            5'd1 : 5'd0);
+                    port_head_mask_r[skid_idx] <= 8'b1 << port_slot_w[skid_idx];
                 end
                 if (reserve_i && reserve_port_i == skid_idx[2:0] &&
-                    (!port_active_r[skid_idx] ||
-                        (last_take_w[skid_idx] && port_match_w[skid_idx] == 0))) begin
+                    (port_count_r[skid_idx] == 0 ||
+                        (last_take_w[skid_idx] && port_count_r[skid_idx] == 1))) begin
                     port_active_r[skid_idx] <= 1'b1;
                     port_head_r[skid_idx] <= tail_r;
+                    port_head_mask_r[skid_idx] <= 8'b1 << tail_r;
                     port_available_r[skid_idx] <= reserve_error_i ? reserve_beats_i : 5'b0;
+                    port_ready_r[skid_idx] <= reserve_error_i && |reserve_beats_i;
+                    port_load_r[skid_idx] <= 1'b0;
+                    // The delayed pulse belongs to the previous head at allocation.
+                    port_return_r[skid_idx] <= 1'b0;
                 end
                 if (take_w[skid_idx]) begin
                     skid_valid_r[skid_idx] <= 1'b0;
@@ -307,6 +370,15 @@ module edrv32_mem_xbar_rbuf_gpu (
     // Table payload and per-descriptor progress are initialized on allocation only.
     always @(posedge clk_i) begin
         for (state_idx = 0; state_idx < 8; state_idx = state_idx + 1) begin
+            if ((ddr_rvalid_i && return_slot_w == state_idx[2:0]) &&
+                !(fetch_w && fetch_slot_w == state_idx[2:0])) begin
+                available_r[state_idx] <= available_r[state_idx] + 5'd1;
+                available_nonzero_r[state_idx] <= 1'b1;
+            end else if (!(ddr_rvalid_i && return_slot_w == state_idx[2:0]) &&
+                fetch_w && fetch_slot_w == state_idx[2:0]) begin
+                available_r[state_idx] <= available_r[state_idx] - 5'd1;
+                available_nonzero_r[state_idx] <= |available_r[state_idx][4:1];
+            end
             if (ddr_rvalid_i && {29'b0, return_slot_w} == state_idx) begin
                 received_r[state_idx] <= received_r[state_idx] + 5'd1;
             end
@@ -315,6 +387,8 @@ module edrv32_mem_xbar_rbuf_gpu (
             end
             if (sent_take_w[state_idx]) sent_r[state_idx] <= sent_r[state_idx] + 5'd1;
             if (reserve_i && {29'b0, tail_r} == state_idx) begin
+                available_r[state_idx] <= reserve_error_i ? reserve_beats_i : 5'b0;
+                available_nonzero_r[state_idx] <= reserve_error_i && |reserve_beats_i;
                 error_r[state_idx] <= reserve_error_i;
                 id_r[state_idx] <= {reserve_port_i, reserve_id_i};
                 start_r[state_idx] <= write_ptr_r;
@@ -328,12 +402,12 @@ module edrv32_mem_xbar_rbuf_gpu (
             if (fetch_w && fetch_port_w == state_idx[2:0]) begin
                 port_addr_r[state_idx] <= port_addr_r[state_idx] + 7'd1;
             end
-            if (last_take_w[state_idx]) begin
-                port_addr_r[state_idx] <= start_r[port_slot_w[state_idx]];
+            if (port_load_r[state_idx]) begin
+                port_addr_r[state_idx] <= load_addr_w[state_idx];
             end
             if (reserve_i && reserve_port_i == state_idx[2:0] &&
-                (!port_active_r[state_idx] ||
-                    (last_take_w[state_idx] && port_match_w[state_idx] == 0))) begin
+                (port_count_r[state_idx] == 0 ||
+                    (last_take_w[state_idx] && port_count_r[state_idx] == 1))) begin
                 port_addr_r[state_idx] <= write_ptr_r;
             end
         end
