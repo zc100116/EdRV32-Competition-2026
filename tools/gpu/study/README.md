@@ -41,3 +41,36 @@ python3 tools/gpu/study/gl4es_size.py > build/gpu/m4/gl4es-size.json
 
 本轮不运行RTL lint（没有RTL变化），不运行无关CPU回归。完整ES状态参考、Mesa/Piglit
 环境、微码编译trace和Windows PDS均列在设计记录的后续验证项，未声称已经运行。
+
+## M-5 可执行微码和共享 setup
+
+```sh
+mkdir -p build/gpu/m5
+python3 tools/gpu/study/m5_model.py > build/gpu/m5/run.log
+PYTHONPYCACHEPREFIX=build/gpu/m5/pycache python3 -m py_compile tools/gpu/study/m5_*.py
+git diff --check
+```
+
+输出 `build/gpu/m5/m5-model.json` 和 `tables.md`。约9秒、37MiB峰值RSS，单进程；
+只调用一次M-4的串行C工作负载，不需要numpy、RTL仿真或远端主机。
+
+- `m5_vertex.py`：状态选择生成可执行微码IR；DP3/4展开、物理32寄存器分配，FP32
+  通过标准库struct与主机libc的fmaf舍入。每变体128个顶点逐项对照独立双精度公式，
+  再断言物理寄存器程序与虚拟寄存器程序输出完全一致；含双面、透视眼坐标、两套
+  texture q、用户面距离、fog和非整数spot/specular。LOOP、swizzle、abs/negate及
+  掩码另有定向执行。输出`programs`可读全部物理指令，`schedule_W2L10`可读静态发射表。
+  周期是四上下文固定批次重复的服务间隔；FMA8/10/12、W1/2/4全表在JSON。
+  SFU延迟/II是排程输入估算，程序未编码为最终64bit二进制，不是RTL周期实测。
+- `m5_setup.py`：4个49×33乘法池、4个活动属性的静态DAG，RAM字段寿命和资源公式；
+  signed48工作尾数、signed24/32共享指数系数、整数64²局部域，所有宽度断言实跑。
+  39个三角形（7个定向+32随机）、两个独立纹理分母；`aggregate`含系数压力探针，
+  `common_covered_quantized`只含640×360共同top-left覆盖像素并匹配输出量化，
+  不能把压力探针或超出现有P-A坐标域的失败当作当前RTL画面错误。
+  LOD用屏幕对齐2×2 helper差分，单位为mip level，沿用既有max/RMS误差方法。
+- `m5_model.py`：沿用M-4场景和DDR公式，以真实生成的双纹理灯光程序以及新setup周期
+  重算三档150/200MHz；包含2000quad展开。setup全部档使用同一四池候选；满配带宽
+  沿用565条件，不把RGBA8吞吐视为已验证。
+
+结果解释、完整表格及对M-4的修正见设计记录末尾“M-5 验证”。数值误差是研究结果，
+脚本不以整条表达式相对误差1e-5设通过门禁；ES §2.1.1讨论单次运算精度，非复合
+pow/光照/抵消后输出的统一相对阈值。没有运行Khronos一致性、PDS或新RTL测试。
