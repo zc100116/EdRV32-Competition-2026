@@ -133,3 +133,30 @@ git diff --check
 主候选43570 LUT/44549 FF/147 APM/123 DRM/6487 LR；仅为结构估算，±40%原始
 分配额误差仍有效。建议GPU DRM规划额160；未落实宽深/端口的v2 LR预算明确保留，
 不凭空迁移扣面积。模型条件、GL同步语义候选及所有未验证事项见设计记录第9节。
+
+## M-8 原生vec4与五百万几何吞吐
+
+```sh
+mkdir -p build/gpu/m8
+python3 tools/gpu/study/m8_model.py > build/gpu/m8/run.log
+PYTHONPYCACHEPREFIX=build/gpu/m8/pycache python3 -m py_compile tools/gpu/study/m8_*.py
+git diff --check
+```
+
+单进程约36秒、峰值64MiB；不需要M-4/M-6生成物或远端主机。
+输出`build/gpu/m8/m8-model.json`、`tables.md`，不提交生成物。
+
+- `m8_vertex.py`：原生DP3/4逐级FP32或完整积单次舍入，复用M-5全部14×128精度语料，
+  两种算法均检查物理寄存器执行。常量在draw bank直读，动态RF仍32 vec4/context；
+  对D1扫描lane/context，按SFU II4和同步取数重排，其他灯负载与仅位置也生成周期。
+  JSON保留静态发射表、指令源、动态峰值和定向抵消例，不假定硬件乱序。
+- `m8_setup.py`：完整宽度8 NORM、3宽+3窄规格化口、属性专用阶段三方案，11/16属性
+  每组512三角形；保留同步取数开销和有限context，统计活动属性以核对scratch容量。
+  源48bit/重定位60bit数值不变，39三角形/双纹理/边界helper语料和780整数恒等式重跑。
+- `m8_model.py`：按M-7逐模块额替换geometry/setup，列quad开关、64/128/192KiB容量、
+  CLMS需求及150/200MHz帧时间，增加5k/10k三角形的固定像素/同比过绘两种场景。
+  quad描述符/bin不按零费用处理；容量影响采用显式合成重用距离，未冒充真实cache trace。
+
+最小已评估达标档53066 LUT/53052 FF/151 APM/215 DRM/5719 LR：D1为29.750拍，
+11属性setup为29.714拍，均在150MHz超过5M/s；quad开为54029 LUT/54973 FF。
+周期为条件排程模型、资源为结构估算（非PDS），具体条件与待定项见设计记录第10节。
