@@ -30,7 +30,8 @@ static _Noreturn void usage(void)
 {
     fputs("gpu_test --scene 0..4 --mode 0|1|2 --level 0..6 --filter 0|1|2 "
           "--frames N --out existing-dir [--sequence 0|1] [--input script] "
-          "[--tick N] [--weapon 0|1|2] [--shot boss|explosion|ring|hit|drone|combat|slash|"
+          "[--export existing-dir] [--tick N] [--weapon 0|1|2] "
+          "[--shot boss|explosion|ring|hit|drone|combat|slash|"
           "choice|minimap|day|dusk|coast|landmark|lod]\n", stderr);
     exit(1);
 }
@@ -40,6 +41,7 @@ int main(int argc, char **argv)
     const char *out = NULL;
     const char *input = NULL;
     const char *shot = NULL;
+    const char *export = NULL;
     unsigned tick = 0, weapon = 0;
     for (int i = 1; i < argc; ++i) {
         if (i+1 == argc) usage();
@@ -48,6 +50,7 @@ int main(int argc, char **argv)
         if (!strcmp(key, "--out")) out = value;
         else if (!strcmp(key, "--input")) input = value;
         else if (!strcmp(key, "--shot")) shot = value;
+        else if (!strcmp(key, "--export")) export = value;
         else {
             char *end;
             unsigned n = (unsigned)strtoul(value, &end, 10);
@@ -97,6 +100,7 @@ int main(int argc, char **argv)
         if (!script) { perror(input); return 1; }
         event = fscanf(script, "%u %u", &next_frame, &next_keys);
     }
+    if (export) pc_soc_trace_begin(export);
     test_init();
     test_select(scene, mode, level, filter);
     test.weapon = weapon;
@@ -137,6 +141,7 @@ int main(int argc, char **argv)
         fflush(stdout);
     }
     if (script) fclose(script);
+    if (export) pc_soc_trace_end();
     pc_soc_destroy();
     return 0;
 }
