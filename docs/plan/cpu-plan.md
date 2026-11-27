@@ -148,8 +148,10 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | N-FRZ | 冻结 CPU v0.21（用户 2026-11-08）：RTL 恢复为 9fa3f649，规格回退为 cpu-spec v0.23 / cache-spec v0.14 / cache-testplan v0.6，I$ 数据 IP 回到 64 位 | 协调者 | N-PDS6 | 树与 9fa3f649 一致 | cpu-n16 | [x] 224fb4b7 + 规格提交 |
 | N-SPEC | 投机补偿的流水切分评估（用户 2026-11-08）：C3 + 地址预测 / W 基址 / 编译器重排，ALU 环分簇旁路等，组合 C6-line、C1，估等效跑分；只做模型 | Codex sol（task_283409578182 / ctx_4e278ab607c4） | N-FRZ | 等效跑分比 v0.21 高 ≥5% 才考虑 RTL | task-cpu-spec-eval | [x] 4c11b0cd（分支 zc100116/task-cpu-spec-eval，不合入）：最佳组合 S2+C1+C6-line+L2 估计 141 MHz、等效 CoreMark 0.955×v0.21；无组合 ≥ +5%，CPU 停在 v0.21 |
 | N-SOC | 冻结 CPU 并入整片 SoC，整片时钟目标待定 | — | N-FRZ | 整片 P&R、上板 | — | [ ] 待讨论 |
-| C2-I | CPU v2 整数核架构评估（用户 2026-11-27：作为作品集 IP，自身时序/性能/资源最优）：v0.21+ CPI 栈、5 级双发射等候选、关键环路时序与资源、推荐配置和参数；只做模型和设计记录 | Codex sol（ctx_045f516f7293） | — | `docs/design/2026-11-27-cpu-v2-architecture.md`；test_pipe_model 通过 | zc100116/gpu-dev | [x] 第一版（ba4afff65）：B0 模型误差 −0.014%；V5-default 5.265 CM/MHz、8.8k LUT/5.2k FF（估算），整片规划 135 MHz。协调者评审：V5 视觉 −21%/MHz 全部来自 load-use（B0 提前 load 延迟 1 被取消），缺 B0 修时序对照、ID 提前访存的干净版本和编译调度对照，默认 gshare1024 性价比差；待用户决定是否做 C2-I2 |
+| C2-I | CPU v2 整数核架构评估（用户 2026-11-27：作为作品集 IP，自身时序/性能/资源最优）：v0.21+ CPI 栈、5 级双发射等候选、关键环路时序与资源、推荐配置和参数；只做模型和设计记录 | Codex sol（ctx_045f516f7293） | — | `docs/design/2026-11-27-cpu-v2-architecture.md`；test_pipe_model 通过 | zc100116/gpu-dev | [x] 第一版（ba4afff65）：B0 模型误差 −0.014%；V5-default 5.265 CM/MHz、8.8k LUT/5.2k FF（估算），整片规划 135 MHz。协调者评审：V5 视觉 −21%/MHz 全部来自 load-use（B0 提前 load 延迟 1 被取消），缺 B0 修时序对照、ID 提前访存的干净版本和编译调度对照，默认 gshare1024 性价比差；第二轮见 C2-I2 |
 | C2-F | CPU v2 浮点单元设计：F 必选、D 可配置（用户 2026-11-27），FMA/APM 方案、除法开方、资源与负载加速比、验证方案；只做模型和设计记录 | Codex sol（ctx_dfd9ed38a61e） | 接口待 C2-I | `docs/design/2026-11-27-cpu-v2-fpu.md` | zc100116/gpu-dev | [x] 第一版（84c6bb7ff）：短路 FMA 核心 + 独立 SRT；F 增量约 2.7k LUT/1.1k FF/2 APM，F+D 约 8.5k/5.5k/14；单精度负载较软浮点 7.5–9.1×（模型）。协调者评审：按 3 级 LUT 预算切拍，S 延迟 ADD 8/MUL 10/FMA 14、D 30 偏长，待 C2-I 给出 CPU 实测级数预算后重估（C2-F2） |
+| C2-I2 | 整数核第二轮：B0-fix 对照；V5 + ID 提前地址 / 次级 ALU / 编译调度隐藏 load-use；gshare4096 默认；快速除法器；更新三档推荐 | Codex sol（ctx_a7c1fcb5c881） | C2-I | 架构记录追加第二轮；test_pipe_model 通过 | zc100116/gpu-dev | [~] 进行中 |
+| C2-F2 | FPU 按 C2-I 校准的段预算（约 carry32+4 级）重新切拍；ADD/MUL 旁路取舍；队列 8/16 项（LUTRAM）；NONE/F/FD 资源与加速比 | Codex sol（ctx_e78bf0f97d1e） | C2-I | FPU 记录第二版 | zc100116/gpu-dev | [~] 进行中 |
 
 ## 6. 变更记录
 
