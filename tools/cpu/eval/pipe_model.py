@@ -128,6 +128,8 @@ class Predictor:
         instruction = record.instruction
         if instruction.kind not in CONTROL:
             return
+        if isinstance(instruction, Macro):
+            instruction = instruction.members[-1]
         taken = record.next_pc != instruction.pc + instruction.size
         target = record.next_pc if instruction.kind == 'jalr' else instruction.target
         self.btb[(instruction.pc >> self.shift) & (len(self.btb) - 1)] = instruction, target
@@ -231,11 +233,14 @@ def fill_ib(program, ib, halfwords, depth=4, pht_size=1024, gshare_pc_shift=1):
         if len(halfwords) < length:
             break
         entry, taken, target, history, checkpoint = meta
-        hit = bool(entry and entry[0].pc == pc)
+        prediction_pc = (instruction.members[-1].pc if isinstance(instruction, Macro)
+                         and instruction.kind in CONTROL else pc)
+        hit = bool(entry and entry[0].pc == prediction_pc)
         ib.append(Record(instruction, hit, hit and taken, target,
-                         ((pc >> gshare_pc_shift) ^ history) & (pht_size - 1), checkpoint))
+                         ((prediction_pc >> gshare_pc_shift) ^ history) & (pht_size - 1),
+                         checkpoint))
         saved = getattr(history, 'direction', None)
-        if saved and saved[0] == pc:
+        if saved and saved[0] == prediction_pc:
             ib[-1].direction_meta = saved[1]
         del halfwords[:length]
 
@@ -283,7 +288,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
              alu_latency=1, shift_latency=None, compare_latency=None,
              decode_split=False, branch_register=False, memory_probe=None,
              line_predictor=False, memory_capture=False, capture_early='registered',
-             csr_latency=None, system_capture=True):
+             csr_latency=None, system_capture=True, issue_width=2):
     if fusion:
         program, trace = fuse_program(program, trace, fusion, begin, end)
     changes = INORDER_VARIANTS.get(variant, {})
@@ -430,15 +435,18 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 if ideal_query[1]:
                     predictor.action(ideal_query[0][0])
             entry, taken, target, history, checkpoint = ideal_query
-            hit = bool(entry and entry[0].pc == pc)
+            prediction_pc = (instruction.members[-1].pc if isinstance(instruction, Macro)
+                             and instruction.kind in CONTROL else pc)
+            hit = bool(entry and entry[0].pc == prediction_pc)
             if perfect_prediction and instruction.kind in CONTROL:
                 hit = True
                 taken = instruction.kind != 'branch' or next_pc != pc + instruction.size
                 target = next_pc
             ib.append(Record(instruction, hit, hit and taken, target,
-                             ((pc >> gshare_pc_shift) ^ history) & (pht - 1), checkpoint))
+                             ((prediction_pc >> gshare_pc_shift) ^ history) & (pht - 1),
+                             checkpoint))
             saved = getattr(history, 'direction', None)
-            if saved and saved[0] == pc:
+            if saved and saved[0] == prediction_pc:
                 ib[-1].direction_meta = saved[1]
             front_cursor += 1
             if next_pc != pc + instruction.size or (hit and taken):
@@ -677,7 +685,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 count = 1
                 reason = 8
                 younger_late = younger_store = younger_lcb = False
-                if len(ib) >= 2:
+                if len(ib) >= 2 and issue_width == 2:
                     younger = ib[1].instruction
                     chain = serial_alu and older.kind == 'alu' and (
                         serial_alu == 'any' or operation(older) in {

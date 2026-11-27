@@ -26,6 +26,81 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_control_fusion_preserves_prediction_when_entering_second_member(self):
+        program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+        program[0] = replace(instruction(0, rd=3, sources=(1, 2)), bits=0x0020a1b3)
+        program[4] = replace(instruction(4, 'branch', sources=(3,), target=16),
+                             bits=0x18663)
+        program[16] = instruction(16, 'jalr', sources=(5,))
+        program[20] = instruction(20, 'serial')
+        trace = [0, 4, 8, 12, 16, 4, 8, 12, 16, 0, 4, 16, 4, 16, 20]
+        for predictor in (None, 'tournament'):
+            result = simulate(program, trace, 0, 20, 'V3s', e_penalty=2, d_penalty=1,
+                              fusion=('compare-branch',), direction_predictor=predictor,
+                              second_level=bool(predictor))
+            self.assertEqual(result['instructions'], len(trace) - 1)
+            self.assertEqual(result['fused'], 2)
+
+    def test_control_fusion_requires_one_fetch_query_group(self):
+        from ipc_structures import fuse_program
+        first = replace(instruction(4, rd=3, sources=(1, 2)), bits=0x0020a1b3)
+        branch = replace(instruction(8, 'branch', sources=(3,), target=32), bits=0x18663)
+        program, trace = fuse_program({4: first, 8: branch}, [4, 8],
+                                      ('compare-branch',), 0, 36)
+        self.assertEqual(trace, [4, 8])
+        self.assertEqual(program[4].size, 4)
+
+    def test_compare_fusion_does_not_match_multiply_high_encoding(self):
+        from ipc_structures import fuse_program
+        multiply = replace(instruction(0, 'mul', rd=3, sources=(1, 2)), bits=0x0220a1b3)
+        branch = replace(instruction(4, 'branch', sources=(3,), target=32), bits=0x18663)
+        program, trace = fuse_program({0: multiply, 4: branch}, [0, 4],
+                                      ('compare-branch',), -4, 36)
+        self.assertEqual(trace, [0, 4])
+        self.assertEqual(program[0].kind, 'mul')
+
+    def test_compare_branch_fusion_has_two_external_sources(self):
+        from ipc_structures import fuse_program
+        compare = replace(instruction(0, rd=3, sources=(1, 2)), bits=0x0020a1b3)
+        branch = replace(instruction(4, 'branch', sources=(3, 4), target=32), bits=0x18663)
+        program, trace = fuse_program({0: compare, 4: branch}, [0, 4],
+                                      ('compare-branch',), -4, 36)
+        self.assertEqual(trace, [0, 4])
+        self.assertEqual(program[0].kind, 'alu')
+
+    def test_single_issue_keeps_retirement_and_serializes_independent_alu(self):
+        stream = [instruction(pc, rd=1 + pc // 4) for pc in range(0, 64, 4)]
+        dual = run(stream, 'V3s', perfect_frontend=True, perfect_prediction=True)
+        single = run(stream, 'V3s', perfect_frontend=True, perfect_prediction=True,
+                     issue_width=1)
+        self.assertEqual(single['instructions'], dual['instructions'])
+        self.assertEqual(single['hpm1'], 0)
+        self.assertGreater(single['cycles'], dual['cycles'])
+
+    def test_compare_branch_fusion_keeps_architectural_destinations_and_target(self):
+        from ipc_structures import destinations, fuse_program
+        compare = replace(instruction(0, rd=3, sources=(1, 2)), bits=0x0020a1b3)
+        branch = replace(instruction(4, 'branch', sources=(3,), target=16), bits=0x18663)
+        program, trace = fuse_program({0: compare, 4: branch}, [0, 4],
+                                      ('compare-branch',), -4, 20)
+        self.assertEqual(trace, [0])
+        self.assertEqual(program[0].sources, (1, 2))
+        self.assertEqual(destinations(program[0]), (3,))
+        self.assertEqual(program[0].target, 16)
+        self.assertEqual(program[0].kind, 'branch')
+        predictor = Predictor(32, 512, 8)
+        predictor.btb[0] = branch, branch.target
+        predictor.pht[2] = 3
+        query = predictor.query(0)
+        ib = deque()
+        fill_ib(program, ib, [(pc, query) for pc in range(0, 8, 2)], pht_size=512)
+        self.assertTrue(ib[0].hit)
+        self.assertTrue(ib[0].taken)
+        self.assertEqual(ib[0].index, 2)
+        ib[0].next_pc = branch.target
+        predictor.update(ib[0])
+        self.assertEqual(predictor.btb[0][0].pc, branch.pc)
+
     def test_m2_early_source_is_an_already_registered_result(self):
         consumer = instruction(8, 'load', rd=3, sources=(2,))
         producer = Record(instruction(0, 'load', rd=2), False, False, 0, 0, (0, 0, 0))
