@@ -83,8 +83,12 @@ def estimate(base, name):
         # two return extractors: 32 x log2(read_bytes) selection LUT budget.
         lut += 128 + 32 + 32 + 64 + 64 * int(math.log2(width))
         ff += 2 * 32 + 2 * 32 + 32
-        critical = max(critical, HFF + ADD32 + 3 * Q,
+        critical = max(critical, HFF + 2 * MUX + ADD32, HFF + 3 * Q,
                        HDRM + int(math.log2(width / 4)) * MUX + Q)
+        if c.get('merge_early'):
+            # Younger EX base bypass + AGU + same-block comparison must
+            # qualify the older ID-addressed E read at this same edge.
+            critical = max(critical, HFF + 2 * MUX + ADD32 + 3 * Q)
     if name == 'zba' or c.get('zba'):
         lut += 128  # Fixed shifted wiring feeds the existing ALU input selection.
         critical = max(critical, HFF + ADD32 + 4 * Q)
@@ -181,7 +185,8 @@ def tables(root):
                   ' | ' + '/'.join(str(r['f2_corrections']) for r in rows) + ' |')
         print('\n| 读宽/负载 | EX候选 | 合并/补读 | 同64/128/256位覆盖（占候选） |')
         print('|---|---:|---:|---:|')
-        for name in ('load64', 'load128', 'load256'):
+        for name in ('load64', 'load128', 'load256',
+                     'load64-early', 'load128-early', 'load256-early'):
             for w in ('coremark', 'vision', 'render'):
                 m = by[w, base, name]['merge']
                 coverage = [f'{m["coverage"][str(k)]} '

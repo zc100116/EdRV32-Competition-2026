@@ -119,10 +119,12 @@ class LoadMerge:
     same aligned RAM read chunk. A mismatch serializes the second read with one
     full-pipeline hold cycle. Paired loads both have ordinary latency two.
     """
-    def __init__(self, addresses, read_bytes):
+    def __init__(self, addresses, read_bytes, preserve_early=False):
         self.addresses = addresses
         self.read_bytes = read_bytes
+        self.preserve_early = preserve_early
         self.candidates = self.merged = self.replays = 0
+        self.early_merged = 0
         self.coverage = dict.fromkeys((8, 16, 32), 0)
 
     def resolve(self, records, active):
@@ -144,4 +146,10 @@ class LoadMerge:
         self.candidates += active
         self.merged += active and merged
         self.replays += active and not merged
+        if merged and self.preserve_early:
+            # The existing older ID address starts the wide E read while the
+            # younger EX AGU compares against it. Match qualifies the same
+            # registered return; no younger address computation enters ID.
+            records[1].result_latency = records[0].result_latency
+            self.early_merged += active and records[0].early_load
         return int(not merged)

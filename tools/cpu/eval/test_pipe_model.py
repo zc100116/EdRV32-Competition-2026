@@ -27,6 +27,23 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_round4_merge_can_reuse_older_registered_id_address(self):
+        stream = [instruction(pc) for pc in range(0, 16, 4)] + [
+                  replace(instruction(16, 'load', rd=4), bits=0x2003),
+                  replace(instruction(20, 'load', rd=5), bits=0x2003),
+                  instruction(24, sources=(4, 5))]
+        addresses = [0] * 4 + [0x80000000, 0x80000004, 0, 0]
+        ordinary = LoadMerge(addresses, 8)
+        early = LoadMerge(addresses, 8, preserve_early=True)
+        options = dict(perfect_frontend=True, perfect_prediction=True,
+                       early_address='rf_wb')
+        a = run(stream, 'V3s', load_merge=ordinary, **options)
+        b = run(stream, 'V3s', load_merge=early, **options)
+        self.assertEqual(early.early_merged, 1)
+        self.assertEqual(b['early_loads'], 1)
+        self.assertEqual(b['slots_load_use'], 0)
+        self.assertEqual(b['cycles'], a['cycles'] - 1)
+
     def test_round4_queued_lvt_tracks_wb_while_head_waits(self):
         rf = QueuedOwners()
         rf.write([(0, 4, 10), (1, 5, 20)])

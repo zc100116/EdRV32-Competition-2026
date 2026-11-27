@@ -939,10 +939,12 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     issued.append(record)
                 if load_merge is not None and len(issued) == 2 and all(
                         r.instruction.kind == 'load' for r in issued):
-                    for record in issued:
-                        # Both AGUs are in EX, so neither uses ID early-return.
-                        record.early_load = False
-                        record.result_latency = load_latency
+                    for lane, record in enumerate(issued):
+                        if lane or not load_merge.preserve_early:
+                            # The younger AGU is in EX. The optional older ID
+                            # read may serve it only after EX confirms a match.
+                            record.early_load = False
+                            record.result_latency = load_latency
                 if any(r.instruction.kind == 'div' for r in issued):
                     record = next(r for r in issued if r.instruction.kind == 'div')
                     division_left = (division_cycles[record.trace_index] if

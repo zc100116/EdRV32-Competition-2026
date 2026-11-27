@@ -27,6 +27,7 @@ for count, entries in ((3, 128), (3, 256), (3, 512), (4, 256), (4, 512),
     EXPERIMENTS[f'tage{count}-{entries}'] = dict(tage=(count, entries))
 for width in (8, 16, 32):
     EXPERIMENTS[f'load{width * 8}'] = dict(read_bytes=width)
+    EXPERIMENTS[f'load{width * 8}-early'] = dict(read_bytes=width, merge_early=True)
 for count, entries in ((3, 256), (4, 512), (5, 1024)):
     EXPERIMENTS[f'combo{count}'] = dict(tage=(count, entries), unaligned_fetch=True,
                                         rf='ff')
@@ -36,6 +37,7 @@ EXPERIMENTS['combo4-sync'] = dict(EXPERIMENTS['combo4'], decode_split=True, rf='
 EXPERIMENTS['combo3-sync'] = dict(EXPERIMENTS['combo3'], decode_split=True, rf='sync')
 EXPERIMENTS['combo5-sync'] = dict(EXPERIMENTS['combo5'], decode_split=True, rf='sync')
 EXPERIMENTS['combo4-zba-sync'] = dict(EXPERIMENTS['combo4-zba'], decode_split=True, rf='sync')
+EXPERIMENTS['combo4-load-early'] = dict(EXPERIMENTS['combo4'], read_bytes=32, merge_early=True)
 
 
 def main():
@@ -67,12 +69,13 @@ def main():
                     changes = dict(EXPERIMENTS[name])
                     tage = changes.pop('tage', None)
                     read_bytes = changes.pop('read_bytes', None)
+                    merge_early = changes.pop('merge_early', False)
                     changes.pop('rf', None)
                     changes.pop('zba', None)
                     options = dict(BASES[base], **changes)
                     if tage:
                         options.update(direction_predictor=RamTage(*tage), second_level=True)
-                    merge = LoadMerge(addresses, read_bytes) if read_bytes else None
+                    merge = LoadMerge(addresses, read_bytes, merge_early) if read_bytes else None
                     options.update(division_cycles=divs['radix4-early' if base == 'full'
                                                        else 'early-div'], load_merge=merge)
                     result = simulate(program, trace, symbols['start_time'], symbols['stop_time'],
@@ -81,7 +84,8 @@ def main():
                     result.update(instructions=instructions, ipc=instructions / result['cycles'])
                     if merge:
                         result['merge'] = dict(candidates=merge.candidates, merged=merge.merged,
-                                               replays=merge.replays, coverage=merge.coverage)
+                                               replays=merge.replays, coverage=merge.coverage,
+                                               early_merged=merge.early_merged)
                     stream.write(json.dumps(dict(workload=args.workload, base=base, name=name,
                                                  **result)) + '\n')
                     stream.flush()
