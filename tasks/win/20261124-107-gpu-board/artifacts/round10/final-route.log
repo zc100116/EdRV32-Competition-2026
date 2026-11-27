@@ -1,0 +1,184 @@
+Card 107 round 10 | PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676
+Run 74c53048; source pin bfaa8a41; requested by round 10 addendum and round 11 task.
+Local source snapshot: G:/codex_project/edrv32-card107/build/card107-pds-check/logbackup/round10-pnr-final-20261127-145628.
+
+Original place_route/run.log line numbers, from Routing started to the last completed iteration:
+9907: Routing started.
+9908: Build routing arch for double attribute device.
+9909: Enter timing driven router mode.
+9910: Route thread size: 5
+9911: Building routing graph takes 12.17 sec.
+9912: Init coarse delay table.
+9913: Read place coarse delay table takes 0.47 sec.
+9914: Build SRB system takes 0.25 sec.
+9915: Setup STE netlist take 15341 msec.
+9916: Dispose control chain take 2932 msec.
+9917: Collect const net info take 1761 msec.
+9918: Worst slack is -2394, TNS before route is -9124844.
+9919: Total nets for routing: 200859.
+9920: Total loads for routing: 926350.
+9921: Direct connect net size: 8677
+9922: Build all design net take 15446 msec.
+9923: Processing design graph takes 35.55 sec.
+9924: Delay table total memory: 72.78639603 MB
+9925: Route graph total memory: 414.01229191 MB
+9926: Route design total memory: 251.99203491 MB
+9927: Global routing takes 0.01 sec.
+9928: Total 200857 subnets.
+9929: Unrouted clock nets at iteration 0 (0.990 sec): 12
+9930: Unrouted clock nets at iteration 1 (0.711 sec): 6
+9931: Unrouted clock nets at iteration 2 (0.397 sec): 4
+9932: Unrouted clock nets at iteration 3 (0.396 sec): 4
+9933: Unrouted clock nets at iteration 4 (0.266 sec): 2
+9934: Unrouted clock nets at iteration 5 (0.079 sec): 0
+9935: Total route nets size: 200817
+9936: Pre route takes 86.124 sec
+9937: Unrouted general nets at iteration 7 (MT total route time: 23.130 sec): 171514(overused: 1181958)
+9938: Unrouted general nets at iteration 8 (MT total route time: 29.039 sec): 155564(overused: 984069)
+9939: Unrouted general nets at iteration 9 (MT total route time: 51.248 sec): 141765(overused: 807525)
+9940: Unrouted general nets at iteration 10 (MT total route time: 122.441 sec): 130645(overused: 687674)
+9941: Unrouted general nets at iteration 11 (MT total route time: 224.394 sec): 122209(overused: 603127)
+9942: Unrouted general nets at iteration 12 (MT total route time: 231.088 sec): 105986(overused: 558736)
+9943: Unrouted general nets at iteration 13 (MT total route time: 292.134 sec): 95997(overused: 491553)
+9944: Unrouted general nets at iteration 14 (MT total route time: 349.983 sec): 88119(overused: 430815)
+9945: Unrouted general nets at iteration 15 (MT total route time: 448.877 sec): 81986(overused: 382650)
+9946: Unrouted general nets at iteration 16 (MT total route time: 600.068 sec): 76728(overused: 341160)
+9947: Unrouted general nets at iteration 17 (MT total route time: 432.874 sec): 71662(overused: 305999)
+9948: Unrouted general nets at iteration 18 (MT total route time: 312.200 sec): 71703(overused: 307828)
+9949: Unrouted general nets at iteration 19 (MT total route time: 348.786 sec): 69029(overused: 285943)
+9950: Unrouted general nets at iteration 20 (MT total route time: 352.066 sec): 65820(overused: 264076)
+9951: Unrouted general nets at iteration 21 (MT total route time: 364.460 sec): 62672(overused: 243001)
+9952: Unrouted general nets at iteration 22 (MT total route time: 401.758 sec): 59610(overused: 224540)
+9953: Unrouted general nets at iteration 23 (MT total route time: 384.679 sec): 56802(overused: 205951)
+9954: Unrouted general nets at iteration 24 (MT total route time: 404.617 sec): 54401(overused: 193171)
+9955: Unrouted general nets at iteration 25 (MT total route time: 396.062 sec): 51896(overused: 180204)
+9956: Unrouted general nets at iteration 26 (MT total route time: 391.566 sec): 49327(overused: 167607)
+9957: Unrouted general nets at iteration 27 (MT total route time: 408.748 sec): 47305(overused: 155683)
+9958: Unrouted general nets at iteration 28 (MT total route time: 418.530 sec): 46875(overused: 157306)
+9959: Unrouted general nets at iteration 29 (MT total route time: 415.332 sec): 45374(overused: 149678)
+9960: Unrouted general nets at iteration 30 (MT total route time: 418.611 sec): 43800(overused: 140206)
+9961: Unrouted general nets at iteration 31 (MT total route time: 406.516 sec): 42229(overused: 133075)
+9962: Unrouted general nets at iteration 32 (MT total route time: 476.050 sec): 40504(overused: 124585)
+9963: Unrouted general nets at iteration 33 (MT total route time: 445.551 sec): 38963(overused: 117342)
+9964: Unrouted general nets at iteration 34 (MT total route time: 449.375 sec): 37322(overused: 110060)
+9965: Unrouted general nets at iteration 35 (MT total route time: 483.903 sec): 35579(overused: 103508)
+9966: Unrouted general nets at iteration 36 (MT total route time: 427.017 sec): 34465(overused: 98528)
+9967: Unrouted general nets at iteration 37 (MT total route time: 434.074 sec): 32848(overused: 92769)
+9968: Unrouted general nets at iteration 38 (MT total route time: 433.625 sec): 33207(overused: 95689)
+9969: Unrouted general nets at iteration 39 (MT total route time: 425.939 sec): 32442(overused: 91334)
+9970: Unrouted general nets at iteration 40 (MT total route time: 434.262 sec): 31279(overused: 86979)
+9971: Unrouted general nets at iteration 41 (MT total route time: 418.315 sec): 30238(overused: 82711)
+9972: Unrouted general nets at iteration 42 (MT total route time: 452.821 sec): 29308(overused: 79208)
+9973: Unrouted general nets at iteration 43 (MT total route time: 434.491 sec): 28212(overused: 75451)
+9974: Unrouted general nets at iteration 44 (MT total route time: 434.915 sec): 27267(overused: 72068)
+9975: Unrouted general nets at iteration 45 (MT total route time: 454.873 sec): 26689(overused: 69902)
+9976: Unrouted general nets at iteration 46 (MT total route time: 413.319 sec): 25776(overused: 66808)
+9977: Unrouted general nets at iteration 47 (MT total route time: 443.954 sec): 24833(overused: 63327)
+9978: Unrouted general nets at iteration 48 (MT total route time: 444.427 sec): 25103(overused: 65935)
+9979: Unrouted general nets at iteration 49 (MT total route time: 462.434 sec): 25029(overused: 64963)
+9980: Unrouted general nets at iteration 50 (MT total route time: 453.676 sec): 24310(overused: 62140)
+9981: Unrouted general nets at iteration 51 (MT total route time: 470.310 sec): 23734(overused: 60644)
+9982: Unrouted general nets at iteration 52 (MT total route time: 480.391 sec): 23349(overused: 58395)
+9983: Unrouted general nets at iteration 53 (MT total route time: 467.485 sec): 22700(overused: 55764)
+9984: Unrouted general nets at iteration 54 (MT total route time: 475.996 sec): 21618(overused: 52741)
+9985: Unrouted general nets at iteration 55 (MT total route time: 483.650 sec): 20940(overused: 51192)
+9986: Unrouted general nets at iteration 56 (MT total route time: 432.441 sec): 20279(overused: 49112)
+9987: Unrouted general nets at iteration 57 (MT total route time: 430.868 sec): 19890(overused: 47817)
+9988: Unrouted general nets at iteration 58 (MT total route time: 427.320 sec): 20204(overused: 48904)
+9989: Unrouted general nets at iteration 59 (MT total route time: 407.713 sec): 19744(overused: 47443)
+9990: Unrouted general nets at iteration 60 (MT total route time: 411.722 sec): 19283(overused: 45568)
+9991: Unrouted general nets at iteration 61 (MT total route time: 440.909 sec): 18130(overused: 42435)
+9992: Unrouted general nets at iteration 62 (MT total route time: 435.145 sec): 17685(overused: 41066)
+9993: Unrouted general nets at iteration 63 (MT total route time: 429.202 sec): 17276(overused: 39604)
+9994: Unrouted general nets at iteration 64 (MT total route time: 395.687 sec): 16709(overused: 38399)
+9995: Unrouted general nets at iteration 65 (MT total route time: 420.954 sec): 16934(overused: 39143)
+9996: Unrouted general nets at iteration 66 (MT total route time: 381.108 sec): 16695(overused: 38678)
+9997: Unrouted general nets at iteration 67 (MT total route time: 397.945 sec): 15763(overused: 35903)
+9998: Unrouted general nets at iteration 68 (MT total route time: 431.681 sec): 16141(overused: 37276)
+9999: Unrouted general nets at iteration 69 (MT total route time: 400.045 sec): 16348(overused: 37588)
+10000: Unrouted general nets at iteration 70 (MT total route time: 408.704 sec): 15749(overused: 35434)
+10001: Unrouted general nets at iteration 71 (MT total route time: 412.530 sec): 15458(overused: 34330)
+10002: Unrouted general nets at iteration 72 (MT total route time: 415.619 sec): 15040(overused: 33530)
+10003: Unrouted general nets at iteration 73 (MT total route time: 457.441 sec): 14771(overused: 32507)
+10004: Unrouted general nets at iteration 74 (MT total route time: 411.228 sec): 14353(overused: 31088)
+10005: Unrouted general nets at iteration 75 (MT total route time: 419.197 sec): 13916(overused: 30345)
+10006: Unrouted general nets at iteration 76 (MT total route time: 411.926 sec): 13595(overused: 29610)
+10007: Unrouted general nets at iteration 77 (MT total route time: 425.161 sec): 13203(overused: 28614)
+10008: Unrouted general nets at iteration 78 (MT total route time: 450.216 sec): 13629(overused: 29759)
+10009: Unrouted general nets at iteration 79 (MT total route time: 454.996 sec): 13285(overused: 28919)
+10010: Unrouted general nets at iteration 80 (MT total route time: 437.192 sec): 13086(overused: 27922)
+10011: Unrouted general nets at iteration 81 (MT total route time: 423.357 sec): 12625(overused: 27259)
+10012: Unrouted general nets at iteration 82 (MT total route time: 421.280 sec): 12374(overused: 26010)
+10013: Unrouted general nets at iteration 83 (MT total route time: 409.370 sec): 12077(overused: 25406)
+10014: Unrouted general nets at iteration 84 (MT total route time: 406.479 sec): 11709(overused: 24510)
+10015: Unrouted general nets at iteration 85 (MT total route time: 402.539 sec): 11288(overused: 23426)
+10016: Unrouted general nets at iteration 86 (MT total route time: 385.305 sec): 11197(overused: 23186)
+10017: Unrouted general nets at iteration 87 (MT total route time: 342.426 sec): 10807(overused: 22383)
+10018: Unrouted general nets at iteration 88 (MT total route time: 350.974 sec): 11041(overused: 23049)
+10019: Unrouted general nets at iteration 89 (MT total route time: 359.905 sec): 10836(overused: 22795)
+10020: Unrouted general nets at iteration 90 (MT total route time: 448.563 sec): 10616(overused: 21965)
+10021: Unrouted general nets at iteration 91 (MT total route time: 429.807 sec): 10285(overused: 21251)
+10022: Unrouted general nets at iteration 92 (MT total route time: 389.065 sec): 10091(overused: 20797)
+10023: Unrouted general nets at iteration 93 (MT total route time: 459.179 sec): 9975(overused: 20317)
+10024: Unrouted general nets at iteration 94 (MT total route time: 406.282 sec): 9739(overused: 20078)
+10025: Unrouted general nets at iteration 95 (MT total route time: 392.838 sec): 9564(overused: 19576)
+10026: Unrouted general nets at iteration 96 (MT total route time: 376.104 sec): 9468(overused: 19494)
+10027: Unrouted general nets at iteration 97 (MT total route time: 388.343 sec): 9376(overused: 19227)
+10028: Unrouted general nets at iteration 98 (MT total route time: 387.798 sec): 9256(overused: 18934)
+10029: Unrouted general nets at iteration 99 (MT total route time: 413.331 sec): 9084(overused: 18231)
+10030: Unrouted general nets at iteration 100 (MT total route time: 375.909 sec): 8824(overused: 17711)
+10031: Unrouted general nets at iteration 101 (MT total route time: 386.985 sec): 8790(overused: 17564)
+10032: Unrouted general nets at iteration 102 (MT total route time: 354.965 sec): 8822(overused: 17872)
+10033: Unrouted general nets at iteration 103 (MT total route time: 361.613 sec): 8367(overused: 16745)
+10034: Unrouted general nets at iteration 104 (MT total route time: 347.208 sec): 8280(overused: 16664)
+10035: Unrouted general nets at iteration 105 (MT total route time: 348.199 sec): 8000(overused: 15905)
+10036: Unrouted general nets at iteration 106 (MT total route time: 380.716 sec): 7651(overused: 15050)
+10037: Unrouted general nets at iteration 107 (MT total route time: 368.338 sec): 7652(overused: 15252)
+10038: Unrouted general nets at iteration 108 (MT total route time: 434.693 sec): 7770(overused: 15420)
+10039: Unrouted general nets at iteration 109 (MT total route time: 411.037 sec): 7697(overused: 15234)
+10040: Unrouted general nets at iteration 110 (MT total route time: 420.578 sec): 7310(overused: 14249)
+10041: Unrouted general nets at iteration 111 (MT total route time: 434.571 sec): 7248(overused: 13938)
+10042: Unrouted general nets at iteration 112 (MT total route time: 356.351 sec): 7018(overused: 13119)
+10043: Unrouted general nets at iteration 113 (MT total route time: 407.291 sec): 6783(overused: 12840)
+10044: Unrouted general nets at iteration 114 (MT total route time: 361.929 sec): 6501(overused: 12298)
+10045: Unrouted general nets at iteration 115 (MT total route time: 427.283 sec): 6338(overused: 11922)
+10046: Unrouted general nets at iteration 116 (MT total route time: 379.144 sec): 6314(overused: 11860)
+10047: Unrouted general nets at iteration 117 (MT total route time: 354.314 sec): 6245(overused: 11757)
+10048: Unrouted general nets at iteration 118 (MT total route time: 325.973 sec): 6355(overused: 12108)
+10049: Unrouted general nets at iteration 119 (MT total route time: 361.939 sec): 6244(overused: 12056)
+10050: Unrouted general nets at iteration 120 (MT total route time: 332.834 sec): 6319(overused: 12009)
+10051: Unrouted general nets at iteration 121 (MT total route time: 366.572 sec): 6254(overused: 11765)
+10052: Unrouted general nets at iteration 122 (MT total route time: 406.459 sec): 6059(overused: 11400)
+10053: Unrouted general nets at iteration 123 (MT total route time: 334.762 sec): 6242(overused: 11893)
+10054: Unrouted general nets at iteration 124 (MT total route time: 380.883 sec): 5988(overused: 11380)
+10055: Unrouted general nets at iteration 125 (MT total route time: 360.077 sec): 6044(overused: 11506)
+10056: Unrouted general nets at iteration 126 (MT total route time: 362.740 sec): 6004(overused: 11039)
+10057: Unrouted general nets at iteration 127 (MT total route time: 400.344 sec): 5859(overused: 10998)
+10058: Unrouted general nets at iteration 128 (MT total route time: 374.951 sec): 5865(overused: 11060)
+10059: Unrouted general nets at iteration 129 (MT total route time: 333.997 sec): 5779(overused: 10806)
+10060: Unrouted general nets at iteration 130 (MT total route time: 345.561 sec): 5589(overused: 10349)
+10061: Unrouted general nets at iteration 131 (MT total route time: 356.396 sec): 5601(overused: 10397)
+10062: Unrouted general nets at iteration 132 (MT total route time: 396.762 sec): 5384(overused: 9992)
+10063: Unrouted general nets at iteration 133 (MT total route time: 317.293 sec): 5317(overused: 9801)
+10064: Unrouted general nets at iteration 134 (MT total route time: 299.840 sec): 5264(overused: 9570)
+10065: Unrouted general nets at iteration 135 (MT total route time: 335.612 sec): 5013(overused: 9209)
+10066: Unrouted general nets at iteration 136 (MT total route time: 322.983 sec): 5288(overused: 9768)
+10067: Unrouted general nets at iteration 137 (MT total route time: 343.862 sec): 5322(overused: 9648)
+10068: Unrouted general nets at iteration 138 (MT total route time: 345.703 sec): 5207(overused: 9679)
+10069: Unrouted general nets at iteration 139 (MT total route time: 358.648 sec): 5364(overused: 9927)
+10070: Unrouted general nets at iteration 140 (MT total route time: 336.350 sec): 5105(overused: 9369)
+10071: Unrouted general nets at iteration 141 (MT total route time: 338.470 sec): 4992(overused: 8962)
+10072: Unrouted general nets at iteration 142 (MT total route time: 323.973 sec): 4726(overused: 8378)
+10073: Unrouted general nets at iteration 143 (MT total route time: 375.445 sec): 4728(overused: 8428)
+10074: Unrouted general nets at iteration 144 (MT total route time: 386.208 sec): 4759(overused: 8522)
+10075: Unrouted general nets at iteration 145 (MT total route time: 355.576 sec): 4545(overused: 8115)
+10076: Unrouted general nets at iteration 146 (MT total route time: 329.196 sec): 4549(overused: 8333)
+10077: Unrouted general nets at iteration 147 (MT total route time: 366.226 sec): 4843(overused: 8888)
+10078: Unrouted general nets at iteration 148 (MT total route time: 306.212 sec): 4901(overused: 8893)
+10079: Unrouted general nets at iteration 149 (MT total route time: 361.212 sec): 4816(overused: 8733)
+10080: Unrouted general nets at iteration 150 (MT total route time: 358.071 sec): 4639(overused: 8254)
+10081: Unrouted general nets at iteration 151 (MT total route time: 375.153 sec): 4830(overused: 8783)
+10082: Unrouted general nets at iteration 152 (MT total route time: 357.824 sec): 4828(overused: 8685)
+
+PDS GUI log native error:
+61626: E: Flow-0127: Process exits abnormally.

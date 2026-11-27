@@ -69,7 +69,11 @@ PDS 布线日志已报告迭代的计数原值随附件上传。当前 P&R 日�
 
 按补充任务，已从本轮原始 ADS 综合报告导出 **50 条 `clk_mem → clk_mem` setup 路径**，包含起点、终点、裕量和逻辑级数。Slack 范围 **−1.731 至 −0.360 ns**。最差路径从 `u_soc/u_aud/u_dma/rd_ptr_o[5]/CLK` 到 `u_soc/u_aud/u_dma/m_axi_araddr_o[5]/CE`，**19 逻辑级**。[clk_mem 最差 50 条路径](artifacts/round10/setup_top50_clk_mem.txt)
 
-第 10 轮最终未布网模块分布及 CLMA／CLMS 等资源数据待本轮 P&R 结束后提取。
+### 第 10 轮布局布线结束情况
+
+第 10 轮没有布通。记录到通用布线第 **152 轮**，当轮耗时 **357.824 秒**，剩 **4,828 条未布网**和 **8,685** 个 `overused`。最少未布网出现在第 **145 轮**，为 **4,545 条**，当轮 `overused` 为 **8,115**。路由日志最后写入于 2026-11-27 14:48:38（北京时间），随后 PDS GUI 日志记录 `E: Flow-0127: Process exits abnormally.`。[布线及异常日志](artifacts/round10/final-route.log) · [全部已记录轮次](artifacts/round10/route-final-iterations.txt)
+
+本轮 `.prr` 为 0 字节，目录中的 `fail_route_nets.txt` 仍为第 9 轮文件。第 10 轮未取得最终未布网模块分布、CLMA／CLMS 等 `Use of` 行、P&R 最终总用时和布线后时序。布局与综合数据见本轮前面的报告。
 
 ## 第 9 轮资源、时序与布局快照
 
