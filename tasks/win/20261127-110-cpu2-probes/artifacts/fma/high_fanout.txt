@@ -1,0 +1,51 @@
+Post-route fanout as shown in reported slow-corner sequential setup paths.
+Coverage is limited to nets printed in those paths. If multiple counts appear, the largest reported count determines rank.
+
+Rank | Reported fanout | Net
+1 | 895 | ntclkbufg_0
+2 | 236 | u_fma/e7_right_w
+3 | 141 | u_fma/e5_far_r
+4 | 137 | u_fma/e7_shift_r [2]
+5 | 121 | u_fma/e7_shift_w [6]
+6 | 91 | u_fma/e6_reverse_select_r
+7 | 84 | u_fma/e4_right_r
+8 | 80 | u_fma/e5_c_sign_r
+9 | 80 | u_fma/e6_subtract_w
+10 | 79 | u_fma/e5_product_sign_r
+11 | 71 | u_fma/e7_shift_w [3]
+12 | 69 | u_fma/e3_right_r
+13 | 69 | u_fma/e4_limit_r [2]
+14 | 62 | u_fma/e4_shift_r [4]
+15 | 61 | _N5
+16 | 59 | u_fma/e8_increment_w
+17 | 50 | u_fma/e4_shift_r [3]
+18 | 47 | _N6
+19 | 43 | u_fma/e4_shift_r [5]
+20 | 38 | u_fma/e4_limit_r [0]
+21 | 38 | u_fma/e4_limit_r [1]
+22 | 38 | u_fma/e4_shift_r [6]
+23 | 36 | _N8
+24 | 34 | u_fma/e8_bias_w [8]
+25 | 33 | u_fma/_N6016
+26 | 33 | u_fma/_N6017
+27 | 32 | u_fma/e1_a_lz_r [3]
+28 | 31 | u_fma/e1_a_lz_r [2]
+29 | 31 | u_fma/e1_c_lz_r [2]
+30 | 31 | u_fma/e1_c_lz_r [3]
+31 | 29 | u_fma/e1_b_lz_r [2]
+32 | 29 | u_fma/e1_c_lz_r [1]
+33 | 29 | u_fma/e3_shift_r [0]
+34 | 29 | u_fma/e3_shift_r [1]
+35 | 28 | u_fma/e1_b_lz_r [3]
+36 | 28 | u_fma/e1_c_lz_r [0]
+37 | 28 | u_fma/e7_special_r
+38 | 27 | u_fma/_N6018
+39 | 27 | u_fma/e1_a_lz_r [1]
+40 | 27 | u_fma/e1_b_lz_r [1]
+
+Global Clock Info:
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| GClk Inst                | Site Of GClk Inst     | GClk Fanout Net     | Clock Loads     | Non_Clock Loads     | Driver Inst           | Driver Pin     | Site Of Driver Inst
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| clkbufg_0/gopclkbufg     | USCM_383_882          | ntclkbufg_0         | 895             | 0                   | clk_i_ibuf/opit_1     | DI_TO_CLK      | IOLHR_724_786
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
