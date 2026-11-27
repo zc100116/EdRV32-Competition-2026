@@ -1,0 +1,354 @@
+Card 107 round 11 B | task b2a27314 | local run ced62bb5
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | captured 2026-11-27T23:09:52+08:00
+
+B settings and action completion, then placement stages and native routing ending.
+Flow Command: pnr -dc_duplication false -plc_decongestion 4 -dump_router_congestion_plot true -slack_weight 10 -pin_cost_increasing_speed 600 -logic_optimize_lut6d_combing_strategy 0
+10: Process "Place & Route" started.
+9977: Action pnr: Real time elapsed is 6h:24m:37s
+9978: Action pnr: CPU time elapsed is 0h:37m:30s
+9979: Action pnr: Process CPU time elapsed is 0h:44m:58s
+9981: Action pnr: Peak memory pool usage is 6,579 MB
+9985: Process "Place & Route" done.
+9988: Process "Report Timing" started.
+10150: Action report_timing: Real time elapsed is 0h:3m:19s
+10151: Action report_timing: CPU time elapsed is 0h:0m:16s
+10152: Action report_timing: Process CPU time elapsed is 0h:0m:22s
+10154: Action report_timing: Peak memory pool usage is 6,136 MB
+10158: Process "Report Timing" done.
+
+Placement; original place_route/run.log line numbers:
+9402: Phase 1 Pre global placement started.
+9406: C: Place-2039: The placement site of clk_i_ibuf/opit_1 and u_pll_sys/u_gpll/gpll_inst is incompatible.
+9418: Phase 1.1 1st GP placement started.
+9419: Design Utilization : 63%.
+9422: 1st GP placement takes 2.97 sec.
+9424: Phase 1.2 Clock placement started.
+9440: Clock placement takes 0.23 sec.
+9443: Pre global placement takes 3.47 sec.
+9445: Phase 2 Global placement started.
+9446: Phase 2.1 Fixed placement started.
+9594: Fixed placement takes 2.61 sec.
+9596: Phase 2.2 Process placement started.
+9602: Process placement takes 0.00 sec.
+9604: Phase 2.3 IO placement started.
+9605: IO placement takes 0.00 sec.
+9611: Phase 2.4 2nd GP placement started.
+9617: Design Utilization : 63%.
+9619: Worst slack after global placement is -2143
+9620: 2nd GP placement takes 19.09 sec.
+9623: Global placement takes 22.25 sec.
+9625: Phase 3 Post global placement started.
+9626: Phase 3.1 Macro cell placement started.
+9629: Macro cell placement takes 5.30 sec.
+9633: Phase 3.2 3rd GP placement started.
+9634: Design Utilization : 63%.
+9636: Worst slack after post global placement is -2345
+9637: 3rd GP placement takes 3.62 sec.
+9640: Post global placement takes 8.94 sec.
+9642: Phase 4 Legalization started.
+9645: Legalization takes 0.80 sec.
+9647: Phase 5 Timing-driven detailed placement started.
+9648: Phase 5.1 Replication placement started.
+9649: Replication placement takes 0.00 sec.
+9652: Phase 5.2 Swapping placement started.
+9653: Worst slack before detailed placement is -2485, TNS before detailed placement is -20642228.
+9654: Cost at Swap iteration 0 : -2485, wslk -2038, tns -14470707, takes 1.89 sec.
+9656: Cost at DP iteration 0 : -2038, wslk -1597, tns -9579231, takes 1.02 sec.
+9658: Cost at Swap iteration 1 : -1597, wslk -1526, tns -8272440, takes 4.38 sec.
+9660: Cost at Swap iteration 2 : -1526, wslk -1526, tns -7613238, takes 2.55 sec.
+9662: Cost at DP iteration 2 : -1526, wslk -1389, tns -5459950, takes 0.72 sec.
+9664: Cost at Swap iteration 3 : -1389, wslk -1389, tns -5019836, takes 1.23 sec.
+9666: Cost at Swap iteration 4 : -1389, wslk -1377, tns -4790138, takes 1.39 sec.
+9668: Cost at DP iteration 4 : -1377, wslk -1377, tns -4050371, takes 0.25 sec.
+9670: Cost at Swap iteration 5 : -1377, wslk -1377, tns -3933287, takes 0.72 sec.
+9672: Cost at Swap iteration 6 : -1377, wslk -1377, tns -3937677, takes 0.50 sec.
+9674: Cost at DP iteration 6 : -1377, wslk -1377, tns -3661048, takes 0.30 sec.
+9676: Cost at Swap iteration 7 : -1377, wslk -1377, tns -3581361, takes 0.50 sec.
+9678: Worst slack after detailed placement is -1377, TNS after detailed placement is -3581361.
+9679: Swapping placement takes 16.16 sec.
+9682: Timing-driven detailed placement takes 16.17 sec.
+9684: Worst slack is -1377, TNS after placement is -3577713.
+9685: Placement done.
+9686: Total placement takes 54.47 sec.
+9687: Finished placement.
+
+Routing; original place_route/run.log line numbers:
+9689: Routing started.
+9690: Build routing arch for double attribute device.
+9691: Enter timing driven router mode.
+9692: Route thread size: 5
+9693: Building routing graph takes 15.62 sec.
+9694: Init coarse delay table.
+9695: Read place coarse delay table takes 0.09 sec.
+9696: Build SRB system takes 0.11 sec.
+9697: Setup STE netlist take 18314 msec.
+9698: Dispose control chain take 3558 msec.
+9699: Collect const net info take 2910 msec.
+9700: Worst slack is -1377, TNS before route is -3577713.
+9701: Total nets for routing: 187014.
+9702: Total loads for routing: 897995.
+9703: Direct connect net size: 9037
+9704: Build all design net take 12402 msec.
+9705: Processing design graph takes 37.25 sec.
+9706: Delay table total memory: 72.78639603 MB
+9707: Route graph total memory: 403.42242527 MB
+9708: Route design total memory: 247.29923248 MB
+9709: Global routing takes 0.01 sec.
+9710: Total 187012 subnets.
+9711: Unrouted clock nets at iteration 0 (0.801 sec): 12
+9712: Unrouted clock nets at iteration 1 (0.646 sec): 5
+9713: Unrouted clock nets at iteration 2 (0.610 sec): 4
+9714: Unrouted clock nets at iteration 3 (0.183 sec): 3
+9715: Unrouted clock nets at iteration 4 (0.152 sec): 2
+9716: Unrouted clock nets at iteration 5 (0.116 sec): 0
+9717: Total route nets size: 186972
+9718: Pre route takes 79.243 sec
+9719: Unrouted general nets at iteration 7 (MT total route time: 22.162 sec): 162389(overused: 1157996)
+9720: Unrouted general nets at iteration 8 (MT total route time: 21.761 sec): 146085(overused: 941480)
+9721: Unrouted general nets at iteration 9 (MT total route time: 37.143 sec): 131143(overused: 740495)
+9722: Unrouted general nets at iteration 10 (MT total route time: 60.018 sec): 118448(overused: 587041)
+9723: Unrouted general nets at iteration 11 (MT total route time: 132.271 sec): 107390(overused: 479470)
+9724: Unrouted general nets at iteration 12 (MT total route time: 289.586 sec): 90413(overused: 447379)
+9725: Unrouted general nets at iteration 13 (MT total route time: 408.523 sec): 77137(overused: 377909)
+9726: Unrouted general nets at iteration 14 (MT total route time: 459.018 sec): 66897(overused: 312231)
+9727: Unrouted general nets at iteration 15 (MT total route time: 611.966 sec): 59287(overused: 259135)
+9728: Unrouted general nets at iteration 16 (MT total route time: 727.663 sec): 52601(overused: 216013)
+9729: Unrouted general nets at iteration 17 (MT total route time: 532.109 sec): 47170(overused: 178888)
+9730: Unrouted general nets at iteration 18 (MT total route time: 486.934 sec): 43356(overused: 158971)
+9731: Unrouted general nets at iteration 19 (MT total route time: 497.427 sec): 39294(overused: 135440)
+9732: Unrouted general nets at iteration 20 (MT total route time: 489.296 sec): 35795(overused: 117776)
+9733: Unrouted general nets at iteration 21 (MT total route time: 463.379 sec): 32413(overused: 100845)
+9734: Unrouted general nets at iteration 22 (MT total route time: 484.632 sec): 29563(overused: 88145)
+9735: Unrouted general nets at iteration 23 (MT total route time: 459.568 sec): 26935(overused: 77767)
+9736: Unrouted general nets at iteration 24 (MT total route time: 473.496 sec): 25071(overused: 70177)
+9737: Unrouted general nets at iteration 25 (MT total route time: 544.802 sec): 22948(overused: 62456)
+9738: Unrouted general nets at iteration 26 (MT total route time: 569.243 sec): 20962(overused: 55473)
+9739: Unrouted general nets at iteration 27 (MT total route time: 580.742 sec): 19363(overused: 50091)
+9740: Unrouted general nets at iteration 28 (MT total route time: 366.034 sec): 18323(overused: 46256)
+9741: Unrouted general nets at iteration 29 (MT total route time: 344.612 sec): 17266(overused: 42407)
+9742: Unrouted general nets at iteration 30 (MT total route time: 377.513 sec): 15632(overused: 37505)
+9743: Unrouted general nets at iteration 31 (MT total route time: 317.171 sec): 14350(overused: 33809)
+9744: Unrouted general nets at iteration 32 (MT total route time: 352.726 sec): 13507(overused: 31212)
+9745: Unrouted general nets at iteration 33 (MT total route time: 308.720 sec): 12726(overused: 28881)
+9746: Unrouted general nets at iteration 34 (MT total route time: 319.845 sec): 11516(overused: 25520)
+9747: Unrouted general nets at iteration 35 (MT total route time: 369.936 sec): 10831(overused: 23498)
+9748: Unrouted general nets at iteration 36 (MT total route time: 372.941 sec): 10295(overused: 22104)
+9749: Unrouted general nets at iteration 37 (MT total route time: 362.680 sec): 9612(overused: 20176)
+9750: Unrouted general nets at iteration 38 (MT total route time: 367.313 sec): 8883(overused: 18656)
+9751: Unrouted general nets at iteration 39 (MT total route time: 314.292 sec): 8534(overused: 18192)
+9752: Unrouted general nets at iteration 40 (MT total route time: 234.518 sec): 8093(overused: 16673)
+9753: Unrouted general nets at iteration 41 (MT total route time: 228.533 sec): 7526(overused: 15049)
+9754: Unrouted general nets at iteration 42 (MT total route time: 200.615 sec): 7060(overused: 14151)
+9755: Unrouted general nets at iteration 43 (MT total route time: 221.762 sec): 6492(overused: 12956)
+9756: Unrouted general nets at iteration 44 (MT total route time: 197.652 sec): 6062(overused: 12103)
+9757: Unrouted general nets at iteration 45 (MT total route time: 194.925 sec): 5656(overused: 10979)
+9758: Unrouted general nets at iteration 46 (MT total route time: 213.314 sec): 5519(overused: 10781)
+9759: Unrouted general nets at iteration 47 (MT total route time: 184.098 sec): 5440(overused: 10675)
+9760: Unrouted general nets at iteration 48 (MT total route time: 170.815 sec): 5319(overused: 10450)
+9761: Unrouted general nets at iteration 49 (MT total route time: 173.351 sec): 5064(overused: 9727)
+9762: Unrouted general nets at iteration 50 (MT total route time: 151.894 sec): 4556(overused: 8417)
+9763: Unrouted general nets at iteration 51 (MT total route time: 150.518 sec): 4304(overused: 7772)
+9764: Unrouted general nets at iteration 52 (MT total route time: 156.239 sec): 4088(overused: 7345)
+9765: Unrouted general nets at iteration 53 (MT total route time: 151.029 sec): 4086(overused: 7542)
+9766: Unrouted general nets at iteration 54 (MT total route time: 136.273 sec): 3939(overused: 7231)
+9767: Unrouted general nets at iteration 55 (MT total route time: 139.422 sec): 3712(overused: 6566)
+9768: Unrouted general nets at iteration 56 (MT total route time: 136.050 sec): 3288(overused: 5711)
+9769: Unrouted general nets at iteration 57 (MT total route time: 128.803 sec): 3223(overused: 5522)
+9770: Unrouted general nets at iteration 58 (MT total route time: 127.628 sec): 3013(overused: 5297)
+9771: Unrouted general nets at iteration 59 (MT total route time: 118.955 sec): 2982(overused: 5265)
+9772: Unrouted general nets at iteration 60 (MT total route time: 108.644 sec): 2859(overused: 4934)
+9773: Unrouted general nets at iteration 61 (MT total route time: 108.639 sec): 2717(overused: 4799)
+9774: Unrouted general nets at iteration 62 (MT total route time: 88.513 sec): 2684(overused: 4629)
+9775: Unrouted general nets at iteration 63 (MT total route time: 88.727 sec): 2620(overused: 4581)
+9776: Unrouted general nets at iteration 64 (MT total route time: 85.310 sec): 2491(overused: 4192)
+9777: Unrouted general nets at iteration 65 (MT total route time: 72.978 sec): 2345(overused: 3982)
+9778: Unrouted general nets at iteration 66 (MT total route time: 77.244 sec): 2048(overused: 3381)
+9779: Unrouted general nets at iteration 67 (MT total route time: 77.466 sec): 1949(overused: 3186)
+9780: Unrouted general nets at iteration 68 (MT total route time: 57.448 sec): 1820(overused: 2910)
+9781: Unrouted general nets at iteration 69 (MT total route time: 64.333 sec): 1712(overused: 2725)
+9782: Unrouted general nets at iteration 70 (MT total route time: 56.480 sec): 1536(overused: 2523)
+9783: Unrouted general nets at iteration 71 (MT total route time: 62.610 sec): 1546(overused: 2480)
+9784: Unrouted general nets at iteration 72 (MT total route time: 63.575 sec): 1507(overused: 2402)
+9785: Unrouted general nets at iteration 73 (MT total route time: 49.889 sec): 1334(overused: 2049)
+9786: Unrouted general nets at iteration 74 (MT total route time: 55.663 sec): 1221(overused: 1964)
+9787: Unrouted general nets at iteration 75 (MT total route time: 50.011 sec): 1214(overused: 1949)
+9788: Unrouted general nets at iteration 76 (MT total route time: 46.842 sec): 1198(overused: 1917)
+9789: Unrouted general nets at iteration 77 (MT total route time: 37.030 sec): 1118(overused: 1778)
+9790: Unrouted general nets at iteration 78 (MT total route time: 41.354 sec): 1057(overused: 1629)
+9791: Unrouted general nets at iteration 79 (MT total route time: 34.664 sec): 978(overused: 1566)
+9792: Unrouted general nets at iteration 80 (MT total route time: 32.242 sec): 924(overused: 1449)
+9793: Unrouted general nets at iteration 81 (MT total route time: 29.643 sec): 904(overused: 1372)
+9794: Unrouted general nets at iteration 82 (MT total route time: 27.340 sec): 948(overused: 1533)
+9795: Unrouted general nets at iteration 83 (MT total route time: 23.520 sec): 909(overused: 1402)
+9796: Unrouted general nets at iteration 84 (MT total route time: 28.044 sec): 815(overused: 1259)
+9797: Unrouted general nets at iteration 85 (MT total route time: 27.428 sec): 866(overused: 1391)
+9798: Unrouted general nets at iteration 86 (MT total route time: 25.985 sec): 863(overused: 1353)
+9799: Unrouted general nets at iteration 87 (MT total route time: 26.115 sec): 893(overused: 1444)
+9800: Unrouted general nets at iteration 88 (MT total route time: 24.498 sec): 865(overused: 1366)
+9801: Unrouted general nets at iteration 89 (MT total route time: 20.778 sec): 910(overused: 1438)
+9802: Unrouted general nets at iteration 90 (MT total route time: 27.899 sec): 837(overused: 1252)
+9803: Unrouted general nets at iteration 91 (MT total route time: 15.163 sec): 698(overused: 998)
+9804: Unrouted general nets at iteration 92 (MT total route time: 17.108 sec): 672(overused: 1025)
+9805: Unrouted general nets at iteration 93 (MT total route time: 16.467 sec): 583(overused: 884)
+9806: Unrouted general nets at iteration 94 (MT total route time: 19.779 sec): 574(overused: 842)
+9807: Unrouted general nets at iteration 95 (MT total route time: 15.641 sec): 617(overused: 974)
+9808: Unrouted general nets at iteration 96 (MT total route time: 18.697 sec): 594(overused: 905)
+9809: Unrouted general nets at iteration 97 (MT total route time: 24.519 sec): 556(overused: 863)
+9810: Unrouted general nets at iteration 98 (MT total route time: 26.251 sec): 507(overused: 733)
+9811: Unrouted general nets at iteration 99 (MT total route time: 25.134 sec): 465(overused: 690)
+9812: Unrouted general nets at iteration 100 (MT total route time: 23.958 sec): 469(overused: 748)
+9813: Unrouted general nets at iteration 101 (MT total route time: 28.191 sec): 497(overused: 786)
+9814: Unrouted general nets at iteration 102 (MT total route time: 20.424 sec): 458(overused: 674)
+9815: Unrouted general nets at iteration 103 (MT total route time: 19.247 sec): 399(overused: 565)
+9816: Unrouted general nets at iteration 104 (MT total route time: 11.446 sec): 438(overused: 708)
+9817: Unrouted general nets at iteration 105 (MT total route time: 11.363 sec): 379(overused: 594)
+9818: Unrouted general nets at iteration 106 (MT total route time: 11.048 sec): 328(overused: 493)
+9819: Unrouted general nets at iteration 107 (MT total route time: 14.952 sec): 322(overused: 469)
+9820: Unrouted general nets at iteration 108 (MT total route time: 18.070 sec): 327(overused: 478)
+9821: Unrouted general nets at iteration 109 (MT total route time: 16.465 sec): 371(overused: 572)
+9822: Unrouted general nets at iteration 110 (MT total route time: 15.367 sec): 415(overused: 613)
+9823: Unrouted general nets at iteration 111 (MT total route time: 13.541 sec): 407(overused: 639)
+9824: Unrouted general nets at iteration 112 (MT total route time: 13.109 sec): 404(overused: 655)
+9825: Unrouted general nets at iteration 113 (MT total route time: 10.039 sec): 420(overused: 656)
+9826: Unrouted general nets at iteration 114 (MT total route time: 7.110 sec): 421(overused: 603)
+9827: Unrouted general nets at iteration 115 (MT total route time: 9.620 sec): 383(overused: 599)
+9828: Unrouted general nets at iteration 116 (MT total route time: 7.537 sec): 338(overused: 503)
+9829: Unrouted general nets at iteration 117 (MT total route time: 10.462 sec): 361(overused: 576)
+9830: Unrouted general nets at iteration 118 (MT total route time: 7.798 sec): 339(overused: 492)
+9831: Unrouted general nets at iteration 119 (MT total route time: 8.597 sec): 321(overused: 471)
+9832: Unrouted general nets at iteration 120 (MT total route time: 9.644 sec): 255(overused: 346)
+9833: Unrouted general nets at iteration 121 (MT total route time: 8.790 sec): 196(overused: 254)
+9834: Unrouted general nets at iteration 122 (MT total route time: 8.564 sec): 190(overused: 264)
+9835: Unrouted general nets at iteration 123 (MT total route time: 9.279 sec): 185(overused: 269)
+9836: Unrouted general nets at iteration 124 (MT total route time: 17.377 sec): 213(overused: 280)
+9837: Unrouted general nets at iteration 125 (MT total route time: 9.632 sec): 232(overused: 332)
+9838: Unrouted general nets at iteration 126 (MT total route time: 10.966 sec): 205(overused: 278)
+9839: Unrouted general nets at iteration 127 (MT total route time: 7.070 sec): 246(overused: 343)
+9840: Unrouted general nets at iteration 128 (MT total route time: 10.818 sec): 216(overused: 277)
+9841: Unrouted general nets at iteration 129 (MT total route time: 5.311 sec): 179(overused: 251)
+9842: Unrouted general nets at iteration 130 (MT total route time: 4.242 sec): 176(overused: 251)
+9843: Unrouted general nets at iteration 131 (MT total route time: 3.113 sec): 165(overused: 235)
+9844: Unrouted general nets at iteration 132 (MT total route time: 4.194 sec): 166(overused: 244)
+9845: Unrouted general nets at iteration 133 (MT total route time: 7.450 sec): 138(overused: 178)
+9846: Unrouted general nets at iteration 134 (MT total route time: 4.385 sec): 127(overused: 184)
+9847: Unrouted general nets at iteration 135 (MT total route time: 3.736 sec): 100(overused: 120)
+9848: Unrouted general nets at iteration 136 (MT total route time: 5.802 sec): 90(overused: 127)
+9849: Unrouted general nets at iteration 137 (MT total route time: 1.250 sec): 75(overused: 104)
+9850: Unrouted general nets at iteration 138 (MT total route time: 1.719 sec): 78(overused: 110)
+9851: Unrouted general nets at iteration 139 (MT total route time: 2.292 sec): 72(overused: 102)
+9852: Unrouted general nets at iteration 140 (MT total route time: 1.951 sec): 55(overused: 72)
+9853: Unrouted general nets at iteration 141 (MT total route time: 1.197 sec): 36(overused: 44)
+9854: Unrouted general nets at iteration 142 (MT total route time: 3.787 sec): 28(overused: 45)
+9855: Unrouted general nets at iteration 143 (MT total route time: 2.030 sec): 25(overused: 26)
+9856: Unrouted general nets at iteration 144 (MT total route time: 0.784 sec): 12(overused: 16)
+9857: Unrouted general nets at iteration 145 (MT total route time: 1.210 sec): 14(overused: 17)
+9858: Unrouted general nets at iteration 146 (MT total route time: 2.242 sec): 9(overused: 10)
+9859: Unrouted general nets at iteration 147 (MT total route time: 1.605 sec): 7(overused: 8)
+9860: Unrouted general nets at iteration 148 (MT total route time: 1.251 sec): 9(overused: 10)
+9861: Unrouted general nets at iteration 149 (MT total route time: 1.173 sec): 2(overused: 2)
+9862: Unrouted general nets at iteration 150 (MT total route time: 1.396 sec): 6(overused: 14)
+9863: Unrouted general nets at iteration 151 (MT total route time: 1.217 sec): 5(overused: 6)
+9864: Unrouted general nets at iteration 152 (MT total route time: 0.691 sec): 2(overused: 2)
+9865: Unrouted general nets at iteration 153 (MT total route time: 0.692 sec): 2(overused: 2)
+9866: Unrouted general nets at iteration 154 (MT total route time: 0.686 sec): 0(overused: 0)
+9867: ----General net take 0.979 sec(route net take 0.463 sec, inc cost take 0.516 sec, iter times: 1)
+9868: ----const net route take 3.682 sec
+9869: Unrouted nets at iteration 155 (4.683 sec): 1
+9870: ----General net take 0.982 sec(route net take 0.483 sec, inc cost take 0.499 sec, iter times: 1)
+9871: ----const net route take 0.143 sec
+9872: Unrouted nets at iteration 156 (1.152 sec): 1
+9873: ----General net take 2044.361 sec(route net take 1994.374 sec, inc cost take 49.935 sec, iter times: 100)
+9874: ----const net route take 0.155 sec
+9875: Unrouted nets at iteration 157 (2044.559 sec): 99
+9876: ----General net take 59.035 sec(route net take 45.243 sec, inc cost take 13.774 sec, iter times: 27)
+9877: ----const net route take 0.070 sec
+9878: Unrouted nets at iteration 158 (59.134 sec): 0
+9879: Detailed routing takes 21199.40 sec.
+9880: Fix violation Finished.
+9881: Fix violation Finished.
+9882: Hold Violation Fix in router takes 439.43 sec.
+9883: Sort Original Nets take 0.760 sec
+9884: Build solution node for device pins which were mapped to more than one design pin take 7.456 sec
+9885: Total net: 187014, route succeed net: 187014
+9886: Generate routing result take 2.433 sec
+9887: Handle PERMUX permutation take 17.548 sec
+9888: Handle const net take 1.783 sec
+9889: Handle route through take 0.727 sec
+9890: Handle loads' routing node take 2.169 sec
+9891: Used SRB routing arc is 2458008.
+9892: Finish routing takes 37.72 sec.
+9893: Total routing takes 21831.98 sec.
+9894:
+9895:
+9896: Device Utilization Summary :
+9897: +--------------------------------------------------------------------------------------+
+9898: | Logic Utilization                 | Used       | Available     | Utilization(%)
+9899: +--------------------------------------------------------------------------------------+
+9900: | Use of ADC                        | 0          | 1             | 0
+9901: | Use of ANALOG                     | 0          | 1             | 0
+9902: | Use of APM                        | 212        | 740           | 29
+9903: | Use of BKCL                       | 6          | 10            | 60
+9904: | Use of CCS                        | 1          | 1             | 100
+9905: | Use of CLMA                       | 28397      | 30075         | 95
+9906: |   FF                              | 108722     | 240600        | 46
+9907: |   LUT                             | 83523      | 120300        | 70
+9908: |   LUT-FF pairs                    | 38016      | 120300        | 32
+9909: | Use of CLMS                       | 9290       | 9875          | 95
+9910: |   FF                              | 34620      | 79000         | 44
+9911: |   LUT                             | 27617      | 39500         | 70
+9912: |   LUT-FF pairs                    | 16852      | 39500         | 43
+9913: |   Distributed RAM                 | 13089      | 39500         | 34
+9914: | Use of DDRPHY_CPD                 | 1          | 20            | 5
+9915: | Use of DDRPHY_IOCLK_DIV           | 2          | 10            | 20
+9916: | Use of DDR_PHY                    | 7          | 40            | 18
+9917: | Use of DRM                        | 250        | 415           | 61
+9918: | Use of GCLK_INBUF_SYN             | 0          | 40            | 0
+9919: | Use of GPLL                       | 7          | 10            | 70
+9920: | Use of GSEB                       | 0          | 512           | 0
+9921: | Use of HARD0                      | 11201      | 25050         | 45
+9922: | Use of HCKB                       | 37         | 120           | 31
+9923: |  HCKB dataused                    | 0          | 120           | 0
+9924: | Use of HCKMUX_TEST                | 0          | 10            | 0
+9925: | Use of HSSTLP                     | 0          | 2             | 0
+9926: | Use of IO                         | 115        | 400           | 29
+9927: |   IOBD                            | 59         | 192           | 31
+9928: |   IOBS                            | 56         | 208           | 27
+9929: | Use of IOCKB                      | 0          | 40            | 0
+9930: | Use of IOCKMUX_TEST               | 0          | 10            | 0
+9931: | Use of IOLHR                      | 114        | 500           | 23
+9932: | Use of KEYRAM                     | 0          | 1             | 0
+9933: | Use of MFG_TEST                   | 0          | 1             | 0
+9934: | Use of MRCKB                      | 1          | 20            | 5
+9935: | Use of MRCKMUX_TEST               | 0          | 10            | 0
+9936: | Use of MRPOSTMUX_TEST             | 0          | 10            | 0
+9937: | Use of PCIE                       | 0          | 1             | 0
+9938: | Use of PCKMUX_TEST                | 0          | 20            | 0
+9939: | Use of PLLMRMUX_TEST              | 0          | 10            | 0
+9940: | Use of PLLREFMUX_TEST             | 0          | 10            | 0
+9941: | Use of POSTGMUXLR_TEST            | 0          | 4             | 0
+9942: | Use of PPLL                       | 2          | 10            | 20
+9943: | Use of PREGMUXC_TEST              | 0          | 3             | 0
+9944: | Use of PREGMUXC_X16_200H_TEST     | 0          | 4             | 0
+9945: | Use of PREGMUXLR_TEST             | 0          | 10            | 0
+9946: | Use of RCKB                       | 4          | 40            | 10
+9947: |  RCKB dataused                    | 2          | 40            | 5
+9948: | Use of RCKMUX_TEST                | 0          | 10            | 0
+9949: | Use of SCANCHAIN                  | 0          | 1             | 0
+9950: | Use of SCKMUX_TEST                | 0          | 20            | 0
+9951: | Use of SFB                        | 0          | 5075          | 0
+9952: | Use of SPAD                       | 0          | 8             | 0
+9953: | Use of TSERDES                    | 14         | 80            | 18
+9954: | Use of USCM                       | 10         | 32            | 32
+9955: |  USCM dataused                    | 0          | 32            | 0
+9956: | Use of USCMMUX_TEST               | 0          | 32            | 0
+9957: +--------------------------------------------------------------------------------------+
+9958:
+9959: Finished routing.
+9960: Design 'edrv32_fpga_board_gpu_top' has been placed and routed successfully.
+9961: Saving design to DB.
+9962: Finished placement and routing.
+9963: Action pnr: Real time elapsed is 6h:24m:37s
+9964: Action pnr: CPU time elapsed is 0h:37m:30s
+9965: Action pnr: Process CPU time elapsed is 0h:44m:58s
+9966: Current time: Fri Nov 27 21:55:50 2026
+9967: Action pnr: Peak memory pool usage is 6,579 MB

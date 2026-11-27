@@ -1,0 +1,14 @@
+Card 107 round 11 B | b2a27314 / run ced62bb5
+Native post-route timing from the B PNR database. PDS 2022.2-SP6.1 build 138931.
+Expanded report command: report_timing -input_db_file input-pnr.adf -max_path 200 -nworst 1 -force_to_run.
+
+Slow-corner setup paths for clk_serial -> clk_serial; 8 paths available, up to 200.
+Rank | Slack(ns) | Logic levels | Startpoint -> Endpoint
+   1 |     1.306 |            0 | u_tmds/g_channel[0].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN0
+   2 |     1.306 |            0 | u_tmds/g_channel[1].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN0
+   3 |     1.306 |            0 | u_tmds/g_channel[2].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN0
+   4 |     1.306 |            0 | u_tmds/g_channel[3].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN0
+   5 |     1.374 |            0 | u_tmds/g_channel[0].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN1
+   6 |     1.374 |            0 | u_tmds/g_channel[1].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN1
+   7 |     1.374 |            0 | u_tmds/g_channel[2].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN1
+   8 |     1.374 |            0 | u_tmds/g_channel[3].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN1

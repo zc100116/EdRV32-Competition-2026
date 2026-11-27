@@ -1,0 +1,5 @@
+Card 107 round 11 B | task b2a27314 | local run ced62bb5
+PDS 2022.2-SP6.1 build 138931 | PG2L200H-6 FBB676 | captured 2026-11-27T23:09:52+08:00
+
+P&R warning, critical warning and error lines mentioning APM or cascade (original line numbers).
+(none found in the B P&R run.log)

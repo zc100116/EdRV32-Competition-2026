@@ -1,0 +1,7 @@
+Card 107 round 11 B | b2a27314 / run ced62bb5
+Native post-route timing from the B PNR database. PDS 2022.2-SP6.1 build 138931.
+Expanded report command: report_timing -input_db_file input-pnr.adf -max_path 200 -nworst 1 -force_to_run.
+
+Performance Summary and timing summary tables match the original GUI .rtr.
+Verified 200 GPU setup paths and distinct endpoints, WNS -1.852 ns.
+Top reported hold slack: -0.361 ns.
