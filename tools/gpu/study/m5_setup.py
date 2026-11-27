@@ -102,7 +102,7 @@ def evaluate(record, origin, x, y, bits=32):
     return math.ldexp(value, e)
 
 
-def schedule(attributes):
+def dag(attributes, slots=4):
     """ASAP static DAG, 4x(49x33) pool, four live attributes, one packed write/cycle.
     An attribute owns a RAM slot from read through packed coefficient write.
     Same-cycle resource caps: 4 multipliers, 2 adders, 2 normalizers, 1 RAM write.
@@ -124,7 +124,7 @@ def schedule(attributes):
         reciprocal = add(f'newton{j}y', 'mul', (q, reciprocal))
     for a in range(attributes):
         tag = f'a{a}_'
-        previous = (f'a{a-4}_write',) if a >= 4 else ()
+        previous = (f'a{a-slots}_write',) if a >= slots else ()
         read = add(tag+'read', 'read', previous, a)
         aligned = [add(tag+f'input{i}', 'norm', (read,), a) for i in range(3)]
         diffs = [add(tag+f'd{i}', 'add', aligned, a) for i in range(2)]
@@ -144,6 +144,11 @@ def schedule(attributes):
         packed = [add(tag+f'pack{i}', 'norm', (start_norm, *gradients), a)
                   for i in range(3)]
         add(tag+'write', 'write', packed, a)
+    return nodes
+
+
+def schedule(attributes):
+    nodes = dag(attributes)
     latencies = dict(mul=6, add=2, norm=2, read=1, write=1)
     ports = dict(mul=4, add=2, norm=2, read=1, write=1)
     ready, issued, t = {}, [], 0
@@ -175,7 +180,7 @@ def summary(pairs):
                 rms=math.sqrt(sum((a-b)**2 for a, b in pairs)/len(pairs)), n=len(pairs))
 
 
-def precision():
+def corpus():
     rng = random.Random(20261127)
     # Exact translated Q4 edges; area is the signed determinant, not half-area.
     cases = [
@@ -192,6 +197,11 @@ def precision():
         x, y = rng.randrange(0, 500)*16, rng.randrange(0, 250)*16
         cases.append((f'random{i}', [(x+8, y+8), (x+rng.randrange(1, 100)*16, y+9),
                                     (x+9, y+rng.randrange(1, 100)*16)]))
+    return cases
+
+
+def precision(coefficient_fn=coefficients, evaluate_fn=evaluate, boundaries=False):
+    cases = corpus()
     collected, per_case, quantized, in_domain = {}, {}, {}, {}
     common = {}
     continuity = {24: 0., 32: 0.}
@@ -217,6 +227,10 @@ def precision():
                            for j in range(3)]
                 if min(weights) >= 0:
                     probes.append((x, y))
+        if boundaries:
+            for bx in range((minx//64+1)*64, maxx+1, 64):
+                for by in range(miny//64*64, maxy+1, 64):
+                    probes.extend((bx+dx, by+dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1))
         probes = list(dict.fromkeys(probes))
         metrics = {model: {k: [] for k in ('uv', 'z', 'rgba', 'lod')}
                    for model in ('P-A', 'block24', 'block32')}
@@ -255,8 +269,8 @@ def precision():
                 origin = x//64*64, y//64*64
                 key = origin, bits
                 if key not in records:
-                    records[key] = [coefficients(vertices, ch, origin, bits) for ch in channels]
-                return [evaluate(r, origin, x, y, bits) for r in records[key]]
+                    records[key] = [coefficient_fn(vertices, ch, origin, bits) for ch in channels]
+                return [evaluate_fn(r, origin, x, y, bits) for r in records[key]]
 
             for x, y in probes:
                 ideal = exact(x, y)
@@ -306,10 +320,10 @@ def precision():
             by = (miny+maxy)//2//64*64
             for bits in (24, 32):
                 for ch in channels:
-                    a = coefficients(vertices, ch, (bx-64, by), bits)
-                    b = coefficients(vertices, ch, (bx, by), bits)
-                    left = evaluate(a, (bx-64, by), bx, by, bits)
-                    right = evaluate(b, (bx, by), bx, by, bits)
+                    a = coefficient_fn(vertices, ch, (bx-64, by), bits)
+                    b = coefficient_fn(vertices, ch, (bx, by), bits)
+                    left = evaluate_fn(a, (bx-64, by), bx, by, bits)
+                    right = evaluate_fn(b, (bx, by), bx, by, bits)
                     continuity[bits] = max(continuity[bits], abs(left-right)/max(1., abs(right)))
         per_case[name] = {model: {k: summary(v) for k, v in row.items()}
                           for model, row in metrics.items()}
