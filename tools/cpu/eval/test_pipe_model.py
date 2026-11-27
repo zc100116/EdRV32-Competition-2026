@@ -27,6 +27,17 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_round4_sync_rf_qualifies_early_address_at_d2(self):
+        prefix = [instruction(pc) for pc in range(0, 24, 4)]
+        producer = [instruction(24, rd=4), instruction(28)]
+        options = dict(early_address='rf_wb', decode_split=True,
+                       perfect_frontend=True, perfect_prediction=True)
+        adjacent = prefix + producer + [instruction(32, 'load', rd=5, sources=(4,))]
+        future_wb = prefix + producer + [instruction(pc) for pc in range(32, 48, 4)] + [
+            instruction(48, 'load', rd=5, sources=(4,))]
+        self.assertEqual(run(adjacent, 'V3s', **options)['early_loads'], 0)
+        self.assertEqual(run(future_wb, 'V3s', **options)['early_loads'], 1)
+
     def test_round4_zba_constant_shift_add_can_execute_late(self):
         zba = replace(instruction(4, rd=5, sources=(4, 6)), bits=0x206222b3)
         stream = [instruction(0, 'load', rd=4), zba]

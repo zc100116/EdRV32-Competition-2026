@@ -407,10 +407,15 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
 
     def id_early_load(instruction, issued):
         base = instruction.sources[-1] if instruction.sources else 0
+        # D1 qualifies the next cycle's D2 address. Present D2/E/M then
+        # occupy E/M/W; only the future RF/WB inputs may feed the early AGU.
+        address_e, address_m, address_w = ((decode_pending, e, m) if decode_split else
+                                          (e, m, w))
         return (not base or not any(
-            base in destinations(r.instruction) for r in issued + e + m)) and (
+            base in destinations(r.instruction) for r in issued + address_e + address_m)) and (
             not base or not any(base in destinations(r.instruction) and
-                (r.result_latency or latencies.get(r.instruction.kind, 1)) > 3 for r in w))
+                (r.result_latency or latencies.get(r.instruction.kind, 1)) > 3
+                for r in address_w))
 
     def schedule(instruction, lane, older=None, older_late=False):
         needs = []
