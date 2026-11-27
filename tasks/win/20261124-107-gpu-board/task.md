@@ -217,12 +217,17 @@
   4. 综合预估时序汇总：各时钟域的 WNS、TNS、估算频率；
   5. clk_gpu、clk_mem 各最差 200 条 setup 路径，一行一条：起点、终点、裕量、逻辑级数；clk_gpu 最差 20 条路径的逐级明细；
   6. 高扇出表。
-- **第二段：布局布线**。只要综合估算的 clk_gpu ≥ 150 MHz 就继续跑。回传：
+- **第二段：布局布线，两组参数并行跑**。只要综合估算的 clk_gpu ≥ 150 MHz 就跑。前几轮布局布线用的都是 GUI 默认参数；本轮改用下面两组。参数含义见 `docs/guides/pds-floorplan.md` 3.1 节。
+  - 做法：Device Map 完成后，把工程目录整个复制一份，原工程跑 A、副本跑 B，两个同时跑。两边都用同一个 Device Map 结果，不要重新综合。命令行写法参照卡 74 第 5 节第 3 步：`pds_shell.exe -action place_route -project_file <工程 .pds> <参数> <device_map 下的 _map.adf>`。用 GUI 跑也可以，在 Place & Route 的属性里设置相同的取值。
+  - **A 组（视觉 SoC 卡 68 R2 布通时用的参数）**：`-plc_decongestion 2 -slack_weight 40 -pin_cost_increasing_speed 600 -logic_optimize_lut6d_combing_strategy 0 -dump_router_congestion_plot true`
+  - **B 组（布通优先）**：`-plc_decongestion 4 -slack_weight 10 -pin_cost_increasing_speed 600 -logic_optimize_lut6d_combing_strategy 0 -dump_router_congestion_plot true`，再在 GUI 中**取消勾选 Design Cells Duplication**（`-dc_duplication`，默认开：布局时为时序复制单元，会增加 LUT/FF）。B 组的时序预计会差一些，它的作用是回答"放宽时序以后能不能布通"。PDS 没有单独的"关闭时序驱动"开关，B 组就是用来代替它的。
+  - 如果某个参数名 PDS 不接受，把报错原文写进 result.md，去掉这个参数继续跑，不要自行换成别的参数。
+- **两组分别回传**：
   1. 布局报告中的全部 `Use of` 行，**特别是 `Use of CLMA`、`Use of CLMS`**；
-  2. 是否布通；布线迭代次数和每次迭代的用时；拥塞摘要；
-  3. 布通时：第 6e 节的全部时序内容；
-  4. 布不通时：按第 6h 节补充要求第 1 条的方法，统计未布网的模块分布。然后在同一工程上关闭时序驱动（timing-driven）重跑一次布局布线，回传同样的 `Use of` 行和是否布通。用这一次区分"放不下"和"为时序摊开"。
-  5. APM 级联链的放置：如果报告中有 APM 级联或 APM 列放置相关的告警或错误，回传原文。
+  2. 是否布通；每次布线迭代的未布通数和用时；拥塞摘要；
+  3. 布通的那组：第 6e 节的全部时序内容；
+  4. 布不通的那组：按第 6h 节补充要求第 1 条的方法，统计未布网的模块分布；
+  5. APM 级联或 APM 列放置相关的告警或错误，回传原文。
 - 上板步骤（第 5 节第 5～8 步）本轮先不做，等协调者看过布线结果再定。
 
 ## 7. 通过判据
