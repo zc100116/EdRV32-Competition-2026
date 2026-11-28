@@ -1,5 +1,5 @@
 // Self-checking public-interface test; independent architectural reference.
-module tb;
+module tb #(parameter ISSUE_WIDTH = 2);
     reg clk_i;
     reg rst_n_i;
     reg [19:0] id_rs_i;
@@ -9,16 +9,28 @@ module tb;
     reg [63:0] wb_data_i;
     wire [31:1] lvt_o;
     wire [127:0] id_data_o;
-    edrv32_cpu2_rf dut (
+    edrv32_cpu2_rf #(.ISSUE_WIDTH(ISSUE_WIDTH)) dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .id_rs_i(id_rs_i),
-        .id_owner_i(id_owner_i),
-        .wb_valid_i(wb_valid_i),
-        .wb_rd_i(wb_rd_i),
-        .wb_data_i(wb_data_i),
-        .lvt_o(lvt_o),
-        .id_data_o(id_data_o)
+        .id_rs0_i(id_rs_i[0 +: 5]),
+        .id_owner0_i(id_owner_i[0]),
+        .id_data0_o(id_data_o[0 +: 32]),
+        .id_rs1_i(id_rs_i[5 +: 5]),
+        .id_owner1_i(id_owner_i[1]),
+        .id_data1_o(id_data_o[32 +: 32]),
+        .id_rs2_i(id_rs_i[10 +: 5]),
+        .id_owner2_i(id_owner_i[2]),
+        .id_data2_o(id_data_o[64 +: 32]),
+        .id_rs3_i(id_rs_i[15 +: 5]),
+        .id_owner3_i(id_owner_i[3]),
+        .id_data3_o(id_data_o[96 +: 32]),
+        .wb0_valid_i(wb_valid_i[0]),
+        .wb0_rd_i(wb_rd_i[0 +: 5]),
+        .wb0_data_i(wb_data_i[0 +: 32]),
+        .wb1_valid_i(wb_valid_i[1]),
+        .wb1_rd_i(wb_rd_i[5 +: 5]),
+        .wb1_data_i(wb_data_i[32 +: 32]),
+        .lvt_o(lvt_o)
     );
     always #5 clk_i = ~clk_i;
     task tick; begin @(posedge clk_i); #1; end endtask
@@ -41,12 +53,12 @@ module tb;
     task check_reads;
         begin
             #1;
-            for (p=0; p<4; p=p+1) begin
+            for (p=0; p<2*ISSUE_WIDTH; p=p+1) begin
                 r = int'(id_rs_i[5*p +: 5]);
                 expected = reference[r];
                 if (wb_valid_i[0] && int'(wb_rd_i[4:0])==r && r!=0)
                     expected=wb_data_i[31:0];
-                if (wb_valid_i[1] && int'(wb_rd_i[9:5])==r && r!=0)
+                if (ISSUE_WIDTH==2 && wb_valid_i[1] && int'(wb_rd_i[9:5])==r && r!=0)
                     expected=wb_data_i[63:32];
                 if (id_data_o[32*p +: 32] !== expected)
                     $fatal(1,"RF port %0d expected %h got %h at %0t",p,expected,
@@ -58,12 +70,13 @@ module tb;
         begin
             check_reads();
             tick();
-            for (integer w=0;w<2;w=w+1) begin
+            for (integer w=0;w<ISSUE_WIDTH;w=w+1) begin
                 r=int'(wb_rd_i[5*w +: 5]);
                 if (wb_valid_i[w] && r!=0) begin
-                    reference[r]=wb_data_i[32*w +: 32]; owners[r]=1'(w);
+                    reference[r]=wb_data_i[32*w +: 32]; owners[r]=(ISSUE_WIDTH==2) ? 1'(w):0;
                 end
             end
+            if (ISSUE_WIDTH==1 && id_data_o[127:64]!==0) $fatal(1,"inactive reads");
             if (lvt_o !== owners) $fatal(1,"LVT expected %h got %h",owners,lvt_o);
             for (integer v=0;v<4;v=v+1)
                 id_owner_i[v]=(id_rs_i[5*v +: 5]!=0) ? owners[id_rs_i[5*v +: 5]]:0;
