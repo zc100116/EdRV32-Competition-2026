@@ -1613,6 +1613,8 @@ module edrv32_cpu2_issue #(
             reg [(ISSUE_WIDTH+2)-1:0] ras_count_r;
             assign entry_ras_count_w[entry] = ras_count_r;
             reg valid_r;
+            wire [T-1:0] age_w = ENTRY-age_head_i;
+            wire [T:0] occupied_w = N_COUNT-allocate_credit_i;
             assign entry_valid_w[entry] = valid_r && ({1'b0, age_w} < occupied_w);
             reg pending_r;
             assign entry_pending_w[entry] = pending_r;
@@ -1621,9 +1623,7 @@ module edrv32_cpu2_issue #(
             reg [3-1:0] countdown_r;
             assign entry_countdown_w[entry] = countdown_r;
             assign serial_pending_w[entry] = entry_valid_w[entry] && (class_r == 3'd7);
-            wire [T-1:0] age_w = ENTRY-age_head_i;
             wire canceled_w = cancel_valid_i && (age_w >= cancel_age_w);
-            wire [T:0] occupied_w = N_COUNT-allocate_credit_i;
             wire retiring_w = valid_r && !({1'b0, age_w} < occupied_w);
             wire accepted_w = pending_r && (channel_tag_w[channel_r] == ENTRY) &&
                 channel_valid_w[channel_r] && channel_ready_w[channel_r];

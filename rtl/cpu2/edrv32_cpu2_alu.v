@@ -130,6 +130,7 @@ module edrv32_cpu2_alu #(
             wire ex_wait1_r = (ISSUE_WIDTH == 2) && execute0_source1_wait_i;
             wire ex_wait2_r = (ISSUE_WIDTH == 2) && execute0_source2_wait_i;
             wire [T-1:0] ex_age_w = ex_tag_r - age_head_i;
+            wire [T-1:0] cancel_age_w = cancel_tag_i - age_head_i;
             wire ex_cancel_w = cancel_valid_i && (ex_age_w >= cancel_age_w);
             wire [T-1:0] skid_age_w = skid_tag_r - age_head_i;
             wire skid_cancel_w = skid_valid_r && cancel_valid_i && (skid_age_w >= cancel_age_w);
@@ -138,7 +139,6 @@ module edrv32_cpu2_alu #(
             wire [T-1:0] input_age_w = execute0_tag_i - age_head_i;
             wire input_cancel_w = execute0_valid_i && cancel_valid_i &&
                 (input_age_w >= cancel_age_w);
-            wire [T-1:0] cancel_age_w = cancel_tag_i - age_head_i;
             wire ex_early_w = ex_valid_r && !ex_late_r;
             wire mem_ready_w = mem_valid_r && !mem_wait1_r && !mem_wait2_r;
             assign execute0_ready_o = ex_late_r ? !mem_valid_r : !skid_valid_r;
@@ -526,6 +526,7 @@ module edrv32_cpu2_alu #(
             wire ex_wait1_r = (ISSUE_WIDTH == 2) && execute1_source1_wait_i;
             wire ex_wait2_r = (ISSUE_WIDTH == 2) && execute1_source2_wait_i;
             wire [T-1:0] ex_age_w = ex_tag_r - age_head_i;
+            wire [T-1:0] cancel_age_w = cancel_tag_i - age_head_i;
             wire ex_cancel_w = cancel_valid_i && (ex_age_w >= cancel_age_w);
             wire [T-1:0] skid_age_w = skid_tag_r - age_head_i;
             wire skid_cancel_w = skid_valid_r && cancel_valid_i && (skid_age_w >= cancel_age_w);
@@ -534,7 +535,6 @@ module edrv32_cpu2_alu #(
             wire [T-1:0] input_age_w = execute1_tag_i - age_head_i;
             wire input_cancel_w = execute1_valid_i && cancel_valid_i &&
                 (input_age_w >= cancel_age_w);
-            wire [T-1:0] cancel_age_w = cancel_tag_i - age_head_i;
             wire ex_early_w = ex_valid_r && !ex_late_r;
             wire mem_ready_w = mem_valid_r && !mem_wait1_r && !mem_wait2_r;
             assign execute1_ready_o = ex_late_r ? !mem_valid_r : !skid_valid_r;
