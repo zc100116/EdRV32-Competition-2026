@@ -1,0 +1,10 @@
+top: tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 120
+pass: PASS
+tier: smoke full
+simulator: verilator
+group: verif/unit/cpu2_tage

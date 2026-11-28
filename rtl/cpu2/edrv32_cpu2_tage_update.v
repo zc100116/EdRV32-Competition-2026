@@ -1,6 +1,7 @@
 // File: edrv32_cpu2_tage_update.v
 // Spec: cpu-v2-spec 5.4.
-// Description: One branch update: current-row counters, usefulness and first longer allocation.
+// Description: One branch update from current rows and the saved prediction token.
+// Saturate the matching provider and allocate at most one longer row, short to long.
 // Clock domain: clk_sys.
 module edrv32_cpu2_tage_update (
     // Saved prediction token and current training rows.

@@ -1,0 +1,10 @@
+top: tb
+files: files.f
+defines: SIM_MODE
+parameters: ISSUE_WIDTH=2 FPU_FORMAT='"FD"'
+software:
+timeout: 180
+pass: PASS
+tier: full
+simulator: verilator
+group: verif/unit/cpu2_frontend

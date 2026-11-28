@@ -1,0 +1,11 @@
+top: tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 300
+pass: PASS
+tier: full
+simulator: verilator
+plusargs: +ALL_ROWS
+group: verif/unit/cpu2_tage

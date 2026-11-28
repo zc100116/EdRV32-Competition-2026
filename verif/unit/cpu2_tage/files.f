@@ -6,4 +6,3 @@ tb.sv
 ../../../rtl/tech/edrv32_ram_cpu2_tage_train.v
 ../../../rtl/tech/edrv32_ram_cpu2_base.v
 ../../../rtl/tech/edrv32_ram_cpu2_base_train.v
-../../../rtl/tech/edrv32_ram_cpu2_fast.v

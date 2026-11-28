@@ -1,0 +1,10 @@
+top: tb
+files: files.f
+defines: SIM_MODE
+parameters: ISSUE_WIDTH=1
+software:
+timeout: 180
+pass: PASS
+tier: smoke full
+simulator: verilator
+group: verif/unit/cpu2_frontend

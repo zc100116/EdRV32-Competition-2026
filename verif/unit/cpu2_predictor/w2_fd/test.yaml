@@ -1,9 +1,10 @@
 top: tb
 files: files.f
 defines: SIM_MODE
-parameters:
+parameters: ISSUE_WIDTH=2 FPU_FORMAT='"FD"'
 software:
 timeout: 180
 pass: PASS
-tier: smoke full
+tier: full
 simulator: verilator
+group: verif/unit/cpu2_predictor

@@ -1,0 +1,14 @@
+tb.sv
++incdir+../../../rtl/include
+../../../rtl/cpu2/edrv32_cpu2_frontend.v
+../../../rtl/cpu2/edrv32_cpu2_predictor.v
+../../../rtl/cpu2/edrv32_cpu2_tage.v
+../../../rtl/cpu2/edrv32_cpu2_tage_update.v
+../../../rtl/cpu2/edrv32_cpu2_fetch.v
+../../../rtl/cpu2/edrv32_cpu2_ib.v
+../../../rtl/tech/edrv32_ram_cpu2_btb.v
+../../../rtl/tech/edrv32_ram_cpu2_fast.v
+../../../rtl/tech/edrv32_ram_cpu2_tage.v
+../../../rtl/tech/edrv32_ram_cpu2_tage_train.v
+../../../rtl/tech/edrv32_ram_cpu2_base.v
+../../../rtl/tech/edrv32_ram_cpu2_base_train.v
