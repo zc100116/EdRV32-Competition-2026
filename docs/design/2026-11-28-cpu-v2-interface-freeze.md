@@ -443,6 +443,10 @@ j=0,1按年龄，只有一条时在0。所有字段在该退休或陷阱事件�
 
 completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，`cancel_tag`=该 tag+1（mod N），否则不发 cancel；`commit_cancel_valid` 同沿时取 commit 的值。空队列时的"下一应执行 PC"是 commit 内部寄存 `next_pc_r`（随退休、重定向、陷阱、MRET 更新），不设端口。
 
+**设备 load 与 FD 设备访问（I05）。** 设备 load（含 FLD 两 beat）先以 `lsu_complete_device=1` 完成，只表示"可授权"：该项 done=1 供提交头授权，但 `source{p}_ready` 必须为0，准备数据不得转发。commit 授权后 LSU 发出设备事务（FD 两 beat 在 LSU 内拼成 B 位），`commit_lsu_done` 增加 `commit_lsu_done_data`（B 位）；commit 用它做本条退休写，同沿 WB 广播供等待源捕获（沿"已完成项将退休时同沿 WB 供等待源"规则）。completion 不做二次完成更新。可缓存 FLD 两 beat 都命中后一次完成 64 位，按普通 load。
+
+**I$ 跨行 LRU（I05）。** 双 bank 跨行组命中的两行组号相邻、奇偶不同。I$ 双 bank 的 LRU 按组号奇偶分两块，每块用 `edrv32_ram_cpu2_cache_lru`，地址 `{1'b0, set[8:1]}`，跨行命中同沿各写一块，不串行。总容量不变；单 bank I$ 与 D$ 各一块整 512 组。
+
 ## 影响
 
 审核通过后需修改CPU spec2.2/2.3、3、4、5、6及9的C01–C09；FPU spec2.4、3、4、5.1/5.4/5.5及9的F01/F02/F04/F05；CPU testplan2/4/6/7的T02/T03及对应CV02–CV14；FPU testplan4/6/7的FT01/FT03及FV10–FV15。C10、F03/F06与FT03中的未测数值继续待定；旧cpu/cache规格不改，外部总线无差异。

@@ -7,7 +7,7 @@
 | 包装 | `rtl/tech/edrv32_ram_cpu2_cache_lru.v` |
 | 器件 | PG2L200H-6 |
 | 用途 | 每组LRU位 |
-| 使用者/实例数 | I$×1、D$×1 |
+| 使用者/实例数 | 双发射I$按组号奇偶×2（地址最高位接0）；单发射I$×1；D$×1 |
 | Write/Read Width | 1 / 1 |
 | Write/Read Depth | 512 / 512（地址 9 位） |
 | 时钟 | 同一个 clk_sys，上升沿，同步写 |
