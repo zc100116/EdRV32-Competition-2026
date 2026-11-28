@@ -481,6 +481,8 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 
 **FP 单精度单元端口（F02）。** fma32/convert/short 只用 `FPU_FORMAT` 派生 T；源固定 32 位、只保留实际使用的源（fma32 src1/2/3、convert src1/int_src、short src1/2），NaN-boxing 检查与扩展由 fpu_top 完成；握手/响应/取消字段照表。
 
+**FP 单元完成背压（F02）。** 单元输出设 2 项 skid；流水使能（含 APM 包装新增的 `enable_i` 接 APM 时钟使能）是由 skid 占用算出的**寄存**信号，按规格 5.1 区域复制（根 ≤8、叶 ≤16）；`unit_req_ready` 用同一寄存使能。不得把下游 `unit_resp_ready` 组合接到流水使能或 req_ready。无背压时 II1。
+
 ## 影响
 
 审核通过后需修改CPU spec2.2/2.3、3、4、5、6及9的C01–C09；FPU spec2.4、3、4、5.1/5.4/5.5及9的F01/F02/F04/F05；CPU testplan2/4/6/7的T02/T03及对应CV02–CV14；FPU testplan4/6/7的FT01/FT03及FV10–FV15。C10、F03/F06与FT03中的未测数值继续待定；旧cpu/cache规格不改，外部总线无差异。

@@ -47,7 +47,7 @@ SoftFloat必须设置tininess-after-rounding，精度和舍入必须与指令一
 
 FT01：参考必须使用SoftFloat Release3e、TestFloat Release3e（TestFloat3系列对应版），以实际导入上游commit记录，不预造尚未导入的commit。必须记录生成选项、seed、精度/舍入；full必须使用testfloat_gen level2，逐已实现opcode×精度×适用五舍入比对结果与每条flags。RMM、NaN、tininess-after-rounding必须按RISC-V包装；搬移/boxing/非法编码必须用定向位模型及Spike。每类固定边界必须全部运行，序列随机seed=0..9，每seed至少10000条操作，F/FD各自固定结构必须全部运行，NONE必须验证非法FP访问；F的D指令必须非法。厂商IP版本必须由Windows任务卡给出，算术正确性不得依赖其近似模型。
 
-Spike必须比较退休PC/编码、rd/domain、原始32/64位结果、每条flags、累计fcsr、FS、陷阱和访存副作用；F/D架构测试必须使用仓库riscv-arch-test实际commit和适配说明。I/M/Zicsr/Zba与F/D混合必须同时经过CPU验证，不只验证纯FP程序。
+Spike必须比较退休PC/编码、rd/domain、原始32/64位结果、每次退休后的累计fflags/fcsr、FS、陷阱和访存地址/store数据；每条flags由单元级SoftFloat/TestFloat向量逐条验证（Spike日志在粘滞位已置时无法恢复每条flags）；load原始数据按rd值的低size字节一致性检查；逐beat外部副作用（含FSD部分写）用trace_mem_effect与AXI/BFM比较；源tag、F2纠正等实现相关字段不与Spike比较，由核级一致性检查（重定向目标等于下一条退休PC）覆盖。F/D架构测试必须使用仓库riscv-arch-test实际commit和适配说明。I/M/Zicsr/Zba与F/D混合必须同时经过CPU验证，不只验证纯FP程序。
 
 周期模型必须使用C2-F2脚本和相同trace，记C_total=integer+structure+dependency+writeback+fd_beat，按实际调度互斥计数，不能独立最坏值相加。完整CPU前端/miss影响必须另列；F必须采用固定3R/N8模型，FD必须采用固定2R/N16模型。
 
@@ -93,3 +93,4 @@ FT03：FV10–15必须使用F02已冻结的FS逐事件转换、F04逐beat错误/
 | 2026-11-27 | v0.1-draft | 配套FPU第二版结构；加入协调者确认的保留rm/frm非法测试FV03 |
 | 2026-11-28 | v0.2 | 依据 docs/design/2026-11-28-cpu-v2-interface-freeze.md 已决定状态及更正 C01，冻结接口、行为和两种CPU×三种FPU格式，Zba固定启用，更新模型估算、验证和实施依赖 |
 | 2026-11-28 | v0.2 | 按用户决定将单发射固定为精简结构+Zba；双发射满配及NONE/F/FD固定结构不变，同步接口、验证、实施和模型结论 |
+| 2026-11-28 | v0.2 | Spike比较范围按其日志能力收窄：每条flags移至单元级SoftFloat，核级比累计fflags；副作用对BFM；实现相关字段做一致性检查（V01提问） |
