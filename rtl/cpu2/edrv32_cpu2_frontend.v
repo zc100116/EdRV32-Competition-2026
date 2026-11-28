@@ -163,7 +163,9 @@ module edrv32_cpu2_frontend #(
     mem_predict_train_base_index_i,
     age_head_i,
     cancel_valid_i,
-    cancel_tag_i
+    cancel_tag_i,
+    ib_count_o,
+    frontend_active_o
 );
     localparam TAG_BITS = (FPU_FORMAT == "FD") ? 4 : (FPU_FORMAT == "F") ? 3 : 2;
     localparam RAS_BITS = (ISSUE_WIDTH == 2) ? 256 : 128;
@@ -171,6 +173,9 @@ module edrv32_cpu2_frontend #(
     localparam RAS_COUNT_BITS = RAS_PTR_BITS+1;
 
     // Clock and domain reset.
+    output wire [$clog2((ISSUE_WIDTH == 2 ? 8 : 4)+5)-1:0] ib_count_o;
+    output wire [1:0] frontend_active_o;
+    assign frontend_active_o = {predict_slot_valid_r, ic_req_valid_o};
     input wire clk_i;
     input wire rst_n_i;
 
@@ -1564,7 +1569,8 @@ module edrv32_cpu2_frontend #(
         .ib_head1_predict_fast_index_o(ib_head1_predict_fast_index_o),
         .ib_head1_ras_data_o(ib_head1_ras_data_o),
         .ib_head1_ras_ptr_o(ib_head1_ras_ptr_o),
-        .ib_head1_ras_count_o(ib_head1_ras_count_o)
+        .ib_head1_ras_count_o(ib_head1_ras_count_o),
+        .ib_count_o(ib_count_o)
     );
     assign unused_w = ^{branch_redirect_tag_i, tage_valid_w, correction_cause_r,
         fast1_ras_data_w, fast1_ras_ptr_w, fast1_ras_count_w,

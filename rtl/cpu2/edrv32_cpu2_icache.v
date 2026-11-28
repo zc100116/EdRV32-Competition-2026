@@ -44,7 +44,8 @@ module edrv32_cpu2_icache #(
     input wire ic_inv_valid_i,
     output wire ic_inv_ready_o,
     output wire ic_inv_done_o,
-    output wire ic_miss_event_o
+    output wire ic_miss_event_o,
+    output wire debug_miss_o
 );
     /* verilator lint_off UNUSEDPARAM */
     `include "edrv32_soc_map.vh"
@@ -497,4 +498,5 @@ module edrv32_cpu2_icache #(
             end
         end
     end
+    assign debug_miss_o = state_r != S_IDLE;
 endmodule

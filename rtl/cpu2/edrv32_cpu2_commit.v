@@ -110,7 +110,28 @@ module edrv32_cpu2_commit #(
     input wire ic_inv_ready_i,
     input wire ic_inv_done_i,
     output wire [1:0] counter_retire_count_o,
-    output wire [1:0] hpm_branch_count_o
+    output wire [1:0] hpm_branch_count_o,
+    // I06: architectural observation; no external IP ports.
+    output wire [ISSUE_WIDTH-1:0] trace_valid_o,
+    output wire [32*ISSUE_WIDTH-1:0] trace_pc_o,
+    output wire [32*ISSUE_WIDTH-1:0] trace_instr_o,
+    output wire [5*ISSUE_WIDTH-1:0] trace_rd_o,
+    output wire [2*ISSUE_WIDTH-1:0] trace_rd_domain_o,
+    output wire [64*ISSUE_WIDTH-1:0] trace_rd_data_o,
+    output wire [5*ISSUE_WIDTH-1:0] trace_flags_o,
+    output wire [ISSUE_WIDTH-1:0] trace_mem_valid_o,
+    output wire [ISSUE_WIDTH-1:0] trace_mem_store_o,
+    output wire [32*ISSUE_WIDTH-1:0] trace_mem_addr_o,
+    output wire [64*ISSUE_WIDTH-1:0] trace_mem_data_o,
+    output wire [8*ISSUE_WIDTH-1:0] trace_mem_mask_o,
+    output wire trace_trap_o,
+    output wire [31:0] trace_cause_o,
+    output wire [31:0] trace_trap_pc_o,
+    output wire [31:0] trace_tval_o,
+    // I06: frozen HPM/debug observation.
+    output reg commit_mem_wait_o,
+    output wire commit_div_wait_o,
+    output wire commit_device_wait_o
 );
     // Commit-only classification: four bits cover the nine mutually exclusive kinds.
     localparam [3:0] C_FENCE = 4'd1;
@@ -514,4 +535,29 @@ module edrv32_cpu2_commit #(
         trace_tval_w
     };
     /* verilator lint_on UNUSEDSIGNAL */
+    assign trace_valid_o = trace_valid_w;
+    assign trace_pc_o = trace_pc_w;
+    assign trace_instr_o = trace_instr_w;
+    assign trace_rd_o = trace_rd_w;
+    assign trace_rd_domain_o = trace_rd_domain_w;
+    assign trace_rd_data_o = trace_rd_data_w;
+    assign trace_flags_o = trace_flags_w;
+    assign trace_mem_valid_o = trace_mem_valid_w;
+    assign trace_mem_store_o = trace_mem_store_w;
+    assign trace_mem_addr_o = trace_mem_addr_w;
+    assign trace_mem_data_o = trace_mem_data_w;
+    assign trace_mem_mask_o = trace_mem_mask_w;
+    assign trace_trap_o = trace_trap_w;
+    assign trace_cause_o = trace_cause_w;
+    assign trace_trap_pc_o = trace_trap_pc_w;
+    assign trace_tval_o = trace_tval_w;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            commit_mem_wait_o <= 1'b0;
+        end else begin
+            commit_mem_wait_o <= head0_valid_i && memory0_w && !retire0_w;
+        end
+    end
+    assign commit_div_wait_o = head0_valid_i && head0_divide_i && !head0_done_i;
+    assign commit_device_wait_o = state_r == S_LSU && head0_device_i && !lsu_done_w;
 endmodule

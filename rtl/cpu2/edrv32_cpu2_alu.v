@@ -91,7 +91,8 @@ module edrv32_cpu2_alu #(
     output wire [5-1:0] alu1_complete_flags_o,
     output wire alu1_complete_exception_o,
     output wire [4-1:0] alu1_complete_cause_o,
-    output wire [32-1:0] alu1_complete_tval_o
+    output wire [32-1:0] alu1_complete_tval_o,
+    output wire [1:0] debug_mem_valid_o
 );
     localparam T = (FPU_FORMAT == "NONE") ? 2 : (FPU_FORMAT == "F") ? 3 : 4;
     localparam B = (FPU_FORMAT == "FD") ? 64 : 32;
@@ -101,6 +102,7 @@ module edrv32_cpu2_alu #(
             reg [T-1:0] skid_tag_r;
             reg [31:0] skid_data_r;
             reg mem_valid_r;
+            assign debug_mem_valid_o[0] = mem_valid_r;
             reg [T-1:0] mem_tag_r;
             reg [31:0] mem_instr_r;
             reg [31:0] mem_src1_r;
@@ -157,7 +159,8 @@ module edrv32_cpu2_alu #(
                 else if (lock_valid_r && cancel_valid_i &&
                     ((lock_tag_r-age_head_i) >= cancel_age_w))
                     lock_valid_r <= 1'b0;
-                else if (alu0_complete_valid_o)
+                else if (alu0_complete_valid_o &&
+                    !(cancel_valid_i && (alu0_complete_tag_o-age_head_i) >= cancel_age_w))
                     lock_valid_r <= 1'b1;
             end
             always @(posedge clk_i) begin
@@ -474,6 +477,7 @@ module edrv32_cpu2_alu #(
             assign alu0_complete_cause_o = 4'd0;
             assign alu0_complete_tval_o = 32'd0;
             assign execute0_ready_o = 1'b0;
+            assign debug_mem_valid_o[0] = 1'b0;
         end
     endgenerate
     generate
@@ -482,6 +486,7 @@ module edrv32_cpu2_alu #(
             reg [T-1:0] skid_tag_r;
             reg [31:0] skid_data_r;
             reg mem_valid_r;
+            assign debug_mem_valid_o[1] = mem_valid_r;
             reg [T-1:0] mem_tag_r;
             reg [31:0] mem_instr_r;
             reg [31:0] mem_src1_r;
@@ -538,7 +543,8 @@ module edrv32_cpu2_alu #(
                 else if (lock_valid_r && cancel_valid_i &&
                     ((lock_tag_r-age_head_i) >= cancel_age_w))
                     lock_valid_r <= 1'b0;
-                else if (alu1_complete_valid_o)
+                else if (alu1_complete_valid_o &&
+                    !(cancel_valid_i && (alu1_complete_tag_o-age_head_i) >= cancel_age_w))
                     lock_valid_r <= 1'b1;
             end
             always @(posedge clk_i) begin
@@ -855,6 +861,7 @@ module edrv32_cpu2_alu #(
             assign alu1_complete_cause_o = 4'd0;
             assign alu1_complete_tval_o = 32'd0;
             assign execute1_ready_o = 1'b0;
+            assign debug_mem_valid_o[1] = 1'b0;
         end
     endgenerate
     /* verilator lint_off UNUSEDSIGNAL */

@@ -180,7 +180,14 @@ module tb # (parameter FORMAT = 0);
         .axi_bid_i(axi_bid_i),
         .axi_bresp_i(axi_bresp_i),
         .axi_bvalid_i(axi_bvalid_i),
-        .axi_bready_o(axi_bready_o)
+        .axi_bready_o(axi_bready_o),
+        // I06 observation-only outputs.
+        .trace_mem_effect_valid_o(),
+        .trace_mem_effect_tag_o(),
+        .trace_mem_effect_addr_o(),
+        .trace_mem_effect_data_o(),
+        .trace_mem_effect_mask_o(),
+        .debug_miss_o()
     );
     reg [7:0] memory [0:1048575];
     reg [7:0] reference_memory [0:1048575];

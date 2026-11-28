@@ -332,7 +332,12 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
         .branch_redirect_ras_count_o(branch_redirect_ras_count_o),
         .branch_redirect_ras_pop_o(branch_redirect_ras_pop_o),
         .branch_redirect_ras_push_o(branch_redirect_ras_push_o),
-        .branch_redirect_link_o(branch_redirect_link_o)
+        .branch_redirect_link_o(branch_redirect_link_o),
+        // I06 observation-only outputs.
+        .trace_branch_pc_o(),
+        .trace_branch_stage_o(),
+        .trace_branch_cause_o(),
+        .debug_mem_valid_o()
     );
     task tick; @(posedge clk_i); #1; endtask
     task branch(input integer pipeline,input [31:0] code,input [31:0] x,input [31:0] y,
@@ -414,6 +419,34 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
     bit expected;
     initial begin
         tick();rst_n_i=1;branch_complete_ready_i=1;tick();
+        // I06: a held pipe0 result must not select an invalid pipe1 with the same tag.
+        @(negedge clk_i);
+        branch_complete_ready_i=0;
+        execute0_valid_i=1; execute0_tag_i=0; execute1_tag_i=0;
+        execute0_instr_i=32'h1063; execute0_pc_i=32'h100;
+        execute0_imm_i=32'h20; execute0_src1_i=0; execute0_src2_i=0;
+        tick(); execute0_valid_i=0; #1;
+        if(!branch_complete_valid_o || branch_complete_tag_o!==0)
+            $fatal(1,"held pipe0 branch lost to invalid pipe1 tag alias");
+        tick();
+        if(!branch_complete_valid_o)$fatal(1,"held branch did not remain valid");
+        branch_complete_ready_i=1; tick();
+        if(ISSUE_WIDTH==2) begin
+            // Cancel a newly ready MEM result before it has acquired a completion lock.
+            @(negedge clk_i);
+            execute0_valid_i=1; execute0_tag_i=2; execute0_late_i=1;
+            execute0_source1_wait_i=1; execute0_source1_tag_i=0;
+            tick(); execute0_valid_i=0;
+            wb0_valid_i=1; wb0_tag_i=0; wb0_data_i=0;
+            tick(); wb0_valid_i=0;
+            branch_complete_ready_i=0; cancel_valid_i=1; cancel_tag_i=2;
+            tick(); cancel_valid_i=0;
+            execute0_late_i=0; execute0_source1_wait_i=0;
+            execute0_valid_i=1; execute0_tag_i=3; branch_complete_ready_i=1; #1;
+            if(!branch_complete_valid_o || branch_complete_tag_o!==3)
+                $fatal(1,"canceled newly ready MEM result left a branch lock");
+            tick(); execute0_valid_i=0; tick();
+        end
         for(integer p=0;p<ISSUE_WIDTH;p++) begin
             for(integer f=0;f<8;f++) begin
                 if(f!=2 && f!=3) begin

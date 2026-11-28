@@ -89,7 +89,14 @@ module check_csr #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE")
         .trap_tval_i(trap_tval_i),
         .counter_retire_count_i(counter_retire_count_i),
         .hpm_event_i(hpm_event_i),
-        .hpm_branch_count_i(hpm_branch_count_i)
+        .hpm_branch_count_i(hpm_branch_count_i),
+        // I06 observation-only outputs.
+        .trace_csr_valid_o(),
+        .trace_csr_addr_o(),
+        .trace_csr_data_o(),
+        .trace_fflags_o(),
+        .trace_frm_o(),
+        .trace_fs_o()
     );
     always #5 clk_i = ~clk_i;
     task tick; begin @(posedge clk_i); #1; end endtask
@@ -174,6 +181,8 @@ module check_csr #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE")
         hpm_event_i='0;
         hpm_branch_count_i='0;
         tick(); rst_n_i=1; tick();
+        // I06: FENCE.I shares the ordered system request channel, not CSR permission.
+        access_csr(32'h0000100f, 32'b0);
         read_csr(12'h300,0,32'h1800);
         read_csr(12'h001,1,0);
         read_csr(12'h301,0,32'h40001100 | (FPU_FORMAT=="NONE" ? 0:32'h20) |

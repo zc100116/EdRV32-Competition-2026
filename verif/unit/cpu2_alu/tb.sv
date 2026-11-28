@@ -156,7 +156,9 @@ module tb #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE");
         .fp_resp_valid_i(1'b0),
         .fp_resp_ready_i(1'b0),
         .fp_resp_tag_i({T{1'b0}}),
-        .fp_resp_data_i({B{1'b0}})
+        .fp_resp_data_i({B{1'b0}}),
+        // I06 observation-only outputs.
+        .debug_mem_valid_o()
     );
     task tick; @(posedge clk_i); #1; endtask
     function [31:0] op(input integer f7,input integer f3,input bit immediate_op);
@@ -289,6 +291,14 @@ module tb #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE");
             tick();cancel=0;load_done=0;check(0,11,1);
             tick();check(0,11,1);accept[0]=1;
             tick();check(0,17,0);tick();
+            // I06: cancel a newly ready MEM result before it acquires a lock.
+            age=0; @(negedge clk_i);valid=1;late=1;wait1=1;wait2=0;
+            tag[0]=2;source1[0]=0;instr[0]=op(0,0,0);a[0]=0;b[0]=1;
+            tick();valid=0;tick();
+            wb0_valid_i=1;wb0_tag_i=0;wb0_data_i=7;tick();wb0_valid_i=0;
+            accept[0]=0;cancel=1;cancel_tag=2;tick();cancel=0;
+            late=0;wait1=0;accept[0]=1;
+            arithmetic(0,op(0,0,0),9,8,0,17);
         end
         // Inclusive cancellation at a wrapped head leaves no old result after tag reuse.
         @(negedge clk_i);age=T'(-1);tag[0]=0;valid=1;instr[0]=op(0,0,0);a[0]=1;b[0]=2;

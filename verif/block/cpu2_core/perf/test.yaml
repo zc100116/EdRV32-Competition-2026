@@ -1,0 +1,11 @@
+top: tb
+files: ../files.f
+defines: SIM_MODE
+parameters: ISSUE_WIDTH=1,2 FPU_FORMAT=NONE
+software:
+timeout: 600
+pass: PASS
+tier: perf
+simulator: verilator
+group: verif/block/cpu2_core
+runner: python3 verif/block/cpu2_core/run.py perf

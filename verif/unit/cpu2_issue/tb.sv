@@ -637,7 +637,11 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
         .predict_read1_tag1_o(predict_read1_tag1_o),
         .predict_read1_tag2_o(predict_read1_tag2_o),
         .predict_read1_tag3_o(predict_read1_tag3_o),
-        .predict_read1_base_index_o(predict_read1_base_index_o)
+        .predict_read1_base_index_o(predict_read1_base_index_o),
+        // I06 observation-only outputs.
+        .issue_hpm_o(),
+        .issue_pair_cause_o(),
+        .issue_wait_o()
     );
     task tick; @(posedge clk_i); #1; endtask
     task clear;

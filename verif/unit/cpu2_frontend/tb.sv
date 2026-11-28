@@ -324,7 +324,10 @@ module tb #(
         .mem_predict_train_base_index_i(mem_predict_train_base_index_i),
         .age_head_i(age_head_i),
         .cancel_valid_i(cancel_valid_i),
-        .cancel_tag_i(cancel_tag_i)
+        .cancel_tag_i(cancel_tag_i),
+        // I06 observation-only outputs.
+        .ib_count_o(),
+        .frontend_active_o()
     );
     always #5 clk_i = ~clk_i;
     task tick; begin @(posedge clk_i); #1; end endtask

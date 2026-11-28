@@ -298,7 +298,11 @@ module edrv32_cpu2_issue #(
     output wire [10-1:0] predict_read1_tag1_o,
     output wire [10-1:0] predict_read1_tag2_o,
     output wire [10-1:0] predict_read1_tag3_o,
-    output wire [12-1:0] predict_read1_base_index_o
+    output wire [12-1:0] predict_read1_base_index_o,
+    // I06: frozen HPM/debug observation.
+    output wire [7:0] issue_hpm_o,
+    output reg [2:0] issue_pair_cause_o,
+    output reg issue_wait_o
 );
     localparam T = FPU_FORMAT=="NONE" ? 2 : FPU_FORMAT=="F" ? 3 : 4;
     localparam N = 2**T;
@@ -2033,4 +2037,34 @@ module edrv32_cpu2_issue #(
         fp_req_ready_i,
         decode_complete_ready_i};
     /* verilator lint_on UNUSEDSIGNAL */
+    assign issue_hpm_o = {
+                !ib_head0_valid_i && allocate_credit_i != 0 && !cancel_valid_i,
+                1'b0, observe_div_w, observe_load_w,
+                observe_single_w && !ib_head1_valid_i,
+                !observe_raw_w && !observe_structure_w && observe_type_w,
+                !observe_raw_w && observe_structure_w, observe_raw_w};
+    wire observe_single_w = ISSUE_WIDTH == 2 && fire_w && !use_pair_w;
+    wire observe_raw_w = observe_single_w && ib_head1_valid_i && !raw_pair_w;
+    wire observe_structure_w = observe_single_w && ib_head1_valid_i &&
+        ((allocate_credit_i < 2) || !pair_capacity_w || !d1_sources_w);
+    wire observe_type_w = observe_single_w && ib_head1_valid_i && !types_pair_w;
+    wire observe_load_w = ib_head0_valid_i && !head_ready_w &&
+        ((d0_wait1_w && entry_class_w[q01_tag_w] == 3'd3) ||
+        (d0_wait2_w && entry_class_w[q02_tag_w] == 3'd3));
+    wire observe_div_w = ib_head0_valid_i && !head_ready_w &&
+        ((d0_wait1_w && entry_class_w[q01_tag_w] == 3'd5) ||
+        (d0_wait2_w && entry_class_w[q02_tag_w] == 3'd5) ||
+        (d0_class_w == 3'd5 && !div_req_ready_i));
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            issue_pair_cause_o <= 3'b0;
+            issue_wait_o <= 1'b0;
+        end else begin
+
+            issue_pair_cause_o <= observe_raw_w ? 3'd1 :
+                observe_structure_w ? 3'd2 : observe_type_w ? 3'd3 :
+                (observe_single_w && !ib_head1_valid_i) ? 3'd4 : 3'd0;
+            issue_wait_o <= ib_head0_valid_i && !fire_w;
+        end
+    end
 endmodule

@@ -113,7 +113,8 @@ module edrv32_cpu2_ib #(
     ib_head1_predict_fast_index_o,
     ib_head1_ras_data_o,
     ib_head1_ras_ptr_o,
-    ib_head1_ras_count_o
+    ib_head1_ras_count_o,
+    ib_count_o
 );
     localparam RAS_BITS = (ISSUE_WIDTH == 2) ? 256 : 128;
     localparam RAS_PTR_BITS = (ISSUE_WIDTH == 2) ? 3 : 2;
@@ -236,6 +237,9 @@ module edrv32_cpu2_ib #(
     output wire [RAS_PTR_BITS-1:0] ib_head1_ras_ptr_o;
     output wire [RAS_COUNT_BITS-1:0] ib_head1_ras_count_o;
 
+    // I06: expose existing occupancy without another counter.
+    output wire [$clog2((ISSUE_WIDTH == 2 ? 8 : 4)+5)-1:0] ib_count_o;
+    assign ib_count_o = count_r;
     reg [3:0] count_r;
     reg [3:0] credit_r;
     reg [PHYSICAL:0] occupancy_r;

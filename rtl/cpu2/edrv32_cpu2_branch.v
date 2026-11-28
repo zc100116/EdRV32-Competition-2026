@@ -170,7 +170,12 @@ module edrv32_cpu2_branch #(
     output reg [(ISSUE_WIDTH+2)-1:0] branch_redirect_ras_count_o,
     output reg branch_redirect_ras_pop_o,
     output reg branch_redirect_ras_push_o,
-    output reg [32-1:0] branch_redirect_link_o
+    output reg [32-1:0] branch_redirect_link_o,
+    // I06: registered recovery observation aligned with branch_redirect_valid.
+    output reg [31:0] trace_branch_pc_o,
+    output reg [1:0] trace_branch_stage_o,
+    output reg [1:0] trace_branch_cause_o,
+    output wire [1:0] debug_mem_valid_o
 );
     localparam T = FPU_FORMAT=="NONE" ? 2 : FPU_FORMAT=="F" ? 3 : 4;
     localparam B = FPU_FORMAT=="FD" ? 64 : 32;
@@ -548,6 +553,7 @@ module edrv32_cpu2_branch #(
             reg [T-1:0] skid_tag_r;
             reg [31:0] skid_data_r;
             reg mem_valid_r;
+            assign debug_mem_valid_o[0] = mem_valid_r;
             reg [T-1:0] mem_tag_r;
             reg [31:0] mem_instr_r;
             reg [31:0] mem_src1_r;
@@ -606,7 +612,8 @@ module edrv32_cpu2_branch #(
                 else if (lock_valid_r && cancel_valid_i &&
                     ((lock_tag_r-age_head_i) >= cancel_age_w))
                     lock_valid_r <= 1'b0;
-                else if (compare0_valid_w)
+                else if (compare0_valid_w &&
+                    !(cancel_valid_i && compare0_age_w >= cancel_age_w))
                     lock_valid_r <= 1'b1;
             end
             always @(posedge clk_i) begin
@@ -923,6 +930,7 @@ module edrv32_cpu2_branch #(
             assign compare0_cause_w = 4'd0;
             assign compare0_tval_w = 32'd0;
             assign execute0_ready_o = 1'b0;
+            assign debug_mem_valid_o[0] = 1'b0;
         end
     endgenerate
     generate
@@ -931,6 +939,7 @@ module edrv32_cpu2_branch #(
             reg [T-1:0] skid_tag_r;
             reg [31:0] skid_data_r;
             reg mem_valid_r;
+            assign debug_mem_valid_o[1] = mem_valid_r;
             reg [T-1:0] mem_tag_r;
             reg [31:0] mem_instr_r;
             reg [31:0] mem_src1_r;
@@ -989,7 +998,8 @@ module edrv32_cpu2_branch #(
                 else if (lock_valid_r && cancel_valid_i &&
                     ((lock_tag_r-age_head_i) >= cancel_age_w))
                     lock_valid_r <= 1'b0;
-                else if (compare1_valid_w)
+                else if (compare1_valid_w &&
+                    !(cancel_valid_i && compare1_age_w >= cancel_age_w))
                     lock_valid_r <= 1'b1;
             end
             always @(posedge clk_i) begin
@@ -1306,6 +1316,7 @@ module edrv32_cpu2_branch #(
             assign compare1_cause_w = 4'd0;
             assign compare1_tval_w = 32'd0;
             assign execute1_ready_o = 1'b0;
+            assign debug_mem_valid_o[1] = 1'b0;
         end
     endgenerate
     wire [T-1:0] cancel_age_w = cancel_tag_i - age_head_i;
@@ -1381,7 +1392,8 @@ module edrv32_cpu2_branch #(
         mem_push_w ? 3'd3 : mem_jalr_w ? 3'd2 : 3'd1;
     reg lock_valid_r;
     reg [T-1:0] lock_tag_r;
-    wire choose1_w = lock_valid_r ? (compare1_tag_w == lock_tag_r) :
+    wire choose1_w = lock_valid_r ?
+        (compare1_valid_w && compare1_tag_w == lock_tag_r) :
         (compare1_valid_w && (!compare0_valid_w || (compare1_age_w < compare0_age_w)));
     wire [T-1:0] result_tag_w = choose1_w ? compare1_tag_w : compare0_tag_w;
     wire result_valid_w = choose1_w ? compare1_valid_w : compare0_valid_w;
@@ -1418,7 +1430,8 @@ module edrv32_cpu2_branch #(
             lock_valid_r <= 1'b0;
         else if (branch_complete_valid_o && branch_complete_ready_i)
             lock_valid_r <= 1'b0;
-        else if (branch_complete_valid_o)
+        else if (branch_complete_valid_o &&
+            !(cancel_valid_i && (branch_complete_tag_o-age_head_i) >= cancel_age_w))
             lock_valid_r <= 1'b1;
     end
     always @(posedge clk_i) begin
@@ -1500,6 +1513,11 @@ module edrv32_cpu2_branch #(
             mem_predict_train_fast_index_r <= meta_predict_fast_index_w[mem_tag_w];
         end
         if (ex_mispredict_w || mem_mispredict_w) begin
+            trace_branch_pc_o <= redirect_mem_w ? mem_pc_w : ex_pc_w;
+            trace_branch_stage_o <= redirect_mem_w ? 2'd3 : 2'd2;
+            trace_branch_cause_o <= redirect_mem_w ?
+                (meta_predict_taken_w[mem_tag_w] != mem_taken_w ? 2'd1 : 2'd2) :
+                (meta_predict_taken_w[ex_tag_w] != ex_taken_w ? 2'd1 : 2'd2);
             branch_redirect_tag_o <= redirect_tag_w;
             branch_redirect_pc_o <= redirect_mem_w ? mem_next_w : ex_next_w;
             branch_redirect_ras_data_o <= meta_ras_data_w[redirect_tag_w];

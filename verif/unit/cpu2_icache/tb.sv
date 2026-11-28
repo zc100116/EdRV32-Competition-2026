@@ -70,7 +70,9 @@ module tb # (parameter ISSUE_WIDTH = 2);
         .axi_rresp_i(axi_rresp_i),
         .axi_rlast_i(axi_rlast_i),
         .axi_rvalid_i(axi_rvalid_i),
-        .axi_rready_o(axi_rready_o)
+        .axi_rready_o(axi_rready_o),
+        // I06 observation-only outputs.
+        .debug_miss_o()
     );
     reg [31:0] queue_addr [0:127];
     int push = 0;

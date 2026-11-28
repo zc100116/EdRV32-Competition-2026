@@ -106,7 +106,14 @@ module edrv32_cpu2_dcache #(
     output wire wb_err_o,
     output wire [31:0] wb_err_addr_o,
     output wire dc_wb_event_o,
-    output wire dc_miss_event_o
+    output wire dc_miss_event_o,
+    // I06: architectural store beat observation, no IP external ports.
+    output wire trace_mem_effect_valid_o,
+    output wire [(FPU_FORMAT=="FD" ? 4 : FPU_FORMAT=="F" ? 3 : 2)-1:0] trace_mem_effect_tag_o,
+    output wire [31:0] trace_mem_effect_addr_o,
+    output wire [31:0] trace_mem_effect_data_o,
+    output wire [3:0] trace_mem_effect_mask_o,
+    output wire debug_miss_o
 );
     /* verilator lint_off UNUSEDPARAM */
     `include "edrv32_soc_map.vh"
@@ -955,4 +962,14 @@ module edrv32_cpu2_dcache #(
         end
         if (wb_finish_w && |axi_bresp_i) wb_err_addr_r <= wb_addr_r;
     end
+    wire trace_device_write_w;
+    assign trace_device_write_w = device_state_r == D_WRITE && !device_w_r && axi_wready_i;
+    assign trace_mem_effect_valid_o = commit_cached_w || trace_device_write_w;
+    assign trace_mem_effect_tag_o = trace_device_write_w ?
+        device_index_r[T:1] : dc_commit_tag_i;
+    assign trace_mem_effect_addr_o = trace_device_write_w ?
+        device_addr_r : pending_addr_r[commit_index_w];
+    assign trace_mem_effect_data_o = trace_device_write_w ? device_data_r : dc_commit_data_i;
+    assign trace_mem_effect_mask_o = trace_device_write_w ? device_mask_r : dc_commit_mask_i;
+    assign debug_miss_o = state_r != S_IDLE;
 endmodule

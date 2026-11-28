@@ -216,7 +216,27 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
         .ic_inv_ready_i(ic_inv_ready_i),
         .ic_inv_done_i(ic_inv_done_i),
         .counter_retire_count_o(counter_retire_count_o),
-        .hpm_branch_count_o(hpm_branch_count_o)
+        .hpm_branch_count_o(hpm_branch_count_o),
+        // I06 observation-only outputs.
+        .trace_valid_o(),
+        .trace_pc_o(),
+        .trace_instr_o(),
+        .trace_rd_o(),
+        .trace_rd_domain_o(),
+        .trace_rd_data_o(),
+        .trace_flags_o(),
+        .trace_mem_valid_o(),
+        .trace_mem_store_o(),
+        .trace_mem_addr_o(),
+        .trace_mem_data_o(),
+        .trace_mem_mask_o(),
+        .trace_trap_o(),
+        .trace_cause_o(),
+        .trace_trap_pc_o(),
+        .trace_tval_o(),
+        .commit_mem_wait_o(),
+        .commit_div_wait_o(),
+        .commit_device_wait_o()
     );
     // Interface classification model; original words remain trace-only stimuli.
     function [3:0] commit_kind(input [31:0] instr);

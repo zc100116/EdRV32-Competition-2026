@@ -46,7 +46,14 @@ module edrv32_cpu2_csr #(
     input wire [31:0] trap_tval_i,
     input wire [1:0] counter_retire_count_i,
     input wire [15:0] hpm_event_i,
-    input wire [1:0] hpm_branch_count_i
+    input wire [1:0] hpm_branch_count_i,
+    // I06: architectural observation; no external IP ports.
+    output wire [ISSUE_WIDTH-1:0] trace_csr_valid_o,
+    output wire [12*ISSUE_WIDTH-1:0] trace_csr_addr_o,
+    output wire [32*ISSUE_WIDTH-1:0] trace_csr_data_o,
+    output wire [4:0] trace_fflags_o,
+    output wire [2:0] trace_frm_o,
+    output wire [1:0] trace_fs_o
 );
     localparam T = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
     localparam H = ISSUE_WIDTH == 1 ? 2 : 8;
@@ -119,7 +126,8 @@ module edrv32_cpu2_csr #(
     assign commit_operand_w = complete_instr_r[14] ?
         {27'b0, complete_instr_r[19:15]} : complete_src_r;
     assign mret_w = mret_valid_i;
-    assign req_illegal_w = csr_req_instr_i[14:12] != 3'b0 &&
+    assign req_illegal_w = csr_req_instr_i[6:0] == 7'h73 &&
+        csr_req_instr_i[14:12] != 3'b0 &&
         (!req_exists_w || (req_write_w &&
         (req_addr_w[11:10] == 2'b11 || req_addr_w == 12'h344)) ||
         ((req_addr_w == 12'h001 || req_addr_w == 12'h002 || req_addr_w == 12'h003) &&
@@ -587,4 +595,10 @@ module edrv32_cpu2_csr #(
         event_r[3]
     };
     /* verilator lint_on UNUSEDSIGNAL */
+    assign trace_csr_valid_o = trace_csr_valid_w;
+    assign trace_csr_addr_o = trace_csr_addr_w;
+    assign trace_csr_data_o = trace_csr_data_w;
+    assign trace_fflags_o = trace_fflags_w;
+    assign trace_frm_o = trace_frm_w;
+    assign trace_fs_o = trace_fs_w;
 endmodule
