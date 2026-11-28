@@ -1557,6 +1557,7 @@ module edrv32_cpu2_issue #(
         end
     end
     genvar entry;
+    genvar operand;
     generate
         for (entry=0; entry<N; entry=entry+1) begin : g_entry
             localparam [T-1:0] ENTRY = entry;
@@ -1598,12 +1599,32 @@ module edrv32_cpu2_issue #(
                 early_resp_valid_i && early_resp_hit_i && early_resp_tag_i == source2_tag_r;
             assign entry_dispatch_ready_w[entry] = ISSUE_WIDTH == 2 ||
                 ((!source1_wait_r || short1_w) && (!source2_wait_r || short2_w));
-            wire ordinary1_w = lsu_complete_valid_i && lsu_complete_ready_i &&
-                !lsu_complete_device_i && lsu_complete_tag_i == source1_tag_r;
-            wire ordinary2_w = lsu_complete_valid_i && lsu_complete_ready_i &&
-                !lsu_complete_device_i && lsu_complete_tag_i == source2_tag_r;
-            wire retired1_w = wb0_valid_i && wb0_tag_i == source1_tag_r;
-            wire retired2_w = wb0_valid_i && wb0_tag_i == source2_tag_r;
+            wire [1:0] pending_source_valid_w;
+            wire [B-1:0] pending_source_data_w [0:1];
+            // Local EX backpressure may outlive a producer's result and retirement.
+            // Retain the value in the existing source FFs, independently of dispatch.
+            for (operand = 0; operand < 2; operand = operand + 1) begin : g_pending_source
+                wire [T-1:0] pending_tag_w = operand == 0 ? source1_tag_r : source2_tag_r;
+                wire early_w = early_resp_valid_i && early_resp_hit_i &&
+                    early_resp_tag_i == pending_tag_w;
+                wire ordinary_w = lsu_complete_valid_i && lsu_complete_ready_i &&
+                    !lsu_complete_device_i && lsu_complete_tag_i == pending_tag_w;
+                wire alu0_w = ISSUE_WIDTH == 2 && alu0_complete_valid_i &&
+                    alu0_complete_tag_i == pending_tag_w;
+                wire alu1_w = ISSUE_WIDTH == 2 && alu1_complete_valid_i &&
+                    alu1_complete_tag_i == pending_tag_w;
+                wire wb0_w = wb0_valid_i && wb0_tag_i == pending_tag_w;
+                wire wb1_w = ISSUE_WIDTH == 2 && wb1_valid_i && wb1_tag_i == pending_tag_w;
+                assign pending_source_valid_w[operand] = early_w || ordinary_w ||
+                    alu0_w || alu1_w || wb0_w || wb1_w;
+                assign pending_source_data_w[operand] =
+                    ({B{early_w}} & {{(B-32){1'b0}}, early_resp_data_i}) |
+                    ({B{ordinary_w}} & lsu_complete_data_i) |
+                    ({B{alu0_w}} & alu0_complete_data_i) |
+                    ({B{alu1_w}} & alu1_complete_data_i) |
+                    ({B{wb0_w}} & {{(B-32){1'b0}}, wb0_data_i}) |
+                    ({B{wb1_w}} & {{(B-32){1'b0}}, wb1_data_i});
+            end
             reg early_r;
             assign entry_early_w[entry] = early_r;
             reg [3-1:0] rm_r;
@@ -1697,15 +1718,13 @@ module edrv32_cpu2_issue #(
                 end
             end
             always @(posedge clk_i) begin
-                if (ISSUE_WIDTH == 1 && pending_r) begin
-                    if (source1_wait_r && (short1_w || ordinary1_w || retired1_w)) begin
-                        src1_r <= short1_w ? {{(B-32){1'b0}}, early_resp_data_i} :
-                            ordinary1_w ? lsu_complete_data_i : {{(B-32){1'b0}}, wb0_data_i};
+                if (pending_r) begin
+                    if (source1_wait_r && pending_source_valid_w[0]) begin
+                        src1_r <= pending_source_data_w[0];
                         source1_wait_r <= 1'b0;
                     end
-                    if (source2_wait_r && (short2_w || ordinary2_w || retired2_w)) begin
-                        src2_r <= short2_w ? {{(B-32){1'b0}}, early_resp_data_i} :
-                            ordinary2_w ? lsu_complete_data_i : {{(B-32){1'b0}}, wb0_data_i};
+                    if (source2_wait_r && pending_source_valid_w[1]) begin
+                        src2_r <= pending_source_data_w[1];
                         source2_wait_r <= 1'b0;
                     end
                 end

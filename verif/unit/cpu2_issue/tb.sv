@@ -891,6 +891,67 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
             if(!lsu_req_valid_o || lsu_req_addr_o!=32'h10000800)
                 $fatal(1,"old skid value survived tag reuse");
         end
+        // BE1: an EX request may wait longer than its producer's return and retirement.
+        if(ISSUE_WIDTH==2)for(int producer=0;producer<5;producer++)begin
+            int producer_tag,consumer_tag;
+            producer_tag=producer==4?1:0;consumer_tag=producer_tag+1;
+            clear();execute0_ready_i=1;execute1_ready_i=1;
+            alu0_complete_valid_i=0;lsu_complete_valid_i=0;wb0_valid_i=0;wb1_valid_i=0;
+            @(negedge clk_i);ib_head0_valid_i=1;
+            if(producer==4)begin ib_head0_instr_i=instruction(0,8,2,3);tick();end
+            ib_head0_instr_i=instruction(producer==2?0:3,6,4,3);tick();
+            ib_head0_instr_i=instruction(0,7,6,3);#1;
+            if(!allocate_valid_o)$fatal(1,"late consumer failed to reserve a pending entry");
+            tick();ib_head0_valid_i=0;execute0_ready_i=0;
+            @(negedge clk_i);
+            if(producer==0)begin
+                early_resp_valid_i=1;early_resp_hit_i=1;early_resp_tag_i=T'(producer_tag);early_resp_data_i=32'h321;
+            end else if(producer==1)begin
+                lsu_complete_valid_i=1;lsu_complete_ready_i=1;lsu_complete_tag_i=T'(producer_tag);
+                lsu_complete_data_i=B'(32'h321);
+            end else if(producer==2)begin
+                alu0_complete_valid_i=1;alu0_complete_ready_i=0;alu0_complete_tag_i=T'(producer_tag);
+                alu0_complete_data_i=B'(32'h321);
+            end
+            tick();early_resp_valid_i=0;early_resp_hit_i=0;lsu_complete_valid_i=0;
+            if(producer==2)begin alu0_complete_ready_i=1;tick();alu0_complete_valid_i=0;end
+            // Device data is only available here, while EX remains blocked.
+            @(negedge clk_i);wb0_valid_i=1;wb0_tag_i=0;
+            wb0_rd_i=producer==4?8:6;wb0_data_i=producer==4?35:32'h321;
+            wb1_valid_i=producer==4;wb1_tag_i=T'(producer_tag);wb1_rd_i=6;wb1_data_i=32'h321;
+            retire=producer==4?2:1;tick();retire=0;wb0_valid_i=0;wb1_valid_i=0;
+            repeat(3)tick();#1;
+            if(!execute0_valid_o || execute0_source1_wait_o || execute0_src1_o!=32'h321)
+                $fatal(1,"pending operand lost producer%0d return/retirement",producer);
+            if(producer==0)begin
+                // Fill completed slots behind the blocked consumer, then reuse its source tag.
+                for(int fill=0;fill<N-3;fill++)begin
+                    @(negedge clk_i);ib_head0_valid_i=1;
+                    ib_head0_instr_i=instruction(4,9,2,3);tick();
+                end
+                @(negedge clk_i);ib_head1_valid_i=1;
+                ib_head1_instr_i=instruction(0,8,2,3);#1;
+                if(allocate_count_o!=2)$fatal(1,"source-tag reuse pair not allocated");
+                tick();ib_head0_valid_i=0;ib_head1_valid_i=0;tick();
+                @(negedge clk_i);alu1_complete_valid_i=1;alu1_complete_ready_i=0;
+                alu1_complete_tag_i=0;alu1_complete_data_i=B'(32'hbad);tick();
+                if(!execute0_valid_o || execute0_source1_wait_o || execute0_src1_o!=32'h321)
+                    $fatal(1,"new source-tag epoch overwrote captured pending operand");
+                alu1_complete_ready_i=1;tick();alu1_complete_valid_i=0;
+            end
+            execute0_ready_i=1;tick();
+            // Cancel the consumer and reuse its physical tag for a new producer version.
+            @(negedge clk_i);cancel_valid_i=1;cancel_tag_i=T'(consumer_tag);tick();cancel_valid_i=0;
+            @(negedge clk_i);ib_head0_valid_i=1;
+            ib_head0_instr_i=instruction(0,6,2,3);tick();
+            ib_head0_instr_i=instruction(0,7,6,3)|32'h1000;#1;
+            if(allocate_valid_o)$fatal(1,"old captured operand leaked through tag reuse");
+            alu0_complete_valid_i=1;alu0_complete_ready_i=1;alu0_complete_tag_i=T'(consumer_tag);
+            alu0_complete_data_i=B'(32'h654);#1;
+            if(!allocate_valid_o)$fatal(1,"new version failed to supply reused tag");
+            tick();ib_head0_valid_i=0;alu0_complete_valid_i=0;#1;
+            if(execute0_src1_o!=32'h654)$fatal(1,"reused tag retained old pending data");
+        end
         // An uncommitted but completed rs1 still disqualifies early AGU.
         clear();@(negedge clk_i);ib_head0_valid_i=1;
         ib_head0_instr_i=instruction(0,6,2,3);tick();
