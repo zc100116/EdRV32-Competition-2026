@@ -17,6 +17,8 @@ module edrv32_fpga_probe_cpu2_fma_top (
     reg [31:0] b_r;
     reg [31:0] c_r;
     reg [1:0] op_r;
+    reg [1:0] kind_r;
+    wire [31:0] instr_w;
     reg [2:0] rm_r;
     wire [31:0] result_w;
     wire [4:0] flags_w;
@@ -31,6 +33,7 @@ module edrv32_fpga_probe_cpu2_fma_top (
             b_r <= stimulus_r[63:32];
             c_r <= stimulus_r[95:64];
             op_r <= stimulus_r[97:96];
+            kind_r <= stimulus_r[99:98];
             rm_r <= stimulus_r[100] ? 3'b100 : {1'b0, stimulus_r[99:98]};
         end
         result_r <= result_w;
@@ -39,6 +42,10 @@ module edrv32_fpga_probe_cpu2_fma_top (
             ^ result_r[15:12] ^ result_r[19:16] ^ result_r[23:20]
             ^ result_r[27:24] ^ result_r[31:28] ^ flags_r[3:0] ^ {3'b0, flags_r[4]};
     end
+    // Keep ADD, SUB, MUL and every fused variant live in the timing netlist.
+    assign instr_w = kind_r == 2'd0 ? 32'h00000053
+        : kind_r == 2'd1 ? 32'h08000053
+        : kind_r == 2'd2 ? 32'h10000053 : {25'b0, 3'b100, op_r, 2'b11};
     wire unit_req_ready_w;
     wire unused_resp_valid_w;
     wire [2:0] unused_resp_tag_w;
@@ -52,7 +59,7 @@ module edrv32_fpga_probe_cpu2_fma_top (
         .rst_n_i(rst_n_i),
         .unit_req_valid_i(1'b1),
         .unit_req_ready_o(unit_req_ready_w),
-        .unit_req_instr_i({25'b0, 3'b100, op_r, 2'b11}),
+        .unit_req_instr_i(instr_w),
         .unit_req_tag_i(3'b0),
         .unit_req_src1_i(a_r),
         .unit_req_src2_i(b_r),
