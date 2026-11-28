@@ -73,3 +73,125 @@ python3 tools/cpu/run_cpu2_core.py --width 2 --program rv32ui-fence_i
 - CSR 架构写判定原本已有 opcode 限定，无须修改。
 - FENCE funct3=0、MRET/WFI 均沿原系统请求/提交路径；未新增异常兜底或重试。
 - 按同一取消建立规则检查 ALU 两管线、branch 两管线及全局锁，并补对应复现测试。
+
+
+## 8. I06P：同 ELF 性能定位与授权修复（2026-11-28）
+
+代码提交：LSU `279af665c`、early_resp `aff3a92ae`、观测/复现工具 `c4589f343`。
+对照 RTL 基线 `86f413ddf`；NONE、ISSUE_WIDTH=1/2，GCC 15.2.0、Verilator 5.051 devel。
+两项修复均先取得协调者授权；完成队列容量、寄存信用、LSU 单请求结构保持冻结行为。
+
+### 8.1 口径
+
+直接把模型输入 `build/cpu-v2/isa/zba/coremark/coremark.elf` 后门加载到同一核级 BFM，
+10 次迭代。模型和 RTL 都用 start_time 首指令到 stop_time 首指令的退休窗口；观察
+区间为 [start, stop)，两宽都精确退休 2,456,216 条。模型 ELF 的 start/stop 为
+100049c0/10004a4c，I06 原 ELF 为 100048ac/10004938；启动、输出代码和布局不同。
+两者均为 O3、funroll-all-loops、finline-limit=600、函数/跳转/循环对齐 4、ILP32、
+RV32IM/Zicsr/Zba；I06 构建另显式列入 Zifencei，完整命令见 core2 README/构建脚本。
+不把两份 ELF 的周期直接当作修复前后比较。
+
+BFM 保留固定小等待与真实 I$/D$ refill；原模型 IcacheProbe(1) 只计增量 1 拍
+I$ miss，没有等价 AXI refill/存储器探针，也没有真实有限完成队列/寄存信用和
+串行 LSU 接受间隔。下表“模型”专指任务给定的原无限完成窗口模型，源码基线
+`86f413ddf`；模型 worker 已另提交 `83aebc308` 加入容量，默认值已改变。
+新模型脚本重现旧口径时须加 `--completion-entries 0`，不能把新默认结果混入此表。
+
+| 同模型 ELF | 原模型 W1 | RTL 前 W1 | RTL 后 W1 | 原模型 W2 | RTL 前 W2 | RTL 后 W2 |
+|---|---:|---:|---:|---:|---:|---:|
+| 窗口周期 | 2673925 | 3785675 | 3534269 | 1599073 | 3314628 | 3053180 |
+| CoreMark/MHz | 3.739821 | 2.641537 | 2.829439 | 6.253623 | 3.016930 | 3.275274 |
+| 退休 IPC | .918581 | .648818 | .694971 | 1.536025 | .741023 | .804478 |
+| 2 条退休拍 HPM1 | 0 | 0 | 0 | 1029338 | 749334 | 747627 |
+| 0 条退休拍 HPM3 | 217709 | 1329459 | 1078053 | 172195 | 1607746 | 1344591 |
+| IB 空拍 | 未单列 | 105883 | 105900 | 未单列 | 31117 | 32315 |
+| 完成队列 credit=0 拍 | 未建模 | 640790 | 456365 | 未建模 | 1164695 | 914081 |
+| LSU 非 ready 拍 | 未建模 | 1248461 | 980967 | 未建模 | 1286442 | 1018912 |
+| store 队头拍 | 未单列 | 653342 | 383754 | 未单列 | 717365 | 447522 |
+| 最短缓存 store 队头拍 | 未单列 | 4 | 2 | 未单列 | 4 | 2 |
+| RAW 配对失败 HPM5 | N/A | 0 | 0 | 150516 | 151853 | 151710 |
+| 结构/操作数失败 HPM6 | N/A | 0 | 0 | 98468 | 802214 | 802655 |
+| 类型失败 HPM7 | N/A | 0 | 0 | 112443 | 51446 | 51909 |
+| 仅一条 HPM8 | N/A | 0 | 0 | 31778 | 4377 | 4676 |
+| load 等待 HPM9 | 153881 | 400796 | 335974 | 163814 | 396679 | 333048 |
+| 分支依赖 HPM12 | 49360 | 105381 | 108841 | 22120 | 30250 | 33117 |
+| 执行误预测 HPM16 | 49340 | 52372 | 52371 | 12949 | 12797 | 13047 |
+| F2 更正 | 0 | 0 | 0 | 45754 | 39301 | 39305 |
+| I$ miss HPM13 / miss 状态拍 | 未等价计数 | 318/1908 | 318/1908 | 未等价计数 | 324/1944 | 324/1944 |
+| D$ miss HPM14 / miss 状态拍 | 未等价计数 | 22/132 | 22/132 | 未等价计数 | 22/132 | 22/132 |
+| DIV/设备等待 HPM10/11 | 0/0 | 0/0 | 0/0 | 0/0 | 0/0 | 0/0 |
+
+这些事件有重叠，不能相加为总周期。退休 trace 另确认两宽均有 504,996 条分支，
+RTL 当前 HPM4 连接没有计入这项，表中使用 trace 分类，未把 HPM4=0 当作没有分支。
+修后重定向到目标首次 allocate 的匹配记录：W1 EX 52371 次/157771 拍；
+W2 F2 29252/262764、EX 12258/37413、MEM 769/2372。
+F2 统计含保留的较老 IB 指令排空，且仅统计窗口内匹配成功的事件，不能作为独占
+恢复停顿。原模型 redirect E/M/D 为损失槽数，W1 184420/0/9707，
+W2 36504/5308/5969；不是同单位的恢复延迟，不能直接相减。
+
+### 8.2 最大差距与证据
+
+1. 完成窗口是双发射最大的结构限制。`completion.v:247` 的 credit 来自 count_r，
+   `:273` 在退休沿更新 count，`:497` 先捕获 done，下一拍才供 commit 退休。
+   NONE 深度为 4；allocate E0、完成捕获 E1、退休 E2、信用 E3 可用。
+   新增热缓存 dispatch.S 在没有 IB 空/访存等待/miss 时，64 条独立 ALU 指令：
+   W1 64 拍（IPC=1），W2 48 拍（IPC=4/3），后者 16 拍队列满且正在退休。
+   原模型 IPC=1.536 已超过这个纯 ALU 上限。修后 W2 HPM6 的 762783/802655
+   （95.03%）由 credit<2 引起，操作数 24038、通道 15834。
+   修后队列全满拍中，W1 正在退休/头 store/头 load 为 216374/158452/51520，
+   W2 为 519037/278064/234837。协调者决定保留冻结结构，另扫模型 N=4/8/16。
+2. LSU 接受吞吐/提交串行化。`lsu.v:257` 仅 S_IDLE 接收普通请求；
+   热缓存 load_stream.S 的 64 个独立 load：W1 127 拍、W2 126 拍，均无 I$/D$ miss，
+   LSU busy 63 拍；early 查询 61、命中 0。真实 load 接受间隔约 2 拍，原模型约 1 拍。
+   原模型 early_loads W1/W2 为 334064/260738；修后 RTL 查询/命中为
+   325863/150971、324195/138762。模型可短路的 load 与真实下一拍预约可用性不同，
+   不能把查询都当作短延迟成功。单发射没有 EX/MEM late 依赖执行，本次 early 输入
+   对其不建立 ID 反馈路径；W1 提速主要由 store fall-through 产生。
+3. 缓存/预测不是百万拍差距的主因。真实 miss 状态总计约 2 千拍；执行误预测次数
+   接近原模型。分支依赖和恢复有次级差异，但不能解释队列和 LSU 的数量级差距。
+
+### 8.3 修复、复现与回归
+
+- LSU `edrv32_cpu2_lsu.v:230,288,380,388`：原 AUTHORIZE→COMMIT 和最终
+  BEAT_DONE→DONE 各引入一个无必要的等待拍。授权后第一 beat 直接提交，最后 done
+  直接向 commit 报告；背压时仍保留原寄存状态，FD 第一 beat 明确使用低字。
+  单元新增授权同拍 valid、最终 done 同拍 valid/data/error、ready 时回到 idle
+  检查；在旧代码上报“authorization did not fall through to first beat”，修后
+  NONE/F/FD 三配置 PASS，覆盖双 beat、设备、错误和背压。
+- early_resp `top.v:1235,1331`、`alu.v:181`、`branch.v:634`：原 top 将 LSU
+  early 回应仅放到 unused_w，late 操作数只等普通 completion。按协调者授权为两模块
+  接入 valid/tag/hit/data；只在 valid&&hit&&tag 匹配时按既有 EX/MEM 捕获路径接收。
+  不产生重复 load completion，不反馈 ID。ALU/branch 单元均增加 early miss 保持等待、
+  随后 early hit 唤醒而普通 completion 不到达的用例；各六配置全部 PASS。
+- 两宽各 55 个核级程序 PASS：原 53 个加 dispatch/load_stream；含 rv32ui/rv32um/Zba、
+  trap/redirect。完整 I06 CoreMark 各一次通过，list/matrix/state CRC e714/1fd7/8e3a、
+  最终 fcaf，退休 2,477,565 条。原 ELF 修后 W1 3520496 拍/2.840509 CM/MHz，
+  W2 3054727 拍/3.273615；同 ELF 对照以前述模型 ELF 表为准。
+- 风格 22 文件 0 告警；两宽 NONE top `--lint-only -Wall` 0 告警。
+  单元有效最终结果为 LSU 三配置、ALU 六配置、branch 六配置 PASS。
+
+复现命令（加载仓库 GCC 环境，在仿真目录执行）：
+
+```sh
+python3 tools/cpu/build_cpu2_tests.py --suite isa
+python3 tools/cpu/run_cpu2_core.py --width 1
+python3 tools/cpu/run_cpu2_core.py --width 2
+python3 tools/cpu/build_cpu2_tests.py --suite coremark
+python3 tools/cpu/run_cpu2_core.py --width 1 --program coremark --no-build
+python3 tools/cpu/run_cpu2_core.py --width 2 --program coremark --no-build
+python3 tools/cpu/cpu2_perf.py --elf build/cpu-v2/isa/zba/coremark/coremark.elf --width 1
+python3 tools/cpu/cpu2_perf.py --elf build/cpu-v2/isa/zba/coremark/coremark.elf --width 2
+python3 tools/regress.py full --path verif/unit/cpu2_alu
+python3 tools/regress.py full --path verif/unit/cpu2_branch
+python3 tools/regress.py smoke --path verif/unit/cpu2_lsu
+python3 tools/cpu/eval/run_v2_single.py coremark --completion-entries 0
+python3 tools/cpu/eval/run_v2_round4.py coremark --bases full --names combo4-zba --completion-entries 0
+```
+
+`cpu2_perf.py` 的 +PERF_ONLY 在 stop_time 即结束，适用于模型 ELF 的 HTIF 输出环境；
+这只验证窗口而不检查输出 CRC，CRC 由完整 CoreMark 核级运行另验。
+原始逐项数值写入 build/cpu2_perf/w{1,2}.log；定向窗口也可用同脚本选择
+build/cpu2_core/programs/dispatch/dispatch.elf 或
+build/cpu2_core/programs/load_stream/load_stream.elf。所有观测均在验证环境，
+没有增加 RTL 参数、架构状态或运行门禁。剩余容量/LSU 结构差异交协调者的模型任务，
+本轮没有待批准 RTL 修改。
