@@ -98,11 +98,12 @@ module tb # (parameter ISSUE_WIDTH = 2);
     always @(posedge clk_i) begin
         cycles <= cycles + 1;
         if (ic_miss_event_o) misses <= misses + 1;
+        if (ic_cancel_i) pull = push;
         if (ic_req_valid_i && ic_req_ready_o) begin
             queue_addr[push % 128] = ic_req_addr_i;
             push = push + 1;
         end
-        if (ic_resp_valid_o && ic_resp_ready_i) begin
+        if (ic_resp_valid_o && ic_resp_ready_i && !ic_cancel_i) begin
             reg [31:0] pc;
             reg [31:0] actual0;
             reg [31:0] actual1;
@@ -139,7 +140,6 @@ module tb # (parameter ISSUE_WIDTH = 2);
             pull = pull + 1;
             responses <= responses + 1;
         end
-        if (ic_cancel_i) pull = push;
         axi_arready_i <= !bus_busy && cycles % 3 != 0;
         if (axi_arvalid_o && axi_arready_i) begin
             if (axi_arid_o != 0 || axi_arsize_o != 3 || axi_arburst_o != 1 ||
@@ -238,6 +238,25 @@ module tb # (parameter ISSUE_WIDTH = 2);
             drain();
             if (ar_count != start_ar || responses != start_resp + 12)
                 $fatal(1, "warm stream issued AXI or lost group");
+        end
+        // FE1: discard an old held response but preserve a new recovery F1 on that edge.
+        begin
+            int start_ar;
+            int start_resp;
+            ic_resp_ready_i=0;
+            request(32'h10000008);
+            while(!ic_resp_valid_o) tick();
+            step();start_ar=ar_count;start_resp=responses;
+            ic_cancel_i=1;ic_req_valid_i=1;ic_req_addr_i=32'h10000000;
+            if(!ic_req_ready_o) $fatal(1,"recovery F1 missing registered capacity");
+            tick();
+            step();ic_cancel_i=0;ic_req_valid_i=0;
+            #1;
+            if(!ic_resp_valid_o) $fatal(1,"recovery F1 did not return in next cycle");
+            ic_resp_ready_i=1;
+            drain();
+            if(ar_count!=start_ar || responses!=start_resp+1)
+                $fatal(1,"recovery F1 lost, duplicated or refetched hot line");
         end
         // Response backpressure fills the two reserved group contexts.
         ic_resp_ready_i = 0;

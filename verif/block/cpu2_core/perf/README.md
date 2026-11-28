@@ -44,3 +44,24 @@ No frequency, FPGA resource or PDS timing result is inferred from these simulati
 
 The build/lint commands waive only Verilator 5.051's new `PROCASSINIT` warning for declaration
 initializers in the existing verification harnesses; `-Wall` remains fatal for all other warnings.
+
+FE1 adds `audit_branches.py`: after running `branch_alternating`, run
+`python3 verif/block/cpu2_core/perf/audit_branches.py` to compare all 64 architectural
+branches, including issue-time source readiness, resolution stage, and recovery latency.
+The model is observed with Python tracing; its files and scheduling rules are unchanged.
+`fe1-branch-alternating-c720.csv` uses the frozen c72091981 backend with the frontend
+changes and its original tag interface; `fe1-branch-alternating-joint.csv` records the
+concurrent N16/tag4 backend snapshot. `stage_difference=1` selects its 32 differing rows.
+`rtl_id_waits` lists cycles relative to allocation, registered credit, and pending sources;
+`rtl_to_ib`/`rtl_to_issue` count from the registered recovery pulse.
+
+In both audits the model retires 32 late branches, all correctly predicted; the other
+32 conditional branches redirect in EX. The c720 backend also selects those 32 as
+early branches, but its ID trace shows an intervening zero-credit cycle. The joint
+snapshot issues them with credit available while x22 is still pending from the
+preceding XORI, selecting MEM instead. For example, PC 0x80000070 uses model
+`x22:0/prior_ready_in=0`; c720 waits at credit 0 before EX issue; the joint snapshot
+waits on tag 7 produced at 0x8000006c and selects MEM. Both RTL configurations expose
+and allocate the recovery target one cycle after the registered recovery pulse.
+These are observed differences in source readiness/capacity, without assigning a
+root cause to a frontend or backend scheduling rule.

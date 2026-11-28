@@ -276,13 +276,19 @@ module edrv32_cpu2_ib #(
 
 
 
+    // CPU5.1: an empty IB lets the synchronous F2 result enter ID directly.
+    // Only the unconsumed prefix is stored; IF ready and credit remain registered-capacity paths.
+    wire empty_w = count_r == 4'd0;
+    wire [1:0] bypass_remove_count_w = empty_w ? ib_remove_count_i : 2'd0;
+    wire [1:0] queued_push_count_w = push_count_w - bypass_remove_count_w;
     assign push_w = fetch_push_valid_i;
     assign push_count_w = push_w ? fetch_push_count_i : 2'd0;
-    assign retained_w = occupancy_r >> ib_remove_count_i;
+    assign retained_w = empty_w ? occupancy_r : occupancy_r >> ib_remove_count_i;
     assign fetch_push_ready_o = 1'b1;
     assign ib_credit_o = credit_r;
-    assign ib_head0_valid_o = count_r != 4'd0;
-    assign ib_head1_valid_o = (ISSUE_WIDTH == 2) && count_r >= 4'd2;
+    assign ib_head0_valid_o = !empty_w || fetch_push_valid_i;
+    assign ib_head1_valid_o = (ISSUE_WIDTH == 2) &&
+        (empty_w ? fetch_push_valid_i && fetch_push_count_i == 2'd2 : count_r >= 4'd2);
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             count_r <= 4'd0;
@@ -290,25 +296,26 @@ module edrv32_cpu2_ib #(
             occupancy_r <= {{PHYSICAL{1'b0}}, 1'b1};
         end else if (frontend_flush_i) begin
             count_r <= 4'd0;
-            credit_r <= CAPACITY;
+            credit_r <= CAPACITY - {2'b0, reserve_valid_i, 1'b0};
             occupancy_r <= {{PHYSICAL{1'b0}}, 1'b1};
         end else begin
             count_r <= count_r - {2'b0, ib_remove_count_i} + {2'b0, push_count_w};
             credit_r <= credit_r + {2'b0, ib_remove_count_i} - {2'b0, reserve_valid_i, 1'b0} +
                 {1'b0, reserve_cancel_count_i, 1'b0} + (push_w ? 4'd2 -
                 {2'b0, fetch_push_count_i} : 4'd0);
-            occupancy_r <= retained_w << push_count_w;
+            occupancy_r <= retained_w << queued_push_count_w;
         end
     end
     generate
         for (slot = 0; slot < PHYSICAL; slot = slot + 1) begin : g_slot
             wire insert0_w;
             wire insert1_w;
-            assign insert0_w = push_w && retained_w[slot];
+            assign insert0_w = push_w && queued_push_count_w != 0 &&
+                bypass_remove_count_w != 2'd1 && retained_w[slot];
             if (slot == 0) begin : g_first
-                assign insert1_w = 1'b0;
+                assign insert1_w = push_w && bypass_remove_count_w == 2'd1;
             end else begin : g_later
-                assign insert1_w = push_w && fetch_push_count_i == 2'd2 && retained_w[slot-1];
+                assign insert1_w = push_w && queued_push_count_w == 2'd2 && retained_w[slot-1];
             end
             reg [32-1:0] pc_r;
             wire [32-1:0] pc_next1_w;
@@ -832,67 +839,199 @@ module edrv32_cpu2_ib #(
             end
         end
     endgenerate
-    assign ib_head0_pc_o = pc_flat_w[0 +: 32];
-    assign ib_head0_instr_o = instr_flat_w[0 +: 32];
-    assign ib_head0_error_o = error_flat_w[0 +: 1];
-    assign ib_head0_candidates_o = candidates_flat_w[0 +: 5];
-    assign ib_head0_predict_taken_o = predict_taken_flat_w[0 +: 1];
-    assign ib_head0_predict_target_o = predict_target_flat_w[0 +: 32];
-    assign ib_head0_predict_token_o = predict_token_flat_w[0 +: 1];
-    assign ib_head0_predict_provider_o = predict_provider_flat_w[0 +: 3];
-    assign ib_head0_predict_alternate_o = predict_alternate_flat_w[0 +: 1];
-    assign ib_head0_predict_index0_o = predict_index0_flat_w[0 +: 9];
-    assign ib_head0_predict_index1_o = predict_index1_flat_w[0 +: 9];
-    assign ib_head0_predict_index2_o = predict_index2_flat_w[0 +: 9];
-    assign ib_head0_predict_index3_o = predict_index3_flat_w[0 +: 9];
-    assign ib_head0_predict_tag0_o = predict_tag0_flat_w[0 +: 10];
-    assign ib_head0_predict_tag1_o = predict_tag1_flat_w[0 +: 10];
-    assign ib_head0_predict_tag2_o = predict_tag2_flat_w[0 +: 10];
-    assign ib_head0_predict_tag3_o = predict_tag3_flat_w[0 +: 10];
-    assign ib_head0_predict_base_index_o = predict_base_index_flat_w[0 +: 12];
-    assign ib_head0_predict_fast_index_o = predict_fast_index_flat_w[0 +: 12];
-    assign ib_head0_ras_data_o = ras_data_flat_w[0 +: RAS_BITS];
-    assign ib_head0_ras_ptr_o = ras_ptr_flat_w[0 +: RAS_PTR_BITS];
-    assign ib_head0_ras_count_o = ras_count_flat_w[0 +: RAS_COUNT_BITS];
-    assign ib_head1_pc_o = (ISSUE_WIDTH == 2) ? pc_flat_w[32*1 +: 32] : {32{1'b0}};
-    assign ib_head1_instr_o = (ISSUE_WIDTH == 2) ? instr_flat_w[32*1 +: 32] : {32{1'b0}};
-    assign ib_head1_error_o = (ISSUE_WIDTH == 2) ? error_flat_w[1*1 +: 1] : {1{1'b0}};
-    assign ib_head1_candidates_o = (ISSUE_WIDTH == 2) ? candidates_flat_w[5*1 +: 5] : {5{1'b0}};
-    assign ib_head1_predict_taken_o = (ISSUE_WIDTH == 2) ? predict_taken_flat_w[1*1 +: 1] :
-        {1{1'b0}};
-    assign ib_head1_predict_target_o = (ISSUE_WIDTH == 2) ? predict_target_flat_w[32*1 +: 32] :
-        {32{1'b0}};
-    assign ib_head1_predict_token_o = (ISSUE_WIDTH == 2) ? predict_token_flat_w[1*1 +: 1] :
-        {1{1'b0}};
-    assign ib_head1_predict_provider_o = (ISSUE_WIDTH == 2) ? predict_provider_flat_w[3*1 +: 3]
-        : {3{1'b0}};
-    assign ib_head1_predict_alternate_o = (ISSUE_WIDTH == 2) ? predict_alternate_flat_w[1*1 +:
-        1] : {1{1'b0}};
-    assign ib_head1_predict_index0_o = (ISSUE_WIDTH == 2) ? predict_index0_flat_w[9*1 +: 9] :
-        {9{1'b0}};
-    assign ib_head1_predict_index1_o = (ISSUE_WIDTH == 2) ? predict_index1_flat_w[9*1 +: 9] :
-        {9{1'b0}};
-    assign ib_head1_predict_index2_o = (ISSUE_WIDTH == 2) ? predict_index2_flat_w[9*1 +: 9] :
-        {9{1'b0}};
-    assign ib_head1_predict_index3_o = (ISSUE_WIDTH == 2) ? predict_index3_flat_w[9*1 +: 9] :
-        {9{1'b0}};
-    assign ib_head1_predict_tag0_o = (ISSUE_WIDTH == 2) ? predict_tag0_flat_w[10*1 +: 10] :
-        {10{1'b0}};
-    assign ib_head1_predict_tag1_o = (ISSUE_WIDTH == 2) ? predict_tag1_flat_w[10*1 +: 10] :
-        {10{1'b0}};
-    assign ib_head1_predict_tag2_o = (ISSUE_WIDTH == 2) ? predict_tag2_flat_w[10*1 +: 10] :
-        {10{1'b0}};
-    assign ib_head1_predict_tag3_o = (ISSUE_WIDTH == 2) ? predict_tag3_flat_w[10*1 +: 10] :
-        {10{1'b0}};
-    assign ib_head1_predict_base_index_o = (ISSUE_WIDTH == 2) ? predict_base_index_flat_w[12*1
-        +: 12] : {12{1'b0}};
-    assign ib_head1_predict_fast_index_o = (ISSUE_WIDTH == 2) ? predict_fast_index_flat_w[12*1
-        +: 12] : {12{1'b0}};
-    assign ib_head1_ras_data_o = (ISSUE_WIDTH == 2) ? ras_data_flat_w[RAS_BITS*1 +: RAS_BITS] :
-        {RAS_BITS{1'b0}};
-    assign ib_head1_ras_ptr_o = (ISSUE_WIDTH == 2) ? ras_ptr_flat_w[RAS_PTR_BITS*1 +:
-        RAS_PTR_BITS] : {RAS_PTR_BITS{1'b0}};
-    assign ib_head1_ras_count_o = (ISSUE_WIDTH == 2) ? ras_count_flat_w[RAS_COUNT_BITS*1 +:
-        RAS_COUNT_BITS] : {RAS_COUNT_BITS{1'b0}};
-    assign unused_w = ^candidates_flat_w;
+    // Eight regional occupancy copies keep the new head mux control local.
+    // Per-16-bit preserved empty copies align with count_r without adding a data stage.
+    wire [3:0] region_count_w [0:7];
+    wire [3:0] region_next_count_w [0:7];
+    genvar area;
+    generate
+        for (area = 0; area < 8; area = area+1) begin : g_head_region
+            localparam ORIGINAL = area == 0;
+            if (ORIGINAL) begin : g_original
+                assign region_count_w[area] = count_r;
+            end else begin : g_copy
+                (* keep = "true", syn_preserve = 1 *) reg [3:0] count_copy_r;
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i)
+                        count_copy_r <= 4'd0;
+                    else
+                        count_copy_r <= region_next_count_w[area];
+                end
+                assign region_count_w[area] = count_copy_r;
+            end
+            assign region_next_count_w[area] = frontend_flush_i ? 4'd0 :
+                region_count_w[area] - {2'b0, ib_remove_count_i} + {2'b0, push_count_w};
+        end
+    endgenerate
+    localparam HEAD_BITS = 32 + 32 + 1 + 5 + 1 + 32 +
+        1 + 3 + 1 + 9 + 9 + 9 + 9 + 10 +
+        10 + 10 + 10 + 12 + 12 + RAS_BITS + RAS_PTR_BITS + RAS_COUNT_BITS;
+    wire [2*HEAD_BITS-1:0] stored_head_w;
+    wire [2*HEAD_BITS-1:0] incoming_head_w;
+    wire [2*HEAD_BITS-1:0] selected_head_w;
+    assign stored_head_w[HEAD_BITS*0 +: HEAD_BITS] = {
+        pc_flat_w[32*0 +: 32],
+        instr_flat_w[32*0 +: 32],
+        error_flat_w[1*0 +: 1],
+        candidates_flat_w[5*0 +: 5],
+        predict_taken_flat_w[1*0 +: 1],
+        predict_target_flat_w[32*0 +: 32],
+        predict_token_flat_w[1*0 +: 1],
+        predict_provider_flat_w[3*0 +: 3],
+        predict_alternate_flat_w[1*0 +: 1],
+        predict_index0_flat_w[9*0 +: 9],
+        predict_index1_flat_w[9*0 +: 9],
+        predict_index2_flat_w[9*0 +: 9],
+        predict_index3_flat_w[9*0 +: 9],
+        predict_tag0_flat_w[10*0 +: 10],
+        predict_tag1_flat_w[10*0 +: 10],
+        predict_tag2_flat_w[10*0 +: 10],
+        predict_tag3_flat_w[10*0 +: 10],
+        predict_base_index_flat_w[12*0 +: 12],
+        predict_fast_index_flat_w[12*0 +: 12],
+        ras_data_flat_w[RAS_BITS*0 +: RAS_BITS],
+        ras_ptr_flat_w[RAS_PTR_BITS*0 +: RAS_PTR_BITS],
+        ras_count_flat_w[RAS_COUNT_BITS*0 +: RAS_COUNT_BITS]};
+    assign incoming_head_w[HEAD_BITS*0 +: HEAD_BITS] = {
+        fetch_push0_pc_i,
+        fetch_push0_instr_i,
+        fetch_push0_error_i,
+        fetch_push0_candidates_i,
+        fetch_push0_predict_taken_i,
+        fetch_push0_predict_target_i,
+        fetch_push0_predict_token_i,
+        fetch_push0_predict_provider_i,
+        fetch_push0_predict_alternate_i,
+        fetch_push0_predict_index0_i,
+        fetch_push0_predict_index1_i,
+        fetch_push0_predict_index2_i,
+        fetch_push0_predict_index3_i,
+        fetch_push0_predict_tag0_i,
+        fetch_push0_predict_tag1_i,
+        fetch_push0_predict_tag2_i,
+        fetch_push0_predict_tag3_i,
+        fetch_push0_predict_base_index_i,
+        fetch_push0_predict_fast_index_i,
+        fetch_push0_ras_data_i,
+        fetch_push0_ras_ptr_i,
+        fetch_push0_ras_count_i};
+    assign {
+        ib_head0_pc_o,
+        ib_head0_instr_o,
+        ib_head0_error_o,
+        ib_head0_candidates_o,
+        ib_head0_predict_taken_o,
+        ib_head0_predict_target_o,
+        ib_head0_predict_token_o,
+        ib_head0_predict_provider_o,
+        ib_head0_predict_alternate_o,
+        ib_head0_predict_index0_o,
+        ib_head0_predict_index1_o,
+        ib_head0_predict_index2_o,
+        ib_head0_predict_index3_o,
+        ib_head0_predict_tag0_o,
+        ib_head0_predict_tag1_o,
+        ib_head0_predict_tag2_o,
+        ib_head0_predict_tag3_o,
+        ib_head0_predict_base_index_o,
+        ib_head0_predict_fast_index_o,
+        ib_head0_ras_data_o,
+        ib_head0_ras_ptr_o,
+        ib_head0_ras_count_o} = selected_head_w[HEAD_BITS*0 +: HEAD_BITS];
+    assign stored_head_w[HEAD_BITS*1 +: HEAD_BITS] = {
+        pc_flat_w[32*1 +: 32],
+        instr_flat_w[32*1 +: 32],
+        error_flat_w[1*1 +: 1],
+        candidates_flat_w[5*1 +: 5],
+        predict_taken_flat_w[1*1 +: 1],
+        predict_target_flat_w[32*1 +: 32],
+        predict_token_flat_w[1*1 +: 1],
+        predict_provider_flat_w[3*1 +: 3],
+        predict_alternate_flat_w[1*1 +: 1],
+        predict_index0_flat_w[9*1 +: 9],
+        predict_index1_flat_w[9*1 +: 9],
+        predict_index2_flat_w[9*1 +: 9],
+        predict_index3_flat_w[9*1 +: 9],
+        predict_tag0_flat_w[10*1 +: 10],
+        predict_tag1_flat_w[10*1 +: 10],
+        predict_tag2_flat_w[10*1 +: 10],
+        predict_tag3_flat_w[10*1 +: 10],
+        predict_base_index_flat_w[12*1 +: 12],
+        predict_fast_index_flat_w[12*1 +: 12],
+        ras_data_flat_w[RAS_BITS*1 +: RAS_BITS],
+        ras_ptr_flat_w[RAS_PTR_BITS*1 +: RAS_PTR_BITS],
+        ras_count_flat_w[RAS_COUNT_BITS*1 +: RAS_COUNT_BITS]};
+    assign incoming_head_w[HEAD_BITS*1 +: HEAD_BITS] = {
+        fetch_push1_pc_i,
+        fetch_push1_instr_i,
+        fetch_push1_error_i,
+        fetch_push1_candidates_i,
+        fetch_push1_predict_taken_i,
+        fetch_push1_predict_target_i,
+        fetch_push1_predict_token_i,
+        fetch_push1_predict_provider_i,
+        fetch_push1_predict_alternate_i,
+        fetch_push1_predict_index0_i,
+        fetch_push1_predict_index1_i,
+        fetch_push1_predict_index2_i,
+        fetch_push1_predict_index3_i,
+        fetch_push1_predict_tag0_i,
+        fetch_push1_predict_tag1_i,
+        fetch_push1_predict_tag2_i,
+        fetch_push1_predict_tag3_i,
+        fetch_push1_predict_base_index_i,
+        fetch_push1_predict_fast_index_i,
+        fetch_push1_ras_data_i,
+        fetch_push1_ras_ptr_i,
+        fetch_push1_ras_count_i};
+    assign {
+        ib_head1_pc_o,
+        ib_head1_instr_o,
+        ib_head1_error_o,
+        ib_head1_candidates_o,
+        ib_head1_predict_taken_o,
+        ib_head1_predict_target_o,
+        ib_head1_predict_token_o,
+        ib_head1_predict_provider_o,
+        ib_head1_predict_alternate_o,
+        ib_head1_predict_index0_o,
+        ib_head1_predict_index1_o,
+        ib_head1_predict_index2_o,
+        ib_head1_predict_index3_o,
+        ib_head1_predict_tag0_o,
+        ib_head1_predict_tag1_o,
+        ib_head1_predict_tag2_o,
+        ib_head1_predict_tag3_o,
+        ib_head1_predict_base_index_o,
+        ib_head1_predict_fast_index_o,
+        ib_head1_ras_data_o,
+        ib_head1_ras_ptr_o,
+        ib_head1_ras_count_o} = selected_head_w[HEAD_BITS*1 +: HEAD_BITS];
+    genvar head;
+    genvar chunk;
+    generate
+        for (head = 0; head < 2; head = head+1) begin : g_head
+            localparam ACTIVE = ISSUE_WIDTH > head;
+            if (ACTIVE) begin : g_active
+                localparam CHUNKS = (HEAD_BITS+15)/16;
+                for (chunk = 0; chunk < CHUNKS; chunk = chunk+1) begin : g_slice
+                    localparam WIDTH = HEAD_BITS-16*chunk < 16 ? HEAD_BITS-16*chunk : 16;
+                    localparam OFFSET = HEAD_BITS*head+16*chunk;
+                    localparam REGION = (head+chunk)%8;
+                    (* keep = "true", syn_preserve = 1 *) reg empty_r;
+                    always @(posedge clk_i or negedge rst_n_i) begin
+                        if (!rst_n_i)
+                            empty_r <= 1'b1;
+                        else
+                            empty_r <= region_next_count_w[REGION] == 4'd0;
+                    end
+                    assign selected_head_w[OFFSET +: WIDTH] = empty_r ?
+                        incoming_head_w[OFFSET +: WIDTH] : stored_head_w[OFFSET +: WIDTH];
+                end
+            end else begin : g_unused
+                assign selected_head_w[HEAD_BITS*head +: HEAD_BITS] = {HEAD_BITS{1'b0}};
+            end
+        end
+    endgenerate
+    assign unused_w = ^{candidates_flat_w, stored_head_w, incoming_head_w};
 endmodule

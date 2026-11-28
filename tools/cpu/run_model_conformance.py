@@ -97,7 +97,7 @@ def compile_cores(lint=False):
         list(pool.map(compile_one, jobs))
 
 
-def model(directory, width, entries):
+def model(directory, width, entries, **diagnostics):
     program, names, trace = program_and_trace(directory)
     addresses = memory_trace(directory, program, trace)
     options = dict(BASES['small' if width == 1 else 'full'])
@@ -111,6 +111,7 @@ def model(directory, width, entries):
                    'early-div' if width == 1 else 'radix4-early', complete_schedule=True),
                    completion_entries=entries, completion_addresses=addresses,
                    frontend_probe=IcacheProbe(1), frontend_registered_margin=True)
+    options.update(diagnostics)
     result = simulate(program, trace, names['start_time'], names['stop_time'], 'V3s', **options)
     return result
 
@@ -182,6 +183,9 @@ def run(names):
             execute(command, directory / (target + '.log'))
             log = (directory / (target + '.log')).read_text()
             row[target] = int(re.search(r'PERF (?:old|width=\d+) cycles=(\d+)', log)[1])
+            if target != 'old':
+                row[target + '_hpm16'] = int(re.search(
+                    r'HPM event=16 count=(\d+)', log)[1])
             check_trace(directory, target)
         rows.append(row)
         print(json.dumps(row), flush=True)

@@ -31,7 +31,13 @@ module probe_tb;
         $fwrite(fd, "_ready,csr_req_tag,csr_complete_valid,csr_complete_ready,csr_complete_tag,b");
         $fwrite(fd, "ranch_redirect_valid,branch_redirect_pc,f2_redirect_valid,ic_req_valid,ic_r");
         $fwrite(fd, "eq_ready,ic_req_addr,ic_resp_valid,ic_resp_ready,lsu_state");
-        $fdisplay(fd, "");
+        $fwrite(fd, ",allocate0_pc,allocate1_pc,branch_source_pc,branch_stage");
+        $fwrite(fd, ",execute0_source1_tag,execute0_source2_tag");
+        $fwrite(fd, ",execute1_source1_tag,execute1_source2_tag");
+        $fwrite(fd, ",trace0_valid,trace0_pc,trace1_valid,trace1_pc");
+        $fwrite(fd, ",id0_wait1,id0_wait2,id1_wait1,id1_wait2");
+        $fwrite(fd, ",id0_source1_tag,id0_source2_tag,id1_source1_tag,id1_source2_tag");
+        $fdisplay(fd, ",id0_late,id1_late,group_late");
     end
     always @(posedge harness.clk) begin
         if (harness.rst_n) begin
@@ -130,7 +136,30 @@ module probe_tb;
             $fwrite(fd, ",%0h", harness.dut.ic_req_addr_w);
             $fwrite(fd, ",%0h", harness.dut.ic_resp_valid_w);
             $fwrite(fd, ",%0h", harness.dut.ic_resp_ready_w);
-            $fdisplay(fd, ",%0h", harness.dut.u_lsu.state_r);
+            $fwrite(fd, ",%0h", harness.dut.u_lsu.state_r);
+            $fwrite(fd, ",%0h", harness.dut.allocate0_pc_w);
+            $fwrite(fd, ",%0h", harness.dut.allocate1_pc_w);
+            $fwrite(fd, ",%0h", harness.dut.trace_branch_pc_w);
+            $fwrite(fd, ",%0h", harness.dut.trace_branch_stage_w);
+            $fwrite(fd, ",%0h", harness.dut.execute0_source1_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.execute0_source2_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.execute1_source1_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.execute1_source2_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.trace_valid_w[0]);
+            $fwrite(fd, ",%0h", harness.dut.trace_pc_w[0 +: 32]);
+            $fwrite(fd, ",%0h", harness.dut.trace_valid_w[1]);
+            $fwrite(fd, ",%0h", harness.dut.trace_pc_w[32 +: 32]);
+            $fwrite(fd, ",%0h", harness.dut.u_issue.d0_wait1_w);
+            $fwrite(fd, ",%0h", harness.dut.u_issue.d0_wait2_w);
+            $fwrite(fd, ",%0h", harness.dut.u_issue.d1_wait1_w);
+            $fwrite(fd, ",%0h", harness.dut.u_issue.d1_wait2_w);
+            $fwrite(fd, ",%0h", harness.dut.u_issue.q01_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.u_issue.q02_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.u_issue.q11_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.u_issue.q12_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.u_issue.d0_late_w);
+            $fwrite(fd, ",%0h", harness.dut.u_issue.d1_late_w);
+            $fdisplay(fd, ",%0h", harness.dut.u_issue.group_late_w);
         end
     end
     final $fclose(fd);

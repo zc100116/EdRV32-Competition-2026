@@ -1,6 +1,6 @@
 // File: edrv32_cpu2_predictor.v
 // Spec: cpu-v2-spec 3.3, 5.4, 5.5 and interface-freeze RAS recovery supplement.
-// Description: Fixed gshare4096, word-indexed BTB and speculative full-snapshot RAS.
+// Description: Fixed gshare4096, grouped/word-indexed BTB and speculative full-snapshot RAS.
 // Private fast outputs are the F1 context; restore applies pop before push.
 // Clock domain: clk_sys.
 module edrv32_cpu2_predictor #(
@@ -58,7 +58,7 @@ module edrv32_cpu2_predictor #(
     cancel_valid_i,
     cancel_tag_i
 );
-    localparam TAG_BITS = (FPU_FORMAT == "FD") ? 4 : (FPU_FORMAT == "F") ? 3 : 2;
+    localparam TAG_BITS = (ISSUE_WIDTH == 2 || FPU_FORMAT == "FD") ? 4 : 3;
     localparam RAS_DEPTH = (ISSUE_WIDTH == 2) ? 8 : 4;
     localparam RAS_BITS = 32*RAS_DEPTH;
     localparam RAS_PTR_BITS = (ISSUE_WIDTH == 2) ? 3 : 2;
@@ -301,8 +301,8 @@ module edrv32_cpu2_predictor #(
             reg [63:0] valid_r;
             wire [5:0] clear0_addr_w;
             wire [5:0] clear1_addr_w;
-            assign clear0_addr_w = ISSUE_WIDTH == 2 ? clear0_pc_i[8:3] : clear0_pc_i[7:2];
-            assign clear1_addr_w = ISSUE_WIDTH == 2 ? clear1_pc_i[8:3] : clear1_pc_i[7:2];
+            assign clear0_addr_w = clear0_pc_i[8:3];
+            assign clear1_addr_w = clear1_pc_i[8:3];
             wire [31:0] selected_pc_w;
             wire [58:0] selected_data_w;
             wire selected_valid_w;
@@ -325,13 +325,13 @@ module edrv32_cpu2_predictor #(
                 assign bank_write_w = write_valid_w && write_pc_w[2] == (word != 0);
                 assign tag_w = {1'b0, pc_w[31:9]};
             end else begin : g_replicated
-                // Two read replicas hold the same 64 logical entries, not 128 entries.
+                // CPU5.5: 64 aligned groups; freed tag bit stores the control word position.
                 assign selected_pc_w = pc_w;
-                assign read_addr_w = pc_w[7:2];
-                assign write_addr_w = write_pc_w[7:2];
-                assign write_tag_w = write_pc_w[31:8];
+                assign read_addr_w = pc_w[8:3];
+                assign write_addr_w = write_pc_w[8:3];
+                assign write_tag_w = {write_pc_w[31:9], write_pc_w[2]};
                 assign bank_write_w = write_valid_w;
-                assign tag_w = pc_w[31:8];
+                assign tag_w = {pc_w[31:9], pc_w[2]};
             end
             edrv32_ram_cpu2_btb u_btb (
                 .clk_i(clk_i),
@@ -362,34 +362,16 @@ module edrv32_cpu2_predictor #(
                 assign selected_data_w = data_w;
                 assign selected_valid_w = valid_r[read_addr_w];
             end
-            wire [23:0] ex_tag_w;
-            wire [23:0] mem_tag_w;
             wire [23:0] pending_tag_w;
-            assign ex_tag_w = (ISSUE_WIDTH == 2) ? {1'b0, ex_predict_train_pc_i[31:9]} :
-                ex_predict_train_pc_i[31:8];
-            assign mem_tag_w = (ISSUE_WIDTH == 2) ? {1'b0, mem_predict_train_pc_i[31:9]} :
-                mem_predict_train_pc_i[31:8];
+            wire pending_hit_w;
             assign pending_tag_w = (ISSUE_WIDTH == 2) ? {1'b0, pending_pc_r[31:9]} :
-                pending_pc_r[31:8];
-            // Full word address equality also covers the unbanked 64-entry geometry.
-            assign query_btb_w[word] = ex_table_update_w && ((ISSUE_WIDTH == 2) ?
-                ex_predict_train_pc_i[8:2] == pc_w[8:2] :
-                    ex_predict_train_pc_i[7:2] == pc_w[7:2]) ?
-                {ex_tag_w, ex_predict_train_type_i, ex_predict_train_target_i} :
-                mem_update_w && ((ISSUE_WIDTH == 2) ? mem_predict_train_pc_i[8:2] == pc_w[8:2] :
-                    mem_predict_train_pc_i[7:2] == pc_w[7:2]) ?
-                {mem_tag_w, mem_predict_train_type_i, mem_predict_train_target_i} :
-                pending_valid_r && ((ISSUE_WIDTH == 2) ? pending_pc_r[8:2] == pc_w[8:2] :
-                    pending_pc_r[7:2] == pc_w[7:2]) ?
+                {pending_pc_r[31:9], pending_pc_r[2]};
+            // F1 reads the state preceding this edge; only registered pending writes bypass.
+            assign pending_hit_w = pending_valid_r && ((ISSUE_WIDTH == 2) ?
+                pending_pc_r[8:2] == pc_w[8:2] : pending_pc_r[8:3] == pc_w[8:3]);
+            assign query_btb_w[word] = pending_hit_w ?
                 {pending_tag_w, pending_type_r, pending_target_r} : selected_data_w;
-            assign valid_w = (ex_table_update_w && ((ISSUE_WIDTH == 2) ?
-                ex_predict_train_pc_i[8:2] ==
-                pc_w[8:2] :
-                    ex_predict_train_pc_i[7:2] == pc_w[7:2])) ||
-                (mem_update_w && ((ISSUE_WIDTH == 2) ? mem_predict_train_pc_i[8:2] == pc_w[8:2] :
-                    mem_predict_train_pc_i[7:2] == pc_w[7:2])) ||
-                (pending_valid_r && ((ISSUE_WIDTH == 2) ? pending_pc_r[8:2] == pc_w[8:2] :
-                    pending_pc_r[7:2] == pc_w[7:2])) || selected_valid_w;
+            assign valid_w = pending_hit_w || selected_valid_w;
             assign query_tag_w[word] = tag_w;
             wire [58:0] selected_btb_w;
             assign selected_btb_w = query_btb_w[word];
@@ -399,9 +381,16 @@ module edrv32_cpu2_predictor #(
                 selected_btb_w[34:0]};
         end
     endgenerate
-    assign ras_data0_w = ras_data_r;
-    assign ras_ptr0_w = ras_ptr_r;
-    assign ras_count0_w = ras_count_r;
+    wire [RAS_BITS-1:0] restore_data_w;
+    wire [RAS_PTR_BITS-1:0] restore_ptr_w = restore_write_ptr_w +
+        {{(RAS_PTR_BITS-1){1'b0}}, ras_restore_push_i};
+    wire [RAS_COUNT_BITS-1:0] restore_count_w = ras_restore_push_i ?
+        (restore_pop_w || ras_restore_count_i == RAS_LIMIT ? ras_restore_count_i :
+        ras_restore_count_i + 1'b1) :
+        ras_restore_count_i - {{(RAS_COUNT_BITS-1){1'b0}}, restore_pop_w};
+    assign ras_data0_w = ras_restore_valid_i ? restore_data_w : ras_data_r;
+    assign ras_ptr0_w = ras_restore_valid_i ? restore_ptr_w : ras_ptr_r;
+    assign ras_count0_w = ras_restore_valid_i ? restore_count_w : ras_count_r;
     generate
         begin : g_ras_step0
             wire [58:0] btb_w;
@@ -503,13 +492,9 @@ module edrv32_cpu2_predictor #(
         if (!rst_n_i) begin
             ras_ptr_r <= {RAS_PTR_BITS{1'b0}};
             ras_count_r <= {RAS_COUNT_BITS{1'b0}};
-        end else if (ras_restore_valid_i) begin
-            ras_ptr_r <= restore_write_ptr_w + {{(RAS_PTR_BITS-1){1'b0}}, ras_restore_push_i};
-            if (ras_restore_push_i)
-                ras_count_r <= restore_pop_w || ras_restore_count_i == RAS_LIMIT ?
-                    ras_restore_count_i : ras_restore_count_i + 1'b1;
-            else
-                ras_count_r <= ras_restore_count_i - {{(RAS_COUNT_BITS-1){1'b0}}, restore_pop_w};
+        end else if (ras_restore_valid_i && !predict_req_valid_i) begin
+            ras_ptr_r <= restore_ptr_w;
+            ras_count_r <= restore_count_w;
         end else if (predict_req_valid_i) begin
             ras_ptr_r <= ras_ptr2_w;
             ras_count_r <= ras_count2_w;
@@ -524,13 +509,14 @@ module edrv32_cpu2_predictor #(
             genvar half;
             for (half = 0; half < 2; half = half + 1) begin : g_half
                 reg [15:0] data_r;
+                assign restore_data_w[32*ras_entry+16*half +: 16] =
+                    ras_restore_push_i && restore_write_ptr_w == ras_entry ?
+                    ras_restore_link_i[16*half +: 16] :
+                    ras_restore_data_i[32*ras_entry+16*half +: 16];
                 always @(posedge clk_i) begin
-                    if (ras_restore_valid_i)
-                        data_r <= ras_restore_push_i && restore_write_ptr_w == ras_entry ?
-                            ras_restore_link_i[16*half +: 16] :
-                            ras_restore_data_i[32*ras_entry+16*half +: 16];
-                    else if (predict_req_valid_i)
-                        data_r <= advanced_w[32*ras_entry+16*half +: 16];
+                    if (ras_restore_valid_i || predict_req_valid_i)
+                        data_r <= predict_req_valid_i ? advanced_w[32*ras_entry+16*half +: 16] :
+                            restore_data_w[32*ras_entry+16*half +: 16];
                 end
                 assign ras_data_w_out[32*ras_entry+16*half +: 16] = data_r;
             end

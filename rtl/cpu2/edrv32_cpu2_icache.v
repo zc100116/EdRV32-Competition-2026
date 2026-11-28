@@ -133,7 +133,7 @@ module edrv32_cpu2_icache #(
     assign ic_req_ready_o = !scan_r && state_r == S_IDLE && count_r < 2 &&
         (!valid_r[head_r] || pipe_valid_r || (done0_r[head_r] && done1_r[head_r]));
     assign accept_w = ic_req_valid_i && ic_req_ready_o;
-    assign replay_w = !scan_r && state_r == S_IDLE && !pipe_valid_r &&
+    assign replay_w = !ic_cancel_i && !scan_r && state_r == S_IDLE && !pipe_valid_r &&
         valid_r[head_r] && !(done0_r[head_r] && done1_r[head_r]);
     assign read_w = accept_w || replay_w;
     assign read_addr0_w = replay_w ? addr_r[head_r] : ic_req_addr_i;
@@ -193,7 +193,7 @@ module edrv32_cpu2_icache #(
     assign ic_inv_ready_o = !scan_r;
     assign inv_start_w = ic_inv_valid_i && ic_inv_ready_o;
     assign ic_inv_done_o = inv_done_r;
-    assign ic_miss_event_o = pipe_use_w && !pipe_complete_w &&
+    assign ic_miss_event_o = pipe_use_w && !pipe_complete_w && !ic_cancel_i &&
         (miss_bank_w ? cacheable1_w : cacheable0_w);
     assign axi_arid_o = 4'd0;
     assign axi_araddr_o = miss_cacheable_r ? {miss_addr_r[31:5], 5'd0} :
@@ -381,7 +381,7 @@ module edrv32_cpu2_icache #(
                 lru_valid0_r <= cacheable0_w && |hit0_w;
                 lru_valid1_r <= ISSUE_WIDTH == 2 && cacheable1_w && |hit1_w &&
                     pipe_bank0_addr_r[13:5] != pipe_bank1_addr_r[13:5];
-                if (!pipe_complete_w) begin
+                if (!pipe_complete_w && !ic_cancel_i) begin
                     state_r <= S_AR;
                     fill_beat_r <= 2'd0;
                     fill_error_r <= 1'b0;
@@ -404,13 +404,16 @@ module edrv32_cpu2_icache #(
                 tail_r <= !tail_r;
             end
             if (ic_cancel_i) begin
-                valid_r <= 2'd0;
+                // FE1: cancel owns only the old epoch; a same-edge F1 starts slot zero.
+                valid_r <= {1'b0, accept_w};
                 done0_r <= 2'd0;
                 done1_r <= 2'd0;
-                pipe_valid_r <= 1'b0;
+                error0_r <= 2'd0;
+                error1_r <= 2'd0;
+                pipe_valid_r <= accept_w;
                 head_r <= 1'b0;
-                tail_r <= 1'b0;
-                count_r <= 2'd0;
+                tail_r <= accept_w;
+                count_r <= {1'b0, accept_w};
             end
             case (state_r)
                 S_AR: if (axi_arready_i) state_r <= S_FILL;
@@ -450,9 +453,9 @@ module edrv32_cpu2_icache #(
     end
     always @(posedge clk_i) begin
         if (accept_w)
-            addr_r[tail_r] <= ic_req_addr_i;
+            addr_r[ic_cancel_i ? 1'b0 : tail_r] <= ic_req_addr_i;
         if (read_w) begin
-            pipe_slot_r <= replay_w ? head_r : tail_r;
+            pipe_slot_r <= ic_cancel_i ? 1'b0 : replay_w ? head_r : tail_r;
             pipe_odd_r <= read_addr0_w[2];
             pipe_bank0_addr_r <= read_bank0_addr_w;
             pipe_bank1_addr_r <= read_bank1_addr_w;
@@ -472,7 +475,7 @@ module edrv32_cpu2_icache #(
             lru_set1_r <= pipe_bank1_addr_r[13:5];
             lru_data0_r <= !hit0_w[1];
             lru_data1_r <= !hit1_w[1];
-            if (!pipe_complete_w) begin
+            if (!pipe_complete_w && !ic_cancel_i) begin
                 miss_slot_r <= pipe_slot_r;
                 miss_addr_r <= miss_bank_w ? pipe_bank1_addr_r : pipe_bank0_addr_r;
                 miss_cacheable_r <= miss_bank_w ? cacheable1_w : cacheable0_w;

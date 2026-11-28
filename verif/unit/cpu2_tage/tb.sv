@@ -2,7 +2,7 @@
 module tb #(
     parameter [31:0] FPU_FORMAT = "NONE"
 );
-    localparam TAG_BITS = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
+    localparam TAG_BITS = 4;
     reg clk_i;
     reg rst_n_i;
     reg f1_valid_i;

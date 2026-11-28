@@ -3,7 +3,7 @@ module tb #(
     parameter ISSUE_WIDTH = 2,
     parameter [31:0] FPU_FORMAT = "NONE"
 );
-    localparam TAG_BITS = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
+    localparam TAG_BITS = (ISSUE_WIDTH == 2 || FPU_FORMAT == "FD") ? 4 : 3;
     localparam RAS_BITS = ISSUE_WIDTH == 2 ? 256 : 128;
     localparam RAS_PTR_BITS = ISSUE_WIDTH == 2 ? 3 : 2;
     localparam RAS_COUNT_BITS = RAS_PTR_BITS+1;
@@ -173,7 +173,7 @@ module tb #(
                          input integer index_value,input bit outcome);
         integer idx;
         begin
-            idx = (address >> 2)&(BTB_ENTRIES-1);
+            idx = (address >> (ISSUE_WIDTH == 1 ? 3 : 2))&(BTB_ENTRIES-1);
             btb_valid[idx] = 1;
             btb_pc[idx] = address;
             btb_target[idx] = target;
@@ -235,7 +235,7 @@ module tb #(
             #1;
             for (integer word_number = 0; word_number < 2; word_number++) begin
                 pc_value = group_address + 4*word_number;
-                idx = (pc_value >> 2)&(BTB_ENTRIES-1);
+                idx = (pc_value >> (ISSUE_WIDTH == 1 ? 3 : 2))&(BTB_ENTRIES-1);
                 fast_index = ((pc_value >> 2)^int'(history))&4095;
                 hit = btb_valid[idx] && btb_pc[idx] == pc_value;
                 kind = hit ? btb_type[idx] : 0;
@@ -332,6 +332,15 @@ module tb #(
         for (integer j = 0; j < 128; j++) btb_valid[j] = 0;
         restore(0,0,0,0);
         query(0,0);
+        // CPU5.5 grouped W1: 8B-spaced controls use every one of the 64 entries.
+        for (integer n=0; n<64; n++) train_one('h8000+8*n,1,0,1);
+        for (integer n=0; n<64; n++) query('h8000+8*n,0);
+        // A same-group younger control replaces the group's prior position in W1.
+        // W2 retains both independently indexed words.
+        train_one('h9000,1,0,1);train_one('h9004,1,0,1);
+        query('h9000,0);query('h9004,0);
+        train_one('h9000,1,0,1);
+        query('h9000,0);query('h9004,0);
         // Every fast counter sees a taken transition from weak NT, then an NT transition.
         for (integer n = 0; n < 4096; n++) begin
             next_history = {history[10:0],1'b1};
@@ -449,6 +458,17 @@ module tb #(
             next_history={history[10:0],1'b0};address=(selected_index^int'(next_history))*4;
             train_one(address,0,(selected_index+1)%4096,0);query(address,0);
         end
+        // F1 must read the old BTB entry on a live EX training edge.
+        train_one('h7400,1,0,1);
+        predict_req_pc_i='h7400;query_skip0_i=0;
+        ex_predict_train_valid_i=1;ex_predict_train_pc_i='h7400;
+        ex_predict_train_type_i=1;ex_predict_train_target_i='h7600;
+        #1;
+        if(!fast0_hit_o || fast0_target_o!='h7500)
+            $fatal(1,"live EX training must not bypass into the F1 query");
+        train_reference('h7400,'h7600,1,0,1);
+        tick();ex_predict_train_valid_i=0;
+        query('h7400,0);
         // Same-cycle age cancellation masks the younger training event.
         cancel_valid_i = 1;cancel_tag_i = 1;age_head_i = 0;
         ex_predict_train_valid_i = 1;ex_predict_train_tag_i = 2;

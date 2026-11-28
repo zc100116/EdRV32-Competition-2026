@@ -3,7 +3,7 @@ module tb #(
     parameter ISSUE_WIDTH = 2,
     parameter [31:0] FPU_FORMAT = "NONE"
 );
-    localparam TAG_BITS = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
+    localparam TAG_BITS = (ISSUE_WIDTH == 2 || FPU_FORMAT == "FD") ? 4 : 3;
     localparam RAS_BITS = ISSUE_WIDTH == 2 ? 256 : 128;
     localparam RAS_PTR_BITS = ISSUE_WIDTH == 2 ? 3 : 2;
     localparam RAS_COUNT_BITS = RAS_PTR_BITS+1;
@@ -570,7 +570,7 @@ module tb #(
                 residents = 0;
                 pending = 0;
                 next_stream = int'(redirect_pc_i);
-                if (!ic_cancel_o || accepted || returned) $fatal(1,"redirect priority");
+                if (!ic_cancel_o || returned) $fatal(1,"redirect old response priority");
             end else begin
                 for (integer j = 0; j < residents-remove; j++) begin
                     resident_pc[j] = resident_pc[j+remove];
@@ -595,7 +595,8 @@ module tb #(
                     end
                     pending--;
                 end
-                if (accepted) begin
+            end
+            if (accepted) begin
                     base_pc = ISSUE_WIDTH == 2 ? next_stream : next_stream & -8;
                     if (ic_req_addr_o !== 32'(base_pc))
                         $fatal(1,"request cycle=%0d expected=%h actual=%h",cycles,base_pc,ic_req_addr_o);
@@ -608,11 +609,11 @@ module tb #(
                     end
                     pending++;
                     next_stream = base_pc + 8;
-                end
             end
             if (wb0_valid_i && wb0_rd_i != 0) owner_model[wb0_rd_i] = 0;
             if (wb1_valid_i && wb1_rd_i != 0) owner_model[wb1_rd_i] = 1;
             tick();
+            if (redirect_now) begin ic_resp_valid_i=0; #1; end
             for (integer j = 0; j < pending; j++)
                 if (pending_delay[j] > 0) pending_delay[j]--;
             check_head();
@@ -771,6 +772,31 @@ module tb #(
         ic_resp_valid_i=1;tick();ic_resp_valid_i=0;
         if(ib_head0_pc_o!='h7004 || ib_head0_ras_count_o!=0 || f2_redirect_valid_o)
             $fatal(1,"commit must not apply younger RAS restore");
+        // A cold direct call resolves in F2, and its recovery edge accepts F1.
+        fetch_stop_i=1;ic_resp_valid_i=0;ib_remove_count_i=0;
+        rst_n_i=0;tick();rst_n_i=1;
+        redirect_valid_i=1;redirect_pc_i='ha000;fetch_stop_i=0;
+        #1;
+        if(!ic_req_valid_o || ic_req_addr_o!='ha000)
+            $fatal(1,"registered redirect must start recovery F1");
+        tick();redirect_valid_i=0;fetch_stop_i=1;
+        ic_resp_bank0_way0_instr_i=32'h008000ef;
+        ic_resp_bank1_way0_instr_i=32'h00000013;
+        ic_resp_bank0_way_hit_i=1;ic_resp_bank1_way_hit_i=1;
+        ic_resp_valid_i=1;#1;
+        if(!ib_head0_valid_o || !ib_head0_predict_taken_o ||
+           ib_head0_predict_target_o!='ha008)
+            $fatal(1,"cold JAL must be available at the F2 to ID boundary");
+        tick();ic_resp_valid_i=0;fetch_stop_i=0;#1;
+        if(!f2_redirect_valid_o || !ic_req_valid_o || ic_req_addr_o!='ha008)
+            $fatal(1,"cold JAL recovery F1 must use registered target");
+        tick();fetch_stop_i=1;
+        begin
+            reg [31:0] held_pc;
+            #1;held_pc=ic_req_addr_o;
+            frontend_flush_i=1;tick();frontend_flush_i=0;#1;
+            if(ic_req_addr_o!=held_pc) $fatal(1,"flush without a target must retain PC");
+        end
         $display("PASS CV08 frontend ISSUE_WIDTH=%0d: credits, errors, cross-line delays, owner/WB, redirect and F2 RAS prefix",ISSUE_WIDTH);
         $finish;
     end

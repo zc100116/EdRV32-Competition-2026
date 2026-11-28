@@ -293,3 +293,32 @@ done
 dcache-final 与 lint 日志；单元逐项日志副本在 build/i05b/unit/cpu2_{lsu,dcache}，
 复现运行的默认目录为 build/regress/smoke/unit/cpu2_{lsu,dcache}。
 仿真使用独立目录，结果收集后清理；本轮没有需要协调者追加决定的项目。
+
+### FE1：BTB 几何与恢复边界（2026-11-28）
+基线 c72091981；下表 R1/R2 为冻结后端加 FE1（仅回置旧 tag 接口），M1/M2 保持模型原默认，未改模型文件。
+D02（a类，修正A00旧b判定）：W1 BTB 改为 PC[8:3] 的64组，复用 tag 空位保存 PC[2]；组内最后训练的控制指令替换整项，W2仍为128字项。
+D03：已寄存恢复 PC 同沿启动 F1；I$ 取消旧上下文并保留同沿新请求；空 IB 直通到 ID；冷 JAL 在 F2 译码恢复，RAS 先恢复再作用新预测。
+| 微基准 | M1 | R1 | M2 | R2 |
+|---|---:|---:|---:|---:|
+| branch_taken | 95 | 94 | 197 | 197 |
+| branch_not_taken | 67 | 66 | 66 | 66 |
+| branch_alternating | 207 | 206 | 165 | 197 |
+| jal | 71 | 70 | 71 | 71 |
+| jalr | 325 | 324 | 325 | 325 |
+| call_return | 168 | 167 | 131 | 131 |
+| late_AB | 187 | 188 | 261 | 261 |
+| pair_AB | 133 | 132 | 67 | 98 |
+| pair_BA | 133 | 132 | 69 | 101 |
+N4 诊断模型的 W2 AB/BA 为98/101，隔离 RTL 完全相等；联合 N16 快照为67/69，与原默认相等。
+剩余32拍逐条证据见 [c720 CSV](../../verif/block/cpu2_core/perf/fe1-branch-alternating-c720.csv) 与 [联合 CSV](../../verif/block/cpu2_core/perf/fe1-branch-alternating-joint.csv)：各64行，联合 stage_difference=1 的32行即差异。
+模型32条晚分支全部预测正确，另外32条在EX重定向；c720同样早晚分布，但错误分支先等1拍 credit；联合快照则等待前一XORI的x22而选MEM，共64条晚分支。
+例如80000070：模型 x22 ready_in=0；c720 credit0→credit1 后EX；联合 credit12、等待tag7@8000006c后MEM；两种RTL的已登记恢复→目标IB/ID均1拍，根因留协调者判断。
+CoreMark/MHz：W1 2.968852→3.070552（3368305→3256743拍），W2 3.466027→3.505579（2885148→2852596拍），同一ELF与冻结后端。
+HPM16（仅EX/MEM恢复）W1 49151→41846、W2 13478→9924；F2更正另列：W1 0→6839、W2 40766→42746。
+联合N16快照另有CoreMark超时（20M拍、最后退休10001aac），已将末端控制日志及源快照交BE1；隔离两宽CoreMark均PASS。
+Yosys LUT6参考级数（W1/W2）：F1地址4/5、BTB读索引4/8、写索引2/6、恢复控制6/6；BTB读的8级含carry/INV，JAL目标12/13级分别为4/6级LUT加8/7级carry。
+frontend+I$相对基线增量：LUT −2985/+1934、FF +100/+44、LUTRAM 0/0；tech宏未改，DRM/APM实例增量0；BTB仍为逻辑64/128项，物理读副本及59位数据宽度均未增加。
+IB直通的空标志按16位分区，8区计数副本限制新增控制扇出；复用既有上下文/RAS恢复寄存器，不增加数据流水拍；上述是逻辑级参考，尚非PDS 165MHz收敛结论。
+验证：27个单元配置PASS；九流×三RTL均通过Spike寄存器/PC轨迹对照；核级55程序×两宽PASS；两宽NONE RTL top --lint-only -Wall及六个改动RTL风格检查零告警。
+复现：run_model_conformance.py 的 build/run --names 加上述九例；audit_branches.py 只观察原模型调度，输出逐分支等待源与解析级；measure.py 输出前端/I$映射资源和路径级数。
+原始日志、ELF、CSV、PPA摘要与联合死锁源快照保留在 build/fe1/results；接口取消沿新请求与BTB沿前读语义由协调者补冻结记录。

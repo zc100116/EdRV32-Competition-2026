@@ -167,7 +167,7 @@ module edrv32_cpu2_frontend #(
     ib_count_o,
     frontend_active_o
 );
-    localparam TAG_BITS = (FPU_FORMAT == "FD") ? 4 : (FPU_FORMAT == "F") ? 3 : 2;
+    localparam TAG_BITS = (ISSUE_WIDTH == 2 || FPU_FORMAT == "FD") ? 4 : 3;
     localparam RAS_BITS = (ISSUE_WIDTH == 2) ? 256 : 128;
     localparam RAS_PTR_BITS = (ISSUE_WIDTH == 2) ? 3 : 2;
     localparam RAS_COUNT_BITS = RAS_PTR_BITS+1;
@@ -599,11 +599,24 @@ module edrv32_cpu2_frontend #(
 
     assign flush_w = frontend_flush_i || redirect_valid_i ||
         commit_redirect_valid_i || branch_redirect_valid_i;
-    assign query_pc_w = (ISSUE_WIDTH == 2) ? pc_r : {pc_r[31:3], 3'd0};
-    assign query_skip_w = (ISSUE_WIDTH == 1) && pc_r[2];
+    // Registered recovery targets can start F1 while old contexts are canceled.
+    wire recovery_valid_w = commit_redirect_valid_i || redirect_valid_i ||
+        branch_redirect_valid_i || (!frontend_flush_i && correction_r);
+    wire recovery_w = flush_w || correction_r;
+    wire [31:0] recovery_pc_w = commit_redirect_valid_i ? commit_redirect_pc_i :
+        redirect_valid_i ? redirect_pc_i : branch_redirect_valid_i ?
+        branch_redirect_pc_i : correction_r ? correction_pc_r : pc_r;
+    wire [31:0] request_pc_w = recovery_valid_w ? recovery_pc_w : pc_r;
+    wire request_slot_w = recovery_w ? 1'b0 : tail_r;
+    wire redirect_request_w = commit_redirect_valid_i || redirect_valid_i ||
+        branch_redirect_valid_i;
+    wire correction_request_w = !flush_w && correction_r &&
+        (credit_w >= 4'd2 || contexts_r != 0);
+    assign query_pc_w = (ISSUE_WIDTH == 2) ? request_pc_w : {request_pc_w[31:3], 3'd0};
+    assign query_skip_w = (ISSUE_WIDTH == 1) && request_pc_w[2];
     assign sequential_pc_w = query_pc_w + 32'd8;
-    assign ic_req_valid_o = !fetch_stop_i && !flush_w && !correction_r &&
-        contexts_r < 2'd2 && credit_w >= 4'd2;
+    assign ic_req_valid_o = !fetch_stop_i && (redirect_request_w || correction_request_w ||
+        (!recovery_w && contexts_r < 2'd2 && credit_w >= 4'd2));
     assign ic_req_addr_o = query_pc_w;
     assign request_w = ic_req_valid_o && ic_req_ready_i;
     assign ic_cancel_o = flush_w || correction_r;
@@ -637,33 +650,29 @@ module edrv32_cpu2_frontend #(
             clear1_valid_r <= response_w && !oldest_taken_w && context_1_hit_w &&
                 !word1_control_w && context1_raw_taken_w;
             predict_slot_valid_r <= request_w;
-            if (flush_w || correction_r) begin
-                contexts_r <= 2'd0;
-                head_r <= 1'b0;
-                tail_r <= 1'b0;
-                predict_slot_valid_r <= 1'b0;
+            // Direct next-pointer equations avoid a recovery-dependent FF enable chain.
+            head_r <= !recovery_w && (head_r ^ response_w);
+            tail_r <= request_w ^ (tail_r && !recovery_w);
+            if (recovery_w) begin
+                contexts_r <= {1'b0, request_w};
+                predict_slot_valid_r <= request_w;
                 correction_r <= 1'b0;
-                if (commit_redirect_valid_i)
-                    pc_r <= commit_redirect_pc_i;
-                else if (redirect_valid_i)
-                    pc_r <= redirect_pc_i;
-                else if (branch_redirect_valid_i)
-                    pc_r <= branch_redirect_pc_i;
-                else if (correction_r)
-                    pc_r <= correction_pc_r;
+                pc_r <= request_w ? fast_next_pc_w : recovery_pc_w;
             end else begin
-                contexts_r <= contexts_r + {1'b0, request_w} - {1'b0, response_w};
                 if (request_w) begin
                     pc_r <= fast_next_pc_w;
-                    tail_r <= !tail_r;
                 end
-                if (response_w)
-                    head_r <= !head_r;
+                // Precompute count +/- 1 from registered state, keeping recovery off the carry.
+                case({request_w, response_w})
+                    2'b10: contexts_r <= contexts_r + 2'd1;
+                    2'b01: contexts_r <= contexts_r - 2'd1;
+                    default: contexts_r <= contexts_r;
+                endcase
             end
         end
     end
     always @(posedge clk_i) begin
-        predict_slot_r <= tail_r;
+        predict_slot_r <= request_slot_w;
         if (response_w) begin
             correction_cause_r <= (context0_raw_taken_w && !word0_control_w && !context_skip_w) ||
                 (context1_raw_taken_w && !word1_control_w && !oldest_taken_w) ? 2'd3 : 2'd1;
@@ -835,6 +844,7 @@ module edrv32_cpu2_frontend #(
     generate
         if (ISSUE_WIDTH == 2) begin : g_tage
             edrv32_cpu2_tage #(
+                .ISSUE_WIDTH(ISSUE_WIDTH),
                 .FPU_FORMAT(FPU_FORMAT)
             ) u_tage (
                 .clk_i(clk_i),
@@ -970,7 +980,7 @@ module edrv32_cpu2_frontend #(
             for (top_half = 0; top_half < 2; top_half = top_half + 1) begin : g_ras_top
                 reg [15:0] data_r;
                 always @(posedge clk_i) begin
-                    if (request_w && tail_r == SLOT)
+                    if (request_w && request_slot_w == SLOT)
                         data_r <= fast0_ras_top_w[16*top_half +: 16];
                 end
                 assign saved_ras_top_w[32*slot+16*top_half +: 16] = data_r;
@@ -986,7 +996,7 @@ module edrv32_cpu2_frontend #(
                     32-16*base_pc_part : 16;
                 reg [WIDTH-1:0] data_r;
                 always @(posedge clk_i) begin
-                    if (request_w && tail_r == SLOT)
+                    if (request_w && request_slot_w == SLOT)
                         data_r <= base_pc_capture_w[16*base_pc_part +: WIDTH];
                 end
                 assign base_pc_r[16*base_pc_part +: WIDTH] = data_r;
@@ -994,7 +1004,7 @@ module edrv32_cpu2_frontend #(
             assign saved_base_pc_w[32*slot +: 32] = base_pc_r;
             reg [1-1:0] skip_r;
             always @(posedge clk_i) begin
-                if (request_w && tail_r == SLOT)
+                if (request_w && request_slot_w == SLOT)
                     skip_r <= query_skip_w;
             end
             assign saved_skip_w[1*slot +: 1] = skip_r;
@@ -1008,7 +1018,7 @@ module edrv32_cpu2_frontend #(
                     32-16*fast_next_part : 16;
                 reg [WIDTH-1:0] data_r;
                 always @(posedge clk_i) begin
-                    if (request_w && tail_r == SLOT)
+                    if (request_w && request_slot_w == SLOT)
                         data_r <= fast_next_capture_w[16*fast_next_part +: WIDTH];
                 end
                 assign fast_next_r[16*fast_next_part +: WIDTH] = data_r;
@@ -1016,13 +1026,13 @@ module edrv32_cpu2_frontend #(
             assign saved_fast_next_w[32*slot +: 32] = fast_next_r;
             reg [1-1:0] word0_hit_r;
             always @(posedge clk_i) begin
-                if (request_w && tail_r == SLOT)
+                if (request_w && request_slot_w == SLOT)
                     word0_hit_r <= fast0_hit_w;
             end
             assign saved_0_hit_w[1*slot +: 1] = word0_hit_r;
             reg [1-1:0] word0_taken_r;
             always @(posedge clk_i) begin
-                if (request_w && tail_r == SLOT)
+                if (request_w && request_slot_w == SLOT)
                     word0_taken_r <= fast0_taken_w;
             end
             assign saved_0_taken_w[1*slot +: 1] = word0_taken_r;
@@ -1036,7 +1046,7 @@ module edrv32_cpu2_frontend #(
                     32-16*word0_target_part : 16;
                 reg [WIDTH-1:0] data_r;
                 always @(posedge clk_i) begin
-                    if (request_w && tail_r == SLOT)
+                    if (request_w && request_slot_w == SLOT)
                         data_r <= word0_target_capture_w[16*word0_target_part +: WIDTH];
                 end
                 assign word0_target_r[16*word0_target_part +: WIDTH] = data_r;
@@ -1044,13 +1054,13 @@ module edrv32_cpu2_frontend #(
             assign saved_0_target_w[32*slot +: 32] = word0_target_r;
             reg [3-1:0] word0_type_r;
             always @(posedge clk_i) begin
-                if (request_w && tail_r == SLOT)
+                if (request_w && request_slot_w == SLOT)
                     word0_type_r <= fast0_type_w;
             end
             assign saved_0_type_w[3*slot +: 3] = word0_type_r;
             reg [12-1:0] word0_fast_index_r;
             always @(posedge clk_i) begin
-                if (request_w && tail_r == SLOT)
+                if (request_w && request_slot_w == SLOT)
                     word0_fast_index_r <= fast0_fast_index_w;
             end
             assign saved_0_fast_index_w[12*slot +: 12] = word0_fast_index_r;
@@ -1064,7 +1074,7 @@ module edrv32_cpu2_frontend #(
                     RAS_BITS-16*word0_ras_data_part : 16;
                 reg [WIDTH-1:0] data_r;
                 always @(posedge clk_i) begin
-                    if (request_w && tail_r == SLOT)
+                    if (request_w && request_slot_w == SLOT)
                         data_r <= word0_ras_data_capture_w[16*word0_ras_data_part +: WIDTH];
                 end
                 assign word0_ras_data_r[16*word0_ras_data_part +: WIDTH] = data_r;
@@ -1080,7 +1090,7 @@ module edrv32_cpu2_frontend #(
                     RAS_PTR_BITS-16*word0_ras_ptr_part : 16;
                 reg [WIDTH-1:0] data_r;
                 always @(posedge clk_i) begin
-                    if (request_w && tail_r == SLOT)
+                    if (request_w && request_slot_w == SLOT)
                         data_r <= word0_ras_ptr_capture_w[16*word0_ras_ptr_part +: WIDTH];
                 end
                 assign word0_ras_ptr_r[16*word0_ras_ptr_part +: WIDTH] = data_r;
@@ -1096,7 +1106,7 @@ module edrv32_cpu2_frontend #(
                     RAS_COUNT_BITS-16*word0_ras_count_part : 16;
                 reg [WIDTH-1:0] data_r;
                 always @(posedge clk_i) begin
-                    if (request_w && tail_r == SLOT)
+                    if (request_w && request_slot_w == SLOT)
                         data_r <= word0_ras_count_capture_w[16*word0_ras_count_part +: WIDTH];
                 end
                 assign word0_ras_count_r[16*word0_ras_count_part +: WIDTH] = data_r;
@@ -1161,13 +1171,13 @@ module edrv32_cpu2_frontend #(
             assign saved_0_tage_base_w[12*slot +: 12] = word0_tage_base_r;
             reg [1-1:0] word1_hit_r;
             always @(posedge clk_i) begin
-                if (request_w && tail_r == SLOT)
+                if (request_w && request_slot_w == SLOT)
                     word1_hit_r <= fast1_hit_w;
             end
             assign saved_1_hit_w[1*slot +: 1] = word1_hit_r;
             reg [1-1:0] word1_taken_r;
             always @(posedge clk_i) begin
-                if (request_w && tail_r == SLOT)
+                if (request_w && request_slot_w == SLOT)
                     word1_taken_r <= fast1_taken_w;
             end
             assign saved_1_taken_w[1*slot +: 1] = word1_taken_r;
@@ -1181,7 +1191,7 @@ module edrv32_cpu2_frontend #(
                     32-16*word1_target_part : 16;
                 reg [WIDTH-1:0] data_r;
                 always @(posedge clk_i) begin
-                    if (request_w && tail_r == SLOT)
+                    if (request_w && request_slot_w == SLOT)
                         data_r <= word1_target_capture_w[16*word1_target_part +: WIDTH];
                 end
                 assign word1_target_r[16*word1_target_part +: WIDTH] = data_r;
@@ -1189,13 +1199,13 @@ module edrv32_cpu2_frontend #(
             assign saved_1_target_w[32*slot +: 32] = word1_target_r;
             reg [3-1:0] word1_type_r;
             always @(posedge clk_i) begin
-                if (request_w && tail_r == SLOT)
+                if (request_w && request_slot_w == SLOT)
                     word1_type_r <= fast1_type_w;
             end
             assign saved_1_type_w[3*slot +: 3] = word1_type_r;
             reg [12-1:0] word1_fast_index_r;
             always @(posedge clk_i) begin
-                if (request_w && tail_r == SLOT)
+                if (request_w && request_slot_w == SLOT)
                     word1_fast_index_r <= fast1_fast_index_w;
             end
             assign saved_1_fast_index_w[12*slot +: 12] = word1_fast_index_r;
@@ -1258,12 +1268,41 @@ module edrv32_cpu2_frontend #(
             assign saved_1_tage_base_w[12*slot +: 12] = word1_tage_base_r;
         end
     endgenerate
+    // Decode a direct JAL before ID captures the F2 result (model d_penalty=1).
+    wire [31:0] physical0_instr_w = ic_resp_bank0_way_hit_i[1] ?
+        ic_resp_bank0_way1_instr_i : ic_resp_bank0_way0_instr_i;
+    wire [31:0] physical1_instr_w = ic_resp_bank1_way_hit_i[1] ?
+        ic_resp_bank1_way1_instr_i : ic_resp_bank1_way0_instr_i;
+    wire [63:0] decoded_instr_w = context_base_pc_w[2] ?
+        {physical0_instr_w, physical1_instr_w} : {physical1_instr_w, physical0_instr_w};
+    wire [1:0] direct_jal_w;
+    wire [1:0] direct_hit_w = {context_1_hit_w, context_0_hit_w};
+    wire [63:0] direct_target_w;
+    wire [5:0] decoded_type_w;
+    genvar decode_word;
+    generate
+        for (decode_word = 0; decode_word < 2; decode_word = decode_word+1) begin : g_direct
+            wire [31:0] instr_w;
+            wire [31:0] pc_w;
+            wire link_w;
+            assign instr_w = decoded_instr_w[32*decode_word +: 32];
+            assign pc_w = context_base_pc_w + 4*decode_word;
+            assign direct_jal_w[decode_word] = !direct_hit_w[decode_word] &&
+                instr_w[6:0] == 7'b1101111;
+            assign link_w = instr_w[11:7] == 5'd1 || instr_w[11:7] == 5'd5;
+            assign decoded_type_w[3*decode_word +: 3] = link_w ? 3'd3 : 3'd1;
+            assign direct_target_w[32*decode_word +: 32] = pc_w +
+                {{11{instr_w[31]}}, instr_w[31], instr_w[19:12], instr_w[20],
+                instr_w[30:21], 1'b0};
+        end
+    endgenerate
     assign context0_pc_w = context_base_pc_w;
-    assign context0_predict_taken_w = context0_raw_taken_w && word0_control_w;
+    assign context0_predict_taken_w = (context0_raw_taken_w || direct_jal_w[0]) && word0_control_w;
     assign context0_raw_taken_w = (context_0_hit_w && context_0_type_w == 3'd0 &&
         ISSUE_WIDTH == 2) ?
         current0_prediction_w : context_0_taken_w;
-    assign context0_predict_target_w = context_0_target_w;
+    assign context0_predict_target_w = direct_jal_w[0] ?
+        direct_target_w[0 +: 32] : context_0_target_w;
     assign context0_predict_token_w = (ISSUE_WIDTH == 2) && context_0_hit_w && context_0_type_w
         == 3'd0;
     assign context0_predict_provider_w = current0_provider_w;
@@ -1294,11 +1333,11 @@ module edrv32_cpu2_frontend #(
     assign current0_base_w = predict_slot_valid_r && predict_slot_r == head_r ?
         tage_base_w[12*0 +: 12] : context_0_tage_base_w;
     assign context1_pc_w = context_base_pc_w + 32'd4;
-    assign context1_predict_taken_w = context1_raw_taken_w && word1_control_w;
+    assign context1_predict_taken_w = (context1_raw_taken_w || direct_jal_w[1]) && word1_control_w;
     assign context1_raw_taken_w = (context_1_hit_w && context_1_type_w == 3'd0 &&
         ISSUE_WIDTH == 2) ?
         current1_prediction_w : context_1_taken_w;
-    assign context1_predict_target_w =
+    assign context1_predict_target_w = direct_jal_w[1] ? direct_target_w[32 +: 32] :
         (context_1_type_w == 3'd4 || context_1_type_w == 3'd5) && context_0_ras_count_w != 0 ?
         context_ras_top_w : context_1_target_w;
     assign context1_predict_token_w = (ISSUE_WIDTH == 2) && context_1_hit_w && context_1_type_w
@@ -1338,7 +1377,9 @@ module edrv32_cpu2_frontend #(
     assign final_next_pc_w = oldest_taken_w ? context0_predict_target_w :
         youngest_taken_w ? context1_predict_target_w : context_base_pc_w + 32'd8;
     assign final_taken_w = oldest_taken_w || youngest_taken_w;
-    assign final_type_w = oldest_taken_w ? context_0_type_w : context_1_type_w;
+    assign final_type_w = oldest_taken_w ?
+        (direct_jal_w[0] ? decoded_type_w[0 +: 3] : context_0_type_w) :
+        (direct_jal_w[1] ? decoded_type_w[3 +: 3] : context_1_type_w);
     assign final_pc_w = oldest_taken_w ? context0_pc_w : context1_pc_w;
     assign final_pop_w = final_taken_w && (final_type_w == 3'd4 || final_type_w == 3'd5);
     assign final_push_w = final_taken_w && (final_type_w == 3'd3 || final_type_w == 3'd5);

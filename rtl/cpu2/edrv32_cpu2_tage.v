@@ -4,6 +4,7 @@
 // The measured F1 folds and F2 parallel shadow comparisons retain their boundary.
 // Clock domain: clk_sys.
 module edrv32_cpu2_tage #(
+    parameter ISSUE_WIDTH = 2,
     parameter [31:0] FPU_FORMAT = "NONE"
 ) (
     clk_i,
@@ -75,7 +76,7 @@ module edrv32_cpu2_tage #(
     cancel_valid_i,
     cancel_tag_i
 );
-    localparam TAG_BITS = (FPU_FORMAT == "FD") ? 4 : (FPU_FORMAT == "F") ? 3 : 2;
+    localparam TAG_BITS = (ISSUE_WIDTH == 2 || FPU_FORMAT == "FD") ? 4 : 3;
     input wire clk_i;
     input wire rst_n_i;
     // Private frontend query interface; both words share resolved history.
