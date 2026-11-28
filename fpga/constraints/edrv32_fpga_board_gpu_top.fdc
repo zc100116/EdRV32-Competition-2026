@@ -6,7 +6,7 @@ create_clock -name {clk_board} [get_ports {clk_i}] -period {37.037037} -waveform
 create_clock -name {clk_ddr_ref} [get_ports {ddr_ref_clk_p_i}] -period {8} -waveform {0 4}
 create_clock -name {clk_rgmii_ref} [get_ports {rgmii_rxc_i}] -period {8} -waveform {0 4}
 create_generated_clock -name {clk_sys} -source [get_ports {clk_i}] [get_pins {u_pll_sys/clkout0}] -multiply_by {100} -divide_by {27}
-create_generated_clock -name {clk_gpu} -source [get_ports {clk_i}] [get_pins {u_pll_gpu/clkout0}] -multiply_by {40} -divide_by {9}
+create_generated_clock -name {clk_gpu} -source [get_ports {clk_i}] [get_pins {u_pll_gpu/clkout0}] -multiply_by {100} -divide_by {27}
 create_generated_clock -name {clk_pix} -source [get_ports {clk_i}] [get_pins {u_pll_video/clkout0}] -multiply_by {11} -divide_by {4}
 create_generated_clock -name {clk_serial} -source [get_ports {clk_i}] [get_pins {u_pll_video/clkout1}] -multiply_by {55} -divide_by {4}
 # Nominal target only: update with Windows actual PLL ratio before G-T1 (ip_pll_aud.md).

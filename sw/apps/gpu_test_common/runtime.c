@@ -671,7 +671,7 @@ void test_frame(void)
     test.cpu_us = (uint32_t)(test_clock_us()-start-gpu_wait_elapsed);
     test.cpu = cpu_mode;
     uint32_t cycles = mmio_read32(EDRV32_GPU_BASE + EDRV32_GPU_PERF_OFFSET(0))-gpu_start;
-    test.gpu_us = cycles ? (cycles+179)/180 : 0; /* gpu-spec 7: initial clk_gpu 180 MHz */
+    test.gpu_us = cycles ? (cycles+99)/100 : 0; /* gpu-soc-spec 5.1 v0.5: clk_gpu 100 MHz */
     test.pixels = mmio_read32(EDRV32_GPU_BASE + EDRV32_GPU_PERF_OFFSET(4))-pixel_start;
     disp_submit(DISP_L0, gpu_physical(test.surface[test.frame & 1]), 1280);
     mmio_write32(EDRV32_DISP_BASE + EDRV32_DISP_GPU_CTRL_OFFSET,
