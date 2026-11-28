@@ -14,9 +14,14 @@ out.mkdir(parents=True, exist_ok=True)
  input clk_i, input wr_en_i, input [3:0] wr_addr_i, input [31:0] wr_data_i,
  input [3:0] rd_addr_i, output [31:0] rd_data_o); endmodule
 ''')
-for top in sys.argv[1:] or ['edrv32_gpu2_fp32_scalar', 'edrv32_gpu2_fp32']:
+sources = sorted([*(root / 'rtl/gpu2').glob('edrv32_gpu2_fp32*.v'),
+                  *(root / 'rtl/gpu2').glob('edrv32_gpu2_sfu*.v')])
+sources += [root / 'fpga/rtl/edrv32_fpga_probe_gpu2_fp32_top.v']
+for top in sys.argv[1:] or ['edrv32_gpu2_fp32_scalar', 'edrv32_gpu2_fp32',
+                                  'edrv32_gpu2_sfu_arithmetic',
+                                  'edrv32_fpga_probe_gpu2_fp32_top']:
     script = (f'read_verilog {out / "tech.v"} '
-              + ' '.join(str(p) for p in sorted((root / 'rtl/gpu2').glob('edrv32_gpu2_fp32*.v')))
+              + ' '.join(str(p) for p in sources)
               + f'; synth -top {top} -flatten -noabc; abc -lut 4; stat; ltp -noff; '
               + f'write_json {out / (top + ".json")}')
     with (out / (top + '.log')).open('w') as log:
