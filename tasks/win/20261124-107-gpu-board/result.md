@@ -50,15 +50,16 @@ Slow Corner，裕量单位 ns。同域估算频率取 PDS Performance Summary。
 | 20:53:16 | 调试工具已连接 COM7，115200 8N1。 |
 | 20:53:40 | 下载前收到了完整启动信息，`CHIP_ID=0xED320001`、`CLK_SYS_HZ=125000000`、`MEM_READY=1`，随后 `Boot SRAM` 并进入 Monitor。 |
 | 20:54:22–20:54:31 | PDS 选择本轮 `board_gpu_round12/generate_bitstream/edrv32_fpga_board_gpu_top.sbit`，JTAG Program 成功，`The done bit is 1`。 |
-| 21:00:37 | COM7 仍连接，缓冲为 21 条记录（其中 1 条为连接状态），累计 RX 561 字节，最后接收仍为 20:53:40.133。下载后无新增串口字节，两个 Windows 有线网卡显示 Disconnected。板端 Link 灯、LED、复位动作时间未取得。 |
+| 21:00:37 | COM7 仍连接，缓冲为 21 条记录（其中 1 条为连接状态），累计 RX 561 字节，最后接收仍为 20:53:40.133。下载后无新增串口字节，Windows 的两个有线网卡在状态快照中显示 Disconnected。板端 Link 灯、LED、复位动作时间未取得。 |
+| 用户补充 | 板子网口在测试期间一直连着。Windows 网卡状态保留为主机侧快照，板端协商速率及 RXC 尚未直接测量。 |
 
 [串口原始缓冲及网卡状态](uart/round12-bios.log) · [JTAG 下载记录](artifacts/round12/raw/jtag-configuration.log) · [Programming 控制台](artifacts/round12/raw/jtag-console.log)
 
 **已确认**：旧版输出来自下载前。下载后没有取得 GPU 版预期的 `CHIP_ID=0xED320002`、`CLK_SYS_HZ=100000000` 或 BIOS 菜单。Boot ROM IP 的 IDF 指向原 `board_gpu/init/ip_rom_boot.dat`，已按 DRM 存储布局从本轮生成的 INIT 参数还原全部 2,048 个 64 位字，与原工程和第 12 轮本地 .dat 均逐字一致，含 BIOS 菜单和启动横幅。此检查针对 PDS 工程的 ROM 初值，板上取指情况未取得。
 
-**待板上确认**：GPU 版在四路 PLL 锁定后才放开板级复位，CPU 还等 DDR 就绪和各域的复位副本释放。ETH 收发复位副本也在 CPU 释放条件中，ETH 时钟由 PHY 的 `RGMII_RXC` 经 PLL 提供。若 RXC 无可用时钟，CPU 可在执行 BIOS 前一直受复位。Windows 网卡断开只表明未观察到 PC 侧链路，板上的 RXC、PLL lock、`ddr_init_done_w`、`mem_ready_r` 和 `rst_sys_n_w` 电平尚未取得。GPU、内存和 RGMII 仍有时序违例，现有证据未定位哪个实际条件首先阻断启动。 [板级复位](../../../fpga/rtl/edrv32_fpga_board_gpu_top.v#L110) · [SoC 复位释放逻辑](../../../rtl/soc/edrv32_soc_reset_ctrl_gpu.v#L155) · [ETH 时钟来源](../../../fpga/rtl/edrv32_fpga_rgmii.v#L50)
+**待板上确认**：GPU 版在四路 PLL 锁定后才放开板级复位，CPU 还等 DDR 就绪和各域的复位副本释放。ETH 收发复位副本也在 CPU 释放条件中，ETH 时钟由 PHY 的 `RGMII_RXC` 经 PLL 提供。若 RXC 无可用时钟，CPU 可在执行 BIOS 前一直受复位。用户报告测试期间网口一直连着。Windows 网卡快照无法判定板端连接或 RXC 状态。板上的 RXC、PLL lock、`ddr_init_done_w`、`mem_ready_r` 和 `rst_sys_n_w` 电平尚未取得。GPU、内存和 RGMII 仍有时序违例，现有证据未定位哪个实际条件首先阻断启动。 [板级复位](../../../fpga/rtl/edrv32_fpga_board_gpu_top.v#L110) · [SoC 复位释放逻辑](../../../rtl/soc/edrv32_soc_reset_ctrl_gpu.v#L155) · [ETH 时钟来源](../../../fpga/rtl/edrv32_fpga_rgmii.v#L50)
 
-后续定位顺序为确认板端千兆链路后复位，检查是否出现 GPU BIOS；仍无输出时观察四路 PLL lock、`ddr_init_done_w` / `mem_ready_r`、ETH 复位副本和 `rst_sys_n_w`。这次用现有串口缓冲和工程报告定位，未取得新的板上探针数据。
+后续先观察 CPU 的低有效复位 `rst_sys_n_w`。若持续为低，分别核对四路 PLL lock、板级复位、`ddr_init_done_w` / `mem_ready_r`、ETH 时钟和各域复位副本。若已释放，则检查 Boot ROM 取指和 UART TX 是否有活动。板上探针数据未取得。
 
 | 上板测试 | 结果 |
 |---|---|
