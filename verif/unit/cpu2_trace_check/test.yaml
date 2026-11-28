@@ -1,0 +1,12 @@
+top: tb
+files: files.f
+defines:
+parameters:
+software: synthetic known trace; real Spike 1.1.1-dev log fixture
+seed: 0
+model: Spike 1.1.1-dev 520a5f1; independent synthetic events
+timeout: 60
+pass: PASS
+tier: smoke full
+simulator: verilator
+runner: python3 verif/unit/cpu2_trace_check/smoke.py --converter-only

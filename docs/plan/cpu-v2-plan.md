@@ -57,10 +57,10 @@
 |---|---|---|---|---|---|---|
 | I01 | frontend/predictor/tage/tage_update/fetch/ib：单发射gshare4096无TAGE/BTB64/RAS4/IB4+4预留/64位8B对齐；双发射TAGE4×512+gshare4096/BTB128/RAS8/IB8+4预留/双bank及owner候选 | D | S01/P04/P06/P08 | CV07/CV08单元通过；单发射精简前端全部边界，双发射XOR折叠/训练待写/跨行逐字错误/寄存信用与恢复符合逐信号表 | zc100116/gpu-dev 共用工作树 | [x] 73d171b8f（I01 终端失效后由 I01b 复核提交），六配置 lint/smoke 通过 |
 | I02 | decode/issue/rf/id_agu/alu/branch：单发射2R1W与双发射4R2W LVT；程序槽/管线映射、配对、双域记分牌与本地晚操作数等待 | D | S01/P02/P08 | CV02–CV05通过；老A+年轻LSU互换、WAW按槽、early失败不重发、单发射无晚执行 | zc100116/gpu-dev 共用工作树 | [x] b533b26cf，六模块29项Verilator/26项Icarus通过 |
-| I03 | mul/div：单MUL全流水，单发射radix-2/双发射radix-4位长提前结束DIV；双发射共享输入按年龄选、单发射单入口 | D | S01 | CV06通过；MUL延迟4/II1，DIV正常单发射L=3+k、双发射L=3+ceil(k/2)/特殊L2、背压保持；回放独立修正拍并更新性能模型 | zc100116/gpu-dev 共用工作树 | [~] ctx_217cc3a26351 |
+| I03 | mul/div：单MUL全流水，单发射radix-2/双发射radix-4位长提前结束DIV；双发射共享输入按年龄选、单发射单入口 | D | S01 | CV06通过；MUL延迟4/II1，DIV正常单发射L=3+k、双发射L=3+ceil(k/2)/特殊L2、背压保持；回放独立修正拍并更新性能模型 | zc100116/gpu-dev 共用工作树 | [x] 6f801ca84：CV06六配置12项通过；C07回放CoreMark不变，视觉+4686周期，报告 docs/reports/2026-11-28-perf-cpu2-div-schedule.md |
 | I04 | completion/commit/csr：NONE4项FF、F8/FD16共享bank；单发射2HPM（3–4）/双发射8HPM（3–10）、CSR/FS、年龄取消、精确中断与重定向 | D | S01 | CV09/CV10/CV14通过；head相对年龄/原子取消/完整提交边界、已捕获CSR源和FS逐事件正确；六配置端口容量一致 | zc100116/gpu-dev 共用工作树 | [x] 1eac54f59 + 评审返工 620f76631（记录瘦身，Yosys参考FF −1440） |
 | I05 | lsu/icache/dcache/cache_ctrl：单LSU提前关联、RAM元数据、512组扫描、写缓冲、APB维护、FD两beat准备/授权/done | D | S01/P02/P06 | CV04/CV11/CV12通过；逐tag/beat关联、16组段、done/BUSY、设备头授权及AXI/APB逐信号不变；测维护附加拍数 | zc100116/gpu-dev 共用工作树 | [x] 1f9dee737/76f2d8d63/5d739774d/51625520f，9项smoke通过，维护周期见第4节 |
-| I06 | top：单发射精简/双发射满配的NONE核连线集成与独立核级验证 | V | I01/I02/I03/I04/I05/V02/V03 | 单发射+NONE、双发射+NONE均完整CPU smoke/full，固定Zba必测，Spike零不一致 | task-cpu-v2-none-integration / 派发时分支 | [ ] |
+| I06 | top：单发射精简/双发射满配的NONE核连线集成与独立核级验证 | V | I01/I02/I03/I04/I05/V02/V03 | 单发射+NONE、双发射+NONE均完整CPU smoke/full，固定Zba必测，Spike零不一致 | zc100116/gpu-dev 共用工作树 | [~] 顶层连线+核级smoke（NONE）ctx_dd8183a2007f；V01接入与V02/V03完整回归后续 |
 
 ### 3.4 FPU 单元、验证与整数核集成
 

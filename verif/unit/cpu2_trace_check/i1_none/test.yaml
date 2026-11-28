@@ -1,0 +1,13 @@
+top: tb
+files: ../files.f
+defines:
+parameters: ISSUE_WIDTH=1 FPU_FORMAT=NONE
+software: synthetic ordered events and field mutations
+seed: 0
+model: independent trace/BFM events
+timeout: 90
+pass: PASS
+tier: smoke full
+simulator: verilator
+group: cpu2_trace_i1_none
+runner: python3 verif/unit/cpu2_trace_check/smoke.py --issue-width 1 --format NONE
