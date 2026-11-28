@@ -447,6 +447,8 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 
 **I$ 跨行 LRU（I05）。** 双 bank 跨行组命中的两行组号相邻、奇偶不同。I$ 双 bank 的 LRU 按组号奇偶分两块，每块用 `edrv32_ram_cpu2_cache_lru`，地址 `{1'b0, set[8:1]}`，跨行命中同沿各写一块，不串行。总容量不变；单 bank I$ 与 D$ 各一块整 512 组。
 
+**RAS 恢复（I01）。** branch→frontend 随 `branch_redirect_*` 增 `branch_redirect_ras_data`（32×RAS_DEPTH）、`branch_redirect_ras_ptr`（log2深度）、`branch_redirect_ras_count`（log2(深度+1)），即该分支执行前的快照；另增 `branch_redirect_ras_pop`1、`branch_redirect_ras_push`1、`branch_redirect_link`32（分支 PC+4）。frontend 恢复快照后按本条类型先 pop 再 push。commit 重定向（陷阱、MRET、FENCE.I、串行化重取）不恢复 RAS，沿用当前内容：RAS 只是预测状态，不影响架构正确性，commit 不携带 RAS 快照。
+
 ## 影响
 
 审核通过后需修改CPU spec2.2/2.3、3、4、5、6及9的C01–C09；FPU spec2.4、3、4、5.1/5.4/5.5及9的F01/F02/F04/F05；CPU testplan2/4/6/7的T02/T03及对应CV02–CV14；FPU testplan4/6/7的FT01/FT03及FV10–FV15。C10、F03/F06与FT03中的未测数值继续待定；旧cpu/cache规格不改，外部总线无差异。
