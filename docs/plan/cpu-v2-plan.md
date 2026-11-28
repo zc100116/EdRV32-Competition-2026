@@ -47,7 +47,7 @@
 | 编号 | 内容 | 执行者 | 依赖 | 验收标准 | 拟Task/分支 | 状态 |
 |---|---|---|---|---|---|---|
 | S01 | CPU/FPU v0.2规格、验证/实施方案及逐信号接口冻结；两种CPU×三格式固定结构 | C | P11 | C01–C09及F01/F02/F04/F05、T02/T03/FT01/FT03按用户2026-11-28决定转录；C10/F03/F06仍待测 | task-cpu-v2-spec-freeze / 协调者分支 | [x] 用户2026-11-28确认；v0.2审核草稿已形成 |
-| V01 | 按规格trace建立双域64位退休、CSR/FS、异常及逐beat副作用Spike比较器 | V | S01 | 已知正确/故意错误trace验证比较器，覆盖双退休、老退休+年轻异常及FSD部分写 | task-cpu-v2-verif-env / 派发时分支 | [ ] |
+| V01 | 按规格trace建立双域64位退休、CSR/FS、异常及逐beat副作用Spike比较器 | V | S01 | 已知正确/故意错误trace验证比较器，覆盖双退休、老退休+年轻异常及FSD部分写 | zc100116/gpu-dev 共用工作树 | [~] ctx_aaaef4b1a8e4 |
 | V02 | 架构测试适配和受约束随机指令环境 | V | S01/V01 | I/M/Zicsr/Zba/F/D集、seed复现，配对/晚执行/提前地址/冲刷交叉生成 | task-cpu-v2-verif-isa / 派发时分支 | [ ] |
 | V03 | 建立单/双发射×NONE/F/FD六种固定配置的构建/lint/完整回归档位与性能输入 | V | S01/V01 | 两testplan所有测试项有test.yaml，6种全部full及seed0..9预算、Zba对应trace与perf区间固定 | task-cpu-v2-verif-matrix / 派发时分支 | [ ] |
 
@@ -55,11 +55,11 @@
 
 | 编号 | 内容 | 执行者 | 依赖 | 验收标准 | 拟Task/分支 | 状态 |
 |---|---|---|---|---|---|---|
-| I01 | frontend/predictor/tage/tage_update/fetch/ib：单发射gshare4096无TAGE/BTB64/RAS4/IB4+4预留/64位8B对齐；双发射TAGE4×512+gshare4096/BTB128/RAS8/IB8+4预留/双bank及owner候选 | D | S01/P04/P06/P08 | CV07/CV08单元通过；单发射精简前端全部边界，双发射XOR折叠/训练待写/跨行逐字错误/寄存信用与恢复符合逐信号表 | task-cpu-v2-frontend / 派发时分支 | [ ] |
-| I02 | decode/issue/rf/id_agu/alu/branch：单发射2R1W与双发射4R2W LVT；程序槽/管线映射、配对、双域记分牌与本地晚操作数等待 | D | S01/P02/P08 | CV02–CV05通过；老A+年轻LSU互换、WAW按槽、early失败不重发、单发射无晚执行 | task-cpu-v2-backend / 派发时分支 | [ ] |
-| I03 | mul/div：单MUL全流水，单发射radix-2/双发射radix-4位长提前结束DIV；双发射共享输入按年龄选、单发射单入口 | D | S01 | CV06通过；MUL延迟4/II1，DIV正常单发射L=3+k、双发射L=3+ceil(k/2)/特殊L2、背压保持；回放独立修正拍并更新性能模型 | task-cpu-v2-muldiv / 派发时分支 | [ ] |
-| I04 | completion/commit/csr：NONE4项FF、F8/FD16共享bank；单发射2HPM（3–4）/双发射8HPM（3–10）、CSR/FS、年龄取消、精确中断与重定向 | D | S01 | CV09/CV10/CV14通过；head相对年龄/原子取消/完整提交边界、已捕获CSR源和FS逐事件正确；六配置端口容量一致 | task-cpu-v2-commit / 派发时分支 | [ ] |
-| I05 | lsu/icache/dcache/cache_ctrl：单LSU提前关联、RAM元数据、512组扫描、写缓冲、APB维护、FD两beat准备/授权/done | D | S01/P02/P06 | CV04/CV11/CV12通过；逐tag/beat关联、16组段、done/BUSY、设备头授权及AXI/APB逐信号不变；测维护附加拍数 | task-cpu-v2-lsu-l1 / 派发时分支 | [ ] |
+| I01 | frontend/predictor/tage/tage_update/fetch/ib：单发射gshare4096无TAGE/BTB64/RAS4/IB4+4预留/64位8B对齐；双发射TAGE4×512+gshare4096/BTB128/RAS8/IB8+4预留/双bank及owner候选 | D | S01/P04/P06/P08 | CV07/CV08单元通过；单发射精简前端全部边界，双发射XOR折叠/训练待写/跨行逐字错误/寄存信用与恢复符合逐信号表 | zc100116/gpu-dev 共用工作树 | [~] ctx_705d05ba2d17 |
+| I02 | decode/issue/rf/id_agu/alu/branch：单发射2R1W与双发射4R2W LVT；程序槽/管线映射、配对、双域记分牌与本地晚操作数等待 | D | S01/P02/P08 | CV02–CV05通过；老A+年轻LSU互换、WAW按槽、early失败不重发、单发射无晚执行 | zc100116/gpu-dev 共用工作树 | [x] b533b26cf，六模块29项Verilator/26项Icarus通过 |
+| I03 | mul/div：单MUL全流水，单发射radix-2/双发射radix-4位长提前结束DIV；双发射共享输入按年龄选、单发射单入口 | D | S01 | CV06通过；MUL延迟4/II1，DIV正常单发射L=3+k、双发射L=3+ceil(k/2)/特殊L2、背压保持；回放独立修正拍并更新性能模型 | zc100116/gpu-dev 共用工作树 | [~] ctx_217cc3a26351 |
+| I04 | completion/commit/csr：NONE4项FF、F8/FD16共享bank；单发射2HPM（3–4）/双发射8HPM（3–10）、CSR/FS、年龄取消、精确中断与重定向 | D | S01 | CV09/CV10/CV14通过；head相对年龄/原子取消/完整提交边界、已捕获CSR源和FS逐事件正确；六配置端口容量一致 | zc100116/gpu-dev 共用工作树 | [x] 1eac54f59 + 评审返工 620f76631（记录瘦身，Yosys参考FF −1440） |
+| I05 | lsu/icache/dcache/cache_ctrl：单LSU提前关联、RAM元数据、512组扫描、写缓冲、APB维护、FD两beat准备/授权/done | D | S01/P02/P06 | CV04/CV11/CV12通过；逐tag/beat关联、16组段、done/BUSY、设备头授权及AXI/APB逐信号不变；测维护附加拍数 | zc100116/gpu-dev 共用工作树 | [x] 1f9dee737/76f2d8d63/5d739774d/51625520f，9项smoke通过，维护周期见第4节 |
 | I06 | top：单发射精简/双发射满配的NONE核连线集成与独立核级验证 | V | I01/I02/I03/I04/I05/V02/V03 | 单发射+NONE、双发射+NONE均完整CPU smoke/full，固定Zba必测，Spike零不一致 | task-cpu-v2-none-integration / 派发时分支 | [ ] |
 
 ### 3.4 FPU 单元、验证与整数核集成
@@ -67,10 +67,10 @@
 | 编号 | 内容 | 执行者 | 依赖 | 验收标准 | 拟Task/分支 | 状态 |
 |---|---|---|---|---|---|---|
 | F01 | fpu_rf与issue源捕获接口：F固定3R、FD固定2R；统一S源副本和未读rs3生产版本 | D | S01/P08 | FV10/FV12通过；F N8/FD N16、单/双发射源数正确；rs3生产者退休同沿不丢值 | task-cpu-v2-fp-rf / 派发时分支 | [ ] |
-| F02 | fpu_fma32/fpu_convert/fpu_short及lz24/lza32：S ADD/MUL/FMA共享尾端、转换与短操作 | D | S01/P10 | FV02/FV04–FV07/FV09/FV11/FV16通过；逐位/flags及F03开发初值拍数报告；回收探针LUT | task-cpu-v2-fp32 / 派发时分支 | [ ] |
-| F03 | fpu_divsqrt：独立基4 S/D recurrence及本地完成/年龄取消 | D | S01/P10 | FV08逐位/flags通过；S19/D35初值按真实准备/迭代/尾端记录，完成背压与取消不丢结果 | task-cpu-v2-fp-divsqrt / 派发时分支 | [ ] |
+| F02 | fpu_fma32/fpu_convert/fpu_short及lz24/lza32：S ADD/MUL/FMA共享尾端、转换与短操作 | D | S01/P10 | FV02/FV04–FV07/FV09/FV11/FV16通过；逐位/flags及F03开发初值拍数报告；回收探针LUT | zc100116/gpu-dev 共用工作树 | [~] ctx_483ddc4f8fbb |
+| F03 | fpu_divsqrt：独立基4 S/D recurrence及本地完成/年龄取消 | D | S01/P10 | FV08逐位/flags通过；S19/D35初值按真实准备/迭代/尾端记录，完成背压与取消不丢结果 | zc100116/gpu-dev 共用工作树 | [~] ctx_b0b9b0650e90 |
 | F04 | fpu_fma64：D独立12APM完整106位积和D ADD/MUL/FMA共享尾端；只在FD实例化 | D | S01/F02 | FV06/FV07/FV09/FV16 D通过；Δe0/8/16及单次舍入正确，F03 D延迟/II实测输入齐全 | task-cpu-v2-fp64 / 派发时分支 | [ ] |
-| F05 | SoftFloat/TestFloat Release3e RISC-V包装及独立F/D参考/验证程序 | V | S01/V01 | FV01–FV09可运行；FT01 level2与每类seed0..9各10000操作；F仅S、FD S/D、NONE无状态的期望完整 | task-cpu-v2-fp-verif / 派发时分支 | [ ] |
+| F05 | SoftFloat/TestFloat Release3e RISC-V包装及独立F/D参考/验证程序 | V | S01/V01 | FV01–FV09可运行；FT01 level2与每类seed0..9各10000操作；F仅S、FD S/D、NONE无状态的期望完整 | zc100116/gpu-dev 共用工作树 | [~] ctx_ddeb943e6397 |
 | F06 | D关键段PDS、APM/RAM逐拍等价和统一源副本资源测量 | W | F03/F04/F01 | carry84/carry57、D级联/尾端全部setup/hold与真实宏碎片；F03/F06未测数值据报告定稿 | Windows任务卡编号待派发 / win分支待派发 | [ ] |
 | F07 | fpu_top接入top/issue/completion/commit/csr/lsu：FP管线0及程序槽互换、单FP写口、FS、两beat | D | I01/I02/I03/I04/I05/F01/F02/F03/F04/F05 | CV13/FV10–FV15联调通过；F/FD各在单/双发射正确，FSD高错允许低beat副作用，整数RF/D$不增副本 | task-cpu-v2-fp-integration / 派发时分支 | [ ] |
 | F08 | 独立F/FD核级/SoC验证并汇总全部六种配置完整回归 | V | F07/F06/I06/V02/V03 | CPU/FPU全部适用full及架构测试、随机预算通过；NONE/F/FD均与两种CPU交叉，flags/FS/部分写符合Spike和内存记分板 | task-cpu-v2-fp-validation / 派发时分支 | [ ] |
