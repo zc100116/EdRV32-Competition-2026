@@ -58,7 +58,11 @@ def check(path):
             report(number, 'declare one signal per line')
         port = re.match(r'\s*(input|output|inout)\b(.*)', line)
         if port:
-            names = re.findall(r'\b[A-Za-z_]\w*\b', port[2].split('=')[0])
+            body = re.sub(r'\[[^\[\]]*\]', '', port[2])
+            while '[' in body:
+                body = re.sub(r'\[[^\[\]]*\]', '', body)
+            body = re.split(r'(?<![=!<>])=(?!=)', body)[0]
+            names = re.findall(r'\b[A-Za-z_]\w*\b', body)
             name = names[-1] if names else ''
             suffixes = ('_i',) if port[1] == 'input' else ('_o', '_oe')
             if not name.endswith(suffixes):
