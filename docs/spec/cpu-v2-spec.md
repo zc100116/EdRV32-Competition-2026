@@ -245,10 +245,11 @@ FPU内部 top→fma32/fma64/divsqrt/convert/short 使用 `unit_req_valid/ready/i
 | dc_early_valid / dc_early_addr / dc_early_tag | A→D$ | 1/32/T | 发射沿查询，使用同一物理读口 |
 | dc_early_resp_valid / dc_early_resp_tag / dc_early_hit / dc_early_way0_data / dc_early_way1_data | D$→A | 1/T/2/32/32 | 下一拍固定返回，失败hit00，LSU捕获后才供消费者 |
 | dc_fence_valid / dc_fence_ready / dc_fence_clean_all | commit→D$ / 反向 / commit→D$ | 各1 | clean_all0排空写缓冲，1全clean |
+| lsu_store_drained | A→D$ | 1 | 寄存：LSU已提交未排空store项为空；与写缓冲空共同门控fence/维护，已准备未提交项不计 |
 | dc_fence_done | D$→commit | 1 | 已接受fence完成脉冲，无错误旁路 |
 | dc_wb_event / dc_miss_event | D$→CSR | 各1 | 写回AW/新miss事件，非请求等待拍数 |
 
-D$寄存准入需预留同步RAM返回及发现miss后一拍的已接受请求槽；不沿旧核静默丢第二请求。early占用读口时不再接受另一普通读，选择来自已登记的端口预约；其后实际请求 `dc_req_early=1` 时重用捕获结果，失败则普通访问本地顺延。缓存响应device只是准备阶段，LSU不把它当完成数据；提交头授权后才发设备AXI，最终dc_done后才退休。可缓存store直到提交不改架构内存。LSU store队列必须保存已准备未提交及已提交未排空的可缓存store beat，开发初值4项 **[待定]**（由模型在2/4项中扫描定稿）；已提交项按序每拍至多一项经dc_commit排入写缓冲，取消只清未提交项。年轻load（含early查询）与队列中任一项同字时，不得复用early结果，必须在LSU本地等待这些项排入写缓冲后再走普通访问，由写缓冲按字节合并；load返回路径不增加队列合并。队列满时只有store不能接收（ready来自寄存计数）。FENCE/维护必须等队列和写缓冲都空。
+D$寄存准入需预留同步RAM返回及发现miss后一拍的已接受请求槽；不沿旧核静默丢第二请求。early占用读口时不再接受另一普通读，选择来自已登记的端口预约；其后实际请求 `dc_req_early=1` 时重用捕获结果，失败则普通访问本地顺延。缓存响应device只是准备阶段，LSU不把它当完成数据；提交头授权后才发设备AXI，最终dc_done后才退休。可缓存store直到提交不改架构内存。LSU store队列必须保存已准备未提交及已提交未排空的可缓存store beat，开发初值4项 **[待定]**（由模型在2/4项中扫描定稿）；已提交项按序每拍至多一项经dc_commit排入写缓冲，取消只清未提交项。年轻load（含early查询）与队列中任一项同字时，不得复用early结果，必须在LSU本地等待这些项排入写缓冲后再走普通访问，由写缓冲按字节合并；load返回路径不增加队列合并。队列满时只有store不能接收（ready来自寄存计数）。FENCE/维护必须等已提交队列项和写缓冲都空（lsu_store_drained）。
 
 ### 3.8 前端与 I$、维护控制
 
