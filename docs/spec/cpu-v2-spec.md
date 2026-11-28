@@ -176,7 +176,7 @@ L为整数LSU，D为DIV，P为FP算术/转换/FP访存，S为CSR/系统/FENCE；
 | div_req_valid / ready / tag / instr / src1 / src2 | issue↔DIV | 同上 | 单入口局部忙不冻结其他模块 |
 | lsu_req_valid / ready / tag / instr / addr / store_data / early | issue↔LSU | 1/1/T/32/32/B/1 | FP数据按B捕获；普通整数仅低32，单指令入口 |
 | early_req_valid / early_req_addr / early_req_tag | ID AGU→LSU | 1/32/T | 只在本沿load实际发射时有效，共用分配tag |
-| early_resp_valid / early_resp_tag / early_resp_hit / early_resp_data | LSU→MEM操作数捕获 | 1/T/1/32 | 下一拍本地捕获；hit0不得置生产项完成 |
+| early_resp_valid / early_resp_tag / early_resp_hit / early_resp_data | LSU→MEM操作数捕获（双发射）/ issue本地待发项（单发射） | 1/T/1/32 | 下一拍本地捕获；hit0不得置生产项完成；单发射消费者下一拍由寄存hit/data驱动EX源，未命中等普通完成 |
 | age_head / cancel_valid / cancel_tag | completion→全部在途模块 | T/1/T | 通用包含边界取消；RF仅提交写无须取消端口 |
 
 MEM等待位保留 `operand{j}_{p}_tag/valid`（T/1），p=1,2，监听已接受完成源的 `*_complete_tag/data`（T/32），命中就捕获并清wait；进入等待位时已完成源随execute输入捕获，不额外增加队列异步读口。已完成项将退休时，同沿WB数据必须供尚未捕获的等待源使用，不能释放后再按旧tag读。取消沿清等待valid。
