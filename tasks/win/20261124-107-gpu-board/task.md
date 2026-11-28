@@ -269,6 +269,19 @@
   - 第一项先确认：**下载后 BIOS 是否有串口输出**。没有的话，记下板上 LED 状态，按复位键再试一次，把现象写进 result.md，然后停止，不用继续后面的步骤。
 - **回传（上板）**：`uart/round12-<步骤>.log`、`photo/round12-*`、`video/round12-*`（单个视频超过 100 MB 只写本地路径）；result.md 的"上板"表按步骤填写，`gpu_test` 四个场景各占一行。
 
+## 6l. 第 13 轮（2026-11-28，复位死锁修复 + clk_gpu 100 MHz）
+
+- **背景**：第 12 轮下载后无串口输出。根因已在仿真中确认：`rst_sys_n` 等待 ETH 域复位副本，ETH 时钟来自 PHY 的 RXC，而 PHY 由 ETH 寄存器 `PHY_CTRL.PHY_RST`（复位值 1）保持复位，要 BIOS 运行后才释放，CPU 与 PHY 互相等待，与是否插网线无关。
+- **本轮改动**：
+  - 复位修复 `08c014e79`：`rst_sys_n` 只等 clk_mem/clk_gpu/clk_aud/clk_pix 的复位副本，不等 ETH；新增单元测试 `verif/unit/soc_reset_ctrl_gpu/eth_clk_off`（旧 RTL 失败、新 RTL 通过）。
+  - **clk_gpu 100 MHz**（原 120，用户 2026-11-28，与 clk_sys 相同）；clk_sys 100、clk_mem 125 不变。规格 gpu-soc-spec v0.5，约束已同步。
+  - `src/gpu_test.elf` 重新编译（HUD 的 GPU 时间按 100 MHz 换算），其余 3 个 ELF 沿用第 12 轮。
+- **IP（用户 GUI）**：只重新生成 `ip_pll_gpu`：CLKOUT0 改为 **100.000 MHz**，其余选项按 `fpga/ip/ip_pll_gpu.md`。`ip_pll_sys` 保持第 12 轮的 100 MHz。其余 IP 沿用第 12 轮工程。IP Compiler 显示的实际频率不是 100.000 MHz 时，停下来，把显示的频率和分频参数写进 result.md。
+- **工程**：复制第 12 轮工程为 `board_gpu_round13`。取本卡最新提交，移除旧源文件，重新执行导入脚本，从 Compile 开始。
+- **布局布线只跑一组，参数与第 12 轮相同**：`-plc_decongestion 4 -slack_weight 10 -pin_cost_increasing_speed 600 -logic_optimize_lut6d_combing_strategy 0 -dump_router_congestion_plot true`，GUI 中取消勾选 Design Cells Duplication。
+- **回传（布线后）**：同第 6k 节（是否布通、全部 `Use of` 行、各域 WNS/TNS/WHS/THS 与估算频率、clk_sys/clk_gpu/clk_mem 各 200 条 setup、各域前 20 条明细、20 条 hold）。
+- **上板**：照第 6k 节做，文件名前缀改为 `round13`，即使还有违例也照做。下载后先确认 BIOS 串口输出（应为 `CHIP_ID=0xED320002`、`CLK_SYS_HZ=100000000`）；没有输出时记下 LED 状态，按复位键再试一次，写进 result.md 后停止。有输出则继续第 5～8 步和 `gpu_test` 四个场景，每个场景记录 HUD 上的 FPS、CPU ms、GPU µs（拍照或串口原文）。
+
 ## 7. 通过判据
 
 - 布局布线完成（时序不满足也要完整回传报告，不判失败）。
