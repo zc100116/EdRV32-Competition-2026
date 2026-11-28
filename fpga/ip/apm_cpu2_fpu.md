@@ -37,3 +37,31 @@ E5 tail P/CPO、低 16 位残数。PDS 须实测内部寄存路径与专用 CPI/
 覆盖非规格化 significand 的输入规格化、完整低积及流水错拍。
 `python3 verif/unit/cpu2_fpu_fma32/levels.py` 把原语作为时钟边界，生成 XC7 LUT6/进位链
 代理级数；原语内部不映射成 LUT、不重复计入 CLM FF。最终 PDS 结果由协调者任务卡回传。
+
+## D：12 颗 APM、完整 106 位积
+
+`edrv32_cpu2_fpu_fma64` 使用 `edrv32_apm_cpu2_u53xu53`，固定拆分
+`(24+24+5) × (16+16+16+5)`，十二项的位权依次为
+`0,16,24,32,40,48,48,56,64,72,80,96`。相邻位权差为
+`16,8,8,8,8,0,8,8,8,8,16`；e=48 的第二项必须用直通 CPI，不能右移8位。
+
+新增原生包装 `edrv32_apm_cpu2_shift8`（MODEZ=7，CPI>>>8）和
+`edrv32_apm_cpu2_direct`（MODEZ=3，CPI 不移位）；head/shift16 仍为 MODEZ=0/6。
+其余原语参数、MODEY、MODEIN、复位与 CE 连接与上文相同。直通 MODEZ=3 同仓库
+`ip_mac_npu_int8_chain.md` 的原生 CPI 配置。
+
+首项在规格化末沿直接采样 APM X/Y；第 k 项输入相对首项错后 k 拍。
+每颗原语依次使用 X/Y、MULT、P/CPO 三个内部寄存边界，十二项总计14个使能沿。
+每次权差 d>0，把前项 P 的低 d 位保留并错拍至链尾，d=0 仅传递已保留低位；
+最终输出 `{P11[9:0],residue11[95:0]}`。所有106位均参与后续融合与舍入。
+包装的124位 `enable_i` 为同沿区域副本，每个外部 FF CE 叶最多16个数据位，
+每个原语 CE 叶连接单颗 APM 的 CE 引脚；不得将内部 MULT/P/CPO 另计为逻辑 FF。
+
+D 探针：`rtl/filelists/cpu2_probe_fma64.f`、
+`fpga/scripts/import_probe_cpu2_fma64_top.tcl`、
+`fpga/constraints/edrv32_fpga_probe_cpu2_fma64_top.fdc`（165 MHz / 6.061 ns）。
+`python3 verif/unit/cpu2_fpu_fma64/run.py smoke` 和 `full` 检查十二个逐项部分和与完整积，
+并运行五舍入、特殊值、subnormal、单次舍入、尾端预约、取消和完成背压；
+`--softfloat-root build/fpu` 加跑 F05 的 D smoke 向量。
+`python3 verif/unit/cpu2_fpu_fma64/levels.py` 生成 XC7 代理资源/级数，原语只作时钟边界。
+实际专用级联放置、原语等价与布局布线频率仍由 F06 的 PDS/ModelSim 验证。

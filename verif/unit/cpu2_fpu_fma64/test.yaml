@@ -1,0 +1,14 @@
+top: tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+simulator: verilator
+timeout: 120
+pass: PASS
+tier: smoke
+runner: python3 verif/unit/cpu2_fpu_fma64/run.py smoke --softfloat-root build/fpu
+configuration: FD only, fixed four-bit tags, independent of ISSUE_WIDTH
+seed: Fraction arithmetic 0xF0464, protocol 0xF02A51, APM 0xF0412345678ABCDE
+model: exact Fraction and F05 SoftFloat/TestFloat Release3e smoke
+vectors: build/cpu2_fpu_fma64/smoke.txt

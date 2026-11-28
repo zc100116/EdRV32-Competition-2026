@@ -1,0 +1,10 @@
++incdir+../../rtl/include
+../../rtl/tech/edrv32_apm_cpu2_head.v
+../../rtl/tech/edrv32_apm_cpu2_shift16.v
+../../rtl/tech/edrv32_apm_cpu2_shift8.v
+../../rtl/tech/edrv32_apm_cpu2_direct.v
+../../rtl/tech/edrv32_apm_cpu2_u53xu53.v
+../../rtl/cpu2/fpu/edrv32_cpu2_fpu_lza32.v
+../../rtl/cpu2/fpu/edrv32_cpu2_fpu_fma64_lz53.v
+../../rtl/cpu2/fpu/edrv32_cpu2_fpu_fma64.v
+../../fpga/rtl/edrv32_fpga_probe_cpu2_fma64_top.v
