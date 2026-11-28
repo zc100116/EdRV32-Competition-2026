@@ -40,7 +40,7 @@
 | P08 | LVT RF探针PDS/厂商RAM等价 | W | P07 | 异步读/候选owner/WB更新时序、LUTRAM打包及ASIC等价宏接口记录 | tasks/win/20261127-110-cpu2-probes（工程A） | [x] 卡 110 第 2 轮：153.5 MHz，见 docs/reports/2026-11-28-timing-cpu2-probes.md |
 | P09 | FP32 FMA探针RTL及APM包装行为测试 | D | P00 | 完整积和X/Y捕获、4拍链/8拍FMA初值、77位carry/LZA逐拍证据 | task-cpu-v2-probe-fma / 派发时分支 | [x] P-FMA 完成（e1fd27d5c），112 万向量逐位通过；Yosys 参考 E7/E8 超预算，待 PDS |
 | P10 | FP32 FMA探针PDS/厂商APM逐拍等价 | W | P09 | X/Y、MULT/P/CPO级联和carry77段实测，setup/hold/资源报告 | tasks/win/20261127-110-cpu2-probes（工程B） | [x] 卡 110：158.5 MHz，2 APM |
-| P11 | 五探针评审、修订延迟/资源/频率初值并重放性能模型 | C | P02/P04/P06/P08/P10 | 接口与可实现边界明确；不通过假设有显式修订，更新正式规格需用户确认 | task-cpu-v2-probe-review / 协调者分支 | [~] 实测报告 docs/reports/2026-11-28-timing-cpu2-probes.md 已出，待定项初定中 |
+| P11 | 五探针评审、修订延迟/资源/频率初值并重放性能模型 | C | P02/P04/P06/P08/P10 | 接口与可实现边界明确；不通过假设有显式修订，更新正式规格需用户确认 | task-cpu-v2-probe-review / 协调者分支 | [~] 实测报告已出（独立 153.5/158.5 MHz）；用户 2026-11-28 要求多留余量，独立探针目标提到 165 MHz（对 150 留 10%），P-INT-T/P-FMA-T 进行中 |
 
 ### 3.2 接口冻结与验证基础设施
 
