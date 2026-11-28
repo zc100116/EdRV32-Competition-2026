@@ -467,6 +467,16 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 
 **TAGE 三方写碰撞（I01，用户 2026-11-28 确认）。** 待写项已占用且同拍 MEM、EX 都训练时，优先级待写项 > MEM > EX，EX 的表写入丢弃，过滤历史照常推进；不停顿、不加待写项、不加 ready/信用端口。规格 5.4 已补。
 
+**I$ 响应按物理 bank 输出（I01/I05）。** 取代上表 `ic_resp_word{j}_*`：I$→fetch 改为 `ic_resp_bank{b}_way{k}_instr`32、`ic_resp_bank{b}_way_hit`2、`ic_resp_bank{b}_error`1，b=0 偶字 bank、b=1 奇字 bank。双发射命中直接给物理 RAM 输出，miss 返回按 bank 存放；fetch 按物理 bank 查 LVT（选路前并行），再选路，最后按 PC[2] 排成 PC/PC+4，候选 bit4 为 bank 选择（CPU5.2，沿探针）。跨行时奇 bank 来自行 A、偶 bank 来自行 B。单发射 64 位取指同样按 bank 输出（低字 bank0、高字 bank1）。
+
+**普通 load 拍边界（I05）。** 设 X 为 load 进入 LSU 本地入口（ID/EX 寄存器）后的执行拍：`dc_req` 必须在 X 被接受，中间不加寄存；命中数据在 X+1 由 D$ 同步 RAM 输出，`lsu_complete` 在 X+1 直接承接（fall-through），完成背压时 LSU 本地保持；completion 与 MEM 等待源在 X+1 末捕获（CPU7"DRM load→操作数捕获"段），消费者 X+2 执行。
+
+**trace 访存数据（I05/I04）。** `lsu_complete_mem_data`/`trace_mem_data`：load 填实际访问的原始 1/2/4/8 字节（低位对齐，未做符号扩展或 NaN boxing），其余位 0；store 填未移位的 store 数据低 size 字节，其余位 0。`mask` 为低位对齐的 size 掩码（1/3/F/FF），地址给原地址。设备 load 在退休时取 `commit_lsu_done_data` 的低 size 字节。
+
+**异常控制指令不训练（I01/I02）。** 产生异常（含目标未对齐）的控制指令不置 `ex/mem_predict_train_valid`，不装 BTB、不更新 TAGE/fast；frontend 不对预测目标做舍入。
+
+**CSR 读改写原子性（I04）。** CSRRS/RC/RW 的写值以本条 `csr_req` 返回的旧值为基（与 rd 一致），CSR 模块保存该基值到 `csr_commit`；issue 已保证 CSR 单发且等更老项到有序边界，同时只有一条未提交 CSR。
+
 ## 影响
 
 审核通过后需修改CPU spec2.2/2.3、3、4、5、6及9的C01–C09；FPU spec2.4、3、4、5.1/5.4/5.5及9的F01/F02/F04/F05；CPU testplan2/4/6/7的T02/T03及对应CV02–CV14；FPU testplan4/6/7的FT01/FT03及FV10–FV15。C10、F03/F06与FT03中的未测数值继续待定；旧cpu/cache规格不改，外部总线无差异。
