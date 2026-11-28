@@ -79,7 +79,8 @@ def main():
         (OUT / 'coremark.json').write_text(json.dumps(manifest, indent=2) + '\n')
         return
     sources = [(ENV / 'smoke.S', 'smoke'), (ENV / 'trap.S', 'trap'),
-               (ENV / 'redirect.S', 'redirect')]
+               (ENV / 'redirect.S', 'redirect'), (ENV / 'dispatch.S', 'dispatch'),
+               (ENV / 'load_stream.S', 'load_stream')]
     if args.suite == 'isa':
         for group in ['rv32ui', 'rv32um']:
             for source in sorted((ROOT / 'third_party/riscv-tests/isa' / group).glob('*.S')):
