@@ -1,5 +1,77 @@
 # 卡 107 结果
 
+## 第 12 轮降频版结果
+
+**布局布线全通，时序仍有违例。JTAG 下载成功，上板停在 BIOS 首次串口输出之前。**
+
+| 项 | 实测 |
+|---|---|
+| 任务卡 / 工程源码 | `d17e3730` / 本地 `c84fd634`，RTL、FPGA 目录和软件源码一致 |
+| PDS / 器件 | 2022.2-SP6.1 build 138931，ADS，Logos2 PG2L200H-6 FBB676 |
+| 工程 | `G:/codex_project/EdRV32-FPGA/board_gpu_round12/board_gpu_round12.pds` |
+| 时钟目标 | `clk_sys` 100 MHz、`clk_gpu` 120 MHz、`clk_mem` 125 MHz |
+| P&R 设置 | Placement Decongestion 4、Slack Weight 10、Pin Cost Increasing Speed 600、LUT6D Strategy 0。单元复制关闭、拥塞导出开启。 |
+| 比特流 | `generate_bitstream/edrv32_fpga_board_gpu_top.sbit`，9,188,552 字节，19:04:34 完成 |
+
+### 流程、资源和拥塞
+
+| 阶段 | 结果 | PDS 墙钟用时 |
+|---|---|---:|
+| Compile | 完成 | 2 分 15 秒 |
+| Synthesize | 完成 | 8 分 50 秒 |
+| Device Map | 完成 | 1 分 53 秒 |
+| Place & Route | 187,293 / 187,293 条网布通 | 6 小时 12 分 13 秒 |
+| Report Timing | 完成，Some Constraints Violated | 2 分 17 秒 |
+| Generate Bitstream | 完成 | 2 分 14 秒 |
+
+PDS 记录布局 99.27 秒、预布线 128.550 秒、详细布线 21,037.76 秒、路由总用时 21,495.62 秒。时钟网第 5 轮归零，通用布线第 112 轮归零，收尾第 116 轮全部归零。第 115 轮单轮耗时 2,943.916 秒，输出仍有 14 条未布网。106 份拥塞网格中，正值格从通用布线第 7 轮的 23,234 个降到第 112 轮的 0 个。全流程原始日志和报告在附件中。 [阶段记录](artifacts/round12/flow-excerpts.log) · [逐轮布线](artifacts/round12/route-iterations.txt) · [拥塞](artifacts/round12/congestion-summary.txt) · [原始报告及日志](artifacts/round12/raw)
+
+布线后层次汇总为 LUT 97,886、FF 143,937、分布式 RAM LUT 13,089、APM 212、DRM 250、I/O 115。器件表为 CLMA 27,884/30,075（PDS 93%）、CLMS 9,217/9,875（94%）、APM 212/740（29%）、DRM 250/415（61%）。综合为 1,957 组 control set。 [器件资源](artifacts/round12/resource_use_of.txt) · [资源层次](artifacts/round12/resource_hier.txt) · [高扇出](artifacts/round12/high_fanout.txt) · [控制集](artifacts/round12/controlsets.txt)
+
+### 布线后时序
+
+Slow Corner，裕量单位 ns。同域估算频率取 PDS Performance Summary。
+
+| 路径 | 目标 MHz | 估算 MHz | WNS | TNS | WHS | THS |
+|---|---:|---:|---:|---:|---:|---:|
+| `clk_sys → clk_sys` | 100.0001 | 101.6780 | +0.165 | 0.000 | +0.133 | 0.000 |
+| `clk_gpu → clk_gpu` | 120.0001 | 115.7764 | −0.304 | −1.772 | +0.072 | 0.000 |
+| `clk_mem → clk_mem` | 125.0000 | 122.8350 | −0.141 | −0.141 | +0.133 | 0.000 |
+| `clk_rgmii_ref → clk_eth` | — | — | −0.168 | −0.767 | −0.361 | −1.698 |
+
+相较于第 11 轮 B 组，`clk_sys` 同域 WNS 由 −1.152 ns 改善为 +0.165 ns，`clk_gpu` 由 −1.852 ns 改善为 −0.304 ns，`clk_mem` 由 −0.764 ns 改善为 −0.141 ns。本轮 `clk_gpu` 有 29 个 setup 失败端点，`clk_mem` 有 1 个。完整汇总包含所有路径组、快慢角及恢复/移除检查。 [第 12 轮汇总](artifacts/round12/timing_summary.txt) · [第 11 轮 B 汇总](artifacts/round11/B/timing_summary.txt)
+
+扩展导出与 GUI 原始汇总一致。三个同域各取得 200 个不同 setup 端点。GPU 最差路径从 `u_setup/u_plane/tag_0_r_delay83_r[3]` 到 `u_setup/g_edge[0].output_value_r[0][5]`，1 逻辑级，逻辑/布线延迟为 0.418/7.649 ns。内存域最差路径位于 DDR PHY 内的复位时钟相位调整逻辑。 [GPU 200 条](artifacts/round12/setup_top200_clk_gpu.txt) · [CPU 200 条](artifacts/round12/setup_top200_clk_sys.txt) · [DDR 200 条](artifacts/round12/setup_top200_clk_mem.txt) · [GPU 前 20 明细](artifacts/round12/setup_top20_detail_clk_gpu.txt) · [CPU 前 20 明细](artifacts/round12/setup_top20_detail_clk_sys.txt) · [DDR 前 20 明细](artifacts/round12/setup_top20_detail_clk_mem.txt) · [快慢角保持各 20 条](artifacts/round12/hold_top20.txt)
+
+### 上板日志和启动问题
+
+| 时间（北京时间） | 证据 |
+|---|---|
+| 20:53:16 | 调试工具已连接 COM7，115200 8N1。 |
+| 20:53:40 | 下载前收到了完整启动信息，`CHIP_ID=0xED320001`、`CLK_SYS_HZ=125000000`、`MEM_READY=1`，随后 `Boot SRAM` 并进入 Monitor。 |
+| 20:54:22–20:54:31 | PDS 选择本轮 `board_gpu_round12/generate_bitstream/edrv32_fpga_board_gpu_top.sbit`，JTAG Program 成功，`The done bit is 1`。 |
+| 21:00:37 | COM7 仍连接，缓冲为 21 条记录（其中 1 条为连接状态），累计 RX 561 字节，最后接收仍为 20:53:40.133。下载后无新增串口字节，两个 Windows 有线网卡显示 Disconnected。板端 Link 灯、LED、复位动作时间未取得。 |
+
+[串口原始缓冲及网卡状态](uart/round12-bios.log) · [JTAG 下载记录](artifacts/round12/raw/jtag-configuration.log) · [Programming 控制台](artifacts/round12/raw/jtag-console.log)
+
+**已确认**：旧版输出来自下载前。下载后没有取得 GPU 版预期的 `CHIP_ID=0xED320002`、`CLK_SYS_HZ=100000000` 或 BIOS 菜单。Boot ROM IP 的 IDF 指向原 `board_gpu/init/ip_rom_boot.dat`，已按 DRM 存储布局从本轮生成的 INIT 参数还原全部 2,048 个 64 位字，与原工程和第 12 轮本地 .dat 均逐字一致，含 BIOS 菜单和启动横幅。此检查针对 PDS 工程的 ROM 初值，板上取指情况未取得。
+
+**待板上确认**：GPU 版在四路 PLL 锁定后才放开板级复位，CPU 还等 DDR 就绪和各域的复位副本释放。ETH 收发复位副本也在 CPU 释放条件中，ETH 时钟由 PHY 的 `RGMII_RXC` 经 PLL 提供。若 RXC 无可用时钟，CPU 可在执行 BIOS 前一直受复位。Windows 网卡断开只表明未观察到 PC 侧链路，板上的 RXC、PLL lock、`ddr_init_done_w`、`mem_ready_r` 和 `rst_sys_n_w` 电平尚未取得。GPU、内存和 RGMII 仍有时序违例，现有证据未定位哪个实际条件首先阻断启动。 [板级复位](../../../fpga/rtl/edrv32_fpga_board_gpu_top.v#L110) · [SoC 复位释放逻辑](../../../rtl/soc/edrv32_soc_reset_ctrl_gpu.v#L155) · [ETH 时钟来源](../../../fpga/rtl/edrv32_fpga_rgmii.v#L50)
+
+后续定位顺序为确认板端千兆链路后复位，检查是否出现 GPU BIOS；仍无输出时观察四路 PLL lock、`ddr_init_done_w` / `mem_ready_r`、ETH 复位副本和 `rst_sys_n_w`。这次用现有串口缓冲和工程报告定位，未取得新的板上探针数据。
+
+| 上板测试 | 结果 |
+|---|---|
+| BIOS / CHIP_ID | 下载后无串口输出，未取得 GPU CHIP_ID。 |
+| `gpu_render.elf` | 未跑，BIOS 无应答。 |
+| `gpu_audio.elf` | 未跑，BIOS 无应答。 |
+| `gpu_hello.elf` | 未跑，BIOS 无应答。 |
+| `gpu_test.elf` — Prism Patrol | 未跑。 |
+| `gpu_test.elf` — Candy Canyon | 未跑。 |
+| `gpu_test.elf` — 棱炉地宫 | 未跑。 |
+| `gpu_test.elf` — 云脊漫游 | 未跑。 |
+| 照片 / 视频 | 未取得。 |
+
 ## 第 11 轮 Device Map 结果
 
 | 项 | 内容 |

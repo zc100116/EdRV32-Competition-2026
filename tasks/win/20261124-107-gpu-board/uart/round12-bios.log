@@ -1,0 +1,27 @@
+# Card 107 round 12 | desktop debug tool buffer and status
+# Capture time: 2026-11-28 21:00:37 +08:00
+# JTAG Program completed 2026-11-28 20:54:31 +08:00, see artifacts/round12/raw/jtag-configuration.log.
+# COM COM7 @ 115200 8N1 | connected=True | rxBytes=561 | txBytes=0 | lastSeq=21
+# NIC 以太网 5 | ASIX USB to Gigabit Ethernet Family Adapter | Disconnected | 0 bps
+# NIC 以太网 | Realtek Gaming 2.5GbE Family Controller | Disconnected | 1 Gbps
+2026-11-28 20:53:16.548 +08:00 #1 [sys] connected COM7 @ 115200 8N1
+2026-11-28 20:53:40.012 +08:00 #2 [rx] 
+2026-11-28 20:53:40.012 +08:00 #3 [rx]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+2026-11-28 20:53:40.012 +08:00 #4 [rx]   E         D   D   R   R   V   V      3      2 
+2026-11-28 20:53:40.012 +08:00 #5 [rx]   EEEE      D   D   RRRRR    V V    3333   2222 
+2026-11-28 20:53:40.012 +08:00 #6 [rx]   E         D   D   R  R     V V       3   2    
+2026-11-28 20:53:40.012 +08:00 #7 [rx]   EEEEEEE   DDDD    R    R    V     3333   2222 
+2026-11-28 20:53:40.012 +08:00 #8 [rx] 
+2026-11-28 20:53:40.012 +08:00 #9 [rx]   EdRV32 Boot ROM - UART 115200 8N1
+2026-11-28 20:53:40.012 +08:00 #10 [rx] CHIP_ID: 0xed320001
+2026-11-28 20:53:40.012 +08:00 #11 [rx] CLK_SYS_HZ: 125000000
+2026-11-28 20:53:40.012 +08:00 #12 [rx] ROM bytes: 16384
+2026-11-28 20:53:40.012 +08:00 #13 [rx] SRAM bytes: 65536
+2026-11-28 20:53:40.012 +08:00 #14 [rx] I-cache bytes: 8192
+2026-11-28 20:53:40.012 +08:00 #15 [rx] D-cache bytes: 8192
+2026-11-28 20:53:40.012 +08:00 #16 [rx] MEM_READY: 1
+2026-11-28 20:53:40.012 +08:00 #17 [rx] Build commit: 92b38fd2
+2026-11-28 20:53:40.012 +08:00 #18 [rx] Compiler version: GCC 15.2.0
+2026-11-28 20:53:40.133 +08:00 #19 [rx] Boot SRAM
+2026-11-28 20:53:40.133 +08:00 #20 [rx] Monitor: EdRV32
+2026-11-28 20:53:40.133 +08:00 #21 [rx] Menu: 1=CoreMark 2=Peripheral tests 3=System info
