@@ -40,13 +40,13 @@
 | P08 | LVT RF探针PDS/厂商RAM等价 | W | P07 | 异步读/候选owner/WB更新时序、LUTRAM打包及ASIC等价宏接口记录 | tasks/win/20261127-110-cpu2-probes（工程A） | [x] 卡 110 第 2 轮：153.5 MHz，见 docs/reports/2026-11-28-timing-cpu2-probes.md |
 | P09 | FP32 FMA探针RTL及APM包装行为测试 | D | P00 | 完整积和X/Y捕获、4拍链/8拍FMA初值、77位carry/LZA逐拍证据 | task-cpu-v2-probe-fma / 派发时分支 | [x] P-FMA 完成（e1fd27d5c），112 万向量逐位通过；Yosys 参考 E7/E8 超预算，待 PDS |
 | P10 | FP32 FMA探针PDS/厂商APM逐拍等价 | W | P09 | X/Y、MULT/P/CPO级联和carry77段实测，setup/hold/资源报告 | tasks/win/20261127-110-cpu2-probes（工程B） | [x] 卡 110：158.5 MHz，2 APM |
-| P11 | 五探针评审、修订延迟/资源/频率初值并重放性能模型 | C | P02/P04/P06/P08/P10 | 接口与可实现边界明确；不通过假设有显式修订，更新正式规格需用户确认 | task-cpu-v2-probe-review / 协调者分支 | [~] 实测报告已出（独立 153.5/158.5 MHz）；用户 2026-11-28 要求多留余量，独立探针目标提到 165 MHz（对 150 留 10%），P-INT-T（fd048ddf3）、P-FMA-T（8344727fc）完成；卡 110 第 3 轮 165 MHz 约束下整数 168.4 / FMA 179.2 MHz 均通过 |
+| P11 | 五探针评审、修订延迟/资源/频率初值并重放性能模型 | C | P02/P04/P06/P08/P10 | 接口与可实现边界明确；不通过假设有显式修订，更新正式规格需用户确认 | task-cpu-v2-probe-review / 协调者分支 | [x] 卡 110 第 3 轮 165 MHz 约束下整数 168.4 / FMA 179.2 MHz；初值保留，FMA LUT 回收放到 F02 |
 
 ### 3.2 接口冻结与验证基础设施
 
 | 编号 | 内容 | 执行者 | 依赖 | 验收标准 | 拟Task/分支 | 状态 |
 |---|---|---|---|---|---|---|
-| S01 | CPU/FPU规格、测试方案和参数矩阵审核冻结；明确所有跨模块接口 | C | P11 | C01–C09、F01/F02/F04/F05及验证待定项有确认条款；用户确认正式规格 | task-cpu-v2-spec-freeze / 协调者分支 | [ ] |
+| S01 | CPU/FPU规格、测试方案和参数矩阵审核冻结；明确所有跨模块接口 | C | P11 | C01–C09、F01/F02/F04/F05及验证待定项有确认条款；用户确认正式规格 | task-cpu-v2-spec-freeze / 协调者分支 | [~] 接口冻结提案 S01-D（ctx_4a1768f32d26）起草中，审核后逐项请用户确认 |
 | V01 | 核级退休/双域CSR/内存与Spike比对基础设施 | V | S01 | 已知正确与故意错误trace检验比较器；双退休/FP64/异常可表达 | task-cpu-v2-verif-env / 派发时分支 | [ ] |
 | V02 | 架构测试适配和受约束随机指令环境 | V | S01/V01 | I/M/Zicsr/Zba/F/D集、seed复现，配对/晚执行/提前地址/冲刷交叉生成 | task-cpu-v2-verif-isa / 派发时分支 | [ ] |
 | V03 | 单元/核/SoC参数回归档位与性能输入整理 | V | S01/V01 | 两testplan全部测试项有test.yaml归属，参数矩阵和perf测量区间固定 | task-cpu-v2-verif-matrix / 派发时分支 | [ ] |
