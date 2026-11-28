@@ -1,0 +1,3 @@
+Place & Route log warning/error lines mentioning APM, cascade, CPI or CPO.
+
+No matching warning/error lines in the final Place & Route log.

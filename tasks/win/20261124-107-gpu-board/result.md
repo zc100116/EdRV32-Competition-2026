@@ -87,6 +87,34 @@ A 入口为 `G:/codex_project/EdRV32-FPGA/board_gpu/board_gpu.pds`，B 入口为
 
 原始 B 组日志和 GUI 报告已备份在 `G:/codex_project/edrv32-card107/build/card107-pds-check/logbackup/round11-B-final`。扩大路径数的原始报告保存在 `G:/codex_project/edrv32-card107/build/card107-pds-check/round11-B-post-route-top200/report_timing`。
 
+### 第 11 轮 A 组最终布局布线结果
+
+同第 11 轮 B 组，实测源码本地提交 ced62bb5 对应任务卡 b2a27314，使用同一批 Device Map 产物。PDS 2022.2-SP6.1 build 138931，PG2L200H-6 FBB676。
+A 组实际命令为 <code>pnr -plc_decongestion 2 -dump_router_congestion_plot true -slack_weight 40 -pin_cost_increasing_speed 600 -logic_optimize_lut6d_combing_strategy 0</code>。单元复制保持默认开启。P&R 在 2026-11-28 02:15 完成，随后 GUI 导出时序报告。[阶段日志](artifacts/round11/A/pnr-excerpts.log)
+
+**A 组全布通，时序仍有违例。** 总用时 **10 小时 44 分 10 秒**，布局 91.91 秒，预布线 82.785 秒，详细布线 36,286.39 秒，路由总用时 36,850.27 秒。最终布通 **187,322/187,322** 条网络。时钟网第 5 轮清零，通用布线第 281 轮清零，收尾第 286 轮归零。第 284 轮有 65 条未布网，耗时 3,281.441 秒。B 组 P&R 用时 6 小时 24 分 37 秒。
+拥塞网格从第 7 轮的 23,383 个正值格降到第 281 轮的 0 个。附每轮未布网、过用数、用时与 275 份拥塞网格统计。[布线逐轮日志](artifacts/round11/A/route-iterations.txt) · [拥塞统计](artifacts/round11/A/congestion-summary.txt)
+
+布线后 CLMA 27896/30075（PDS 93%），CLMS 9152/9875（PDS 93%）。模块层次汇总为 LUT 98184、FF 143505、分布式 RAM LUT 13089、APM 212、DRM 250、I/O 115。P&R 日志中有 0 条匹配的 APM 或级联告警/错误。[器件资源表](artifacts/round11/A/resource_use_of.txt) · [层次资源表](artifacts/round11/A/resource_hier.txt) · [APM 日志核对](artifacts/round11/A/apm-pnr-messages.txt)
+
+#### A 组布线后时序
+
+| 时钟域 | A 估算 MHz | B 估算 MHz | A WNS (ns) | A TNS (ns) | A WHS (ns) | A THS (ns) |
+|---|---:|---:|---:|---:|---:|---:|
+| clk_gpu | 135.5247 | 134.9941 | -1.823 | -5738.606 | +0.073 | 0.000 |
+| clk_sys | 111.8054 | 109.2641 | -0.944 | -267.150 | +0.148 | 0.000 |
+| clk_mem | 114.5738 | 114.1031 | -0.728 | -47.662 | +0.068 | 0.000 |
+| clk_aud | 234.7414 | 178.3482 | +77.120 | 0.000 | +0.308 | 0.000 |
+| clk_eth | 191.3143 | 177.5568 | +2.773 | 0.000 | +0.245 | 0.000 |
+| clk_pix | 164.3385 | 169.0046 | +7.383 | 0.000 | +0.243 | 0.000 |
+| clk_serial | 720.8199 | 720.8199 | +1.306 | 0.000 | +0.346 | 0.000 |
+| rst_clk | 273.2987 | 271.3704 | +4.341 | 0.000 | +0.213 | 0.000 |
+
+慢角最差建立路径为 u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK → u_soc/u_gpu/u_core/u_target/u_store/tail_read_row_r[3]/opit_0/CE，9 级。慢角最差保持裕量 -0.361 ns，出现在 clk_rgmii_ref → clk_eth。
+扩展报告与原 GUI 汇总一致。每个同域最多保留 200 条慢角建立路径，附 clk_gpu 前 20 条建立及快、慢角各 20 条保持明细。[时序汇总](artifacts/round11/A/timing_summary.txt) · [GPU 建立前 200 条](artifacts/round11/A/setup_top200_clk_gpu.txt) · [建立前 20 条明细](artifacts/round11/A/setup_top20_detail.txt) · [保持明细](artifacts/round11/A/hold_top20.txt)
+
+原始工程报告：G:/codex_project/EdRV32-FPGA/board_gpu/place_route、G:/codex_project/EdRV32-FPGA/board_gpu/report_timing。扩展时序报告：G:/codex_project/edrv32-card107/build/card107-pds-check/round11-A-post-route-top200/report_timing/edrv32_fpga_board_gpu_top.rtr。本次只记录 P&R 与时序。
+
 ## 第 10 轮 Device Map 结果
 
 | 项 | 内容 |

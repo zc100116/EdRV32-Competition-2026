@@ -1,0 +1,15 @@
+Final GUI P&R command from impl.tcl and phase totals from place_route/run.log.
+
+pnr -plc_decongestion 2 -dump_router_congestion_plot true -slack_weight 40 -pin_cost_increasing_speed 600 -logic_optimize_lut6d_combing_strategy 0
+
+strategy name : 0
+Total placement takes 91.91 sec.
+Pre route takes 82.785 sec
+Detailed routing takes 36286.39 sec.
+Total net: 187322, route succeed net: 187322
+Total routing takes 36850.27 sec.
+Action pnr: Real time elapsed is 10h:44m:10s
+Action pnr: CPU time elapsed is 1h:41m:46s
+Action pnr: Process CPU time elapsed is 1h:55m:18s
+Current time: Sat Nov 28 02:15:20 2026
+Action pnr: Peak memory pool usage is 7,698 MB

@@ -1,0 +1,10 @@
+Slow-corner sequential setup, clk_serial -> clk_serial. 8 reported endpoints.
+Rank | Slack (ns) | Logic levels | Logic / Route (ns) | Startpoint -> Endpoint
+1 | +1.306 | 0 | 0.380 / 0.000 | u_tmds/g_channel[0].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN0
+2 | +1.306 | 0 | 0.380 / 0.000 | u_tmds/g_channel[1].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN0
+3 | +1.306 | 0 | 0.380 / 0.000 | u_tmds/g_channel[2].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN0
+4 | +1.306 | 0 | 0.380 / 0.000 | u_tmds/g_channel[3].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN0
+5 | +1.374 | 0 | 0.377 / 0.000 | u_tmds/g_channel[0].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN1
+6 | +1.374 | 0 | 0.377 / 0.000 | u_tmds/g_channel[1].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN1
+7 | +1.374 | 0 | 0.377 / 0.000 | u_tmds/g_channel[2].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN1
+8 | +1.374 | 0 | 0.377 / 0.000 | u_tmds/g_channel[3].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN1

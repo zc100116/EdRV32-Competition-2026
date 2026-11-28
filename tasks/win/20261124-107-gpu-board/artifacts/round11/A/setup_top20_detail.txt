@@ -1,0 +1,1581 @@
+Worst 20 slow-corner clk_gpu sequential setup paths.
+
+Rank 1
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/tail_read_row_r[3]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.280  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.565
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y1                   td                    0.142       9.112 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_10/gateop_perm/Y
+                                   net (fanout=1)        1.238      10.350         u_soc/u_gpu/u_core/resolve_read_addr_w [14]
+ CLMA_399_954/Y3                   td                    0.188      10.538 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][14]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.616      11.154         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [14]
+ CLMS_393_997/Y3                   td                    0.188      11.342 r       u_soc/u_gpu/u_core/u_target/u_store/tail_read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=9)        0.395      11.737         u_soc/u_gpu/u_core/u_target/u_store/tail_read_w
+ CLMA_393_996/CE0                                                          r       u_soc/u_gpu/u_core/u_target/u_store/tail_read_row_r[3]/opit_0/CE
+
+ Data arrival time                                                  11.737         Logic Levels: 9
+                                                                                   Logic: 2.192ns(34.739%), Route: 4.118ns(65.261%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.323      10.120         ntclkbufg_0
+ CLMA_393_996/CLK                                                          r       u_soc/u_gpu/u_core/u_target/u_store/tail_read_row_r[3]/opit_0/CLK
+ clock pessimism                                         0.582      10.702
+ clock uncertainty                                      -0.550      10.152
+
+ Setup time                                             -0.238       9.914
+
+ Data required time                                                  9.914
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.914
+ Data arrival time                                                  11.737
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.823
+
+Rank 2
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/tail_read_row_r[5]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.280  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.565
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y1                   td                    0.142       9.112 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_10/gateop_perm/Y
+                                   net (fanout=1)        1.238      10.350         u_soc/u_gpu/u_core/resolve_read_addr_w [14]
+ CLMA_399_954/Y3                   td                    0.188      10.538 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][14]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.616      11.154         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [14]
+ CLMS_393_997/Y3                   td                    0.188      11.342 r       u_soc/u_gpu/u_core/u_target/u_store/tail_read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=9)        0.395      11.737         u_soc/u_gpu/u_core/u_target/u_store/tail_read_w
+ CLMA_393_996/CE0                                                          r       u_soc/u_gpu/u_core/u_target/u_store/tail_read_row_r[5]/opit_0/CE
+
+ Data arrival time                                                  11.737         Logic Levels: 9
+                                                                                   Logic: 2.192ns(34.739%), Route: 4.118ns(65.261%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.323      10.120         ntclkbufg_0
+ CLMA_393_996/CLK                                                          r       u_soc/u_gpu/u_core/u_target/u_store/tail_read_row_r[5]/opit_0/CLK
+ clock pessimism                                         0.582      10.702
+ clock uncertainty                                      -0.550      10.152
+
+ Setup time                                             -0.238       9.914
+
+ Data required time                                                  9.914
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.914
+ Data arrival time                                                  11.737
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.823
+
+Rank 3
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[8]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.282  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.563
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y1                   td                    0.142       9.112 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_10/gateop_perm/Y
+                                   net (fanout=1)        1.238      10.350         u_soc/u_gpu/u_core/resolve_read_addr_w [14]
+ CLMA_399_954/Y3                   td                    0.188      10.538 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][14]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.504      11.042         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [14]
+ CLMS_393_997/Y0                   td                    0.235      11.277 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.432      11.709         u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].select_read_w
+ CLMA_393_1008/CE0                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[8]/opit_0/CE
+
+ Data arrival time                                                  11.709         Logic Levels: 9
+                                                                                   Logic: 2.239ns(35.642%), Route: 4.043ns(64.358%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.321      10.118         ntclkbufg_0
+ CLMA_393_1008/CLK                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[8]/opit_0/CLK
+ clock pessimism                                         0.582      10.700
+ clock uncertainty                                      -0.550      10.150
+
+ Setup time                                             -0.238       9.912
+
+ Data required time                                                  9.912
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.912
+ Data arrival time                                                  11.709
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.797
+
+Rank 4
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[10]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.282  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.563
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y1                   td                    0.142       9.112 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_10/gateop_perm/Y
+                                   net (fanout=1)        1.238      10.350         u_soc/u_gpu/u_core/resolve_read_addr_w [14]
+ CLMA_399_954/Y3                   td                    0.188      10.538 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][14]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.504      11.042         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [14]
+ CLMS_393_997/Y0                   td                    0.235      11.277 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.432      11.709         u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].select_read_w
+ CLMA_393_1008/CE0                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[10]/opit_0/CE
+
+ Data arrival time                                                  11.709         Logic Levels: 9
+                                                                                   Logic: 2.239ns(35.642%), Route: 4.043ns(64.358%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.321      10.118         ntclkbufg_0
+ CLMA_393_1008/CLK                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[10]/opit_0/CLK
+ clock pessimism                                         0.582      10.700
+ clock uncertainty                                      -0.550      10.150
+
+ Setup time                                             -0.238       9.912
+
+ Data required time                                                  9.912
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.912
+ Data arrival time                                                  11.709
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.797
+
+Rank 5
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[6]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.282  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.563
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y1                   td                    0.142       9.112 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_10/gateop_perm/Y
+                                   net (fanout=1)        1.238      10.350         u_soc/u_gpu/u_core/resolve_read_addr_w [14]
+ CLMA_399_954/Y3                   td                    0.188      10.538 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][14]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.504      11.042         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [14]
+ CLMS_393_997/Y0                   td                    0.235      11.277 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.431      11.708         u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].select_read_w
+ CLMS_393_1009/CE0                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[6]/opit_0/CE
+
+ Data arrival time                                                  11.708         Logic Levels: 9
+                                                                                   Logic: 2.239ns(35.647%), Route: 4.042ns(64.353%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.321      10.118         ntclkbufg_0
+ CLMS_393_1009/CLK                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[6]/opit_0/CLK
+ clock pessimism                                         0.582      10.700
+ clock uncertainty                                      -0.550      10.150
+
+ Setup time                                             -0.238       9.912
+
+ Data required time                                                  9.912
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.912
+ Data arrival time                                                  11.708
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.796
+
+Rank 6
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[9]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.282  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.563
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y1                   td                    0.142       9.112 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_10/gateop_perm/Y
+                                   net (fanout=1)        1.238      10.350         u_soc/u_gpu/u_core/resolve_read_addr_w [14]
+ CLMA_399_954/Y3                   td                    0.188      10.538 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][14]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.504      11.042         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [14]
+ CLMS_393_997/Y0                   td                    0.235      11.277 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.431      11.708         u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].select_read_w
+ CLMS_393_1009/CE0                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[9]/opit_0/CE
+
+ Data arrival time                                                  11.708         Logic Levels: 9
+                                                                                   Logic: 2.239ns(35.647%), Route: 4.042ns(64.353%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.321      10.118         ntclkbufg_0
+ CLMS_393_1009/CLK                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[9]/opit_0/CLK
+ clock pessimism                                         0.582      10.700
+ clock uncertainty                                      -0.550      10.150
+
+ Setup time                                             -0.238       9.912
+
+ Data required time                                                  9.912
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.912
+ Data arrival time                                                  11.708
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.796
+
+Rank 7
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_row_r[0]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.283  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.562
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y0                   td                    0.071       9.041 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_9/gateop_perm/Y
+                                   net (fanout=1)        0.961      10.002         u_soc/u_gpu/u_core/resolve_read_addr_w [13]
+ CLMA_417_906/Y2                   td                    0.097      10.099 f       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][13]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.917      11.016         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [13]
+ CLMS_393_997/Y1                   td                    0.235      11.251 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.446      11.697         u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].select_read_w
+ CLMA_393_1014/CE1                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_row_r[0]/opit_0/CE
+
+ Data arrival time                                                  11.697         Logic Levels: 9
+                                                                                   Logic: 2.077ns(33.126%), Route: 4.193ns(66.874%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.320      10.117         ntclkbufg_0
+ CLMA_393_1014/CLK                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_row_r[0]/opit_0/CLK
+ clock pessimism                                         0.582      10.699
+ clock uncertainty                                      -0.550      10.149
+
+ Setup time                                             -0.238       9.911
+
+ Data required time                                                  9.911
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.911
+ Data arrival time                                                  11.697
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.786
+
+Rank 8
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_row_r[9]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.283  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.562
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y0                   td                    0.071       9.041 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_9/gateop_perm/Y
+                                   net (fanout=1)        0.961      10.002         u_soc/u_gpu/u_core/resolve_read_addr_w [13]
+ CLMA_417_906/Y2                   td                    0.097      10.099 f       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][13]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.917      11.016         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [13]
+ CLMS_393_997/Y1                   td                    0.235      11.251 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.446      11.697         u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].select_read_w
+ CLMA_393_1014/CE1                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_row_r[9]/opit_0/CE
+
+ Data arrival time                                                  11.697         Logic Levels: 9
+                                                                                   Logic: 2.077ns(33.126%), Route: 4.193ns(66.874%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.320      10.117         ntclkbufg_0
+ CLMA_393_1014/CLK                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_row_r[9]/opit_0/CLK
+ clock pessimism                                         0.582      10.699
+ clock uncertainty                                      -0.550      10.149
+
+ Setup time                                             -0.238       9.911
+
+ Data required time                                                  9.911
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.911
+ Data arrival time                                                  11.697
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.786
+
+Rank 9
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[1]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.280  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.565
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y1                   td                    0.142       9.112 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_10/gateop_perm/Y
+                                   net (fanout=1)        1.238      10.350         u_soc/u_gpu/u_core/resolve_read_addr_w [14]
+ CLMA_399_954/Y3                   td                    0.188      10.538 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][14]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.504      11.042         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [14]
+ CLMS_393_997/Y0                   td                    0.235      11.277 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.415      11.692         u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].select_read_w
+ CLMA_393_996/CE1                                                          r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[1]/opit_0/CE
+
+ Data arrival time                                                  11.692         Logic Levels: 9
+                                                                                   Logic: 2.239ns(35.738%), Route: 4.026ns(64.262%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.323      10.120         ntclkbufg_0
+ CLMA_393_996/CLK                                                          r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[1]/opit_0/CLK
+ clock pessimism                                         0.582      10.702
+ clock uncertainty                                      -0.550      10.152
+
+ Setup time                                             -0.238       9.914
+
+ Data required time                                                  9.914
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.914
+ Data arrival time                                                  11.692
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.778
+
+Rank 10
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[3]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.280  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.565
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y1                   td                    0.142       9.112 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_10/gateop_perm/Y
+                                   net (fanout=1)        1.238      10.350         u_soc/u_gpu/u_core/resolve_read_addr_w [14]
+ CLMA_399_954/Y3                   td                    0.188      10.538 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][14]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.504      11.042         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [14]
+ CLMS_393_997/Y0                   td                    0.235      11.277 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.415      11.692         u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].select_read_w
+ CLMA_393_996/CE1                                                          r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[3]/opit_0/CE
+
+ Data arrival time                                                  11.692         Logic Levels: 9
+                                                                                   Logic: 2.239ns(35.738%), Route: 4.026ns(64.262%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.323      10.120         ntclkbufg_0
+ CLMA_393_996/CLK                                                          r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[3]/opit_0/CLK
+ clock pessimism                                         0.582      10.702
+ clock uncertainty                                      -0.550      10.152
+
+ Setup time                                             -0.238       9.914
+
+ Data required time                                                  9.914
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.914
+ Data arrival time                                                  11.692
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.778
+
+Rank 11
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[0]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.283  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.562
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y1                   td                    0.142       9.112 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_10/gateop_perm/Y
+                                   net (fanout=1)        1.238      10.350         u_soc/u_gpu/u_core/resolve_read_addr_w [14]
+ CLMA_399_954/Y3                   td                    0.188      10.538 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][14]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.504      11.042         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [14]
+ CLMS_393_997/Y0                   td                    0.235      11.277 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.405      11.682         u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].select_read_w
+ CLMA_393_1014/CE0                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[0]/opit_0/CE
+
+ Data arrival time                                                  11.682         Logic Levels: 9
+                                                                                   Logic: 2.239ns(35.795%), Route: 4.016ns(64.205%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.320      10.117         ntclkbufg_0
+ CLMA_393_1014/CLK                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[7].read_row_r[0]/opit_0/CLK
+ clock pessimism                                         0.582      10.699
+ clock uncertainty                                      -0.550      10.149
+
+ Setup time                                             -0.238       9.911
+
+ Data required time                                                  9.911
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.911
+ Data arrival time                                                  11.682
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.771
+
+Rank 12
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[6].read_row_r[0]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.265  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.580
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y1                   td                    0.142       9.112 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_10/gateop_perm/Y
+                                   net (fanout=1)        1.238      10.350         u_soc/u_gpu/u_core/resolve_read_addr_w [14]
+ CLMA_399_954/Y3                   td                    0.188      10.538 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][14]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.500      11.038         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [14]
+ CLMA_417_978/Y2                   td                    0.101      11.139 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[6].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=12)       0.555      11.694         u_soc/u_gpu/u_core/u_target/u_store/g_segment[6].select_read_w
+ CLMA_417_985/CE0                                                          r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[6].read_row_r[0]/opit_0/CE
+
+ Data arrival time                                                  11.694         Logic Levels: 9
+                                                                                   Logic: 2.105ns(33.589%), Route: 4.162ns(66.411%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.338      10.135         ntclkbufg_0
+ CLMA_417_985/CLK                                                          r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[6].read_row_r[0]/opit_0/CLK
+ clock pessimism                                         0.582      10.717
+ clock uncertainty                                      -0.550      10.167
+
+ Setup time                                             -0.238       9.929
+
+ Data required time                                                  9.929
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.929
+ Data arrival time                                                  11.694
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.765
+
+Rank 13
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_row_r[3]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.281  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.564
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y0                   td                    0.071       9.041 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_9/gateop_perm/Y
+                                   net (fanout=1)        0.961      10.002         u_soc/u_gpu/u_core/resolve_read_addr_w [13]
+ CLMA_417_906/Y2                   td                    0.097      10.099 f       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][13]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.917      11.016         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [13]
+ CLMS_393_997/Y1                   td                    0.235      11.251 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.410      11.661         u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].select_read_w
+ CLMA_393_1002/CE0                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_row_r[3]/opit_0/CE
+
+ Data arrival time                                                  11.661         Logic Levels: 9
+                                                                                   Logic: 2.077ns(33.317%), Route: 4.157ns(66.683%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.322      10.119         ntclkbufg_0
+ CLMA_393_1002/CLK                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_row_r[3]/opit_0/CLK
+ clock pessimism                                         0.582      10.701
+ clock uncertainty                                      -0.550      10.151
+
+ Setup time                                             -0.238       9.913
+
+ Data required time                                                  9.913
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.913
+ Data arrival time                                                  11.661
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.748
+
+Rank 14
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_row_r[8]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.281  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.564
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y0                   td                    0.071       9.041 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_9/gateop_perm/Y
+                                   net (fanout=1)        0.961      10.002         u_soc/u_gpu/u_core/resolve_read_addr_w [13]
+ CLMA_417_906/Y2                   td                    0.097      10.099 f       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][13]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.917      11.016         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [13]
+ CLMS_393_997/Y1                   td                    0.235      11.251 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.410      11.661         u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].select_read_w
+ CLMA_393_1002/CE0                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_row_r[8]/opit_0/CE
+
+ Data arrival time                                                  11.661         Logic Levels: 9
+                                                                                   Logic: 2.077ns(33.317%), Route: 4.157ns(66.683%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.322      10.119         ntclkbufg_0
+ CLMA_393_1002/CLK                                                         r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[10].read_row_r[8]/opit_0/CLK
+ clock pessimism                                         0.582      10.701
+ clock uncertainty                                      -0.550      10.151
+
+ Setup time                                             -0.238       9.913
+
+ Data required time                                                  9.913
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.913
+ Data arrival time                                                  11.661
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.748
+
+Rank 15
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_row_r[0]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.280  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.565
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y0                   td                    0.071       9.041 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_9/gateop_perm/Y
+                                   net (fanout=1)        0.961      10.002         u_soc/u_gpu/u_core/resolve_read_addr_w [13]
+ CLMA_417_906/Y2                   td                    0.101      10.103 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][13]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.866      10.969         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [13]
+ CLMA_393_972/Y2                   td                    0.235      11.204 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.417      11.621         u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].select_read_w
+ CLMA_387_979/CE0                                                          r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_row_r[0]/opit_0/CE
+
+ Data arrival time                                                  11.621         Logic Levels: 9
+                                                                                   Logic: 2.081ns(33.597%), Route: 4.113ns(66.403%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.323      10.120         ntclkbufg_0
+ CLMA_387_979/CLK                                                          r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_row_r[0]/opit_0/CLK
+ clock pessimism                                         0.582      10.702
+ clock uncertainty                                      -0.550      10.152
+
+ Setup time                                             -0.238       9.914
+
+ Data required time                                                  9.914
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.914
+ Data arrival time                                                  11.621
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.707
+
+Rank 16
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_row_r[6]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.280  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.565
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y0                   td                    0.071       9.041 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_9/gateop_perm/Y
+                                   net (fanout=1)        0.961      10.002         u_soc/u_gpu/u_core/resolve_read_addr_w [13]
+ CLMA_417_906/Y2                   td                    0.101      10.103 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][13]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.866      10.969         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [13]
+ CLMA_393_972/Y2                   td                    0.235      11.204 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.417      11.621         u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].select_read_w
+ CLMA_387_979/CE0                                                          r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_row_r[6]/opit_0/CE
+
+ Data arrival time                                                  11.621         Logic Levels: 9
+                                                                                   Logic: 2.081ns(33.597%), Route: 4.113ns(66.403%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.323      10.120         ntclkbufg_0
+ CLMA_387_979/CLK                                                          r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_row_r[6]/opit_0/CLK
+ clock pessimism                                         0.582      10.702
+ clock uncertainty                                      -0.550      10.152
+
+ Setup time                                             -0.238       9.914
+
+ Data required time                                                  9.914
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.914
+ Data arrival time                                                  11.621
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.707
+
+Rank 17
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/tail_read_row_r[0]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.282  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.563
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y1                   td                    0.142       9.112 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_10/gateop_perm/Y
+                                   net (fanout=1)        1.238      10.350         u_soc/u_gpu/u_core/resolve_read_addr_w [14]
+ CLMA_399_954/Y3                   td                    0.188      10.538 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][14]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.616      11.154         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [14]
+ CLMS_393_997/Y3                   td                    0.188      11.342 r       u_soc/u_gpu/u_core/u_target/u_store/tail_read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=9)        0.277      11.619         u_soc/u_gpu/u_core/u_target/u_store/tail_read_w
+ CLMS_393_1009/CE1                                                         r       u_soc/u_gpu/u_core/u_target/u_store/tail_read_row_r[0]/opit_0/CE
+
+ Data arrival time                                                  11.619         Logic Levels: 9
+                                                                                   Logic: 2.192ns(35.401%), Route: 4.000ns(64.599%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.321      10.118         ntclkbufg_0
+ CLMS_393_1009/CLK                                                         r       u_soc/u_gpu/u_core/u_target/u_store/tail_read_row_r[0]/opit_0/CLK
+ clock pessimism                                         0.582      10.700
+ clock uncertainty                                      -0.550      10.150
+
+ Setup time                                             -0.238       9.912
+
+ Data required time                                                  9.912
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.912
+ Data arrival time                                                  11.619
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.707
+
+Rank 18
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_row_r[2]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.276  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.569
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y0                   td                    0.071       9.041 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_9/gateop_perm/Y
+                                   net (fanout=1)        0.961      10.002         u_soc/u_gpu/u_core/resolve_read_addr_w [13]
+ CLMA_417_906/Y2                   td                    0.101      10.103 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][13]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.866      10.969         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [13]
+ CLMA_393_972/Y2                   td                    0.235      11.204 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.417      11.621         u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].select_read_w
+ CLMA_393_978/CE0                                                          r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_row_r[2]/opit_0/CE
+
+ Data arrival time                                                  11.621         Logic Levels: 9
+                                                                                   Logic: 2.081ns(33.597%), Route: 4.113ns(66.403%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.327      10.124         ntclkbufg_0
+ CLMA_393_978/CLK                                                          r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_row_r[2]/opit_0/CLK
+ clock pessimism                                         0.582      10.706
+ clock uncertainty                                      -0.550      10.156
+
+ Setup time                                             -0.238       9.918
+
+ Data required time                                                  9.918
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.918
+ Data arrival time                                                  11.621
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.703
+
+Rank 19
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_row_r[3]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.276  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.569
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y0                   td                    0.071       9.041 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_9/gateop_perm/Y
+                                   net (fanout=1)        0.961      10.002         u_soc/u_gpu/u_core/resolve_read_addr_w [13]
+ CLMA_417_906/Y2                   td                    0.101      10.103 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][13]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.866      10.969         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [13]
+ CLMA_393_972/Y2                   td                    0.235      11.204 r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=11)       0.417      11.621         u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].select_read_w
+ CLMA_393_978/CE0                                                          r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_row_r[3]/opit_0/CE
+
+ Data arrival time                                                  11.621         Logic Levels: 9
+                                                                                   Logic: 2.081ns(33.597%), Route: 4.113ns(66.403%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.327      10.124         ntclkbufg_0
+ CLMA_393_978/CLK                                                          r       u_soc/u_gpu/u_core/u_target/u_store/g_segment[11].read_row_r[3]/opit_0/CLK
+ clock pessimism                                         0.582      10.706
+ clock uncertainty                                      -0.550      10.156
+
+ Setup time                                             -0.238       9.918
+
+ Data required time                                                  9.918
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.918
+ Data arrival time                                                  11.621
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.703
+
+Rank 20
+Startpoint  : u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+Endpoint    : u_soc/u_gpu/u_core/u_target/u_store/tail_read_row_r[2]/opit_0/CE
+Path Group  : clk_gpu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.275  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.570
+  Launch Clock Delay      :  5.427
+  Clock Pessimism Removal :  0.582
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.382       2.435         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.067       2.502 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       3.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.177       3.824 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.603       5.427         ntclkbufg_0
+ CLMA_453_607/CLK                                                          r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/CLK
+
+ CLMA_453_607/Q0                   tco                   0.213       5.640 r       u_soc/u_gpu/u_core/u_resolve/x0_r[2]/opit_0/Q
+                                   net (fanout=2)        0.266       5.906         u_soc/u_gpu/u_core/u_resolve/x0_r [2]
+ CLMA_453_619/COUT                 td                    0.369       6.275 f       u_soc/u_gpu/u_core/u_resolve/N39.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.275         u_soc/u_gpu/u_core/u_resolve/N39.co [4]
+ CLMA_453_625/Y0                   td                    0.071       6.346 r       u_soc/u_gpu/u_core/u_resolve/N39.fsub_5/gateop_perm/Y
+                                   net (fanout=1)        0.546       6.892         u_soc/u_gpu/u_core/u_resolve/N39 [4]
+ CLMA_441_630/COUT                 td                    0.299       7.191 f       u_soc/u_gpu/u_core/u_resolve/N4149_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.191         u_soc/u_gpu/u_core/u_resolve/_N71745
+ CLMA_441_636/COUT                 td                    0.090       7.281 f       u_soc/u_gpu/u_core/u_resolve/N4149_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.281         u_soc/u_gpu/u_core/u_resolve/_N71749
+ CLMA_441_642/Y3                   td                    0.224       7.505 r       u_soc/u_gpu/u_core/u_resolve/N4149_12/gateop_perm/Y
+                                   net (fanout=2)        1.057       8.562         u_soc/u_gpu/u_core/u_resolve/N4149 [11]
+ CLMA_423_744/COUT                 td                    0.408       8.970 f       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.970         u_soc/u_gpu/u_core/u_resolve/_N71289
+ CLMA_423_750/Y1                   td                    0.142       9.112 r       u_soc/u_gpu/u_core/u_resolve/resolve_read_addr_o_1_10/gateop_perm/Y
+                                   net (fanout=1)        1.238      10.350         u_soc/u_gpu/u_core/resolve_read_addr_w [14]
+ CLMA_399_954/Y3                   td                    0.188      10.538 r       u_soc/u_gpu/u_core/u_target/u_store/addr_r[0][14]/opit_0_L6Q_perm/L6
+                                   net (fanout=15)       0.616      11.154         u_soc/u_gpu/u_core/u_target/read_addr_w_alias [14]
+ CLMS_393_997/Y3                   td                    0.188      11.342 r       u_soc/u_gpu/u_core/u_target/u_store/tail_read_enable_r/opit_0_inv_L6Q_perm/L6
+                                   net (fanout=9)        0.280      11.622         u_soc/u_gpu/u_core/u_target/u_store/tail_read_w
+ CLMA_399_990/CE0                                                          r       u_soc/u_gpu/u_core/u_target/u_store/tail_read_row_r[2]/opit_0/CE
+
+ Data arrival time                                                  11.622         Logic Levels: 9
+                                                                                   Logic: 2.192ns(35.383%), Route: 4.003ns(64.617%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu (rising edge)                             5.555       5.555 r
+ D18                                                     0.000       5.555 r       clk_i (port)
+                                   net (fanout=1)        0.046       5.601         clk_i
+ IOBD_0_1386/DIN                   td                    0.766       6.367 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.367         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       6.462 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=4)        1.176       7.638         nt_clk_i
+ GPLL_7_463/CLKOUT0                td                    0.033       7.671 r       u_pll_gpu/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.976       8.647         clk_gpu_w
+ USCM_383_894/CLKOUT               td                    0.150       8.797 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=90993)
+                                                         1.328      10.125         ntclkbufg_0
+ CLMA_399_990/CLK                                                          r       u_soc/u_gpu/u_core/u_target/u_store/tail_read_row_r[2]/opit_0/CLK
+ clock pessimism                                         0.582      10.707
+ clock uncertainty                                      -0.550      10.157
+
+ Setup time                                             -0.238       9.919
+
+ Data required time                                                  9.919
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.919
+ Data arrival time                                                  11.622
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.703
