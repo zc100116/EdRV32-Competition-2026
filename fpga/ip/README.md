@@ -180,3 +180,8 @@ GPU v2 setup/存储探针（G-P03/G-P04，220 MHz；APM 直接例化 GTP_APM_E2�
 | ip_lutram_gpu2_setup92 | [创建说明](ip_lutram_gpu2_setup92.md) | 72×16×92 scratch 的 LUTRAM 对照 |
 
 | ip_ram_gpu2_queue | [创建说明](ip_ram_gpu2_queue.md) | GPU v2 FP32 返回队列16×32，5实例，异步读 LUTRAM |
+
+| ip_rom_gpu2_sfu | [创建说明](ip_rom_gpu2_sfu.md) | SFU/setup共享1024×32 TDP种子ROM，1DRM |
+| ip_ram_gpu2_sfu_scratch | [创建说明](ip_ram_gpu2_sfu_scratch.md) | SFU14个独立同步scratch bank，14DRM |
+| ip_lutram_gpu2_sfu_word16 | [创建说明](ip_lutram_gpu2_sfu_word16.md) | SFU metadata/返回队列16位区域，6份32×16 |
+| ip_lutram_gpu2_sfu_word5 | [创建说明](ip_lutram_gpu2_sfu_word5.md) | SFU metadata/返回tag区域，4份32×5 |

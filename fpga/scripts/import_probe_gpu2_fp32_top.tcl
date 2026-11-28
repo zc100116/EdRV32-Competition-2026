@@ -33,7 +33,7 @@ proc edrv32_filelist {path} {
     return $files
 }
 
-set edrv32_sources [edrv32_filelist [file join $edrv32_repo rtl filelists cpu2_probe_core1.f]]
+set edrv32_sources [edrv32_filelist [file join $edrv32_repo rtl filelists gpu2_probe_fp32.f]]
 
 foreach f $edrv32_sources {
     add_design $f

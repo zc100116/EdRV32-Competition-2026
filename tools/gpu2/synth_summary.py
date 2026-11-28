@@ -33,7 +33,7 @@ for filename in sys.argv[1:]:
         elif 'DFF' in cell['type']:
             endpoints.extend((node, names.get(q, f'{name}.Q'))
                              for node, q in zip(conn['D'], conn['Q']))
-        elif cell['type'].startswith('edrv32_'):
+        elif cell['type'].startswith(('edrv32_', 'ip_')):
             for port, direction in cell['port_directions'].items():
                 if direction == 'input' and port not in ('clk_i', 'enable_i', 'wr_en_i'):
                     endpoints.extend((node, f'{name}.{port}[{idx}]')
@@ -62,6 +62,21 @@ for filename in sys.argv[1:]:
     ff = sum(n for kind, n in counts.items() if 'DFF' in kind)
     apm = counts['edrv32_apm_gpu2_u24xu24'] * 2
     ff += counts['edrv32_apm_gpu2_u24xu24'] * 48
+    drm = counts['ip_rom_gpu2_sfu'] + counts['ip_ram_gpu2_sfu_scratch']
+    lr = (counts['edrv32_ram_gpu2_queue'] * 16
+          + counts['ip_lutram_gpu2_sfu_word16'] * 16
+          + counts['ip_lutram_gpu2_sfu_word5'] * 5)
     print(Path(filename).stem, f'LUT4={counts["$lut"]} FF={ff} APM={apm}',
-          f'LUTRAM={counts["edrv32_ram_gpu2_queue"] * 16} DRM=0',
+          f'LUTRAM={lr} DRM={drm}',
           f'depth={levels} start={names.get(node, node)} end={endpoint}')
+
+    # DP's two independent adder layers use this same three-edge cell.
+    if Path(filename).stem == 'edrv32_gpu2_fp32_add':
+        for stage, prefix in ((1, 's1_'), (2, 's2_'), (3, 'result_o')):
+            choices = [(n, q) for n, q in endpoints if q.startswith(prefix)]
+            endnode, endname = max(choices, key=lambda pair: depth(pair[0]))
+            level = depth(endnode)
+            while endnode in previous:
+                endnode = previous[endnode]
+            print(f'  ADD stage{stage}: depth={level} start={names.get(endnode, endnode)} '
+                  f'end={endname}')

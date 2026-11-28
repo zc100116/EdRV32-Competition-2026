@@ -70,6 +70,23 @@ def capture(full=True):
     vertex.sfu = legacy_record
     original.sfu = small_record
     original.study()
+    # M6's precision summary skips broad underflows before calling either SFU.
+    # Replay those exact x/y pairs as well, preserving both old-M5 and small LOG products.
+    rng = random.Random(20261127)
+    for _ in range(4 * 20000):
+        rng.random()
+    restored = 0
+    for span in (.8, 8):
+        for _ in range(20000):
+            x = vertex.fp(2 ** rng.uniform(-span, 0))
+            y = vertex.fp(rng.uniform(.25, 127.75))
+            if x ** y < 2 ** -126:
+                restored += 1
+                for fn in (vertex_original_sfu, original_sfu):
+                    small_record('LOG2', x)
+                    product = vertex.fp(fn('LOG2', x) * y)
+                    small_record('EXP2', product)
+    print(f'M6 underflow replay: {restored} original pairs, {4*restored} SFU requests')
     original.sfu = original_sfu
     vertex.sfu = vertex_original_sfu
     return rows

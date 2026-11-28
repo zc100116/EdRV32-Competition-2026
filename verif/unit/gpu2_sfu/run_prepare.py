@@ -49,7 +49,7 @@ with (out / 'prepare.txt').open('w') as stream:
                      f'{scale & 1023:03x} {ctrl:02x} {expected:08x}\n')
 subprocess.run(['verilator', '--binary', '--timing', '--timescale', '1ns/1ps', '-j', '1',
                 '--top-module', 'tb_prepare', '--Mdir', str(out / 'obj_prepare'),
-                '-o', 'sim', *expand_files(ROOT / 'verif/unit/gpu2_sfu/files.f')],
+                '-o', 'sim', *expand_files(ROOT / 'verif/unit/gpu2_sfu/prepare.f')],
                cwd=ROOT, check=True)
 subprocess.run([str(out / 'obj_prepare/sim'), '+VECTORS=' + str(out / 'prepare.txt')],
                cwd=ROOT, check=True)

@@ -1,5 +1,5 @@
-name: gpu2_sfu_parts
-top: tb_prepare
+name: gpu2_sfu
+top: tb
 files: files.f
 simulator: verilator
 timeout: 60
