@@ -2,9 +2,9 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.1-draft |
-| 日期 | 2026-11-27 |
-| 状态 | 草案，供协调者审核 |
+| 版本 | v0.2 |
+| 日期 | 2026-11-28 |
+| 状态 | 已确认（用户 2026-11-28 决定）；F03、F06 仍待实测 |
 | 范围 | CPU v2可选F/FD算术、独立FP RF及与整数后端集成契约 |
 | 关联文档 | cpu-v2-spec.md、fpu-testplan.md、cpu-v2-plan.md；docs/design/2026-11-27-cpu-v2-fpu.md 第二版；docs/design/2026-11-27-cpu-v2-architecture.md“FPU接口”及第四轮 |
 
@@ -12,7 +12,7 @@
 
 1.1 FPU必须是CPU v2的可选扩展，工作在CPU同一clk_sys域。FPU_FORMAT=NONE必须不实例化FPU、FP RF、FP CSR；F必须实现FLEN=32，FD必须实现FLEN=64及F、D两种精度。本文采用RISC-V F/D 2.2的软件行为，范围仅RV32，不增加Zfh、Zfa、Zfinx、RV64指令。
 
-1.2 FPU必须通过槽0进入全核共享顺序完成队列，独立整数指令可在槽1执行。算术内部可多周期并行，寄存器、flags和访存副作用必须按序提交。
+1.2 FPU必须通过执行管线0进入全核共享顺序完成队列，双发射时可与另一程序槽的独立整数ALU配对，槽到管线必须按cpu-v2-spec 2.3分配。算术内部可多周期并行，寄存器、flags和访存副作用必须按序提交。
 
 ## 2. 功能描述
 
@@ -51,35 +51,51 @@ FD中窄FP结果、FLW和FMV.W.X必须把高32位写为全1。窄非搬移运算
 
 ### 2.4 微结构与构建参数
 
-必须采用FMA核心加ADD/MUL旁路，按精度共享尾端；DIV/SQRT必须使用独立基4digit recurrence入口。D必须独立扩展S数据通路和乘法资源，不串行复用S两颗APM、不把S全部送入宽D核心。
+必须采用FMA核心加ADD/MUL旁路，按精度共享尾端；DIV/SQRT必须使用独立基4digit recurrence入口。D必须独立扩展S数据通路和乘法资源，不串行复用S两颗APM，不把S全部送入宽D核心。
 
-| 参数 | 合法值 | 推荐初值 |
-|---|---|---|
-| FPU_FORMAT | NONE/F/FD | IP按应用构建；图形F、通用双精度FD |
-| FMA_READ_PORTS | 2/3 | F默认3 **[待定]**（协调者评审建议）；FD初值2、满配3 |
-| COMPLETION_DEPTH | F/FD为8/16，NONE固定4 | F=8、FD=16 |
+FPU必须只由FPU_FORMAT选择格式；CPU的ISSUE_WIDTH必须选择cpu-v2-spec 2.2的单发射精简或双发射满配结构；FP读口与队列深度不得独立配置。
 
-端口数量、FLEN、队列tag宽度必须由上述参数派生。任意项转发必须固定启用，不保留仅末级/头旁路比较方案开关。D算术II初值4 **[待定]**，不因此删减D硬件资源。
+| 固定结构 | NONE | F | FD |
+|---|---|---|---|
+| 精度/FLEN B | 无，整数数据32 | S / 32 | S+D / 64 |
+| FP RF读口 R | 无 | 3 | 2 |
+| 完成项 N / tag T | 4 / 2，FF记录 | 8 / 3，数据/PC LUTRAM | 16 / 4，数据/PC LUTRAM |
+| 单/双发射统一源数 S | 2 / 4 | 3 / 5 | 2 / 4 |
+| FP RF/算术/CSR | 不实例化 | 实例化F | 实例化F/D |
+
+任意项转发必须固定启用。F必须同拍捕获三源；FD必须先捕获rs1/rs2、次拍rs3。D算术II初值4 **[待定]**（F03）。板级必须为双发射+F，CPU必须采用单发射精简或双发射满配（cpu-v2-spec 2.2），与NONE/F/FD交叉共6种且全部完整回归；本表内部结构和源副本数不随整数精简结构改变。
 
 ## 3. 接口
 
-3.1 所有接口必须与CPU同域，无新增外部总线或跨时钟域。顶层外部标准接口必须沿cpu-v2-spec 3.1。FPU端口最终拼写随F05冻结，以下逻辑字段必须存在，方向以FPU为准；N=共享完成深度、T=ceil(log2 N)、B=FLEN。
+### 3.1 同域与握手
 
-| 信号/字段 | 方向 | 位宽 | 时钟域 | 说明 |
-|---|---|---|---|---|
-| clk_i / rst_n_i | in | 1/1 | clk_sys | 控制复位，数据阵列不复位 |
-| fp_req_valid_i / fp_req_ready_o | in/out | 1/1 | clk_sys | 槽0接受握手 |
-| fp_req_instr_i / fp_req_tag_i | in | 32/T | clk_sys | 指令、全核年龄tag |
-| fp_req_src1_i / src2_i / src3_i | in | 各B | clk_sys | 已捕获FP源；2R需rs3捕获相位 |
-| fp_req_int_src_i / fp_req_rm_i | in | 32/3 | clk_sys | 整数源、按序解析的舍入编码 |
-| fp_resp_valid_o / fp_resp_ready_i | out/in | 1/1 | clk_sys | 完成握手，背压保留本地结果 |
-| fp_resp_tag_o / data_o / flags_o | out | T/B/5 | clk_sys | 对应tag结果、该条flags |
-| fp_resp_int_dest_o | out | 1 | clk_sys | 结果写整数域 |
-| fp_cancel_valid_i / fp_cancel_tag_i | in | 1/T | clk_sys | 取消年龄边界，年轻项不得提交 |
+所有接口必须同属clk_sys；每模块必须有clk_i/rst_n_i各1位，控制复位、数据不复位。标准外部总线必须沿cpu-v2-spec 3.9。T在F/FD分别3/4，B分别32/64；NONE必须不实例化FP接口。valid&&ready的上升沿必须接受一次，背压必须保持valid及全部负载；ready必须来自寄存容量。
 
-3.2 FP load/store必须通过单整数LSU；FSW/FSD数据来自FP RF，返回写FP域。FP→整数转换、比较/分类必须竞争槽0整数写口；整数→FP必须使用槽0整数读口。不得增加整数RF端口。
 
-3.3 单FP完成写口必须仲裁FP load和算术；两个完成bank必须按顺序tag奇偶分bank，各bank单写。冲突必须年龄优先并保留年轻源结果。fcsr/FS必须由整数特权/提交部分维护，FPU返回每指令flags而不直接更改架构状态。
+下表以整数端为A、FPU为B；FPU端必须用相同词干和反向_i/_o后缀，例如fp_req_valid_i、fp_req_ready_o、fp_resp_valid_o、fp_resp_ready_i、fp_cancel_valid_i、fp_cancel_tag_i、fp_age_head_i。
+
+| A端端口 | 方向 | 位宽 | 语义 |
+|---|---|---:|---|
+| fp_req_valid_o / fp_req_ready_i | A→B / B→A | 各1 | 三源全部捕获后一次接受，等待负载保持 |
+| fp_req_instr_o / fp_req_tag_o | A→B | 32/T | 原始编码/共享tag |
+| fp_req_src1_o / fp_req_src2_o / fp_req_src3_o | A→B | 各B | FP原始位，FD保留boxing高32 |
+| fp_req_int_src_o / fp_req_rm_o | A→B | 32/3 | 整数源/已解析合法舍入，进入后不重采frm |
+| fp_resp_valid_i / fp_resp_ready_o | B→A / A→B | 各1 | 本地结果完成，仲裁背压保持 |
+| fp_resp_tag_i / fp_resp_data_i / fp_resp_flags_i / fp_resp_int_dest_i | B→A | T/B/5/1 | 每条结果，int_dest1整数、0FP |
+| fp_cancel_valid_o / fp_cancel_tag_o / fp_age_head_o | A→B | 1/T/T | 包含边界取消；age_head是C05比较必需字段 |
+
+FPU内部 top→fma32/fma64/divsqrt/convert/short 使用 `unit_req_valid/ready/instr/tag/src1/src2/src3/int_src/rm`，位宽和握手逐项同fp_req；各单元→top使用 `unit_resp_valid/ready/tag/data/flags/int_dest`，逐项同fp_resp，32位算术结果在FD由top按boxing扩展。每单元都有 `age_head/cancel_valid/cancel_tag` 同上，完成前后均可取消；未用源由译码确定，不设空预留接口。NONE不实例化这些接口。
+
+
+### 3.2 RF、LSU、共享完成与CSR
+
+FP RF读写、统一source、allocate、完成源/head/提交、CSR flags/FS、LSU逐beat接口必须逐信号沿cpu-v2-spec 3.4、3.5、3.7，位宽必须使用本文2.4固定表；NONE无FP域。FP load/store必须经过单LSU，不增加整数RF端口或D$副本。FP→整数比较/转换/分类必须使用整数提交写口0，另一整数写口在双发射中保留；整数→FP源必须使用已有整数读口。
+
+FP load和算术必须竞争单FP目的完成写口。FPU不得直接改fcsr/FS，必须仅返回每指令flags，由commit按程序顺序生效。无rd branch/store也必须参与完成PC写仲裁。
+
+### 3.3 模块与技术包装
+
+FP根必须为rtl/cpu2/fpu/；模块必须为edrv32_cpu2_fpu_top（路由）、edrv32_cpu2_fpu_rf（FP RF）、edrv32_cpu2_fpu_fma32、edrv32_cpu2_fpu_fma64（按精度ADD/MUL/FMA及共享尾端）、edrv32_cpu2_fpu_divsqrt（独立S/D基4入口）、edrv32_cpu2_fpu_convert、edrv32_cpu2_fpu_short。S辅助必须沿已有edrv32_cpu2_fpu_lz24/edrv32_cpu2_fpu_lza32；D辅助必须依真实数据通路确定，不预留空模块。F必须不实例化D算术；NONE必须不实例化上述模块。FP RF及共享完成宏端口/几何必须沿cpu-v2-spec 3.10；F06的FP乘法宏实际打包仍待测。
 
 ## 4. 寄存器
 
@@ -89,18 +105,22 @@ FD中窄FP结果、FLW和FMV.W.X必须把高32位写为全1。窄非搬移运算
 | fflags | 0x001 | RW | 0 | [4:0]=NV/DZ/OF/UF/NX，对应bit4..0；高位0 |
 | frm | 0x002 | RW | 0 | [2:0]舍入编码，高位0；保留编码照存 |
 | fcsr | 0x003 | RW | 0 | [7:5]frm，[4:0]fflags，高位0 |
-| mstatus.FS/SD | 0x300 | 见CPU CSR | Off初值 **[待定]** | FS[14:13]，SD[31]由Dirty状态生成 |
+| mstatus.FS/SD | 0x300 | 见CPU CSR | Off(00) | FS[14:13]，SD[31]由Dirty状态生成 |
 | misa.F/D | 0x301 | 写忽略 | 按构建 | NONE均0、F仅F、FD两者1 |
 
 4.1 每条已提交FP指令必须将自身flags OR入fflags；CSR显式写清/置flags必须与长运算按程序顺序生效，年轻取消项不得影响fflags。三CSR必须互为别名。
 
-4.2 NONE必须使FP CSR访问非法。FS=Off时的FP指令/FP CSR非法访问、Dirty写入和上下文保存恢复必须由CPU特权集成负责；具体FS复位和Dirty触发事件 F02 **[待定]**。推荐复位Off，写FP架构状态/flags/frm后Dirty，允许软件保存恢复全部f0–f31和fcsr。
+4.2 含F/FD复位FS=Off(00)，Initial=01/Clean=10/Dirty=11，SD=(FS==11)；SD只读。NONE的FS/SD读0写忽略、FP CSR非法。FS=Off时FP指令（含访存/搬移）和FP CSR访问均非法，mtval=指令。
+
+仅在提交时：任何FP目的寄存器写（包括FLW/FLD/FMV）置Dirty；FP指令flags非0所致fflags写置Dirty；对fflags/frm/fcsr的实际CSR写访问置Dirty，即使写回相同值。只读CSR（CSRRS/RC零源）、FSW/FSD、无flags的整数目的比较/转换/分类不置Dirty。取消项无效；FP RF数据不复位，不以FS=Initial偷偷清空寄存器。
+
+软件写mstatus.FS按2bit原值保存（含主动置Clean/Initial/Off），同拍陷阱优先沿CPU CSR规则；写fcsr三别名有序、flags OR与CSR显式写按指令年龄依次作用。所有CSR/系统单发并等待更老完成，动态rm在FP源接受前采样已生效frm；保留frm原样保存，使用非法编码时才陷阱。
 
 ## 5. 行为与时序
 
 ### 5.1 RF、发射和依赖
 
-FP RF必须独立32×B、单写；2R FMA必须先读rs1/rs2并捕获，次拍读rs3，连续FMA接受间隔至少2；额外源捕获周期只加一次。3R必须同拍捕获三源，本体II不受rs3捕获限制。捕获期间可配独立整数，但不得开始新FP读取；未读rs3期间必须保持RAW/WAW版本正确。
+FP RF必须独立32×B、单写；FD FMA必须先读rs1/rs2并捕获，次拍读rs3，连续FMA接受间隔至少2；额外源捕获周期只加一次。F必须同拍捕获三源，本体II不受rs3捕获限制。双发射捕获期间可配独立整数，但不得开始新FP读取；未读rs3期间必须保持RAW/WAW版本正确。
 
 必须独立跟踪FP/整数域RAW/WAW；同组FP相关不得配。等待最老FP指令必须阻止年轻越序发射；FPU长运算不得统一停顿整数流水，有容量且不相关的后继整数可继续按序发射。
 
@@ -114,7 +134,7 @@ ADD/MUL/FMA必须共享各精度尾端入口，按入口周期预约冲突，S�
 
 ### 5.3 延迟和吞吐初值
 
-所有本表数字为规划估算，均 **[待定]**（F03）。本体延迟从最后一个源已捕获到本地结果可转发，不含2R FMA额外的一次源捕获，不含真实完成竞争。
+所有本表数字为规划估算，均 **[待定]**（F03）。本体延迟从最后一个源已捕获到本地结果可转发，不含FD FMA额外的一次源捕获，不含真实完成竞争。
 
 | 操作 | S延迟 | D延迟 | 本体II初值 |
 |---|---:|---:|---|
@@ -132,17 +152,21 @@ DIV/SQRT初值必须按基4每拍一轮：S准备2、迭代14、尾部3；D准�
 
 F/FD必须采用8/16项全核共享完成队列，不增加FP专用第二队列。数据和PC必须用LUTRAM，flags/目的/年龄控制用FF；整数NONE原4项独立FF不承受两bank伪争用。无rd的branch/store也必须写其PC完成记录并参与bank仲裁。
 
-任意完成未提交项必须可按最新源tag转发；R个源读取加一个提交读取必须使用M=R+1结果副本，PC每bank一份。队列异步读结果必须本地捕获，不得直接串入EX最长选择；若真实实现多一拍必须改F03并重跑模型。每拍最多两条退休、最多一条FP目的写，架构RF/fflags/store必须按序生效。取消必须覆盖在途算术、排队完成和flags，tag环回不得误读旧RF版本。
+任意完成未提交项必须可按最新源tag转发；低32位结果每bank必须复制S+1份（F单/双发射4/6份，FD单/双发射3/5份），FD高32位每bank必须3份，PC每bank1份。统一源口必须按域映射，不另设额外FP完成读口。队列异步读结果必须本地捕获，不得直接串入EX最长选择；若真实实现多一拍必须改F03并重跑模型。每拍最多ISSUE_WIDTH条退休、最多一条FP目的写，架构RF/fflags/store必须按序生效。取消必须覆盖在途算术、排队完成和flags，tag环回不得误读旧RF版本。必须以队头相对距离比较年龄，cancel_tag包含边界；取消同沿必须清算术/本地结果valid与flags，取消范围内的同拍接收必须不记完成。取消后的结果源必须不再回送旧tag，队列下一拍可复用tag；已发AXI必须收完并由cache抑制旧响应。两个bank必须按tag[0]选择，单写、年龄优先；异bank两个FP目的也必须只接收老者。FD未读rs3必须保留源版本/生产tag，生产者退休同沿必须捕获值，不得被年轻同目的写覆盖。三源全部捕获后才一次req握手；额外捕获拍必须只计一次。
 
 ### 5.5 浮点访存边界
 
-FLW/FSW必须使用一个32位beat，FLD/FSD必须低地址字再高地址字两beat；FD两beat之间不得退休或响应中断。FLD必须全部返回才提供64位源；FLD/FSD不得承诺64位原子性。推荐FLW/FSW四字节、FLD/FSD八字节自然对齐，未对齐产生CPU普通访存异常 **[待定]**（F04）。第二beat访问故障和跨行store副作用必须由F04与CPU C05共同冻结，初值沿总线已完成事务不可撤销、单指令精确退休契约，不假定事务回滚。
+S必须4B对齐，D必须8B对齐，不对齐在任何beat发出前报告cause4/6、mtval原地址；两beat低字后高字，共一个tag。FLD仅两字成功才完成64位结果；任一错误无FP寄存器/flags写回。第二beat访问错误cause5/7，mepc本条PC、mtval故障beat地址（原地址+4）。
+
+可缓存FSD先完成两beat的地址/tag准备，再在不可撤销头依次写缓冲；设备/不可缓存从头授权后依次发单拍，低beat失败不发高beat。高beat失败不能撤销已完成低beat总线或存储副作用，不退休本条/年轻项，但明确允许部分存储；不得声称精确退休等于外部回滚。两个成功响应后才退休一次；两beat之间不退休年轻项/不响应中断。
+
+自然对齐8B且行32B时 `(addr mod32)∈{0,8,16,24}`，高字偏移≤28，因此本版**不存在合法D指令跨cache行**，也不跨4KiB/PMA自然边界；行尾24/28必须覆盖。双bank跨行取指必须沿cpu-v2-spec 3/5.5。
 
 ## 6. 错误处理
 
 6.1 数值异常必须只置本条flags并于提交累计，不引起M态陷阱；合法subnormal必须由硬件处理。
 
-6.2 未实现精度/指令、FS=Off非法访问、2.2非法舍入必须向CPU报告非法指令，mtval为编码；非法舍入项不得提交结果或flags。访存不对齐/访问错误必须按CPU cause4/5/6/7，故障项和年轻项不提交。
+6.2 未实现精度/指令、FS=Off非法访问、2.2非法舍入必须由整数译码/CSR在进入FPU前生成CPU非法指令完成项；FPU不得增加异常响应通道；mtval必须为编码；非法舍入项不得提交结果或flags。访存不对齐/访问错误必须按CPU cause4/5/6/7，故障项和年轻项不提交。
 
 6.3 冲刷必须取消年轻结果和flags，保留更老完成和已提交架构状态。完成竞争必须保留源结果，不能丢失、重复提交或静默降级。不得增加规格未要求的超时、重试和软件subnormal兜底。
 
@@ -158,21 +182,15 @@ FLW/FSW必须使用一个32位beat，FLD/FSD必须低地址字再高地址字两
 | D DIV/SQRT recurrence | 5.756 | carry57+3普通级 |
 | APM寄存阶段代理 | 5.323 | X/Y、MULT/P/CPO和级联仍须PDS逐项验证 |
 
-7.2 下表均为C2-F2结构估算，误差约±40%，为相对旧评估V5-default整数基础的集成增量；不将其CPU总数直接套到C2-I4主档。总LUT已含LUTRAM，CLM=ceil(max(LUT/4,FF/8)/.70)，APM不折算LUT。
+7.2 下表必须仅作为结构估算，误差约±40%；增量相对C2-F2旧V5-default整数基础，不得直接与CPU第四轮总数相加作为实测。逻辑LUT含义不含LUTRAM，总LUT包含LUTRAM；flags/控制为FF，不增加第二FP完成队列。
 
-| 配置/R/N | 增量总LUT/逻辑LUT估算 | FF估算 | APM估算 | LUTRAM估算 | 逻辑RAM bit估算 |
-|---|---|---:|---:|---:|---:|
-| NONE/—/4 | 0/0 | 0 | 0 | 0 | 0 |
-| F/2/8 | 3709/3389 | 873 | 2 | 320 | 3072 |
-| F/2/16 | 3821/3501 | 1049 | 2 | 320 | 4096 |
-| F/3/8（推荐F默认） | 3805/3389 | 873 | 2 | 416 | 4352 |
-| F/3/16 | 3917/3501 | 1049 | 2 | 416 | 5632 |
-| FD/2/8 | 9858/9282 | 4633 | 14 | 576 | 5888 |
-| FD/2/16（推荐FD） | 9970/9394 | 4809 | 14 | 576 | 7680 |
-| FD/3/8 | 10050/9282 | 4633 | 14 | 768 | 8448 |
-| FD/3/16 | 10162/9394 | 4809 | 14 | 768 | 10752 |
+| 格式 | 单/双发射增量总LUT估算 | 逻辑LUT估算 | FF估算 | APM估算 | 单/双发射LUTRAM估算 | 单/双发射逻辑RAM bit估算 |
+|---|---|---:|---:|---:|---|---|
+| NONE | 0/0 | 0 | 0 | 0 | 0/0 | 0/0 |
+| F（3读、N8） | 3805/3933 | 3389 | 873 | 2 | 416/544 | 4352/4864 |
+| FD（2读、N16） | 9970/10098 | 9394 | 4809 | 14 | 576/704 | 7680/8704 |
 
-3R各行按C2-F2公式推算：相对2R增加3B个LUTRAM，逻辑位增加(32+N)B，未预减选择逻辑。公式必须包含RF R×32×B bit；共享队列N×((R+1)B+32)bit，物理LUTRAM=R×B+2×((R+1)B+32)，每单元按64bit物理容量计。flags/控制为FF，不能再加一份FP结果队列。资源/真实宏打包 F06 **[待定]**。
+估算必须采用固定源端口S：RF物理LUTRAM=R×B；队列物理LUTRAM=2×[32(S+1)+32×1_FD(R+1)+32]；逻辑bit=32RB+N×[32(S+1)+32×1_FD(R+1)+32]。每单元物理容量64bit；CLM=ceil(max(LUT/4,FF/8)/.70)。逻辑LUT/FF/APM沿C2-F2的F/3/N8及FD/2/N16；双发射按冻结统一源域口径比旧表增加128 LUTRAM，不能再采用旧R+1全宽复制口径。公式来源为接口冻结记录F05，旧逻辑资源来源为`python3 tools/cpu/eval/fpu_resources.py`及C2-F2；真实宏打包和集成资源仍为F06 **[待定]**。
 
 7.3 perf初值必须使用相同C2-F2软件和trace，比对实际调度的整数基础、结构、依赖、写回和额外beat互斥周期之和。F/3R/8的matrix_s/vertex_s/physics_s周期估算34929/15449/112742；FD/2R/16的matrix_d/whetstone_d周期估算88693/151235。F-only的软件double可能比NONE慢，不能承诺所有浮点软件加速。上述简化命中模型不能替代CPU v2完整前端/cache/错路性能测量。
 
@@ -182,17 +200,17 @@ FLW/FSW必须使用一个32位beat，FLD/FSD必须低地址字再高地址字两
 
 ## 9. 待定事项
 
-| ID | 事项及推荐初值 | 定稿时机 |
+| ID | 事项及开发初值 | 定稿时机 |
 |---|---|---|
-| F01 | F默认读口推荐3（协调者评审建议），FD默认2、满配3；F队列8/FD16 | FP RF/集成任务前，协调者确认资源与负载收益 |
-| F02 | FS复位Off、写架构FP状态/flags/frm置Dirty及SD生成细则 | 特权CSR任务前，按架构状态转移逐项冻结 |
-| F03 | 延迟/II及读捕获时序：S5/7/8、D6/18/20、DIV/SQRT19/35、D II4 | FP32探针后暂定，D探针/RTL逐拍验证后定稿 |
-| F04 | 自然对齐、两beat第二拍错误/跨行store：推荐S4B/D8B，已完成总线副作用不回滚，单指令退休 | LSU/FPU并行实现前，与CPU C05共同冻结 |
-| F05 | 最终端口、年龄/取消tag环回、完成bank仲裁与本地捕获 | 后端/FPU/验证任务前；端口与周期模型一致 |
-| F06 | 资源、技术包装几何和FPGA/ASIC乘法宏契约 | PDS探针和综合后，以实际打包替换估算 |
+| F03 | 延迟/II及源捕获：S5/7/8、D6/18/20、DIV/SQRT19/35、D II4 | 真实算术RTL逐拍与D探针测量后定稿 |
+| F06 | 资源、宏实际打包、FPGA/ASIC乘法宏契约 | PDS/厂商等价/ASIC移植后，以实际打包替代估算 |
+
+CPU C10及验证FT02的性能接受数值仍必须待测；不得把已冻结接口或局部探针频率当作整核验收。
 
 ## 10. 变更记录
 
 | 日期 | 版本 | 变更/依据 |
 |---|---|---|
 | 2026-11-27 | v0.1-draft | 依据C2-F2第二版和C2-I接口起草；F默认3R按协调者建议列待定；保留舍入非法行为经协调者ask确认 |
+| 2026-11-28 | v0.2 | 依据 docs/design/2026-11-28-cpu-v2-interface-freeze.md 已决定状态及更正 C01，冻结接口、行为和两种CPU×三种FPU格式，Zba固定启用，更新模型估算、验证和实施依赖 |
+| 2026-11-28 | v0.2 | 按用户决定将单发射固定为精简结构+Zba；双发射满配及NONE/F/FD固定结构不变，同步接口、验证、实施和模型结论 |

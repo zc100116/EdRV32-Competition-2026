@@ -2,8 +2,8 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本/日期/状态 | v0.1-draft / 2026-11-27 / 草案 |
-| 对应规格 | cpu-v2-spec.md v0.1-draft；F/FD同时受fpu-testplan约束 |
+| 版本/日期/状态 | v0.2 / 2026-11-28 / 已确认 |
+| 对应规格 | cpu-v2-spec.md v0.2；F/FD同时受fpu-testplan约束 |
 | 关联文档 | cpu-v2-plan.md；C2-I第四轮；既有cpu/cache规格仅用于兼容契约 |
 
 ## 1. 验证对象和范围
@@ -20,7 +20,7 @@
 | 核 verif/block/ | CPU v2 IP、可变等待/错误存储模型、退休记分板、Spike | PC/编码/目的域和值、CSR、陷阱、提交访存 |
 | SoC verif/soc/ | edrv32_soc_top及DDR/ROM/UART等既有模型、CLINT/PLIC、DMA软件 | 系统出口、内存可见性、中断和性能 |
 
-仿真必须用Verilator5 --timing；控制复位/X传播补充Icarus，厂商IP等价和PDS由Windows任务卡完成。退休接口最终字段随CPU C04冻结；必须支持按序最多两条退休和FP64结果/flags。检查器必须位于verif，不进入可综合RTL。
+仿真必须用Verilator5 --timing；控制复位/X传播补充Icarus，厂商IP等价和PDS由Windows任务卡完成。退休观察必须逐字段沿cpu-v2-spec 3.11，含双域64位结果、flags、CSR、每指令访存、逐beat实际副作用、陷阱、重定向及源tag；必须支持单/双退休，两个事件按年龄分别比较。检查器必须位于verif，不进入可综合RTL。
 
 软件必须由GCC15.2.0同一ELF提供DUT与Spike输入；默认后门预加载。核级tohost结束，SoC级SIM_EXIT=0结束并保存UART日志。test.yaml必须记录顶层、files.f、参数、程序、超时、回归档位和共享构建group。
 
@@ -30,22 +30,22 @@
 
 | 编号/层级 | 对应规格条款 | 测试内容 | 激励方法 | 检查方法 | 档位 |
 |---|---|---|---|---|---|
-| CV01 B | 1.1–1.3、2.1、2.2 | RV32I/M/Zicsr/Zicntr/Zifencei、无C/A等非法、三个Zba、NONE/F/FD可见性 | 定向、riscv-arch-test I/M/Zicsr/Zba、随机指令 | Spike逐条、架构签名 | smoke/full |
-| CV02 U/B | 2.2、2.3、5.1、5.3 | 全类型两槽配对矩阵，RAW/WAW/x0、程序槽/执行位置、单控制/单LSU/单MUL、CSR单发 | 穷举类型和寄存器关系、约束随机 | 年龄/发射记分板、退休比对 | smoke/full |
-| CV03 U/B | 5.2 | RF两owner、4R2W/2R1W、WB转发、年轻同址写、owner随IB等待多次切换、同拍写后入队、双候选bank | 定向、随机写读/IB停留 | 独立32寄存器模型逐口检查 | smoke/full |
+| CV01 B | 1.1–1.3、2.1、2.2 | RV32I/M/Zicsr/Zicntr/Zifencei、无C/A等非法、固定必测SH1ADD/SH2ADD/SH3ADD三个Zba指令、NONE/F/FD可见性 | 定向、riscv-arch-test I/M/Zicsr/Zba、随机指令 | Spike逐条、架构签名 | smoke/full |
+| CV02 U/B | 2.2、2.3、5.1、5.3 | 全类型×两种管线分配（含老A+年轻LSU/DIV互换），RAW/WAW/WAR/x0、程序槽/执行位置、单控制/单LSU/单MUL、CSR单发 | 穷举类型和寄存器关系、约束随机 | 年龄/发射记分板、退休比对 | smoke/full |
+| CV03 U/B | 5.2 | 单发射异步2R1W无LVT及WB转发；双发射RF两owner、4R2W、WB转发、年轻同址写、owner随IB等待多次切换、同拍写后入队、双候选bank | 定向、随机写读/IB停留 | 独立32寄存器模型逐口检查 | smoke/full |
 | CV04 U/B | 5.2、5.5 | 提前地址RF/WB资格；组内/EX/MEM生产者排除、WB未完成MUL、x0；短1/普通2、未发射丢弃、miss/设备/维护失败 | 定向依赖距离、随机延迟/反压 | 周期记分板与Spike，不使用未完成值 | smoke/full |
-| CV05 U/B | 5.3 | 早ALU/短load→同组晚ALU/分支、普通load不可同组、前组load→晚执行、晚结果链、禁止同拍carry级联 | 全支持opcode×槽位×依赖距离随机 | 真实结果可用时间/退休比对 | smoke/full |
-| CV06 U/B | 5.4、2.3 | 单MUL双槽、四种高低积、延迟4/II1；DIV四指令、位长0..32、符号、除零/溢出、基2/4早结束 | 边界向量、随机操作数 | Python整数模型、Spike、完成时序 | smoke/full |
-| CV07 U/B | 5.4、5.5 | gshare/BTB/RAS初值、索引冲突、call/return溢出恢复；TAGE全部表/项/历史、provider/alternate、冷BTB过滤、分配/待写旁路、EX/MEM训练碰撞 | 可控分支流、随机PC/方向 | 独立预测状态模型逐查询/训练检查 | smoke/full |
-| CV08 U/B | 5.5、5.2 | 对齐/双bank任意字起点、跨行一/双miss、第二字错误、最老taken、F2纠正暴露/取消call，IB满/空/在途信用 | 定向行尾、随机后端反压 | 指令序列/PC/RAS/owner记分板 | smoke/full |
+| CV05 U/B | 5.3 | 单发射无晚执行、依赖在发射前等待；双发射早ALU/短load→同组晚ALU/分支、普通load不可同组、前组load→晚执行、晚结果链、禁止同拍carry级联 | 全支持opcode×槽位×依赖距离随机 | 真实结果可用时间/退休比对 | smoke/full |
+| CV06 U/B | 5.4、2.3 | 单MUL（单发射单入口、双发射双槽择老）、四种高低积、延迟4/II1；DIV四指令、位长0..32、符号、除零/溢出、单发射基2/双发射基4位长提前结束、E0接受/E1预处理/E2初始化/E3起迭代/独立符号修正L=3+n（单发射n=k，双发射n=ceil(k/2)），特殊L=2 | 边界向量、随机操作数 | Python整数模型、Spike、完成时序 | smoke/full |
+| CV07 U/B | 5.4、5.5 | 两种配置gshare4096；单发射BTB64/RAS4、双发射BTB128/RAS8；初值、索引冲突、call/return溢出恢复；仅双发射TAGE固定4×512全部表/项/历史4/12/32/96、provider/alternate、冷BTB过滤、分配/待写旁路、EX/MEM训练碰撞 | 可控分支流、随机PC/方向 | 独立预测状态模型逐查询/训练检查 | smoke/full |
+| CV08 U/B | 5.5、5.2 | 单发射64位8B对齐、IB4+4物理在途预留；双发射IB8+4预留、双bank任意字起点、跨行一/双miss、第二字错误、最老taken、F2纠正暴露/取消call，IB满/空/在途信用 | 定向行尾、随机后端反压 | 指令序列/PC/RAS/owner记分板 | smoke/full |
 | CV09 U/B | 5.1、5.6 | 无全局停顿、长DIV/FP或D$miss时无关项推进；队列满、两bank完成冲突含无rd PC、双退休、头阻塞、tag环回 | 人为同时完成、长短混合随机 | 每项一次完成/提交、顺序/容量/副作用检查 | smoke/full |
-| CV10 U/B/S | 4.1、4.2、6.1–6.3 | 全CSR/复位/WARL/RO/不存在、计数器写冲突、HPM0/2/8、异常双槽年龄、嵌套陷阱、MRET/WFI、中断三源/屏蔽/vectored | CSR程序、定向irq、随机异常插入 | Spike、CSR镜像、mepc/mcause/mtval精确检查 | smoke/full |
+| CV10 U/B/S | 4.1、4.2、6.1–6.3 | 全CSR/复位/WARL/RO/不存在、计数器写冲突、单发射固定2个HPM（3–4）/双发射8个（3–10），单发射未实现HPM地址非法、异常双槽年龄、嵌套陷阱、MRET/WFI、中断三源/屏蔽/vectored | CSR程序、定向irq、随机异常插入 | Spike、CSR镜像、mepc/mcause/mtval精确检查 | smoke/full |
 | CV11 U/B | 3.1、3.3、5.5、6.4 | cache两路/512组/行边界、替换、元数据初始化、hit吞吐、clean/dirty miss、写分配、逐字节store合并、PMA和取消 | AXI背压/错误注入、定向/随机存取 | 字节内存模型、事务检查、错误地址与行有效 | smoke/full |
 | CV12 U/B/S | 4.3、5.5、6.4 | 全APB寄存器、RW1C新错误优先、BUSY写、范围0/非对齐/跨组/超容量、全clean/FENCE/FENCE.I、在途填充失效、设备轮询 | 软件维护、自修改代码、DMA往返 | 数据可见性、握手/BUSY、PLIC6、软件结果 | smoke/full |
-| CV13 B/S | 1.3、3.2、4.2、5.6、6.3 | FP单槽/两写域、整数转换冲突、CSR/flags排序、双beat及取消；F/D全部架构交叉 | fpu-testplan联合程序、随机混合 | Spike FP退休、TestFloat结果、内存副作用 | smoke/full |
-| CV14 U/B | 3.1–3.3、5.1、6.1–6.4 | 反压/冲刷与错误交叉：老异常+年轻store、晚分支+load miss、同时重定向、已接受与未接受请求取消 | 受约束随机指令、逐接口延迟/错误随机 | 年龄模型和Spike；错路无架构副作用 | full |
-| CV15 B/S | 7、8 | 三主档CoreMark/视觉/LVGL、Zba可选软件、L1全命中隔离和真实miss两种条件 | 固定ELF与输入，性能软件 | CPU周期模型分项、软件结果和HPM | perf |
-| CV16 U/B | 2.2、7、9 | 所有合法参数值、主档及组合、技术包装/复位、PDS关键段 | 参数矩阵编译/定向，Windows探针 | 构建/lint、功能、setup/hold/资源报告 | full/perf |
+| CV13 B/S | 1.3、3.2、4.2、5.6、6.3 | FP管线0、程序槽可互换/两写域、整数转换冲突、CSR/flags排序、双beat及取消；F/D全部架构交叉 | fpu-testplan联合程序、随机混合 | Spike FP退休、TestFloat结果、内存副作用 | smoke/full |
+| CV14 U/B | 3.1–3.3、5.1、6.1–6.4 | 反压/冲刷与错误交叉：老异常+年轻store、双发射晚分支/单发射EX分支+load miss、同时重定向、已接受与未接受请求取消 | 受约束随机指令、逐接口延迟/错误随机 | 年龄模型和Spike；错路无架构副作用 | full |
+| CV15 B/S | 7、8 | 单发射精简/双发射满配CoreMark/视觉/LVGL、固定Zba对应ISA软件、L1全命中隔离和真实miss两种条件 | 固定ELF与输入，性能软件 | CPU周期模型分项、软件结果和HPM | perf |
+| CV16 U/B | 2.2、7、9 | 2种CPU×NONE/F/FD共6种配置构建/lint/完整回归、技术包装/复位、PDS关键段 | 6种配置编译/定向/完整回归，Windows探针 | 构建/lint、功能、setup/hold/资源报告 | full/perf |
 
 ## 4. 参考模型
 
@@ -54,6 +54,14 @@ Spike必须以相同ISA配置、初始内存和中断日程执行；逐退休比
 riscv-arch-test必须使用仓库版本及实际commit，记录I/M/Zicsr/Zba/F/D适配集合；Zicntr/Zifencei不足处必须用CV01/CV10/CV12定向程序补齐。预测器必须用独立功能状态模型，cache用按字节内存+维护模型，不能读取RTL内部算式作为期望值。
 
 perf必须固定C2-I4提交1a26a7924输入/编译选项和测量区间。RTL周期与模型必须区分指令发射、数据依赖、结构冲突、F2纠正/重定向、miss/维护；模型没有覆盖的系统成本必须单列。阈值见T01，不能将估算当实测。
+
+T03冻结期望：所有定向时序必须以valid&&ready接受沿计，取消必须同沿优先，错路不得产生架构副作用。CV02必须覆盖类型对×两种管线分配×RAW/WAW/WAR/x0，互换后退休、异常和WAW仍按槽年龄。单发射必须验证一次仅一条，不实例化双管线特性。
+
+CV04必须检查early与实际发射同沿关联、未紧接下一拍接受不复用early、双发射early失败时已发射晚消费者在MEM等待生产tag，不重复load或分配；CV06必须检查单发射radix-2 L=3+k、双发射radix-4 L=3+ceil(k/2)、k=0仍修正、特殊L=2及完成背压；CV07必须验证单发射gshare4096/BTB64/RAS4；仅双发射以独立RamTage等价状态模型检查9位XOR折叠/10位tag、饱和/分配顺序及单待写旁路；CV08必须检查跨行逐字错误/寄存信用。
+
+CV09必须覆盖满队列tag环回、head相对年龄、同bank碰撞、单FP目的写口及取消同拍完成。CV10/14必须检查提交副作用前采样中断、同步异常优先、MEIP>MSIP>MTIP、接收中断退休0、mepc最老未退休PC，以及头DIV/已授权设备/FENCE.I/D双beat不可分割；年轻DIV/FP必须可被老冲刷取消。
+
+CV11/12必须检查复位第1–512沿I/D两路并扫，末组后才接受阵列请求；I失效512组done/BUSY，重叠填充收完不置有效，16组段和写回错误沿既有APB路径。CV13必须采用fpu-spec 4的FS逐事件Dirty与5.5每beat部分写契约。trace必须只为内部观察，不增加IP端口，不读取RTL内存/算式生成期望。完整perf数值阈值仍由T01/C10待测。
 
 ## 5. 覆盖目标
 
@@ -75,24 +83,24 @@ perf必须固定C2-I4提交1a26a7924输入/编译选项和测量区间。RTL周�
 | 7/8 | CV15、CV16/全部测试族 |
 | 9/10 | 待定项由CV16及对应测试族在定稿时核对；变更记录为文档审核项 |
 
-必须达成全部合法类型配对、支持的晚opcode×槽位×源关系、提前地址每个资格排除原因、TAGE provider/alternate每表及无命中、训练旁路碰撞、IB/完成队列满空环回、每种异常×两槽年龄×冲刷阶段、所有PMA区域/维护命令/总线错误响应覆盖。随机生成必须记录seed和指令流，重点提高上述交叉出现率，不以代码覆盖率代替功能覆盖。
+必须达成全部合法类型配对、支持的晚opcode×槽位×源关系、提前地址每个资格排除原因、双发射TAGE provider/alternate每表及无命中、训练旁路碰撞、IB/完成队列满空环回、每种异常×两槽年龄×冲刷阶段、所有PMA区域/维护命令/总线错误响应覆盖。随机生成必须记录seed和指令流，重点提高上述交叉出现率，不以代码覆盖率代替功能覆盖。
 
 ## 6. 通过判据和回归档位划分
 
-smoke必须每主档至少通过基本整数/CSR/中断、短load、晚执行（满配）、RF、cache维护与完成冲突短例；单项约60秒内。full必须运行全部定向、约束随机、架构测试、Icarus控制复位以及合法参数矩阵。perf必须运行三主档的三负载、相同软件的Zba对应点及FP联合性能，PDS单元探针与整片报告必须单独记条件。
+T02配置范围必须固定为单发射精简×NONE/F/FD、双发射满配×NONE/F/FD共6种，全部运行完整回归；不得以短例、抽样或两两覆盖替代。所有配置必须固定Zba；单发射必须为gshare4096（无TAGE）/BTB64/RAS4/IB4（另4项物理在途预留）/64位8B对齐取指/异步2R1W无LVT/无晚执行/单管线/radix-2/2HPM（3–4），双发射必须为TAGE4×512/gshare4096、BTB128/RAS8/IB8/radix-4/8HPM。两种配置均为单LSU、I$/D$各32KiB/2路/32B行，FP内部结构必须沿规格固定表。
 
-参数矩阵必须覆盖每个2.2合法值；主档NONE全回归，主档×F/FD×2R/3R×N8/16均跑集成回归。其余合法结构组合至少完成编译/lint、CV02–CV09及CSR/异常短例；完整全组合规模/随机预算见T02，不把未跑组合声称支持已验证。
+smoke必须每种配置通过基本整数/CSR/中断、短load、适用的晚执行、RF、cache维护、完成冲突和FP短例；单项约60秒内。full必须在全部6种配置运行全部适用定向、约束随机、架构测试、Icarus控制复位及构建/lint；每配置seed=0..9，每seed至少10000条退休，被陷阱终止后必须用下一定向段继续完成预算，长随机也必须纳入full。NONE必须检查全部FP指令/CSR非法，F必须检查D非法。
 
-通过必须为零Spike/签名/内存/协议不一致、零丢失/重复提交、功能覆盖目标全部达到，风格及lint零告警。FAIL必须打印PC、期望/实际、周期和seed后结束。perf允许的模型偏差必须待T01明确，发现未建模成本必须报出，不能调RTL行为迎合模型。PDS必须报告全部相关域setup/hold WNS/TNS/WHS/THS，不用Linux结果代替。
+perf必须运行两种CPU的三个固定Zba负载及FP联合性能；PDS单元探针和整片报告必须单独记录条件。通过必须为零Spike/签名/内存/协议不一致、零丢失/重复提交、功能覆盖全部达到、风格/lint零告警；FAIL必须打印PC、期望/实际、周期和seed后结束。perf允许偏差仍待T01明确，未建模成本必须分项报告。PDS必须报告全部相关域setup/hold WNS/TNS/WHS/THS，不用Linux结果代替。
 
 ## 7. 待定事项与变更记录
 
 | ID | 事项/初值 | 定稿时机 |
 |---|---|---|
 | T01 | perf允许偏差：推荐全命中固定微程序周期精确一致，完整负载先报告分项差异；数值阈值由协调者按C10批准 | RTL性能回归前 |
-| T02 | 参数全组合/随机预算：推荐主档矩阵完整架构回归，其余合法组合定向和至少每组合10个固定种子；长随机另纳full | 验证Task派发前 |
-| T03 | 退休trace、宏端口和未定异常边界的测试字段：推荐随CPU C02/C04/C05/C07/C08/C09、F02/F04/F05冻结 | 独立验证Task派发前 |
 
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-11-27 | v0.1-draft | 配套CPU v2新IP规格草稿，覆盖三层验证和模型对照 |
+| 2026-11-28 | v0.2 | 依据 docs/design/2026-11-28-cpu-v2-interface-freeze.md 已决定状态及更正 C01，冻结接口、行为和两种CPU×三种FPU格式，Zba固定启用，更新模型估算、验证和实施依赖 |
+| 2026-11-28 | v0.2 | 按用户决定将单发射固定为精简结构+Zba；双发射满配及NONE/F/FD固定结构不变，同步接口、验证、实施和模型结论 |
