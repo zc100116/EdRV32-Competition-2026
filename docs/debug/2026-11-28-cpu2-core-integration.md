@@ -322,3 +322,41 @@ IB直通的空标志按16位分区，8区计数副本限制新增控制扇出；
 验证：27个单元配置PASS；九流×三RTL均通过Spike寄存器/PC轨迹对照；核级55程序×两宽PASS；两宽NONE RTL top --lint-only -Wall及六个改动RTL风格检查零告警。
 复现：run_model_conformance.py 的 build/run --names 加上述九例；audit_branches.py 只观察原模型调度，输出逐分支等待源与解析级；measure.py 输出前端/I$映射资源和路径级数。
 原始日志、ELF、CSV、PPA摘要与联合死锁源快照保留在 build/fe1/results；接口取消沿新请求与BTB沿前读语义由协调者补冻结记录。
+
+## 10. BE1：完成窗口、store 退休和消费者边界（2026-11-28）
+
+基线01177676b，联合FE1=6532c3553，后端=6cd8b9296/5565f2dad；两宽NONE、GCC15.2、同一模型ELF/10迭代/start_time–stop_time，BFM固定等待；未改模型。
+D06：全部使用现有共享LUTRAM，W1 NONE/F=8、FD=16、W2=16；T/信用由N导出，无短环信用。D01：四beat SQ准备即done，退休计数标记，逐beat排入写缓冲不等done；设备仍授权/done。
+D05删除冗余MUL E3，最终合并进入现有skid/完成口，相关EX间隔4；D08复用CSR请求寄存，分配沿直入，II3；D07 W1复用本地pending等待已寄存early结果，W2复用原MEM/EX skid实现同沿替换。
+普通load原195→132拍：ID源旁路误依赖完成表同bank写口ready；改valid+tag旁路，完成/退休仍握手，未改普通load配对矩阵；audit_backend.py观察原模型对应逐拍调度。
+D$纠正三类顺序问题：延迟store准备way被年轻miss驱逐；维护后旧way提交；旧miss等待时年轻store准备/年轻miss填充造成循环等待。分别用准备记录排空、失效重查/重新写分配、pipe_ordered_w约束解决（dcache.v:389–400）。
+render W2复现1292777条后分支8008c7fc/tag9死锁：EX背压期间pending漏采load返回，生产者已退休；issue.v:1606起复用源FF捕获ALU/early/接受LSU/WB0/1并清wait，新增返回→退休→物理tag复用用例，旧实现可复现FAIL。
+
+| 微基准 | 模型W1 | RTL W1 | 模型W2 | RTL W2 |
+|---|---:|---:|---:|---:|
+| store_stream | 131 | 131 | 130 | 131 |
+| load_store | 131 | 131 | 130 | 131 |
+| mul_chain | 256 | 257 | 255 | 257 |
+| mul_stream | 131 | 132 | 130 | 132 |
+| alu_stream | 259 | 258 | 131 | 131 |
+| csr_read | 194 | 194 | 193 | 193 |
+| load_use | 131 | 131 | 67 | 67 |
+| ordinary_load_use | 259 | 258 | 131 | 132 |
+
+全部23例（含15个pair_*）正向差距最大2拍；W1 pair_AD/DA=1917对1987（快70拍）：原A00已1928对1987，DIV未改功能；硬件独立ALU可与DIV重叠，模型pipe_model.py:851–861的div_wait挡全局发射；请求间隔30，非本轮新增慢拍。
+同模型ELF CoreMark：I05b→联合本轮W1 3381542/2.957231→2674632/3.738832，W2 2883957/3.467458→1757049/5.691361；模型2673925/3.739821、1599073/6.253623；收益含FE1。原I06 ELF另跑tohost/CRC：2666532/3.750189、1757087/5.691238。
+同窗口LSU非ready：457205→7893、484038→19269；HPM9：261299→91494、217666→96046。W2退休双条/零条拍：模型1029338/172195，RTL932411/233244；少96927个双退拍＋多61049个零退拍＝157976拍总差。
+W2 HPM5/6/7/8：模型150516/98468/112443/31778，RTL162252/212740/107284/43948；HPM9模型163814/RTL96046；HPM16模型12949/RTL13567。W1 HPM8模型计单条与RTL口径不同，不作逐项归因。
+剩余证据①共读口：131190次early查询被普通读占口（dcache.v:381–382），模型id_early_load只检查基址可用、不建模读口仲裁（pipe_model.py:569–578）；branch+load结构失败29222对模型505，load+load49671对29523。
+剩余证据②完成bank等待：ALU0/1/branch有效未接收137821/192369/103642拍，模型CompletionWindow:80–84按tick+latency+1完成、没有bank写口仲裁；ALU+ALU结构失败45206对28498。各计数重叠，不能直接相加当成可回收拍数。
+次要证据：晚消费者捕获遇未接受ALU/LSU分别2604/16次；branch已寄存early可用558次、其中延后555次（另22次与其他结果重叠）。只列已观测事件，不把它们解释成全部差距。
+普通miss等待store排空的事件/累计拍（W1,W2）：CoreMark 5/19、4/16；vision 770/3669、694/2778；render 2037/8118、2085/8278。vision RTL2106684/1448242对C07模型2005575/1174627；render694229/562736对606296/421068。
+Yosys0.67+94、XC7同IP几何flatten：W1 LUT15838→25075（+9237）、FF10780→14422（+3642）、LUTRAM281→341（+60）；W2 LUT40773→80383（+39610）、FF19731→35816（+16085）、LUTRAM398→482（+84）；DRM IP10/30、APM4/4，增量均0。
+同脚本read_slang --keep-hierarchy且不flatten的总LUT/FF/LUTRAM：W1 21573/12108/472→31941/16677/532；W2 49089/20678/526→100758/38618/610；逐模块表及两宽各最差20条路径在下述原始数据中，tech/IP子树计入最近CPU模块，不按flatten别名猜资源归属。
+flatten全核最差32→54级、42→91级：W1 I$ tag读→D$ tag地址（27LUT/24MUX/3carry）；W2 completion.head_r→D$.early_grant_r（47LUT/35MUX/8carry/1INV）。early_data寄存→ALU skid为21/15级；→完成RAM写数据最长23/21级；完整路径保留ABC无src段，已知模块与来源分开列出。
+资源显著超过模型预算W1 LUT6662/FF3877、W2 LUT11907/FF6550；不宣称165MHz或PDS收敛，协调者已将资源/时序收敛另派且不得增加模型拍数。新增状态用于N扩容控制、四beat SQ/≤16位CE叶及失效重查；短load、pending捕获和MEM替换复用既有寄存，MUL减少结果寄存。
+性能加载器仅cpu2_perf.py按PT_LOAD补零p_memsz−p_filesz，并在退休stop_time结束、不依赖tohost；bss_smoke.S检查初始化哨兵和32字零填充，修前失败、修后W1/W2 249/156拍PASS；正常55程序仍检查tohost。
+验证：55程序×两宽及原I06 CoreMark CRC/tohost PASS；23例×三核Spike寄存器/PC轨迹PASS；后端60种配置、FPU接口tag迁移16种配置PASS；含SQ满/同字load等待/设备授权/FSD双beat/取消/FENCE/维护失效及同沿drain+年轻miss；15个改动RTL风格与六种top --lint-only -Wall均零告警。
+复现：`python3 tools/cpu/run_model_conformance.py {build,run} --names`后接上述八例与所有pair_*；两宽分别`python3 tools/cpu/run_cpu2_core.py --width W`及`--program coremark --no-build`；`python3 tools/cpu/cpu2_perf.py --width W --elf build/cpu-v2/isa/zba/coremark/coremark.elf --no-build`。
+单元：`python3 tools/regress.py full --path verif/unit/cpu2_MODULE -j 2`；PPA：`python3 verif/block/cpu2_core/perf/measure_backend.py W`及加`--hierarchy`，基线同命令在01177676b运行；BSS：GCC15.2 `-march=rv32im_zicsr_zba -mabi=ilp32 -nostdlib -nostartfiles -Wl,-Ttext=0x80000000`构建bss_smoke.S后交cpu2_perf.py。
+原始数据保留`build/be1/results/`：tables/{kernels,modules,worst20-both,workloads,coremark-profile}.csv及完整日志/映射JSON；曾发现Verilator5.051复用旧binary，已作废相关数字，最终删除Mdir并以私有wrapper追加--no-skip-identical重新构建；独立仿真目录结果收集后清理。
