@@ -238,8 +238,8 @@ module tb #(parameter MEM_HALF_PERIOD = 7);
     end
     always @(posedge clk) begin
         #1;
-        check(u_reset.u_mem_released.bit_i === mem_copies_n[0],
-              "SY-07 memory-release CDC samples the memory copy");
+        check(u_reset.u_media_released.bit_i !== 1'b1 || mem_copies_n[0] === 1'b1,
+              "SY-07 system-release CDC waits for the memory copy");
         if (monitor_soft) begin
             check(rst_sys_por_n && rst_mem_core_n, "power-on and memory core survive soft reset");
             if (media_only) check(rst_sys_n, "SY-03 media reset leaves system running");

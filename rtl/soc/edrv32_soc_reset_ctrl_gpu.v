@@ -32,8 +32,12 @@ module edrv32_soc_reset_ctrl_gpu (
 );
     wire rst_mem_por_n_w;
     wire mem_ready_w;
-    wire mem_released_w;
+    wire media_released_w;
+    wire media_copies_n_w;
     wire rst_mem_copy_n_w;
+    wire rst_gpu_copy_n_w;
+    wire rst_aud_copy_n_w;
+    wire rst_pix_copy_n_w;
     wire media_release_n_w;
     wire sys_release_n_w;
     wire soft_active_w;
@@ -114,17 +118,37 @@ module edrv32_soc_reset_ctrl_gpu (
         .rst_n_o(rst_eth_tx_n_o)
     );
 
-    // spec 2.10 release order: all one-stage memory copies release first.
+    // spec 2.10 release order: all one-stage engine copies release first.
     edrv32_reset_copy u_mem_copy (
         .clk_i(clk_mem_i),
         .rst_n_i(rst_mem_n_o),
         .rst_n_o(rst_mem_copy_n_w)
     );
-    edrv32_cdc_sync_bit u_mem_released (
+    // visual SoC 5.3.5: wait for the copies of the on-board PLL engine domains.
+    // ETH clocks come from the PHY, held in reset until software clears
+    // PHY_CTRL.PHY_RST, so ETH copies must not gate SYS (gpu-soc-spec 5.3).
+    edrv32_reset_copy u_gpu_copy (
+        .clk_i(clk_gpu_i),
+        .rst_n_i(rst_gpu_n_o),
+        .rst_n_o(rst_gpu_copy_n_w)
+    );
+    edrv32_reset_copy u_aud_copy (
+        .clk_i(clk_aud_i),
+        .rst_n_i(rst_aud_n_o),
+        .rst_n_o(rst_aud_copy_n_w)
+    );
+    edrv32_reset_copy u_pix_copy (
+        .clk_i(clk_pix_i),
+        .rst_n_i(rst_pix_n_o),
+        .rst_n_o(rst_pix_copy_n_w)
+    );
+    assign media_copies_n_w = rst_mem_copy_n_w && rst_gpu_copy_n_w
+        && rst_aud_copy_n_w && rst_pix_copy_n_w;
+    edrv32_cdc_sync_bit u_media_released (
         .clk_i(clk_sys_i),
         .rst_n_i(rst_sys_por_n_o && !soft_soc_r),
-        .bit_i(rst_mem_copy_n_w),
-        .bit_o(mem_released_w)
+        .bit_i(media_copies_n_w),
+        .bit_o(media_released_w)
     );
     // A media-only reset must not revoke a previously released system reset.
     always @(posedge clk_sys_i or negedge rst_sys_por_n_o) begin
@@ -132,7 +156,7 @@ module edrv32_soc_reset_ctrl_gpu (
             sys_release_r <= 1'b0;
         end else if (soft_reset_soc_i || soft_soc_r) begin
             sys_release_r <= 1'b0;
-        end else if (mem_released_w) begin
+        end else if (media_released_w) begin
             sys_release_r <= 1'b1;
         end
     end
