@@ -195,3 +195,101 @@ build/cpu2_core/programs/dispatch/dispatch.elf 或
 build/cpu2_core/programs/load_stream/load_stream.elf。所有观测均在验证环境，
 没有增加 RTL 参数、架构状态或运行门禁。剩余容量/LSU 结构差异交协调者的模型任务，
 本轮没有待批准 RTL 修改。
+
+
+## 9. I05b：普通 load 每拍接收（2026-11-28）
+
+实现/测试提交：a1b81d626；前测为第 8 节 I06P，early 规则补充由协调者提交
+`bdb44511f`。GCC 15.2.0、Verilator 5.051 devel；同一模型 ELF、10 次迭代、
+[start_time, stop_time) 退休窗口，两宽均为 2,456,216 条指令，BFM 条件沿用 8.1。
+
+### 9.1 根因与实现
+
+旧 LSU 仅 S_IDLE 准入，即使普通命中响应正通过 fall-through 完成，S_RESPONSE
+也不能接受下一条；D$ 本身已有两个响应上下文，能够每拍完成一条命中请求。
+在 `edrv32_cpu2_lsu.v:279` 用已有寄存状态/类型与新增一项 queue_valid 构成
+准入容量。上一条响应捕获沿可直接装入新请求元数据（`:476`）；若上一条延迟返回
+或完成被背压，第二项保留 tag、地址、指令类型、数据和已发出/等待状态，直到按序
+接替。已拉起但未接受的 D$ 请求跨头完成背压持续保持 valid 和载荷（`:297`）。
+store、设备、FD 双 beat 仍按原准备/头授权/最终 done 流程处理；每个在途项按年龄
+取消。替换元数据与旧错误同沿时，新项的 fault_addr 优先，避免覆盖成旧请求地址。
+`lsu_req_ready` 没有来自 D$ ready、response valid 或 completion ready 的组合路径；
+D$ 请求 ready 仍为其原有寄存容量，D$ RTL 无须修改。
+
+只做双槽时，原 early 优先规则使核级连续 load 的当前实际请求被后一条 ID 查询
+顺延，W1 仍为 125 拍、early 查询 61/命中 0。经 ask，协调者授权并提交唯一例外：
+已登记、valid/tag/hit 成功且 dc_req_early=1 的实际请求不再读 RAM，可与下一条
+early 查询同拍接受。LSU `:307` 实现该例外；未命中、已过期和普通未复用请求保持
+既有仲裁，已等待的普通请求仍保留读口。D$ 既有 promote/read_array/early_read
+选择本来就支持这一无双读操作，新增测试确认连续复用的数据/tag 完整性。
+
+### 9.2 测量
+
+| 项目 | W1 前→后 | W2 前→后 |
+|---|---:|---:|
+| 热 load_stream：64 条 load 窗口周期 | 127→64 | 126→63 |
+| 热 load_stream：LSU 非 ready 拍 | 63→0 | 63→0 |
+| 同模型 ELF CoreMark 周期 | 3534269→3381542 | 3053180→2883957 |
+| 同模型 ELF CoreMark/MHz | 2.829439→2.957231 | 3.275274→3.467458 |
+| 同模型 ELF LSU 非 ready 拍 | 980967→457205 | 1018912→484038 |
+| 同模型 ELF load 等待 HPM9 | 335974→261299 | 333048→217666 |
+| 完成队列 credit=0 拍 | 456365→374899 | 914081→808879 |
+| store 队头拍 | 383754→322877 | 447522→383911 |
+| early 成功回应 | 150971→177842 | 138762→191039 |
+
+热 load_stream 两宽均无 I$/D$ miss、无 IB 空或满完成队列停顿；双发射窗口的
+63 拍是按 start/stop 退休边界计时的窗口数字，不能把 64/63 解释为单 LSU
+每拍接受多条；流中实际普通请求/响应仍各最多每拍一条。
+CoreMark/MHz 相对 I06P 分别提升 4.52%/5.87%，LSU busy 降低 53.39%/52.49%。
+这些计数有重叠，不能相加。缓存 miss 状态拍仍为 W1 1908/132、W2 1944/132；
+最短缓存 store 队头仍为 2 拍。尚有 store/设备等局部忙和四项完成窗口限制，
+本任务没有扩容或改动这些结构，也没有把结果宣称达到原无限窗口模型。
+
+完整原 I06 ELF 另跑到 tohost/CRC 检查结束：W1 3368305 拍、2.968852 CM/MHz；
+W2 2885148 拍、3.466027 CM/MHz。与模型 ELF 布局不同，修复前后对照以上表为准。
+
+### 9.3 防回归与命令
+
+- LSU NONE/F/FD 三配置 PASS：普通连续 load 每拍请求/下一拍完成；miss 头后接受
+  store；双响应完成背压；未接受请求跨完成背压/early 竞争保持；年轻槽取消；
+  queued FD 低高 beat/头授权；8 条连续 early 成功复用及中间 early 失败走普通访问。
+  early 测试保持在端口 tag 容量内，不复用仍有未完成实例的 tag。
+- D$ NONE/F/FD 三配置 PASS：连续不同字的命中、每拍 early 复用并查询下一项、
+  同步 miss 发现沿保留第二个 hit/miss 请求；原 store、维护、设备、取消测试一并通过。
+  期望数据由外部字节内存模型产生，不读取 RTL 内部状态计算参考值。
+- 两宽各 55 个程序 PASS，含 rv32ui/rv32um/Zba、trap/redirect、dispatch/load_stream；
+  完整 CoreMark 两宽 PASS。新普通流测试在旧 LSU 上以 load stream admission n=1
+  失败，确认复现原隔拍准入问题。
+- 22 个 CPU2 RTL 风格 0 告警；ISSUE_WIDTH=1/2 × NONE/F/FD 六组 top
+  `--lint-only -Wall` 0 告警，front size 字段只取实际使用的两位。
+
+```sh
+python3 tools/regress.py smoke --path verif/unit/cpu2_lsu -j 2
+python3 tools/regress.py smoke --path verif/unit/cpu2_dcache -j 2
+python3 tools/cpu/build_cpu2_tests.py --suite isa
+python3 tools/cpu/build_cpu2_tests.py --suite coremark
+for w in 1 2; do
+    python3 tools/cpu/run_cpu2_core.py --width "$w"
+    python3 tools/cpu/run_cpu2_core.py --width "$w" --program coremark --no-build
+    python3 tools/cpu/cpu2_perf.py --elf build/cpu2_core/programs/load_stream/load_stream.elf --width "$w" --no-build
+    python3 tools/cpu/cpu2_perf.py --elf build/cpu-v2/isa/zba/coremark/coremark.elf --width "$w" --no-build
+done
+python3 tools/check/verilog_style.py rtl/cpu2/*.v
+```
+
+top lint 的复现命令：
+
+```sh
+cd rtl/filelists
+for f in NONE F FD; do
+    for w in 1 2; do
+        verilator --lint-only -Wall -DSIM_MODE --top-module edrv32_cpu2_top \
+            -GISSUE_WIDTH="$w" "-GFPU_FORMAT=\"$f\"" -f cpu2.f
+    done
+done
+```
+
+原始结果位于 build/i05b 的 stream、model、smoke、coremark、lsu-final、
+dcache-final 与 lint 日志；单元逐项日志副本在 build/i05b/unit/cpu2_{lsu,dcache}，
+复现运行的默认目录为 build/regress/smoke/unit/cpu2_{lsu,dcache}。
+仿真使用独立目录，结果收集后清理；本轮没有需要协调者追加决定的项目。
