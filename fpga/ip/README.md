@@ -169,3 +169,14 @@ Compiler 接受这两份文件、ROM 最初几条指令和 SRAM 首字正确，�
 | ip_lutram_gpu_read_pool | [创建说明](ip_lutram_gpu_read_pool.md) | GPU 读 DMA 64×256，1 实例 |
 | ip_lutram_gpu_write_pool | [创建说明](ip_lutram_gpu_write_pool.md) | GPU 写 DMA、命令 FIFO 各 32×256，合计 2 实例 |
 | ip_ram_gpu_resolve_line | [创建说明](ip_ram_gpu_resolve_line.md) | GPU RESOLVE 512×72，3 实例 |
+
+GPU v2 setup/存储探针（G-P03/G-P04，220 MHz；APM 直接例化 GTP_APM_E2）：
+
+| IP | 创建说明 | 使用者 |
+|---|---|---|
+| GPU v2 setup APM 原语 | [结构说明](ip_apm_gpu2_setup.md) | setup 49×33，一池6 APM |
+| ip_ram_gpu2_sdp72 | [创建说明](ip_ram_gpu2_sdp72.md) | C12 RF/常量、DRM scratch，同几何复用 |
+| ip_ram_gpu2_sdp36 | [创建说明](ip_ram_gpu2_sdp36.md) | C12 program，1024×160有效位 |
+| ip_lutram_gpu2_setup92 | [创建说明](ip_lutram_gpu2_setup92.md) | 72×16×92 scratch 的 LUTRAM 对照 |
+
+| ip_ram_gpu2_queue | [创建说明](ip_ram_gpu2_queue.md) | GPU v2 FP32 返回队列16×32，5实例，异步读 LUTRAM |

@@ -1,0 +1,28 @@
+# GPU v2 banks probe; 220 MHz margin constraint, no PLL.
+create_clock -name {clk_gpu2_banks} [get_ports {clk_i}] -period {4.545} -waveform {0.000 2.272}
+
+define_attribute {p:clk_i} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:clk_i} {PAP_IO_LOC} {D18}
+define_attribute {p:clk_i} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:clk_i} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:clk_i} {PAP_IO_NONE} {TRUE}
+
+define_attribute {p:rst_n_i} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:rst_n_i} {PAP_IO_LOC} {C22}
+define_attribute {p:rst_n_i} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:rst_n_i} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:rst_n_i} {PAP_IO_NONE} {TRUE}
+
+define_attribute {p:stim_i} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:stim_i} {PAP_IO_LOC} {C23}
+define_attribute {p:stim_i} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:stim_i} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:stim_i} {PAP_IO_NONE} {TRUE}
+
+define_attribute {p:obs_o} {PAP_IO_DIRECTION} {OUTPUT}
+define_attribute {p:obs_o} {PAP_IO_LOC} {A20}
+define_attribute {p:obs_o} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:obs_o} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:obs_o} {PAP_IO_DRIVE} {8}
+define_attribute {p:obs_o} {PAP_IO_NONE} {TRUE}
+define_attribute {p:obs_o} {PAP_IO_SLEW} {SLOW}
