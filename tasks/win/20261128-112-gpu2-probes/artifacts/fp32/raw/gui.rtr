@@ -1,0 +1,1359 @@
+
+----------------------------------------------------------------------------------------------------
+| Tool Version : Fabric Compiler (version 2022.2-SP6.1 <build 138931>)
+| Date         : Sat Nov 28 22:35:17 2026
+| Design       : edrv32_fpga_probe_gpu2_fp32_top
+| Device       : PG2L200H
+| Speed Grade  : -6
+| Package      : FBB676
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+| Timing Models: Pre-silicon
+| Tcl Command  : report_timing 
+----------------------------------------------------------------------------------------------------
+
+Timing analysis mode : multi corner
+
+ Clock Summary:                                                                                     
+****************************************************************************************************
+                                                                         Clock   Non-clock          
+ Clock                    Period       Waveform            Type          Loads       Loads  Sources 
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_fp32            4.5450       {0.0000 2.2720}     Declared       3424         599  {clk_i} 
+====================================================================================================
+
+ Clock Groups:                                                                                      
+****************************************************************************************************
+ Clock Group                   Group Type                 Clocks                                    
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+ Performance Summary:                                                                               
+****************************************************************************************************
+                              Requested       Estimated      Requested      Estimated               
+ Clock                        Frequency       Frequency      Period         Period             Slack
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_fp32             220.0220 MHz    115.9689 MHz         4.5450         8.6230         -4.078
+====================================================================================================
+
+Design Summary : Some Constraints Violated.
+
+Setup Summary(Slow Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_fp32          clk_gpu2_fp32               -4.078   -2673.007           1548          14888
+====================================================================================================
+
+Hold Summary(Slow Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_fp32          clk_gpu2_fp32                0.145       0.000              0          14888
+====================================================================================================
+
+Recovery Summary(Slow Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+Removal Summary(Slow Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+Minimum Pulse Width Summary(Slow Corner):
+****************************************************************************************************
+                                                                         WPWS Failing     WPWS Total
+ Clock                                            WPWS(ns)    TPWS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_fp32                                       1.618       0.000              0           3424
+====================================================================================================
+
+Setup Summary(Fast Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_fp32          clk_gpu2_fp32               -0.479      -4.674             32          14888
+====================================================================================================
+
+Hold Summary(Fast Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_fp32          clk_gpu2_fp32                0.101       0.000              0          14888
+====================================================================================================
+
+Recovery Summary(Fast Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+Removal Summary(Fast Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+Minimum Pulse Width Summary(Fast Corner):
+****************************************************************************************************
+                                                                         WPWS Failing     WPWS Total
+ Clock                                            WPWS(ns)    TPWS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_fp32                                       1.617       0.000              0           3424
+====================================================================================================
+
+Slow Corner
+****************************************************************************************************
+====================================================================================================
+
+Startpoint  : u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/CLK
+Endpoint    : u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/I3
+Path Group  : clk_gpu2_fp32
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.045  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.294
+  Launch Clock Delay      :  3.806
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.660       3.806         ntclkbufg_0      
+ APM_587_1134/CLK_0                                                        r       u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/CLK
+
+ APM_587_1134/P_0[15]              tco                   0.437       4.243 r       u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/P[15]
+                                   net (fanout=17)       0.923       5.166         u_fp32/g_lane[3].u_scalar/s5_product_w [31]
+ CLMA_639_1146/Y2                  td                    0.240       5.406 r       u_fp32/g_lane[3].u_scalar/N236_1_353/LUT6D_inst_perm/L6
+                                   net (fanout=1)        0.266       5.672         u_fp32/g_lane[3].u_scalar/u_lz_tap/hit_4_4_w
+ CLMA_651_1146/Y0                  td                    0.101       5.773 r       u_fp32/g_lane[3].u_scalar/u_lz_tap/N180_3/gateop_perm/L6
+                                   net (fanout=6)        0.300       6.073         u_fp32/g_lane[3].u_scalar/u_lz_tap/hit_8_2_w
+ CLMA_651_1153/CR0                 td                    0.204       6.277 r       u_fp32/g_lane[3].u_scalar/u_lz_tap/N225_18[1]_muxf7_perm/L7
+                                   net (fanout=1)        0.283       6.560         u_fp32/g_lane[3].u_scalar/u_lz_tap/nb749 [1]
+ CLMA_651_1159/Y3                  td                    0.188       6.748 r       u_fp32/g_lane[3].u_scalar/u_lz_tap/count_o_23[1]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.443       7.191         u_fp32/g_lane[3].u_scalar/tap_s6_lz_w [1]
+ CLMA_651_1171/COUT                td                    0.302       7.493 f       u_fp32/g_lane[3].u_scalar/tap_s6_exp_r[3]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.493         u_fp32/g_lane[3].u_scalar/N373_1.co [4]
+ CLMA_651_1177/Y0                  td                    0.071       7.564 r       u_fp32/g_lane[3].u_scalar/tap_s6_exp_r[4]/opit_0_AQ_perm/Y
+                                   net (fanout=2)        0.281       7.845         u_fp32/g_lane[3].u_scalar/tap_s6_exp_w [4]
+ CLMA_651_1170/Y3                  td                    0.113       7.958 r       u_fp32/g_lane[3].u_scalar/N386_mux5_5/gateop_perm/L6
+                                   net (fanout=2)        0.281       8.239         u_fp32/g_lane[3].u_scalar/_N36928
+ CLMA_651_1176/Y3                  td                    0.101       8.340 r       u_fp32/g_lane[3].u_scalar/N386_mux7_3/gateop_perm/L6
+                                   net (fanout=1)        0.262       8.602         u_fp32/g_lane[3].u_scalar/_N715
+ CLMA_639_1176/Y0                  td                    0.078       8.680 r       u_fp32/g_lane[3].u_scalar/N388_10[0]/LUT6_inst_perm/L6
+                                   net (fanout=98)       0.484       9.164         u_fp32/g_lane[3].u_scalar/tap_s6_shift_w [0]
+ CLMA_639_1146/CR2                 td                    0.349       9.513 r       u_fp32/g_lane[3].u_scalar/N236_1_353/LUT6D_inst_perm/L5
+                                   net (fanout=2)        0.262       9.775         u_fp32/g_lane[3].u_scalar/_N5822
+ CLMA_639_1158/Y1                  td                    0.188       9.963 r       u_fp32/g_lane[3].u_scalar/N393_2_59/gateop_perm/L6
+                                   net (fanout=4)        0.283      10.246         u_fp32/g_lane[3].u_scalar/_N5976
+ CLMA_633_1158/Y2                  td                    0.235      10.481 r       u_fp32/g_lane[3].u_scalar/N393_4_51/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.571      11.052         u_fp32/g_lane[3].u_scalar/_N6122
+ CLMA_645_1164/Y0                  td                    0.078      11.130 r       u_fp32/g_lane[3].u_scalar/N408_5_84/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.262      11.392         u_fp32/g_lane[3].u_scalar/_N36993
+ CLMA_633_1164/Y0                  td                    0.188      11.580 r       u_fp32/g_lane[3].u_scalar/N408_5_89/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.283      11.863         u_fp32/g_lane[3].u_scalar/_N36343_2
+ CLMA_627_1165/Y1                  td                    0.188      12.051 r       u_fp32/g_lane[3].u_scalar/N408_3_823/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.125      12.176         u_fp32/g_lane[3].u_scalar/_N37098
+ CLMA_627_1164/A3                                                          r       u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/I3
+
+ Data arrival time                                                  12.176         Logic Levels: 15 
+                                                                                   Logic: 3.061ns(36.571%), Route: 5.309ns(63.429%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       4.545       4.545 r                        
+ M2                                                      0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.059       4.604         clk_i            
+ IOBD_732_786/DIN                  td                    0.766       5.370 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.370         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       5.465 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       6.233         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.150       6.383 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.456       7.839         ntclkbufg_0      
+ CLMA_627_1164/CLK                                                         r       u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.467       8.306                          
+ clock uncertainty                                      -0.050       8.256                          
+
+ Setup time                                             -0.158       8.098                          
+
+ Data required time                                                  8.098                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.098                          
+ Data arrival time                                                  12.176                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -4.078                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/CLK
+Endpoint    : u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/I5
+Path Group  : clk_gpu2_fp32
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.045  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.294
+  Launch Clock Delay      :  3.806
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.660       3.806         ntclkbufg_0      
+ APM_587_1134/CLK_0                                                        r       u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/CLK
+
+ APM_587_1134/P_0[15]              tco                   0.437       4.243 r       u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/P[15]
+                                   net (fanout=17)       0.923       5.166         u_fp32/g_lane[3].u_scalar/s5_product_w [31]
+ CLMA_639_1146/Y2                  td                    0.240       5.406 r       u_fp32/g_lane[3].u_scalar/N236_1_353/LUT6D_inst_perm/L6
+                                   net (fanout=1)        0.266       5.672         u_fp32/g_lane[3].u_scalar/u_lz_tap/hit_4_4_w
+ CLMA_651_1146/Y0                  td                    0.101       5.773 r       u_fp32/g_lane[3].u_scalar/u_lz_tap/N180_3/gateop_perm/L6
+                                   net (fanout=6)        0.300       6.073         u_fp32/g_lane[3].u_scalar/u_lz_tap/hit_8_2_w
+ CLMA_651_1153/CR0                 td                    0.204       6.277 r       u_fp32/g_lane[3].u_scalar/u_lz_tap/N225_18[1]_muxf7_perm/L7
+                                   net (fanout=1)        0.283       6.560         u_fp32/g_lane[3].u_scalar/u_lz_tap/nb749 [1]
+ CLMA_651_1159/Y3                  td                    0.188       6.748 r       u_fp32/g_lane[3].u_scalar/u_lz_tap/count_o_23[1]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.443       7.191         u_fp32/g_lane[3].u_scalar/tap_s6_lz_w [1]
+ CLMA_651_1171/COUT                td                    0.302       7.493 f       u_fp32/g_lane[3].u_scalar/tap_s6_exp_r[3]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.493         u_fp32/g_lane[3].u_scalar/N373_1.co [4]
+ CLMA_651_1177/Y0                  td                    0.071       7.564 r       u_fp32/g_lane[3].u_scalar/tap_s6_exp_r[4]/opit_0_AQ_perm/Y
+                                   net (fanout=2)        0.281       7.845         u_fp32/g_lane[3].u_scalar/tap_s6_exp_w [4]
+ CLMA_651_1170/Y3                  td                    0.113       7.958 r       u_fp32/g_lane[3].u_scalar/N386_mux5_5/gateop_perm/L6
+                                   net (fanout=2)        0.281       8.239         u_fp32/g_lane[3].u_scalar/_N36928
+ CLMA_651_1176/Y3                  td                    0.101       8.340 r       u_fp32/g_lane[3].u_scalar/N386_mux7_3/gateop_perm/L6
+                                   net (fanout=1)        0.262       8.602         u_fp32/g_lane[3].u_scalar/_N715
+ CLMA_639_1176/Y0                  td                    0.078       8.680 r       u_fp32/g_lane[3].u_scalar/N388_10[0]/LUT6_inst_perm/L6
+                                   net (fanout=98)       0.641       9.321         u_fp32/g_lane[3].u_scalar/tap_s6_shift_w [0]
+ CLMA_633_1146/Y1                  td                    0.188       9.509 r       u_fp32/g_lane[3].u_scalar/N401_3_0/LUT6D_inst_perm/L6
+                                   net (fanout=1)        0.448       9.957         u_fp32/g_lane[3].u_scalar/_N6918
+ CLMA_651_1141/Y3                  td                    0.188      10.145 r       u_fp32/g_lane[3].u_scalar/N408_3_767/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.419      10.564         u_fp32/g_lane[3].u_scalar/_N36396_11
+ CLMA_651_1158/Y0                  td                    0.078      10.642 r       u_fp32/g_lane[3].u_scalar/N408_3_861/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.460      11.102         u_fp32/g_lane[3].u_scalar/_N36396_3
+ CLMS_633_1177/Y3                  td                    0.223      11.325 r       u_fp32/g_lane[3].u_scalar/N408_3_819/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.612      11.937         u_fp32/g_lane[3].u_scalar/_N37094
+ CLMA_627_1165/Y3                  td                    0.113      12.050 r       u_fp32/g_lane[3].u_scalar/N408_3_829/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.125      12.175         u_fp32/g_lane[3].u_scalar/_N40128
+ CLMA_627_1164/A5                                                          r       u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/I5
+
+ Data arrival time                                                  12.175         Logic Levels: 14 
+                                                                                   Logic: 2.625ns(31.366%), Route: 5.744ns(68.634%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       4.545       4.545 r                        
+ M2                                                      0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.059       4.604         clk_i            
+ IOBD_732_786/DIN                  td                    0.766       5.370 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.370         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       5.465 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       6.233         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.150       6.383 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.456       7.839         ntclkbufg_0      
+ CLMA_627_1164/CLK                                                         r       u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.467       8.306                          
+ clock uncertainty                                      -0.050       8.256                          
+
+ Setup time                                             -0.123       8.133                          
+
+ Data required time                                                  8.133                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.133                          
+ Data arrival time                                                  12.175                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -4.042                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/CLK
+Endpoint    : u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/I2
+Path Group  : clk_gpu2_fp32
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.045  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.294
+  Launch Clock Delay      :  3.806
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.660       3.806         ntclkbufg_0      
+ APM_587_1134/CLK_0                                                        r       u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/CLK
+
+ APM_587_1134/P_0[15]              tco                   0.437       4.243 r       u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/P[15]
+                                   net (fanout=17)       0.923       5.166         u_fp32/g_lane[3].u_scalar/s5_product_w [31]
+ CLMA_639_1146/Y2                  td                    0.240       5.406 r       u_fp32/g_lane[3].u_scalar/N236_1_353/LUT6D_inst_perm/L6
+                                   net (fanout=1)        0.266       5.672         u_fp32/g_lane[3].u_scalar/u_lz_tap/hit_4_4_w
+ CLMA_651_1146/Y0                  td                    0.101       5.773 r       u_fp32/g_lane[3].u_scalar/u_lz_tap/N180_3/gateop_perm/L6
+                                   net (fanout=6)        0.300       6.073         u_fp32/g_lane[3].u_scalar/u_lz_tap/hit_8_2_w
+ CLMA_651_1153/CR0                 td                    0.204       6.277 r       u_fp32/g_lane[3].u_scalar/u_lz_tap/N225_18[1]_muxf7_perm/L7
+                                   net (fanout=1)        0.283       6.560         u_fp32/g_lane[3].u_scalar/u_lz_tap/nb749 [1]
+ CLMA_651_1159/Y3                  td                    0.188       6.748 r       u_fp32/g_lane[3].u_scalar/u_lz_tap/count_o_23[1]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.443       7.191         u_fp32/g_lane[3].u_scalar/tap_s6_lz_w [1]
+ CLMA_651_1171/COUT                td                    0.302       7.493 f       u_fp32/g_lane[3].u_scalar/tap_s6_exp_r[3]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.493         u_fp32/g_lane[3].u_scalar/N373_1.co [4]
+ CLMA_651_1177/Y2                  td                    0.157       7.650 r       u_fp32/g_lane[3].u_scalar/tap_s6_exp_r[6]/opit_0_AQ_perm/Y
+                                   net (fanout=3)        0.283       7.933         u_fp32/g_lane[3].u_scalar/tap_s6_exp_w [6]
+ CLMA_651_1183/Y3                  td                    0.223       8.156 r       u_fp32/g_lane[3].u_scalar/N386_mux5_6/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.125       8.281         u_fp32/g_lane[3].u_scalar/_N711
+ CLMA_651_1182/CR0                 td                    0.269       8.550 r       u_fp32/g_lane[3].u_scalar/N388_10[1]_muxf7_perm/L7
+                                   net (fanout=142)      0.457       9.007         u_fp32/g_lane[3].u_scalar/tap_s6_shift_w [1]
+ CLMS_645_1177/Y1                  td                    0.078       9.085 r       u_fp32/g_lane[3].u_scalar/N393_1_42/LUT6D_inst_perm/L6
+                                   net (fanout=3)        0.257       9.342         u_fp32/g_lane[3].u_scalar/_N5882
+ CLMS_645_1177/CR2                 td                    0.349       9.691 r       u_fp32/g_lane[3].u_scalar/N393_3_42/LUT6D_inst_perm/L5
+                                   net (fanout=2)        0.609      10.300         u_fp32/g_lane[3].u_scalar/_N5959
+ CLMA_627_1189/Y2                  td                    0.188      10.488 r       u_fp32/g_lane[3].u_scalar/N393_4_34/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.639      11.127         u_fp32/g_lane[3].u_scalar/_N6105
+ CLMS_633_1165/Y3                  td                    0.188      11.315 r       u_fp32/g_lane[3].u_scalar/N408_1_153/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.125      11.440         u_fp32/g_lane[3].u_scalar/_N36417_11
+ CLMA_633_1164/Y1                  td                    0.235      11.675 r       u_fp32/g_lane[3].u_scalar/N408_1_9/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.281      11.956         u_fp32/g_lane[3].u_scalar/_N36417_2
+ CLMA_627_1164/A2                                                          r       u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/I2
+
+ Data arrival time                                                  11.956         Logic Levels: 13 
+                                                                                   Logic: 3.159ns(38.761%), Route: 4.991ns(61.239%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       4.545       4.545 r                        
+ M2                                                      0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.059       4.604         clk_i            
+ IOBD_732_786/DIN                  td                    0.766       5.370 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.370         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       5.465 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       6.233         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.150       6.383 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.456       7.839         ntclkbufg_0      
+ CLMA_627_1164/CLK                                                         r       u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.467       8.306                          
+ clock uncertainty                                      -0.050       8.256                          
+
+ Setup time                                             -0.233       8.023                          
+
+ Data required time                                                  8.023                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.023                          
+ Data arrival time                                                  11.956                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -3.933                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_fp32/g_lane[3].s11_vec_r[1]/opit_0/CLK
+Endpoint    : u_fp32/g_lane[3].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_0/ram32x2d/DIH
+Path Group  : clk_gpu2_fp32
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.031  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.824
+  Launch Clock Delay      :  3.283
+  Clock Pessimism Removal :  -0.510
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.766       0.825 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.825         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       0.920 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       1.688         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.150       1.838 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.445       3.283         ntclkbufg_0      
+ CLMA_633_1038/CLK                                                         r       u_fp32/g_lane[3].s11_vec_r[1]/opit_0/CLK
+
+ CLMA_633_1038/Q0                  tco                   0.166       3.449 f       u_fp32/g_lane[3].s11_vec_r[1]/opit_0/Q
+                                   net (fanout=1)        0.250       3.699         u_fp32/g_lane[3].s11_vec_r [1]
+ CLMS_633_1027/BD                                                          f       u_fp32/g_lane[3].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_0/ram32x2d/DIH
+
+ Data arrival time                                                   3.699         Logic Levels: 0  
+                                                                                   Logic: 0.166ns(39.904%), Route: 0.250ns(60.096%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.678       3.824         ntclkbufg_0      
+ CLMS_633_1027/CLK                                                         r       u_fp32/g_lane[3].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_0/ram32x2d/CLK
+ clock pessimism                                        -0.510       3.314                          
+ clock uncertainty                                       0.000       3.314                          
+
+ Hold time                                               0.240       3.554                          
+
+ Data required time                                                  3.554                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  3.554                          
+ Data arrival time                                                   3.699                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.145                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_fp32/vec_valid_r[9]/opit_0_inv_srl/CLK
+Endpoint    : u_fp32/g_lane[0].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_12/ram32x2d/WE
+Path Group  : clk_gpu2_fp32
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.083  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.814
+  Launch Clock Delay      :  3.264
+  Clock Pessimism Removal :  -0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.766       0.825 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.825         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       0.920 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       1.688         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.150       1.838 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.426       3.264         ntclkbufg_0      
+ CLMS_579_985/CLK                                                          r       u_fp32/vec_valid_r[9]/opit_0_inv_srl/CLK
+
+ CLMS_579_985/CR3                  tco                   0.181       3.445 f       u_fp32/vec_valid_r[9]/opit_0_inv_srl/CR0
+                                   net (fanout=71)       0.289       3.734         u_fp32/vec_valid_r [10]
+ CLMS_597_979/WE                                                           f       u_fp32/g_lane[0].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_12/ram32x2d/WE
+
+ Data arrival time                                                   3.734         Logic Levels: 0  
+                                                                                   Logic: 0.181ns(38.511%), Route: 0.289ns(61.489%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.668       3.814         ntclkbufg_0      
+ CLMS_597_979/CLK                                                          r       u_fp32/g_lane[0].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_12/ram32x2d/CLK
+ clock pessimism                                        -0.467       3.347                          
+ clock uncertainty                                       0.000       3.347                          
+
+ Hold time                                               0.240       3.587                          
+
+ Data required time                                                  3.587                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  3.587                          
+ Data arrival time                                                   3.734                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.147                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_fp32/vec_valid_r[9]/opit_0_inv_srl/CLK
+Endpoint    : u_fp32/g_lane[0].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_13/ram32x2d/WE
+Path Group  : clk_gpu2_fp32
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.083  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.814
+  Launch Clock Delay      :  3.264
+  Clock Pessimism Removal :  -0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.766       0.825 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.825         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       0.920 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       1.688         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.150       1.838 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.426       3.264         ntclkbufg_0      
+ CLMS_579_985/CLK                                                          r       u_fp32/vec_valid_r[9]/opit_0_inv_srl/CLK
+
+ CLMS_579_985/CR3                  tco                   0.181       3.445 f       u_fp32/vec_valid_r[9]/opit_0_inv_srl/CR0
+                                   net (fanout=71)       0.289       3.734         u_fp32/vec_valid_r [10]
+ CLMS_597_979/WE                                                           f       u_fp32/g_lane[0].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_13/ram32x2d/WE
+
+ Data arrival time                                                   3.734         Logic Levels: 0  
+                                                                                   Logic: 0.181ns(38.511%), Route: 0.289ns(61.489%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.668       3.814         ntclkbufg_0      
+ CLMS_597_979/CLK                                                          r       u_fp32/g_lane[0].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_13/ram32x2d/CLK
+ clock pessimism                                        -0.467       3.347                          
+ clock uncertainty                                       0.000       3.347                          
+
+ Hold time                                               0.240       3.587                          
+
+ Data required time                                                  3.587                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  3.587                          
+ Data arrival time                                                   3.734                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.147                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : fold_o[19]/opit_0_L6Q_perm/CLK
+Endpoint    : fold_o[19] (port)
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.661       3.807         ntclkbufg_0      
+ CLMA_591_997/CLK                                                          r       fold_o[19]/opit_0_L6Q_perm/CLK
+
+ CLMA_591_997/Q1                   tco                   0.213       4.020 r       fold_o[19]/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        4.053       8.073         nt_fold_o[19]    
+ IOLHR_16_780/DO_P                 td                    0.641       8.714 r       fold_o_obuf[19]/opit_1/DO_P
+                                   net (fanout=1)        0.000       8.714         fold_o_obuf[19]/ntO
+ IOBS_0_780/PAD                    td                    2.504      11.218 r       fold_o_obuf[19]/opit_0/O
+                                   net (fanout=1)        0.038      11.256         fold_o[19]       
+ L23                                                                       r       fold_o[19] (port)
+
+ Data arrival time                                                  11.256         Logic Levels: 2  
+                                                                                   Logic: 3.358ns(45.080%), Route: 4.091ns(54.920%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : fold_o[14]/opit_0_L6Q_perm/CLK
+Endpoint    : fold_o[14] (port)
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.654       3.800         ntclkbufg_0      
+ CLMS_579_1003/CLK                                                         r       fold_o[14]/opit_0_L6Q_perm/CLK
+
+ CLMS_579_1003/Q1                  tco                   0.213       4.013 r       fold_o[14]/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        3.905       7.918         nt_fold_o[14]    
+ IOLHR_16_738/DO_P                 td                    0.641       8.559 r       fold_o_obuf[14]/opit_1/DO_P
+                                   net (fanout=1)        0.000       8.559         fold_o_obuf[14]/ntO
+ IOBS_0_738/PAD                    td                    2.504      11.063 r       fold_o_obuf[14]/opit_0/O
+                                   net (fanout=1)        0.027      11.090         fold_o[14]       
+ P21                                                                       r       fold_o[14] (port)
+
+ Data arrival time                                                  11.090         Logic Levels: 2  
+                                                                                   Logic: 3.358ns(46.063%), Route: 3.932ns(53.937%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : fold_o[5]/opit_0_L6Q_perm/CLK
+Endpoint    : fold_o[5] (port)
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.650       3.796         ntclkbufg_0      
+ CLMA_567_985/CLK                                                          r       fold_o[5]/opit_0_L6Q_perm/CLK
+
+ CLMA_567_985/Q1                   tco                   0.213       4.009 r       fold_o[5]/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        3.878       7.887         nt_fold_o[5]     
+ IOLHR_16_744/DO_P                 td                    0.641       8.528 r       fold_o_obuf[5]/opit_1/DO_P
+                                   net (fanout=1)        0.000       8.528         fold_o_obuf[5]/ntO
+ IOBD_0_744/PAD                    td                    2.500      11.028 r       fold_o_obuf[5]/opit_0/O
+                                   net (fanout=1)        0.027      11.055         fold_o[5]        
+ P20                                                                       r       fold_o[5] (port) 
+
+ Data arrival time                                                  11.055         Logic Levels: 2  
+                                                                                   Logic: 3.354ns(46.205%), Route: 3.905ns(53.795%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : c_lfsr_r[31]/opit_0_inv/RS
+Path Group  : **default**
+Path Type   : min (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ J25                                                     0.000       0.000 f       rst_n_i (port)   
+                                   net (fanout=1)        0.048       0.048         rst_n_i          
+ IOBD_0_930/DIN                    td                    0.678       0.726 f       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.726         rst_n_i_ibuf/ntD 
+ IOLHR_16_930/DI_TO_CLK            td                    0.095       0.821 f       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=258)      2.194       3.015         nt_rst_n_i       
+ CLMA_495_948/RS                                                           f       c_lfsr_r[31]/opit_0_inv/RS
+
+ Data arrival time                                                   3.015         Logic Levels: 2  
+                                                                                   Logic: 0.773ns(25.638%), Route: 2.242ns(74.362%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : c_lfsr_r[61]/opit_0_inv_srl/RS
+Path Group  : **default**
+Path Type   : min (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ J25                                                     0.000       0.000 f       rst_n_i (port)   
+                                   net (fanout=1)        0.048       0.048         rst_n_i          
+ IOBD_0_930/DIN                    td                    0.678       0.726 f       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.726         rst_n_i_ibuf/ntD 
+ IOLHR_16_930/DI_TO_CLK            td                    0.095       0.821 f       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=258)      2.272       3.093         nt_rst_n_i       
+ CLMA_465_1051/RS                                                          f       c_lfsr_r[61]/opit_0_inv_srl/RS
+
+ Data arrival time                                                   3.093         Logic Levels: 2  
+                                                                                   Logic: 0.773ns(24.992%), Route: 2.320ns(75.008%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : c_lfsr_r[43]/opit_0_inv/RS
+Path Group  : **default**
+Path Type   : min (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ J25                                                     0.000       0.000 f       rst_n_i (port)   
+                                   net (fanout=1)        0.048       0.048         rst_n_i          
+ IOBD_0_930/DIN                    td                    0.678       0.726 f       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.726         rst_n_i_ibuf/ntD 
+ IOLHR_16_930/DI_TO_CLK            td                    0.095       0.821 f       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=258)      2.322       3.143         nt_rst_n_i       
+ CLMA_465_991/RS                                                           f       c_lfsr_r[43]/opit_0_inv/RS
+
+ Data arrival time                                                   3.143         Logic Levels: 2  
+                                                                                   Logic: 0.773ns(24.594%), Route: 2.370ns(75.406%)
+====================================================================================================
+
+{clk_gpu2_fp32} Minimum Pulse Width :
+****************************************************************************************************
+ Slack       Actual Width    Require Width   Type              Location                Pin          
+----------------------------------------------------------------------------------------------------
+ 1.618       2.272           0.654           High Pulse Width  APM_527_918/CLK_1       u_fp32/g_lane[0].u_scalar/u_product/u_head/u_apm/gopapm/CLK
+ 1.618       2.272           0.654           High Pulse Width  APM_527_918/CLK_0       u_fp32/g_lane[0].u_scalar/u_product/u_tail/u_apm/gopapm/CLK
+ 1.618       2.272           0.654           High Pulse Width  APM_527_1038/CLK_1      u_fp32/g_lane[1].u_scalar/u_product/u_head/u_apm/gopapm/CLK
+====================================================================================================
+
+====================================================================================================
+Fast Corner
+****************************************************************************************************
+====================================================================================================
+
+Startpoint  : u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/CLK
+Endpoint    : u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/I3
+Path Group  : clk_gpu2_fp32
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.029  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.076
+  Launch Clock Delay      :  2.411
+  Clock Pessimism Removal :  0.306
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.041       2.411         ntclkbufg_0      
+ APM_587_1134/CLK_0                                                        r       u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/CLK
+
+ APM_587_1134/P_0[15]              tco                   0.311       2.722 f       u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/P[15]
+                                   net (fanout=17)       0.566       3.288         u_fp32/g_lane[3].u_scalar/s5_product_w [31]
+ CLMA_639_1146/Y2                  td                    0.125       3.413 f       u_fp32/g_lane[3].u_scalar/N236_1_353/LUT6D_inst_perm/L6
+                                   net (fanout=1)        0.162       3.575         u_fp32/g_lane[3].u_scalar/u_lz_tap/hit_4_4_w
+ CLMA_651_1146/Y0                  td                    0.066       3.641 f       u_fp32/g_lane[3].u_scalar/u_lz_tap/N180_3/gateop_perm/L6
+                                   net (fanout=6)        0.164       3.805         u_fp32/g_lane[3].u_scalar/u_lz_tap/hit_8_2_w
+ CLMA_651_1153/CR0                 td                    0.115       3.920 f       u_fp32/g_lane[3].u_scalar/u_lz_tap/N225_18[1]_muxf7_perm/L7
+                                   net (fanout=1)        0.160       4.080         u_fp32/g_lane[3].u_scalar/u_lz_tap/nb749 [1]
+ CLMA_651_1159/Y3                  td                    0.100       4.180 f       u_fp32/g_lane[3].u_scalar/u_lz_tap/count_o_23[1]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.240       4.420         u_fp32/g_lane[3].u_scalar/tap_s6_lz_w [1]
+ CLMA_651_1171/COUT                td                    0.198       4.618 f       u_fp32/g_lane[3].u_scalar/tap_s6_exp_r[3]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       4.618         u_fp32/g_lane[3].u_scalar/N373_1.co [4]
+ CLMA_651_1177/Y0                  td                    0.037       4.655 f       u_fp32/g_lane[3].u_scalar/tap_s6_exp_r[4]/opit_0_AQ_perm/Y
+                                   net (fanout=2)        0.160       4.815         u_fp32/g_lane[3].u_scalar/tap_s6_exp_w [4]
+ CLMA_651_1170/Y3                  td                    0.070       4.885 f       u_fp32/g_lane[3].u_scalar/N386_mux5_5/gateop_perm/L6
+                                   net (fanout=2)        0.160       5.045         u_fp32/g_lane[3].u_scalar/_N36928
+ CLMA_651_1176/Y3                  td                    0.066       5.111 f       u_fp32/g_lane[3].u_scalar/N386_mux7_3/gateop_perm/L6
+                                   net (fanout=1)        0.161       5.272         u_fp32/g_lane[3].u_scalar/_N715
+ CLMA_639_1176/Y0                  td                    0.039       5.311 f       u_fp32/g_lane[3].u_scalar/N388_10[0]/LUT6_inst_perm/L6
+                                   net (fanout=98)       0.287       5.598         u_fp32/g_lane[3].u_scalar/tap_s6_shift_w [0]
+ CLMA_639_1146/CR2                 td                    0.185       5.783 f       u_fp32/g_lane[3].u_scalar/N236_1_353/LUT6D_inst_perm/L5
+                                   net (fanout=2)        0.161       5.944         u_fp32/g_lane[3].u_scalar/_N5822
+ CLMA_639_1158/Y1                  td                    0.100       6.044 f       u_fp32/g_lane[3].u_scalar/N393_2_59/gateop_perm/L6
+                                   net (fanout=4)        0.160       6.204         u_fp32/g_lane[3].u_scalar/_N5976
+ CLMA_633_1158/Y2                  td                    0.122       6.326 f       u_fp32/g_lane[3].u_scalar/N393_4_51/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.313       6.639         u_fp32/g_lane[3].u_scalar/_N6122
+ CLMA_645_1164/Y0                  td                    0.039       6.678 f       u_fp32/g_lane[3].u_scalar/N408_5_84/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.161       6.839         u_fp32/g_lane[3].u_scalar/_N36993
+ CLMA_633_1164/Y0                  td                    0.100       6.939 f       u_fp32/g_lane[3].u_scalar/N408_5_89/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.160       7.099         u_fp32/g_lane[3].u_scalar/_N36343_2
+ CLMA_627_1165/Y1                  td                    0.100       7.199 f       u_fp32/g_lane[3].u_scalar/N408_3_823/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.075       7.274         u_fp32/g_lane[3].u_scalar/_N37098
+ CLMA_627_1164/A3                                                          f       u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/I3
+
+ Data arrival time                                                   7.274         Logic Levels: 15 
+                                                                                   Logic: 1.773ns(36.459%), Route: 3.090ns(63.541%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       4.545       4.545 r                        
+ M2                                                      0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.059       4.604         clk_i            
+ IOBD_732_786/DIN                  td                    0.445       5.049 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.049         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.073       5.122 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493       5.615         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.097       5.712 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     0.909       6.621         ntclkbufg_0      
+ CLMA_627_1164/CLK                                                         r       u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.306       6.927                          
+ clock uncertainty                                      -0.050       6.877                          
+
+ Setup time                                             -0.082       6.795                          
+
+ Data required time                                                  6.795                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.795                          
+ Data arrival time                                                   7.274                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.479                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/CLK
+Endpoint    : u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/I5
+Path Group  : clk_gpu2_fp32
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.029  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.076
+  Launch Clock Delay      :  2.411
+  Clock Pessimism Removal :  0.306
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.041       2.411         ntclkbufg_0      
+ APM_587_1134/CLK_0                                                        r       u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/CLK
+
+ APM_587_1134/P_0[15]              tco                   0.311       2.722 f       u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/P[15]
+                                   net (fanout=17)       0.566       3.288         u_fp32/g_lane[3].u_scalar/s5_product_w [31]
+ CLMA_639_1146/Y2                  td                    0.125       3.413 f       u_fp32/g_lane[3].u_scalar/N236_1_353/LUT6D_inst_perm/L6
+                                   net (fanout=1)        0.162       3.575         u_fp32/g_lane[3].u_scalar/u_lz_tap/hit_4_4_w
+ CLMA_651_1146/Y0                  td                    0.066       3.641 f       u_fp32/g_lane[3].u_scalar/u_lz_tap/N180_3/gateop_perm/L6
+                                   net (fanout=6)        0.164       3.805         u_fp32/g_lane[3].u_scalar/u_lz_tap/hit_8_2_w
+ CLMA_651_1153/CR0                 td                    0.115       3.920 f       u_fp32/g_lane[3].u_scalar/u_lz_tap/N225_18[1]_muxf7_perm/L7
+                                   net (fanout=1)        0.160       4.080         u_fp32/g_lane[3].u_scalar/u_lz_tap/nb749 [1]
+ CLMA_651_1159/Y3                  td                    0.100       4.180 f       u_fp32/g_lane[3].u_scalar/u_lz_tap/count_o_23[1]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.240       4.420         u_fp32/g_lane[3].u_scalar/tap_s6_lz_w [1]
+ CLMA_651_1171/COUT                td                    0.198       4.618 f       u_fp32/g_lane[3].u_scalar/tap_s6_exp_r[3]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       4.618         u_fp32/g_lane[3].u_scalar/N373_1.co [4]
+ CLMA_651_1177/Y0                  td                    0.037       4.655 f       u_fp32/g_lane[3].u_scalar/tap_s6_exp_r[4]/opit_0_AQ_perm/Y
+                                   net (fanout=2)        0.160       4.815         u_fp32/g_lane[3].u_scalar/tap_s6_exp_w [4]
+ CLMA_651_1170/Y3                  td                    0.070       4.885 f       u_fp32/g_lane[3].u_scalar/N386_mux5_5/gateop_perm/L6
+                                   net (fanout=2)        0.160       5.045         u_fp32/g_lane[3].u_scalar/_N36928
+ CLMA_651_1176/Y3                  td                    0.066       5.111 f       u_fp32/g_lane[3].u_scalar/N386_mux7_3/gateop_perm/L6
+                                   net (fanout=1)        0.161       5.272         u_fp32/g_lane[3].u_scalar/_N715
+ CLMA_639_1176/Y0                  td                    0.040       5.312 r       u_fp32/g_lane[3].u_scalar/N388_10[0]/LUT6_inst_perm/L6
+                                   net (fanout=98)       0.349       5.661         u_fp32/g_lane[3].u_scalar/tap_s6_shift_w [0]
+ CLMA_633_1146/Y1                  td                    0.100       5.761 f       u_fp32/g_lane[3].u_scalar/N401_3_0/LUT6D_inst_perm/L6
+                                   net (fanout=1)        0.251       6.012         u_fp32/g_lane[3].u_scalar/_N6918
+ CLMA_651_1141/Y3                  td                    0.100       6.112 f       u_fp32/g_lane[3].u_scalar/N408_3_767/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.242       6.354         u_fp32/g_lane[3].u_scalar/_N36396_11
+ CLMA_651_1158/Y0                  td                    0.039       6.393 f       u_fp32/g_lane[3].u_scalar/N408_3_861/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.279       6.672         u_fp32/g_lane[3].u_scalar/_N36396_3
+ CLMS_633_1177/Y3                  td                    0.125       6.797 f       u_fp32/g_lane[3].u_scalar/N408_3_819/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.335       7.132         u_fp32/g_lane[3].u_scalar/_N37094
+ CLMA_627_1165/Y3                  td                    0.070       7.202 f       u_fp32/g_lane[3].u_scalar/N408_3_829/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.075       7.277         u_fp32/g_lane[3].u_scalar/_N40128
+ CLMA_627_1164/A5                                                          f       u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/I5
+
+ Data arrival time                                                   7.277         Logic Levels: 14 
+                                                                                   Logic: 1.562ns(32.100%), Route: 3.304ns(67.900%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       4.545       4.545 r                        
+ M2                                                      0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.059       4.604         clk_i            
+ IOBD_732_786/DIN                  td                    0.445       5.049 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.049         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.073       5.122 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493       5.615         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.097       5.712 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     0.909       6.621         ntclkbufg_0      
+ CLMA_627_1164/CLK                                                         r       u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.306       6.927                          
+ clock uncertainty                                      -0.050       6.877                          
+
+ Setup time                                             -0.051       6.826                          
+
+ Data required time                                                  6.826                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.826                          
+ Data arrival time                                                   7.277                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.451                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/CLK
+Endpoint    : u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/I2
+Path Group  : clk_gpu2_fp32
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.029  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.076
+  Launch Clock Delay      :  2.411
+  Clock Pessimism Removal :  0.306
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.041       2.411         ntclkbufg_0      
+ APM_587_1134/CLK_0                                                        r       u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/CLK
+
+ APM_587_1134/P_0[15]              tco                   0.311       2.722 f       u_fp32/g_lane[3].u_scalar/u_product/u_tail/u_apm/gopapm/P[15]
+                                   net (fanout=17)       0.566       3.288         u_fp32/g_lane[3].u_scalar/s5_product_w [31]
+ CLMA_639_1146/Y2                  td                    0.125       3.413 f       u_fp32/g_lane[3].u_scalar/N236_1_353/LUT6D_inst_perm/L6
+                                   net (fanout=1)        0.162       3.575         u_fp32/g_lane[3].u_scalar/u_lz_tap/hit_4_4_w
+ CLMA_651_1146/Y0                  td                    0.066       3.641 f       u_fp32/g_lane[3].u_scalar/u_lz_tap/N180_3/gateop_perm/L6
+                                   net (fanout=6)        0.164       3.805         u_fp32/g_lane[3].u_scalar/u_lz_tap/hit_8_2_w
+ CLMA_651_1153/CR0                 td                    0.115       3.920 f       u_fp32/g_lane[3].u_scalar/u_lz_tap/N225_18[1]_muxf7_perm/L7
+                                   net (fanout=1)        0.160       4.080         u_fp32/g_lane[3].u_scalar/u_lz_tap/nb749 [1]
+ CLMA_651_1159/Y3                  td                    0.100       4.180 f       u_fp32/g_lane[3].u_scalar/u_lz_tap/count_o_23[1]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.240       4.420         u_fp32/g_lane[3].u_scalar/tap_s6_lz_w [1]
+ CLMA_651_1171/COUT                td                    0.198       4.618 f       u_fp32/g_lane[3].u_scalar/tap_s6_exp_r[3]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       4.618         u_fp32/g_lane[3].u_scalar/N373_1.co [4]
+ CLMA_651_1177/Y0                  td                    0.037       4.655 f       u_fp32/g_lane[3].u_scalar/tap_s6_exp_r[4]/opit_0_AQ_perm/Y
+                                   net (fanout=2)        0.160       4.815         u_fp32/g_lane[3].u_scalar/tap_s6_exp_w [4]
+ CLMA_651_1170/Y3                  td                    0.070       4.885 f       u_fp32/g_lane[3].u_scalar/N386_mux5_5/gateop_perm/L6
+                                   net (fanout=2)        0.160       5.045         u_fp32/g_lane[3].u_scalar/_N36928
+ CLMA_651_1176/Y3                  td                    0.066       5.111 f       u_fp32/g_lane[3].u_scalar/N386_mux7_3/gateop_perm/L6
+                                   net (fanout=1)        0.161       5.272         u_fp32/g_lane[3].u_scalar/_N715
+ CLMA_639_1176/Y0                  td                    0.039       5.311 f       u_fp32/g_lane[3].u_scalar/N388_10[0]/LUT6_inst_perm/L6
+                                   net (fanout=98)       0.287       5.598         u_fp32/g_lane[3].u_scalar/tap_s6_shift_w [0]
+ CLMA_639_1146/CR2                 td                    0.185       5.783 f       u_fp32/g_lane[3].u_scalar/N236_1_353/LUT6D_inst_perm/L5
+                                   net (fanout=2)        0.161       5.944         u_fp32/g_lane[3].u_scalar/_N5822
+ CLMA_639_1158/Y1                  td                    0.100       6.044 f       u_fp32/g_lane[3].u_scalar/N393_2_59/gateop_perm/L6
+                                   net (fanout=4)        0.372       6.416         u_fp32/g_lane[3].u_scalar/_N5976
+ CLMA_627_1176/Y3                  td                    0.066       6.482 f       u_fp32/g_lane[3].u_scalar/N393_4_43/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.160       6.642         u_fp32/g_lane[3].u_scalar/_N6114
+ CLMS_633_1177/CR0                 td                    0.167       6.809 f       u_fp32/g_lane[3].u_scalar/N408_1_154_muxf7_perm/L7
+                                   net (fanout=1)        0.161       6.970         u_fp32/g_lane[3].u_scalar/_N36417_12
+ CLMA_633_1164/Y1                  td                    0.066       7.036 f       u_fp32/g_lane[3].u_scalar/N408_1_9/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.160       7.196         u_fp32/g_lane[3].u_scalar/_N36417_2
+ CLMA_627_1164/A2                                                          f       u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/I2
+
+ Data arrival time                                                   7.196         Logic Levels: 14 
+                                                                                   Logic: 1.711ns(35.758%), Route: 3.074ns(64.242%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       4.545       4.545 r                        
+ M2                                                      0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.059       4.604         clk_i            
+ IOBD_732_786/DIN                  td                    0.445       5.049 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.049         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.073       5.122 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493       5.615         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.097       5.712 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     0.909       6.621         ntclkbufg_0      
+ CLMA_627_1164/CLK                                                         r       u_fp32/g_lane[3].u_scalar/tap_s6_increment_r/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.306       6.927                          
+ clock uncertainty                                      -0.050       6.877                          
+
+ Setup time                                             -0.112       6.765                          
+
+ Data required time                                                  6.765                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.765                          
+ Data arrival time                                                   7.196                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.431                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_fp32/vec_valid_r[9]/opit_0_inv_srl/CLK
+Endpoint    : u_fp32/g_lane[1].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_0/ram32x2d/WE
+Path Group  : clk_gpu2_fp32
+Path Type   : min (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.042  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.402
+  Launch Clock Delay      :  2.054
+  Clock Pessimism Removal :  -0.306
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.445       0.504 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.504         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.073       0.577 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493       1.070         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.097       1.167 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     0.887       2.054         ntclkbufg_0      
+ CLMS_579_985/CLK                                                          r       u_fp32/vec_valid_r[9]/opit_0_inv_srl/CLK
+
+ CLMS_579_985/CR3                  tco                   0.122       2.176 f       u_fp32/vec_valid_r[9]/opit_0_inv_srl/CR0
+                                   net (fanout=71)       0.182       2.358         u_fp32/vec_valid_r [10]
+ CLMS_561_985/WE                                                           f       u_fp32/g_lane[1].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_0/ram32x2d/WE
+
+ Data arrival time                                                   2.358         Logic Levels: 0  
+                                                                                   Logic: 0.122ns(40.132%), Route: 0.182ns(59.868%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.032       2.402         ntclkbufg_0      
+ CLMS_561_985/CLK                                                          r       u_fp32/g_lane[1].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_0/ram32x2d/CLK
+ clock pessimism                                        -0.306       2.096                          
+ clock uncertainty                                       0.000       2.096                          
+
+ Hold time                                               0.161       2.257                          
+
+ Data required time                                                  2.257                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  2.257                          
+ Data arrival time                                                   2.358                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.101                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_fp32/vec_valid_r[9]/opit_0_inv_srl/CLK
+Endpoint    : u_fp32/g_lane[1].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_12/ram32x2d/WE
+Path Group  : clk_gpu2_fp32
+Path Type   : min (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.042  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.402
+  Launch Clock Delay      :  2.054
+  Clock Pessimism Removal :  -0.306
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.445       0.504 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.504         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.073       0.577 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493       1.070         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.097       1.167 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     0.887       2.054         ntclkbufg_0      
+ CLMS_579_985/CLK                                                          r       u_fp32/vec_valid_r[9]/opit_0_inv_srl/CLK
+
+ CLMS_579_985/CR3                  tco                   0.122       2.176 f       u_fp32/vec_valid_r[9]/opit_0_inv_srl/CR0
+                                   net (fanout=71)       0.182       2.358         u_fp32/vec_valid_r [10]
+ CLMS_561_985/WE                                                           f       u_fp32/g_lane[1].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_12/ram32x2d/WE
+
+ Data arrival time                                                   2.358         Logic Levels: 0  
+                                                                                   Logic: 0.122ns(40.132%), Route: 0.182ns(59.868%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.032       2.402         ntclkbufg_0      
+ CLMS_561_985/CLK                                                          r       u_fp32/g_lane[1].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_12/ram32x2d/CLK
+ clock pessimism                                        -0.306       2.096                          
+ clock uncertainty                                       0.000       2.096                          
+
+ Hold time                                               0.161       2.257                          
+
+ Data required time                                                  2.257                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  2.257                          
+ Data arrival time                                                   2.358                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.101                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_fp32/vec_valid_r[9]/opit_0_inv_srl/CLK
+Endpoint    : u_fp32/g_lane[1].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_13/ram32x2d/WE
+Path Group  : clk_gpu2_fp32
+Path Type   : min (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.042  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.402
+  Launch Clock Delay      :  2.054
+  Clock Pessimism Removal :  -0.306
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.445       0.504 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.504         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.073       0.577 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493       1.070         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.097       1.167 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     0.887       2.054         ntclkbufg_0      
+ CLMS_579_985/CLK                                                          r       u_fp32/vec_valid_r[9]/opit_0_inv_srl/CLK
+
+ CLMS_579_985/CR3                  tco                   0.122       2.176 f       u_fp32/vec_valid_r[9]/opit_0_inv_srl/CR0
+                                   net (fanout=71)       0.182       2.358         u_fp32/vec_valid_r [10]
+ CLMS_561_985/WE                                                           f       u_fp32/g_lane[1].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_13/ram32x2d/WE
+
+ Data arrival time                                                   2.358         Logic Levels: 0  
+                                                                                   Logic: 0.122ns(40.132%), Route: 0.182ns(59.868%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.032       2.402         ntclkbufg_0      
+ CLMS_561_985/CLK                                                          r       u_fp32/g_lane[1].u_vec_queue/u_ip/u_ipm_distributed_sdpram_ip_ram_gpu2_queue/mem_13/ram32x2d/CLK
+ clock pessimism                                        -0.306       2.096                          
+ clock uncertainty                                       0.000       2.096                          
+
+ Hold time                                               0.161       2.257                          
+
+ Data required time                                                  2.257                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  2.257                          
+ Data arrival time                                                   2.358                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.101                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : fold_o[19]/opit_0_L6Q_perm/CLK
+Endpoint    : fold_o[19] (port)
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.041       2.411         ntclkbufg_0      
+ CLMA_591_997/CLK                                                          r       fold_o[19]/opit_0_L6Q_perm/CLK
+
+ CLMA_591_997/Q1                   tco                   0.125       2.536 f       fold_o[19]/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        2.581       5.117         nt_fold_o[19]    
+ IOLHR_16_780/DO_P                 td                    0.353       5.470 f       fold_o_obuf[19]/opit_1/DO_P
+                                   net (fanout=1)        0.000       5.470         fold_o_obuf[19]/ntO
+ IOBS_0_780/PAD                    td                    2.022       7.492 f       fold_o_obuf[19]/opit_0/O
+                                   net (fanout=1)        0.038       7.530         fold_o[19]       
+ L23                                                                       f       fold_o[19] (port)
+
+ Data arrival time                                                   7.530         Logic Levels: 2  
+                                                                                   Logic: 2.500ns(48.838%), Route: 2.619ns(51.162%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : fold_o[14]/opit_0_L6Q_perm/CLK
+Endpoint    : fold_o[14] (port)
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.036       2.406         ntclkbufg_0      
+ CLMS_579_1003/CLK                                                         r       fold_o[14]/opit_0_L6Q_perm/CLK
+
+ CLMS_579_1003/Q1                  tco                   0.125       2.531 f       fold_o[14]/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        2.499       5.030         nt_fold_o[14]    
+ IOLHR_16_738/DO_P                 td                    0.353       5.383 f       fold_o_obuf[14]/opit_1/DO_P
+                                   net (fanout=1)        0.000       5.383         fold_o_obuf[14]/ntO
+ IOBS_0_738/PAD                    td                    2.022       7.405 f       fold_o_obuf[14]/opit_0/O
+                                   net (fanout=1)        0.027       7.432         fold_o[14]       
+ P21                                                                       f       fold_o[14] (port)
+
+ Data arrival time                                                   7.432         Logic Levels: 2  
+                                                                                   Logic: 2.500ns(49.741%), Route: 2.526ns(50.259%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : fold_o[16]/opit_0_L6Q_perm/CLK
+Endpoint    : fold_o[16] (port)
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_fp32 (rising edge)                       0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=4023)     1.034       2.404         ntclkbufg_0      
+ CLMA_573_1002/CLK                                                         r       fold_o[16]/opit_0_L6Q_perm/CLK
+
+ CLMA_573_1002/Q2                  tco                   0.125       2.529 f       fold_o[16]/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        2.475       5.004         nt_fold_o[16]    
+ IOLHR_16_750/DO_P                 td                    0.353       5.357 f       fold_o_obuf[16]/opit_1/DO_P
+                                   net (fanout=1)        0.000       5.357         fold_o_obuf[16]/ntO
+ IOBS_0_750/PAD                    td                    2.022       7.379 f       fold_o_obuf[16]/opit_0/O
+                                   net (fanout=1)        0.028       7.407         fold_o[16]       
+ N22                                                                       f       fold_o[16] (port)
+
+ Data arrival time                                                   7.407         Logic Levels: 2  
+                                                                                   Logic: 2.500ns(49.970%), Route: 2.503ns(50.030%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : c_lfsr_r[31]/opit_0_inv/RS
+Path Group  : **default**
+Path Type   : min (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ J25                                                     0.000       0.000 r       rst_n_i (port)   
+                                   net (fanout=1)        0.048       0.048         rst_n_i          
+ IOBD_0_930/DIN                    td                    0.445       0.493 r       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.493         rst_n_i_ibuf/ntD 
+ IOLHR_16_930/DI_TO_CLK            td                    0.073       0.566 r       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=258)      1.275       1.841         nt_rst_n_i       
+ CLMA_495_948/RS                                                           r       c_lfsr_r[31]/opit_0_inv/RS
+
+ Data arrival time                                                   1.841         Logic Levels: 2  
+                                                                                   Logic: 0.518ns(28.137%), Route: 1.323ns(71.863%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : c_lfsr_r[61]/opit_0_inv_srl/RS
+Path Group  : **default**
+Path Type   : min (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ J25                                                     0.000       0.000 r       rst_n_i (port)   
+                                   net (fanout=1)        0.048       0.048         rst_n_i          
+ IOBD_0_930/DIN                    td                    0.445       0.493 r       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.493         rst_n_i_ibuf/ntD 
+ IOLHR_16_930/DI_TO_CLK            td                    0.073       0.566 r       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=258)      1.326       1.892         nt_rst_n_i       
+ CLMA_465_1051/RS                                                          r       c_lfsr_r[61]/opit_0_inv_srl/RS
+
+ Data arrival time                                                   1.892         Logic Levels: 2  
+                                                                                   Logic: 0.518ns(27.378%), Route: 1.374ns(72.622%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : c_lfsr_r[43]/opit_0_inv/RS
+Path Group  : **default**
+Path Type   : min (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ J25                                                     0.000       0.000 r       rst_n_i (port)   
+                                   net (fanout=1)        0.048       0.048         rst_n_i          
+ IOBD_0_930/DIN                    td                    0.445       0.493 r       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.493         rst_n_i_ibuf/ntD 
+ IOLHR_16_930/DI_TO_CLK            td                    0.073       0.566 r       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=258)      1.341       1.907         nt_rst_n_i       
+ CLMA_465_991/RS                                                           r       c_lfsr_r[43]/opit_0_inv/RS
+
+ Data arrival time                                                   1.907         Logic Levels: 2  
+                                                                                   Logic: 0.518ns(27.163%), Route: 1.389ns(72.837%)
+====================================================================================================
+
+{clk_gpu2_fp32} Minimum Pulse Width :
+****************************************************************************************************
+ Slack       Actual Width    Require Width   Type              Location                Pin          
+----------------------------------------------------------------------------------------------------
+ 1.617       2.272           0.655           High Pulse Width  APM_527_918/CLK_1       u_fp32/g_lane[0].u_scalar/u_product/u_head/u_apm/gopapm/CLK
+ 1.617       2.272           0.655           High Pulse Width  APM_527_918/CLK_0       u_fp32/g_lane[0].u_scalar/u_product/u_tail/u_apm/gopapm/CLK
+ 1.617       2.272           0.655           High Pulse Width  APM_527_1038/CLK_1      u_fp32/g_lane[1].u_scalar/u_product/u_head/u_apm/gopapm/CLK
+====================================================================================================
+
+====================================================================================================
+
+Inputs and Outputs :
++----------------------------------------------------------------------------------------------------------------------+
+| Type       | File Name                                                                                              
++----------------------------------------------------------------------------------------------------------------------+
+| Input      | G:/codex_project/EdRV32-FPGA/gpu2_probe_fp32/place_route/edrv32_fpga_probe_gpu2_fp32_top_pnr.adf       
+| Output     | G:/codex_project/EdRV32-FPGA/gpu2_probe_fp32/report_timing/edrv32_fpga_probe_gpu2_fp32_top_rtp.adf     
+|            | G:/codex_project/EdRV32-FPGA/gpu2_probe_fp32/report_timing/edrv32_fpga_probe_gpu2_fp32_top.rtr         
+|            | G:/codex_project/EdRV32-FPGA/gpu2_probe_fp32/report_timing/rtr.db                                      
++----------------------------------------------------------------------------------------------------------------------+
+
+
+Flow Command: report_timing 
+Peak memory: 1,559 MB
+Total CPU time to report_timing completion : 0h:0m:1s
+Process Total CPU time to report_timing completion : 0h:0m:1s
+Total real time to report_timing completion : 0h:0m:25s

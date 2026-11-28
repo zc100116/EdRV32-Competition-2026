@@ -1,0 +1,1229 @@
+
+----------------------------------------------------------------------------------------------------
+| Tool Version : Fabric Compiler (version 2022.2-SP6.1 <build 138931>)
+| Date         : Sat Nov 28 22:27:10 2026
+| Design       : edrv32_fpga_probe_gpu2_banks_lutram_top
+| Device       : PG2L200H
+| Speed Grade  : -6
+| Package      : FBB676
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+| Timing Models: Pre-silicon
+| Tcl Command  : report_timing 
+----------------------------------------------------------------------------------------------------
+
+Timing analysis mode : multi corner
+
+ Clock Summary:                                                                                     
+****************************************************************************************************
+                                                                         Clock   Non-clock          
+ Clock                    Period       Waveform            Type          Loads       Loads  Sources 
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_banks_lutram    4.5450       {0.0000 2.2720}     Declared      14822           0  {clk_i} 
+====================================================================================================
+
+ Clock Groups:                                                                                      
+****************************************************************************************************
+ Clock Group                   Group Type                 Clocks                                    
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+ Performance Summary:                                                                               
+****************************************************************************************************
+                              Requested       Estimated      Requested      Estimated               
+ Clock                        Frequency       Frequency      Period         Period             Slack
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_banks_lutram     220.0220 MHz    259.9428 MHz         4.5450         3.8470          0.698
+====================================================================================================
+
+Design Summary : All Constraints Met.
+
+Setup Summary(Slow Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_banks_lutram  clk_gpu2_banks_lutram        0.698       0.000              0          51843
+====================================================================================================
+
+Hold Summary(Slow Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_banks_lutram  clk_gpu2_banks_lutram        0.131       0.000              0          51843
+====================================================================================================
+
+Recovery Summary(Slow Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+Removal Summary(Slow Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+Minimum Pulse Width Summary(Slow Corner):
+****************************************************************************************************
+                                                                         WPWS Failing     WPWS Total
+ Clock                                            WPWS(ns)    TPWS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_banks_lutram                               1.312       0.000              0          14822
+====================================================================================================
+
+Setup Summary(Fast Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_banks_lutram  clk_gpu2_banks_lutram        2.320       0.000              0          51843
+====================================================================================================
+
+Hold Summary(Fast Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_banks_lutram  clk_gpu2_banks_lutram        0.100       0.000              0          51843
+====================================================================================================
+
+Recovery Summary(Fast Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+Removal Summary(Fast Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+Minimum Pulse Width Summary(Fast Corner):
+****************************************************************************************************
+                                                                         WPWS Failing     WPWS Total
+ Clock                                            WPWS(ns)    TPWS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_banks_lutram                               1.702       0.000              0          14822
+====================================================================================================
+
+Slow Corner
+****************************************************************************************************
+====================================================================================================
+
+Startpoint  : u_probe/g_rf[2].capture_r[51]/opit_0/CLK
+Endpoint    : rf_rd_data_observed_r/opit_0_L6Q_perm/I2
+Path Group  : clk_gpu2_banks_lutram
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.269  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.753
+  Launch Clock Delay      :  4.417
+  Clock Pessimism Removal :  0.395
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.673       4.417         ntclkbufg_0      
+ CLMA_591_930/CLK                                                          r       u_probe/g_rf[2].capture_r[51]/opit_0/CLK
+
+ CLMA_591_930/Q0                   tco                   0.213       4.630 r       u_probe/g_rf[2].capture_r[51]/opit_0/Q
+                                   net (fanout=1)        0.620       5.250         rf_rd_data_w[307]
+ CLMA_579_930/Y0                   td                    0.235       5.485 r       N748_259/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.793       6.278         _N14428          
+ CLMA_537_931/Y1                   td                    0.240       6.518 r       N748_364/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.626       7.144         _N14533          
+ CLMA_537_871/Y0                   td                    0.113       7.257 r       N748_383/gateop_perm/L6
+                                   net (fanout=1)        0.455       7.712         _N14552          
+ CLMA_537_841/A2                                                           r       rf_rd_data_observed_r/opit_0_L6Q_perm/I2
+
+ Data arrival time                                                   7.712         Logic Levels: 3  
+                                                                                   Logic: 0.801ns(24.310%), Route: 2.494ns(75.690%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         4.545       4.545 r                        
+ D18                                                     0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.046       4.591         clk_i            
+ IOBD_0_1386/DIN                   td                    0.766       5.357 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.357         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       5.452 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       6.744         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.150       6.894 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.404       8.298         ntclkbufg_0      
+ CLMA_537_841/CLK                                                          r       rf_rd_data_observed_r/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.395       8.693                          
+ clock uncertainty                                      -0.050       8.643                          
+
+ Setup time                                             -0.233       8.410                          
+
+ Data required time                                                  8.410                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.410                          
+ Data arrival time                                                   7.712                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.698                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_probe/g_setup[31].capture_r[53]/opit_0/CLK
+Endpoint    : g_bank[31].observation_r/opit_0_L6Q_perm/I2
+Path Group  : clk_gpu2_banks_lutram
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.308  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.694
+  Launch Clock Delay      :  4.397
+  Clock Pessimism Removal :  0.395
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.653       4.397         ntclkbufg_0      
+ CLMA_555_936/CLK                                                          r       u_probe/g_setup[31].capture_r[53]/opit_0/CLK
+
+ CLMA_555_936/Q3                   tco                   0.213       4.610 r       u_probe/g_setup[31].capture_r[53]/opit_0/Q
+                                   net (fanout=1)        0.413       5.023         setup_rd_data_w[2905]
+ CLMA_561_936/Y1                   td                    0.107       5.130 f       N317_47/LUT6_inst_perm/L6
+                                   net (fanout=1)        1.401       6.531         _N11210          
+ CLMA_417_931/Y0                   td                    0.240       6.771 r       N317_87/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.480       7.251         _N11250          
+ CLMS_405_907/A2                                                           r       g_bank[31].observation_r/opit_0_L6Q_perm/I2
+
+ Data arrival time                                                   7.251         Logic Levels: 2  
+                                                                                   Logic: 0.560ns(19.622%), Route: 2.294ns(80.378%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         4.545       4.545 r                        
+ D18                                                     0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.046       4.591         clk_i            
+ IOBD_0_1386/DIN                   td                    0.766       5.357 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.357         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       5.452 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       6.744         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.150       6.894 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.345       8.239         ntclkbufg_0      
+ CLMS_405_907/CLK                                                          r       g_bank[31].observation_r/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.395       8.634                          
+ clock uncertainty                                      -0.050       8.584                          
+
+ Setup time                                             -0.233       8.351                          
+
+ Data required time                                                  8.351                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.351                          
+ Data arrival time                                                   7.251                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         1.100                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_probe/g_rf[0].capture_r[23]/opit_0/CLK
+Endpoint    : rf_rd_data_observed_r/opit_0_L6Q_perm/I1
+Path Group  : clk_gpu2_banks_lutram
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.051  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.753
+  Launch Clock Delay      :  4.358
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.614       4.358         ntclkbufg_0      
+ CLMA_495_846/CLK                                                          r       u_probe/g_rf[0].capture_r[23]/opit_0/CLK
+
+ CLMA_495_846/Q0                   tco                   0.213       4.571 r       u_probe/g_rf[0].capture_r[23]/opit_0/Q
+                                   net (fanout=1)        0.766       5.337         rf_rd_data_w[23] 
+ CLMA_495_840/Y0                   td                    0.113       5.450 r       N748_24/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.479       5.929         _N14193          
+ CLMA_483_841/Y0                   td                    0.240       6.169 r       N748_329/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.300       6.469         _N14498          
+ CLMA_495_840/Y3                   td                    0.223       6.692 r       N748_375/gateop_perm/L6
+                                   net (fanout=1)        0.723       7.415         _N14544          
+ CLMA_537_841/A1                                                           r       rf_rd_data_observed_r/opit_0_L6Q_perm/I1
+
+ Data arrival time                                                   7.415         Logic Levels: 3  
+                                                                                   Logic: 0.789ns(25.810%), Route: 2.268ns(74.190%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         4.545       4.545 r                        
+ D18                                                     0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.046       4.591         clk_i            
+ IOBD_0_1386/DIN                   td                    0.766       5.357 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.357         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       5.452 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       6.744         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.150       6.894 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.404       8.298         ntclkbufg_0      
+ CLMA_537_841/CLK                                                          r       rf_rd_data_observed_r/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554       8.852                          
+ clock uncertainty                                      -0.050       8.802                          
+
+ Setup time                                             -0.280       8.522                          
+
+ Data required time                                                  8.522                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.522                          
+ Data arrival time                                                   7.415                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         1.107                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : g_bank[43].stimulus_r[17]/opit_0_srl/CLK
+Endpoint    : u_probe/g_setup[43].u_ram/rd_data_r[9]/opit_0_32X2DL6QL5Q/DIL
+Path Group  : clk_gpu2_banks_lutram
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.236  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.312
+  Launch Clock Delay      :  3.681
+  Clock Pessimism Removal :  -0.395
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.766       0.812 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.812         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       0.907 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       2.199         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.150       2.349 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.332       3.681         ntclkbufg_0      
+ CLMA_387_624/CLK                                                          r       g_bank[43].stimulus_r[17]/opit_0_srl/CLK
+
+ CLMA_387_624/CR1                  tco                   0.183       3.864 f       g_bank[43].stimulus_r[17]/opit_0_srl/CR0
+                                   net (fanout=2)        0.424       4.288         g_bank[43].stimulus_r [18]
+ CLMS_375_619/M0                                                           f       u_probe/g_setup[43].u_ram/rd_data_r[9]/opit_0_32X2DL6QL5Q/DIL
+
+ Data arrival time                                                   4.288         Logic Levels: 0  
+                                                                                   Logic: 0.183ns(30.148%), Route: 0.424ns(69.852%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.568       4.312         ntclkbufg_0      
+ CLMS_375_619/CLK                                                          r       u_probe/g_setup[43].u_ram/rd_data_r[9]/opit_0_32X2DL6QL5Q/CLK
+ clock pessimism                                        -0.395       3.917                          
+ clock uncertainty                                       0.000       3.917                          
+
+ Hold time                                               0.240       4.157                          
+
+ Data required time                                                  4.157                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  4.157                          
+ Data arrival time                                                   4.288                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.131                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : g_bank[18].stimulus_r[79]/opit_0_srl/CLK
+Endpoint    : u_probe/g_setup[18].u_ram/rd_data_r[71]/opit_0_32X2DL6QL5Q/DIL
+Path Group  : clk_gpu2_banks_lutram
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.233  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.360
+  Launch Clock Delay      :  3.732
+  Clock Pessimism Removal :  -0.395
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.766       0.812 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.812         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       0.907 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       2.199         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.150       2.349 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.383       3.732         ntclkbufg_0      
+ CLMA_477_612/CLK                                                          r       g_bank[18].stimulus_r[79]/opit_0_srl/CLK
+
+ CLMA_477_612/CR3                  tco                   0.181       3.913 f       g_bank[18].stimulus_r[79]/opit_0_srl/CR0
+                                   net (fanout=2)        0.424       4.337         g_bank[18].stimulus_r [80]
+ CLMS_477_607/M2                                                           f       u_probe/g_setup[18].u_ram/rd_data_r[71]/opit_0_32X2DL6QL5Q/DIL
+
+ Data arrival time                                                   4.337         Logic Levels: 0  
+                                                                                   Logic: 0.181ns(29.917%), Route: 0.424ns(70.083%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.616       4.360         ntclkbufg_0      
+ CLMS_477_607/CLK                                                          r       u_probe/g_setup[18].u_ram/rd_data_r[71]/opit_0_32X2DL6QL5Q/CLK
+ clock pessimism                                        -0.395       3.965                          
+ clock uncertainty                                       0.000       3.965                          
+
+ Hold time                                               0.240       4.205                          
+
+ Data required time                                                  4.205                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  4.205                          
+ Data arrival time                                                   4.337                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.132                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : g_bank[45].stimulus_r[87]/opit_0_srl/CLK
+Endpoint    : u_probe/g_setup[45].u_ram/rd_data_r[79]/opit_0_32X2DL6QL5Q/DIL
+Path Group  : clk_gpu2_banks_lutram
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.233  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.431
+  Launch Clock Delay      :  3.803
+  Clock Pessimism Removal :  -0.395
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.766       0.812 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.812         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       0.907 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       2.199         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.150       2.349 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.454       3.803         ntclkbufg_0      
+ CLMA_609_612/CLK                                                          r       g_bank[45].stimulus_r[87]/opit_0_srl/CLK
+
+ CLMA_609_612/CR2                  tco                   0.182       3.985 f       g_bank[45].stimulus_r[87]/opit_0_srl/CR0
+                                   net (fanout=2)        0.423       4.408         g_bank[45].stimulus_r [88]
+ CLMS_609_607/M2                                                           f       u_probe/g_setup[45].u_ram/rd_data_r[79]/opit_0_32X2DL6QL5Q/DIL
+
+ Data arrival time                                                   4.408         Logic Levels: 0  
+                                                                                   Logic: 0.182ns(30.083%), Route: 0.423ns(69.917%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.687       4.431         ntclkbufg_0      
+ CLMS_609_607/CLK                                                          r       u_probe/g_setup[45].u_ram/rd_data_r[79]/opit_0_32X2DL6QL5Q/CLK
+ clock pessimism                                        -0.395       4.036                          
+ clock uncertainty                                       0.000       4.036                          
+
+ Hold time                                               0.240       4.276                          
+
+ Data required time                                                  4.276                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  4.276                          
+ Data arrival time                                                   4.408                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.132                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : observation_r/opit_0_L6Q_perm/CLK
+Endpoint    : obs_o (port)
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.654       4.398         ntclkbufg_0      
+ CLMA_591_781/CLK                                                          r       observation_r/opit_0_L6Q_perm/CLK
+
+ CLMA_591_781/Q0                   tco                   0.194       4.592 f       observation_r/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        5.207       9.799         nt_obs_o         
+ IOLHR_16_1338/DO_P                td                    0.641      10.440 f       obs_o_obuf/opit_1/DO_P
+                                   net (fanout=1)        0.000      10.440         obs_o_obuf/ntO   
+ IOBS_0_1338/PAD                   td                    2.266      12.706 f       obs_o_obuf/opit_0/O
+                                   net (fanout=1)        0.066      12.772         obs_o            
+ A20                                                                       f       obs_o (port)     
+
+ Data arrival time                                                  12.772         Logic Levels: 2  
+                                                                                   Logic: 3.101ns(37.031%), Route: 5.273ns(62.969%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : stim_i (port)
+Endpoint    : stimulus_root_r[5]/opit_0_inv/D
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C23                                                     0.000       0.000 f       stim_i (port)    
+                                   net (fanout=1)        0.059       0.059         stim_i           
+ IOBS_0_1290/DIN                   td                    0.794       0.853 f       stim_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.853         stim_i_ibuf/ntD  
+ IOLHR_16_1290/DI_TO_CLK           td                    0.110       0.963 f       stim_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=8)        5.811       6.774         nt_stim_i        
+ CLMA_597_696/M0                                                           f       stimulus_root_r[5]/opit_0_inv/D
+
+ Data arrival time                                                   6.774         Logic Levels: 2  
+                                                                                   Logic: 0.904ns(13.345%), Route: 5.870ns(86.655%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : stimulus_root_r[5]/opit_0_inv/RS
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C22                                                     0.000       0.000 f       rst_n_i (port)   
+                                   net (fanout=1)        0.059       0.059         rst_n_i          
+ IOBD_0_1296/DIN                   td                    0.794       0.853 f       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.853         rst_n_i_ibuf/ntD 
+ IOLHR_16_1296/DI_TO_CLK           td                    0.110       0.963 f       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=8)        5.562       6.525         nt_rst_n_i       
+ CLMA_597_696/RS                                                           f       stimulus_root_r[5]/opit_0_inv/RS
+
+ Data arrival time                                                   6.525         Logic Levels: 2  
+                                                                                   Logic: 0.904ns(13.854%), Route: 5.621ns(86.146%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : stim_i (port)
+Endpoint    : stimulus_root_r[6]/opit_0_inv/D
+Path Group  : **default**
+Path Type   : min (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C23                                                     0.000       0.000 f       stim_i (port)    
+                                   net (fanout=1)        0.059       0.059         stim_i           
+ IOBS_0_1290/DIN                   td                    0.678       0.737 f       stim_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.737         stim_i_ibuf/ntD  
+ IOLHR_16_1290/DI_TO_CLK           td                    0.095       0.832 f       stim_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=8)        3.423       4.255         nt_stim_i        
+ CLMA_555_919/M0                                                           f       stimulus_root_r[6]/opit_0_inv/D
+
+ Data arrival time                                                   4.255         Logic Levels: 2  
+                                                                                   Logic: 0.773ns(18.167%), Route: 3.482ns(81.833%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : stim_i (port)
+Endpoint    : stimulus_root_r[4]/opit_0_inv/D
+Path Group  : **default**
+Path Type   : min (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C23                                                     0.000       0.000 f       stim_i (port)    
+                                   net (fanout=1)        0.059       0.059         stim_i           
+ IOBS_0_1290/DIN                   td                    0.678       0.737 f       stim_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.737         stim_i_ibuf/ntD  
+ IOLHR_16_1290/DI_TO_CLK           td                    0.095       0.832 f       stim_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=8)        3.616       4.448         nt_stim_i        
+ CLMA_555_823/M0                                                           f       stimulus_root_r[4]/opit_0_inv/D
+
+ Data arrival time                                                   4.448         Logic Levels: 2  
+                                                                                   Logic: 0.773ns(17.379%), Route: 3.675ns(82.621%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : stim_i (port)
+Endpoint    : stimulus_root_r[3]/opit_0_inv/D
+Path Group  : **default**
+Path Type   : min (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C23                                                     0.000       0.000 f       stim_i (port)    
+                                   net (fanout=1)        0.059       0.059         stim_i           
+ IOBS_0_1290/DIN                   td                    0.678       0.737 f       stim_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.737         stim_i_ibuf/ntD  
+ IOLHR_16_1290/DI_TO_CLK           td                    0.095       0.832 f       stim_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=8)        3.660       4.492         nt_stim_i        
+ CLMA_561_852/M0                                                           f       stimulus_root_r[3]/opit_0_inv/D
+
+ Data arrival time                                                   4.492         Logic Levels: 2  
+                                                                                   Logic: 0.773ns(17.208%), Route: 3.719ns(82.792%)
+====================================================================================================
+
+{clk_gpu2_banks_lutram} Minimum Pulse Width :
+****************************************************************************************************
+ Slack       Actual Width    Require Width   Type              Location                Pin          
+----------------------------------------------------------------------------------------------------
+ 1.312       2.272           0.960           High Pulse Width  DRM_622_798/CLKA[0]     u_probe/g_const[0].u_half0/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 1.312       2.272           0.960           High Pulse Width  DRM_622_798/CLKB[0]     u_probe/g_const[0].u_half0/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 1.312       2.272           0.960           High Pulse Width  DRM_622_732/CLKA[0]     u_probe/g_const[0].u_half1/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+====================================================================================================
+
+====================================================================================================
+Fast Corner
+****************************************************************************************************
+====================================================================================================
+
+Startpoint  : u_probe/g_rf[2].capture_r[51]/opit_0/CLK
+Endpoint    : rf_rd_data_observed_r/opit_0_L6Q_perm/I2
+Path Group  : clk_gpu2_banks_lutram
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.180  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.224
+  Launch Clock Delay      :  2.646
+  Clock Pessimism Removal :  0.242
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.824       1.478         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.115       1.593 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.053       2.646         ntclkbufg_0      
+ CLMA_591_930/CLK                                                          r       u_probe/g_rf[2].capture_r[51]/opit_0/CLK
+
+ CLMA_591_930/Q0                   tco                   0.125       2.771 f       u_probe/g_rf[2].capture_r[51]/opit_0/Q
+                                   net (fanout=1)        0.338       3.109         rf_rd_data_w[307]
+ CLMA_579_930/Y0                   td                    0.122       3.231 f       N748_259/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.439       3.670         _N14428          
+ CLMA_537_931/Y1                   td                    0.125       3.795 f       N748_364/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.380       4.175         _N14533          
+ CLMA_537_871/Y0                   td                    0.070       4.245 f       N748_383/gateop_perm/L6
+                                   net (fanout=1)        0.284       4.529         _N14552          
+ CLMA_537_841/A2                                                           f       rf_rd_data_observed_r/opit_0_L6Q_perm/I2
+
+ Data arrival time                                                   4.529         Logic Levels: 3  
+                                                                                   Logic: 0.442ns(23.473%), Route: 1.441ns(76.527%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         4.545       4.545 r                        
+ D18                                                     0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.046       4.591         clk_i            
+ IOBD_0_1386/DIN                   td                    0.445       5.036 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.036         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       5.109 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.690       5.799         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.097       5.896 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         0.873       6.769         ntclkbufg_0      
+ CLMA_537_841/CLK                                                          r       rf_rd_data_observed_r/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.242       7.011                          
+ clock uncertainty                                      -0.050       6.961                          
+
+ Setup time                                             -0.112       6.849                          
+
+ Data required time                                                  6.849                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.849                          
+ Data arrival time                                                   4.529                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         2.320                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_probe/g_setup[31].capture_r[53]/opit_0/CLK
+Endpoint    : g_bank[31].observation_r/opit_0_L6Q_perm/I2
+Path Group  : clk_gpu2_banks_lutram
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.201  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.189
+  Launch Clock Delay      :  2.632
+  Clock Pessimism Removal :  0.242
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.824       1.478         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.115       1.593 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.039       2.632         ntclkbufg_0      
+ CLMA_555_936/CLK                                                          r       u_probe/g_setup[31].capture_r[53]/opit_0/CLK
+
+ CLMA_555_936/Q3                   tco                   0.125       2.757 f       u_probe/g_setup[31].capture_r[53]/opit_0/Q
+                                   net (fanout=1)        0.232       2.989         setup_rd_data_w[2905]
+ CLMA_561_936/Y1                   td                    0.070       3.059 f       N317_47/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.883       3.942         _N11210          
+ CLMA_417_931/Y0                   td                    0.125       4.067 f       N317_87/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.293       4.360         _N11250          
+ CLMS_405_907/A2                                                           f       g_bank[31].observation_r/opit_0_L6Q_perm/I2
+
+ Data arrival time                                                   4.360         Logic Levels: 2  
+                                                                                   Logic: 0.320ns(18.519%), Route: 1.408ns(81.481%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         4.545       4.545 r                        
+ D18                                                     0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.046       4.591         clk_i            
+ IOBD_0_1386/DIN                   td                    0.445       5.036 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.036         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       5.109 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.690       5.799         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.097       5.896 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         0.838       6.734         ntclkbufg_0      
+ CLMS_405_907/CLK                                                          r       g_bank[31].observation_r/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.242       6.976                          
+ clock uncertainty                                      -0.050       6.926                          
+
+ Setup time                                             -0.112       6.814                          
+
+ Data required time                                                  6.814                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.814                          
+ Data arrival time                                                   4.360                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         2.454                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : g_group[2].observation_r/opit_0_L6Q_perm/CLK
+Endpoint    : observation_r/opit_0_L6Q_perm/I5
+Path Group  : clk_gpu2_banks_lutram
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.142  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.233
+  Launch Clock Delay      :  2.617
+  Clock Pessimism Removal :  0.242
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.824       1.478         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.115       1.593 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.024       2.617         ntclkbufg_0      
+ CLMA_513_576/CLK                                                          r       g_group[2].observation_r/opit_0_L6Q_perm/CLK
+
+ CLMA_513_576/Q2                   tco                   0.125       2.742 f       g_group[2].observation_r/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        0.977       3.719         group_observation_w[2]
+ CLMA_537_829/Y0                   td                    0.122       3.841 f       N772_9/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.612       4.453         _N14978          
+ CLMA_591_781/A5                                                           f       observation_r/opit_0_L6Q_perm/I5
+
+ Data arrival time                                                   4.453         Logic Levels: 1  
+                                                                                   Logic: 0.247ns(13.453%), Route: 1.589ns(86.547%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         4.545       4.545 r                        
+ D18                                                     0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.046       4.591         clk_i            
+ IOBD_0_1386/DIN                   td                    0.445       5.036 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.036         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       5.109 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.690       5.799         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.097       5.896 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         0.882       6.778         ntclkbufg_0      
+ CLMA_591_781/CLK                                                          r       observation_r/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.242       7.020                          
+ clock uncertainty                                      -0.050       6.970                          
+
+ Setup time                                             -0.051       6.919                          
+
+ Data required time                                                  6.919                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.919                          
+ Data arrival time                                                   4.453                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         2.466                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : g_bank[4].stimulus_r[3]/opit_0_srl/CLK
+Endpoint    : u_probe/g_setup[4].u_ram/rd_data_r[67]/opit_0_32X2DL6QL5Q/WADDR[1]
+Path Group  : clk_gpu2_banks_lutram
+Path Type   : min (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.017  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.689
+  Launch Clock Delay      :  2.294
+  Clock Pessimism Removal :  -0.378
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.445       0.491 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.491         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       0.564 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.690       1.254         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.097       1.351 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         0.943       2.294         ntclkbufg_0      
+ CLMA_705_924/CLK                                                          r       g_bank[4].stimulus_r[3]/opit_0_srl/CLK
+
+ CLMA_705_924/Q2                   tco                   0.109       2.403 f       g_bank[4].stimulus_r[3]/opit_0_srl/Q0
+                                   net (fanout=46)       0.169       2.572         g_bank[4].stimulus_r [3]
+ CLMS_711_931/D1                                                           f       u_probe/g_setup[4].u_ram/rd_data_r[67]/opit_0_32X2DL6QL5Q/WADDR[1]
+
+ Data arrival time                                                   2.572         Logic Levels: 0  
+                                                                                   Logic: 0.109ns(39.209%), Route: 0.169ns(60.791%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.824       1.478         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.115       1.593 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.096       2.689         ntclkbufg_0      
+ CLMS_711_931/CLK                                                          r       u_probe/g_setup[4].u_ram/rd_data_r[67]/opit_0_32X2DL6QL5Q/CLK
+ clock pessimism                                        -0.378       2.311                          
+ clock uncertainty                                       0.000       2.311                          
+
+ Hold time                                               0.161       2.472                          
+
+ Data required time                                                  2.472                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  2.472                          
+ Data arrival time                                                   2.572                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.100                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : g_bank[7].stimulus_r[49]/opit_0_srl/CLK
+Endpoint    : u_probe/g_setup[7].u_ram/rd_data_r[41]/opit_0_32X2DL6QL5Q/DIL
+Path Group  : clk_gpu2_banks_lutram
+Path Type   : min (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.043  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.631
+  Launch Clock Delay      :  2.243
+  Clock Pessimism Removal :  -0.345
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.445       0.491 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.491         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       0.564 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.690       1.254         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.097       1.351 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         0.892       2.243         ntclkbufg_0      
+ CLMA_573_948/CLK                                                          r       g_bank[7].stimulus_r[49]/opit_0_srl/CLK
+
+ CLMA_573_948/CR3                  tco                   0.122       2.365 f       g_bank[7].stimulus_r[49]/opit_0_srl/CR0
+                                   net (fanout=2)        0.182       2.547         g_bank[7].stimulus_r [50]
+ CLMS_561_955/M2                                                           f       u_probe/g_setup[7].u_ram/rd_data_r[41]/opit_0_32X2DL6QL5Q/DIL
+
+ Data arrival time                                                   2.547         Logic Levels: 0  
+                                                                                   Logic: 0.122ns(40.132%), Route: 0.182ns(59.868%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.824       1.478         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.115       1.593 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.038       2.631         ntclkbufg_0      
+ CLMS_561_955/CLK                                                          r       u_probe/g_setup[7].u_ram/rd_data_r[41]/opit_0_32X2DL6QL5Q/CLK
+ clock pessimism                                        -0.345       2.286                          
+ clock uncertainty                                       0.000       2.286                          
+
+ Hold time                                               0.161       2.447                          
+
+ Data required time                                                  2.447                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  2.447                          
+ Data arrival time                                                   2.547                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.100                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : g_bank[7].stimulus_r[83]/opit_0_srl/CLK
+Endpoint    : u_probe/g_setup[7].u_ram/rd_data_r[75]/opit_0_32X2DL6QL5Q/DIL
+Path Group  : clk_gpu2_banks_lutram
+Path Type   : min (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.043  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.621
+  Launch Clock Delay      :  2.233
+  Clock Pessimism Removal :  -0.345
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.445       0.491 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.491         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       0.564 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.690       1.254         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.097       1.351 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         0.882       2.233         ntclkbufg_0      
+ CLMS_573_1003/CLK                                                         r       g_bank[7].stimulus_r[83]/opit_0_srl/CLK
+
+ CLMS_573_1003/CR3                 tco                   0.122       2.355 f       g_bank[7].stimulus_r[83]/opit_0_srl/CR0
+                                   net (fanout=2)        0.182       2.537         g_bank[7].stimulus_r [84]
+ CLMS_561_1009/M2                                                          f       u_probe/g_setup[7].u_ram/rd_data_r[75]/opit_0_32X2DL6QL5Q/DIL
+
+ Data arrival time                                                   2.537         Logic Levels: 0  
+                                                                                   Logic: 0.122ns(40.132%), Route: 0.182ns(59.868%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.824       1.478         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.115       1.593 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.028       2.621         ntclkbufg_0      
+ CLMS_561_1009/CLK                                                         r       u_probe/g_setup[7].u_ram/rd_data_r[75]/opit_0_32X2DL6QL5Q/CLK
+ clock pessimism                                        -0.345       2.276                          
+ clock uncertainty                                       0.000       2.276                          
+
+ Hold time                                               0.161       2.437                          
+
+ Data required time                                                  2.437                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  2.437                          
+ Data arrival time                                                   2.537                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.100                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : observation_r/opit_0_L6Q_perm/CLK
+Endpoint    : obs_o (port)
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_banks_lutram (rising edge)
+                                                         0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.824       1.478         nt_clk_i         
+ USCM_383_930/CLKOUT               td                    0.115       1.593 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=14822)
+                                                         1.034       2.627         ntclkbufg_0      
+ CLMA_591_781/CLK                                                          r       observation_r/opit_0_L6Q_perm/CLK
+
+ CLMA_591_781/Q0                   tco                   0.125       2.752 f       observation_r/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        3.165       5.917         nt_obs_o         
+ IOLHR_16_1338/DO_P                td                    0.353       6.270 f       obs_o_obuf/opit_1/DO_P
+                                   net (fanout=1)        0.000       6.270         obs_o_obuf/ntO   
+ IOBS_0_1338/PAD                   td                    2.022       8.292 f       obs_o_obuf/opit_0/O
+                                   net (fanout=1)        0.066       8.358         obs_o            
+ A20                                                                       f       obs_o (port)     
+
+ Data arrival time                                                   8.358         Logic Levels: 2  
+                                                                                   Logic: 2.500ns(43.622%), Route: 3.231ns(56.378%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : stim_i (port)
+Endpoint    : stimulus_root_r[5]/opit_0_inv/D
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C23                                                     0.000       0.000 f       stim_i (port)    
+                                   net (fanout=1)        0.059       0.059         stim_i           
+ IOBS_0_1290/DIN                   td                    0.515       0.574 f       stim_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.574         stim_i_ibuf/ntD  
+ IOLHR_16_1290/DI_TO_CLK           td                    0.087       0.661 f       stim_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=8)        3.562       4.223         nt_stim_i        
+ CLMA_597_696/M0                                                           f       stimulus_root_r[5]/opit_0_inv/D
+
+ Data arrival time                                                   4.223         Logic Levels: 2  
+                                                                                   Logic: 0.602ns(14.255%), Route: 3.621ns(85.745%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : stimulus_root_r[5]/opit_0_inv/RS
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C22                                                     0.000       0.000 f       rst_n_i (port)   
+                                   net (fanout=1)        0.059       0.059         rst_n_i          
+ IOBD_0_1296/DIN                   td                    0.515       0.574 f       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.574         rst_n_i_ibuf/ntD 
+ IOLHR_16_1296/DI_TO_CLK           td                    0.087       0.661 f       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=8)        3.406       4.067         nt_rst_n_i       
+ CLMA_597_696/RS                                                           f       stimulus_root_r[5]/opit_0_inv/RS
+
+ Data arrival time                                                   4.067         Logic Levels: 2  
+                                                                                   Logic: 0.602ns(14.802%), Route: 3.465ns(85.198%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : stim_i (port)
+Endpoint    : stimulus_root_r[6]/opit_0_inv/D
+Path Group  : **default**
+Path Type   : min (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C23                                                     0.000       0.000 r       stim_i (port)    
+                                   net (fanout=1)        0.059       0.059         stim_i           
+ IOBS_0_1290/DIN                   td                    0.445       0.504 r       stim_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.504         stim_i_ibuf/ntD  
+ IOLHR_16_1290/DI_TO_CLK           td                    0.073       0.577 r       stim_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=8)        1.979       2.556         nt_stim_i        
+ CLMA_555_919/M0                                                           r       stimulus_root_r[6]/opit_0_inv/D
+
+ Data arrival time                                                   2.556         Logic Levels: 2  
+                                                                                   Logic: 0.518ns(20.266%), Route: 2.038ns(79.734%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : stim_i (port)
+Endpoint    : stimulus_root_r[4]/opit_0_inv/D
+Path Group  : **default**
+Path Type   : min (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C23                                                     0.000       0.000 r       stim_i (port)    
+                                   net (fanout=1)        0.059       0.059         stim_i           
+ IOBS_0_1290/DIN                   td                    0.445       0.504 r       stim_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.504         stim_i_ibuf/ntD  
+ IOLHR_16_1290/DI_TO_CLK           td                    0.073       0.577 r       stim_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=8)        2.094       2.671         nt_stim_i        
+ CLMA_555_823/M0                                                           r       stimulus_root_r[4]/opit_0_inv/D
+
+ Data arrival time                                                   2.671         Logic Levels: 2  
+                                                                                   Logic: 0.518ns(19.393%), Route: 2.153ns(80.607%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : stim_i (port)
+Endpoint    : stimulus_root_r[3]/opit_0_inv/D
+Path Group  : **default**
+Path Type   : min (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C23                                                     0.000       0.000 r       stim_i (port)    
+                                   net (fanout=1)        0.059       0.059         stim_i           
+ IOBS_0_1290/DIN                   td                    0.445       0.504 r       stim_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.504         stim_i_ibuf/ntD  
+ IOLHR_16_1290/DI_TO_CLK           td                    0.073       0.577 r       stim_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=8)        2.116       2.693         nt_stim_i        
+ CLMA_561_852/M0                                                           r       stimulus_root_r[3]/opit_0_inv/D
+
+ Data arrival time                                                   2.693         Logic Levels: 2  
+                                                                                   Logic: 0.518ns(19.235%), Route: 2.175ns(80.765%)
+====================================================================================================
+
+{clk_gpu2_banks_lutram} Minimum Pulse Width :
+****************************************************************************************************
+ Slack       Actual Width    Require Width   Type              Location                Pin          
+----------------------------------------------------------------------------------------------------
+ 1.702       2.272           0.570           High Pulse Width  DRM_622_798/CLKA[0]     u_probe/g_const[0].u_half0/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 1.702       2.272           0.570           High Pulse Width  DRM_622_798/CLKB[0]     u_probe/g_const[0].u_half0/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 1.702       2.272           0.570           High Pulse Width  DRM_622_732/CLKA[0]     u_probe/g_const[0].u_half1/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+====================================================================================================
+
+====================================================================================================
+
+Inputs and Outputs :
++--------------------------------------------------------------------------------------------------------------------------------------+
+| Type       | File Name                                                                                                              
++--------------------------------------------------------------------------------------------------------------------------------------+
+| Input      | G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/place_route/edrv32_fpga_probe_gpu2_banks_lutram_top_pnr.adf       
+| Output     | G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/report_timing/edrv32_fpga_probe_gpu2_banks_lutram_top_rtp.adf     
+|            | G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/report_timing/edrv32_fpga_probe_gpu2_banks_lutram_top.rtr         
+|            | G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/report_timing/rtr.db                                              
++--------------------------------------------------------------------------------------------------------------------------------------+
+
+
+Flow Command: report_timing 
+Peak memory: 1,513 MB
+Total CPU time to report_timing completion : 0h:0m:3s
+Process Total CPU time to report_timing completion : 0h:0m:3s
+Total real time to report_timing completion : 0h:0m:30s

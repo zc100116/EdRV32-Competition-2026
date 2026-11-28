@@ -1,0 +1,97 @@
+# do check_drm_collision.do
+# onerror {quit -code 1 -f}
+# set repo_root G:/codex_project/edrv32-card112
+# G:/codex_project/edrv32-card112
+# set task_src $repo_root/tasks/win/20261128-112-gpu2-probes/src
+# G:/codex_project/edrv32-card112/tasks/win/20261128-112-gpu2-probes/src
+# set vendor_root G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation
+# G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation
+# set ip_dirs [dict create \
+#     ip_ram_gpu2_sdp72 G:/codex_project/EdRV32-FPGA/gpu2_probe_banks/ipcore/ip_ram_gpu2_sdp72 \
+#     ip_ram_gpu2_sdp36 G:/codex_project/EdRV32-FPGA/gpu2_probe_banks/ipcore/ip_ram_gpu2_sdp36 \
+#     ip_ram_gpu2_sfu_scratch G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_ram_gpu2_sfu_scratch]
+# ip_ram_gpu2_sdp72 G:/codex_project/EdRV32-FPGA/gpu2_probe_banks/ipcore/ip_ram_gpu2_sdp72 ip_ram_gpu2_sdp36 G:/codex_project/EdRV32-FPGA/gpu2_probe_banks/ipcore/ip_ram_gpu2_sdp36 ip_ram_gpu2_sfu_scratch G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_ram_gpu2_sfu_scratch
+# set build_dir [file join $repo_root build/win/20261128-112-gpu2-probes]
+# G:/codex_project/edrv32-card112/build/win/20261128-112-gpu2-probes
+# file mkdir $build_dir
+# cd $build_dir
+# reading modelsim.ini
+# vlib drm_check_work
+# ** Warning: (vlib-34) Library already exists at "drm_check_work".
+# Errors: 0, Warnings: 1
+# vmap work drm_check_work
+# Model Technology ModelSim SE-64 vmap 2020.4 Lib Mapping Utility 2020.10 Oct 13 2020
+# vmap work drm_check_work 
+# Modifying modelsim.ini
+# set includes [list +incdir+$repo_root/rtl/include]
+# +incdir+G:/codex_project/edrv32-card112/rtl/include
+# set sources [list $repo_root/rtl/tech/edrv32_ram_gpu2_sdp72.v \
+#     $repo_root/rtl/tech/edrv32_ram_gpu2_sdp36.v $repo_root/rtl/tech/edrv32_ram_gpu2_sfu_scratch.v]
+# G:/codex_project/edrv32-card112/rtl/tech/edrv32_ram_gpu2_sdp72.v G:/codex_project/edrv32-card112/rtl/tech/edrv32_ram_gpu2_sdp36.v G:/codex_project/edrv32-card112/rtl/tech/edrv32_ram_gpu2_sfu_scratch.v
+# dict for {name dir} $ip_dirs {
+#     lappend includes +incdir+$dir/rtl
+#     lappend sources $dir/$name.v
+#     foreach source [glob -nocomplain $dir/rtl/*.v] {
+#         if {![string match *_init_param.v $source] && ![string match *_Reset_Value.v $source]} {
+#             lappend sources $source
+#         }
+#     }
+# }
+# foreach name {GTP_DRM18K_E1 GTP_DRM36K_E1 GTP_GRS} {
+#     lappend sources $vendor_root/$name.v
+# }
+# lappend sources $task_src/drm_collision_check.sv
+# G:/codex_project/edrv32-card112/rtl/tech/edrv32_ram_gpu2_sdp72.v G:/codex_project/edrv32-card112/rtl/tech/edrv32_ram_gpu2_sdp36.v G:/codex_project/edrv32-card112/rtl/tech/edrv32_ram_gpu2_sfu_scratch.v G:/codex_project/EdRV32-FPGA/gpu2_probe_banks/ipcore/ip_ram_gpu2_sdp72/ip_ram_gpu2_sdp72.v G:/codex_project/EdRV32-FPGA/gpu2_probe_banks/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v G:/codex_project/EdRV32-FPGA/gpu2_probe_banks/ipcore/ip_ram_gpu2_sdp36/ip_ram_gpu2_sdp36.v G:/codex_project/EdRV32-FPGA/gpu2_probe_banks/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_ram_gpu2_sfu_scratch/ip_ram_gpu2_sfu_scratch.v G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_ram_gpu2_sfu_scratch/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sfu_scratch.v G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_DRM18K_E1.v G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_DRM36K_E1.v G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_GRS.v G:/codex_project/edrv32-card112/tasks/win/20261128-112-gpu2-probes/src/drm_collision_check.sv
+# eval vlog -sv -timescale 1ns/1ps +define+FPGA_MODE $includes $sources
+# Model Technology ModelSim SE-64 vlog 2020.4 Compiler 2020.10 Oct 13 2020
+# Start time: 22:27:36 on Nov 28,2026
+# vlog -sv -timescale 1ns/1ps "+define+FPGA_MODE" "+incdir+G:/codex_project/edrv32-card112/rtl/include" "+incdir+G:/codex_project/EdRV32-FPGA/gpu2_probe_banks/ipcore/ip_ram_gpu2_sdp72/rtl" "+incdir+G:/codex_project/EdRV32-FPGA/gpu2_probe_banks/ipcore/ip_ram_gpu2_sdp36/rtl" "+incdir+G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_ram_gpu2_sfu_scratch/rtl" G:/codex_project/edrv32-card112/rtl/tech/edrv32_ram_gpu2_sdp72.v G:/codex_project/edrv32-card112/rtl/tech/edrv32_ram_gpu2_sdp36.v G:/codex_project/edrv32-card112/rtl/tech/edrv32_ram_gpu2_sfu_scratch.v G:/codex_project/EdRV32-FPGA/gpu2_probe_banks/ipcore/ip_ram_gpu2_sdp72/ip_ram_gpu2_sdp72.v G:/codex_project/EdRV32-FPGA/gpu2_probe_banks/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v G:/codex_project/EdRV32-FPGA/gpu2_probe_banks/ipcore/ip_ram_gpu2_sdp36/ip_ram_gpu2_sdp36.v G:/codex_project/EdRV32-FPGA/gpu2_probe_banks/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_ram_gpu2_sfu_scratch/ip_ram_gpu2_sfu_scratch.v G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_ram_gpu2_sfu_scratch/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sfu_scratch.v G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_DRM18K_E1.v G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_DRM36K_E1.v G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_GRS.v G:/codex_project/edrv32-card112/tasks/win/20261128-112-gpu2-probes/src/drm_collision_check.sv 
+# -- Compiling module edrv32_ram_gpu2_sdp72
+# -- Compiling module edrv32_ram_gpu2_sdp36
+# -- Compiling module edrv32_ram_gpu2_sfu_scratch
+# -- Compiling module ip_ram_gpu2_sdp72
+# -- Compiling module ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72
+# -- Compiling module ip_ram_gpu2_sdp36
+# -- Compiling module ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36
+# -- Compiling module ip_ram_gpu2_sfu_scratch
+# -- Compiling module ipm2l_sdpram_v1_10_ip_ram_gpu2_sfu_scratch
+# -- Compiling module GTP_DRM18K_E1
+# -- Compiling module GTP_DRM36K_E1
+# -- Compiling module GTP_GRS
+# -- Compiling module drm_collision_check
+# 
+# Top level modules:
+# 	GTP_DRM18K_E1
+# 	drm_collision_check
+# End time: 22:27:37 on Nov 28,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vsim -c work.drm_collision_check
+# vsim -c work.drm_collision_check 
+# Start time: 22:27:37 on Nov 28,2026
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# ** Warning: G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_DRM36K_E1.v(746): (vopt-2250) Function "mem_read_a" has no return value assignment.
+# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=1.
+# //  ModelSim SE-64 2020.4 Oct 13 2020
+# //
+# //  Copyright 1991-2020 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.drm_collision_check(fast)
+# run -all
+# PASS drm_collision
+# ** Note: $finish    : G:/codex_project/edrv32-card112/tasks/win/20261128-112-gpu2-probes/src/drm_collision_check.sv(61)
+#    Time: 70 ns  Iteration: 1  Instance: /drm_collision_check
+# Break at G:/codex_project/edrv32-card112/tasks/win/20261128-112-gpu2-probes/src/drm_collision_check.sv line 61
+# Stopped at G:/codex_project/edrv32-card112/tasks/win/20261128-112-gpu2-probes/src/drm_collision_check.sv line 61
+# quit -f
+# End time: 22:27:39 on Nov 28,2026, Elapsed time: 0:00:02
+# Errors: 0, Warnings: 1

@@ -1,0 +1,1363 @@
+
+----------------------------------------------------------------------------------------------------
+| Tool Version : Fabric Compiler (version 2022.2-SP6.1 <build 138931>)
+| Date         : Sat Nov 28 22:27:57 2026
+| Design       : edrv32_fpga_probe_gpu2_sfu_top
+| Device       : PG2L200H
+| Speed Grade  : -6
+| Package      : FBB676
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+| Timing Models: Pre-silicon
+| Tcl Command  : report_timing 
+----------------------------------------------------------------------------------------------------
+
+Timing analysis mode : multi corner
+
+ Clock Summary:                                                                                     
+****************************************************************************************************
+                                                                         Clock   Non-clock          
+ Clock                    Period       Waveform            Type          Loads       Loads  Sources 
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_sfu             4.5450       {0.0000 2.2720}     Declared       2567         319  {clk_i} 
+====================================================================================================
+
+ Clock Groups:                                                                                      
+****************************************************************************************************
+ Clock Group                   Group Type                 Clocks                                    
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+ Performance Summary:                                                                               
+****************************************************************************************************
+                              Requested       Estimated      Requested      Estimated               
+ Clock                        Frequency       Frequency      Period         Period             Slack
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_sfu              220.0220 MHz    137.7980 MHz         4.5450         7.2570         -2.712
+====================================================================================================
+
+Design Summary : Some Constraints Violated.
+
+Setup Summary(Slow Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_sfu           clk_gpu2_sfu                -2.712    -579.827            742          10454
+====================================================================================================
+
+Hold Summary(Slow Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_sfu           clk_gpu2_sfu                 0.142       0.000              0          10454
+====================================================================================================
+
+Recovery Summary(Slow Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+Removal Summary(Slow Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+Minimum Pulse Width Summary(Slow Corner):
+****************************************************************************************************
+                                                                         WPWS Failing     WPWS Total
+ Clock                                            WPWS(ns)    TPWS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_sfu                                        1.312       0.000              0           2567
+====================================================================================================
+
+Setup Summary(Fast Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_sfu           clk_gpu2_sfu                 0.372       0.000              0          10454
+====================================================================================================
+
+Hold Summary(Fast Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_sfu           clk_gpu2_sfu                 0.100       0.000              0          10454
+====================================================================================================
+
+Recovery Summary(Fast Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+Removal Summary(Fast Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+
+Minimum Pulse Width Summary(Fast Corner):
+****************************************************************************************************
+                                                                         WPWS Failing     WPWS Total
+ Clock                                            WPWS(ns)    TPWS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_gpu2_sfu                                        1.617       0.000              0           2567
+====================================================================================================
+
+Slow Corner
+****************************************************************************************************
+====================================================================================================
+
+Startpoint  : request_lfsr_r[12]/opit_0_inv/CLK
+Endpoint    : u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/ADA0[12]
+Path Group  : clk_gpu2_sfu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.051  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.205
+  Launch Clock Delay      :  3.723
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.577       3.723         ntclkbufg_0      
+ CLMA_327_1015/CLK                                                         r       request_lfsr_r[12]/opit_0_inv/CLK
+
+ CLMA_327_1015/Q0                  tco                   0.213       3.936 r       request_lfsr_r[12]/opit_0_inv/Q
+                                   net (fanout=11)       0.450       4.386         request_lfsr_r[12]
+ CLMA_327_1003/Y1                  td                    0.101       4.487 r       u_sfu/u_prepare/u_lz_input/N59_11[0]_1/gateop_perm/Y
+                                   net (fanout=2)        0.591       5.078         u_sfu/u_prepare/u_lz_input/nb267 [0]
+ CLMA_321_1020/Y3                  td                    0.188       5.266 r       u_sfu/u_prepare/u_lz_input/N79[0]/LUT6_inst_perm/L6
+                                   net (fanout=27)       0.270       5.536         u_sfu/u_prepare/lz_w [0]
+ CLMS_321_1033/COUT                td                    0.405       5.941 f       u_sfu/u_prepare/N16.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       5.941         u_sfu/u_prepare/N16.co [4]
+ CLMS_321_1039/COUT                td                    0.090       6.031 f       u_sfu/u_prepare/N16.fsub_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.031         u_sfu/u_prepare/N16.co [8]
+ CLMS_321_1045/Y0                  td                    0.071       6.102 r       u_sfu/u_prepare/N16.fsub_9/gateop_perm/Y
+                                   net (fanout=8)        0.451       6.553         u_sfu/u_prepare/exponent_w [8]
+ CLMA_315_1038/Y1                  td                    0.078       6.631 r       u_sfu/u_prepare/N49_mux8_3/gateop_perm/L6
+                                   net (fanout=5)        0.416       7.047         u_sfu/u_prepare/_N18337
+ CLMA_315_1033/Y3                  td                    0.188       7.235 r       u_sfu/u_prepare/N55[1]/LUT6_inst_perm/L6
+                                   net (fanout=41)       0.471       7.706         u_sfu/u_prepare/exp_shift_w [1]
+ CLMA_303_1038/CR2                 td                    0.380       8.086 r       u_sfu/u_prepare/N62_10[0]_muxf7_perm/L7
+                                   net (fanout=1)        0.251       8.337         u_sfu/u_prepare/_N13529
+ CLMA_303_1039/Y3                  td                    0.188       8.525 r       u_sfu/u_prepare/N62_13[0]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.282       8.807         u_sfu/u_prepare/exp_magnitude_fixed_w [0]
+ CLMA_297_1038/COUT                td                    0.302       9.109 f       u_sfu/u_prepare/N75.fsub_3/gateop_perm/COUT
+                                   net (fanout=1)        0.000       9.109         u_sfu/u_prepare/N75.co [3]
+ CLMA_297_1044/Y2                  td                    0.157       9.266 r       u_sfu/u_prepare/N75.fsub_6/gateop_perm/Y
+                                   net (fanout=2)        0.126       9.392         u_sfu/u_prepare/N75 [5]
+ CLMA_297_1045/Y1                  td                    0.188       9.580 r       u_sfu/N230_0[5]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.443      10.023         u_sfu/nb2 [5]    
+ CLMA_285_1044/COUT                td                    0.299      10.322 f       u_sfu/N230_3_7/gateop_perm/COUT
+                                   net (fanout=1)        0.000      10.322         u_sfu/_N1985     
+ CLMA_285_1050/Y1                  td                    0.142      10.464 r       u_sfu/N230_3_9/gateop_perm/Y
+                                   net (fanout=1)        0.477      10.941         u_sfu/table_addr_w [8]
+ DRM_280_1038/ADA0[12]                                                     r       u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/ADA0[12]
+
+ Data arrival time                                                  10.941         Logic Levels: 14 
+                                                                                   Logic: 2.990ns(41.424%), Route: 4.228ns(58.576%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        4.545       4.545 r                        
+ M2                                                      0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.059       4.604         clk_i            
+ IOBD_732_786/DIN                  td                    0.766       5.370 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.370         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       5.465 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       6.233         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.150       6.383 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.367       7.750         ntclkbufg_0      
+ DRM_280_1038/CLKA[0]                                                      r       u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ clock pessimism                                         0.467       8.217                          
+ clock uncertainty                                      -0.050       8.167                          
+
+ Setup time                                              0.062       8.229                          
+
+ Data required time                                                  8.229                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.229                          
+ Data arrival time                                                  10.941                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -2.712                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : request_lfsr_r[12]/opit_0_inv/CLK
+Endpoint    : u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/ADA0[11]
+Path Group  : clk_gpu2_sfu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.051  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.205
+  Launch Clock Delay      :  3.723
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.577       3.723         ntclkbufg_0      
+ CLMA_327_1015/CLK                                                         r       request_lfsr_r[12]/opit_0_inv/CLK
+
+ CLMA_327_1015/Q0                  tco                   0.213       3.936 r       request_lfsr_r[12]/opit_0_inv/Q
+                                   net (fanout=11)       0.450       4.386         request_lfsr_r[12]
+ CLMA_327_1003/Y1                  td                    0.101       4.487 r       u_sfu/u_prepare/u_lz_input/N59_11[0]_1/gateop_perm/Y
+                                   net (fanout=2)        0.591       5.078         u_sfu/u_prepare/u_lz_input/nb267 [0]
+ CLMA_321_1020/Y3                  td                    0.188       5.266 r       u_sfu/u_prepare/u_lz_input/N79[0]/LUT6_inst_perm/L6
+                                   net (fanout=27)       0.270       5.536         u_sfu/u_prepare/lz_w [0]
+ CLMS_321_1033/COUT                td                    0.405       5.941 f       u_sfu/u_prepare/N16.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       5.941         u_sfu/u_prepare/N16.co [4]
+ CLMS_321_1039/COUT                td                    0.090       6.031 f       u_sfu/u_prepare/N16.fsub_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.031         u_sfu/u_prepare/N16.co [8]
+ CLMS_321_1045/Y0                  td                    0.071       6.102 r       u_sfu/u_prepare/N16.fsub_9/gateop_perm/Y
+                                   net (fanout=8)        0.451       6.553         u_sfu/u_prepare/exponent_w [8]
+ CLMA_315_1038/Y1                  td                    0.078       6.631 r       u_sfu/u_prepare/N49_mux8_3/gateop_perm/L6
+                                   net (fanout=5)        0.416       7.047         u_sfu/u_prepare/_N18337
+ CLMA_315_1033/Y3                  td                    0.188       7.235 r       u_sfu/u_prepare/N55[1]/LUT6_inst_perm/L6
+                                   net (fanout=41)       0.471       7.706         u_sfu/u_prepare/exp_shift_w [1]
+ CLMA_303_1038/CR2                 td                    0.380       8.086 r       u_sfu/u_prepare/N62_10[0]_muxf7_perm/L7
+                                   net (fanout=1)        0.251       8.337         u_sfu/u_prepare/_N13529
+ CLMA_303_1039/Y3                  td                    0.188       8.525 r       u_sfu/u_prepare/N62_13[0]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.282       8.807         u_sfu/u_prepare/exp_magnitude_fixed_w [0]
+ CLMA_297_1038/COUT                td                    0.302       9.109 f       u_sfu/u_prepare/N75.fsub_3/gateop_perm/COUT
+                                   net (fanout=1)        0.000       9.109         u_sfu/u_prepare/N75.co [3]
+ CLMA_297_1044/Y2                  td                    0.157       9.266 r       u_sfu/u_prepare/N75.fsub_6/gateop_perm/Y
+                                   net (fanout=2)        0.126       9.392         u_sfu/u_prepare/N75 [5]
+ CLMA_297_1045/Y1                  td                    0.188       9.580 r       u_sfu/N230_0[5]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.443      10.023         u_sfu/nb2 [5]    
+ CLMA_285_1044/COUT                td                    0.299      10.322 f       u_sfu/N230_3_7/gateop_perm/COUT
+                                   net (fanout=1)        0.000      10.322         u_sfu/_N1985     
+ CLMA_285_1050/Y0                  td                    0.071      10.393 r       u_sfu/N230_3_8/gateop_perm/Y
+                                   net (fanout=1)        0.475      10.868         u_sfu/table_addr_w [7]
+ DRM_280_1038/ADA0[11]                                                     r       u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/ADA0[11]
+
+ Data arrival time                                                  10.868         Logic Levels: 14 
+                                                                                   Logic: 2.919ns(40.854%), Route: 4.226ns(59.146%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        4.545       4.545 r                        
+ M2                                                      0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.059       4.604         clk_i            
+ IOBD_732_786/DIN                  td                    0.766       5.370 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.370         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       5.465 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       6.233         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.150       6.383 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.367       7.750         ntclkbufg_0      
+ DRM_280_1038/CLKA[0]                                                      r       u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ clock pessimism                                         0.467       8.217                          
+ clock uncertainty                                      -0.050       8.167                          
+
+ Setup time                                              0.062       8.229                          
+
+ Data required time                                                  8.229                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.229                          
+ Data arrival time                                                  10.868                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -2.639                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : request_lfsr_r[12]/opit_0_inv/CLK
+Endpoint    : u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/ADA0[10]
+Path Group  : clk_gpu2_sfu
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.051  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.205
+  Launch Clock Delay      :  3.723
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.577       3.723         ntclkbufg_0      
+ CLMA_327_1015/CLK                                                         r       request_lfsr_r[12]/opit_0_inv/CLK
+
+ CLMA_327_1015/Q0                  tco                   0.213       3.936 r       request_lfsr_r[12]/opit_0_inv/Q
+                                   net (fanout=11)       0.450       4.386         request_lfsr_r[12]
+ CLMA_327_1003/Y1                  td                    0.101       4.487 r       u_sfu/u_prepare/u_lz_input/N59_11[0]_1/gateop_perm/Y
+                                   net (fanout=2)        0.591       5.078         u_sfu/u_prepare/u_lz_input/nb267 [0]
+ CLMA_321_1020/Y3                  td                    0.188       5.266 r       u_sfu/u_prepare/u_lz_input/N79[0]/LUT6_inst_perm/L6
+                                   net (fanout=27)       0.270       5.536         u_sfu/u_prepare/lz_w [0]
+ CLMS_321_1033/COUT                td                    0.405       5.941 f       u_sfu/u_prepare/N16.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       5.941         u_sfu/u_prepare/N16.co [4]
+ CLMS_321_1039/COUT                td                    0.090       6.031 f       u_sfu/u_prepare/N16.fsub_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.031         u_sfu/u_prepare/N16.co [8]
+ CLMS_321_1045/Y0                  td                    0.071       6.102 r       u_sfu/u_prepare/N16.fsub_9/gateop_perm/Y
+                                   net (fanout=8)        0.451       6.553         u_sfu/u_prepare/exponent_w [8]
+ CLMA_315_1038/Y1                  td                    0.078       6.631 r       u_sfu/u_prepare/N49_mux8_3/gateop_perm/L6
+                                   net (fanout=5)        0.416       7.047         u_sfu/u_prepare/_N18337
+ CLMA_315_1033/Y3                  td                    0.188       7.235 r       u_sfu/u_prepare/N55[1]/LUT6_inst_perm/L6
+                                   net (fanout=41)       0.471       7.706         u_sfu/u_prepare/exp_shift_w [1]
+ CLMA_303_1038/CR2                 td                    0.380       8.086 r       u_sfu/u_prepare/N62_10[0]_muxf7_perm/L7
+                                   net (fanout=1)        0.251       8.337         u_sfu/u_prepare/_N13529
+ CLMA_303_1039/Y3                  td                    0.188       8.525 r       u_sfu/u_prepare/N62_13[0]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.282       8.807         u_sfu/u_prepare/exp_magnitude_fixed_w [0]
+ CLMA_297_1038/Y2                  td                    0.253       9.060 r       u_sfu/u_prepare/N75.fsub_2/gateop_perm/Y
+                                   net (fanout=2)        0.263       9.323         u_sfu/u_prepare/N75 [1]
+ CLMA_285_1039/Y2                  td                    0.188       9.511 r       u_sfu/N230_0[1]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.602      10.113         u_sfu/nb2 [1]    
+ CLMA_285_1038/COUT                td                    0.077      10.190 f       u_sfu/N230_3_3/gateop_perm/COUT
+                                   net (fanout=1)        0.000      10.190         u_sfu/_N1981     
+ CLMA_285_1044/Y3                  td                    0.224      10.414 r       u_sfu/N230_3_7/gateop_perm/Y
+                                   net (fanout=1)        0.452      10.866         u_sfu/table_addr_w [6]
+ DRM_280_1038/ADA0[10]                                                     r       u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/ADA0[10]
+
+ Data arrival time                                                  10.866         Logic Levels: 13 
+                                                                                   Logic: 2.644ns(37.015%), Route: 4.499ns(62.985%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        4.545       4.545 r                        
+ M2                                                      0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.059       4.604         clk_i            
+ IOBD_732_786/DIN                  td                    0.766       5.370 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.370         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       5.465 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       6.233         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.150       6.383 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.367       7.750         ntclkbufg_0      
+ DRM_280_1038/CLKA[0]                                                      r       u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ clock pessimism                                         0.467       8.217                          
+ clock uncertainty                                      -0.050       8.167                          
+
+ Setup time                                              0.062       8.229                          
+
+ Data required time                                                  8.229                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.229                          
+ Data arrival time                                                  10.866                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -2.637                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_sfu/u_prepare/scale_r[1][1]/opit_0_srl/CLK
+Endpoint    : u_sfu/g_engine[0].u_meta/u_region0/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_0/ram32x2d/DIH
+Path Group  : clk_gpu2_sfu
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.072  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.757
+  Launch Clock Delay      :  3.218
+  Clock Pessimism Removal :  -0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.766       0.825 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.825         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       0.920 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       1.688         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.150       1.838 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.380       3.218         ntclkbufg_0      
+ CLMS_255_1087/CLK                                                         r       u_sfu/u_prepare/scale_r[1][1]/opit_0_srl/CLK
+
+ CLMS_255_1087/CR0                 tco                   0.182       3.400 f       u_sfu/u_prepare/scale_r[1][1]/opit_0_srl/CR0
+                                   net (fanout=4)        0.272       3.672         u_sfu/front_scale_w [1]
+ CLMS_261_1099/CD                                                          f       u_sfu/g_engine[0].u_meta/u_region0/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_0/ram32x2d/DIH
+
+ Data arrival time                                                   3.672         Logic Levels: 0  
+                                                                                   Logic: 0.182ns(40.088%), Route: 0.272ns(59.912%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.611       3.757         ntclkbufg_0      
+ CLMS_261_1099/CLK                                                         r       u_sfu/g_engine[0].u_meta/u_region0/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_0/ram32x2d/CLK
+ clock pessimism                                        -0.467       3.290                          
+ clock uncertainty                                       0.000       3.290                          
+
+ Hold time                                               0.240       3.530                          
+
+ Data required time                                                  3.530                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  3.530                          
+ Data arrival time                                                   3.672                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.142                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_sfu/g_engine[1].queue_write_r[0]/opit_0_inv/CLK
+Endpoint    : u_sfu/g_engine[1].u_queue/u_region0/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_0/ram32x2d/WE
+Path Group  : clk_gpu2_sfu
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.031  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.749
+  Launch Clock Delay      :  3.208
+  Clock Pessimism Removal :  -0.510
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.766       0.825 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.825         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       0.920 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       1.688         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.150       1.838 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.370       3.208         ntclkbufg_0      
+ CLMA_267_1062/CLK                                                         r       u_sfu/g_engine[1].queue_write_r[0]/opit_0_inv/CLK
+
+ CLMA_267_1062/Q0                  tco                   0.166       3.374 f       u_sfu/g_engine[1].queue_write_r[0]/opit_0_inv/Q
+                                   net (fanout=8)        0.250       3.624         u_sfu/g_engine[1].queue_write_r [0]
+ CLMS_267_1051/WE                                                          f       u_sfu/g_engine[1].u_queue/u_region0/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_0/ram32x2d/WE
+
+ Data arrival time                                                   3.624         Logic Levels: 0  
+                                                                                   Logic: 0.166ns(39.904%), Route: 0.250ns(60.096%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.603       3.749         ntclkbufg_0      
+ CLMS_267_1051/CLK                                                         r       u_sfu/g_engine[1].u_queue/u_region0/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_0/ram32x2d/CLK
+ clock pessimism                                        -0.510       3.239                          
+ clock uncertainty                                       0.000       3.239                          
+
+ Hold time                                               0.240       3.479                          
+
+ Data required time                                                  3.479                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  3.479                          
+ Data arrival time                                                   3.624                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.145                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_sfu/g_engine[1].queue_write_r[0]/opit_0_inv/CLK
+Endpoint    : u_sfu/g_engine[1].u_queue/u_region0/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_2/ram32x2d/WE
+Path Group  : clk_gpu2_sfu
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.031  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.749
+  Launch Clock Delay      :  3.208
+  Clock Pessimism Removal :  -0.510
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.766       0.825 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.825         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       0.920 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       1.688         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.150       1.838 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.370       3.208         ntclkbufg_0      
+ CLMA_267_1062/CLK                                                         r       u_sfu/g_engine[1].queue_write_r[0]/opit_0_inv/CLK
+
+ CLMA_267_1062/Q0                  tco                   0.166       3.374 f       u_sfu/g_engine[1].queue_write_r[0]/opit_0_inv/Q
+                                   net (fanout=8)        0.250       3.624         u_sfu/g_engine[1].queue_write_r [0]
+ CLMS_267_1051/WE                                                          f       u_sfu/g_engine[1].u_queue/u_region0/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_2/ram32x2d/WE
+
+ Data arrival time                                                   3.624         Logic Levels: 0  
+                                                                                   Logic: 0.166ns(39.904%), Route: 0.250ns(60.096%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.603       3.749         ntclkbufg_0      
+ CLMS_267_1051/CLK                                                         r       u_sfu/g_engine[1].u_queue/u_region0/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_2/ram32x2d/CLK
+ clock pessimism                                        -0.510       3.239                          
+ clock uncertainty                                       0.000       3.239                          
+
+ Hold time                                               0.240       3.479                          
+
+ Data required time                                                  3.479                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  3.479                          
+ Data arrival time                                                   3.624                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.145                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : fold_o[4]/opit_0_L6Q_perm/CLK
+Endpoint    : fold_o[4] (port)
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.600       3.746         ntclkbufg_0      
+ CLMA_273_1050/CLK                                                         r       fold_o[4]/opit_0_L6Q_perm/CLK
+
+ CLMA_273_1050/Q0                  tco                   0.213       3.959 r       fold_o[4]/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        4.149       8.108         nt_fold_o[4]     
+ IOLHR_724_708/DO_P                td                    0.641       8.749 r       fold_o_obuf[4]/opit_1/DO_P
+                                   net (fanout=1)        0.000       8.749         fold_o_obuf[4]/ntO
+ IOBD_732_708/PAD                  td                    2.500      11.249 r       fold_o_obuf[4]/opit_0/O
+                                   net (fanout=1)        0.061      11.310         fold_o[4]        
+ T2                                                                        r       fold_o[4] (port) 
+
+ Data arrival time                                                  11.310         Logic Levels: 2  
+                                                                                   Logic: 3.354ns(44.342%), Route: 4.210ns(55.658%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : fold_o[5]/opit_0_L6Q_perm/CLK
+Endpoint    : fold_o[5] (port)
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.593       3.739         ntclkbufg_0      
+ CLMA_285_1050/CLK                                                         r       fold_o[5]/opit_0_L6Q_perm/CLK
+
+ CLMA_285_1050/Q3                  tco                   0.213       3.952 r       fold_o[5]/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        4.129       8.081         nt_fold_o[5]     
+ IOLHR_724_666/DO_P                td                    0.641       8.722 r       fold_o_obuf[5]/opit_1/DO_P
+                                   net (fanout=1)        0.000       8.722         fold_o_obuf[5]/ntO
+ IOBS_732_666/PAD                  td                    2.504      11.226 r       fold_o_obuf[5]/opit_0/O
+                                   net (fanout=1)        0.030      11.256         fold_o[5]        
+ R5                                                                        r       fold_o[5] (port) 
+
+ Data arrival time                                                  11.256         Logic Levels: 2  
+                                                                                   Logic: 3.358ns(44.672%), Route: 4.159ns(55.328%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : fold_o[6]/opit_0_L6Q_perm/CLK
+Endpoint    : fold_o[6] (port)
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.593       3.739         ntclkbufg_0      
+ CLMA_285_1051/CLK                                                         r       fold_o[6]/opit_0_L6Q_perm/CLK
+
+ CLMA_285_1051/Q0                  tco                   0.213       3.952 r       fold_o[6]/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        4.105       8.057         nt_fold_o[6]     
+ IOLHR_724_690/DO_P                td                    0.641       8.698 r       fold_o_obuf[6]/opit_1/DO_P
+                                   net (fanout=1)        0.000       8.698         fold_o_obuf[6]/ntO
+ IOBS_732_690/PAD                  td                    2.504      11.202 r       fold_o_obuf[6]/opit_0/O
+                                   net (fanout=1)        0.054      11.256         fold_o[6]        
+ U1                                                                        r       fold_o[6] (port) 
+
+ Data arrival time                                                  11.256         Logic Levels: 2  
+                                                                                   Logic: 3.358ns(44.672%), Route: 4.159ns(55.328%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : request_lfsr_r[1]/opit_0_inv_srl/RS
+Path Group  : **default**
+Path Type   : min (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ L3                                                      0.000       0.000 f       rst_n_i (port)   
+                                   net (fanout=1)        0.044       0.044         rst_n_i          
+ IOBD_732_822/DIN                  td                    0.678       0.722 f       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.722         rst_n_i_ibuf/ntD 
+ IOLHR_724_822/DI_TO_CLK           td                    0.095       0.817 f       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=121)      2.543       3.360         nt_rst_n_i       
+ CLMA_327_1009/RS                                                          f       request_lfsr_r[1]/opit_0_inv_srl/RS
+
+ Data arrival time                                                   3.360         Logic Levels: 2  
+                                                                                   Logic: 0.773ns(23.006%), Route: 2.587ns(76.994%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : request_lfsr_r[8]/opit_0_inv/RS
+Path Group  : **default**
+Path Type   : min (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ L3                                                      0.000       0.000 f       rst_n_i (port)   
+                                   net (fanout=1)        0.044       0.044         rst_n_i          
+ IOBD_732_822/DIN                  td                    0.678       0.722 f       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.722         rst_n_i_ibuf/ntD 
+ IOLHR_724_822/DI_TO_CLK           td                    0.095       0.817 f       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=121)      2.543       3.360         nt_rst_n_i       
+ CLMA_327_1009/RSCO                td                    0.084       3.444 r       request_lfsr_r[1]/opit_0_inv_srl/RSCO
+                                   net (fanout=3)        0.000       3.444         ntR5             
+ CLMA_327_1015/RSCI                                                        r       request_lfsr_r[8]/opit_0_inv/RS
+
+ Data arrival time                                                   3.444         Logic Levels: 3  
+                                                                                   Logic: 0.857ns(24.884%), Route: 2.587ns(75.116%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : request_lfsr_r[12]/opit_0_inv/RS
+Path Group  : **default**
+Path Type   : min (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ L3                                                      0.000       0.000 f       rst_n_i (port)   
+                                   net (fanout=1)        0.044       0.044         rst_n_i          
+ IOBD_732_822/DIN                  td                    0.678       0.722 f       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.722         rst_n_i_ibuf/ntD 
+ IOLHR_724_822/DI_TO_CLK           td                    0.095       0.817 f       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=121)      2.543       3.360         nt_rst_n_i       
+ CLMA_327_1009/RSCO                td                    0.084       3.444 r       request_lfsr_r[1]/opit_0_inv_srl/RSCO
+                                   net (fanout=3)        0.000       3.444         ntR5             
+ CLMA_327_1015/RSCI                                                        r       request_lfsr_r[12]/opit_0_inv/RS
+
+ Data arrival time                                                   3.444         Logic Levels: 3  
+                                                                                   Logic: 0.857ns(24.884%), Route: 2.587ns(75.116%)
+====================================================================================================
+
+{clk_gpu2_sfu} Minimum Pulse Width :
+****************************************************************************************************
+ Slack       Actual Width    Require Width   Type              Location                Pin          
+----------------------------------------------------------------------------------------------------
+ 1.312       2.272           0.960           High Pulse Width  DRM_280_978/CLKA[0]     u_sfu/g_field[0].g_active.u_field/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sfu_scratch/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 1.312       2.272           0.960           High Pulse Width  DRM_280_978/CLKB[0]     u_sfu/g_field[0].g_active.u_field/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sfu_scratch/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 1.312       2.272           0.960           High Pulse Width  DRM_226_948/CLKA[0]     u_sfu/g_field[1].g_active.u_field/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sfu_scratch/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+====================================================================================================
+
+====================================================================================================
+Fast Corner
+****************************************************************************************************
+====================================================================================================
+
+Startpoint  : request_lfsr_r[12]/opit_0_inv/CLK
+Endpoint    : u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/ADA0[12]
+Path Group  : clk_gpu2_sfu
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.036  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.012
+  Launch Clock Delay      :  2.354
+  Clock Pessimism Removal :  0.306
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     0.984       2.354         ntclkbufg_0      
+ CLMA_327_1015/CLK                                                         r       request_lfsr_r[12]/opit_0_inv/CLK
+
+ CLMA_327_1015/Q0                  tco                   0.125       2.479 f       request_lfsr_r[12]/opit_0_inv/Q
+                                   net (fanout=11)       0.240       2.719         request_lfsr_r[12]
+ CLMA_327_1003/Y1                  td                    0.066       2.785 f       u_sfu/u_prepare/u_lz_input/N59_11[0]_1/gateop_perm/Y
+                                   net (fanout=2)        0.350       3.135         u_sfu/u_prepare/u_lz_input/nb267 [0]
+ CLMA_321_1020/Y3                  td                    0.100       3.235 f       u_sfu/u_prepare/u_lz_input/N79[0]/LUT6_inst_perm/L6
+                                   net (fanout=27)       0.162       3.397         u_sfu/u_prepare/lz_w [0]
+ CLMS_321_1033/COUT                td                    0.248       3.645 f       u_sfu/u_prepare/N16.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       3.645         u_sfu/u_prepare/N16.co [4]
+ CLMS_321_1039/COUT                td                    0.056       3.701 f       u_sfu/u_prepare/N16.fsub_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       3.701         u_sfu/u_prepare/N16.co [8]
+ CLMS_321_1045/Y0                  td                    0.042       3.743 r       u_sfu/u_prepare/N16.fsub_9/gateop_perm/Y
+                                   net (fanout=8)        0.241       3.984         u_sfu/u_prepare/exponent_w [8]
+ CLMA_315_1038/Y1                  td                    0.040       4.024 r       u_sfu/u_prepare/N49_mux8_3/gateop_perm/L6
+                                   net (fanout=5)        0.236       4.260         u_sfu/u_prepare/_N18337
+ CLMA_315_1033/Y3                  td                    0.104       4.364 r       u_sfu/u_prepare/N55[1]/LUT6_inst_perm/L6
+                                   net (fanout=41)       0.259       4.623         u_sfu/u_prepare/exp_shift_w [1]
+ CLMA_303_1038/CR2                 td                    0.208       4.831 r       u_sfu/u_prepare/N62_10[0]_muxf7_perm/L7
+                                   net (fanout=1)        0.138       4.969         u_sfu/u_prepare/_N13529
+ CLMA_303_1039/Y3                  td                    0.100       5.069 f       u_sfu/u_prepare/N62_13[0]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.160       5.229         u_sfu/u_prepare/exp_magnitude_fixed_w [0]
+ CLMA_297_1038/COUT                td                    0.198       5.427 f       u_sfu/u_prepare/N75.fsub_3/gateop_perm/COUT
+                                   net (fanout=1)        0.000       5.427         u_sfu/u_prepare/N75.co [3]
+ CLMA_297_1044/Y2                  td                    0.093       5.520 f       u_sfu/u_prepare/N75.fsub_6/gateop_perm/Y
+                                   net (fanout=2)        0.075       5.595         u_sfu/u_prepare/N75 [5]
+ CLMA_297_1045/Y1                  td                    0.100       5.695 f       u_sfu/N230_0[5]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.240       5.935         u_sfu/nb2 [5]    
+ CLMA_285_1044/COUT                td                    0.197       6.132 f       u_sfu/N230_3_7/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.132         u_sfu/_N1985     
+ CLMA_285_1050/Y1                  td                    0.087       6.219 f       u_sfu/N230_3_9/gateop_perm/Y
+                                   net (fanout=1)        0.271       6.490         u_sfu/table_addr_w [8]
+ DRM_280_1038/ADA0[12]                                                     f       u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/ADA0[12]
+
+ Data arrival time                                                   6.490         Logic Levels: 14 
+                                                                                   Logic: 1.764ns(42.650%), Route: 2.372ns(57.350%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        4.545       4.545 r                        
+ M2                                                      0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.059       4.604         clk_i            
+ IOBD_732_786/DIN                  td                    0.445       5.049 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.049         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.073       5.122 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493       5.615         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.097       5.712 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     0.845       6.557         ntclkbufg_0      
+ DRM_280_1038/CLKA[0]                                                      r       u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ clock pessimism                                         0.306       6.863                          
+ clock uncertainty                                      -0.050       6.813                          
+
+ Setup time                                              0.049       6.862                          
+
+ Data required time                                                  6.862                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.862                          
+ Data arrival time                                                   6.490                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.372                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : request_lfsr_r[12]/opit_0_inv/CLK
+Endpoint    : u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/ADA0[11]
+Path Group  : clk_gpu2_sfu
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.036  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.012
+  Launch Clock Delay      :  2.354
+  Clock Pessimism Removal :  0.306
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     0.984       2.354         ntclkbufg_0      
+ CLMA_327_1015/CLK                                                         r       request_lfsr_r[12]/opit_0_inv/CLK
+
+ CLMA_327_1015/Q0                  tco                   0.125       2.479 f       request_lfsr_r[12]/opit_0_inv/Q
+                                   net (fanout=11)       0.240       2.719         request_lfsr_r[12]
+ CLMA_327_1003/Y1                  td                    0.066       2.785 f       u_sfu/u_prepare/u_lz_input/N59_11[0]_1/gateop_perm/Y
+                                   net (fanout=2)        0.350       3.135         u_sfu/u_prepare/u_lz_input/nb267 [0]
+ CLMA_321_1020/Y3                  td                    0.100       3.235 f       u_sfu/u_prepare/u_lz_input/N79[0]/LUT6_inst_perm/L6
+                                   net (fanout=27)       0.162       3.397         u_sfu/u_prepare/lz_w [0]
+ CLMS_321_1033/COUT                td                    0.248       3.645 f       u_sfu/u_prepare/N16.fsub_4/gateop_perm/COUT
+                                   net (fanout=1)        0.000       3.645         u_sfu/u_prepare/N16.co [4]
+ CLMS_321_1039/COUT                td                    0.056       3.701 f       u_sfu/u_prepare/N16.fsub_8/gateop_perm/COUT
+                                   net (fanout=1)        0.000       3.701         u_sfu/u_prepare/N16.co [8]
+ CLMS_321_1045/Y0                  td                    0.042       3.743 r       u_sfu/u_prepare/N16.fsub_9/gateop_perm/Y
+                                   net (fanout=8)        0.241       3.984         u_sfu/u_prepare/exponent_w [8]
+ CLMA_315_1038/Y1                  td                    0.040       4.024 r       u_sfu/u_prepare/N49_mux8_3/gateop_perm/L6
+                                   net (fanout=5)        0.236       4.260         u_sfu/u_prepare/_N18337
+ CLMA_315_1033/Y3                  td                    0.104       4.364 r       u_sfu/u_prepare/N55[1]/LUT6_inst_perm/L6
+                                   net (fanout=41)       0.259       4.623         u_sfu/u_prepare/exp_shift_w [1]
+ CLMA_303_1038/CR2                 td                    0.208       4.831 r       u_sfu/u_prepare/N62_10[0]_muxf7_perm/L7
+                                   net (fanout=1)        0.138       4.969         u_sfu/u_prepare/_N13529
+ CLMA_303_1039/Y3                  td                    0.100       5.069 f       u_sfu/u_prepare/N62_13[0]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.160       5.229         u_sfu/u_prepare/exp_magnitude_fixed_w [0]
+ CLMA_297_1038/COUT                td                    0.198       5.427 f       u_sfu/u_prepare/N75.fsub_3/gateop_perm/COUT
+                                   net (fanout=1)        0.000       5.427         u_sfu/u_prepare/N75.co [3]
+ CLMA_297_1044/Y2                  td                    0.093       5.520 f       u_sfu/u_prepare/N75.fsub_6/gateop_perm/Y
+                                   net (fanout=2)        0.075       5.595         u_sfu/u_prepare/N75 [5]
+ CLMA_297_1045/Y1                  td                    0.100       5.695 f       u_sfu/N230_0[5]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.240       5.935         u_sfu/nb2 [5]    
+ CLMA_285_1044/COUT                td                    0.197       6.132 f       u_sfu/N230_3_7/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.132         u_sfu/_N1985     
+ CLMA_285_1050/Y0                  td                    0.037       6.169 f       u_sfu/N230_3_8/gateop_perm/Y
+                                   net (fanout=1)        0.271       6.440         u_sfu/table_addr_w [7]
+ DRM_280_1038/ADA0[11]                                                     f       u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/ADA0[11]
+
+ Data arrival time                                                   6.440         Logic Levels: 14 
+                                                                                   Logic: 1.714ns(41.948%), Route: 2.372ns(58.052%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        4.545       4.545 r                        
+ M2                                                      0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.059       4.604         clk_i            
+ IOBD_732_786/DIN                  td                    0.445       5.049 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.049         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.073       5.122 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493       5.615         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.097       5.712 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     0.845       6.557         ntclkbufg_0      
+ DRM_280_1038/CLKA[0]                                                      r       u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ clock pessimism                                         0.306       6.863                          
+ clock uncertainty                                      -0.050       6.813                          
+
+ Setup time                                              0.049       6.862                          
+
+ Data required time                                                  6.862                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.862                          
+ Data arrival time                                                   6.440                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.422                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : request_lfsr_r[15]/opit_0_inv_srl/CLK
+Endpoint    : u_sfu/u_prepare/s1_delta_r[20]/opit_0_AQ_perm/CIN
+Path Group  : clk_gpu2_sfu
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.062  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  1.990
+  Launch Clock Delay      :  2.358
+  Clock Pessimism Removal :  0.306
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     0.988       2.358         ntclkbufg_0      
+ CLMS_321_1009/CLK                                                         r       request_lfsr_r[15]/opit_0_inv_srl/CLK
+
+ CLMS_321_1009/Q1                  tco                   0.125       2.483 f       request_lfsr_r[15]/opit_0_inv_srl/Q0
+                                   net (fanout=10)       0.233       2.716         request_lfsr_r[15]
+ CLMA_327_1002/Y2                  td                    0.125       2.841 f       u_sfu/u_prepare/u_lz_input/N59_12[1]/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.357       3.198         u_sfu/u_prepare/u_lz_input/nb267 [1]
+ CLMS_321_1027/Y3                  td                    0.039       3.237 f       u_sfu/u_prepare/u_lz_input/N79[1]/LUT6_inst_perm/L6
+                                   net (fanout=26)       0.243       3.480         u_sfu/u_prepare/lz_w [1]
+ CLMS_321_1009/Y3                  td                    0.070       3.550 f       u_sfu/u_prepare/N3_1_12/LUT6_inst_perm/L6
+                                   net (fanout=3)        0.279       3.829         u_sfu/u_prepare/_N4824
+ CLMA_327_1027/Y1                  td                    0.070       3.899 f       u_sfu/u_prepare/N3_4_98[1]/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.075       3.974         u_sfu/u_prepare/_N13727
+ CLMA_327_1026/Y0                  td                    0.070       4.044 f       u_sfu/u_prepare/s1_norm_r[16]/opit_0_L6Q_perm/L6
+                                   net (fanout=7)        0.366       4.410         u_sfu/u_prepare/normalized_w [16]
+ CLMA_303_1021/Y0                  td                    0.039       4.449 f       u_sfu/u_prepare/N33_14/gateop_perm/L6
+                                   net (fanout=1)        0.147       4.596         u_sfu/u_prepare/_N18376
+ CLMA_303_1020/Y0                  td                    0.039       4.635 f       u_sfu/u_prepare/N33_16/gateop_perm/L6
+                                   net (fanout=1)        0.075       4.710         u_sfu/u_prepare/_N18378
+ CLMA_303_1020/Y1                  td                    0.066       4.776 f       u_sfu/u_prepare/N34/LUT6_inst_perm/L6
+                                   net (fanout=12)       0.161       4.937         u_sfu/u_prepare/N34
+ CLMA_297_1020/Y3                  td                    0.070       5.007 f       u_sfu/u_prepare/N37_0[4]_1/LUT6_inst_perm/L6
+                                   net (fanout=3)        0.075       5.082         u_sfu/u_prepare/_N17993_1
+ CLMA_297_1021/Y3                  td                    0.251       5.333 f       u_sfu/u_prepare/N42_3.fsub_7/gateop_perm/Y
+                                   net (fanout=1)        0.075       5.408         u_sfu/u_prepare/log_delta_w [24]
+ CLMA_297_1020/Y2                  td                    0.070       5.478 f       u_sfu/u_prepare/s1_delta_sign_r/opit_0_L5Q_perm/L6
+                                   net (fanout=24)       0.398       5.876         u_sfu/u_prepare/_N17710_2
+ CLMA_339_1015/COUT                td                    0.198       6.074 f       u_sfu/u_prepare/s1_delta_r[3]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.074         u_sfu/u_prepare/N173_1.co [3]
+ CLMA_339_1021/COUT                td                    0.056       6.130 f       u_sfu/u_prepare/s1_delta_r[7]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.130         u_sfu/u_prepare/N173_1.co [7]
+ CLMA_339_1027/COUT                td                    0.056       6.186 f       u_sfu/u_prepare/s1_delta_r[11]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.186         u_sfu/u_prepare/N173_1.co [11]
+ CLMA_339_1033/COUT                td                    0.056       6.242 f       u_sfu/u_prepare/s1_delta_r[15]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.242         u_sfu/u_prepare/N173_1.co [15]
+ CLMA_339_1039/COUT                td                    0.046       6.288 r       u_sfu/u_prepare/s1_delta_r[19]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.288         u_sfu/u_prepare/N173_1.co [19]
+ CLMA_339_1045/CIN                                                         r       u_sfu/u_prepare/s1_delta_r[20]/opit_0_AQ_perm/CIN
+
+ Data arrival time                                                   6.288         Logic Levels: 16 
+                                                                                   Logic: 1.446ns(36.794%), Route: 2.484ns(63.206%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        4.545       4.545 r                        
+ M2                                                      0.000       4.545 r       clk_i (port)     
+                                   net (fanout=1)        0.059       4.604         clk_i            
+ IOBD_732_786/DIN                  td                    0.445       5.049 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       5.049         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.073       5.122 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493       5.615         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.097       5.712 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     0.823       6.535         ntclkbufg_0      
+ CLMA_339_1045/CLK                                                         r       u_sfu/u_prepare/s1_delta_r[23]/opit_0_AQ_perm/CLK
+ clock pessimism                                         0.306       6.841                          
+ clock uncertainty                                      -0.050       6.791                          
+
+ Setup time                                             -0.057       6.734                          
+
+ Data required time                                                  6.734                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.734                          
+ Data arrival time                                                   6.288                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.446                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_sfu/u_prepare/scale_r[1][1]/opit_0_srl/CLK
+Endpoint    : u_sfu/g_engine[0].u_meta/u_region0/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_0/ram32x2d/DIH
+Path Group  : clk_gpu2_sfu
+Path Type   : min (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.049  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.376
+  Launch Clock Delay      :  2.021
+  Clock Pessimism Removal :  -0.306
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.445       0.504 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.504         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.073       0.577 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493       1.070         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.097       1.167 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     0.854       2.021         ntclkbufg_0      
+ CLMS_255_1087/CLK                                                         r       u_sfu/u_prepare/scale_r[1][1]/opit_0_srl/CLK
+
+ CLMS_255_1087/CR0                 tco                   0.123       2.144 f       u_sfu/u_prepare/scale_r[1][1]/opit_0_srl/CR0
+                                   net (fanout=4)        0.187       2.331         u_sfu/front_scale_w [1]
+ CLMS_261_1099/CD                                                          f       u_sfu/g_engine[0].u_meta/u_region0/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_0/ram32x2d/DIH
+
+ Data arrival time                                                   2.331         Logic Levels: 0  
+                                                                                   Logic: 0.123ns(39.677%), Route: 0.187ns(60.323%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.006       2.376         ntclkbufg_0      
+ CLMS_261_1099/CLK                                                         r       u_sfu/g_engine[0].u_meta/u_region0/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_0/ram32x2d/CLK
+ clock pessimism                                        -0.306       2.070                          
+ clock uncertainty                                       0.000       2.070                          
+
+ Hold time                                               0.161       2.231                          
+
+ Data required time                                                  2.231                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  2.231                          
+ Data arrival time                                                   2.331                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.100                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_sfu/g_engine[1].queue_write_r[1]/opit_0_inv/CLK
+Endpoint    : u_sfu/g_engine[1].u_queue/u_region1/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_2/ram32x2d/WE
+Path Group  : clk_gpu2_sfu
+Path Type   : min (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.020  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.375
+  Launch Clock Delay      :  2.016
+  Clock Pessimism Removal :  -0.339
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.445       0.504 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.504         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.073       0.577 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493       1.070         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.097       1.167 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     0.849       2.016         ntclkbufg_0      
+ CLMA_267_1080/CLK                                                         r       u_sfu/g_engine[1].queue_write_r[1]/opit_0_inv/CLK
+
+ CLMA_267_1080/Q3                  tco                   0.109       2.125 f       u_sfu/g_engine[1].queue_write_r[1]/opit_0_inv/Q
+                                   net (fanout=8)        0.173       2.298         u_sfu/g_engine[1].queue_write_r [1]
+ CLMS_261_1093/WE                                                          f       u_sfu/g_engine[1].u_queue/u_region1/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_2/ram32x2d/WE
+
+ Data arrival time                                                   2.298         Logic Levels: 0  
+                                                                                   Logic: 0.109ns(38.652%), Route: 0.173ns(61.348%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.005       2.375         ntclkbufg_0      
+ CLMS_261_1093/CLK                                                         r       u_sfu/g_engine[1].u_queue/u_region1/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_2/ram32x2d/CLK
+ clock pessimism                                        -0.339       2.036                          
+ clock uncertainty                                       0.000       2.036                          
+
+ Hold time                                               0.161       2.197                          
+
+ Data required time                                                  2.197                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  2.197                          
+ Data arrival time                                                   2.298                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.101                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_sfu/g_engine[1].queue_write_r[1]/opit_0_inv/CLK
+Endpoint    : u_sfu/g_engine[1].u_queue/u_region1/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_5/ram32x2d/WE
+Path Group  : clk_gpu2_sfu
+Path Type   : min (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.020  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.375
+  Launch Clock Delay      :  2.016
+  Clock Pessimism Removal :  -0.339
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.445       0.504 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.504         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.073       0.577 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493       1.070         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.097       1.167 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     0.849       2.016         ntclkbufg_0      
+ CLMA_267_1080/CLK                                                         r       u_sfu/g_engine[1].queue_write_r[1]/opit_0_inv/CLK
+
+ CLMA_267_1080/Q3                  tco                   0.109       2.125 f       u_sfu/g_engine[1].queue_write_r[1]/opit_0_inv/Q
+                                   net (fanout=8)        0.173       2.298         u_sfu/g_engine[1].queue_write_r [1]
+ CLMS_261_1093/WE                                                          f       u_sfu/g_engine[1].u_queue/u_region1/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_5/ram32x2d/WE
+
+ Data arrival time                                                   2.298         Logic Levels: 0  
+                                                                                   Logic: 0.109ns(38.652%), Route: 0.173ns(61.348%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     1.005       2.375         ntclkbufg_0      
+ CLMS_261_1093/CLK                                                         r       u_sfu/g_engine[1].u_queue/u_region1/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16/mem_5/ram32x2d/CLK
+ clock pessimism                                        -0.339       2.036                          
+ clock uncertainty                                       0.000       2.036                          
+
+ Hold time                                               0.161       2.197                          
+
+ Data required time                                                  2.197                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  2.197                          
+ Data arrival time                                                   2.298                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.101                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : fold_o[4]/opit_0_L6Q_perm/CLK
+Endpoint    : fold_o[4] (port)
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     0.997       2.367         ntclkbufg_0      
+ CLMA_273_1050/CLK                                                         r       fold_o[4]/opit_0_L6Q_perm/CLK
+
+ CLMA_273_1050/Q0                  tco                   0.125       2.492 f       fold_o[4]/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        2.685       5.177         nt_fold_o[4]     
+ IOLHR_724_708/DO_P                td                    0.353       5.530 f       fold_o_obuf[4]/opit_1/DO_P
+                                   net (fanout=1)        0.000       5.530         fold_o_obuf[4]/ntO
+ IOBD_732_708/PAD                  td                    2.007       7.537 f       fold_o_obuf[4]/opit_0/O
+                                   net (fanout=1)        0.061       7.598         fold_o[4]        
+ T2                                                                        f       fold_o[4] (port) 
+
+ Data arrival time                                                   7.598         Logic Levels: 2  
+                                                                                   Logic: 2.485ns(47.505%), Route: 2.746ns(52.495%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : fold_o[6]/opit_0_L6Q_perm/CLK
+Endpoint    : fold_o[6] (port)
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     0.993       2.363         ntclkbufg_0      
+ CLMA_285_1051/CLK                                                         r       fold_o[6]/opit_0_L6Q_perm/CLK
+
+ CLMA_285_1051/Q0                  tco                   0.125       2.488 f       fold_o[6]/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        2.638       5.126         nt_fold_o[6]     
+ IOLHR_724_690/DO_P                td                    0.353       5.479 f       fold_o_obuf[6]/opit_1/DO_P
+                                   net (fanout=1)        0.000       5.479         fold_o_obuf[6]/ntO
+ IOBS_732_690/PAD                  td                    2.022       7.501 f       fold_o_obuf[6]/opit_0/O
+                                   net (fanout=1)        0.054       7.555         fold_o[6]        
+ U1                                                                        f       fold_o[6] (port) 
+
+ Data arrival time                                                   7.555         Logic Levels: 2  
+                                                                                   Logic: 2.500ns(48.151%), Route: 2.692ns(51.849%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : fold_o[5]/opit_0_L6Q_perm/CLK
+Endpoint    : fold_o[5] (port)
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_gpu2_sfu (rising edge)                        0.000       0.000 r                        
+ M2                                                      0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.059       0.059         clk_i            
+ IOBD_732_786/DIN                  td                    0.521       0.580 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.580         clk_i_ibuf/ntD   
+ IOLHR_724_786/DI_TO_CLK           td                    0.087       0.667 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.255         nt_clk_i         
+ USCM_383_882/CLKOUT               td                    0.115       1.370 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=2886)     0.993       2.363         ntclkbufg_0      
+ CLMA_285_1050/CLK                                                         r       fold_o[5]/opit_0_L6Q_perm/CLK
+
+ CLMA_285_1050/Q3                  tco                   0.125       2.488 f       fold_o[5]/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        2.653       5.141         nt_fold_o[5]     
+ IOLHR_724_666/DO_P                td                    0.353       5.494 f       fold_o_obuf[5]/opit_1/DO_P
+                                   net (fanout=1)        0.000       5.494         fold_o_obuf[5]/ntO
+ IOBS_732_666/PAD                  td                    2.022       7.516 f       fold_o_obuf[5]/opit_0/O
+                                   net (fanout=1)        0.030       7.546         fold_o[5]        
+ R5                                                                        f       fold_o[5] (port) 
+
+ Data arrival time                                                   7.546         Logic Levels: 2  
+                                                                                   Logic: 2.500ns(48.235%), Route: 2.683ns(51.765%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : request_lfsr_r[1]/opit_0_inv_srl/RS
+Path Group  : **default**
+Path Type   : min (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ L3                                                      0.000       0.000 r       rst_n_i (port)   
+                                   net (fanout=1)        0.044       0.044         rst_n_i          
+ IOBD_732_822/DIN                  td                    0.445       0.489 r       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.489         rst_n_i_ibuf/ntD 
+ IOLHR_724_822/DI_TO_CLK           td                    0.073       0.562 r       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=121)      1.496       2.058         nt_rst_n_i       
+ CLMA_327_1009/RS                                                          r       request_lfsr_r[1]/opit_0_inv_srl/RS
+
+ Data arrival time                                                   2.058         Logic Levels: 2  
+                                                                                   Logic: 0.518ns(25.170%), Route: 1.540ns(74.830%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : request_lfsr_r[9]/opit_0_inv_srl/RS
+Path Group  : **default**
+Path Type   : min (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ L3                                                      0.000       0.000 r       rst_n_i (port)   
+                                   net (fanout=1)        0.044       0.044         rst_n_i          
+ IOBD_732_822/DIN                  td                    0.445       0.489 r       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.489         rst_n_i_ibuf/ntD 
+ IOLHR_724_822/DI_TO_CLK           td                    0.073       0.562 r       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=121)      1.551       2.113         nt_rst_n_i       
+ CLMA_327_1002/RS                                                          r       request_lfsr_r[9]/opit_0_inv_srl/RS
+
+ Data arrival time                                                   2.113         Logic Levels: 2  
+                                                                                   Logic: 0.518ns(24.515%), Route: 1.595ns(75.485%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : request_lfsr_r[11]/opit_0_inv/RS
+Path Group  : **default**
+Path Type   : min (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ L3                                                      0.000       0.000 r       rst_n_i (port)   
+                                   net (fanout=1)        0.044       0.044         rst_n_i          
+ IOBD_732_822/DIN                  td                    0.445       0.489 r       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.489         rst_n_i_ibuf/ntD 
+ IOLHR_724_822/DI_TO_CLK           td                    0.073       0.562 r       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=121)      1.551       2.113         nt_rst_n_i       
+ CLMA_327_1002/RS                                                          r       request_lfsr_r[11]/opit_0_inv/RS
+
+ Data arrival time                                                   2.113         Logic Levels: 2  
+                                                                                   Logic: 0.518ns(24.515%), Route: 1.595ns(75.485%)
+====================================================================================================
+
+{clk_gpu2_sfu} Minimum Pulse Width :
+****************************************************************************************************
+ Slack       Actual Width    Require Width   Type              Location                Pin          
+----------------------------------------------------------------------------------------------------
+ 1.617       2.272           0.655           High Pulse Width  APM_161_1008/CLK_1      u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm/gopapm/CLK
+ 1.617       2.272           0.655           High Pulse Width  APM_161_1008/CLK_0      u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_tail/u_apm/gopapm/CLK
+ 1.617       2.272           0.655           High Pulse Width  APM_161_1074/CLK_1      u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm/gopapm/CLK
+====================================================================================================
+
+====================================================================================================
+
+Inputs and Outputs :
++--------------------------------------------------------------------------------------------------------------------+
+| Type       | File Name                                                                                            
++--------------------------------------------------------------------------------------------------------------------+
+| Input      | G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/place_route/edrv32_fpga_probe_gpu2_sfu_top_pnr.adf       
+| Output     | G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/report_timing/edrv32_fpga_probe_gpu2_sfu_top_rtp.adf     
+|            | G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/report_timing/edrv32_fpga_probe_gpu2_sfu_top.rtr         
+|            | G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/report_timing/rtr.db                                     
++--------------------------------------------------------------------------------------------------------------------+
+
+
+Flow Command: report_timing 
+Peak memory: 1,495 MB
+Total CPU time to report_timing completion : 0h:0m:1s
+Process Total CPU time to report_timing completion : 0h:0m:1s
+Total real time to report_timing completion : 0h:0m:22s

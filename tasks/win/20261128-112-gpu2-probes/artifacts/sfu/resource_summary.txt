@@ -1,0 +1,65 @@
+Post-route top totals | LUT 4546 | FF 3862 | DRM 15 | APM 4 | Distributed RAM 60 | I/O 34
+ADS unique control sets: 42
+
+Device Utilization Summary :
++------------------------------------------------------------------------------------+
+| Logic Utilization                 | Used     | Available     | Utilization(%)
++------------------------------------------------------------------------------------+
+| Use of ADC                        | 0        | 1             | 0
+| Use of ANALOG                     | 0        | 1             | 0
+| Use of APM                        | 4        | 740           | 1
+| Use of BKCL                       | 0        | 10            | 0
+| Use of CCS                        | 1        | 1             | 100
+| Use of CLMA                       | 1237     | 30075         | 5
+|   FF                              | 3032     | 240600        | 2
+|   LUT                             | 3731     | 120300        | 4
+|   LUT-FF pairs                    | 1209     | 120300        | 2
+| Use of CLMS                       | 343      | 9875          | 4
+|   FF                              | 830      | 79000         | 2
+|   LUT                             | 1048     | 39500         | 3
+|   LUT-FF pairs                    | 329      | 39500         | 1
+|   Distributed RAM                 | 60       | 39500         | 1
+| Use of DDRPHY_CPD                 | 0        | 20            | 0
+| Use of DDRPHY_IOCLK_DIV           | 0        | 10            | 0
+| Use of DDR_PHY                    | 0        | 40            | 0
+| Use of DRM                        | 15       | 415           | 4
+| Use of GCLK_INBUF_SYN             | 0        | 40            | 0
+| Use of GPLL                       | 0        | 10            | 0
+| Use of GSEB                       | 0        | 512           | 0
+| Use of HARD0                      | 423      | 25050         | 2
+| Use of HCKB                       | 2        | 120           | 2
+|  HCKB dataused                    | 0        | 120           | 0
+| Use of HCKMUX_TEST                | 0        | 10            | 0
+| Use of HSSTLP                     | 0        | 2             | 0
+| Use of IO                         | 34       | 400           | 9
+|   IOBD                            | 17       | 192           | 9
+|   IOBS                            | 17       | 208           | 9
+| Use of IOCKB                      | 0        | 40            | 0
+| Use of IOCKMUX_TEST               | 0        | 10            | 0
+| Use of IOLHR                      | 34       | 500           | 7
+| Use of KEYRAM                     | 0        | 1             | 0
+| Use of MFG_TEST                   | 0        | 1             | 0
+| Use of MRCKB                      | 0        | 20            | 0
+| Use of MRCKMUX_TEST               | 0        | 10            | 0
+| Use of MRPOSTMUX_TEST             | 0        | 10            | 0
+| Use of PCIE                       | 0        | 1             | 0
+| Use of PCKMUX_TEST                | 0        | 20            | 0
+| Use of PLLMRMUX_TEST              | 0        | 10            | 0
+| Use of PLLREFMUX_TEST             | 0        | 10            | 0
+| Use of POSTGMUXLR_TEST            | 0        | 4             | 0
+| Use of PPLL                       | 0        | 10            | 0
+| Use of PREGMUXC_TEST              | 0        | 3             | 0
+| Use of PREGMUXC_X16_200H_TEST     | 0        | 4             | 0
+| Use of PREGMUXLR_TEST             | 0        | 10            | 0
+| Use of RCKB                       | 0        | 40            | 0
+|  RCKB dataused                    | 0        | 40            | 0
+| Use of RCKMUX_TEST                | 0        | 10            | 0
+| Use of SCANCHAIN                  | 0        | 1             | 0
+| Use of SCKMUX_TEST                | 0        | 20            | 0
+| Use of SFB                        | 0        | 5075          | 0
+| Use of SPAD                       | 0        | 8             | 0
+| Use of TSERDES                    | 0        | 80            | 0
+| Use of USCM                       | 1        | 32            | 4
+|  USCM dataused                    | 0        | 32            | 0
+| Use of USCMMUX_TEST               | 0        | 32            | 0
++------------------------------------------------------------------------------------+

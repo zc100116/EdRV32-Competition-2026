@@ -1,0 +1,58 @@
+按设计说明的流水边界及映射后终点寄存器名前缀对最差 200 个 setup 端点分组。每组报告最差 3 条。
+
+Capture const (53 endpoints)
+Rank | Slack (ns) | Logic levels | Logic / Route (ns) | Startpoint -> Endpoint
+1 | +1.641 | 0 | 1.644 / 1.017 | u_probe/g_const[0].u_half0/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0] -> u_probe/g_const[0].capture_r[69]/opit_0/D
+2 | +1.642 | 0 | 1.644 / 1.018 | u_probe/g_const[0].u_half0/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0] -> u_probe/g_const[0].capture_r[58]/opit_0/D
+3 | +1.709 | 0 | 1.644 / 0.948 | u_probe/g_const[0].u_half1/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0] -> u_probe/g_const[0].capture_r[99]/opit_0/D
+
+Capture program (63 endpoints)
+Rank | Slack (ns) | Logic levels | Logic / Route (ns) | Startpoint -> Endpoint
+1 | +1.422 | 0 | 1.644 / 1.258 | u_probe/g_program[4].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp36/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0] -> u_probe/g_program[4].capture_r[14]/opit_0/D
+2 | +1.547 | 0 | 1.644 / 1.130 | u_probe/g_program[4].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp36/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0] -> u_probe/g_program[4].capture_r[12]/opit_0/D
+3 | +1.558 | 0 | 1.644 / 1.122 | u_probe/g_program[4].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp36/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0] -> u_probe/g_program[4].capture_r[11]/opit_0/D
+
+Capture rf (28 endpoints)
+Rank | Slack (ns) | Logic levels | Logic / Route (ns) | Startpoint -> Endpoint
+1 | +1.565 | 0 | 1.644 / 1.110 | u_probe/g_rf[0].u_half0/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0] -> u_probe/g_rf[0].capture_r[65]/opit_0/D
+2 | +1.590 | 0 | 1.644 / 1.085 | u_probe/g_rf[0].u_half0/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0] -> u_probe/g_rf[0].capture_r[68]/opit_0/D
+3 | +1.651 | 0 | 1.644 / 1.024 | u_probe/g_rf[0].u_half0/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0] -> u_probe/g_rf[0].capture_r[64]/opit_0/D
+
+Other const* (3 endpoints)
+Rank | Slack (ns) | Logic levels | Logic / Route (ns) | Startpoint -> Endpoint
+1 | +1.293 | 3 | 0.777 / 2.267 | u_probe/g_const[0].capture_r[35]/opit_0/CLK -> const_rd_data_observed_r/opit_0_L6Q_perm/I5
+2 | +1.528 | 2 | 0.526 / 2.099 | u_probe/g_const[0].capture_r[118]/opit_0/CLK -> const_rd_data_observed_r/opit_0_L6Q_perm/I1
+3 | +1.575 | 2 | 0.549 / 2.013 | u_probe/g_const[0].capture_r[74]/opit_0/CLK -> const_rd_data_observed_r/opit_0_L6Q_perm/I0
+
+Other g* (42 endpoints)
+Rank | Slack (ns) | Logic levels | Logic / Route (ns) | Startpoint -> Endpoint
+1 | +1.100 | 2 | 0.560 / 2.294 | u_probe/g_setup[31].capture_r[53]/opit_0/CLK -> g_bank[31].observation_r/opit_0_L6Q_perm/I2
+2 | +1.140 | 2 | 0.561 / 2.491 | u_probe/g_setup[60].capture_r[83]/opit_0/CLK -> g_bank[60].observation_r/opit_0_L6Q_perm/I4
+3 | +1.244 | 2 | 0.566 / 2.406 | u_probe/g_setup[60].capture_r[51]/opit_0/CLK -> g_bank[60].observation_r/opit_0_L6Q_perm/I5
+
+Other observation* (1 endpoints)
+Rank | Slack (ns) | Logic levels | Logic / Route (ns) | Startpoint -> Endpoint
+1 | +1.111 | 1 | 0.429 / 2.624 | g_group[2].observation_r/opit_0_L6Q_perm/CLK -> observation_r/opit_0_L6Q_perm/I5
+
+Other program* (4 endpoints)
+Rank | Slack (ns) | Logic levels | Logic / Route (ns) | Startpoint -> Endpoint
+1 | +1.516 | 2 | 0.683 / 2.113 | u_probe/g_program[0].capture_r[35]/opit_0/CLK -> program_rd_data_observed_r/opit_0_L6Q_perm/I5
+2 | +1.542 | 2 | 0.514 / 2.243 | u_probe/g_program[3].capture_r[13]/opit_0/CLK -> program_rd_data_observed_r/opit_0_L6Q_perm/I4
+3 | +1.756 | 2 | 0.502 / 1.994 | u_probe/g_program[1].capture_r[35]/opit_0/CLK -> program_rd_data_observed_r/opit_0_L6Q_perm/I3
+
+Other rf* (6 endpoints)
+Rank | Slack (ns) | Logic levels | Logic / Route (ns) | Startpoint -> Endpoint
+1 | +0.698 | 3 | 0.801 / 2.494 | u_probe/g_rf[2].capture_r[51]/opit_0/CLK -> rf_rd_data_observed_r/opit_0_L6Q_perm/I2
+2 | +1.107 | 3 | 0.789 / 2.268 | u_probe/g_rf[0].capture_r[23]/opit_0/CLK -> rf_rd_data_observed_r/opit_0_L6Q_perm/I1
+3 | +1.322 | 2 | 0.531 / 2.431 | u_probe/g_rf[0].capture_r[61]/opit_0/CLK -> rf_rd_data_observed_r/opit_0_L6Q_perm/I3
+
+DRM 读出 → 业务捕获寄存器
+Rank | Slack (ns) | Logic levels | Logic / Route (ns) | Startpoint -> Endpoint
+1 | +1.422 | 0 | 1.644 / 1.258 | u_probe/g_program[4].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp36/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0] -> u_probe/g_program[4].capture_r[14]/opit_0/D
+2 | +1.547 | 0 | 1.644 / 1.130 | u_probe/g_program[4].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp36/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0] -> u_probe/g_program[4].capture_r[12]/opit_0/D
+3 | +1.558 | 0 | 1.644 / 1.122 | u_probe/g_program[4].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp36/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0] -> u_probe/g_program[4].capture_r[11]/opit_0/D
+
+Setup LUTRAM 读出寄存器 → 业务捕获寄存器
+未取得匹配的时序路径。
+
+该映射使用 0 个 APM。

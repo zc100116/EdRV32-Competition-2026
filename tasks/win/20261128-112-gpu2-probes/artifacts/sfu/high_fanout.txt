@@ -1,0 +1,57 @@
+Device Map 四类原表按同网最高报告值排序，保留分栏计数。CE 大于 16 的全部报告网单列，另列名字明确的使能网。
+
+Rank | Net | Fanout by PDS table
+1 | ntclkbufg_0 | Clock=3956, Other=3956
+2 | N0 | Reset=226, Other=226
+3 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/s8_shift_r[3] | Other=162
+4 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/s8_shift_r[2] | Other=150
+5 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/s8_shift_r[1] | Other=145
+6 | u_sfu/front_commit_r[0] | Other=141
+7 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/s8_shift_r[0] | Other=135
+8 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/s8_shift_r[0] | Other=129
+9 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/s8_shift_r[1] | Other=117
+10 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/s8_shift_r[4] | Other=111
+11 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/s8_shift_r[2] | Other=108
+12 | u_sfu/g_engine[0].issue_op_r[0] | Other=105
+13 | u_sfu/g_engine[0].issue_op_r[1] | Other=105
+14 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/s8_shift_r[3] | Other=103
+15 | u_sfu/_N12798 | Other=96
+16 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/product_shift_r[5][3] | Other=96
+17 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/product_shift_r[5][2] | Other=91
+18 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/product_shift_r[5][3] | Other=86
+19 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/product_shift_r[5][2] | Other=80
+20 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/product_shift_r[5][4] | Other=77
+21 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/product_shift_r[5][1] | Other=76
+22 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/product_shift_r[5][5] | Reset=32, Other=73
+23 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/product_shift_r[5][4] | Other=72
+24 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/s7_forward_r[56] | Other=72
+25 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/s7_forward_r[56] | Other=72
+26 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/s8_shift_r[5] | Other=72
+27 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/product_shift_r[5][5] | Reset=32, Other=70
+28 | u_sfu/g_engine[0].issue_slot_r[2] | Other=69
+29 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/product_shift_r[5][0] | Other=68
+30 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/product_shift_r[5][1] | Other=65
+31 | u_sfu/_N10981 | Other=63
+32 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/s8_shift_r[4] | Other=60
+33 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/addend_sign_r[5] | Other=59
+34 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/product_sign_r[5] | Other=59
+35 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/addend_sign_r[5] | Other=59
+36 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/product_sign_r[5] | Other=59
+37 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/product_shift_r[5][0] | Other=58
+38 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/s3_c_shift_r[5] | Reset=32, Other=56
+39 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/s3_c_shift_r[5] | Reset=32, Other=56
+40 | u_sfu/u_prepare/u_lz_input/hit_16_0_w_cpy | Other=50
+41 | control_lfsr_r[2] | Other=48
+42 | u_sfu/_N11774 | Other=48
+43 | u_sfu/_N11321 | Other=47
+44 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/s3_c_shift_r[3] | Other=47
+45 | u_sfu/g_engine[0].u_arithmetic/u_arithmetic/s3_c_shift_r[4] | Other=47
+46 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/s3_c_shift_r[3] | Other=47
+47 | u_sfu/g_engine[1].u_arithmetic/u_arithmetic/s3_c_shift_r[4] | Other=47
+48 | u_sfu/_N11753 | Other=45
+49 | u_sfu/g_engine[1].u_scale/shift_w[3] | Other=44
+50 | N24 | Other=43
+
+Reported enable nets above 16
+_$$_GND_$$_ | Reset=30, CE=30
+_$$_VCC_$$_ | CE=28

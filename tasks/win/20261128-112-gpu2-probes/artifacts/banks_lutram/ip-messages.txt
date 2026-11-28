@@ -1,0 +1,407 @@
+APM、DRM、LUTRAM 相关告警、错误及匹配的推断信息。
+
+[compile.log] I: Found Verilog include file G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/edrv32_build_mode.vh
+[compile.log] I: Found Verilog include file G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/edrv32_build_mode.vh
+[compile.log] W: Public-4030: File 'G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/edrv32_build_mode.vh' has been added. It is skipped.
+[compile.log] I: Found Verilog include file G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/edrv32_build_mode.vh
+[compile.log] W: Public-4030: File 'G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/edrv32_build_mode.vh' has been added. It is skipped.
+[compile.log] I: Verilog-0001: Analyzing file G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v
+[compile.log] I: Verilog-0002: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 6)] Analyzing module edrv32_gpu2_banks_lutram (library work)
+[compile.log] I: Verilog-0001: Analyzing file G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v
+[compile.log] I: Verilog-0002: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 6)] Analyzing module edrv32_fpga_probe_gpu2_banks_lutram_top (library work)
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 13)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 13)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 54)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 54)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 59)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 59)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 64)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 64)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 69)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 69)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 74)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 74)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 84)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 84)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 89)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 89)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 94)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 94)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 99)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 99)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 104)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 104)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 114)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 114)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 119)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 119)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 124)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 124)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 129)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 129)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 134)] Convert attribute name from keep to PAP_KEEP
+[compile.log] I: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 134)] Convert attribute name from syn_preserve to PAP_PRESERVE
+[compile.log] I: Verilog-0001: Analyzing file G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v
+[compile.log] I: Verilog-0002: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 18)] Analyzing module ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72 (library work)
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 350)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 351)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 354)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 358)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 362)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 366)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 374)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 375)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 378)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 379)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 382)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 383)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 386)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 387)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 390)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 391)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 394)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 395)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 398)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 399)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 402)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 403)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 406)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 407)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 410)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 411)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 414)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 415)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 418)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 419)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 422)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 423)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 426)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 427)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 430)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 431)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 434)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 435)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 438)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 439)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 443)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 444)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 447)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 448)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 452)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 453)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 458)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 459)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 462)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 463)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 466)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 467)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 472)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 473)] Ignore 'system task' $finish
+[compile.log] I: Verilog-0001: Analyzing file G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/ip_ram_gpu2_sdp72.v
+[compile.log] I: Verilog-0002: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/ip_ram_gpu2_sdp72.v(line number: 16)] Analyzing module ip_ram_gpu2_sdp72 (library work)
+[compile.log] I: Verilog-0001: Analyzing file G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v
+[compile.log] I: Verilog-0002: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 18)] Analyzing module ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36 (library work)
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 350)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 351)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 354)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 358)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 362)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 366)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 374)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 375)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 378)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 379)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 382)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 383)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 386)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 387)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 390)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 391)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 394)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 395)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 398)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 399)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 402)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 403)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 406)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 407)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 410)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 411)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 414)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 415)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 418)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 419)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 422)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 423)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 426)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 427)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 430)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 431)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 434)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 435)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 438)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 439)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 443)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 444)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 447)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 448)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 452)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 453)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 458)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 459)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 462)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 463)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 466)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 467)] Ignore 'system task' $finish
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 472)] Ignore 'system task' $display
+[compile.log] W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 473)] Ignore 'system task' $finish
+[compile.log] I: Verilog-0001: Analyzing file G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/ip_ram_gpu2_sdp36.v
+[compile.log] I: Verilog-0002: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/ip_ram_gpu2_sdp36.v(line number: 16)] Analyzing module ip_ram_gpu2_sdp36 (library work)
+[compile.log] I: Verilog-0001: Analyzing file G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_lutram_gpu2_setup92/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_setup92.v
+[compile.log] I: Verilog-0002: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_lutram_gpu2_setup92/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_setup92.v(line number: 20)] Analyzing module ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_setup92 (library work)
+[compile.log] I: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_lutram_gpu2_setup92/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_setup92.v(line number: 29)] Convert attribute name from syn_ramstyle to PAP_RAM_STYLE
+[compile.log] I: Verilog-0001: Analyzing file G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_lutram_gpu2_setup92/ip_lutram_gpu2_setup92.v
+[compile.log] I: Verilog-0002: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_lutram_gpu2_setup92/ip_lutram_gpu2_setup92.v(line number: 18)] Analyzing module ip_lutram_gpu2_setup92 (library work)
+[compile.log] I: Module "edrv32_fpga_probe_gpu2_banks_lutram_top" is set as top module.
+[compile.log] I: Verilog-0003: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 6)] Elaborating module edrv32_fpga_probe_gpu2_banks_lutram_top
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 13)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 28)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 54)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 59)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 64)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 69)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 74)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 84)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 89)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 94)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 99)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 104)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 114)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 119)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 124)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 129)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] W: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 134)] The value of attribute PAP_KEEP is invalid, ignore it.
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/fpga/rtl/edrv32_fpga_probe_gpu2_banks_lutram_top.v(line number: 144)] Elaborating instance u_probe
+[compile.log] I: Verilog-0003: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 6)] Elaborating module edrv32_gpu2_banks_lutram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 53)] Elaborating instance u_ram
+[compile.log] I: Verilog-0003: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/ip_ram_gpu2_sdp36.v(line number: 16)] Elaborating module ip_ram_gpu2_sdp36
+[compile.log] I: Verilog-0004: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/ip_ram_gpu2_sdp36.v(line number: 157)] Elaborating instance U_ipm2l_sdpram_ip_ram_gpu2_sdp36
+[compile.log] I: Verilog-0003: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 18)] Elaborating module ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36
+[compile.log] I: Module instance {edrv32_fpga_probe_gpu2_banks_lutram_top/u_probe/g_program[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp36} parameter value:
+[compile.log] W: Verilog-2039: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 517)] Repeat multiplier in concatenation evaluates to 0
+[compile.log] W: Verilog-2039: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 518)] Repeat multiplier in concatenation evaluates to 0
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 539)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 540)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 541)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 542)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 542)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 543)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 543)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 544)] Case condition never applies
+[compile.log] W: Verilog-2039: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 671)] Repeat multiplier in concatenation evaluates to 0
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 688)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 689)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 690)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 691)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 691)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 692)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 692)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 693)] Case condition never applies
+[compile.log] I: Verilog-0004: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 871)] Elaborating instance U_GTP_DRM36K_E1
+[compile.log] W: Verilog-2023: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 871)] Give initial value 0 for the no drive pin INJECT_SBITERR in module instance edrv32_fpga_probe_gpu2_banks_lutram_top/u_probe/g_program[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp36.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1
+[compile.log] W: Verilog-2023: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp36/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp36.v(line number: 871)] Give initial value 0 for the no drive pin INJECT_DBITERR in module instance edrv32_fpga_probe_gpu2_banks_lutram_top/u_probe/g_program[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp36.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 53)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 53)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 53)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 53)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 77)] Elaborating instance u_half0
+[compile.log] I: Verilog-0003: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/ip_ram_gpu2_sdp72.v(line number: 16)] Elaborating module ip_ram_gpu2_sdp72
+[compile.log] I: Verilog-0004: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/ip_ram_gpu2_sdp72.v(line number: 157)] Elaborating instance U_ipm2l_sdpram_ip_ram_gpu2_sdp72
+[compile.log] I: Verilog-0003: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 18)] Elaborating module ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72
+[compile.log] I: Module instance {edrv32_fpga_probe_gpu2_banks_lutram_top/u_probe/g_rf[0].u_half0/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72} parameter value:
+[compile.log] W: Verilog-2039: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 517)] Repeat multiplier in concatenation evaluates to 0
+[compile.log] W: Verilog-2039: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 518)] Repeat multiplier in concatenation evaluates to 0
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 539)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 540)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 541)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 542)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 542)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 543)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 543)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 544)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 544)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 545)] Case condition never applies
+[compile.log] W: Verilog-2039: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 671)] Repeat multiplier in concatenation evaluates to 0
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 688)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 689)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 690)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 691)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 691)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 692)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 692)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 693)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 693)] Case condition never applies
+[compile.log] W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 694)] Case condition never applies
+[compile.log] I: Verilog-0004: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 871)] Elaborating instance U_GTP_DRM36K_E1
+[compile.log] W: Verilog-2023: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 871)] Give initial value 0 for the no drive pin INJECT_SBITERR in module instance edrv32_fpga_probe_gpu2_banks_lutram_top/u_probe/g_rf[0].u_half0/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1
+[compile.log] W: Verilog-2023: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_ram_gpu2_sdp72/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sdp72.v(line number: 871)] Give initial value 0 for the no drive pin INJECT_DBITERR in module instance edrv32_fpga_probe_gpu2_banks_lutram_top/u_probe/g_rf[0].u_half0/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp72.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 86)] Elaborating instance u_half1
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 77)] Elaborating instance u_half0
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 86)] Elaborating instance u_half1
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 77)] Elaborating instance u_half0
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 86)] Elaborating instance u_half1
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 109)] Elaborating instance u_half0
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 118)] Elaborating instance u_half1
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 109)] Elaborating instance u_half0
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 118)] Elaborating instance u_half1
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0003: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_lutram_gpu2_setup92/ip_lutram_gpu2_setup92.v(line number: 18)] Elaborating module ip_lutram_gpu2_setup92
+[compile.log] I: Verilog-0004: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_lutram_gpu2_setup92/ip_lutram_gpu2_setup92.v(line number: 63)] Elaborating instance u_ipm_distributed_sdpram_ip_lutram_gpu2_setup92
+[compile.log] I: Verilog-0003: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_lutram_gpu2_setup92/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_setup92.v(line number: 20)] Elaborating module ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_setup92
+[compile.log] I: Module instance {edrv32_fpga_probe_gpu2_banks_lutram_top/u_probe/g_setup[0].u_ram/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_setup92} parameter value:
+[compile.log] I: Verilog-0006: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_lutram_gpu2_setup92/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_setup92.v(line number: 70)] Set initial value to mem[i] in initial construct.
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Verilog-0004: [G:/codex_project/edrv32-card112/rtl/gpu2/edrv32_gpu2_banks_lutram.v(line number: 140)] Elaborating instance u_ram
+[compile.log] I: Sdm-0001: [G:/codex_project/EdRV32-FPGA/gpu2_probe_banks_lutram/ipcore/ip_lutram_gpu2_setup92/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_setup92.v(line number: 78)] Found Ram mem, depth=16, width=92.

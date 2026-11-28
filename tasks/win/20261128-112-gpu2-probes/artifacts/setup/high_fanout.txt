@@ -1,0 +1,56 @@
+Device Map 四类原表按同网最高报告值排序，保留分栏计数。CE 大于 16 的全部报告网单列，另列名字明确的使能网。
+
+Rank | Net | Fanout by PDS table
+1 | ntclkbufg_0 | Clock=1366, Other=1366
+2 | mantissa_r[81] | Other=153
+3 | u_probe/u_normalize/N8 | Other=129
+4 | u_probe/u_normalize/N14 | Other=88
+5 | u_probe/u_normalize/shift5_w[127] | Other=69
+6 | u_probe/u_normalize/N20 | Other=53
+7 | u_probe/u_normalize/shift4_w[127] | Other=52
+8 | u_probe/u_normalize/shift4_w[125] | Other=51
+9 | u_probe/u_normalize/shift4_w[126] | Other=51
+10 | tile_x_r[0] | Other=50
+11 | tile_x_r[2] | Other=50
+12 | tile_x_r[4] | Other=50
+13 | tile_y_r[1] | Other=50
+14 | tile_y_r[3] | Other=50
+15 | u_probe/u_normalize/rounded_w[47] | Other=50
+16 | u_probe/u_normalize/shift4_w[124] | Other=50
+17 | u_probe/u_normalize/N38 | Other=49
+18 | u_probe/u_normalize/shift5_w[125]_cpy | Other=48
+19 | u_probe/u_normalize/shifted_sign_r | Other=47
+20 | u_probe/u_multiply/high0_w[47] | Other=38
+21 | u_probe/u_normalize/_N1228 | Other=37
+22 | u_probe/u_normalize/_N1229 | Other=37
+23 | u_probe/u_normalize/_N1230 | Other=36
+24 | u_probe/u_normalize/_N1231 | Other=36
+25 | a_r[48] | Other=27
+26 | tile_x_r[1] | Other=26
+27 | tile_x_r[3] | Other=26
+28 | tile_y_r[0] | Other=26
+29 | tile_y_r[2] | Other=26
+30 | u_probe/u_multiply/x2_r[0] | Other=25
+31 | u_probe/u_normalize/shift5_w[126] | Other=24
+32 | u_probe/u_normalize/_N1226 | Other=22
+33 | u_probe/u_normalize/N26 | Other=21
+34 | start_r[47] | Other=17
+35 | u_probe/u_normalize/_N1210 | Other=14
+36 | u_probe/u_normalize/_N1176 | Other=13
+37 | u_probe/u_normalize/_N1213 | Other=13
+38 | u_probe/u_normalize/_N1222 | Other=13
+39 | u_probe/u_normalize/_N1214 | Other=12
+40 | u_probe/u_relocate/s1_0_r[54] | Other=12
+41 | u_probe/u_normalize/_N1208 | Other=11
+42 | u_probe/u_normalize/_N1209 | Other=10
+43 | u_probe/u_normalize/_N1225 | Other=10
+44 | u_probe/u_normalize/shifted_zero_r | Reset=10, Other=10
+45 | gx_r[0] | Other=8
+46 | gx_r[47] | Other=8
+47 | mantissa_r[20] | Other=7
+48 | mantissa_r[24] | Other=7
+49 | mantissa_r[25] | Other=7
+50 | mantissa_r[31] | Other=7
+
+Reported enable nets above 16
+PDS 表中无匹配。

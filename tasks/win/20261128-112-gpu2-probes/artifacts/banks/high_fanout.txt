@@ -1,0 +1,57 @@
+Device Map 四类原表按同网最高报告值排序，保留分栏计数。CE 大于 16 的全部报告网单列，另列名字明确的使能网。
+
+Rank | Net | Fanout by PDS table
+1 | ntclkbufg_0 | Clock=15680, Other=15680
+2 | _$$_GND_$$_ | Reset=318, CE=318
+3 | _$$_VCC_$$_ | CE=159
+4 | N0 | Reset=8, Other=8
+5 | nt_stim_i | Other=8
+6 | rf_wr_addr_r[0] | Other=7
+7 | rf_wr_addr_r[1] | Other=7
+8 | rf_wr_addr_r[2] | Other=7
+9 | rf_wr_addr_r[3] | Other=7
+10 | rf_wr_addr_r[4] | Other=7
+11 | rf_wr_addr_r[5] | Other=7
+12 | rf_wr_addr_r[6] | Other=7
+13 | rf_wr_addr_r[7] | Other=7
+14 | rf_wr_addr_r[8] | Other=7
+15 | stimulus_root_r[1] | Other=7
+16 | program_rd_addr_r[0] | Other=6
+17 | program_rd_addr_r[1] | Other=6
+18 | program_rd_addr_r[2] | Other=6
+19 | program_rd_addr_r[3] | Other=6
+20 | program_rd_addr_r[4] | Other=6
+21 | program_rd_addr_r[5] | Other=6
+22 | program_rd_addr_r[6] | Other=6
+23 | program_rd_addr_r[7] | Other=6
+24 | program_rd_addr_r[8] | Other=6
+25 | program_rd_addr_r[9] | Other=6
+26 | program_wr_addr_r[0] | Other=6
+27 | program_wr_addr_r[1] | Other=6
+28 | program_wr_addr_r[2] | Other=6
+29 | program_wr_addr_r[3] | Other=6
+30 | program_wr_addr_r[4] | Other=6
+31 | program_wr_addr_r[5] | Other=6
+32 | program_wr_addr_r[6] | Other=6
+33 | program_wr_addr_r[7] | Other=6
+34 | program_wr_addr_r[8] | Other=6
+35 | program_wr_addr_r[9] | Other=6
+36 | rf_wr_en_r[0] | Other=6
+37 | stimulus_root_r[0] | Other=6
+38 | stimulus_root_r[2] | Other=6
+39 | stimulus_root_r[3] | Other=6
+40 | stimulus_root_r[5] | Other=6
+41 | stimulus_root_r[7] | Other=6
+42 | const_wr_addr_r[0] | Other=5
+43 | const_wr_addr_r[1] | Other=5
+44 | const_wr_addr_r[2] | Other=5
+45 | const_wr_addr_r[3] | Other=5
+46 | const_wr_addr_r[4] | Other=5
+47 | const_wr_addr_r[5] | Other=5
+48 | const_wr_addr_r[6] | Other=5
+49 | program_rd_en_r[0] | CE=5, Other=5
+50 | program_wr_en_r[0] | Other=5
+
+Reported enable nets above 16
+_$$_GND_$$_ | Reset=318, CE=318
+_$$_VCC_$$_ | CE=159

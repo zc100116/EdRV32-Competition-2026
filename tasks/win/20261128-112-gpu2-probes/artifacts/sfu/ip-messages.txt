@@ -1,0 +1,128 @@
+APM、DRM、LUTRAM 相关告警、错误及匹配的推断信息。
+
+[compile.log] I: Verilog-0001: Analyzing file G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word16/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word16.v
+[compile.log] I: Verilog-0002: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word16/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word16.v(line number: 20)] Analyzing module ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word16 (library work)
+[compile.log] I: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word16/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word16.v(line number: 29)] Convert attribute name from syn_ramstyle to PAP_RAM_STYLE
+[compile.log] I: Verilog-0001: Analyzing file G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word16/ip_lutram_gpu2_sfu_word16.v
+[compile.log] I: Verilog-0002: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word16/ip_lutram_gpu2_sfu_word16.v(line number: 18)] Analyzing module ip_lutram_gpu2_sfu_word16 (library work)
+[compile.log] I: Verilog-0001: Analyzing file G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word5/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word5.v
+[compile.log] I: Verilog-0002: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word5/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word5.v(line number: 20)] Analyzing module ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word5 (library work)
+[compile.log] I: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word5/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word5.v(line number: 29)] Convert attribute name from syn_ramstyle to PAP_RAM_STYLE
+[compile.log] I: Verilog-0001: Analyzing file G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word5/ip_lutram_gpu2_sfu_word5.v
+[compile.log] I: Verilog-0002: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word5/ip_lutram_gpu2_sfu_word5.v(line number: 18)] Analyzing module ip_lutram_gpu2_sfu_word5 (library work)
+[compile.log] I: Verilog-0004: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_rom_gpu2_sfu/rtl/ipm2l_dpram_v1_9_ip_rom_gpu2_sfu.v(line number: 900)] Elaborating instance U_GTP_DRM36K_E1
+[compile.log] W: Verilog-2023: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_rom_gpu2_sfu/rtl/ipm2l_dpram_v1_9_ip_rom_gpu2_sfu.v(line number: 900)] Give initial value 0 for the no drive pin INJECT_SBITERR in module instance edrv32_fpga_probe_gpu2_sfu_top/u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1
+[compile.log] W: Verilog-2023: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_rom_gpu2_sfu/rtl/ipm2l_dpram_v1_9_ip_rom_gpu2_sfu.v(line number: 900)] Give initial value 0 for the no drive pin INJECT_DBITERR in module instance edrv32_fpga_probe_gpu2_sfu_top/u_sfu/u_seed_rom/u_ip/U_ipm2l_dpram_ip_rom_gpu2_sfu.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1
+[compile.log] I: Verilog-0004: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_ram_gpu2_sfu_scratch/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sfu_scratch.v(line number: 871)] Elaborating instance U_GTP_DRM36K_E1
+[compile.log] W: Verilog-2023: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_ram_gpu2_sfu_scratch/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sfu_scratch.v(line number: 871)] Give initial value 0 for the no drive pin INJECT_SBITERR in module instance edrv32_fpga_probe_gpu2_sfu_top/u_sfu/g_field[0].g_active.u_field/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sfu_scratch.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1
+[compile.log] W: Verilog-2023: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_ram_gpu2_sfu_scratch/rtl/ipm2l_sdpram_v1_10_ip_ram_gpu2_sfu_scratch.v(line number: 871)] Give initial value 0 for the no drive pin INJECT_DBITERR in module instance edrv32_fpga_probe_gpu2_sfu_top/u_sfu/g_field[0].g_active.u_field/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sfu_scratch.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1
+[compile.log] I: Verilog-0003: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word16/ip_lutram_gpu2_sfu_word16.v(line number: 18)] Elaborating module ip_lutram_gpu2_sfu_word16
+[compile.log] I: Verilog-0004: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word16/ip_lutram_gpu2_sfu_word16.v(line number: 63)] Elaborating instance u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16
+[compile.log] I: Verilog-0003: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word16/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word16.v(line number: 20)] Elaborating module ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word16
+[compile.log] I: Module instance {edrv32_fpga_probe_gpu2_sfu_top/u_sfu/g_engine[0].u_meta/u_region0/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word16} parameter value:
+[compile.log] I: Verilog-0006: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word16/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word16.v(line number: 70)] Set initial value to mem[i] in initial construct.
+[compile.log] I: Verilog-0003: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word5/ip_lutram_gpu2_sfu_word5.v(line number: 18)] Elaborating module ip_lutram_gpu2_sfu_word5
+[compile.log] I: Verilog-0004: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word5/ip_lutram_gpu2_sfu_word5.v(line number: 63)] Elaborating instance u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word5
+[compile.log] I: Verilog-0003: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word5/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word5.v(line number: 20)] Elaborating module ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word5
+[compile.log] I: Module instance {edrv32_fpga_probe_gpu2_sfu_top/u_sfu/g_engine[0].u_meta/u_region1/u_ip/u_ipm_distributed_sdpram_ip_lutram_gpu2_sfu_word5} parameter value:
+[compile.log] I: Verilog-0006: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word5/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word5.v(line number: 70)] Set initial value to mem[i] in initial construct.
+[compile.log] I: Sdm-0001: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word16/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word16.v(line number: 78)] Found Ram mem, depth=32, width=16.
+[compile.log] I: Sdm-0001: [G:/codex_project/EdRV32-FPGA/gpu2_probe_sfu/ipcore/ip_lutram_gpu2_sfu_word5/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_gpu2_sfu_word5.v(line number: 78)] Found Ram mem, depth=32, width=5.
+[device_map.log] I: Const net (pin CPI[47] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[46] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[45] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[44] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[43] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[42] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[41] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[40] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[39] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[38] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[37] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[36] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[35] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[34] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[33] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[32] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[31] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[30] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[29] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[28] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[27] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[26] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[25] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[24] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[23] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[22] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[21] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[20] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[19] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[18] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[17] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[16] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[15] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[14] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[13] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[12] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[11] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[10] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[9] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[8] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[7] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[6] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[5] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[4] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[3] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[2] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[1] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[0] of inst u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[47] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[46] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[45] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[44] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[43] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[42] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[41] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[40] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[39] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[38] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[37] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[36] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[35] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[34] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[33] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[32] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[31] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[30] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[29] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[28] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[27] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[26] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[25] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[24] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[23] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[22] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[21] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[20] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[19] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[18] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[17] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[16] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[15] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[14] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[13] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[12] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[11] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[10] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[9] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[8] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[7] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[6] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[5] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[4] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[3] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[2] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[1] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Const net (pin CPI[0] of inst u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm) has been disconnected.
+[device_map.log] I: Infer APM group, base inst: u_sfu/g_engine[0].u_arithmetic/u_arithmetic/u_product/u_head/u_apm/gopapm, insts:2.
+[device_map.log] I: Infer APM group, base inst: u_sfu/g_engine[1].u_arithmetic/u_arithmetic/u_product/u_head/u_apm/gopapm, insts:2.
