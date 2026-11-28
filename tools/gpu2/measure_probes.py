@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-"""Yosys generic LUT4/FF/depth reference with physical APM/RAMs as black boxes."""
+"""Yosys generic LUT4/LUT6, FF and depth reference with APM/RAMs as black boxes."""
 from pathlib import Path
+import argparse
+import io
+import tarfile
 import json
 import re
 import subprocess
@@ -42,10 +45,25 @@ def register_depths(module):
 
 
 def main():
-    output = ROOT / 'build/gpu2/yosys'
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--lut', type=int, choices=(4, 6), default=4)
+    parser.add_argument('--revision')
+    parser.add_argument('--out', type=Path, default=Path('build/gpu2/yosys'))
+    parser.add_argument('--tops', nargs='*')
+    args = parser.parse_args()
+    output = ROOT / args.out
     output.mkdir(parents=True, exist_ok=True)
+    source_root = ROOT
+    if args.revision:
+        source_root = output / 'source'
+        source_root.mkdir(exist_ok=True)
+        archive = subprocess.check_output(['git', 'archive', args.revision, 'rtl/gpu2',
+                                           'rtl/tech', 'rtl/include', 'rtl/filelists', 'fpga/rtl'],
+                                          cwd=ROOT)
+        with tarfile.open(fileobj=io.BytesIO(archive)) as archive_file:
+            archive_file.extractall(source_root, filter='data')
     # Native port and parameter names match the wrappers; this is a synthesis-only model.
-    apm = (ROOT / 'rtl/tech/edrv32_apm_gpu2_setup_head.v').read_text()
+    apm = (source_root / 'rtl/tech/edrv32_apm_gpu2_setup_head.v').read_text()
     params = re.findall(r'\.([A-Z][A-Z0-9_]*)\(([^\n]+)\)',
                         apm.split(') u_apm', 1)[0])
     stub = '(* blackbox *) module GTP_APM_E2 #(\n'
@@ -93,28 +111,31 @@ endmodule
             ('setup', 'edrv32_fpga_probe_gpu2_setup_top'),
             ('banks', 'edrv32_fpga_probe_gpu2_banks_top'),
             ('banks_lutram', 'edrv32_fpga_probe_gpu2_banks_lutram_top')]
+    if args.tops:
+        tops = [(source, top) for source, top in tops if top in args.tops]
     result = []
     for source, top in tops:
-        files = expand_files(ROOT / f'rtl/filelists/gpu2_probe_{source}.f')
+        files = expand_files(source_root / f'rtl/filelists/gpu2_probe_{source}.f')
         files = [name for name in files if not name.startswith('+')]
         script = f'read_verilog -lib {output / "ip_stubs.v"}\n'
-        script += 'read_verilog -DFPGA_MODE -I'+str(ROOT / 'rtl/include')+' '
+        script += 'read_verilog -DFPGA_MODE -I'+str(source_root / 'rtl/include')+' '
         script += ' '.join(files)+'\n'
-        script += f'synth -top {top} -flatten -noabc\nabc -lut 4\nclean\nstat\nltp -noff\n'
+        script += f'synth -top {top} -flatten -noabc\nabc -lut {args.lut}\nclean\nstat\nltp -noff\n'
         script += f'write_json {output / (top+".json")}\n'
         ys = output / (top+'.ys')
         ys.write_text(script)
         log = output / (top+'.log')
         with log.open('w') as stream:
             subprocess.run(['yosys', '-s', str(ys)], stdout=stream,
-                           stderr=subprocess.STDOUT, check=True, cwd=ROOT)
+                           stderr=subprocess.STDOUT, check=True, cwd=source_root)
         module = json.loads((output / (top+'.json')).read_text())['modules'][top]
         cells = module['cells']
         types = [cell['type'] for cell in cells.values()]
-        row = dict(top=top, lut4=types.count('$lut'), ff=sum('DFF' in t for t in types),
+        row = dict(top=top, ff=sum('DFF' in t for t in types),
                    apm=types.count('GTP_APM_E2'),
                    drm=types.count('ip_ram_gpu2_sdp72')+types.count('ip_ram_gpu2_sdp36'),
                    lutram_instances=types.count('ip_lutram_gpu2_setup92'))
+        row[f'lut{args.lut}'] = types.count('$lut')
         match = re.search(r'longest topological path.*?length=(\d+)', log.read_text(), re.I)
         row['depth'] = int(match[1])
         row['register_depths'] = register_depths(module)

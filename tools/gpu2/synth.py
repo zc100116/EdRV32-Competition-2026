@@ -1,12 +1,28 @@
 #!/usr/bin/env python3
-"""Yosys four-input-LUT reference excluding technology APM/LUTRAM internals."""
+"""Yosys LUT4/LUT6 reference excluding technology APM/LUTRAM internals."""
 from pathlib import Path
+import argparse
+import io
+import tarfile
 import subprocess
-import sys
 
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--lut', type=int, choices=(4, 6), default=4)
+parser.add_argument('--revision')
+parser.add_argument('--out', type=Path, default=Path('build/gpu2_synth'))
+parser.add_argument('tops', nargs='*')
+args = parser.parse_args()
 root = Path(__file__).resolve().parents[2]
-out = root / 'build/gpu2_synth'
+out = root / args.out
 out.mkdir(parents=True, exist_ok=True)
+source_root = root
+if args.revision:
+    source_root = out / 'source'
+    source_root.mkdir(exist_ok=True)
+    archive = subprocess.check_output(['git', 'archive', args.revision, 'rtl/gpu2',
+                                       'rtl/tech', 'rtl/include', 'fpga/rtl'], cwd=root)
+    with tarfile.open(fileobj=io.BytesIO(archive)) as archive_file:
+        archive_file.extractall(source_root, filter='data')
 (out / 'tech.v').write_text('''(* blackbox *) module edrv32_apm_gpu2_u24xu24 (
  input clk_i, input [5:0] enable_i, input [23:0] a_i, input [23:0] b_i,
  output [47:0] product_o); endmodule
@@ -26,21 +42,21 @@ out.mkdir(parents=True, exist_ok=True)
  input wr_clk, input rd_clk, input rst, input wr_en, input [4:0] wr_addr,
  input [4:0] wr_data, input [4:0] rd_addr, output [4:0] rd_data); endmodule
 ''')
-sources = sorted([*(root / 'rtl/gpu2').glob('edrv32_gpu2_fp32*.v'),
-                  *(root / 'rtl/gpu2').glob('edrv32_gpu2_sfu*.v')])
-sources += [root / 'fpga/rtl/edrv32_fpga_probe_gpu2_fp32_top.v',
-            root / 'fpga/rtl/edrv32_fpga_probe_gpu2_sfu_top.v']
-sources += sorted((root / 'rtl/tech').glob('edrv32_ram_gpu2_sfu*.v'))
-sources += [root / 'rtl/tech/edrv32_rom_gpu2_sfu.v']
-for top in sys.argv[1:] or ['edrv32_gpu2_fp32_scalar', 'edrv32_gpu2_fp32',
+sources = sorted([*(source_root / 'rtl/gpu2').glob('edrv32_gpu2_fp32*.v'),
+                  *(source_root / 'rtl/gpu2').glob('edrv32_gpu2_sfu*.v')])
+sources += [source_root / 'fpga/rtl/edrv32_fpga_probe_gpu2_fp32_top.v',
+            source_root / 'fpga/rtl/edrv32_fpga_probe_gpu2_sfu_top.v']
+sources += sorted((source_root / 'rtl/tech').glob('edrv32_ram_gpu2_sfu*.v'))
+sources += [source_root / 'rtl/tech/edrv32_rom_gpu2_sfu.v']
+for top in args.tops or ['edrv32_gpu2_fp32_scalar', 'edrv32_gpu2_fp32',
                                   'edrv32_gpu2_sfu_arithmetic',
                                   'edrv32_fpga_probe_gpu2_fp32_top', 'edrv32_gpu2_sfu',
                                   'edrv32_fpga_probe_gpu2_sfu_top', 'edrv32_gpu2_fp32_add']:
-    script = (f'read_verilog -D FPGA_MODE -I{root / "rtl/include"} {out / "tech.v"} '
+    script = (f'read_verilog -D FPGA_MODE -I{source_root / "rtl/include"} {out / "tech.v"} '
               + ' '.join(str(p) for p in sources)
-              + f'; synth -top {top} -flatten -noabc; abc -lut 4; stat; ltp -noff; '
+              + f'; synth -top {top} -flatten -noabc; abc -lut {args.lut}; stat; ltp -noff; '
               + f'write_json {out / (top + ".json")}')
     with (out / (top + '.log')).open('w') as log:
-        subprocess.run(['yosys', '-p', script], cwd=root, stdout=log,
+        subprocess.run(['yosys', '-p', script], cwd=source_root, stdout=log,
                        stderr=subprocess.STDOUT, check=True)
     print(top, 'reference log:', out / (top + '.log'))

@@ -1,7 +1,7 @@
 // File: edrv32_gpu2_setup_probe.v
 // Spec: gpu-v2-spec 2.6; G-P03.
 // Description: Independent reusable N48, six-APM full product and exact relocation paths.
-//              Latencies are respectively 2, 6 and 4 clocks; all accept each clock.
+//              Latencies are respectively 4, 6 and 4 clocks; all accept each clock.
 // Clock domain: clk_gpu.
 module edrv32_gpu2_setup_probe (
     // Clock and valid, independently observed paths use the same issue clock.

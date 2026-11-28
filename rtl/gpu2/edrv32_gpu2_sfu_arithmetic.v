@@ -1,7 +1,7 @@
 // File: edrv32_gpu2_sfu_arithmetic.v
 // Spec: gpu-v2-spec 2.4; architecture M-6 independent ten-edge scalar cores.
 // Description: II1 scalar MUL/FMA arithmetic for the SFU modulo reservation engines.
-// Clock domain: clk_gpu. Scheduler owns validity; no data reset or unused product tap.
+// Clock domain: clk_gpu. Caller captures DRM banks one edge before operand selection; no data reset.
 module edrv32_gpu2_sfu_arithmetic (
     input wire clk_i,
     input wire mul_i,

@@ -67,12 +67,12 @@ module tb;
             add_expected[0] = next_add;
             expected[0] = next_expected;
             #1;
-            if (valid[6] && product !== product_expected[6])
-                $fatal(1, "product vector %0d expected %h got %h", idx-6,
-                       product_expected[6], product);
-            if (valid[2] && add_result !== add_expected[2])
-                $fatal(1, "add vector %0d expected %h got %h", idx-2,
-                       add_expected[2], add_result);
+            if (valid[7] && product !== product_expected[7])
+                $fatal(1, "product vector %0d expected %h got %h", idx-7,
+                       product_expected[7], product);
+            if (valid[3] && add_result !== add_expected[3])
+                $fatal(1, "add vector %0d expected %h got %h", idx-3,
+                       add_expected[3], add_result);
             if (valid[9]) begin
                 if (result !== expected[9])
                     $fatal(1, "vector %0d expected %h got %h time %t",

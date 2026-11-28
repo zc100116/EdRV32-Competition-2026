@@ -99,10 +99,10 @@ module tb;
                 if (sent > 0 && sent < 512 && cycle != last_accept+4) $fatal(1, "II4 gap at %0d", cycle);
                 last_accept = cycle;
                 case (op)
-                    0: begin due = cycle+47; expected_issues += 4; end
-                    1: begin due = cycle+68; expected_issues += 6; end
-                    2: begin due = cycle+88; expected_issues += 8; end
-                    3: begin due = cycle+78; expected_issues += 7; end
+                    0: begin due = cycle+56; expected_issues += 4; end
+                    1: begin due = cycle+79; expected_issues += 6; end
+                    2: begin due = cycle+102; expected_issues += 8; end
+                    3: begin due = cycle+91; expected_issues += 7; end
                     default: $fatal(1, "bad opcode");
                 endcase
                 if (op == 1) begin
@@ -170,7 +170,7 @@ module tb;
         end
         if (actual_issues != expected_issues)
             $fatal(1, "arithmetic issues expected %0d got %0d", expected_issues, actual_issues);
-        $display("PASS SFU %0d requests, %0d RTL reservations, first512 dense II4, latency47/68/88/78, setup concurrent",
+        $display("PASS SFU %0d requests, %0d RTL reservations, first512 dense II4, latency56/79/102/91, setup concurrent",
                  received, actual_issues);
         $finish;
     end

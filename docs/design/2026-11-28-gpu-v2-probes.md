@@ -89,3 +89,49 @@ FP32原smoke/full含staged抵消、第四项NaN忽略、双口背压和12/13拍�
 测试入口python3 tools/regress.py smoke --path verif/unit/gpu2_sfu -j 1；full改档位并用gpu2_sfu/full路径。
 ROM镜像python3 -B tools/gpu2/gen_sfu_rom.py；IP说明/220MHz约束/导入/filelist已提供，日志在build/gpu2_sfu/及gpu2_synth/。
 状态：Linux逐位/静态检查通过；220/200/150MHz实际裕量、真实DRM/LUTRAM/CLMS仍需Windows PDS/ModelSim。
+
+## GP-C：卡112校准后的220MHz切拍候选（待定稿）
+
+基线35ec01496；PDS原始路径见origin/win/20261128-112-gpu2-probes的artifacts/{fp32,sfu,setup}，PG2L200H-6/Slow/4.545ns；本节随GP-C实现提交，规格不改。Yosys0.70+219、ABC LUT4/LUT6；新值为Linux估计，非PDS达标证明。
+先复用原拍：DP把对齐移位移入+2.701ns加法段；FMA把高位积对齐移入+1.772ns加法段，末两级规格化移入RNE段；SFU EXP索引移位量/余数条件与规格化并行计算，缩放仍两拍。
+| 操作 | 旧→新采样延迟（拍） | II与新增拍归因 |
+|---|---|---|
+| vec4 MUL / FMA | 12→12 / 12→12 | II1；算术仍10拍，复用原返回对齐拍 |
+| DP3 / DP4 | 13→16 / 13→16 | II1；积tap 7→8、两层独立加法器各3→4，均对应下表超预算段 |
+| RCP / RSQ / LOG2 / EXP2 | 47/68/88/78→56/79/102/91 | 混合II4；前端+2、bank捕获+1；valid tap 5/18/29/40/52/63/75/86避开引擎/写口相位碰撞 |
+| setup N48 / 49×33 / signed60重定位 | 2/6/4→4/6/4 | 均II1；N48原27级拆绝对值、LZ、移位、舍入；另两项保留原拍 |
+
+| 卡112同一逻辑起终点（实例前缀省略） | 旧Yosys LUT4/LUT6 | PDS级/裕量ns |
+|---|---:|---:|
+| APM s5_product[31]→tap_s6_increment | 32/28 | 15/−4.078 |
+| DP a[18]→s1_small[0] | 26/18 | 15/−3.703 |
+| DP s1_small[2]→s2_sum[24] | 22/14 | 6/+2.701 |
+| DP s2_sum[27]→result[3] | 24/15 | 14/−3.285 |
+| SFU req_data[12]→ROM a_addr[8] | 38/24 | 14/−2.712 |
+| SFU field1 DRM读总线→s1_a_exp[8] | 11/11 | 10/−2.342 |
+| SFU s6_c[3]→s7_forward[55] | 38/23 | 13/+1.772 |
+| N48 mantissa[1]→truncated[3] | 33/28 | 27/−4.188 |
+估计按同类锥校准而非单一比例：普通LUT段L约0.5ns/级；进位段C按协调者确认0.05ns/级，原≥+1ns进位段保留；新增段用T=0.5L+0.05C，DRM另加约2.8ns。PDS优化别名不同，DRM行比较同一读端口的完整32bit锥。
+| 新流水段 | 新Yosys LUT4/LUT6参考 | 校准后每段上界估计（L普通级/C进位级） |
+|---|---|---|
+| DP 比较/移位加法/LZ粗移/低移RNE | 15/11；26/17；18/14；21/13 | 6L+10C / 7L+7C / 7L+3C / 7L+10C，均<4.545ns |
+| 积tap APM捕获/高移GRS/pack；FMA APM低移/高移加法 | 4/2；6/6；pack含carry；3/3；41/27 | tap 2L/4L/3L+10C；FMA 2L/7L+14C（4.2ns，最紧） |
+| FMA LZ/高位规格化/低移RNE | 20/19；10/7；21/13 | 7L+3C / 7L / 7L+10C；其余原拍普通段≤6L |
+| SFU 前端/DRM捕获/捕获后选择/两拍缩放 | ROM11/9；field1/1、result2/2；core首拍19/17；scale16/12、15/11 | 前端各≤7L；DRM1/2L；选择+LZ≤7L加carry；缩放各≤7L加carry |
+| N48 四段；49×33合并/重定位 | 24/15、17/13、8/5、25/16；宽carry单独计 | 1L+21C / 5L+3C / 5L / 3L+24C；合并/重定位≤2L+21C |
+
+| 单元（同工具旧→新，括号为增量） | LUT4 | LUT6 | 外部FF | LR/DRM/APM增量 |
+|---|---:|---:|---:|---|
+| FP32含返回队列 | 15661→13959(−1702) | 11541→10345(−1196) | 4402→5090(+688) | +80/0/0 |
+| SFU含scratch/返回 | 8899→8891(−8) | 6704→6792(+88) | 3625→4470(+845) | 0/0/0 |
+| 裸N48；其余setup单元增量0 | 853→986(+133) | 738→735(−3) | 120→316(+196) | 0/0/0 |
+FF为Yosys合并同值副本后的参考；APM内部/对齐FF不计但增量0。移位叶按7/8/16位复制，选择按16位复制；bank捕获448bit切DRM路径，预译码替换后置操作数捕获；DP16耗尽旧16信用已实测触发II1空拍，32信用用原16深宏双bank（协调者已批准，逻辑深度/总信用均16→32，无数据拍增加）。
+验证：setup smoke/full各3458向量通过；隔离候选FP32 full=200001标量+100000向量、SFU full=448892请求/3119259发射逐位通过（bank捕获重排后的full亦通过）；原IEEE特殊值仍仅G2-07开发核对。风格14文件/−Wall三顶层/PDS三类扫描0告警（含单always写入、generate层次引用、generate局部数组切片）；日志build/gpc/。
+复现：`python3 tools/gpu2/synth.py --lut 4 --out build/gpc/new4 edrv32_gpu2_fp32 edrv32_gpu2_sfu edrv32_gpu2_fp32_add edrv32_gpu2_fp32_scalar`；基线加`--revision 35ec01496`并改`--out build/gpc/base4`，LUT6改`--lut 6`和输出目录；setup用`measure_probes.py --lut 4 --out build/gpc/setup4`；路径用`timing_paths.py netlist --start 信号 --end 信号[bit]`；回归python3 tools/regress.py smoke或full --path verif/unit/gpu2_{fp32,sfu,setup} -j 1（SFU full用/full）。本机仅串行flock /tmp/edrv32-sim.lock，Verilator5.053。
+状态：协调者已批准SFU预取5/18/29/40/52/63/75/86及56/79/102/91拍作为G2-01候选，并批准DP双bank/32信用；G2-01/G2-07最终由协调者和用户定稿；风险为FMA E7余量估计仅0.345ns、SFU选择/LZ、queue bank读选择和复制保留，需原约束PDS重测；E7估计200/150MHz余量0.8/2.467ns，未取得新PDS实测。
+
+GP-C2续接已将获批的SFU预约与FP32双bank候选搬入正式路径，并统一README、tb延迟及先声明后使用风格；实现提交用 `git log -1 --format=%H -- rtl/gpu2/edrv32_gpu2_fp32.v` 定位。
+正式路径用Yosys0.70+219重新测得上表全部新资源数，日志/netlist在 `build/gpc/c2-new4/`、`c2-new6/`、`c2-setup4/`、`c2-setup6/`；前两项复现沿用上列synth命令并改输出目录，N48加 `--tops edrv32_gpu2_setup_normalize`。
+续接仿真用Verilator5.051、独立目录串行 `-j 1`；三组smoke/full按上列入口，SFU另跑 `python3 verif/unit/gpu2_sfu/run_prepare.py`（512输入）及 `run_scale.py`（2048向量）。
+正式路径回归日志回收至 `build/gpc/c2-regress/`，汇总 `build/gpc/c2-regress.log`；首次FP32冷编译超过smoke的60秒预算，完整构建结束后full/smoke通过，setup首次因同步目录缺少model依赖报错、补齐源目录后重跑，未修改timeout或屏蔽错误。
+本次风格14文件、三个FPGA探针顶层 `--lint-only --timing -Wall +define+SIM_MODE`、PDS单always写入/禁止generate层次引用/禁止generate局部数组切片均0告警，日志 `build/gpc/c2-style.log`、`c2-lint-remote.log`、`c2-pds.log`；未更改共享文件列表/FPGA文件或增加RTL文件。

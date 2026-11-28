@@ -82,7 +82,7 @@ module tb_vec;
             if (req_valid && req_ready) begin
                 if (op[1]) begin
                     expected_dp.push_back(next_dp);
-                    dp_due.push_back(cycle + 13);
+                    dp_due.push_back(cycle + 16);
                 end else begin
                     expected_vec.push_back(next_vec);
                     vec_due.push_back(cycle + 12);

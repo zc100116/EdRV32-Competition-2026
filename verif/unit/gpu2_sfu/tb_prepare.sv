@@ -28,18 +28,19 @@ module tb_prepare;
         .special_o(special),
         .special_data_o(special_data)
     );
-    reg [31:0] expected0 [0:2];
-    reg [31:0] expected3 [0:2];
-    reg [9:0] expected_scale [0:2];
-    reg [31:0] expected_special_data [0:2];
-    reg [4:0] expected_ctrl [0:2];
+    reg [31:0] expected0 [0:4];
+    reg [31:0] expected3 [0:4];
+    reg [9:0] expected_scale [0:4];
+    reg [31:0] expected_special_data [0:4];
+    reg [4:0] expected_ctrl [0:4];
     reg [31:0] next0;
     reg [31:0] next3;
     reg [9:0] next_scale;
     reg [31:0] next_special_data;
     reg [4:0] next_ctrl;
     reg [5:0] next_index;
-    reg [2:0] valid = 0;
+    reg [5:0] expected_index [0:4];
+    reg [4:0] valid = 0;
     integer count;
     integer stream;
     integer scan;
@@ -50,50 +51,50 @@ module tb_prepare;
         stream = $fopen(path, "r");
         if (stream == 0) $fatal(1, "cannot open vectors");
         scan = $fscanf(stream, "%d\n", count);
-        for (idx = 0; idx < count+3; idx++) begin
+        for (idx = 0; idx < count+5; idx++) begin
             @(negedge clk);
             if (idx < count) begin
                 scan = $fscanf(stream, "%h %h %h %h %h %h %h %h\n", op, x,
                                next_index, next0, next3, next_scale, next_ctrl,
                                next_special_data);
                 if (scan != 8) $fatal(1, "bad prepare vector %0d", idx);
-                #1;
-                if (!next_ctrl[0] && index !== next_index)
-                    $fatal(1, "index input %h op %d expected %d got %d", x, op,
-                           next_index, index);
             end
             @(posedge clk);
-            valid = {valid[1:0], idx < count};
-            for (int j = 2; j > 0; j--) begin
+            valid = {valid[3:0], idx < count};
+            for (int j = 4; j > 0; j--) begin
+                expected_index[j] = expected_index[j-1];
                 expected0[j] = expected0[j-1];
                 expected3[j] = expected3[j-1];
                 expected_scale[j] = expected_scale[j-1];
                 expected_special_data[j] = expected_special_data[j-1];
                 expected_ctrl[j] = expected_ctrl[j-1];
             end
+            expected_index[0] = next_index;
             expected0[0] = next0;
             expected3[0] = next3;
             expected_scale[0] = next_scale;
             expected_special_data[0] = next_special_data;
             expected_ctrl[0] = next_ctrl;
             #1;
-            if (valid[2]) begin
-                if (special !== expected_ctrl[2][0]) $fatal(1, "special mismatch %0d", idx-2);
+            if (valid[1] && !expected_ctrl[1][0] && index !== expected_index[1])
+                $fatal(1, "index row %0d expected %d got %d", idx-1, expected_index[1], index);
+            if (valid[4]) begin
+                if (special !== expected_ctrl[4][0]) $fatal(1, "special mismatch %0d", idx-4);
                 if (special) begin
-                    if (special_data !== expected_special_data[2])
-                        $fatal(1, "special result mismatch %0d", idx-2);
+                    if (special_data !== expected_special_data[4])
+                        $fatal(1, "special result mismatch %0d", idx-4);
                 end else begin
-                    if ((!expected_ctrl[2][4] && field0 !== expected0[2])
-                            || (!expected_ctrl[2][3] && field3 !== expected3[2])
-                            || scale !== expected_scale[2]
-                            || sign !== expected_ctrl[2][1] || exp_fma !== expected_ctrl[2][2])
+                    if ((!expected_ctrl[4][4] && field0 !== expected0[4])
+                            || (!expected_ctrl[4][3] && field3 !== expected3[4])
+                            || scale !== expected_scale[4]
+                            || sign !== expected_ctrl[4][1] || exp_fma !== expected_ctrl[4][2])
                         $fatal(1, "prepare %0d f0 %h/%h f3 %h/%h scale %h/%h ctrl %b/%b",
-                               idx-2, field0, expected0[2], field3, expected3[2], scale,
-                               expected_scale[2], {exp_fma, sign}, expected_ctrl[2][2:1]);
+                               idx-4, field0, expected0[4], field3, expected3[4], scale,
+                               expected_scale[4], {exp_fma, sign}, expected_ctrl[4][2:1]);
                 end
             end
         end
-        $display("PASS SFU three-edge front end %0d M5/M6 inputs", count);
+        $display("PASS SFU five-edge front end %0d M5/M6 inputs", count);
         $finish;
     end
 endmodule

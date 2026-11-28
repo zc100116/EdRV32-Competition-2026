@@ -21,7 +21,9 @@ def flat(words):
 with (out / 'vec.txt').open('w') as stream:
     stream.write(f'{count}\n')
     for idx in range(count):
-        op = idx % 4
+        # Preserve the original staged-cancellation examples, then test dense runs of each op.
+        op = (idx % 4 if idx < 4 or idx >= 256 else
+              3 if idx < 68 else 2 if idx < 132 else 0 if idx < 196 else 1)
         a, b, c = [[rng.getrandbits(32) for _ in range(4)] for _ in range(3)]
         if idx == 2:
             a = [0x3f800001, 0x3f800000, 0, 0x7fc00000]

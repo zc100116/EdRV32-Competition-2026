@@ -102,7 +102,7 @@ module tb;
             @(posedge clk);
             history = {history[4:0], valid};
             #1;
-            if (norm_valid !== history[1] || product_valid !== history[5] ||
+            if (norm_valid !== history[3] || product_valid !== history[5] ||
                 relocate_valid !== history[3]) $fatal(1, "FAIL valid latency cycle %0d", cycle);
             if (norm_valid) begin
                 if (norm_m_out !== rows_norm_m[norms] || norm_e_out !== rows_norm_e[norms])
@@ -126,7 +126,7 @@ module tb;
             @(negedge clk);
         end
         if (norms != count || relocations != count) $fatal(1, "FAIL missing results");
-        $display("PASS setup: %0d vectors, N48=2 product=6 relocation=4 clocks II1", count);
+        $display("PASS setup: %0d vectors, N48=4 product=6 relocation=4 clocks II1", count);
         $finish;
     end
 endmodule

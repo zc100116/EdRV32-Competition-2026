@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check three front-end stages against original M5/M6 request inputs."""
+"""Check five front-end stages against original M5/M6 request inputs."""
 from pathlib import Path
 import math
 import subprocess
