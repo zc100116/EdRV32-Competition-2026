@@ -1,0 +1,14 @@
+top: tb
+files: files.f
+defines:
+parameters:
+software:
+timeout: 180
+pass: PASS
+tier: smoke full
+simulator: verilator
+runner: python3 verif/unit/fpu_ref_check/run.py
+configuration: F S FLEN32; FD S/D FLEN64; independent of ISSUE_WIDTH
+vectors: build/fpu/smoke-f/; build/fpu/smoke-fd/
+seed: 0
+model: Berkeley SoftFloat/TestFloat Release3e; commits in third_party/*/README.md
