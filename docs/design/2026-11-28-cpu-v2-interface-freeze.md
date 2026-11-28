@@ -465,7 +465,7 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 
 **F2 纠正 trace（I01）。** frontend→top 增 `f2_redirect_valid`1、`f2_redirect_pc`32（被纠正字 PC）、`f2_redirect_target`32（新取指 PC）、`f2_redirect_cause`2（1 方向、3 非控制），为注册的 F2 纠正当拍；top 转成 `trace_redirect_*`，stage 固定 1，tag 填 0（未分配完成 tag）。只供 trace。
 
-**TAGE 三方写碰撞（I01，用户 2026-11-28 确认）。** 待写项已占用且同拍 MEM、EX 都训练时，优先级待写项 > MEM > EX，EX 的表写入丢弃，过滤历史照常推进；不停顿、不加待写项、不加 ready/信用端口。规格 5.4 已补。
+**TAGE 三方写碰撞（I01，用户 2026-11-28 确认）。** 待写项已占用且同拍 MEM、EX 都训练时，优先级待写项 > MEM > EX，EX 的表写入丢弃，过滤历史照常推进；不停顿、不加待写项、不加 ready/信用端口。fast gshare 与 BTB 同样适用，GHR 仍按全部解析条件分支推进。规格 5.4 已补。
 
 **I$ 响应按物理 bank 输出（I01/I05）。** 取代上表 `ic_resp_word{j}_*`：I$→fetch 改为 `ic_resp_bank{b}_way{k}_instr`32、`ic_resp_bank{b}_way_hit`2、`ic_resp_bank{b}_error`1，b=0 偶字 bank、b=1 奇字 bank。双发射命中直接给物理 RAM 输出，miss 返回按 bank 存放；fetch 按物理 bank 查 LVT（选路前并行），再选路，最后按 PC[2] 排成 PC/PC+4，候选 bit4 为 bank 选择（CPU5.2，沿探针）。跨行时奇 bank 来自行 A、偶 bank 来自行 B。单发射 64 位取指同样按 bank 输出（低字 bank0、高字 bank1）。
 
