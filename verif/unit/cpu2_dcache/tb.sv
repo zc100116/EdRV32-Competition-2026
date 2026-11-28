@@ -465,7 +465,7 @@ module tb # (parameter FORMAT = 0);
             step();
             for (int i = 0; i < 16; i++) begin
                 if (!dc_req_ready_o) $fatal(1, "warm ready");
-                expected_addr[push % 128] = 32'h10000004;
+                expected_addr[push % 128] = 32'h10000000 + 32'((i % 8)*4);
                 expected_tag[push % 128] = T'(i);
                 expected_beat[push % 128] = 0;
                 expected_store[push % 128] = 0;
@@ -473,7 +473,7 @@ module tb # (parameter FORMAT = 0);
                 expected_error[push % 128] = 0;
                 push++;
                 dc_req_valid_i = 1;
-                dc_req_addr_i = 32'h10000004;
+                dc_req_addr_i = 32'h10000000 + 32'((i % 8)*4);
                 dc_req_store_i = 0;
                 dc_req_tag_i = T'(i);
                 tick();
@@ -483,6 +483,31 @@ module tb # (parameter FORMAT = 0);
             dc_req_valid_i = 0;
             drain();
             if (ar_count != before_ar) $fatal(1, "warm cache miss");
+        end
+        // Reserve both contexts on adjacent edges before the first miss can block ready.
+        // Check both a retained hit and a second miss behind that miss.
+        for (int pair = 0; pair < 2; pair++) begin
+            step();
+            for (int i = 0; i < 2; i++) begin
+                if (!dc_req_ready_o) $fatal(1, "miss lookahead admission");
+                dc_req_addr_i = pair == 0 ?
+                    (i == 0 ? 32'h80010000 : 32'h10000000) :
+                    (i == 0 ? 32'h80010020 : 32'h80010040);
+                dc_req_valid_i = 1;
+                dc_req_store_i = 0;
+                dc_req_tag_i = T'(i);
+                expected_addr[push % 128] = dc_req_addr_i;
+                expected_tag[push % 128] = T'(i);
+                expected_beat[push % 128] = 0;
+                expected_store[push % 128] = 0;
+                expected_device[push % 128] = 0;
+                expected_error[push % 128] = 0;
+                push++;
+                tick();
+                step();
+            end
+            dc_req_valid_i = 0;
+            drain();
         end
         // All byte masks merge independently and survive full clean.
         for (int mask = 1; mask < 16; mask++) begin
@@ -617,6 +642,40 @@ module tb # (parameter FORMAT = 0);
         step();
         dc_req_valid_i = 0;
         dc_req_early_i = 0;
+        drain();
+        // Successful early promotion and the following query share the port each cycle.
+        step();
+        dc_early_valid_i = 1;
+        dc_early_addr_i = 32'h10000020;
+        dc_early_tag_i = 0;
+        tick();
+        step();
+        for (int i = 0; i < 8; i++) begin
+            if (!dc_early_resp_valid_o || dc_early_resp_tag_o != T'(i) ||
+                dc_early_hit_o == 0 || !dc_req_ready_o)
+                $fatal(1, "consecutive early query n=%0d", i);
+            dc_req_valid_i = 1;
+            dc_req_early_i = 1;
+            dc_req_tag_i = T'(i);
+            dc_req_addr_i = 32'h10000020 + 32'(i*4);
+            dc_early_valid_i = i < 7;
+            dc_early_tag_i = T'(i+1);
+            dc_early_addr_i = 32'h10000020 + 32'((i+1)*4);
+            expected_addr[push % 128] = dc_req_addr_i;
+            expected_tag[push % 128] = T'(i);
+            expected_beat[push % 128] = 0;
+            expected_store[push % 128] = 0;
+            expected_device[push % 128] = 0;
+            expected_error[push % 128] = 0;
+            push++;
+            tick();
+            if (!dc_resp_valid_o || dc_resp_tag_o != T'(i))
+                $fatal(1, "consecutive early promotion response n=%0d", i);
+            step();
+        end
+        dc_req_valid_i = 0;
+        dc_req_early_i = 0;
+        dc_early_valid_i = 0;
         drain();
         // Both reserved contexts retain hit responses during backpressure.
         dc_resp_ready_i = 0;

@@ -134,6 +134,36 @@ module edrv32_cpu2_lsu #(
     reg [T-1:0] early_tag_r;
     reg early_hit_r;
     reg [31:0] early_data_r;
+    // One registered lookahead entry absorbs a response/miss or completion stall.
+    // Ready depends only on these local capacity/state registers.
+    reg queue_valid_r;
+    reg queue_sent_r;
+    reg queue_started_r;
+    reg queue_misaligned_r;
+    reg [T-1:0] queue_tag_r;
+    reg [31:0] queue_addr_r;
+    reg [B-1:0] queue_data_r;
+    reg [2:0] queue_funct3_r;
+    reg queue_store_r;
+    reg queue_fp_r;
+    reg queue_double_r;
+    reg queue_early_r;
+    wire overlap_w;
+    wire input_fire_w;
+    wire input_cancel_w;
+    wire queue_cancel_w;
+    wire active_end_w;
+    wire queue_promote_w;
+    wire input_active_w;
+    wire input_queued_w;
+    wire queue_request_w;
+    wire front_request_w;
+    wire front_misaligned_w;
+    wire front_started_w;
+    wire front_double_w;
+    wire front_fp_w;
+    wire [1:0] front_size_w;
+    wire front_accept_w;
     wire [T-1:0] age_w;
     wire [T-1:0] cancel_age_w;
     wire cancel_w;
@@ -151,6 +181,7 @@ module edrv32_cpu2_lsu #(
     wire [7:0] trace_mask_w;
     wire [3:0] req_mask_w;
     wire early_block_w;
+    wire early_reuse_w;
     wire early_associate_w;
     wire ordinary_valid_w;
     wire [T-1:0] early_result_tag_w;
@@ -245,16 +276,47 @@ module edrv32_cpu2_lsu #(
     assign trace_bits_w = store_r ? store_bits_w :
         double_r ? {complete_high_w, complete_low_w} : {32'd0, complete_low_w};
     assign lsu_complete_mem_data_o = trace_bits_w & trace_bytes_w;
-    assign early_block_w = state_r == S_REQUEST && request_started_r;
+    assign overlap_w = state_r == S_RESPONSE && !store_r && !double_r && !device_r;
+    assign lsu_req_ready_o = state_r == S_IDLE || (overlap_w && !queue_valid_r);
+    assign input_fire_w = lsu_req_valid_i && lsu_req_ready_o;
+    assign input_cancel_w = cancel_valid_i &&
+        ((lsu_req_tag_i - age_head_i) >= cancel_age_w);
+    assign queue_cancel_w = cancel_valid_i &&
+        ((queue_tag_r - age_head_i) >= cancel_age_w);
+    assign active_end_w =
+        (response_complete_w && lsu_complete_ready_i &&
+        (dc_resp_error_i || !(store_r || complete_device_w || double_r))) ||
+        (state_r == S_COMPLETE && lsu_complete_ready_i &&
+        (exception_r || !(store_r || device_r || double_r))) ||
+        (state_r == S_DONE && commit_lsu_done_ready_i) ||
+        (done_fallthrough_w && commit_lsu_done_ready_i);
+    assign queue_promote_w = active_end_w && queue_valid_r && !queue_cancel_w && !cancel_w;
+    assign input_active_w = input_fire_w && (state_r == S_IDLE || active_end_w) &&
+        !input_cancel_w && !(cancel_w && state_r != S_IDLE);
+    assign input_queued_w = input_fire_w && !input_active_w && !input_cancel_w && !cancel_w;
+    assign queue_request_w = queue_valid_r && !queue_sent_r &&
+        (overlap_w || queue_started_r);
+    assign front_request_w = queue_request_w || input_fire_w;
+    assign front_misaligned_w = queue_request_w ? queue_misaligned_r : misaligned_w;
+    assign front_started_w = queue_request_w && queue_started_r;
+    assign front_double_w = queue_request_w ? queue_double_r : req_double_w;
+    assign front_fp_w = queue_request_w ? queue_fp_r : req_fp_w;
+    assign front_size_w = queue_request_w ? queue_funct3_r[1:0] : lsu_req_instr_i[13:12];
+    assign front_accept_w = state_r != S_REQUEST && dc_req_valid_o && dc_req_ready_i;
+    // A successful registered early result uses no new RAM read (freeze I05b).
+    assign early_reuse_w = dc_early_resp_valid_i && dc_req_early_o &&
+        dc_req_tag_o == dc_early_resp_tag_i && |dc_early_hit_i;
+    assign early_block_w = ((state_r == S_REQUEST && request_started_r) ||
+        (queue_request_w && queue_started_r)) && !early_reuse_w;
     assign ordinary_valid_w = state_r == S_REQUEST ?
-        (request_started_r || !early_req_valid_i) : state_r == S_IDLE &&
-        lsu_req_valid_i && !misaligned_w && !early_req_valid_i;
+        (request_started_r || !early_req_valid_i || early_reuse_w) : front_request_w &&
+        !front_misaligned_w && (front_started_w || !early_req_valid_i || early_reuse_w);
     assign early_associate_w = dc_req_valid_o && dc_req_ready_i && dc_req_early_o &&
         dc_req_tag_o == dc_early_resp_tag_i;
     assign early_result_tag_w = early_blocked_r ? early_blocked_tag_r : dc_early_resp_tag_i;
     assign early_funct3_w = lsu_req_valid_i && lsu_req_tag_i == dc_early_resp_tag_i ?
-        lsu_req_instr_i[14:12] : funct3_r;
-    assign lsu_req_ready_o = state_r == S_IDLE;
+        lsu_req_instr_i[14:12] :
+        queue_valid_r && queue_tag_r == dc_early_resp_tag_i ? queue_funct3_r : funct3_r;
     assign lsu_complete_valid_o = state_r == S_COMPLETE || response_complete_w;
     assign lsu_complete_tag_o = tag_r;
     assign lsu_complete_flags_o = 5'd0;
@@ -273,16 +335,23 @@ module edrv32_cpu2_lsu #(
     assign commit_lsu_done_fault_addr_o = done_fallthrough_w && dc_done_error_i ?
         beat_addr_w : fault_addr_r;
     assign dc_req_valid_o = ordinary_valid_w;
-    assign dc_req_tag_o = state_r == S_IDLE ? lsu_req_tag_i : tag_r;
-    assign dc_req_beat_o = state_r == S_IDLE ? 1'b0 : beat_r;
-    assign dc_req_addr_o = state_r == S_IDLE ? lsu_req_addr_i : beat_addr_w;
-    assign dc_req_store_o = state_r == S_IDLE ? req_store_w : store_r;
-    assign dc_req_size_o = state_r == S_IDLE ?
-        (req_double_w || req_fp_w ? 2'd2 : lsu_req_instr_i[13:12]) :
-        (double_r || fp_r ? 2'd2 : funct3_r[1:0]);
-    assign dc_req_data_o = state_r == S_IDLE ? lsu_req_store_data_i[31:0] : selected_store_w;
-    assign dc_req_mask_o = state_r == S_IDLE ? req_mask_w : mask_w;
-    assign dc_req_early_o = state_r == S_IDLE ? lsu_req_early_i : early_r && !beat_r;
+    assign dc_req_tag_o = state_r == S_REQUEST ? tag_r :
+        queue_request_w ? queue_tag_r : lsu_req_tag_i;
+    assign dc_req_beat_o = state_r == S_REQUEST ? beat_r : 1'b0;
+    assign dc_req_addr_o = state_r == S_REQUEST ? beat_addr_w :
+        queue_request_w ? queue_addr_r : lsu_req_addr_i;
+    assign dc_req_store_o = state_r == S_REQUEST ? store_r :
+        queue_request_w ? queue_store_r : req_store_w;
+    assign dc_req_size_o = state_r == S_REQUEST ?
+        (double_r || fp_r ? 2'd2 : funct3_r[1:0]) :
+        (front_double_w || front_fp_w ? 2'd2 : front_size_w);
+    assign dc_req_data_o = state_r == S_REQUEST ? selected_store_w :
+        queue_request_w ? queue_data_r[31:0] : lsu_req_store_data_i[31:0];
+    assign dc_req_mask_o = state_r == S_REQUEST ? mask_w :
+        queue_request_w ? (queue_double_r || queue_fp_r || queue_funct3_r[1] ? 4'hf :
+        queue_funct3_r[0] ? 4'h3 : 4'h1) : req_mask_w;
+    assign dc_req_early_o = state_r == S_REQUEST ? early_r && !beat_r :
+        queue_request_w ? queue_early_r : lsu_req_early_i;
     assign dc_resp_ready_o = state_r == S_RESPONSE;
     // I06P: the registered authorization state can forward its granted first beat.
     assign dc_commit_valid_o = state_r == S_COMMIT ||
@@ -312,6 +381,9 @@ module edrv32_cpu2_lsu #(
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             state_r <= S_IDLE;
+            queue_valid_r <= 1'b0;
+            queue_sent_r <= 1'b0;
+            queue_started_r <= 1'b0;
             request_started_r <= 1'b0;
             early_blocked_r <= 1'b0;
             beat_r <= 1'b0;
@@ -320,6 +392,17 @@ module edrv32_cpu2_lsu #(
             done_error_r <= 1'b0;
             early_valid_r <= 1'b0;
         end else begin
+            if (queue_cancel_w) queue_valid_r <= 1'b0;
+            if (queue_request_w && dc_req_valid_o) begin
+                queue_started_r <= !dc_req_ready_i;
+                if (dc_req_ready_i) queue_sent_r <= 1'b1;
+            end
+            if (input_queued_w) begin
+                queue_valid_r <= 1'b1;
+                queue_sent_r <= front_accept_w;
+                queue_started_r <= dc_req_valid_o && !dc_req_ready_i;
+            end
+            if (queue_promote_w) queue_valid_r <= 1'b0;
             early_valid_r <= dc_early_resp_valid_i || early_blocked_r;
             early_blocked_r <= early_req_valid_i && early_block_w &&
                 !(cancel_valid_i && ((early_req_tag_i - age_head_i) >= cancel_age_w));
@@ -330,19 +413,10 @@ module edrv32_cpu2_lsu #(
                 (state_r == S_IDLE && lsu_req_valid_i && cancel_valid_i &&
                 ((lsu_req_tag_i - age_head_i) >= cancel_age_w))) begin
                 state_r <= S_IDLE;
+                queue_valid_r <= 1'b0;
             end else begin
                 case (state_r)
-                    S_IDLE: begin
-                        if (lsu_req_valid_i) begin
-                            beat_r <= 1'b0;
-                            device_r <= 1'b0;
-                            exception_r <= misaligned_w;
-                            done_error_r <= 1'b0;
-                            request_started_r <= dc_req_valid_o && !dc_req_ready_i;
-                            state_r <= misaligned_w ? S_COMPLETE :
-                                dc_req_valid_o && dc_req_ready_i ? S_RESPONSE : S_REQUEST;
-                        end
-                    end
+                    S_IDLE: begin end
                     S_REQUEST: begin
                         if (dc_req_valid_o) begin
                             request_started_r <= !dc_req_ready_i;
@@ -399,11 +473,50 @@ module edrv32_cpu2_lsu #(
                     S_DONE: if (commit_lsu_done_ready_i) state_r <= S_IDLE;
                     default: begin end
                 endcase
+                // Replace an outgoing response on its capture edge; no ready feedback.
+                begin
+                    if (queue_promote_w || input_active_w) begin
+                        beat_r <= 1'b0;
+                        device_r <= 1'b0;
+                        exception_r <= queue_promote_w ? queue_misaligned_r : misaligned_w;
+                        done_error_r <= 1'b0;
+                        request_started_r <= queue_promote_w ?
+                            queue_started_r && !front_accept_w :
+                            dc_req_valid_o && !dc_req_ready_i;
+                        if (queue_promote_w)
+                            state_r <= queue_misaligned_r ? S_COMPLETE :
+                                queue_sent_r || front_accept_w ? S_RESPONSE : S_REQUEST;
+                        else
+                            state_r <= misaligned_w ? S_COMPLETE :
+                                front_accept_w ? S_RESPONSE : S_REQUEST;
+                    end
+                end
             end
         end
     end
     always @(posedge clk_i) begin
-        if (state_r == S_IDLE && lsu_req_valid_i) begin
+        if (input_queued_w) begin
+            queue_tag_r <= lsu_req_tag_i;
+            queue_addr_r <= lsu_req_addr_i;
+            queue_data_r <= lsu_req_store_data_i;
+            queue_funct3_r <= lsu_req_instr_i[14:12];
+            queue_store_r <= req_store_w;
+            queue_fp_r <= req_fp_w;
+            queue_double_r <= req_double_w;
+            queue_early_r <= lsu_req_early_i;
+            queue_misaligned_r <= misaligned_w;
+        end
+        if (queue_promote_w) begin
+            tag_r <= queue_tag_r;
+            addr_r <= queue_addr_r;
+            store_data_r <= queue_data_r;
+            funct3_r <= queue_funct3_r;
+            store_r <= queue_store_r;
+            fp_r <= queue_fp_r;
+            double_r <= queue_double_r;
+            early_r <= queue_early_r;
+            fault_addr_r <= queue_addr_r;
+        end else if (input_active_w) begin
             tag_r <= lsu_req_tag_i;
             addr_r <= lsu_req_addr_i;
             store_data_r <= lsu_req_store_data_i;
@@ -419,7 +532,7 @@ module edrv32_cpu2_lsu #(
                 high_r <= response_data_w;
             else
                 low_r <= response_data_w;
-            if (dc_resp_error_i)
+            if (dc_resp_error_i && !(queue_promote_w || input_active_w))
                 fault_addr_r <= beat_addr_w;
         end
         if (state_r == S_BEAT_DONE && dc_done_valid_i) begin
@@ -427,7 +540,7 @@ module edrv32_cpu2_lsu #(
                 high_r <= dc_done_data_i;
             else
                 low_r <= dc_done_data_i;
-            if (dc_done_error_i)
+            if (dc_done_error_i && !(queue_promote_w || input_active_w))
                 fault_addr_r <= beat_addr_w;
         end
         early_blocked_tag_r <= early_req_tag_i;

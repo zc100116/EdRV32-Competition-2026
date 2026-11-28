@@ -350,6 +350,116 @@ module tb # (parameter FORMAT = 2);
         step();
         commit_lsu_done_ready_i = 0;
     endtask
+    // External one-cycle D$ and early responders; expected values depend on request addresses.
+    task automatic early_stream(input bit middle_miss);
+        int sent;
+        int received;
+        int queries;
+        int query_limit;
+        int elapsed;
+        int early_hits;
+        reg [31:0] query_addr;
+        reg [31:0] next_query_addr;
+        bit response_pending;
+        bit query_pending;
+        bit next_response;
+        bit next_query;
+        bit input_accepted;
+        reg [T-1:0] response_tag;
+        reg [T-1:0] query_tag;
+        reg [T-1:0] next_response_tag;
+        reg [T-1:0] next_query_tag;
+        reg [31:0] response_addr;
+        reg [31:0] next_response_addr;
+        sent = 0;
+        received = 0;
+        queries = 1;
+        // With four tags, do not issue query 7 while the failed query 3 is still live.
+        query_limit = middle_miss && FORMAT == 0 ? 7 : 8;
+        elapsed = 0;
+        early_hits = 0;
+        query_addr = 32'h10000300;
+        response_pending = 0;
+        query_pending = 1;
+        query_tag = 0;
+        response_tag = 0;
+        response_addr = 0;
+        step();
+        early_req_valid_i = 1;
+        early_req_tag_i = 0;
+        early_req_addr_i = 32'h10000300;
+        tick();
+        step();
+        lsu_complete_ready_i = 1;
+        while (received < 8) begin
+            lsu_req_valid_i = sent < 8;
+            lsu_req_instr_i = 32'h2003;
+            lsu_req_addr_i = 32'h10000300 + 32'(sent*4);
+            lsu_req_tag_i = T'(sent);
+            lsu_req_early_i = 1;
+            early_req_valid_i = queries < query_limit;
+            early_req_tag_i = T'(queries);
+            early_req_addr_i = 32'h10000300 + 32'(queries*4);
+            dc_early_resp_valid_i = query_pending;
+            dc_early_resp_tag_i = query_tag;
+            dc_early_hit_i = middle_miss && query_addr == 32'h1000030c ? 0 : 1;
+            dc_early_way0_data_i = query_addr;
+            dc_resp_valid_i = response_pending;
+            dc_resp_tag_i = response_tag;
+            dc_resp_way_hit_i = 1;
+            dc_resp_way0_data_i = response_addr;
+            #1;
+            input_accepted = lsu_req_valid_i && lsu_req_ready_o;
+            next_response = dc_req_valid_o && dc_req_ready_i;
+            next_response_tag = dc_req_tag_o;
+            next_response_addr = dc_req_addr_o;
+            next_query = dc_early_valid_o;
+            next_query_tag = dc_early_tag_o;
+            next_query_addr = dc_early_addr_o;
+            if (early_resp_valid_o && early_resp_hit_o) begin
+                if (!response_pending || early_resp_tag_o != response_tag ||
+                    early_resp_data_o != response_addr)
+                    $fatal(1, "early association sent=%0d got=%0d tag=%0d/%0d data=%h/%h",
+                        sent, received, early_resp_tag_o, response_tag,
+                        early_resp_data_o, response_addr);
+                early_hits++;
+            end
+            if (!middle_miss && sent < 8 && (!input_accepted || !next_response))
+                $fatal(1, "successful early stream bubble n=%0d", sent);
+            if (response_pending && !dc_resp_ready_o)
+                $fatal(1, "one-cycle ordinary responder unexpectedly blocked");
+            if (lsu_complete_valid_o) begin
+                if (lsu_complete_tag_o != T'(received) || lsu_complete_exception_o ||
+                    lsu_complete_data_o != B'(32'h10000300 + 32'(received*4)))
+                    $fatal(1, "early stream association n=%0d", received);
+                received++;
+            end
+            tick();
+            step();
+            if (input_accepted) sent++;
+            if (queries < query_limit) queries++;
+            response_pending = next_response;
+            response_tag = next_response_tag;
+            response_addr = next_response_addr;
+            query_pending = next_query;
+            query_tag = next_query_tag;
+            query_addr = next_query_addr;
+            elapsed++;
+            if (elapsed > 24) $fatal(1, "early stream stalled");
+        end
+        if (!middle_miss && (elapsed != 9 || early_hits != 8))
+            $fatal(1, "early stream interval/hits");
+        if (middle_miss && (early_hits == 0 || early_hits >= 8))
+            $fatal(1, "early miss was not exercised");
+        lsu_req_valid_i = 0;
+        lsu_req_early_i = 0;
+        early_req_valid_i = 0;
+        dc_early_resp_valid_i = 0;
+        dc_early_hit_i = 0;
+        dc_resp_valid_i = 0;
+        lsu_complete_ready_i = 0;
+        served = requests;
+    endtask
     initial begin
         dc_req_ready_i = 1;
         dc_commit_ready_i = 1;
@@ -376,6 +486,158 @@ module tb # (parameter FORMAT = 2);
             if (!lsu_req_ready_o || lsu_complete_valid_o)
                 $fatal(1, "fall-through result was delivered twice");
         end
+        // Consecutive hit responses overlap consecutive request accepts (one per edge).
+        step();
+        lsu_complete_ready_i = 1;
+        for (int n = 0; n < 9; n++) begin
+            lsu_req_valid_i = n < 8;
+            lsu_req_instr_i = 32'h2003;
+            lsu_req_tag_i = T'(n);
+            lsu_req_addr_i = 32'h10000100 + 32'(n*4);
+            dc_resp_valid_i = n > 0;
+            dc_resp_tag_i = T'(n-1);
+            dc_resp_way_hit_i = 2'b01;
+            dc_resp_way0_data_i = 32'h12340000 + 32'(n-1);
+            #1;
+            if (n < 8 && (!lsu_req_ready_o || !dc_req_valid_o ||
+                dc_req_tag_o != T'(n) || dc_req_addr_o != lsu_req_addr_i))
+                $fatal(1, "load stream admission n=%0d", n);
+            if (n > 0 && (!lsu_complete_valid_o || lsu_complete_tag_o != T'(n-1) ||
+                lsu_complete_data_o != B'(32'h12340000 + 32'(n-1)) ||
+                lsu_complete_mem_addr_o != 32'h10000100 + 32'((n-1)*4)))
+                $fatal(1, "load stream response n=%0d", n);
+            tick();
+            step();
+        end
+        dc_resp_valid_i = 0;
+        lsu_complete_ready_i = 0;
+        served = requests;
+        // A miss can keep the head outstanding while the second slot accepts a store.
+        issue(32'h2003, 32'h10000200, 0, T'(0));
+        issue(32'h2023, 32'h10000204, 64'h89abcdef, T'(1));
+        repeat (3) begin
+            tick();
+            if (lsu_req_ready_o) $fatal(1, "lookahead capacity exceeded");
+        end
+        step();
+        dc_resp_valid_i = 1;
+        dc_resp_way_hit_i = 1;
+        dc_resp_way0_data_i = 32'h55667788;
+        lsu_complete_ready_i = 1;
+        #1;
+        if (!lsu_complete_valid_o || lsu_complete_tag_o != 0 ||
+            lsu_complete_data_o != B'(32'h55667788)) $fatal(1, "miss head association");
+        tick();
+        step();
+        dc_resp_valid_i = 0;
+        lsu_complete_ready_i = 0;
+        served++;
+        prep(0, 32'h10000204, 0, 0, 0);
+        complete(64'h89abcdef, 0, 0, 0, 0);
+        authorize();
+        beat_done(0, 32'h89abcdef, 0, 0);
+        done(0, 0, 0);
+        // Two accepted loads survive completion backpressure without merging metadata.
+        issue(32'h2003, 32'h10000210, 0, T'(0));
+        issue(32'h2003, 32'h10000214, 0, T'(1));
+        dc_resp_valid_i = 1;
+        dc_resp_tag_i = 0;
+        dc_resp_way_hit_i = 2'b01;
+        dc_resp_way0_data_i = 32'h11223344;
+        tick();
+        step();
+        dc_resp_way0_data_i = 32'h55667788;
+        dc_resp_tag_i = T'(1);
+        repeat (3) begin
+            #1;
+            if (dc_resp_ready_o || !lsu_complete_valid_o || lsu_complete_tag_o != 0 ||
+                lsu_complete_data_o != B'(32'h11223344))
+                $fatal(1, "lookahead overwrote backpressured completion");
+            tick();
+            step();
+        end
+        lsu_complete_ready_i = 1;
+        tick();
+        step();
+        #1;
+        if (!lsu_complete_valid_o || lsu_complete_tag_o != T'(1) ||
+            lsu_complete_data_o != B'(32'h55667788))
+            $fatal(1, "lookahead response after backpressure");
+        tick();
+        step();
+        dc_resp_valid_i = 0;
+        lsu_complete_ready_i = 0;
+        served = requests;
+        // An unsent lookahead request retains the ordinary port reservation against early.
+        issue(32'h2003, 32'h10000218, 0, T'(0));
+        dc_req_ready_i = 0;
+        issue(32'h2003, 32'h1000021c, 0, T'(1));
+        early_req_valid_i = 1;
+        early_req_tag_i = T'(2);
+        #1;
+        if (!dc_req_valid_o || dc_req_addr_o != 32'h1000021c || dc_early_valid_o)
+            $fatal(1, "queued held request lost port reservation");
+        tick();
+        step();
+        early_req_valid_i = 0;
+        dc_resp_valid_i = 1;
+        dc_resp_way0_data_i = 32'h12345678;
+        tick();
+        step();
+        served++;
+        dc_resp_valid_i = 0;
+        repeat (2) begin
+            #1;
+            if (!dc_req_valid_o || dc_req_addr_o != 32'h1000021c)
+                $fatal(1, "queued request dropped while head completion stalled");
+            tick();
+            step();
+        end
+        lsu_complete_ready_i = 1;
+        tick();
+        step();
+        lsu_complete_ready_i = 0;
+        dc_req_ready_i = 1;
+        prep(0, 32'h1000021c, 32'habcdef01, 0, 0);
+        complete(64'habcdef01, 0, 0, 0, 0);
+        // Cancel only the younger queued response; the stalled older load survives.
+        issue(32'h2003, 32'h10000208, 0, T'(0));
+        issue(32'h2003, 32'h1000020c, 0, T'(1));
+        cancel_valid_i = 1;
+        cancel_tag_i = T'(1);
+        tick();
+        step();
+        cancel_valid_i = 0;
+        lsu_req_tag_i = 0;
+        lsu_req_addr_i = 32'h10000208;
+        prep(0, 32'h10000208, 32'h11223344, 0, 0);
+        complete(64'h11223344, 0, 0, 0, 0);
+        served = requests;
+        repeat (2) tick();
+        if (!lsu_req_ready_o || lsu_complete_valid_o)
+            $fatal(1, "canceled lookahead remained live");
+        // A queued FD load retains its low/high beat association and head authorization.
+        if (FORMAT == 2) begin
+            issue(32'h2003, 32'h10000400, 0, T'(0));
+            issue(32'h3007, 32'h10000408, 0, T'(1));
+            dc_resp_valid_i = 1;
+            dc_resp_tag_i = 0;
+            dc_resp_way_hit_i = 1;
+            dc_resp_way0_data_i = 32'h12345678;
+            lsu_complete_ready_i = 1;
+            tick();
+            step();
+            served++;
+            dc_resp_valid_i = 0;
+            lsu_complete_ready_i = 0;
+            prep(0, 32'h10000408, 32'h89abcdef, 0, 0);
+            prep(1, 32'h1000040c, 32'h01234567, 0, 0);
+            complete(64'h0123456789abcdef, 0, 0, 0, 0);
+            authorize();
+            done(64'h0123456789abcdef, 0, 0);
+        end
+        early_stream(0);
+        early_stream(1);
         // A downstream request remains stable until D$ accepts it.
         dc_req_ready_i = 0;
         issue(32'h2003, 32'h10000004, 0, T'(1));
