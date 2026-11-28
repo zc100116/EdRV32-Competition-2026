@@ -38,6 +38,27 @@ E8预计算指数候选由19降至17级。仍明显超过估算，协调者 ask 
 `tools/check/verilog_style.py` 与 Verilator `--lint-only -Wall` 零告警；参考模型仅标准库 Fraction。
 影响/状态：探针与正式数据通路源码已实现；150 MHz未通过物理验证，不冻结F03、不加拍、不用multicycle。
 
+### 第 2 版（165 MHz 目标）
+
+保持8拍、II=1和2颗APM，独立约束改为6.061 ns；基线 `0a2199fc8`，新版为本小节所在提交。
+| 拍 | 工作变化 | Yosys XC7代理级数：前→后 |
+|---|---|---:|
+| E1 | 分类、输入LZ和特殊值保持原结构 | 10→9 |
+| E2 | 规格化和乘积指数保持原结构 | 9→9 |
+| E3 | 对齐量、下溢移位界限保持原结构 | 6→6 |
+| E4 | 对齐之外，提前算4组指数基值、floor比较阈值及舍入模式解码 | 4→4 |
+| E5 | 对齐/sticky保持；传递提前算好的指数和舍入控制 | 4→4 |
+| E6 | 加减/LZA保持；幅值选择按20位段复制保留寄存器 | 10→9 |
+| E7 | 单热粗移替代串联移位；低44位压成sticky；注册细移单热码、指数/溢出候选 | 12→9 |
+| E8 | 16种固定细移×3种校正并行；常量加1与舍入判定并行，进位预测选指数/flags | 17→10 |
+细移最多左移7位、校正再左移1位，压缩后的sticky最高到bit51，不改变guard(bit52)及保留位。
+复现：`python3 verif/unit/cpu2_fpu_fma32/levels.py`；Yosys 0.70+219，计数方法与首版相同。
+原始数据仍在 `build/cpu2_fpu_fma32/levels/`；映射全局变化会影响未改结构的级数，不作PDS时序结论。
+仿真主机不可达，经协调者允许改本机Verilator 5.020；smoke 131,120、full 1,121,120逐位全PASS。
+命令：`python3 verif/unit/cpu2_fpu_fma32/run.py smoke`；full复现：`python3 verif/unit/cpu2_fpu_fma32/vectors.py build/cpu2_fpu_fma32/full.txt --random 1000000` 后运行 `build/cpu2_fpu_fma32/obj/sim +VECTORS=build/cpu2_fpu_fma32/full.txt`。
+输入先读到临时变量再显式赋给DUT，修正5.020对fscanf直接驱动组合输入的调度；风格/lint零告警。
+状态：等待PDS按165 MHz实测WNS≥0，未把代理级数换算为频率或宣称物理达标。
+
 ## 整数探针
 
 背景/约束：P01/P03/P05/P07 按 cpu-v2-spec v0.1 5.2/5.4/5.5/7、C2-I4 实现满配结构；150 MHz 尚待 PDS。
@@ -88,3 +109,24 @@ lint：`(cd rtl/filelists && ../../tools/check/lint.sh -DSIM_MODE --top-module e
 PDS 2022.2-SP6.1 在 rtl-infer/DFF-inference 崩溃：generate 展开的多个 always 写同一模块级 reg 数组。
 整数探针改为每次迭代独占局部 reg，由同作用域 assign 接到模块级扁平 wire，读取使用常量位段。
 RF LVT 同样拆为局部位寄存器；不跨 generate 层次引用、不切片局部数组，保持原有行为与拍边界。
+
+### 第 2 版（165 MHz 目标）
+
+F2 两路分别提取 rs、并行查询 LVT/WB，再选路；保留并行结果，避免综合重新串接 tag→LVT。
+WB 在存活项移动前修正，新项在入队前并行修正；每区六项+一个 bank 两路，共16个源操作数。
+IB 增加同沿维护的13位独热信用，移除插入位置的减法/加法比较；不加拍，容量/吞吐/对外时序不变。
+TAGE 训练索引相等关系随已有 EX/MEM/待写项同沿注册，F1 对各旁路源并行比较 index/tag 后合并。
+顶层保留各消费区域的激励捕获寄存器，禁止共享 stimulus 位跨区域合并；约束改为6.061ns。
+
+| 路径（ABC LUT6参考） | 基线 → 第2版 |
+|---|---:|
+| I$读出→IB候选 | 15 → 9 |
+| TAGE RAM→F2 provider/alternate | 13 → 12 |
+| 待写任意寄存器/仅index→F1命中 | 22/22 → 18/6 |
+| MEM index→F1命中/训练捕获/RAM写端口 | 22/11/19 → 15/6/15 |
+| RF读/ID→AGU/DRM→操作数 | 5/17/4 → 5/17/4 |
+基线 `0a2199fc8`；新版为本小节同提交；命令 `python3 verif/unit/cpu2_tage/levels.py`（Yosys 0.70+219）。
+原始输出 `build/cpu2_int/levels/{synth.log,mapped.json,levels.txt}`；同步RAM/FF切断，不代表PDS级数或频率。
+探针相关激励可让MEM index与tag寄存器合并别名；最长旁路控制/训练标签链仍需PDS验证165MHz，未宣称达标。
+协调者同意仿真主机断连后改本机：四个smoke均PASS，命令 `for m in rf fetch tage id_agu; do python3 tools/regress.py smoke --path verif/unit/cpu2_$m -j 1; done`。
+风格检查与Verilator 5.020 `--lint-only -Wall`零告警；未引入generate层次引用、局部数组切片或多always分写。

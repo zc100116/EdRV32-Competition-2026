@@ -157,8 +157,6 @@ module edrv32_cpu2_tage (
     assign pending_o = pending_valid_r;
     // Write-first forwarding around the old-data physical RAMs, without depending on IP mode.
     reg last_write_r;
-    reg [35:0] last_indices_r;
-    reg [11:0] last_base_index_r;
     reg [63:0] last_rows_r;
     reg [3:0] last_mask_r;
     reg [1:0] last_base_r;
@@ -177,21 +175,44 @@ module edrv32_cpu2_tage (
             last_write_r <= write_valid_w;
     end
     always @(posedge clk_i) begin
-        last_indices_r <= write_indices_w;
-        last_base_index_r <= write_base_index_w;
         last_rows_r <= write_rows_w;
         last_mask_r <= write_mask_w;
         last_base_r <= write_base_w;
         mem_rows_r <= ex_current_rows_w;
         mem_base_r <= ex_current_base_w;
     end
+    // Index equality travels with the existing training tokens; no extra stage.
+    reg base_pending_mem_r;
+    reg base_last_mem_r;
+    reg base_pending_ex_r;
+    reg base_last_ex_r;
+    reg base_mem_ex_r;
+    wire base_mem_ex_w;
+    wire base_pending_ex_w;
+    wire base_mem_d_w;
+    wire base_ex_d_w;
+    wire base_pending_d_w;
+    assign base_mem_ex_w = (mem_base_index_r == ex_base_index_r);
+    assign base_pending_ex_w = (pending_base_index_r == ex_base_index_r);
+    assign base_mem_d_w = (mem_base_index_r == d_base_index_i);
+    assign base_ex_d_w = (ex_base_index_r == d_base_index_i);
+    assign base_pending_d_w = (pending_base_index_r == d_base_index_i);
+    always @(posedge clk_i) begin
+        base_pending_mem_r <= ex_update_w || base_mem_ex_w;
+        base_last_mem_r <= pending_valid_r ? base_pending_ex_w :
+            (!mem_update_w || base_mem_ex_w);
+        base_pending_ex_r <= ex_update_w ? base_ex_d_w : base_mem_d_w;
+        base_last_ex_r <= pending_valid_r ? base_pending_d_w :
+            mem_update_w ? base_mem_d_w : base_ex_d_w;
+        base_mem_ex_r <= base_ex_d_w;
+    end
     assign mem_current_base_w =
-        (pending_valid_r && (pending_base_index_r == mem_base_index_r)) ? pending_base_r :
-        (last_write_r && (last_base_index_r == mem_base_index_r)) ? last_base_r : mem_base_r;
+        (pending_valid_r && base_pending_mem_r) ? pending_base_r :
+        (last_write_r && base_last_mem_r) ? last_base_r : mem_base_r;
     assign ex_current_base_w =
-        (mem_update_w && (mem_base_index_r == ex_base_index_r)) ? mem_new_base_w :
-        (pending_valid_r && (pending_base_index_r == ex_base_index_r)) ? pending_base_r :
-        (last_write_r && (last_base_index_r == ex_base_index_r)) ? last_base_r : d_base_w;
+        (mem_update_w && base_mem_ex_r) ? mem_new_base_w :
+        (pending_valid_r && base_pending_ex_r) ? pending_base_r :
+        (last_write_r && base_last_ex_r) ? last_base_r : d_base_w;
     edrv32_ram_cpu2_base_train u_base_train (
         .clk_i(clk_i),
         .wr_en_i(write_valid_w),
@@ -319,15 +340,38 @@ module edrv32_cpu2_tage (
             wire [8:0] ex_index_w;
             wire [8:0] mem_index_w;
             wire [8:0] pending_index_w;
-            wire [8:0] last_index_w;
             wire [8:0] write_index_w;
             wire [8:0] d_index_w;
             assign ex_index_w = ex_indices_r[9*table_num +: 9];
             assign mem_index_w = mem_indices_r[9*table_num +: 9];
             assign pending_index_w = pending_indices_r[9*table_num +: 9];
-            assign last_index_w = last_indices_r[9*table_num +: 9];
             assign write_index_w = write_indices_w[9*table_num +: 9];
             assign d_index_w = d_indices_i[9*table_num +: 9];
+            // Index equality travels with the existing training tokens; no extra stage.
+            reg pending_mem_r;
+            reg last_mem_r;
+            reg pending_ex_r;
+            reg last_ex_r;
+            reg mem_ex_r;
+            wire mem_ex_w;
+            wire pending_ex_w;
+            wire mem_d_w;
+            wire ex_d_w;
+            wire pending_d_w;
+            assign mem_ex_w = (mem_index_w == ex_index_w);
+            assign pending_ex_w = (pending_index_w == ex_index_w);
+            assign mem_d_w = (mem_index_w == d_index_w);
+            assign ex_d_w = (ex_index_w == d_index_w);
+            assign pending_d_w = (pending_index_w == d_index_w);
+            always @(posedge clk_i) begin
+                pending_mem_r <= ex_update_w || mem_ex_w;
+                last_mem_r <= pending_valid_r ? pending_ex_w :
+                    (!mem_update_w || mem_ex_w);
+                pending_ex_r <= ex_update_w ? ex_d_w : mem_d_w;
+                last_ex_r <= pending_valid_r ? pending_d_w :
+                    mem_update_w ? mem_d_w : ex_d_w;
+                mem_ex_r <= ex_d_w;
+            end
             edrv32_ram_cpu2_tage_train u_train (
                 .clk_i(clk_i),
                 .wr_en_i(write_valid_w && write_mask_w[table_num]),
@@ -339,15 +383,15 @@ module edrv32_cpu2_tage (
             );
             assign mem_current_rows_w[16*table_num +: 16] =
                 (pending_valid_r && pending_mask_r[table_num] &&
-                    (pending_index_w == mem_index_w)) ? pending_rows_r[16*table_num +: 16] :
-                (last_write_r && last_mask_r[table_num] && (last_index_w == mem_index_w)) ?
+                    pending_mem_r) ? pending_rows_r[16*table_num +: 16] :
+                (last_write_r && last_mask_r[table_num] && last_mem_r) ?
                     last_rows_r[16*table_num +: 16] : mem_rows_r[16*table_num +: 16];
             assign ex_current_rows_w[16*table_num +: 16] =
-                (mem_update_w && mem_mask_w[table_num] && (mem_index_w == ex_index_w)) ?
+                (mem_update_w && mem_mask_w[table_num] && mem_ex_r) ?
                     mem_new_rows_w[16*table_num +: 16] :
                 (pending_valid_r && pending_mask_r[table_num] &&
-                    (pending_index_w == ex_index_w)) ? pending_rows_r[16*table_num +: 16] :
-                (last_write_r && last_mask_r[table_num] && (last_index_w == ex_index_w)) ?
+                    pending_ex_r) ? pending_rows_r[16*table_num +: 16] :
+                (last_write_r && last_mask_r[table_num] && last_ex_r) ?
                     last_rows_r[16*table_num +: 16] : d_rows_w[16*table_num +: 16];
             wire [8:0] index0_w;
             wire [8:0] index1_w;
@@ -449,35 +493,52 @@ module edrv32_cpu2_tage (
                 assign f2_shadow_index_flat_w[4*query+table_num] = f2_shadow_index_r;
                 wire [8:0] index_w;
                 wire [9:0] tag_w;
-                wire [8:0] write_index_w;
-                wire [8:0] pending_index_w;
-                wire [15:0] write_row_w;
-                wire [15:0] pending_row_w;
+                wire [15:0] old_pending_row_w;
+                wire [15:0] mem_row_w;
+                wire [15:0] ex_row_w;
                 wire [15:0] row_w;
                 wire [9:0] saved_tag_w;
+                wire old_pending_match_w;
+                wire mem_match_w;
+                wire ex_match_w;
                 wire pending_match_w;
                 wire write_match_w;
+                wire old_pending_tag_w;
+                wire mem_tag_w;
+                wire ex_tag_w;
                 assign index_w = pc_w[10:2] ^ fold_index_flat_w[9*table_num +: 9];
                 assign tag_w = pc_w[20:11] ^ fold_tag_flat_w[10*table_num +: 10] ^
                     {1'b0, fold_shift_flat_w[9*table_num +: 9]};
                 assign indices_w[9*table_num +: 9] = index_w;
                 assign tags_w[10*table_num +: 10] = tag_w;
-                assign write_index_w = write_indices_w[9*table_num +: 9];
-                assign pending_index_w = pending_next_indices_w[9*table_num +: 9];
-                assign write_row_w = write_rows_w[16*table_num +: 16];
-                assign pending_row_w = pending_next_rows_w[16*table_num +: 16];
-                assign pending_match_w = pending_next_valid_w && pending_next_mask_w[table_num] &&
-                    (pending_index_w == index_w);
-                assign write_match_w = write_valid_w && write_mask_w[table_num] &&
-                    (write_index_w == index_w);
-                // F1 index AND tag compare is registered, not placed after the F2 row mux.
+                assign old_pending_row_w = pending_rows_r[16*table_num +: 16];
+                assign mem_row_w = mem_new_rows_w[16*table_num +: 16];
+                assign ex_row_w = ex_new_rows_w[16*table_num +: 16];
+                // Compare each source in parallel, before pending/write arbitration.
+                assign old_pending_match_w = pending_mask_r[table_num] &&
+                    (pending_indices_r[9*table_num +: 9] == index_w);
+                assign mem_match_w = mem_mask_w[table_num] &&
+                    (mem_indices_r[9*table_num +: 9] == index_w);
+                assign ex_match_w = ex_mask_w[table_num] &&
+                    (ex_indices_r[9*table_num +: 9] == index_w);
+                assign pending_match_w = pending_next_valid_w &&
+                    (ex_update_w ? ex_match_w : mem_match_w);
+                assign write_match_w = write_valid_w && (pending_valid_r ?
+                    old_pending_match_w : mem_update_w ? mem_match_w : ex_match_w);
+                assign old_pending_tag_w = old_pending_row_w[15] &&
+                    (old_pending_row_w[14:5] == tag_w);
+                assign mem_tag_w = mem_row_w[15] && (mem_row_w[14:5] == tag_w);
+                assign ex_tag_w = ex_row_w[15] && (ex_row_w[14:5] == tag_w);
                 always @(posedge clk_i) begin
                     f2_shadow_index_r <= pending_match_w || write_match_w;
                     f2_shadow_tag_r <= pending_match_w ?
-                        (pending_row_w[15] && (pending_row_w[14:5] == tag_w)) :
-                        (write_row_w[15] && (write_row_w[14:5] == tag_w));
+                        (ex_update_w ? ex_tag_w : mem_tag_w) :
+                        pending_valid_r ? old_pending_tag_w :
+                        mem_update_w ? mem_tag_w : ex_tag_w;
                     f2_shadow_direction_r <= pending_match_w ?
-                        pending_row_w[4] : write_row_w[4];
+                        (ex_update_w ? ex_row_w[4] : mem_row_w[4]) :
+                        pending_valid_r ? old_pending_row_w[4] :
+                        mem_update_w ? mem_row_w[4] : ex_row_w[4];
                 end
                 assign row_w = rows_w[16*table_num +: 16];
                 assign saved_tag_w = f2_tags_flat_w[40*query+10*table_num +: 10];
@@ -487,7 +548,8 @@ module edrv32_cpu2_tage (
                 assign directions_w[table_num] = f2_shadow_index_flat_w[4*query+table_num] ?
                     f2_shadow_direction_flat_w[4*query+table_num] : row_w[4];
                 wire unused_row_w;
-                assign unused_row_w = ^{row_w[3:0], pending_row_w[3:0], write_row_w[3:0]};
+                assign unused_row_w = ^{row_w[3:0], old_pending_row_w[3:0],
+                    mem_row_w[3:0], ex_row_w[3:0]};
             end
             always @(posedge clk_i) begin
                 f2_indices_r <= indices_w;

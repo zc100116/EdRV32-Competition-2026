@@ -49,6 +49,7 @@ module edrv32_cpu2_fetch (
     wire [31:0] physical_instr_w [0:1];
     wire [1:0] physical_hit_w;
     wire [3:0] physical_owner_w;
+    wire [7:0] physical_wb_w;
     wire [1:0] btb_hit_w;
     wire [31:0] btb_target_w [0:1];
     wire [2:0] btb_type_w [0:1];
@@ -89,12 +90,19 @@ module edrv32_cpu2_fetch (
             wire [63:0] way_instr_w;
             wire [1:0] way_hit_w;
             wire [58:0] btb_data_w;
-            wire [31:0] bank_instr_w;
+            (* keep = "true", syn_keep = 1 *) wire [3:0] way_owner_w;
+            (* keep = "true", syn_keep = 1 *) wire [7:0] way_wb_w;
             wire unused_bank_w;
-            assign unused_bank_w = ^{bank_pc_w[2:0], bank_f2_pc_w[13:0],
-                bank_instr_w[31:25], bank_instr_w[14:0]};
-            wire [4:0] rs1_w;
-            wire [4:0] rs2_w;
+            assign unused_bank_w = ^{bank_pc_w[2:0], bank_f2_pc_w[13:0]};
+            wire [1:0] bank_wb_valid_w;
+            wire [9:0] bank_wb_rd_w;
+            if (bank == 0) begin : g_wb_region0
+                assign bank_wb_valid_w = wb_valid_i;
+                assign bank_wb_rd_w = wb_rd_i;
+            end else begin : g_wb_region1
+                assign bank_wb_valid_w = wb_valid_copy_i;
+                assign bank_wb_rd_w = wb_rd_copy_i;
+            end
             reg [63:0] btb_valid_r;
             assign bank_pc_w = physical_pc_w[bank];
             assign bank_f2_pc_w = f2_pc_r[bank];
@@ -102,6 +110,22 @@ module edrv32_cpu2_fetch (
                 localparam WAY = (way != 0);
                 wire fill_w;
                 wire [18:0] tag_w;
+                wire [31:0] instr_w;
+                wire [4:0] rs1_w;
+                wire [4:0] rs2_w;
+                wire unused_instr_w;
+                assign instr_w = way_instr_w[32*way +: 32];
+                assign unused_instr_w = ^{instr_w[31:25], instr_w[14:0]};
+                assign rs1_w = instr_w[19:15];
+                assign rs2_w = instr_w[24:20];
+                // Four parallel LVT reads and WB compares per bank, before tag selection.
+                assign way_owner_w[2*way] = (rs1_w != 5'd0) && lvt_i[rs1_w];
+                assign way_owner_w[2*way+1] = (rs2_w != 5'd0) && lvt_i[rs2_w];
+                assign way_wb_w[4*way +: 4] = {
+                    (rs2_w != 5'd0) && bank_wb_valid_w[1] && (bank_wb_rd_w[9:5] == rs2_w),
+                    (rs1_w != 5'd0) && bank_wb_valid_w[1] && (bank_wb_rd_w[9:5] == rs1_w),
+                    (rs2_w == 5'd0) || (bank_wb_valid_w[0] && (bank_wb_rd_w[4:0] == rs2_w)),
+                    (rs1_w == 5'd0) || (bank_wb_valid_w[0] && (bank_wb_rd_w[4:0] == rs1_w))};
                 assign fill_w = fill_valid_i && (fill_way_i == WAY) &&
                     (fill_addr_i[2] == BANK);
                 edrv32_ram_cpu2_cache_data u_data (
@@ -128,12 +152,10 @@ module edrv32_cpu2_fetch (
             assign physical_instr_w[bank] = way_hit_w[1] ? way_instr_w[63:32] :
                 way_instr_w[31:0];
             assign physical_hit_w[bank] = |way_hit_w;
-            // LVT access starts on the physical word, before alignment.
-            assign bank_instr_w = physical_instr_w[bank];
-            assign rs1_w = bank_instr_w[19:15];
-            assign rs2_w = bank_instr_w[24:20];
-            assign physical_owner_w[2*bank] = (rs1_w != 5'd0) && lvt_i[rs1_w];
-            assign physical_owner_w[2*bank+1] = (rs2_w != 5'd0) && lvt_i[rs2_w];
+            assign physical_owner_w[2*bank +: 2] = way_hit_w[1] ?
+                way_owner_w[3:2] : way_owner_w[1:0];
+            assign physical_wb_w[4*bank +: 4] = way_hit_w[1] ?
+                way_wb_w[7:4] : way_wb_w[3:0];
             edrv32_ram_cpu2_btb u_btb (
                 .clk_i(clk_i),
                 .wr_en_i(btb_write_i && (btb_pc_i[2] == BANK)),
@@ -162,6 +184,17 @@ module edrv32_cpu2_fetch (
     wire [1:0] enqueue_count_w;
     reg [3:0] ib_count_r;
     wire [3:0] retained_count_w;
+    reg [12:0] ib_credit_r;
+    wire [12:0] retained_credit_w;
+    assign retained_credit_w = ib_credit_r >> ib_remove_i;
+    // spec 5.5: registered one-hot occupancy supplies every IB insertion position.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            ib_credit_r <= 13'd1;
+        else
+            ib_credit_r <= enqueue1_w ? (retained_credit_w << 2) :
+                enqueue0_w ? (retained_credit_w << 1) : retained_credit_w;
+    end
     assign aligned_instr_w[0] = f2_parity_r ? physical_instr_w[1] : physical_instr_w[0];
     assign aligned_instr_w[1] = f2_parity_r ? physical_instr_w[0] : physical_instr_w[1];
     assign aligned_taken_w = f2_parity_r ? {f2_taken_r[0], f2_taken_r[1]} : f2_taken_r;
@@ -186,23 +219,33 @@ module edrv32_cpu2_fetch (
             ib_count_r <= retained_count_w + {2'b0, enqueue_count_w};
     end
     wire [383:0] ib_instr_flat_w;
-    wire [59:0] ib_candidates_flat_w;
+    wire [9:0] ib_candidates_flat_w;
     wire [31:0] shifted_instr_w [0:11];
     wire [4:0] shifted_candidates_w [0:11];
+    wire [59:0] corrected_candidates_flat_w;
     genvar slot;
     generate
         for (slot = 0; slot < 2; slot = slot + 1) begin : g_enqueue
-            assign enqueue_candidates_w[slot] = {f2_parity_r ^ (slot != 0),
-                physical_owner_w};
+            wire bank_w;
+            wire [3:0] wb_w;
+            wire [1:0] owner0_w;
+            wire [1:0] owner1_w;
+            assign bank_w = f2_parity_r ^ (slot != 0);
+            assign wb_w = bank_w ? physical_wb_w[7:4] : physical_wb_w[3:0];
+            assign owner0_w = (physical_owner_w[1:0] & ~wb_w[1:0]) | wb_w[3:2];
+            assign owner1_w = (physical_owner_w[3:2] & ~wb_w[1:0]) | wb_w[3:2];
+            assign enqueue_candidates_w[slot] = {bank_w, owner1_w, owner0_w};
         end
         for (slot = 0; slot < 12; slot = slot + 1) begin : g_ib
             reg [4:0] ib_candidates_r;
-            assign ib_candidates_flat_w[5*slot +: 5] = ib_candidates_r;
+            if (slot < 2) begin : g_id
+                assign ib_candidates_flat_w[5*slot +: 5] = ib_candidates_r;
+            end
             reg [31:0] ib_instr_r;
             assign ib_instr_flat_w[32*slot +: 32] = ib_instr_r;
             wire [1:0] wb_valid_w;
             wire [9:0] wb_rd_w;
-            // Region 0 covers six entries plus two incoming words (16 operands).
+            // Each WB region covers six entries and one bank of two ways (16 operands).
             if (slot < 6) begin : g_wb_region0
                 assign wb_valid_w = wb_valid_i;
                 assign wb_rd_w = wb_rd_i;
@@ -210,7 +253,6 @@ module edrv32_cpu2_fetch (
                 assign wb_valid_w = wb_valid_copy_i;
                 assign wb_rd_w = wb_rd_copy_i;
             end
-            localparam [3:0] SLOT = slot;
             wire [31:0] next1_instr_w;
             wire [31:0] next2_instr_w;
             wire [4:0] next1_candidates_w;
@@ -225,14 +267,14 @@ module edrv32_cpu2_fetch (
             wire [1:0] next_owner2_w;
             if (slot < 11) begin : g_next1
                 assign next1_instr_w = ib_instr_flat_w[32*(slot+1) +: 32];
-                assign next1_candidates_w = ib_candidates_flat_w[5*(slot+1) +: 5];
+                assign next1_candidates_w = corrected_candidates_flat_w[5*(slot+1) +: 5];
             end else begin : g_end1
                 assign next1_instr_w = 32'd0;
                 assign next1_candidates_w = 5'd0;
             end
             if (slot < 10) begin : g_next2
                 assign next2_instr_w = ib_instr_flat_w[32*(slot+2) +: 32];
-                assign next2_candidates_w = ib_candidates_flat_w[5*(slot+2) +: 5];
+                assign next2_candidates_w = corrected_candidates_flat_w[5*(slot+2) +: 5];
             end else begin : g_end2
                 assign next2_instr_w = 32'd0;
                 assign next2_candidates_w = 5'd0;
@@ -240,28 +282,36 @@ module edrv32_cpu2_fetch (
             assign shifted_instr_w[slot] = (ib_remove_i == 2'd2) ? next2_instr_w :
                 (ib_remove_i == 2'd1) ? next1_instr_w : ib_instr_flat_w[32*slot +: 32];
             assign shifted_candidates_w[slot] = (ib_remove_i == 2'd2) ? next2_candidates_w :
-                (ib_remove_i == 2'd1) ? next1_candidates_w : ib_candidates_flat_w[5*slot +: 5];
-            assign insert0_w = enqueue0_w && (retained_count_w == SLOT);
-            assign insert1_w = enqueue1_w && ((retained_count_w + 4'd1) == SLOT);
+                (ib_remove_i == 2'd1) ? next1_candidates_w :
+                corrected_candidates_flat_w[5*slot +: 5];
+            assign insert0_w = enqueue0_w && retained_credit_w[slot];
+            if (slot == 0) begin : g_first_position
+                assign insert1_w = 1'b0;
+            end else begin : g_second_position
+                assign insert1_w = enqueue1_w && retained_credit_w[slot-1];
+            end
             assign next_instr_w = insert0_w ? aligned_instr_w[0] :
                 insert1_w ? aligned_instr_w[1] : shifted_instr_w[slot];
             assign selected_candidates_w = insert0_w ? enqueue_candidates_w[0] :
                 insert1_w ? enqueue_candidates_w[1] : shifted_candidates_w[slot];
-            assign next_rs1_w = next_instr_w[19:15];
-            assign next_rs2_w = next_instr_w[24:20];
-            // Both candidates change at this WB edge, including new enqueue items.
+            wire [9:0] current_rs_w;
+            assign current_rs_w = ib_instr_flat_w[32*slot+15 +: 10];
+            assign next_rs1_w = current_rs_w[4:0];
+            assign next_rs2_w = current_rs_w[9:5];
+            // Repair each resident entry before movement; incoming words are repaired in parallel.
             assign next_owner1_w = (next_rs1_w == 5'd0) ? 2'b00 :
                 (wb_valid_w[1] && (wb_rd_w[9:5] == next_rs1_w)) ? 2'b11 :
                 (wb_valid_w[0] && (wb_rd_w[4:0] == next_rs1_w)) ? 2'b00 :
-                {selected_candidates_w[2], selected_candidates_w[0]};
+                {ib_candidates_r[2], ib_candidates_r[0]};
             assign next_owner2_w = (next_rs2_w == 5'd0) ? 2'b00 :
                 (wb_valid_w[1] && (wb_rd_w[9:5] == next_rs2_w)) ? 2'b11 :
                 (wb_valid_w[0] && (wb_rd_w[4:0] == next_rs2_w)) ? 2'b00 :
-                {selected_candidates_w[3], selected_candidates_w[1]};
+                {ib_candidates_r[3], ib_candidates_r[1]};
+            assign corrected_candidates_flat_w[5*slot +: 5] = {ib_candidates_r[4],
+                next_owner2_w[1], next_owner1_w[1], next_owner2_w[0], next_owner1_w[0]};
             always @(posedge clk_i) begin
                 ib_instr_r <= next_instr_w;
-                ib_candidates_r <= {selected_candidates_w[4],
-                    next_owner2_w[1], next_owner1_w[1], next_owner2_w[0], next_owner1_w[0]};
+                ib_candidates_r <= selected_candidates_w;
             end
         end
     endgenerate

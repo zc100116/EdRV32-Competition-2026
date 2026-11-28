@@ -38,6 +38,11 @@ for name, cell in module['cells'].items():
             endpoints.append((q, d))
     elif kind == '$mem_v2':
         synchronous = int(cell['parameters']['RD_CLK_ENABLE'], 2) != 0
+        for port in ('WR_ADDR', 'WR_DATA', 'WR_EN'):
+            for index, bit in enumerate(ports[port]):
+                endpoint = f'{name}.{port}[{index}]'
+                aliases[endpoint] = {f'{name}.{port}'}
+                endpoints.append((endpoint, bit))
         for bit in ports['RD_DATA']:
             if synchronous:
                 roots[bit] = {name}
@@ -54,12 +59,19 @@ segments = [
     ('RF 4R2W', r'^rf_id_data_r$', r'^rf_(id_rs|id_owner|wb_)'),
     ('ID owner/RF/WB to AGU', r'^u_id_agu.ex_addr_r$',
      r'^id_agu_(id_candidates|id_rs1|id_imm|wb_)'),
-    ('F2 bank to IB owner', r'^u_fetch.ib_candidates_r\[',
+    ('F2 bank to IB owner', r'^u_fetch.g_ib\[.*ib_candidates_r$',
      r'^u_fetch.*u_(data|tag).memory_r$'),
     ('TAGE F2 provider/alternate', r'^tage_f2_(prediction|alternate|provider)_r$',
      r'^u_tage.*u_predict.memory_r$'),
-    ('Pending to F1 hit', r'^u_tage.f2_shadow_(index|tag|direction)_r\[',
+    ('Pending to F1 hit', r'^u_tage.g_query\[.*f2_shadow_(index|tag|direction)_r$',
      r'^u_tage.pending_'),
+    ('Pending index to F1 hit', r'^u_tage.g_query\[.*f2_shadow_(index|tag|direction)_r$',
+     r'^u_tage.pending_indices_r$'),
+    ('MEM index to F1 hit', r'^u_tage.g_query\[.*f2_shadow_(index|tag|direction)_r$',
+     r'^u_tage.mem_indices_r$'),
+    ('MEM index to training capture', r'^u_tage.mem_rows_r$', r'^u_tage.mem_indices_r$'),
+    ('MEM index to TAGE write', r'^u_tage.g_table\[.*u_(train|predict).memory_r.WR_',
+     r'^u_tage.mem_indices_r$'),
     ('DRM load to operand capture', r'^u_id_agu.operand_(data|hit)_r$',
      r'^u_id_agu.*u_(data|tag).memory_r$'),
 ]
