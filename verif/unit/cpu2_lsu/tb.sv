@@ -176,6 +176,10 @@ module tb # (parameter FORMAT = 2);
     int requests = 0;
     int served = 0;
     int commits = 0;
+    int commit_served = 0;
+    reg [31:0] committed_data [0:127];
+    reg [T-1:0] committed_tag [0:127];
+    reg committed_beat [0:127];
     reg [31:0] request_addr [0:127];
     reg [T-1:0] request_tag [0:127];
     reg request_beat [0:127];
@@ -189,7 +193,12 @@ module tb # (parameter FORMAT = 2);
         if (cancel_valid_i && served < requests &&
             T'(request_tag[served % 128] - age_head_i) >= T'(cancel_tag_i - age_head_i))
             served = requests;
-        if (dc_commit_valid_o && dc_commit_ready_i) commits <= commits + 1;
+        if (dc_commit_valid_o && dc_commit_ready_i) begin
+            committed_data[commits % 128] = dc_commit_data_o;
+            committed_tag[commits % 128] = dc_commit_tag_o;
+            committed_beat[commits % 128] = dc_commit_beat_o;
+            commits = commits + 1;
+        end
     end
     initial begin
         #100000;
@@ -295,24 +304,33 @@ module tb # (parameter FORMAT = 2);
         if (!commit_lsu_ready_o) $fatal(1, "not ready for authorization");
         commit_lsu_tag_i = lsu_req_tag_i;
         commit_lsu_valid_i = 1;
+        #1;
+        if ((lsu_req_instr_i[5] || lsu_req_addr_i[31:28] == 4'h2) &&
+            dc_commit_ready_i && (!dc_commit_valid_o || dc_commit_beat_o))
+            $fatal(1, "authorization did not fall through to first beat");
         tick();
         step();
         commit_lsu_valid_i = 0;
     endtask
     task automatic beat_done(input bit beat, input [31:0] expected_store,
                              input [31:0] returned_data, input bit error);
-        while (!dc_commit_valid_o) step();
-        if (dc_commit_tag_o != lsu_req_tag_i || dc_commit_beat_o != beat ||
-            dc_commit_data_o != expected_store)
-            $fatal(1, "commit association/data beat %b data %h", dc_commit_beat_o,
-                   dc_commit_data_o);
-        tick();
+        while (commit_served >= commits) step();
+        if (committed_tag[commit_served % 128] != lsu_req_tag_i ||
+            committed_beat[commit_served % 128] != beat ||
+            committed_data[commit_served % 128] != expected_store)
+            $fatal(1, "commit association/data beat %b data %h", committed_beat[commit_served % 128],
+                   committed_data[commit_served % 128]);
+        commit_served++;
         step();
         dc_done_valid_i = 1;
         dc_done_tag_i = lsu_req_tag_i;
         dc_done_beat_i = beat;
         dc_done_error_i = error;
         dc_done_data_i = returned_data;
+        #1;
+        if ((error || beat || FORMAT != 2 || lsu_req_instr_i[14:12] != 3) &&
+            (!commit_lsu_done_valid_o || commit_lsu_done_error_o != error))
+            $fatal(1, "final D$ done did not fall through to commit");
         tick();
         step();
         dc_done_valid_i = 0;
@@ -438,6 +456,15 @@ module tb # (parameter FORMAT = 2);
         authorize();
         beat_done(0, 32'h55667788, 0, 0);
         done(0, 0, 0);
+        // Ready final consumer retires on the D$ done edge, with no DONE bubble.
+        issue(32'h2023, 32'h10000004, 64'h12345678, T'(2));
+        prep(0, 32'h10000004, 0, 0, 0);
+        complete(0, 0, 0, 0, 0);
+        authorize();
+        commit_lsu_done_ready_i = 1;
+        beat_done(0, 32'h12345678, 0, 0);
+        if (!lsu_req_ready_o) $fatal(1, "final done retained an unnecessary busy cycle");
+        commit_lsu_done_ready_i = 0;
         issue(32'h0003, 32'h20000001, 0, T'(3));
         prep(0, 32'h20000001, 0, 1, 0);
         complete(0, 1, 0, 0, 0);

@@ -139,6 +139,7 @@ module edrv32_cpu2_lsu #(
     wire cancel_w;
     wire req_store_w;
     wire response_complete_w;
+    wire done_fallthrough_w;
     wire complete_device_w;
     wire complete_exception_w;
     wire complete_access_w;
@@ -226,8 +227,12 @@ module edrv32_cpu2_lsu #(
     end
     assign response_complete_w = state_r == S_RESPONSE && dc_resp_valid_i &&
         (dc_resp_error_i || !double_r || beat_r);
-    assign complete_low_w = response_complete_w && !beat_r ? response_data_w : low_r;
-    assign complete_high_w = response_complete_w && beat_r ? response_data_w : high_r;
+    assign done_fallthrough_w = state_r == S_BEAT_DONE && dc_done_valid_i &&
+        (dc_done_error_i || !double_r || beat_r);
+    assign complete_low_w = response_complete_w && !beat_r ? response_data_w :
+        done_fallthrough_w && !beat_r ? dc_done_data_i : low_r;
+    assign complete_high_w = response_complete_w && beat_r ? response_data_w :
+        done_fallthrough_w && beat_r ? dc_done_data_i : high_r;
     assign complete_device_w = device_r || (response_complete_w && dc_resp_device_i);
     assign complete_exception_w = response_complete_w ? dc_resp_error_i : exception_r;
     assign complete_access_w = response_complete_w ? dc_resp_error_i : done_error_r;
@@ -262,10 +267,11 @@ module edrv32_cpu2_lsu #(
     assign lsu_complete_mem_addr_o = addr_r;
     assign lsu_complete_mem_mask_o = trace_mask_w;
     assign commit_lsu_ready_o = state_r == S_AUTHORIZE;
-    assign commit_lsu_done_valid_o = state_r == S_DONE;
+    assign commit_lsu_done_valid_o = state_r == S_DONE || done_fallthrough_w;
     assign commit_lsu_done_tag_o = tag_r;
-    assign commit_lsu_done_error_o = done_error_r;
-    assign commit_lsu_done_fault_addr_o = fault_addr_r;
+    assign commit_lsu_done_error_o = done_fallthrough_w ? dc_done_error_i : done_error_r;
+    assign commit_lsu_done_fault_addr_o = done_fallthrough_w && dc_done_error_i ?
+        beat_addr_w : fault_addr_r;
     assign dc_req_valid_o = ordinary_valid_w;
     assign dc_req_tag_o = state_r == S_IDLE ? lsu_req_tag_i : tag_r;
     assign dc_req_beat_o = state_r == S_IDLE ? 1'b0 : beat_r;
@@ -278,10 +284,13 @@ module edrv32_cpu2_lsu #(
     assign dc_req_mask_o = state_r == S_IDLE ? req_mask_w : mask_w;
     assign dc_req_early_o = state_r == S_IDLE ? lsu_req_early_i : early_r && !beat_r;
     assign dc_resp_ready_o = state_r == S_RESPONSE;
-    assign dc_commit_valid_o = state_r == S_COMMIT;
+    // I06P: the registered authorization state can forward its granted first beat.
+    assign dc_commit_valid_o = state_r == S_COMMIT ||
+        (state_r == S_AUTHORIZE && commit_lsu_valid_i && (store_r || device_r));
     assign dc_commit_tag_o = tag_r;
-    assign dc_commit_beat_o = beat_r;
-    assign dc_commit_data_o = selected_store_w;
+    assign dc_commit_beat_o = state_r == S_AUTHORIZE ? 1'b0 : beat_r;
+    assign dc_commit_data_o = state_r == S_AUTHORIZE ?
+        store_data_r[31:0] : selected_store_w;
     assign dc_commit_mask_o = mask_w;
     assign dc_done_ready_o = state_r == S_BEAT_DONE;
     assign dc_cancel_valid_o = cancel_valid_i;
@@ -371,7 +380,8 @@ module edrv32_cpu2_lsu #(
                     S_AUTHORIZE: begin
                         if (commit_lsu_valid_i) begin
                             beat_r <= 1'b0;
-                            state_r <= store_r || device_r ? S_COMMIT : S_DONE;
+                            state_r <= store_r || device_r ?
+                                (dc_commit_ready_i ? S_BEAT_DONE : S_COMMIT) : S_DONE;
                         end
                     end
                     S_COMMIT: if (dc_commit_ready_i) state_r <= S_BEAT_DONE;
@@ -382,7 +392,7 @@ module edrv32_cpu2_lsu #(
                                 beat_r <= 1'b1;
                                 state_r <= S_COMMIT;
                             end else begin
-                                state_r <= S_DONE;
+                                state_r <= commit_lsu_done_ready_i ? S_IDLE : S_DONE;
                             end
                         end
                     end
