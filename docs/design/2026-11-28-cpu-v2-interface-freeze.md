@@ -465,6 +465,8 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 
 **F2 纠正 trace（I01）。** frontend→top 增 `f2_redirect_valid`1、`f2_redirect_pc`32（被纠正字 PC）、`f2_redirect_target`32（新取指 PC）、`f2_redirect_cause`2（1 方向、3 非控制），为注册的 F2 纠正当拍；top 转成 `trace_redirect_*`，stage 固定 1，tag 填 0（未分配完成 tag）。只供 trace。
 
+**TAGE 三方写碰撞（I01，用户 2026-11-28 确认）。** 待写项已占用且同拍 MEM、EX 都训练时，优先级待写项 > MEM > EX，EX 的表写入丢弃，过滤历史照常推进；不停顿、不加待写项、不加 ready/信用端口。规格 5.4 已补。
+
 ## 影响
 
 审核通过后需修改CPU spec2.2/2.3、3、4、5、6及9的C01–C09；FPU spec2.4、3、4、5.1/5.4/5.5及9的F01/F02/F04/F05；CPU testplan2/4/6/7的T02/T03及对应CV02–CV14；FPU testplan4/6/7的FT01/FT03及FV10–FV15。C10、F03/F06与FT03中的未测数值继续待定；旧cpu/cache规格不改，外部总线无差异。
