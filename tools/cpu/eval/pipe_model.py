@@ -57,6 +57,9 @@ class Record:
     serial_pair: bool = False
     memory_checked: bool = False
     completion_order: int = -1
+    issue_tick: int = 0
+    lsu_ready: object = None
+    lsu_waited: bool = False
 
 
 # M01 / CPU5.6: provisional I06P minimum, grant -> done capture -> retirement.
@@ -106,6 +109,93 @@ class CompletionWindow:
     def cancel_after(self, record):
         while self.entries and self.entries[-1][0].completion_order > record.completion_order:
             self.entries.pop()
+
+
+def memory_info(instruction, address):
+    device = not (0x10000000 <= address < 0x10010000 or
+                  0x80000000 <= address < 0xc0000000)
+    beats = 2 if instruction.bits & 0x7f in {0x07, 0x27} and (
+        (instruction.bits >> 12) & 7) == 3 else 1
+    return device, beats
+
+
+class StoreQueue:
+    """CPU v0.3 3.7: reserve beats, commit at retirement, drain one per edge.
+
+    ID reserves registered capacity; an ordinary load checks at its AGU edge,
+    an early load at issue. A conflicting load holds only the local LSU.
+    """
+
+    def __init__(self, capacity, load_latency):
+        self.capacity = capacity or float('inf')
+        self.credit = self.capacity
+        self.entries = deque()
+        self.loads = []
+        self.load_latency = load_latency
+        self.wait_count = 0
+        self.wait_cycles = 0
+        self.full_cycles = 0
+        self.buffer_until = 0
+
+    def conflicts(self, address, beats=1):
+        words = {address // 4 + beat for beat in range(beats)}
+        return any(word in words for _, word, _ in self.entries)
+
+    def allocate(self, record, address, beats):
+        for beat in range(beats):
+            self.entries.append([record, address // 4 + beat, False])
+        self.credit -= beats
+
+    def commit(self, records):
+        orders = {r.completion_order for r in records if r.instruction.kind == 'store'}
+        if orders:
+            for entry in self.entries:
+                if entry[0].completion_order in orders:
+                    entry[2] = True
+
+    def load(self, record, address, tick, entry, decode_delay, active):
+        request = tick + decode_delay + int(not record.early_load)
+        self.loads.append([record, address, request, entry, False])
+        if request == tick:
+            self.advance_loads(tick, active)
+
+    def advance_loads(self, tick, active):
+        remaining = []
+        for pending in self.loads:
+            record, address, request, entry, waited = pending
+            if tick < request:
+                remaining.append(pending)
+                continue
+            _, beats = memory_info(record.instruction, address)
+            if self.conflicts(address, beats):
+                self.wait_count += not waited
+                self.wait_cycles += active
+                pending[4] = True
+                record.lsu_waited = True
+                record.early_load = False
+                record.lsu_ready = float('inf')
+                record.result_latency = float('inf')
+                entry[1] = float('inf')
+                remaining.append(pending)
+            elif waited:
+                # Retry through the ordinary AGU/D$ path; never reuse early data.
+                record.lsu_ready = tick + self.load_latency + beats - 2
+                record.result_latency = record.lsu_ready - record.issue_tick
+                entry[1] = record.lsu_ready + 1
+        self.loads = remaining
+
+    def edge(self, tick, active):
+        self.credit = self.capacity - len(self.entries)
+        if self.entries and self.entries[0][2]:
+            self.entries.popleft()
+            self.buffer_until = tick + 1
+        self.advance_loads(tick, active)
+
+    def cancel_after(self, record):
+        self.entries = deque(e for e in self.entries if e[2] or
+                             e[0].completion_order <= record.completion_order)
+        self.loads = [p for p in self.loads if
+                      p[0].completion_order <= record.completion_order]
 
 
 class Predictor:
@@ -366,7 +456,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
              fetch_bytes=None, queue_depth=None, prediction_capture=None,
              fixed_predictions=None, unaligned_fetch=False, load_merge=None,
              completion_entries=None, completion_addresses=None, completion_same_cycle_credit=False,
-             completion_head_authorization=False):
+             completion_head_authorization=False, store_queue_model=False, store_queue_entries=0):
     if fusion:
         program, trace = fuse_program(program, trace, fusion, begin, end)
     changes = INORDER_VARIANTS.get(variant, {})
@@ -402,9 +492,11 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                         cache_instructions=0, cache_hits=0, branches=0, direction_misses=0,
                         f2_corrections=0, control_misses=0)
     window = (CompletionWindow(completion_entries, issue_width, completion_same_cycle_credit)
-              if completion_entries or completion_head_authorization else None)
+              if completion_entries or completion_head_authorization or store_queue_model else None)
+    stores = StoreQueue(store_queue_entries, load_latency) if store_queue_model else None
     window_stalls = 0
     retired_instructions = 0
+    store_load_waits = 0
     last_writes = {}
     previous_instruction = None
     cache = {}
@@ -459,6 +551,20 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             if source not in forwarded:
                 waits |= wait_kind.get(source, 0)
         return waits
+
+    def memory_blocked(instruction, index):
+        if stores is None:
+            return False
+        if instruction.bits & 0x7f == 0x0f:
+            return bool(stores.entries or tick < stores.buffer_until)
+        if instruction.kind not in {'load', 'store'}:
+            return False
+        if stores.loads:
+            return True
+        if instruction.kind == 'store' and index < len(trace):
+            device, beats = memory_info(instruction, completion_addresses[index])
+            return not device and stores.credit < beats
+        return False
 
     def id_early_load(instruction, issued):
         base = instruction.sources[-1] if instruction.sources else 0
@@ -626,7 +732,11 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         ending = False
         retired_controls = 0
         retired_late = [0, 0, 0]
+        if stores:
+            stores.edge(tick, active)
         retirement = window.edge(tick) if window else w2 if registered_control else w
+        if stores:
+            stores.commit(retirement)
         for record in retirement:
             pc = record.instruction.pc
             if prediction_capture is not None and record.trace_index >= 0 and (
@@ -643,6 +753,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 experimental['fused'] += isinstance(inst, Macro)
                 if inst.kind == 'load':
                     experimental['loads'] += 1
+                    store_load_waits += record.lsu_waited
                     experimental['early_loads'] += record.early_load
                     experimental['adjacent_load_base'] += record.adjacent_base
                 experimental['serial_pairs'] += record.serial_pair
@@ -786,6 +897,19 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     wait_kind[destination] = code if latency > age else 0
                     if late_backend:
                         ready_in[destination] = max(0, latency - age)
+        if stores:
+            # Waiting loads may outlive E/M/W. Walk in order for WAW priority.
+            youngest = {}
+            for record, _, _, _ in window.entries:
+                for destination in destinations(record.instruction):
+                    if destination:
+                        youngest[destination] = record
+            for destination, record in youngest.items():
+                if record.lsu_ready is not None:
+                    left = max(0, record.lsu_ready - tick)
+                    wait_kind[destination] = int(left > 0)
+                    ready_in[destination] = left
+                    producer_kind[destination] = 'load'
         front_empty = not ib
         trace_exhausted = cursor >= len(trace)
         older_waits = hazard(ib[0].instruction) if ib else 0
@@ -814,6 +938,10 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     older_waits = 0
                     older_lcb = True
         csr_wait = bool(ib and ib[0].instruction.kind == 'csr' and (decode_pending or e or m1 or m))
+        if ib and memory_blocked(ib[0].instruction, cursor):
+            csr_wait = True
+            if stores and ib[0].instruction.kind == 'store' and not stores.loads:
+                stores.full_cycles += active
         if ib and available and cursor < len(trace):
             older = ib[0].instruction
             if not older_waits and not csr_wait:
@@ -845,6 +973,10 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                         if allowed:
                             raw = False
                             structural = older.kind in {'csr', 'serial'}
+                    structural |= memory_blocked(younger, cursor + 1)
+                    if (stores and older.kind == 'load' and older.rd in younger.sources and
+                            stores.conflicts(completion_addresses[cursor])):
+                        structural = True
                     if lcb_control_block and younger.kind in CONTROL:
                         structural = True
                     if all_slot1_types and younger.kind in {'csr', 'serial'}:
@@ -919,6 +1051,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     instruction = record.instruction
                     record.lcb = older_lcb if slot == 0 else younger_lcb
                     record.trace_index = cursor
+                    record.issue_tick = tick
                     record.counted_issue = active
                     record.late = older_late if slot == 0 else younger_late
                     record.late_store_data = older_store if slot == 0 else younger_store
@@ -1018,21 +1151,29 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     latency = division_left + 1
                 address = (completion_addresses[record.trace_index] if
                            completion_addresses is not None and record.trace_index >= 0 else 0)
-                device = (inst.kind in {'load', 'store'} and
-                          completion_addresses is not None and not (
-                          0x10000000 <= address < 0x10010000 or
-                          0x80000000 <= address < 0xc0000000))
-                beats = 2 if inst.bits & 0x7f in {0x07, 0x27} and (
-                    (inst.bits >> 12) & 7) == 3 else 1
+                device, beats = memory_info(inst, address)
+                device &= inst.kind in {'load', 'store'} and completion_addresses is not None
+                if stores and not device and inst.kind in {'load', 'store'}:
+                    latency += beats - 1
+                side_effect = (device if stores else completion_head_authorization and (
+                    inst.kind == 'store' or device or beats == 2))
                 window.allocate(record, tick, latency + int(decode_split),
-                                completion_head_authorization and (
-                                    inst.kind == 'store' or device or beats == 2), beats)
+                                side_effect, beats)
+                if stores and not device and record.trace_index >= 0:
+                    if inst.kind == 'store':
+                        stores.allocate(record, address, beats)
+                    elif inst.kind == 'load':
+                        stores.load(record, address, tick, window.entries[-1],
+                                    int(decode_split), active)
 
         # F2 can append the arriving hit and drain two instructions into IB in the same cycle.
         decision = m_redirect or redirect or d_redirect
         if window and (m_redirect or redirect or d_redirect or applied_redirect):
             window.cancel_after(applied_redirect[1] if applied_redirect else
                                 m_redirect or redirect or d_redirect)
+            if stores:
+                stores.cancel_after(applied_redirect[1] if applied_redirect else
+                                    m_redirect or redirect or d_redirect)
         decision_stage = 'm' if m_redirect else 'e' if redirect else 'd'
         if decode_split and decision_stage in {'e', 'm'} and decision:
             decode_pending = []
@@ -1319,6 +1460,11 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         result.update(completion_entries=completion_entries, completion_stall_cycles=window_stalls,
                       completion_same_cycle_credit=completion_same_cycle_credit,
                       completion_head_authorization=completion_head_authorization)
+    if stores:
+        result.update(store_queue_entries=store_queue_entries,
+                      store_queue_load_waits=store_load_waits,
+                      store_queue_load_wait_cycles=stores.wait_cycles,
+                      store_queue_full_cycles=stores.full_cycles)
     result.update(experimental)
     result['predictor_bits'] = predictor.direction.bits if predictor.direction else 2 * pht
     result['ipc'] = result['instructions'] / result['cycles']
