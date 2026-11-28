@@ -60,7 +60,7 @@
 | I03 | mul/div：单MUL全流水，单发射radix-2/双发射radix-4位长提前结束DIV；双发射共享输入按年龄选、单发射单入口 | D | S01 | CV06通过；MUL延迟4/II1，DIV正常单发射L=3+k、双发射L=3+ceil(k/2)/特殊L2、背压保持；回放独立修正拍并更新性能模型 | zc100116/gpu-dev 共用工作树 | [x] 6f801ca84：CV06六配置12项通过；C07回放CoreMark不变，视觉+4686周期，报告 docs/reports/2026-11-28-perf-cpu2-div-schedule.md |
 | I04 | completion/commit/csr：NONE4项FF、F8/FD16共享bank；单发射2HPM（3–4）/双发射8HPM（3–10）、CSR/FS、年龄取消、精确中断与重定向 | D | S01 | CV09/CV10/CV14通过；head相对年龄/原子取消/完整提交边界、已捕获CSR源和FS逐事件正确；六配置端口容量一致 | zc100116/gpu-dev 共用工作树 | [x] 1eac54f59 + 评审返工 620f76631（记录瘦身，Yosys参考FF −1440） |
 | I05 | lsu/icache/dcache/cache_ctrl：单LSU提前关联、RAM元数据、512组扫描、写缓冲、APB维护、FD两beat准备/授权/done | D | S01/P02/P06 | CV04/CV11/CV12通过；逐tag/beat关联、16组段、done/BUSY、设备头授权及AXI/APB逐信号不变；测维护附加拍数 | zc100116/gpu-dev 共用工作树 | [x] 1f9dee737/76f2d8d63/5d739774d/51625520f，9项smoke通过，维护周期见第4节 |
-| I06 | top：单发射精简/双发射满配的NONE核连线集成与独立核级验证 | V | I01/I02/I03/I04/I05/V02/V03 | 单发射+NONE、双发射+NONE均完整CPU smoke/full，固定Zba必测，Spike零不一致 | zc100116/gpu-dev 共用工作树 | [~] 86f413ddf/b69b45048：两宽 NONE 53 程序全过；CoreMark 2.65/3.02 CM/MHz 远低于模型 3.74/6.25，性能定位 I06P ctx_2e65fbb3aad5 进行中 |
+| I06 | top：单发射精简/双发射满配的NONE核连线集成与独立核级验证 | V | I01/I02/I03/I04/I05/V02/V03 | 单发射+NONE、双发射+NONE均完整CPU smoke/full，固定Zba必测，Spike零不一致 | zc100116/gpu-dev 共用工作树 | [~] 两宽 NONE 55 程序全过；I05b 后 CoreMark 2.957/3.467 CM/MHz（模型 3.740/6.254）；A00 定位 8 项缺陷（263c13b79），规格 v0.3（01177676b）定完成记录 8/16 与可缓存 store 退休沿生效；修复：FE1 ctx_8af7e680181d（D02/D03）、BE1 ctx_6730544062d4（D01/D05–D08）、M02 ctx_191e3097f3c4（C11 store 队列项数） |
 
 ### 3.4 FPU 单元、验证与整数核集成
 
