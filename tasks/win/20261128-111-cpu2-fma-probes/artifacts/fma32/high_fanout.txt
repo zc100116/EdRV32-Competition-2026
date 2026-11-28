@@ -1,0 +1,257 @@
+排名来自 Device Map 的 Clock、Reset、CE、Other 原始表。同名网按报告中最高计数排序，保留分栏计数。副本保留按 P&R 网表的同名寄存器单元核对，扇出只填 Device Map 原表有记录的条目。
+
+Rank | Net | Device Map fanout by table
+1 | ntclkbufg_0 | Clock=1834, Other=1834
+2 | u_fma/buffer_valid_r | Other=222
+3 | u_fma/e6_subtract_w | Other=154
+4 | u_fma/N68 | Reset=145, Other=145
+5 | u_fma/e7_shift_w[4] | Other=136
+6 | u_fma/e7_shift_w[3] | Other=120
+7 | u_fma/N977 | Other=119
+8 | u_fma/N65 | CE=104, Other=106
+9 | u_fma/_N10044 | Other=105
+10 | unit_req_ready_w | CE=103, Other=105
+11 | u_fma/e4_right_r | Other=103
+12 | u_fma/mul_select_w | Other=99
+13 | u_fma/e6_reverse_select_r | Other=93
+14 | u_fma/_N6104 | Other=81
+15 | u_fma/e4_shift_r[4] | Other=81
+16 | u_fma/_N10045 | Other=78
+17 | u_fma/e4_shift_r[5] | Other=74
+18 | u_fma/e4_shift_r[6] | Other=74
+19 | u_fma/e7_overflow_inf_r | Other=74
+20 | u_fma/e3_right_r | Other=71
+21 | u_fma/e7_shift_w[5] | Other=71
+22 | u_fma/add_a_big_w | Other=69
+23 | u_fma/e7_special_r | Other=67
+24 | u_fma/e7_fine_shift_r[0] | Other=64
+25 | u_fma/e7_right_w | Other=64
+26 | u_fma/e1_add_base_r[2] | Other=63
+27 | u_fma/e7_fine_shift_r[1] | Other=63
+28 | u_fma/e5_far_r | Other=62
+29 | u_fma/e1_add_base_r[4] | Other=59
+30 | u_fma/e7_shift_w[6] | Other=58
+31 | u_fma/kind_w[1] | Other=55
+32 | u_fma/e1_add_base_r[3] | Other=51
+33 | u_fma/e1_add_delta_r[3] | Other=51
+34 | u_fma/add_select_r[5] | Other=48
+35 | u_fma/e1_add_delta_r[2] | Other=47
+36 | u_fma/product_mul_r[3] | Other=47
+37 | u_fma/product_valid_r[3] | Other=47
+38 | u_fma/add_select_r[3] | Other=44
+39 | u_fma/g_correction[1].selected_w | Other=44
+40 | u_fma/g_correction[2].selected_w | Other=44
+41 | u_fma/add_limit_w[6] | Other=41
+42 | u_fma/e1_add_delta_r[1] | Other=41
+43 | u_fma/add_select_r[4] | Other=40
+44 | u_fma/e4_shift_r[3] | Other=40
+45 | u_fma/e4_limit_r[0] | Other=39
+46 | u_fma/e4_limit_r[1] | Other=39
+47 | u_fma/e4_limit_r[2] | Other=39
+48 | u_fma/e7_fine_right_r | Other=39
+49 | u_fma/e7_fine_shift_r[2] | Other=37
+50 | u_fma/N1305 | Other=36
+
+基于 RTL keep/syn_preserve 声明逐名核对。未取得表示原表未列该网的数据。
+
+Source bit | Same-name placed register cell | Device Map fanout by table
+u_fma/advance_copy_r[0] | gopLUT6Q | CE=10
+u_fma/advance_copy_r[1] | gopQ | CE=10
+u_fma/advance_copy_r[2] | gopQ | CE=16
+u_fma/advance_copy_r[3] | gopQ | CE=8
+u_fma/advance_copy_r[4] | gopQ | CE=8
+u_fma/advance_copy_r[5] | gopQ | CE=16
+u_fma/advance_copy_r[6] | gopQ | 未取得
+u_fma/advance_copy_r[7] | gopQ | 未取得
+u_fma/advance_copy_r[8] | gopQ | 未取得
+u_fma/advance_copy_r[9] | gopQ | 未取得
+u_fma/advance_copy_r[10] | gopQ | 未取得
+u_fma/advance_copy_r[11] | gopQ | 未取得
+u_fma/advance_copy_r[12] | gopQ | 未取得
+u_fma/advance_copy_r[13] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[14] | gopQ | 未取得
+u_fma/advance_copy_r[15] | gopLUT6Q | CE=16
+u_fma/advance_copy_r[16] | gopQ | CE=16
+u_fma/advance_copy_r[17] | gopQ | CE=16
+u_fma/advance_copy_r[18] | gopQ | CE=16
+u_fma/advance_copy_r[19] | gopQ | CE=16
+u_fma/advance_copy_r[20] | gopQ | CE=8
+u_fma/advance_copy_r[21] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[22] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[23] | gopQ | CE=3
+u_fma/advance_copy_r[24] | gopQ | CE=16
+u_fma/advance_copy_r[25] | gopQ | CE=15
+u_fma/advance_copy_r[26] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[27] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[28] | gopQ | CE=3
+u_fma/advance_copy_r[29] | gopQ | CE=12
+u_fma/advance_copy_r[30] | gopQ | CE=16
+u_fma/advance_copy_r[31] | gopLUT6Q | CE=16
+u_fma/advance_copy_r[32] | gopQ | CE=16
+u_fma/advance_copy_r[33] | gopQ | CE=16
+u_fma/advance_copy_r[34] | gopQ | CE=16
+u_fma/advance_copy_r[35] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[36] | gopQ | CE=2
+u_fma/advance_copy_r[37] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[38] | gopQ | CE=2
+u_fma/advance_copy_r[39] | gopQ | CE=8
+u_fma/advance_copy_r[40] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[41] | gopQ | CE=2
+u_fma/advance_copy_r[42] | gopQ | CE=12
+u_fma/advance_copy_r[43] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[44] | gopQ | CE=2
+u_fma/advance_copy_r[45] | gopQ | CE=15
+u_fma/advance_copy_r[46] | gopQ | CE=2
+u_fma/advance_copy_r[47] | gopLUT6Q | CE=2
+u_fma/advance_copy_r[48] | gopQ | CE=2
+u_fma/advance_copy_r[49] | gopQ | CE=2
+u_fma/advance_copy_r[50] | gopQ | CE=4
+u_fma/advance_copy_r[51] | gopQ | CE=16
+u_fma/advance_copy_r[52] | gopQ | CE=16
+u_fma/advance_copy_r[53] | gopQ | CE=16
+u_fma/advance_copy_r[54] | gopQ | CE=16
+u_fma/advance_copy_r[55] | gopQ | CE=16
+u_fma/advance_copy_r[56] | gopQ | CE=15
+u_fma/advance_copy_r[57] | gopQ | 未取得
+u_fma/advance_copy_r[58] | gopQ | 未取得
+u_fma/advance_copy_r[59] | gopQ | 未取得
+u_fma/advance_copy_r[60] | gopQ | CE=7
+u_fma/advance_copy_r[61] | gopQ | CE=6
+u_fma/advance_copy_r[62] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[63] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[64] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[65] | gopLUT6Q | CE=12
+u_fma/advance_copy_r[66] | gopQ | CE=15
+u_fma/advance_copy_r[67] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[68] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[69] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[70] | gopQ | CE=15
+u_fma/advance_copy_r[71] | gopQ | CE=15
+u_fma/advance_copy_r[72] | gopQ | CE=16
+u_fma/advance_copy_r[73] | gopQ | CE=16
+u_fma/advance_copy_r[74] | gopQ | CE=16
+u_fma/advance_copy_r[75] | gopQ | CE=16
+u_fma/advance_copy_r[76] | gopQ | CE=16
+u_fma/advance_copy_r[77] | gopQ | CE=16
+u_fma/advance_copy_r[78] | gopLUT6Q | CE=11
+u_fma/advance_copy_r[79] | gopQ | CE=16
+u_fma/advance_copy_r[80] | gopQ | CE=16
+u_fma/advance_copy_r[81] | gopQ | CE=16
+u_fma/advance_copy_r[82] | gopQ | CE=11
+u_fma/advance_copy_r[83] | gopQ | CE=16
+u_fma/advance_copy_r[84] | gopQ | CE=10
+u_fma/advance_copy_r[85] | gopQ | CE=12
+u_fma/advance_copy_r[86] | gopQ | CE=9
+u_fma/advance_copy_r[87] | gopQ | CE=10
+u_fma/advance_copy_r[88] | gopQ | CE=9
+u_fma/advance_copy_r[89] | gopQ | CE=9
+u_fma/advance_copy_r[90] | gopQ | CE=9
+u_fma/advance_copy_r[91] | gopQ | CE=9
+u_fma/advance_copy_r[92] | gopQ | CE=9
+u_fma/advance_copy_r[93] | gopQ | CE=9
+u_fma/advance_copy_r[94] | gopLUT6Q | CE=16
+u_fma/advance_copy_r[95] | gopQ | CE=16
+u_fma/advance_copy_r[96] | gopQ | CE=16
+u_fma/advance_copy_r[97] | gopQ | CE=16
+u_fma/advance_copy_r[98] | gopQ | CE=13
+u_fma/advance_copy_r[99] | gopQ | CE=16
+u_fma/advance_copy_r[100] | gopQ | CE=16
+u_fma/advance_copy_r[101] | gopQ | CE=16
+u_fma/advance_copy_r[102] | gopQ | CE=16
+u_fma/advance_copy_r[103] | gopQ | CE=13
+u_fma/advance_copy_r[104] | gopQ | CE=10
+u_fma/advance_copy_r[105] | gopQ | CE=10
+u_fma/advance_copy_r[106] | gopQ | CE=10
+u_fma/advance_copy_r[107] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[108] | gopQ | CE=2
+u_fma/advance_copy_r[109] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[110] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[111] | gopLUT6Q | CE=5
+u_fma/advance_copy_r[112] | gopQ | CE=16
+u_fma/advance_copy_r[113] | gopQ | CE=14
+u_fma/advance_copy_r[114] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[115] | gopQ | CE=2
+u_fma/advance_copy_r[116] | gopQ | CE=16
+u_fma/advance_copy_r[117] | gopQ | CE=16
+u_fma/advance_copy_r[118] | gopQ | CE=15
+u_fma/advance_copy_r[119] | gopQ | CE=6
+u_fma/advance_copy_r[120] | gopQ | CE=3
+u_fma/advance_copy_r[121] | gopQ | CE=12
+u_fma/advance_copy_r[122] | gopQ | CE=5
+u_fma/advance_copy_r[123] | gopQ | CE=4
+u_fma/advance_copy_r[124] | 未找到同名寄存器 | 未取得
+u_fma/advance_copy_r[125] | gopQ | CE=2
+u_fma/capacity_count0_r[0] | gopLUT6QL5 | 未取得
+u_fma/capacity_count0_r[1] | 未找到同名寄存器 | 未取得
+u_fma/capacity_count1_r[0] | gopQ | 未取得
+u_fma/capacity_count1_r[1] | gopQ | 未取得
+u_fma/capacity_count2_r[0] | gopQ | 未取得
+u_fma/capacity_count2_r[1] | gopQ | 未取得
+u_fma/capacity_count3_r[0] | gopQ | 未取得
+u_fma/capacity_count3_r[1] | gopQ | 未取得
+u_fma/capacity_count4_r[0] | gopQ | 未取得
+u_fma/capacity_count4_r[1] | gopQ | 未取得
+u_fma/capacity_count5_r[0] | gopQ | 未取得
+u_fma/capacity_count5_r[1] | gopQ | 未取得
+u_fma/capacity_count6_r[0] | gopQ | 未取得
+u_fma/capacity_count6_r[1] | gopQ | 未取得
+u_fma/capacity_count7_r[0] | gopQ | 未取得
+u_fma/capacity_count7_r[1] | gopQ | 未取得
+u_fma/add_select_r[0] | gopLUT6QL5 | Other=24
+u_fma/add_select_r[1] | gopLUT6QL5 | 未取得
+u_fma/add_select_r[2] | gopLUT6Q | 未取得
+u_fma/add_select_r[3] | gopLUT6Q | Other=44
+u_fma/add_select_r[4] | gopLUT6Q | Other=40
+u_fma/add_select_r[5] | gopLUT6QL5 | Other=48
+u_fma/add_select_r[6] | gopLUT6QL5 | Other=35
+u_fma/add_select_r[7] | gopQ | Other=32
+u_fma/add_select_r[8] | gopQ | Other=29
+u_fma/add_select_r[9] | gopQ | Other=23
+u_fma/add_select_r[10] | gopQ | 未取得
+u_fma/add_select_r[11] | gopQ | Other=24
+u_fma/add_select_r[12] | gopQ | 未取得
+u_fma/add_select_r[13] | gopQ | Other=24
+u_fma/add_select_r[14] | gopQ | 未取得
+u_fma/add_select_r[15] | 未找到同名寄存器 | 未取得
+u_fma/add_select_r[16] | gopQ | 未取得
+u_fma/add_select_r[17] | gopQ | 未取得
+u_fma/add_select_r[18] | gopQ | 未取得
+u_fma/add_select_r[19] | gopQ | 未取得
+u_fma/add_select_r[20] | gopQ | 未取得
+u_fma/add_select_r[21] | gopQ | 未取得
+u_fma/add_class_valid_r[0] | gopLUT6QL5 | 未取得
+u_fma/add_class_valid_r[1] | gopQ | 未取得
+u_fma/add_class_valid_r[2] | gopQ | 未取得
+u_fma/add_class_valid_r[3] | gopQ | 未取得
+u_fma/add_class_valid_r[4] | gopQ | 未取得
+u_fma/add_class_valid_r[5] | gopQ | 未取得
+u_fma/add_class_valid_r[6] | gopQ | 未取得
+u_fma/add_class_kind_r[0] | gopLUT6Q | 未取得
+u_fma/add_class_kind_r[1] | gopQ | 未取得
+u_fma/add_class_kind_r[2] | gopQ | 未取得
+u_fma/add_class_kind_r[3] | gopQ | 未取得
+u_fma/add_class_kind_r[4] | gopQ | 未取得
+u_fma/add_class_kind_r[5] | gopQ | 未取得
+u_fma/add_class_kind_r[6] | gopQ | 未取得
+
+Family | Same-name placed registers / declared RTL bits
+advance_copy_r | 106/126
+capacity_count0_r | 1/2
+capacity_count1_r | 2/2
+capacity_count2_r | 2/2
+capacity_count3_r | 2/2
+capacity_count4_r | 2/2
+capacity_count5_r | 2/2
+capacity_count6_r | 2/2
+capacity_count7_r | 2/2
+add_select_r | 21/22
+add_class_valid_r | 7/7
+add_class_kind_r | 7/7
+
+Pipeline-enable leaf fanout above 16 in reported Device Map nets:
+
+All reported CE fanout above 16:
+u_fma/N65 | 104
+unit_req_ready_w | 103
+u_fma/N1947 | 36
+u_fma/N2574 | 36

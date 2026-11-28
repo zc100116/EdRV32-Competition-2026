@@ -1,0 +1,3 @@
+PDS phase log lines about APM groups, cascade, CPI/CPO and internal registers.
+
+[device_map] I: Infer APM group, base inst: u_fma/u_product/u_term0/u_apm/gopapm, insts:12.

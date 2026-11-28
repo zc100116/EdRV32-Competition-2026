@@ -1,0 +1,1619 @@
+Worst 20 Slow Corner setup paths.
+
+Rank 1
+Startpoint  : u_fma/u_product/u_term11/u_apm/gopapm/CLK
+Endpoint    : u_fma/t1_magnitude_r[0]/opit_0_L6Q_perm/I5
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.045  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.294
+  Launch Clock Delay      :  3.806
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.660       3.806         ntclkbufg_0
+ APM_587_828/CLK_0                                                         r       u_fma/u_product/u_term11/u_apm/gopapm/CLK
+
+ APM_587_828/P_0[9]                tco                   0.437       4.243 r       u_fma/u_product/u_term11/u_apm/gopapm/P[9]
+                                   net (fanout=18)       0.733       4.976         u_fma/product_w [105]
+ CLMS_609_823/Y0                   td                    0.188       5.164 r       u_fma/N2243_8[3]/gateop_perm/Y
+                                   net (fanout=234)      0.443       5.607         u_fma/_N16027
+ CLMA_609_840/Y0                   td                    0.240       5.847 r       u_fma/N2275_3_94/LUT6_inst_perm/L6
+                                   net (fanout=4)        0.610       6.457         u_fma/_N11023
+ CLMA_609_858/Y2                   td                    0.101       6.558 r       u_fma/N2275_4_94/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.458       7.016         u_fma/_N11192
+ CLMA_615_841/Y3                   td                    0.223       7.239 r       u_fma/N2282_171_418/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.250       7.489         u_fma/_N25587
+ CLMA_615_840/Y3                   td                    0.188       7.677 r       u_fma/N2282_171_281/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.473       8.150         u_fma/_N23544_5
+ CLMA_639_834/Y2                   td                    0.240       8.390 r       u_fma/N2282_171_6/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.297       8.687         u_fma/_N23189
+ CLMS_633_829/Y3                   td                    0.217       8.904 r       u_fma/N2282_2123_725/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.294       9.198         u_fma/_N25630
+ CLMS_639_823/D5                                                           r       u_fma/t1_magnitude_r[0]/opit_0_L6Q_perm/I5
+
+ Data arrival time                                                   9.198         Logic Levels: 7
+                                                                                   Logic: 1.834ns(34.013%), Route: 3.558ns(65.987%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.456       9.355         ntclkbufg_0
+ CLMS_639_823/CLK                                                          r       u_fma/t1_magnitude_r[0]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.467       9.822
+ clock uncertainty                                      -0.050       9.772
+
+ Setup time                                             -0.117       9.655
+
+ Data required time                                                  9.655
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.655
+ Data arrival time                                                   9.198
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.457
+
+Rank 2
+Startpoint  : u_fma/s2_reverse_select_r[8]/opit_0/CLK
+Endpoint    : u_fma/t1_magnitude_r[0]/opit_0_L6Q_perm/I2
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.068  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.294
+  Launch Clock Delay      :  3.829
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.683       3.829         ntclkbufg_0
+ CLMA_615_870/CLK                                                          r       u_fma/s2_reverse_select_r[8]/opit_0/CLK
+
+ CLMA_615_870/CR0                  tco                   0.261       4.090 r       u_fma/s2_reverse_select_r[8]/opit_0/Q
+                                   net (fanout=16)       0.436       4.526         u_fma/s2_reverse_select_r [8]
+ CLMS_597_871/Y0                   td                    0.235       4.761 r       u_fma/N2232_5[1]/LUT6D_inst_perm/L6
+                                   net (fanout=2)        0.684       5.445         u_fma/_N18645
+ CLMS_609_823/Y2                   td                    0.240       5.685 r       u_fma/N2275_3_121/LUT6_inst_perm/L6
+                                   net (fanout=5)        0.977       6.662         u_fma/_N11050
+ CLMS_639_853/Y2                   td                    0.113       6.775 r       u_fma/N2275_4_121/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.444       7.219         u_fma/_N11219
+ CLMS_633_859/Y1                   td                    0.101       7.320 r       u_fma/N2282_171_103/gateop_perm/L6
+                                   net (fanout=1)        0.256       7.576         u_fma/_N23498_3
+ CLMA_633_858/CR3                  td                    0.507       8.083 f       u_fma/N2282_2123_769/gateop_l6l5_perm/L5
+                                   net (fanout=1)        0.465       8.548         _N5
+ CLMA_639_822/Y3                   td                    0.188       8.736 r       u_fma/N2282_2123_7/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.250       8.986         u_fma/_N23048
+ CLMS_639_823/D2                                                           r       u_fma/t1_magnitude_r[0]/opit_0_L6Q_perm/I2
+
+ Data arrival time                                                   8.986         Logic Levels: 6
+                                                                                   Logic: 1.645ns(31.898%), Route: 3.512ns(68.102%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.456       9.355         ntclkbufg_0
+ CLMS_639_823/CLK                                                          r       u_fma/t1_magnitude_r[0]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.467       9.822
+ clock uncertainty                                      -0.050       9.772
+
+ Setup time                                             -0.228       9.544
+
+ Data required time                                                  9.544
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.544
+ Data arrival time                                                   8.986
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.558
+
+Rank 3
+Startpoint  : a_r[13]/opit_0/CLK
+Endpoint    : u_fma/e1_add_limit_r[5]/opit_0_L6Q_perm/I5
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.062  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.219
+  Launch Clock Delay      :  3.759
+  Clock Pessimism Removal :  0.478
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.613       3.759         ntclkbufg_0
+ CLMS_513_727/CLK                                                          r       a_r[13]/opit_0/CLK
+
+ CLMS_513_727/Q2                   tco                   0.213       3.972 r       a_r[13]/opit_0/Q
+                                   net (fanout=6)        1.137       5.109         a_r[13]
+ CLMA_567_721/Y2                   td                    0.240       5.349 r       u_fma/e1_a_mantissa_r[13]/opit_0_L6QL5_perm/L6
+                                   net (fanout=1)        0.428       5.777         u_fma/a_i [13]
+ CLMA_573_708/COUT                 td                    0.317       6.094 f       u_fma/N1060.lt_7/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.094         u_fma/N1060.co [14]
+ CLMA_573_714/COUT                 td                    0.090       6.184 f       u_fma/N1060.lt_11/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.184         u_fma/N1060.co [22]
+ CLMA_573_720/COUT                 td                    0.090       6.274 f       u_fma/N1060.lt_15/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.274         u_fma/N1060.co [30]
+ CLMA_573_726/COUT                 td                    0.090       6.364 f       u_fma/N1060.lt_19/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.364         u_fma/N1060.co [38]
+ CLMA_573_732/COUT                 td                    0.090       6.454 f       u_fma/N1060.lt_23/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.454         u_fma/N1060.co [46]
+ CLMA_573_738/COUT                 td                    0.090       6.544 f       u_fma/N1060.lt_27/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.544         u_fma/N1060.co [54]
+ CLMA_573_744/CR3                  td                    0.211       6.755 r       u_fma/N1060.lt_31/gateop_l6l5_perm/L5
+                                   net (fanout=130)      0.604       7.359         _N0
+ CLMS_561_739/Y1                   td                    0.078       7.437 r       u_fma/N1108[7]/LUT6D_inst_perm/L6
+                                   net (fanout=4)        0.631       8.068         u_fma/add_big_exp_w [7]
+ CLMA_561_768/Y2                   td                    0.113       8.181 r       u_fma/e1_add_anchor_r[7]/opit_0_L5Q_perm/L6
+                                   net (fanout=9)        0.798       8.979         u_fma/_N24829
+ CLMA_519_768/A5                                                           r       u_fma/e1_add_limit_r[5]/opit_0_L6Q_perm/I5
+
+ Data arrival time                                                   8.979         Logic Levels: 10
+                                                                                   Logic: 1.622ns(31.073%), Route: 3.598ns(68.927%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.381       9.280         ntclkbufg_0
+ CLMA_519_768/CLK                                                          r       u_fma/e1_add_limit_r[5]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.478       9.758
+ clock uncertainty                                      -0.050       9.708
+
+ Setup time                                             -0.123       9.585
+
+ Data required time                                                  9.585
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.585
+ Data arrival time                                                   8.979
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.606
+
+Rank 4
+Startpoint  : u_fma/s2_reverse_count_r[3]/opit_0_L6Q_perm/CLK
+Endpoint    : u_fma/t1_magnitude_r[0]/opit_0_L6Q_perm/I3
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.045  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.294
+  Launch Clock Delay      :  3.806
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.660       3.806         ntclkbufg_0
+ CLMA_591_816/CLK                                                          r       u_fma/s2_reverse_count_r[3]/opit_0_L6Q_perm/CLK
+
+ CLMA_591_816/Q0                   tco                   0.213       4.019 r       u_fma/s2_reverse_count_r[3]/opit_0_L6Q_perm/L6Q
+                                   net (fanout=2)        0.447       4.466         u_fma/s2_reverse_count_r [3]
+ CLMA_603_816/Y3                   td                    0.113       4.579 r       u_fma/N2243_9[3]/LUT6D_inst_perm/L6
+                                   net (fanout=6)        0.296       4.875         u_fma/_N16035
+ CLMA_609_822/Y3                   td                    0.113       4.988 r       u_fma/N2269_6[3]_2/gateop_perm/L6
+                                   net (fanout=236)      0.841       5.829         u_fma/_N25976
+ CLMA_639_786/Y2                   td                    0.240       6.069 r       u_fma/N2273_3_26/LUT6_inst_perm/L6
+                                   net (fanout=5)        0.611       6.680         u_fma/_N9772
+ CLMA_645_798/Y3                   td                    0.078       6.758 r       u_fma/N2273_5_26/LUT6_inst_perm/L6
+                                   net (fanout=3)        0.558       7.316         u_fma/_N10110
+ CLMA_651_787/COUT                 td                    0.369       7.685 f       u_fma/N2284_2_326/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.685         u_fma/_N26156
+ CLMA_651_793/CR1                  td                    0.207       7.892 r       u_fma/N2284_2_324/gateop_l6l5_perm/L5
+                                   net (fanout=1)        0.597       8.489         _N8
+ CLMA_639_810/Y0                   td                    0.240       8.729 r       u_fma/N2284_2/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.263       8.992         u_fma/N2284
+ CLMS_639_823/D3                                                           r       u_fma/t1_magnitude_r[0]/opit_0_L6Q_perm/I3
+
+ Data arrival time                                                   8.992         Logic Levels: 7
+                                                                                   Logic: 1.573ns(30.332%), Route: 3.613ns(69.668%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.456       9.355         ntclkbufg_0
+ CLMS_639_823/CLK                                                          r       u_fma/t1_magnitude_r[0]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.467       9.822
+ clock uncertainty                                      -0.050       9.772
+
+ Setup time                                             -0.152       9.620
+
+ Data required time                                                  9.620
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.620
+ Data arrival time                                                   8.992
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.628
+
+Rank 5
+Startpoint  : u_fma/u_product/residue11_r[71]/opit_0/CLK
+Endpoint    : u_fma/s1_forward_low_r[83]/opit_0/D
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.016  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.268
+  Launch Clock Delay      :  3.794
+  Clock Pessimism Removal :  0.510
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.648       3.794         ntclkbufg_0
+ CLMS_561_841/CLK                                                          r       u_fma/u_product/residue11_r[71]/opit_0/CLK
+
+ CLMS_561_841/CR2                  tco                   0.261       4.055 r       u_fma/u_product/residue11_r[71]/opit_0/Q
+                                   net (fanout=4)        0.587       4.642         u_fma/product_w [71]
+ CLMA_573_828/Y3                   td                    0.188       4.830 r       u_fma/N1053_61/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.463       5.293         u_fma/_N24614
+ CLMS_561_799/Y0                   td                    0.240       5.533 r       u_fma/N1053_91/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.447       5.980         u_fma/_N24644
+ CLMA_567_780/Y2                   td                    0.240       6.220 r       u_fma/N1696[0]_3/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.580       6.800         u_fma/sum_a_w [0]
+ CLMA_561_786/COUT                 td                    0.198       6.998 f       u_fma/s1_forward_low_r[2]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.998         u_fma/_N13223
+ CLMA_561_792/COUT                 td                    0.090       7.088 f       u_fma/s1_forward_low_r[6]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.088         u_fma/_N13227
+ CLMA_561_798/COUT                 td                    0.090       7.178 f       u_fma/s1_forward_low_r[10]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.178         u_fma/_N13231
+ CLMA_561_804/COUT                 td                    0.090       7.268 f       u_fma/s1_forward_low_r[14]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.268         u_fma/_N13235
+ CLMA_561_810/COUT                 td                    0.090       7.358 f       u_fma/sum_forward_low_w_19/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.358         u_fma/_N13239
+ CLMA_561_816/COUT                 td                    0.090       7.448 f       u_fma/s1_forward_low_r[22]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.448         u_fma/_N13243
+ CLMA_561_822/COUT                 td                    0.090       7.538 f       u_fma/s1_forward_low_r[26]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.538         u_fma/_N13247
+ CLMA_561_828/COUT                 td                    0.090       7.628 f       u_fma/s1_forward_low_r[30]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.628         u_fma/_N13251
+ CLMA_561_834/COUT                 td                    0.090       7.718 f       u_fma/sum_forward_low_w_35/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.718         u_fma/_N13255
+ CLMA_561_840/COUT                 td                    0.090       7.808 f       u_fma/s1_forward_low_r[38]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.808         u_fma/_N13259
+ CLMA_561_846/COUT                 td                    0.090       7.898 f       u_fma/s1_forward_low_r[42]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.898         u_fma/_N13263
+ CLMA_561_852/COUT                 td                    0.090       7.988 f       u_fma/s1_forward_low_r[46]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.988         u_fma/_N13267
+ CLMA_561_858/COUT                 td                    0.090       8.078 f       u_fma/sum_forward_low_w_51/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.078         u_fma/_N13271
+ CLMA_561_864/COUT                 td                    0.090       8.168 f       u_fma/s1_forward_low_r[54]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.168         u_fma/_N13275
+ CLMA_561_870/COUT                 td                    0.090       8.258 f       u_fma/s1_forward_low_r[58]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.258         u_fma/_N13279
+ CLMA_561_876/COUT                 td                    0.090       8.348 f       u_fma/s1_forward_low_r[62]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.348         u_fma/_N13283
+ CLMA_561_882/COUT                 td                    0.090       8.438 f       u_fma/sum_forward_low_w_67/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.438         u_fma/_N13287
+ CLMA_561_888/COUT                 td                    0.090       8.528 f       u_fma/s1_forward_low_r[70]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.528         u_fma/_N13291
+ CLMA_561_894/COUT                 td                    0.090       8.618 f       u_fma/s1_forward_low_r[74]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.618         u_fma/_N13295
+ CLMA_561_900/COUT                 td                    0.090       8.708 f       u_fma/s1_forward_low_r[78]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.708         u_fma/_N13299
+ CLMA_561_906/COUT                 td                    0.090       8.798 f       u_fma/sum_forward_low_w_83/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.798         u_fma/_N13303
+ CLMA_561_912/Y0                   td                    0.071       8.869 r       u_fma/sum_forward_low_w_84/gateop_perm/Y
+                                   net (fanout=1)        0.141       9.010         u_fma/sum_forward_low_w [83]
+ CLMA_561_912/M2                                                           r       u_fma/s1_forward_low_r[83]/opit_0/D
+
+ Data arrival time                                                   9.010         Logic Levels: 25
+                                                                                   Logic: 2.998ns(57.477%), Route: 2.218ns(42.523%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.430       9.329         ntclkbufg_0
+ CLMA_561_912/CLK                                                          r       u_fma/s1_forward_low_r[83]/opit_0/CLK
+ clock pessimism                                         0.510       9.839
+ clock uncertainty                                      -0.050       9.789
+
+ Setup time                                             -0.143       9.646
+
+ Data required time                                                  9.646
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.646
+ Data arrival time                                                   9.010
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.636
+
+Rank 6
+Startpoint  : u_fma/u_product/residue11_r[71]/opit_0/CLK
+Endpoint    : u_fma/s1_forward_low_r[49]/opit_0/D
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.058  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.269
+  Launch Clock Delay      :  3.794
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.648       3.794         ntclkbufg_0
+ CLMS_561_841/CLK                                                          r       u_fma/u_product/residue11_r[71]/opit_0/CLK
+
+ CLMS_561_841/CR2                  tco                   0.261       4.055 r       u_fma/u_product/residue11_r[71]/opit_0/Q
+                                   net (fanout=4)        0.587       4.642         u_fma/product_w [71]
+ CLMA_573_828/Y3                   td                    0.188       4.830 r       u_fma/N1053_61/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.463       5.293         u_fma/_N24614
+ CLMS_561_799/Y0                   td                    0.240       5.533 r       u_fma/N1053_91/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.447       5.980         u_fma/_N24644
+ CLMA_567_780/Y2                   td                    0.240       6.220 r       u_fma/N1696[0]_3/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.580       6.800         u_fma/sum_a_w [0]
+ CLMA_561_786/COUT                 td                    0.198       6.998 f       u_fma/s1_forward_low_r[2]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.998         u_fma/_N13223
+ CLMA_561_792/COUT                 td                    0.090       7.088 f       u_fma/s1_forward_low_r[6]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.088         u_fma/_N13227
+ CLMA_561_798/COUT                 td                    0.090       7.178 f       u_fma/s1_forward_low_r[10]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.178         u_fma/_N13231
+ CLMA_561_804/COUT                 td                    0.090       7.268 f       u_fma/s1_forward_low_r[14]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.268         u_fma/_N13235
+ CLMA_561_810/COUT                 td                    0.090       7.358 f       u_fma/sum_forward_low_w_19/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.358         u_fma/_N13239
+ CLMA_561_816/COUT                 td                    0.090       7.448 f       u_fma/s1_forward_low_r[22]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.448         u_fma/_N13243
+ CLMA_561_822/COUT                 td                    0.090       7.538 f       u_fma/s1_forward_low_r[26]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.538         u_fma/_N13247
+ CLMA_561_828/COUT                 td                    0.090       7.628 f       u_fma/s1_forward_low_r[30]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.628         u_fma/_N13251
+ CLMA_561_834/COUT                 td                    0.090       7.718 f       u_fma/sum_forward_low_w_35/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.718         u_fma/_N13255
+ CLMA_561_840/COUT                 td                    0.090       7.808 f       u_fma/s1_forward_low_r[38]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.808         u_fma/_N13259
+ CLMA_561_846/COUT                 td                    0.090       7.898 f       u_fma/s1_forward_low_r[42]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.898         u_fma/_N13263
+ CLMA_561_852/COUT                 td                    0.090       7.988 f       u_fma/s1_forward_low_r[46]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.988         u_fma/_N13267
+ CLMA_561_858/Y2                   td                    0.157       8.145 r       u_fma/sum_forward_low_w_50/gateop_perm/Y
+                                   net (fanout=1)        0.813       8.958         u_fma/sum_forward_low_w [49]
+ CLMA_591_828/M1                                                           r       u_fma/s1_forward_low_r[49]/opit_0/D
+
+ Data arrival time                                                   8.958         Logic Levels: 16
+                                                                                   Logic: 2.274ns(44.036%), Route: 2.890ns(55.964%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.431       9.330         ntclkbufg_0
+ CLMA_591_828/CLK                                                          r       u_fma/s1_forward_low_r[49]/opit_0/CLK
+ clock pessimism                                         0.467       9.797
+ clock uncertainty                                      -0.050       9.747
+
+ Setup time                                             -0.143       9.604
+
+ Data required time                                                  9.604
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.604
+ Data arrival time                                                   8.958
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.646
+
+Rank 7
+Startpoint  : u_fma/u_product/residue11_r[71]/opit_0/CLK
+Endpoint    : u_fma/s1_forward_low_r[80]/opit_0/D
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.017  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.267
+  Launch Clock Delay      :  3.794
+  Clock Pessimism Removal :  0.510
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.648       3.794         ntclkbufg_0
+ CLMS_561_841/CLK                                                          r       u_fma/u_product/residue11_r[71]/opit_0/CLK
+
+ CLMS_561_841/CR2                  tco                   0.261       4.055 r       u_fma/u_product/residue11_r[71]/opit_0/Q
+                                   net (fanout=4)        0.587       4.642         u_fma/product_w [71]
+ CLMA_573_828/Y3                   td                    0.188       4.830 r       u_fma/N1053_61/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.463       5.293         u_fma/_N24614
+ CLMS_561_799/Y0                   td                    0.240       5.533 r       u_fma/N1053_91/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.447       5.980         u_fma/_N24644
+ CLMA_567_780/Y2                   td                    0.240       6.220 r       u_fma/N1696[0]_3/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.580       6.800         u_fma/sum_a_w [0]
+ CLMA_561_786/COUT                 td                    0.198       6.998 f       u_fma/s1_forward_low_r[2]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.998         u_fma/_N13223
+ CLMA_561_792/COUT                 td                    0.090       7.088 f       u_fma/s1_forward_low_r[6]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.088         u_fma/_N13227
+ CLMA_561_798/COUT                 td                    0.090       7.178 f       u_fma/s1_forward_low_r[10]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.178         u_fma/_N13231
+ CLMA_561_804/COUT                 td                    0.090       7.268 f       u_fma/s1_forward_low_r[14]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.268         u_fma/_N13235
+ CLMA_561_810/COUT                 td                    0.090       7.358 f       u_fma/sum_forward_low_w_19/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.358         u_fma/_N13239
+ CLMA_561_816/COUT                 td                    0.090       7.448 f       u_fma/s1_forward_low_r[22]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.448         u_fma/_N13243
+ CLMA_561_822/COUT                 td                    0.090       7.538 f       u_fma/s1_forward_low_r[26]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.538         u_fma/_N13247
+ CLMA_561_828/COUT                 td                    0.090       7.628 f       u_fma/s1_forward_low_r[30]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.628         u_fma/_N13251
+ CLMA_561_834/COUT                 td                    0.090       7.718 f       u_fma/sum_forward_low_w_35/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.718         u_fma/_N13255
+ CLMA_561_840/COUT                 td                    0.090       7.808 f       u_fma/s1_forward_low_r[38]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.808         u_fma/_N13259
+ CLMA_561_846/COUT                 td                    0.090       7.898 f       u_fma/s1_forward_low_r[42]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.898         u_fma/_N13263
+ CLMA_561_852/COUT                 td                    0.090       7.988 f       u_fma/s1_forward_low_r[46]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.988         u_fma/_N13267
+ CLMA_561_858/COUT                 td                    0.090       8.078 f       u_fma/sum_forward_low_w_51/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.078         u_fma/_N13271
+ CLMA_561_864/COUT                 td                    0.090       8.168 f       u_fma/s1_forward_low_r[54]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.168         u_fma/_N13275
+ CLMA_561_870/COUT                 td                    0.090       8.258 f       u_fma/s1_forward_low_r[58]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.258         u_fma/_N13279
+ CLMA_561_876/COUT                 td                    0.090       8.348 f       u_fma/s1_forward_low_r[62]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.348         u_fma/_N13283
+ CLMA_561_882/COUT                 td                    0.090       8.438 f       u_fma/sum_forward_low_w_67/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.438         u_fma/_N13287
+ CLMA_561_888/COUT                 td                    0.090       8.528 f       u_fma/s1_forward_low_r[70]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.528         u_fma/_N13291
+ CLMA_561_894/COUT                 td                    0.090       8.618 f       u_fma/s1_forward_low_r[74]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.618         u_fma/_N13295
+ CLMA_561_900/COUT                 td                    0.090       8.708 f       u_fma/s1_forward_low_r[78]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.708         u_fma/_N13299
+ CLMA_561_906/Y1                   td                    0.142       8.850 r       u_fma/sum_forward_low_w_81/gateop_perm/Y
+                                   net (fanout=1)        0.141       8.991         u_fma/sum_forward_low_w [80]
+ CLMS_561_907/M0                                                           r       u_fma/s1_forward_low_r[80]/opit_0/D
+
+ Data arrival time                                                   8.991         Logic Levels: 24
+                                                                                   Logic: 2.979ns(57.322%), Route: 2.218ns(42.678%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.429       9.328         ntclkbufg_0
+ CLMS_561_907/CLK                                                          r       u_fma/s1_forward_low_r[80]/opit_0/CLK
+ clock pessimism                                         0.510       9.838
+ clock uncertainty                                      -0.050       9.788
+
+ Setup time                                             -0.143       9.645
+
+ Data required time                                                  9.645
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.645
+ Data arrival time                                                   8.991
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.654
+
+Rank 8
+Startpoint  : u_fma/u_product/residue11_r[71]/opit_0/CLK
+Endpoint    : u_fma/s1_forward_low_r[82]/opit_0/D
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.017  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.267
+  Launch Clock Delay      :  3.794
+  Clock Pessimism Removal :  0.510
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.648       3.794         ntclkbufg_0
+ CLMS_561_841/CLK                                                          r       u_fma/u_product/residue11_r[71]/opit_0/CLK
+
+ CLMS_561_841/CR2                  tco                   0.261       4.055 r       u_fma/u_product/residue11_r[71]/opit_0/Q
+                                   net (fanout=4)        0.587       4.642         u_fma/product_w [71]
+ CLMA_573_828/Y3                   td                    0.188       4.830 r       u_fma/N1053_61/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.463       5.293         u_fma/_N24614
+ CLMS_561_799/Y0                   td                    0.240       5.533 r       u_fma/N1053_91/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.447       5.980         u_fma/_N24644
+ CLMA_567_780/Y2                   td                    0.240       6.220 r       u_fma/N1696[0]_3/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.580       6.800         u_fma/sum_a_w [0]
+ CLMA_561_786/COUT                 td                    0.198       6.998 f       u_fma/s1_forward_low_r[2]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.998         u_fma/_N13223
+ CLMA_561_792/COUT                 td                    0.090       7.088 f       u_fma/s1_forward_low_r[6]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.088         u_fma/_N13227
+ CLMA_561_798/COUT                 td                    0.090       7.178 f       u_fma/s1_forward_low_r[10]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.178         u_fma/_N13231
+ CLMA_561_804/COUT                 td                    0.090       7.268 f       u_fma/s1_forward_low_r[14]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.268         u_fma/_N13235
+ CLMA_561_810/COUT                 td                    0.090       7.358 f       u_fma/sum_forward_low_w_19/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.358         u_fma/_N13239
+ CLMA_561_816/COUT                 td                    0.090       7.448 f       u_fma/s1_forward_low_r[22]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.448         u_fma/_N13243
+ CLMA_561_822/COUT                 td                    0.090       7.538 f       u_fma/s1_forward_low_r[26]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.538         u_fma/_N13247
+ CLMA_561_828/COUT                 td                    0.090       7.628 f       u_fma/s1_forward_low_r[30]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.628         u_fma/_N13251
+ CLMA_561_834/COUT                 td                    0.090       7.718 f       u_fma/sum_forward_low_w_35/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.718         u_fma/_N13255
+ CLMA_561_840/COUT                 td                    0.090       7.808 f       u_fma/s1_forward_low_r[38]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.808         u_fma/_N13259
+ CLMA_561_846/COUT                 td                    0.090       7.898 f       u_fma/s1_forward_low_r[42]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.898         u_fma/_N13263
+ CLMA_561_852/COUT                 td                    0.090       7.988 f       u_fma/s1_forward_low_r[46]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.988         u_fma/_N13267
+ CLMA_561_858/COUT                 td                    0.090       8.078 f       u_fma/sum_forward_low_w_51/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.078         u_fma/_N13271
+ CLMA_561_864/COUT                 td                    0.090       8.168 f       u_fma/s1_forward_low_r[54]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.168         u_fma/_N13275
+ CLMA_561_870/COUT                 td                    0.090       8.258 f       u_fma/s1_forward_low_r[58]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.258         u_fma/_N13279
+ CLMA_561_876/COUT                 td                    0.090       8.348 f       u_fma/s1_forward_low_r[62]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.348         u_fma/_N13283
+ CLMA_561_882/COUT                 td                    0.090       8.438 f       u_fma/sum_forward_low_w_67/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.438         u_fma/_N13287
+ CLMA_561_888/COUT                 td                    0.090       8.528 f       u_fma/s1_forward_low_r[70]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.528         u_fma/_N13291
+ CLMA_561_894/COUT                 td                    0.090       8.618 f       u_fma/s1_forward_low_r[74]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.618         u_fma/_N13295
+ CLMA_561_900/COUT                 td                    0.090       8.708 f       u_fma/s1_forward_low_r[78]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.708         u_fma/_N13299
+ CLMA_561_906/Y3                   td                    0.224       8.932 r       u_fma/sum_forward_low_w_83/gateop_perm/Y
+                                   net (fanout=1)        0.141       9.073         u_fma/sum_forward_low_w [82]
+ CLMA_561_906/M3                                                           r       u_fma/s1_forward_low_r[82]/opit_0/D
+
+ Data arrival time                                                   9.073         Logic Levels: 24
+                                                                                   Logic: 3.061ns(57.984%), Route: 2.218ns(42.016%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.429       9.328         ntclkbufg_0
+ CLMA_561_906/CLK                                                          r       u_fma/s1_forward_low_r[82]/opit_0/CLK
+ clock pessimism                                         0.510       9.838
+ clock uncertainty                                      -0.050       9.788
+
+ Setup time                                             -0.034       9.754
+
+ Data required time                                                  9.754
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.754
+ Data arrival time                                                   9.073
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.681
+
+Rank 9
+Startpoint  : u_fma/p13_far_r/opit_0_L5Q_perm/CLK
+Endpoint    : u_fma/s1_forward_count2_r[0]/opit_0_L8Q_perm/M2
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.079  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.255
+  Launch Clock Delay      :  3.801
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.655       3.801         ntclkbufg_0
+ CLMA_573_840/CLK                                                          r       u_fma/p13_far_r/opit_0_L5Q_perm/CLK
+
+ CLMA_573_840/CR3                  tco                   0.260       4.061 r       u_fma/p13_far_r/opit_0_L5Q_perm/L5Q
+                                   net (fanout=162)      0.635       4.696         u_fma/p13_far_r
+ CLMA_567_852/Y3                   td                    0.101       4.797 r       u_fma/s1_a_high_r[11]/opit_0_L6QL5_perm/L6
+                                   net (fanout=4)        0.679       5.476         u_fma/sum_a_w [95]
+ CLMS_543_865/Y2                   td                    0.235       5.711 r       u_fma/N1891[95]/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.256       5.967         u_fma/N1891 [95]
+ CLMS_543_865/CR3                  td                    0.329       6.296 r       u_fma/s1_b_high_r[24]/opit_0_L6Q_LUT6DQL5_perm/L5
+                                   net (fanout=2)        0.688       6.984         u_fma/forward_predict_w [95]
+ CLMA_573_876/Y2                   td                    0.235       7.219 r       u_fma/u_forward2/N8_3/gateop_perm/L6
+                                   net (fanout=3)        0.126       7.345         u_fma/u_forward2/hit_2_4_w
+ CLMA_573_876/Y3                   td                    0.101       7.446 r       u_fma/u_forward2/N40_4/gateop_perm/L6
+                                   net (fanout=4)        0.590       8.036         u_fma/u_forward2/hit_4_2_w
+ CLMA_555_859/CR1                  td                    0.222       8.258 r       u_fma/s1_b_high_r[11]/opit_0_L6Q_LUT6DQL5_perm/L5
+                                   net (fanout=6)        0.688       8.946         u_fma/u_forward2/hit_16_0_w
+ CLMA_555_858/M2                                                           r       u_fma/s1_forward_count2_r[0]/opit_0_L8Q_perm/M2
+
+ Data arrival time                                                   8.946         Logic Levels: 6
+                                                                                   Logic: 1.483ns(28.824%), Route: 3.662ns(71.176%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.417       9.316         ntclkbufg_0
+ CLMA_555_858/CLK                                                          r       u_fma/s1_forward_count2_r[0]/opit_0_L8Q_perm/CLK
+ clock pessimism                                         0.467       9.783
+ clock uncertainty                                      -0.050       9.733
+
+ Setup time                                             -0.105       9.628
+
+ Data required time                                                  9.628
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.628
+ Data arrival time                                                   8.946
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.682
+
+Rank 10
+Startpoint  : u_fma/s1_b_high_r[10]/opit_0_L6Q_LUT6DQL5_perm/CLK
+Endpoint    : u_fma/s2_reverse_select_r[1]/opit_0/D
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.054  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.268
+  Launch Clock Delay      :  3.789
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.643       3.789         ntclkbufg_0
+ CLMS_543_865/CLK                                                          r       u_fma/s1_b_high_r[10]/opit_0_L6Q_LUT6DQL5_perm/CLK
+
+ CLMS_543_865/Q0                   tco                   0.213       4.002 r       u_fma/s1_b_high_r[10]/opit_0_L6Q_LUT6DQL5_perm/L6Q
+                                   net (fanout=3)        1.312       5.314         u_fma/s1_b_high_r [10]
+ CLMA_579_810/COUT                 td                    0.160       5.474 r       u_fma/s2_forward_r[94]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       5.474         u_fma/_N13424
+ CLMA_579_816/COUT                 td                    0.090       5.564 f       u_fma/forward_high_w_15/gateop_perm/COUT
+                                   net (fanout=1)        0.000       5.564         u_fma/_N13428
+ CLMA_579_822/COUT                 td                    0.090       5.654 f       u_fma/s2_forward_r[102]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       5.654         u_fma/_N13432
+ CLMA_579_828/COUT                 td                    0.090       5.744 f       u_fma/s2_forward_r[106]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       5.744         u_fma/_N13436
+ CLMA_579_834/COUT                 td                    0.090       5.834 f       u_fma/s2_forward_r[110]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       5.834         u_fma/_N13440
+ CLMA_579_840/COUT                 td                    0.090       5.924 f       u_fma/forward_high_w_31/gateop_perm/COUT
+                                   net (fanout=1)        0.000       5.924         u_fma/_N13444
+ CLMA_579_846/COUT                 td                    0.090       6.014 f       u_fma/s2_forward_r[118]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.014         u_fma/_N13448
+ CLMA_579_852/COUT                 td                    0.090       6.104 f       u_fma/s2_forward_r[122]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.104         u_fma/_N13452
+ CLMA_579_858/COUT                 td                    0.090       6.194 f       u_fma/s2_forward_r[126]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.194         u_fma/_N13456
+ CLMA_579_864/COUT                 td                    0.090       6.284 f       u_fma/forward_high_w_47/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.284         u_fma/_N13460
+ CLMA_579_870/COUT                 td                    0.090       6.374 f       u_fma/s2_forward_r[134]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.374         u_fma/_N13464
+ CLMA_579_876/COUT                 td                    0.090       6.464 f       u_fma/s2_forward_r[138]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.464         u_fma/_N13468
+ CLMA_579_882/COUT                 td                    0.090       6.554 f       u_fma/s2_forward_r[142]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.554         u_fma/_N13472
+ CLMA_579_888/COUT                 td                    0.090       6.644 f       u_fma/forward_high_w_63/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.644         u_fma/_N13476
+ CLMA_579_894/COUT                 td                    0.090       6.734 f       u_fma/s2_forward_r[150]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.734         u_fma/_N13480
+ CLMA_579_900/COUT                 td                    0.090       6.824 f       u_fma/s2_forward_r[154]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.824         u_fma/_N13484
+ CLMA_579_906/COUT                 td                    0.090       6.914 f       u_fma/s2_forward_r[158]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.914         u_fma/_N13488
+ CLMA_579_912/COUT                 td                    0.090       7.004 f       u_fma/forward_high_w_79/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.004         u_fma/_N13492
+ CLMA_579_918/COUT                 td                    0.090       7.094 f       u_fma/s2_forward_r[166]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.094         u_fma/_N13496
+ CLMA_579_924/Y1                   td                    0.142       7.236 r       u_fma/forward_high_w_85/gateop_perm/Y
+                                   net (fanout=13)       1.681       8.917         u_fma/s2_reverse_select_next_w [0]
+ CLMA_603_786/M2                                                           r       u_fma/s2_reverse_select_r[1]/opit_0/D
+
+ Data arrival time                                                   8.917         Logic Levels: 20
+                                                                                   Logic: 2.135ns(41.634%), Route: 2.993ns(58.366%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.430       9.329         ntclkbufg_0
+ CLMA_603_786/CLK                                                          r       u_fma/s2_reverse_select_r[1]/opit_0/CLK
+ clock pessimism                                         0.467       9.796
+ clock uncertainty                                      -0.050       9.746
+
+ Setup time                                             -0.143       9.603
+
+ Data required time                                                  9.603
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.603
+ Data arrival time                                                   8.917
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.686
+
+Rank 11
+Startpoint  : u_fma/u_product/residue11_r[71]/opit_0/CLK
+Endpoint    : u_fma/s1_forward_low_r[48]/opit_0/D
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.058  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.269
+  Launch Clock Delay      :  3.794
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.648       3.794         ntclkbufg_0
+ CLMS_561_841/CLK                                                          r       u_fma/u_product/residue11_r[71]/opit_0/CLK
+
+ CLMS_561_841/CR2                  tco                   0.261       4.055 r       u_fma/u_product/residue11_r[71]/opit_0/Q
+                                   net (fanout=4)        0.587       4.642         u_fma/product_w [71]
+ CLMA_573_828/Y3                   td                    0.188       4.830 r       u_fma/N1053_61/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.463       5.293         u_fma/_N24614
+ CLMS_561_799/Y0                   td                    0.240       5.533 r       u_fma/N1053_91/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.447       5.980         u_fma/_N24644
+ CLMA_567_780/Y2                   td                    0.240       6.220 r       u_fma/N1696[0]_3/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.580       6.800         u_fma/sum_a_w [0]
+ CLMA_561_786/COUT                 td                    0.198       6.998 f       u_fma/s1_forward_low_r[2]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.998         u_fma/_N13223
+ CLMA_561_792/COUT                 td                    0.090       7.088 f       u_fma/s1_forward_low_r[6]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.088         u_fma/_N13227
+ CLMA_561_798/COUT                 td                    0.090       7.178 f       u_fma/s1_forward_low_r[10]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.178         u_fma/_N13231
+ CLMA_561_804/COUT                 td                    0.090       7.268 f       u_fma/s1_forward_low_r[14]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.268         u_fma/_N13235
+ CLMA_561_810/COUT                 td                    0.090       7.358 f       u_fma/sum_forward_low_w_19/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.358         u_fma/_N13239
+ CLMA_561_816/COUT                 td                    0.090       7.448 f       u_fma/s1_forward_low_r[22]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.448         u_fma/_N13243
+ CLMA_561_822/COUT                 td                    0.090       7.538 f       u_fma/s1_forward_low_r[26]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.538         u_fma/_N13247
+ CLMA_561_828/COUT                 td                    0.090       7.628 f       u_fma/s1_forward_low_r[30]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.628         u_fma/_N13251
+ CLMA_561_834/COUT                 td                    0.090       7.718 f       u_fma/sum_forward_low_w_35/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.718         u_fma/_N13255
+ CLMA_561_840/COUT                 td                    0.090       7.808 f       u_fma/s1_forward_low_r[38]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.808         u_fma/_N13259
+ CLMA_561_846/COUT                 td                    0.090       7.898 f       u_fma/s1_forward_low_r[42]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.898         u_fma/_N13263
+ CLMA_561_852/COUT                 td                    0.090       7.988 f       u_fma/s1_forward_low_r[46]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.988         u_fma/_N13267
+ CLMA_561_858/Y1                   td                    0.142       8.130 r       u_fma/sum_forward_low_w_49/gateop_perm/Y
+                                   net (fanout=1)        0.778       8.908         u_fma/sum_forward_low_w [48]
+ CLMA_591_828/M0                                                           r       u_fma/s1_forward_low_r[48]/opit_0/D
+
+ Data arrival time                                                   8.908         Logic Levels: 16
+                                                                                   Logic: 2.259ns(44.173%), Route: 2.855ns(55.827%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.431       9.330         ntclkbufg_0
+ CLMA_591_828/CLK                                                          r       u_fma/s1_forward_low_r[48]/opit_0/CLK
+ clock pessimism                                         0.467       9.797
+ clock uncertainty                                      -0.050       9.747
+
+ Setup time                                             -0.143       9.604
+
+ Data required time                                                  9.604
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.604
+ Data arrival time                                                   8.908
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.696
+
+Rank 12
+Startpoint  : a_r[13]/opit_0/CLK
+Endpoint    : u_fma/e1_add_limit_r[5]/opit_0_L6Q_perm/I2
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.062  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.219
+  Launch Clock Delay      :  3.759
+  Clock Pessimism Removal :  0.478
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.613       3.759         ntclkbufg_0
+ CLMS_513_727/CLK                                                          r       a_r[13]/opit_0/CLK
+
+ CLMS_513_727/Q2                   tco                   0.213       3.972 r       a_r[13]/opit_0/Q
+                                   net (fanout=6)        1.137       5.109         a_r[13]
+ CLMA_567_721/Y2                   td                    0.240       5.349 r       u_fma/e1_a_mantissa_r[13]/opit_0_L6QL5_perm/L6
+                                   net (fanout=1)        0.428       5.777         u_fma/a_i [13]
+ CLMA_573_708/COUT                 td                    0.317       6.094 f       u_fma/N1060.lt_7/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.094         u_fma/N1060.co [14]
+ CLMA_573_714/COUT                 td                    0.090       6.184 f       u_fma/N1060.lt_11/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.184         u_fma/N1060.co [22]
+ CLMA_573_720/COUT                 td                    0.090       6.274 f       u_fma/N1060.lt_15/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.274         u_fma/N1060.co [30]
+ CLMA_573_726/COUT                 td                    0.090       6.364 f       u_fma/N1060.lt_19/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.364         u_fma/N1060.co [38]
+ CLMA_573_732/COUT                 td                    0.090       6.454 f       u_fma/N1060.lt_23/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.454         u_fma/N1060.co [46]
+ CLMA_573_738/COUT                 td                    0.090       6.544 f       u_fma/N1060.lt_27/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.544         u_fma/N1060.co [54]
+ CLMA_573_744/CR3                  td                    0.211       6.755 r       u_fma/N1060.lt_31/gateop_l6l5_perm/L5
+                                   net (fanout=130)      0.424       7.179         _N0
+ CLMA_573_750/Y0                   td                    0.078       7.257 r       u_fma/e1_add_anchor_r[1]/opit_0_L6QL5_perm/L6
+                                   net (fanout=8)        0.285       7.542         u_fma/add_big_exp_w [1]
+ CLMA_567_751/Y2                   td                    0.240       7.782 r       u_fma/e1_add_marker_pos_r[2]/opit_0_L5Q_perm/L6
+                                   net (fanout=7)        0.982       8.764         u_fma/_N381
+ CLMA_519_768/A2                                                           r       u_fma/e1_add_limit_r[5]/opit_0_L6Q_perm/I2
+
+ Data arrival time                                                   8.764         Logic Levels: 10
+                                                                                   Logic: 1.749ns(34.945%), Route: 3.256ns(65.055%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.381       9.280         ntclkbufg_0
+ CLMA_519_768/CLK                                                          r       u_fma/e1_add_limit_r[5]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.478       9.758
+ clock uncertainty                                      -0.050       9.708
+
+ Setup time                                             -0.233       9.475
+
+ Data required time                                                  9.475
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.475
+ Data arrival time                                                   8.764
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.711
+
+Rank 13
+Startpoint  : u_fma/u_product/residue11_r[71]/opit_0/CLK
+Endpoint    : u_fma/s1_forward_low_r[81]/opit_0/D
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.017  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.267
+  Launch Clock Delay      :  3.794
+  Clock Pessimism Removal :  0.510
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.648       3.794         ntclkbufg_0
+ CLMS_561_841/CLK                                                          r       u_fma/u_product/residue11_r[71]/opit_0/CLK
+
+ CLMS_561_841/CR2                  tco                   0.261       4.055 r       u_fma/u_product/residue11_r[71]/opit_0/Q
+                                   net (fanout=4)        0.587       4.642         u_fma/product_w [71]
+ CLMA_573_828/Y3                   td                    0.188       4.830 r       u_fma/N1053_61/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.463       5.293         u_fma/_N24614
+ CLMS_561_799/Y0                   td                    0.240       5.533 r       u_fma/N1053_91/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.447       5.980         u_fma/_N24644
+ CLMA_567_780/Y2                   td                    0.240       6.220 r       u_fma/N1696[0]_3/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.580       6.800         u_fma/sum_a_w [0]
+ CLMA_561_786/COUT                 td                    0.198       6.998 f       u_fma/s1_forward_low_r[2]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.998         u_fma/_N13223
+ CLMA_561_792/COUT                 td                    0.090       7.088 f       u_fma/s1_forward_low_r[6]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.088         u_fma/_N13227
+ CLMA_561_798/COUT                 td                    0.090       7.178 f       u_fma/s1_forward_low_r[10]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.178         u_fma/_N13231
+ CLMA_561_804/COUT                 td                    0.090       7.268 f       u_fma/s1_forward_low_r[14]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.268         u_fma/_N13235
+ CLMA_561_810/COUT                 td                    0.090       7.358 f       u_fma/sum_forward_low_w_19/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.358         u_fma/_N13239
+ CLMA_561_816/COUT                 td                    0.090       7.448 f       u_fma/s1_forward_low_r[22]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.448         u_fma/_N13243
+ CLMA_561_822/COUT                 td                    0.090       7.538 f       u_fma/s1_forward_low_r[26]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.538         u_fma/_N13247
+ CLMA_561_828/COUT                 td                    0.090       7.628 f       u_fma/s1_forward_low_r[30]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.628         u_fma/_N13251
+ CLMA_561_834/COUT                 td                    0.090       7.718 f       u_fma/sum_forward_low_w_35/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.718         u_fma/_N13255
+ CLMA_561_840/COUT                 td                    0.090       7.808 f       u_fma/s1_forward_low_r[38]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.808         u_fma/_N13259
+ CLMA_561_846/COUT                 td                    0.090       7.898 f       u_fma/s1_forward_low_r[42]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.898         u_fma/_N13263
+ CLMA_561_852/COUT                 td                    0.090       7.988 f       u_fma/s1_forward_low_r[46]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.988         u_fma/_N13267
+ CLMA_561_858/COUT                 td                    0.090       8.078 f       u_fma/sum_forward_low_w_51/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.078         u_fma/_N13271
+ CLMA_561_864/COUT                 td                    0.090       8.168 f       u_fma/s1_forward_low_r[54]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.168         u_fma/_N13275
+ CLMA_561_870/COUT                 td                    0.090       8.258 f       u_fma/s1_forward_low_r[58]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.258         u_fma/_N13279
+ CLMA_561_876/COUT                 td                    0.090       8.348 f       u_fma/s1_forward_low_r[62]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.348         u_fma/_N13283
+ CLMA_561_882/COUT                 td                    0.090       8.438 f       u_fma/sum_forward_low_w_67/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.438         u_fma/_N13287
+ CLMA_561_888/COUT                 td                    0.090       8.528 f       u_fma/s1_forward_low_r[70]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.528         u_fma/_N13291
+ CLMA_561_894/COUT                 td                    0.090       8.618 f       u_fma/s1_forward_low_r[74]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.618         u_fma/_N13295
+ CLMA_561_900/COUT                 td                    0.090       8.708 f       u_fma/s1_forward_low_r[78]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.708         u_fma/_N13299
+ CLMA_561_906/Y2                   td                    0.157       8.865 r       u_fma/sum_forward_low_w_82/gateop_perm/Y
+                                   net (fanout=1)        0.141       9.006         u_fma/sum_forward_low_w [81]
+ CLMS_561_907/M3                                                           r       u_fma/s1_forward_low_r[81]/opit_0/D
+
+ Data arrival time                                                   9.006         Logic Levels: 24
+                                                                                   Logic: 2.994ns(57.444%), Route: 2.218ns(42.556%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.429       9.328         ntclkbufg_0
+ CLMS_561_907/CLK                                                          r       u_fma/s1_forward_low_r[81]/opit_0/CLK
+ clock pessimism                                         0.510       9.838
+ clock uncertainty                                      -0.050       9.788
+
+ Setup time                                             -0.034       9.754
+
+ Data required time                                                  9.754
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.754
+ Data arrival time                                                   9.006
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.748
+
+Rank 14
+Startpoint  : a_r[13]/opit_0/CLK
+Endpoint    : u_fma/e1_add_limit_r[0]/opit_0_L6Q_perm/I0
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.066  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.226
+  Launch Clock Delay      :  3.759
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.613       3.759         ntclkbufg_0
+ CLMS_513_727/CLK                                                          r       a_r[13]/opit_0/CLK
+
+ CLMS_513_727/Q2                   tco                   0.213       3.972 r       a_r[13]/opit_0/Q
+                                   net (fanout=6)        1.137       5.109         a_r[13]
+ CLMA_567_721/Y2                   td                    0.240       5.349 r       u_fma/e1_a_mantissa_r[13]/opit_0_L6QL5_perm/L6
+                                   net (fanout=1)        0.428       5.777         u_fma/a_i [13]
+ CLMA_573_708/COUT                 td                    0.317       6.094 f       u_fma/N1060.lt_7/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.094         u_fma/N1060.co [14]
+ CLMA_573_714/COUT                 td                    0.090       6.184 f       u_fma/N1060.lt_11/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.184         u_fma/N1060.co [22]
+ CLMA_573_720/COUT                 td                    0.090       6.274 f       u_fma/N1060.lt_15/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.274         u_fma/N1060.co [30]
+ CLMA_573_726/COUT                 td                    0.090       6.364 f       u_fma/N1060.lt_19/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.364         u_fma/N1060.co [38]
+ CLMA_573_732/COUT                 td                    0.090       6.454 f       u_fma/N1060.lt_23/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.454         u_fma/N1060.co [46]
+ CLMA_573_738/COUT                 td                    0.090       6.544 f       u_fma/N1060.lt_27/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.544         u_fma/N1060.co [54]
+ CLMA_573_744/CR3                  td                    0.211       6.755 r       u_fma/N1060.lt_31/gateop_l6l5_perm/L5
+                                   net (fanout=130)      0.604       7.359         _N0
+ CLMS_561_739/Y1                   td                    0.078       7.437 r       u_fma/N1108[7]/LUT6D_inst_perm/L6
+                                   net (fanout=4)        0.631       8.068         u_fma/add_big_exp_w [7]
+ CLMA_561_768/Y2                   td                    0.113       8.181 r       u_fma/e1_add_anchor_r[7]/opit_0_L5Q_perm/L6
+                                   net (fanout=9)        0.478       8.659         u_fma/_N24829
+ CLMS_531_769/A0                                                           r       u_fma/e1_add_limit_r[0]/opit_0_L6Q_perm/I0
+
+ Data arrival time                                                   8.659         Logic Levels: 10
+                                                                                   Logic: 1.622ns(33.102%), Route: 3.278ns(66.898%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.388       9.287         ntclkbufg_0
+ CLMS_531_769/CLK                                                          r       u_fma/e1_add_limit_r[0]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.467       9.754
+ clock uncertainty                                      -0.050       9.704
+
+ Setup time                                             -0.285       9.419
+
+ Data required time                                                  9.419
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.419
+ Data arrival time                                                   8.659
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.760
+
+Rank 15
+Startpoint  : u_fma/p13_c_r[103]/opit_0/CLK
+Endpoint    : u_fma/s1_reverse_count2_r[4]/opit_0_L6QL5Q1_perm/I2
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.010  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.257
+  Launch Clock Delay      :  3.734
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.588       3.734         ntclkbufg_0
+ CLMA_453_829/CLK                                                          r       u_fma/p13_c_r[103]/opit_0/CLK
+
+ CLMA_453_829/Q2                   tco                   0.213       3.947 r       u_fma/p13_c_r[103]/opit_0/Q
+                                   net (fanout=4)        1.298       5.245         u_fma/sum_b_w_right_w [103]
+ CLMS_543_835/Y0                   td                    0.235       5.480 r       u_fma/s1_b_high_r[19]/opit_0_L6Q_LUT6DQL5_perm/L6
+                                   net (fanout=1)        0.633       6.113         u_fma/sum_b_w [103]
+ CLMS_561_823/Y0                   td                    0.235       6.348 r       u_fma/N1899_103/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.619       6.967         u_fma/reverse_predict_w [103]
+ CLMA_555_853/Y1                   td                    0.242       7.209 r       u_fma/u_reverse2/N0_4/gateop_perm/Y
+                                   net (fanout=4)        0.283       7.492         u_fma/u_reverse2/hit_4_0_w
+ CLMS_561_853/Y2                   td                    0.188       7.680 r       u_fma/u_reverse2/N64_5/LUT6_inst_perm/L6
+                                   net (fanout=4)        0.453       8.133         u_fma/u_reverse2/hit_8_0_w
+ CLMA_555_870/CR0                  td                    0.346       8.479 r       u_fma/u_reverse2/N71_12[1]/LUT6D_inst_perm/L5
+                                   net (fanout=1)        0.257       8.736         u_fma/u_reverse2/_N17999
+ CLMA_555_871/C2                                                           r       u_fma/s1_reverse_count2_r[4]/opit_0_L6QL5Q1_perm/I2
+
+ Data arrival time                                                   8.736         Logic Levels: 5
+                                                                                   Logic: 1.459ns(29.168%), Route: 3.543ns(70.832%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.419       9.318         ntclkbufg_0
+ CLMA_555_871/CLK                                                          r       u_fma/s1_reverse_count2_r[4]/opit_0_L6QL5Q1_perm/CLK
+ clock pessimism                                         0.467       9.785
+ clock uncertainty                                      -0.050       9.735
+
+ Setup time                                             -0.234       9.501
+
+ Data required time                                                  9.501
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.501
+ Data arrival time                                                   8.736
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.765
+
+Rank 16
+Startpoint  : a_r[13]/opit_0/CLK
+Endpoint    : u_fma/e1_add_limit_r[7]/opit_0_L6Q_perm/I0
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.060  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.232
+  Launch Clock Delay      :  3.759
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.613       3.759         ntclkbufg_0
+ CLMS_513_727/CLK                                                          r       a_r[13]/opit_0/CLK
+
+ CLMS_513_727/Q2                   tco                   0.213       3.972 r       a_r[13]/opit_0/Q
+                                   net (fanout=6)        1.137       5.109         a_r[13]
+ CLMA_567_721/Y2                   td                    0.240       5.349 r       u_fma/e1_a_mantissa_r[13]/opit_0_L6QL5_perm/L6
+                                   net (fanout=1)        0.428       5.777         u_fma/a_i [13]
+ CLMA_573_708/COUT                 td                    0.317       6.094 f       u_fma/N1060.lt_7/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.094         u_fma/N1060.co [14]
+ CLMA_573_714/COUT                 td                    0.090       6.184 f       u_fma/N1060.lt_11/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.184         u_fma/N1060.co [22]
+ CLMA_573_720/COUT                 td                    0.090       6.274 f       u_fma/N1060.lt_15/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.274         u_fma/N1060.co [30]
+ CLMA_573_726/COUT                 td                    0.090       6.364 f       u_fma/N1060.lt_19/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.364         u_fma/N1060.co [38]
+ CLMA_573_732/COUT                 td                    0.090       6.454 f       u_fma/N1060.lt_23/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.454         u_fma/N1060.co [46]
+ CLMA_573_738/COUT                 td                    0.090       6.544 f       u_fma/N1060.lt_27/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.544         u_fma/N1060.co [54]
+ CLMA_573_744/CR3                  td                    0.211       6.755 r       u_fma/N1060.lt_31/gateop_l6l5_perm/L5
+                                   net (fanout=130)      0.604       7.359         _N0
+ CLMS_561_739/Y1                   td                    0.078       7.437 r       u_fma/N1108[7]/LUT6D_inst_perm/L6
+                                   net (fanout=4)        0.631       8.068         u_fma/add_big_exp_w [7]
+ CLMA_561_768/Y2                   td                    0.113       8.181 r       u_fma/e1_add_anchor_r[7]/opit_0_L5Q_perm/L6
+                                   net (fanout=9)        0.478       8.659         u_fma/_N24829
+ CLMA_543_768/A0                                                           r       u_fma/e1_add_limit_r[7]/opit_0_L6Q_perm/I0
+
+ Data arrival time                                                   8.659         Logic Levels: 10
+                                                                                   Logic: 1.622ns(33.102%), Route: 3.278ns(66.898%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.394       9.293         ntclkbufg_0
+ CLMA_543_768/CLK                                                          r       u_fma/e1_add_limit_r[7]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.467       9.760
+ clock uncertainty                                      -0.050       9.710
+
+ Setup time                                             -0.285       9.425
+
+ Data required time                                                  9.425
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.425
+ Data arrival time                                                   8.659
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.766
+
+Rank 17
+Startpoint  : u_fma/u_product/u_term11/u_apm/gopapm/CLK
+Endpoint    : u_fma/t1_magnitude_r[42]/opit_0_L6Q_perm/I4
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.029  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.310
+  Launch Clock Delay      :  3.806
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.660       3.806         ntclkbufg_0
+ APM_587_828/CLK_0                                                         r       u_fma/u_product/u_term11/u_apm/gopapm/CLK
+
+ APM_587_828/P_0[9]                tco                   0.437       4.243 r       u_fma/u_product/u_term11/u_apm/gopapm/P[9]
+                                   net (fanout=18)       0.733       4.976         u_fma/product_w [105]
+ CLMS_609_823/Y0                   td                    0.188       5.164 r       u_fma/N2243_8[3]/gateop_perm/Y
+                                   net (fanout=234)      0.752       5.916         u_fma/_N16027
+ CLMA_603_798/Y1                   td                    0.235       6.151 r       u_fma/N2273_3_82/LUT6_inst_perm/L6
+                                   net (fanout=3)        0.474       6.625         u_fma/_N9828
+ CLMA_609_774/Y0                   td                    0.078       6.703 r       u_fma/N2273_4_82/LUT6_inst_perm/L6
+                                   net (fanout=2)        0.986       7.689         u_fma/_N9997
+ CLMA_669_816/Y3                   td                    0.223       7.912 r       u_fma/N2286_11[18]/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.547       8.459         u_fma/_N16174
+ CLMS_669_799/Y3                   td                    0.113       8.572 r       u_fma/N2286_12[18]/gateop_perm/L6
+                                   net (fanout=1)        0.293       8.865         u_fma/_N16239
+ CLMA_675_804/C4                                                           r       u_fma/t1_magnitude_r[42]/opit_0_L6Q_perm/I4
+
+ Data arrival time                                                   8.865         Logic Levels: 5
+                                                                                   Logic: 1.274ns(25.183%), Route: 3.785ns(74.817%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.472       9.371         ntclkbufg_0
+ CLMA_675_804/CLK                                                          r       u_fma/t1_magnitude_r[42]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.467       9.838
+ clock uncertainty                                      -0.050       9.788
+
+ Setup time                                             -0.147       9.641
+
+ Data required time                                                  9.641
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.641
+ Data arrival time                                                   8.865
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.776
+
+Rank 18
+Startpoint  : u_fma/s2_tiny_r[4]/opit_0/CLK
+Endpoint    : u_fma/t1_magnitude_r[21]/opit_0_L6Q_perm/I0
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.060  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.293
+  Launch Clock Delay      :  3.820
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.674       3.820         ntclkbufg_0
+ CLMA_615_822/CLK                                                          r       u_fma/s2_tiny_r[4]/opit_0/CLK
+
+ CLMA_615_822/Q0                   tco                   0.213       4.033 r       u_fma/s2_tiny_r[4]/opit_0/Q
+                                   net (fanout=1)        0.420       4.453         u_fma/tail_tiny_w_right_w [4]
+ CLMA_615_828/CR0                  td                    0.223       4.676 r       u_fma/N2269_5[5]/gateop_LUT6DL5_perm/L5
+                                   net (fanout=2)        0.626       5.302         u_fma/_N16638
+ CLMA_627_816/Y1                   td                    0.240       5.542 r       u_fma/N2243_8[4]_1/gateop_perm/Y
+                                   net (fanout=288)      1.058       6.600         u_fma/tail_shift_w [4]
+ CLMA_591_870/Y2                   td                    0.101       6.701 r       u_fma/N2273_4_125/LUT6_inst_perm/L6
+                                   net (fanout=2)        1.006       7.707         u_fma/_N10040
+ CLMA_663_828/CR3                  td                    0.333       8.040 r       u_fma/N2275_6_544[14]/LUT6D_inst_perm/L5
+                                   net (fanout=1)        0.676       8.716         u_fma/_N18721
+ CLMA_651_780/D0                                                           r       u_fma/t1_magnitude_r[21]/opit_0_L6Q_perm/I0
+
+ Data arrival time                                                   8.716         Logic Levels: 4
+                                                                                   Logic: 1.110ns(22.672%), Route: 3.786ns(77.328%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.455       9.354         ntclkbufg_0
+ CLMA_651_780/CLK                                                          r       u_fma/t1_magnitude_r[21]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.467       9.821
+ clock uncertainty                                      -0.050       9.771
+
+ Setup time                                             -0.262       9.509
+
+ Data required time                                                  9.509
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.509
+ Data arrival time                                                   8.716
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.793
+
+Rank 19
+Startpoint  : u_fma/s2_reverse_select_r[2]/opit_0/CLK
+Endpoint    : u_fma/t1_magnitude_r[0]/opit_0_L6Q_perm/I4
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.035  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.294
+  Launch Clock Delay      :  3.796
+  Clock Pessimism Removal :  0.467
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.650       3.796         ntclkbufg_0
+ CLMA_573_816/CLK                                                          r       u_fma/s2_reverse_select_r[2]/opit_0/CLK
+
+ CLMA_573_816/CR0                  tco                   0.261       4.057 r       u_fma/s2_reverse_select_r[2]/opit_0/Q
+                                   net (fanout=16)       0.811       4.868         u_fma/s2_reverse_select_r [2]
+ CLMA_597_804/Y3                   td                    0.101       4.969 r       u_fma/N2219_6[9]/gateop_perm/L6
+                                   net (fanout=7)        0.429       5.398         u_fma/tail_magnitude_w [41]
+ CLMS_597_787/Y3                   td                    0.223       5.621 r       u_fma/N2282_1051_6/gateop_perm/L6
+                                   net (fanout=1)        0.604       6.225         u_fma/_N25486
+ CLMA_615_780/Y2                   td                    0.188       6.413 r       u_fma/N2282_1051_8/gateop_perm/L6
+                                   net (fanout=1)        0.667       7.080         u_fma/_N20590
+ CLMA_597_828/Y2                   td                    0.235       7.315 r       u_fma/N2282_2123_4/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.799       8.114         u_fma/_N25617
+ CLMS_639_829/Y0                   td                    0.101       8.215 r       u_fma/N2282_2123_764/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.411       8.626         u_fma/_N25625
+ CLMA_639_822/Y2                   td                    0.078       8.704 r       u_fma/N2282_2123_722/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.125       8.829         u_fma/_N25627
+ CLMS_639_823/D4                                                           r       u_fma/t1_magnitude_r[0]/opit_0_L6Q_perm/I4
+
+ Data arrival time                                                   8.829         Logic Levels: 6
+                                                                                   Logic: 1.187ns(23.584%), Route: 3.846ns(76.416%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.456       9.355         ntclkbufg_0
+ CLMS_639_823/CLK                                                          r       u_fma/t1_magnitude_r[0]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.467       9.822
+ clock uncertainty                                      -0.050       9.772
+
+ Setup time                                             -0.140       9.632
+
+ Data required time                                                  9.632
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.632
+ Data arrival time                                                   8.829
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.803
+
+Rank 20
+Startpoint  : u_fma/u_product/residue11_r[71]/opit_0/CLK
+Endpoint    : u_fma/sum_forward_low_w_84/gateop_perm/CIN
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.016  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.268
+  Launch Clock Delay      :  3.794
+  Clock Pessimism Removal :  0.510
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r
+ M2                                                      0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.059       0.059         clk_i
+ IOBD_732_786/DIN                  td                    0.897       0.956 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.110       1.066 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.969         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.177       2.146 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.648       3.794         ntclkbufg_0
+ CLMS_561_841/CLK                                                          r       u_fma/u_product/residue11_r[71]/opit_0/CLK
+
+ CLMS_561_841/CR2                  tco                   0.261       4.055 r       u_fma/u_product/residue11_r[71]/opit_0/Q
+                                   net (fanout=4)        0.587       4.642         u_fma/product_w [71]
+ CLMA_573_828/Y3                   td                    0.188       4.830 r       u_fma/N1053_61/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.463       5.293         u_fma/_N24614
+ CLMS_561_799/Y0                   td                    0.240       5.533 r       u_fma/N1053_91/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.447       5.980         u_fma/_N24644
+ CLMA_567_780/Y2                   td                    0.240       6.220 r       u_fma/N1696[0]_3/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.580       6.800         u_fma/sum_a_w [0]
+ CLMA_561_786/COUT                 td                    0.198       6.998 f       u_fma/s1_forward_low_r[2]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       6.998         u_fma/_N13223
+ CLMA_561_792/COUT                 td                    0.090       7.088 f       u_fma/s1_forward_low_r[6]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.088         u_fma/_N13227
+ CLMA_561_798/COUT                 td                    0.090       7.178 f       u_fma/s1_forward_low_r[10]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.178         u_fma/_N13231
+ CLMA_561_804/COUT                 td                    0.090       7.268 f       u_fma/s1_forward_low_r[14]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.268         u_fma/_N13235
+ CLMA_561_810/COUT                 td                    0.090       7.358 f       u_fma/sum_forward_low_w_19/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.358         u_fma/_N13239
+ CLMA_561_816/COUT                 td                    0.090       7.448 f       u_fma/s1_forward_low_r[22]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.448         u_fma/_N13243
+ CLMA_561_822/COUT                 td                    0.090       7.538 f       u_fma/s1_forward_low_r[26]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.538         u_fma/_N13247
+ CLMA_561_828/COUT                 td                    0.090       7.628 f       u_fma/s1_forward_low_r[30]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.628         u_fma/_N13251
+ CLMA_561_834/COUT                 td                    0.090       7.718 f       u_fma/sum_forward_low_w_35/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.718         u_fma/_N13255
+ CLMA_561_840/COUT                 td                    0.090       7.808 f       u_fma/s1_forward_low_r[38]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.808         u_fma/_N13259
+ CLMA_561_846/COUT                 td                    0.090       7.898 f       u_fma/s1_forward_low_r[42]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.898         u_fma/_N13263
+ CLMA_561_852/COUT                 td                    0.090       7.988 f       u_fma/s1_forward_low_r[46]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       7.988         u_fma/_N13267
+ CLMA_561_858/COUT                 td                    0.090       8.078 f       u_fma/sum_forward_low_w_51/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.078         u_fma/_N13271
+ CLMA_561_864/COUT                 td                    0.090       8.168 f       u_fma/s1_forward_low_r[54]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.168         u_fma/_N13275
+ CLMA_561_870/COUT                 td                    0.090       8.258 f       u_fma/s1_forward_low_r[58]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.258         u_fma/_N13279
+ CLMA_561_876/COUT                 td                    0.090       8.348 f       u_fma/s1_forward_low_r[62]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.348         u_fma/_N13283
+ CLMA_561_882/COUT                 td                    0.090       8.438 f       u_fma/sum_forward_low_w_67/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.438         u_fma/_N13287
+ CLMA_561_888/COUT                 td                    0.090       8.528 f       u_fma/s1_forward_low_r[70]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.528         u_fma/_N13291
+ CLMA_561_894/COUT                 td                    0.090       8.618 f       u_fma/s1_forward_low_r[74]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.618         u_fma/_N13295
+ CLMA_561_900/COUT                 td                    0.090       8.708 f       u_fma/s1_forward_low_r[78]/opit_0_AQ_perm/COUT
+                                   net (fanout=1)        0.000       8.708         u_fma/_N13299
+ CLMA_561_906/COUT                 td                    0.082       8.790 r       u_fma/sum_forward_low_w_83/gateop_perm/COUT
+                                   net (fanout=1)        0.000       8.790         u_fma/_N13303
+ CLMA_561_912/CIN                                                          r       u_fma/sum_forward_low_w_84/gateop_perm/CIN
+
+ Data arrival time                                                   8.790         Logic Levels: 24
+                                                                                   Logic: 2.919ns(58.427%), Route: 2.077ns(41.573%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.061       6.061 r
+ M2                                                      0.000       6.061 r       clk_i (port)
+                                   net (fanout=1)        0.059       6.120         clk_i
+ IOBD_732_786/DIN                  td                    0.766       6.886 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       6.886         clk_i_ibuf/ntD
+ IOLHR_724_786/DI_TO_CLK           td                    0.095       6.981 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       7.749         nt_clk_i
+ USCM_383_882/CLKOUT               td                    0.150       7.899 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=6223)     1.430       9.329         ntclkbufg_0
+ CLMA_561_912/CLK                                                          r       u_fma/s1_forward_carry_r/opit_0_AQ_perm/CLK
+ clock pessimism                                         0.510       9.839
+ clock uncertainty                                      -0.050       9.789
+
+ Setup time                                             -0.178       9.611
+
+ Data required time                                                  9.611
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  9.611
+ Data arrival time                                                   8.790
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.821
