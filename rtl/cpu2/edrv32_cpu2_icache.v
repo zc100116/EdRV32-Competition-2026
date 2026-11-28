@@ -15,14 +15,14 @@ module edrv32_cpu2_icache #(
     input wire [31:0] ic_req_addr_i,
     output wire ic_resp_valid_o,
     input wire ic_resp_ready_i,
-    output wire [31:0] ic_resp_word0_way0_instr_o,
-    output wire [31:0] ic_resp_word0_way1_instr_o,
-    output wire [31:0] ic_resp_word1_way0_instr_o,
-    output wire [31:0] ic_resp_word1_way1_instr_o,
-    output wire [1:0] ic_resp_word0_way_hit_o,
-    output wire ic_resp_word0_error_o,
-    output wire [1:0] ic_resp_word1_way_hit_o,
-    output wire ic_resp_word1_error_o,
+    output wire [31:0] ic_resp_bank0_way0_instr_o,
+    output wire [31:0] ic_resp_bank0_way1_instr_o,
+    output wire [31:0] ic_resp_bank1_way0_instr_o,
+    output wire [31:0] ic_resp_bank1_way1_instr_o,
+    output wire [1:0] ic_resp_bank0_way_hit_o,
+    output wire ic_resp_bank0_error_o,
+    output wire [1:0] ic_resp_bank1_way_hit_o,
+    output wire ic_resp_bank1_error_o,
 
     // AXI64 read master.
     output wire [3:0] axi_arid_o,
@@ -77,8 +77,9 @@ module edrv32_cpu2_icache #(
     reg [31:0] word11_r [0:1];
     reg pipe_valid_r;
     reg pipe_slot_r;
-    reg [31:0] pipe_addr0_r;
-    reg [31:0] pipe_addr1_r;
+    reg pipe_odd_r;
+    reg [31:0] pipe_bank0_addr_r;
+    reg [31:0] pipe_bank1_addr_r;
     reg miss_slot_r;
     reg [31:0] miss_addr_r;
     reg miss_cacheable_r;
@@ -99,6 +100,11 @@ module edrv32_cpu2_icache #(
     wire [31:0] read_addr0_w;
     wire [31:0] read_addr1_w;
     wire [31:0] slot_addr1_w;
+    wire [31:0] slot_bank0_addr_w;
+    wire [31:0] slot_bank1_addr_w;
+    wire [31:0] read_bank0_addr_w;
+    wire [31:0] read_bank1_addr_w;
+    wire miss_bank_w;
     wire pipe_use_w;
     wire pipe_complete_w;
     wire response_pipe_w;
@@ -132,21 +138,30 @@ module edrv32_cpu2_icache #(
     assign read_addr0_w = replay_w ? addr_r[head_r] : ic_req_addr_i;
     assign read_addr1_w = read_addr0_w + 32'd4;
     assign slot_addr1_w = addr_r[miss_slot_r] + 32'd4;
+    assign slot_bank0_addr_w = ISSUE_WIDTH == 2 && addr_r[miss_slot_r][2] ?
+        slot_addr1_w : addr_r[miss_slot_r];
+    assign slot_bank1_addr_w = ISSUE_WIDTH == 2 && addr_r[miss_slot_r][2] ?
+        addr_r[miss_slot_r] : slot_addr1_w;
+    assign read_bank0_addr_w = ISSUE_WIDTH == 2 && read_addr0_w[2] ?
+        read_addr1_w : read_addr0_w;
+    assign read_bank1_addr_w = ISSUE_WIDTH == 2 && read_addr0_w[2] ?
+        read_addr0_w : read_addr1_w;
+    assign miss_bank_w = ISSUE_WIDTH == 2 && pipe_odd_r ? !complete1_w : complete0_w;
     assign pipe_use_w = pipe_valid_r && state_r == S_IDLE && !scan_r;
-    assign cacheable0_w = pipe_addr0_r[31:SRAM_BITS] ==
+    assign cacheable0_w = pipe_bank0_addr_r[31:SRAM_BITS] ==
         EDRV32_SRAM_BASE[31:SRAM_BITS] ||
-        pipe_addr0_r[31:DDR_BITS] == EDRV32_DDR_BASE[31:DDR_BITS];
-    assign cacheable1_w = pipe_addr1_r[31:SRAM_BITS] ==
+        pipe_bank0_addr_r[31:DDR_BITS] == EDRV32_DDR_BASE[31:DDR_BITS];
+    assign cacheable1_w = pipe_bank1_addr_r[31:SRAM_BITS] ==
         EDRV32_SRAM_BASE[31:SRAM_BITS] ||
-        pipe_addr1_r[31:DDR_BITS] == EDRV32_DDR_BASE[31:DDR_BITS];
+        pipe_bank1_addr_r[31:DDR_BITS] == EDRV32_DDR_BASE[31:DDR_BITS];
     assign pma_error0_w = !(cacheable0_w ||
-        pipe_addr0_r[31:ROM_BITS] == EDRV32_ROM_BASE[31:ROM_BITS]);
+        pipe_bank0_addr_r[31:ROM_BITS] == EDRV32_ROM_BASE[31:ROM_BITS]);
     assign pma_error1_w = !(cacheable1_w ||
-        pipe_addr1_r[31:ROM_BITS] == EDRV32_ROM_BASE[31:ROM_BITS]);
-    assign hit0_w = {tag0_w[1][18] && tag0_w[1][17:0] == pipe_addr0_r[31:14],
-                    tag0_w[0][18] && tag0_w[0][17:0] == pipe_addr0_r[31:14]};
-    assign hit1_w = {tag1_w[1][18] && tag1_w[1][17:0] == pipe_addr1_r[31:14],
-                    tag1_w[0][18] && tag1_w[0][17:0] == pipe_addr1_r[31:14]};
+        pipe_bank1_addr_r[31:ROM_BITS] == EDRV32_ROM_BASE[31:ROM_BITS]);
+    assign hit0_w = {tag0_w[1][18] && tag0_w[1][17:0] == pipe_bank0_addr_r[31:14],
+                    tag0_w[0][18] && tag0_w[0][17:0] == pipe_bank0_addr_r[31:14]};
+    assign hit1_w = {tag1_w[1][18] && tag1_w[1][17:0] == pipe_bank1_addr_r[31:14],
+                    tag1_w[0][18] && tag1_w[0][17:0] == pipe_bank1_addr_r[31:14]};
     assign complete0_w = done0_r[pipe_slot_r] || pma_error0_w ||
         (cacheable0_w && |hit0_w);
     assign complete1_w = done1_r[pipe_slot_r] || pma_error1_w ||
@@ -156,21 +171,21 @@ module edrv32_cpu2_icache #(
     assign ic_resp_valid_o = valid_r[head_r] &&
         ((done0_r[head_r] && done1_r[head_r]) || (response_pipe_w && pipe_complete_w));
     assign pop_w = ic_resp_valid_o && ic_resp_ready_i;
-    assign ic_resp_word0_way0_instr_o = response_pipe_w && !done0_r[head_r] ?
+    assign ic_resp_bank0_way0_instr_o = response_pipe_w && !done0_r[head_r] ?
         data_w[0] : word00_r[head_r];
-    assign ic_resp_word0_way1_instr_o = response_pipe_w && !done0_r[head_r] ?
+    assign ic_resp_bank0_way1_instr_o = response_pipe_w && !done0_r[head_r] ?
         data_w[1] : word01_r[head_r];
-    assign ic_resp_word1_way0_instr_o = response_pipe_w && !done1_r[head_r] ?
+    assign ic_resp_bank1_way0_instr_o = response_pipe_w && !done1_r[head_r] ?
         data_w[2] : word10_r[head_r];
-    assign ic_resp_word1_way1_instr_o = response_pipe_w && !done1_r[head_r] ?
+    assign ic_resp_bank1_way1_instr_o = response_pipe_w && !done1_r[head_r] ?
         data_w[3] : word11_r[head_r];
-    assign ic_resp_word0_way_hit_o = response_pipe_w && !done0_r[head_r] ?
+    assign ic_resp_bank0_way_hit_o = response_pipe_w && !done0_r[head_r] ?
         hit0_w : hit0_r[head_r];
-    assign ic_resp_word1_way_hit_o = response_pipe_w && !done1_r[head_r] ?
+    assign ic_resp_bank1_way_hit_o = response_pipe_w && !done1_r[head_r] ?
         hit1_w : hit1_r[head_r];
-    assign ic_resp_word0_error_o = response_pipe_w && !done0_r[head_r] ?
+    assign ic_resp_bank0_error_o = response_pipe_w && !done0_r[head_r] ?
         pma_error0_w : error0_r[head_r];
-    assign ic_resp_word1_error_o = response_pipe_w && !done1_r[head_r] ?
+    assign ic_resp_bank1_error_o = response_pipe_w && !done1_r[head_r] ?
         pma_error1_w : error1_r[head_r];
     assign replacement0_w = !tag0_w[0][18] ? 1'b0 : !tag0_w[1][18] ? 1'b1 : lru0_w;
     assign replacement1_w = !tag1_w[0][18] ? 1'b0 : !tag1_w[1][18] ? 1'b1 : lru1_w;
@@ -178,7 +193,7 @@ module edrv32_cpu2_icache #(
     assign inv_start_w = ic_inv_valid_i && ic_inv_ready_o;
     assign ic_inv_done_o = inv_done_r;
     assign ic_miss_event_o = pipe_use_w && !pipe_complete_w &&
-        (!complete0_w ? cacheable0_w : cacheable1_w);
+        (miss_bank_w ? cacheable1_w : cacheable0_w);
     assign axi_arid_o = 4'd0;
     assign axi_araddr_o = miss_cacheable_r ? {miss_addr_r[31:5], 5'd0} :
         {miss_addr_r[31:3], 3'd0};
@@ -191,8 +206,11 @@ module edrv32_cpu2_icache #(
     assign tag_install_w = fill_last_w && miss_cacheable_r && !scan_r && !inv_start_w &&
         !fill_invalidated_r && !fill_error_r && axi_rresp_i == 2'b00;
     assign fill_addr_w = {miss_addr_r[13:5], fill_beat_r};
-    assign unused_w = ^{axi_rid_i, pipe_addr0_r[1:0], pipe_addr1_r[1:0],
-        miss_addr_r[2:0], slot_addr1_w[1:0]};
+    assign unused_w = ^{axi_rid_i, pipe_odd_r,
+        miss_addr_r[2:0], slot_addr1_w[1:0], slot_bank0_addr_w[2:0],
+        slot_bank1_addr_w[2:0], pipe_bank0_addr_r[13:0], pipe_bank1_addr_r[13:0],
+        read_bank0_addr_w[2:0],
+        read_bank1_addr_w[2:0]};
     genvar way;
     genvar bank;
     generate
@@ -211,7 +229,7 @@ module edrv32_cpu2_icache #(
                 .wr_addr_i(tag_addr_w),
                 .wr_data_i(tag_data_w),
                 .rd_en_i(read_w),
-                .rd_addr_i(read_addr0_w[13:5]),
+                .rd_addr_i(read_bank0_addr_w[13:5]),
                 .rd_data_o(tag0_w[way])
             );
             if (ISSUE_WIDTH == 1) begin : g_single
@@ -237,15 +255,15 @@ module edrv32_cpu2_icache #(
                 wire [10:0] odd_addr_w;
                 assign even_addr_w = read_addr0_w[2] ? read_addr1_w[13:3] : read_addr0_w[13:3];
                 assign odd_addr_w = read_addr0_w[2] ? read_addr0_w[13:3] : read_addr1_w[13:3];
-                assign data_w[way] = pipe_addr0_r[2] ? odd_w : even_w;
-                assign data_w[2+way] = pipe_addr0_r[2] ? even_w : odd_w;
+                assign data_w[way] = even_w;
+                assign data_w[2+way] = odd_w;
                 edrv32_ram_cpu2_cache_tag u_tag1 (
                     .clk_i(clk_i),
                     .wr_en_i(tag_write_w),
                     .wr_addr_i(tag_addr_w),
                     .wr_data_i(tag_data_w),
                     .rd_en_i(read_w),
-                    .rd_addr_i(read_addr1_w[13:5]),
+                    .rd_addr_i(read_bank1_addr_w[13:5]),
                     .rd_data_o(tag1_w[way])
                 );
                 edrv32_ram_cpu2_cache_data u_even (
@@ -279,14 +297,14 @@ module edrv32_cpu2_icache #(
                 .wr_addr_i(scan_r ? scan_idx_r : lru_set0_r),
                 .wr_data_i(scan_r ? 1'b0 : lru_data0_r),
                 .rd_en_i(read_w),
-                .rd_addr_i(read_addr0_w[13:5]),
+                .rd_addr_i(read_bank0_addr_w[13:5]),
                 .rd_data_o(lru0_w)
             );
             assign lru1_w = lru0_w;
         end else begin : g_dual_lru
             wire [1:0] bank_data_w;
-            assign lru0_w = pipe_addr0_r[5] ? bank_data_w[1] : bank_data_w[0];
-            assign lru1_w = pipe_addr1_r[5] ? bank_data_w[1] : bank_data_w[0];
+            assign lru0_w = pipe_bank0_addr_r[5] ? bank_data_w[1] : bank_data_w[0];
+            assign lru1_w = pipe_bank1_addr_r[5] ? bank_data_w[1] : bank_data_w[0];
             for (bank = 0; bank < 2; bank = bank + 1) begin : g_bank
                 localparam BANK = bank != 0;
                 wire update0_w;
@@ -361,7 +379,7 @@ module edrv32_cpu2_icache #(
                 end
                 lru_valid0_r <= cacheable0_w && |hit0_w;
                 lru_valid1_r <= ISSUE_WIDTH == 2 && cacheable1_w && |hit1_w &&
-                    pipe_addr0_r[13:5] != pipe_addr1_r[13:5];
+                    pipe_bank0_addr_r[13:5] != pipe_bank1_addr_r[13:5];
                 if (!pipe_complete_w) begin
                     state_r <= S_AR;
                     fill_beat_r <= 2'd0;
@@ -402,15 +420,15 @@ module edrv32_cpu2_icache #(
                         if (axi_rlast_i) begin
                             state_r <= S_IDLE;
                             // Any word in the failed line reports failure, even a beat seen earlier.
-                            if ((miss_cacheable_r && addr_r[miss_slot_r][31:5] ==
+                            if ((miss_cacheable_r && slot_bank0_addr_w[31:5] ==
                                 miss_addr_r[31:5]) || (!miss_cacheable_r &&
-                                addr_r[miss_slot_r][31:3] == miss_addr_r[31:3])) begin
+                                slot_bank0_addr_w[31:3] == miss_addr_r[31:3])) begin
                                 done0_r[miss_slot_r] <= 1'b1;
                                 error0_r[miss_slot_r] <= fill_error_r || |axi_rresp_i;
                             end
-                            if ((miss_cacheable_r && slot_addr1_w[31:5] ==
+                            if ((miss_cacheable_r && slot_bank1_addr_w[31:5] ==
                                 miss_addr_r[31:5]) || (!miss_cacheable_r &&
-                                slot_addr1_w[31:3] == miss_addr_r[31:3])) begin
+                                slot_bank1_addr_w[31:3] == miss_addr_r[31:3])) begin
                                 done1_r[miss_slot_r] <= 1'b1;
                                 error1_r[miss_slot_r] <= fill_error_r || |axi_rresp_i;
                             end
@@ -434,8 +452,9 @@ module edrv32_cpu2_icache #(
             addr_r[tail_r] <= ic_req_addr_i;
         if (read_w) begin
             pipe_slot_r <= replay_w ? head_r : tail_r;
-            pipe_addr0_r <= read_addr0_w;
-            pipe_addr1_r <= read_addr1_w;
+            pipe_odd_r <= read_addr0_w[2];
+            pipe_bank0_addr_r <= read_bank0_addr_w;
+            pipe_bank1_addr_r <= read_bank1_addr_w;
         end
         if (pipe_use_w) begin
             if (!done0_r[pipe_slot_r]) begin
@@ -448,30 +467,28 @@ module edrv32_cpu2_icache #(
                 word10_r[pipe_slot_r] <= data_w[2];
                 word11_r[pipe_slot_r] <= data_w[3];
             end
-            lru_set0_r <= pipe_addr0_r[13:5];
-            lru_set1_r <= pipe_addr1_r[13:5];
+            lru_set0_r <= pipe_bank0_addr_r[13:5];
+            lru_set1_r <= pipe_bank1_addr_r[13:5];
             lru_data0_r <= !hit0_w[1];
             lru_data1_r <= !hit1_w[1];
             if (!pipe_complete_w) begin
                 miss_slot_r <= pipe_slot_r;
-                miss_addr_r <= !complete0_w ? pipe_addr0_r : pipe_addr1_r;
-                miss_cacheable_r <= !complete0_w ? cacheable0_w : cacheable1_w;
-                victim_r <= !complete0_w ? replacement0_w : replacement1_w;
+                miss_addr_r <= miss_bank_w ? pipe_bank1_addr_r : pipe_bank0_addr_r;
+                miss_cacheable_r <= miss_bank_w ? cacheable1_w : cacheable0_w;
+                victim_r <= miss_bank_w ? replacement1_w : replacement0_w;
             end
         end
         if (axi_rvalid_i && axi_rready_o) begin
-            if ((miss_cacheable_r && addr_r[miss_slot_r][31:3] ==
+            if ((miss_cacheable_r && slot_bank0_addr_w[31:3] ==
                 {miss_addr_r[31:5], fill_beat_r}) ||
-                (!miss_cacheable_r && addr_r[miss_slot_r][31:3] == miss_addr_r[31:3])) begin
-                word00_r[miss_slot_r] <= addr_r[miss_slot_r][2] ?
-                    axi_rdata_i[63:32] : axi_rdata_i[31:0];
+                (!miss_cacheable_r && slot_bank0_addr_w[31:3] == miss_addr_r[31:3])) begin
+                word00_r[miss_slot_r] <= axi_rdata_i[31:0];
                 hit0_r[miss_slot_r] <= 2'b01;
             end
-            if ((miss_cacheable_r && slot_addr1_w[31:3] ==
+            if ((miss_cacheable_r && slot_bank1_addr_w[31:3] ==
                 {miss_addr_r[31:5], fill_beat_r}) ||
-                (!miss_cacheable_r && slot_addr1_w[31:3] == miss_addr_r[31:3])) begin
-                word10_r[miss_slot_r] <= slot_addr1_w[2] ?
-                    axi_rdata_i[63:32] : axi_rdata_i[31:0];
+                (!miss_cacheable_r && slot_bank1_addr_w[31:3] == miss_addr_r[31:3])) begin
+                word10_r[miss_slot_r] <= axi_rdata_i[63:32];
                 hit1_r[miss_slot_r] <= 2'b01;
             end
             if (fill_last_w) begin

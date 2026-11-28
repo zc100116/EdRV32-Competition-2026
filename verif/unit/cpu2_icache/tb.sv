@@ -10,14 +10,14 @@ module tb # (parameter ISSUE_WIDTH = 2);
     reg [31:0] ic_req_addr_i = 0;
     wire ic_resp_valid_o;
     reg ic_resp_ready_i = 0;
-    wire [31:0] ic_resp_word0_way0_instr_o;
-    wire [31:0] ic_resp_word0_way1_instr_o;
-    wire [1:0] ic_resp_word0_way_hit_o;
-    wire ic_resp_word0_error_o;
-    wire [31:0] ic_resp_word1_way0_instr_o;
-    wire [31:0] ic_resp_word1_way1_instr_o;
-    wire [1:0] ic_resp_word1_way_hit_o;
-    wire ic_resp_word1_error_o;
+    wire [31:0] ic_resp_bank0_way0_instr_o;
+    wire [31:0] ic_resp_bank0_way1_instr_o;
+    wire [1:0] ic_resp_bank0_way_hit_o;
+    wire ic_resp_bank0_error_o;
+    wire [31:0] ic_resp_bank1_way0_instr_o;
+    wire [31:0] ic_resp_bank1_way1_instr_o;
+    wire [1:0] ic_resp_bank1_way_hit_o;
+    wire ic_resp_bank1_error_o;
     reg ic_cancel_i = 0;
     reg ic_inv_valid_i = 0;
     wire ic_inv_ready_o;
@@ -45,14 +45,14 @@ module tb # (parameter ISSUE_WIDTH = 2);
         .ic_req_addr_i(ic_req_addr_i),
         .ic_resp_valid_o(ic_resp_valid_o),
         .ic_resp_ready_i(ic_resp_ready_i),
-        .ic_resp_word0_way0_instr_o(ic_resp_word0_way0_instr_o),
-        .ic_resp_word0_way1_instr_o(ic_resp_word0_way1_instr_o),
-        .ic_resp_word0_way_hit_o(ic_resp_word0_way_hit_o),
-        .ic_resp_word0_error_o(ic_resp_word0_error_o),
-        .ic_resp_word1_way0_instr_o(ic_resp_word1_way0_instr_o),
-        .ic_resp_word1_way1_instr_o(ic_resp_word1_way1_instr_o),
-        .ic_resp_word1_way_hit_o(ic_resp_word1_way_hit_o),
-        .ic_resp_word1_error_o(ic_resp_word1_error_o),
+        .ic_resp_bank0_way0_instr_o(ic_resp_bank0_way0_instr_o),
+        .ic_resp_bank0_way1_instr_o(ic_resp_bank0_way1_instr_o),
+        .ic_resp_bank0_way_hit_o(ic_resp_bank0_way_hit_o),
+        .ic_resp_bank0_error_o(ic_resp_bank0_error_o),
+        .ic_resp_bank1_way0_instr_o(ic_resp_bank1_way0_instr_o),
+        .ic_resp_bank1_way1_instr_o(ic_resp_bank1_way1_instr_o),
+        .ic_resp_bank1_way_hit_o(ic_resp_bank1_way_hit_o),
+        .ic_resp_bank1_error_o(ic_resp_bank1_error_o),
         .ic_cancel_i(ic_cancel_i),
         .ic_inv_valid_i(ic_inv_valid_i),
         .ic_inv_ready_o(ic_inv_ready_o),
@@ -104,21 +104,35 @@ module tb # (parameter ISSUE_WIDTH = 2);
             reg [31:0] pc;
             reg [31:0] actual0;
             reg [31:0] actual1;
+            reg error0;
+            reg error1;
+            reg [1:0] hit0;
+            reg [1:0] hit1;
             pc = queue_addr[pull % 128];
-            actual0 = ic_resp_word0_way_hit_o[1] ? ic_resp_word0_way1_instr_o :
-                ic_resp_word0_way0_instr_o;
-            actual1 = ic_resp_word1_way_hit_o[1] ? ic_resp_word1_way1_instr_o :
-                ic_resp_word1_way0_instr_o;
+            if (ISSUE_WIDTH == 2 && pc[2]) begin
+                actual0 = ic_resp_bank1_way_hit_o[1] ? ic_resp_bank1_way1_instr_o :
+                    ic_resp_bank1_way0_instr_o;
+                actual1 = ic_resp_bank0_way_hit_o[1] ? ic_resp_bank0_way1_instr_o :
+                    ic_resp_bank0_way0_instr_o;
+            end else begin
+                actual0 = ic_resp_bank0_way_hit_o[1] ? ic_resp_bank0_way1_instr_o :
+                    ic_resp_bank0_way0_instr_o;
+                actual1 = ic_resp_bank1_way_hit_o[1] ? ic_resp_bank1_way1_instr_o :
+                    ic_resp_bank1_way0_instr_o;
+            end
+            error0 = ISSUE_WIDTH == 2 && pc[2] ? ic_resp_bank1_error_o : ic_resp_bank0_error_o;
+            error1 = ISSUE_WIDTH == 2 && pc[2] ? ic_resp_bank0_error_o : ic_resp_bank1_error_o;
+            hit0 = ISSUE_WIDTH == 2 && pc[2] ? ic_resp_bank1_way_hit_o : ic_resp_bank0_way_hit_o;
+            hit1 = ISSUE_WIDTH == 2 && pc[2] ? ic_resp_bank0_way_hit_o : ic_resp_bank1_way_hit_o;
             if (pull >= push) $fatal(1, "response with no accepted context");
-            if (ic_resp_word0_error_o !== word_error(pc) ||
-                ic_resp_word1_error_o !== word_error(pc + 4))
+            if (error0 !== word_error(pc) || error1 !== word_error(pc + 4))
                 $fatal(1, "error pc%h expected%b/%b actual%b/%b", pc, word_error(pc),
-                       word_error(pc+4), ic_resp_word0_error_o, ic_resp_word1_error_o);
+                       word_error(pc+4), error0, error1);
             if (!word_error(pc) && (actual0 !== memory_word(pc) ||
-                ic_resp_word0_way_hit_o == 0))
+                hit0 == 0))
                 $fatal(1, "word0 pc%h expected%h actual%h", pc, memory_word(pc), actual0);
             if (!word_error(pc+4) && (actual1 !== memory_word(pc+4) ||
-                ic_resp_word1_way_hit_o == 0))
+                hit1 == 0))
                 $fatal(1, "word1 pc%h expected%h actual%h", pc+4, memory_word(pc+4), actual1);
             pull = pull + 1;
             responses <= responses + 1;
