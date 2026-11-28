@@ -490,11 +490,12 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 | 项 | 结论 |
 |---|---|
 | D06 完成记录（用户确认） | 单发射 NONE/F 8 项、FD 16 项；双发射全部 16 项；全部用 LUTRAM 共享队列，删除 NONE 4 项 FF 结构；不加"释放后次拍可用"短环信用。T/信用位宽按 N 导出 |
-| D01 可缓存 store（用户确认） | 准备即 done（异常此时确定），退休沿生效；`commit_store_count` 通知 LSU 按序标记，LSU store 队列（初值 4 项，C11）按序每拍至多一项经 dc_commit 进写缓冲，无 dc_done；`lsu_complete_device`→`head{j}_device` 区分设备/非缓存 store，后者保持 commit_lsu 授权 + done。年轻 load/early 与队列同字时本地等待排空后走普通访问 |
+| D01 可缓存 store（用户确认） | 准备即 done（异常此时确定），退休沿生效；`commit_store_count` 通知 LSU 按序标记，LSU store 队列（4 项，M02 定稿）按序每拍至多一项经 dc_commit 进写缓冲，无 dc_done；`lsu_complete_device`→`head{j}_device` 区分设备/非缓存 store，后者保持 commit_lsu 授权 + done。年轻 load/early 与队列同字时本地等待排空后走普通访问 |
 | D02 W1 BTB | 规格 5.4/5.5 已定：单发射 64 项按 8B 取指组索引 PC[8:3]，项内存位置；双发射字索引奇偶 bank 共 128 项。RTL 字索引为实现错误 |
 | D03 恢复沿 | 注册恢复沿取消旧 I$/前端上下文，同沿用寄存目标 PC 发 F1；同沿 valid&&ready 接受的新请求属于恢复后上下文，取消只清旧项，新请求下一拍正常返回并预留 2 条 IB 信用；旧 AXI 收完不回送 |
 | D01 维护接口 | 新增 `lsu_store_drained`（LSU→D$，1 位，寄存计数导出）：LSU 已提交未排空 store 项为空；D$ 与写缓冲空共同门控 fence/维护 ready。已准备未提交项不计入（年轻 store 要等 FENCE 退休才提交，计入会死锁） |
 | D07 W1 交付边界 | 单发射 early_resp_valid/tag/hit/data 同时接 issue：源为本拍执行的合格短 load 的消费者先分配进本地待发项，下一拍由 LSU 寄存 hit/data 驱动 EX 源；未命中则等普通完成，不进 ALU、不重发 load；hit 不组合反馈 ID，背压时源数据保持。双发射沿用 MEM 捕获 |
+| D02/D03 BTB 读写时序 | BTB 查询只旁路已登记的 pending 写项，不旁路当拍 EX 训练（与模型 query 读沿前旧项一致，缩短 F1） |
 | D05 MUL / D07 W1 短 load / D08 CSR | 按规格 5.2 延迟表实现：MUL 消费者 EX 间隔 4；单发射合格且命中短 load 间隔 1（early 捕获结果在下一拍作为源寄存值供 ID/EX，不组合反馈 hit）；CSR 读 2 且有序边界不多于模型 II3 |
 
 ## 影响

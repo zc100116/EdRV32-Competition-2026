@@ -249,7 +249,7 @@ FPU内部 top→fma32/fma64/divsqrt/convert/short 使用 `unit_req_valid/ready/i
 | dc_fence_done | D$→commit | 1 | 已接受fence完成脉冲，无错误旁路 |
 | dc_wb_event / dc_miss_event | D$→CSR | 各1 | 写回AW/新miss事件，非请求等待拍数 |
 
-D$寄存准入需预留同步RAM返回及发现miss后一拍的已接受请求槽；不沿旧核静默丢第二请求。early占用读口时不再接受另一普通读，选择来自已登记的端口预约；其后实际请求 `dc_req_early=1` 时重用捕获结果，失败则普通访问本地顺延。缓存响应device只是准备阶段，LSU不把它当完成数据；提交头授权后才发设备AXI，最终dc_done后才退休。可缓存store直到提交不改架构内存。LSU store队列必须保存已准备未提交及已提交未排空的可缓存store beat，开发初值4项 **[待定]**（由模型在2/4项中扫描定稿）；已提交项按序每拍至多一项经dc_commit排入写缓冲，取消只清未提交项。年轻load（含early查询）与队列中任一项同字时，不得复用early结果，必须在LSU本地等待这些项排入写缓冲后再走普通访问，由写缓冲按字节合并；load返回路径不增加队列合并。队列满时只有store不能接收（ready来自寄存计数）。FENCE/维护必须等已提交队列项和写缓冲都空（lsu_store_drained）。
+D$寄存准入需预留同步RAM返回及发现miss后一拍的已接受请求槽；不沿旧核静默丢第二请求。early占用读口时不再接受另一普通读，选择来自已登记的端口预约；其后实际请求 `dc_req_early=1` 时重用捕获结果，失败则普通访问本地顺延。缓存响应device只是准备阶段，LSU不把它当完成数据；提交头授权后才发设备AXI，最终dc_done后才退休。可缓存store直到提交不改架构内存。LSU store队列必须保存已准备未提交及已提交未排空的可缓存store beat，4项（M02模型扫描：两宽三负载相对无限队列损失≤0.07%，2项最高11%，docs/reports/2026-11-28-perf-cpu2-store-queue.md）；已提交项按序每拍至多一项经dc_commit排入写缓冲，取消只清未提交项。年轻load（含early查询）与队列中任一项同字时，不得复用early结果，必须在LSU本地等待这些项排入写缓冲后再走普通访问，由写缓冲按字节合并；load返回路径不增加队列合并。队列满时只有store不能接收（ready来自寄存计数）。FENCE/维护必须等已提交队列项和写缓冲都空（lsu_store_drained）。
 
 ### 3.8 前端与 I$、维护控制
 
@@ -538,7 +538,6 @@ FP32 FMA及其他FP预算见fpu-spec 7。L1命中必须每拍接受一个普通�
 
 | ID | 事项及开发初值 | 定稿时机/依据 |
 |---|---|---|
-| C11 | LSU可缓存store队列项数，开发初值4 | 模型扫描2/4项（含同字load等待），三负载与无限队列差<1%取最小值 |
 | C10 | 150/135MHz、资源及perf阈值；根扇出≤8/叶≤16、使能按≤16位分区均为实现预算；维护无写回访问组数+8/全clean干净32+8为预算，写回附加拍数待测 | RTL回归、整片PDS和上板；I03回放DIV独立修正拍，不把旧模型当保证 |
 
 FPU延迟/II和资源实测未决项必须见fpu-spec F03/F06；验证性能阈值必须见testplan T01/FT02。
@@ -552,4 +551,4 @@ FPU延迟/II和资源实测未决项必须见fpu-spec F03/F06；验证性能阈�
 | 2026-11-28 | v0.2 | 按用户决定将单发射固定为精简结构+Zba；双发射满配及NONE/F/FD固定结构不变，同步接口、验证、实施和模型结论 |
 | 2026-11-28 | v0.2 | 用户确认：完成队列PC改为分配沿写入，完成源不带PC，完成写仲裁与模型口径不变（I04提问，见 docs/design/2026-11-28-cpu-v2-interface-freeze.md 实现补充） |
 | 2026-11-28 | v0.2 | 用户确认：TAGE待写项占用时MEM/EX同拍训练，丢弃EX表写入（I01提问）；同规则用于fast gshare/BTB |
-| 2026-11-28 | v0.3 | 用户确认：完成记录改为单发射NONE/F 8项、FD 16项，双发射全部16项，全部LUTRAM共享队列（M01扫描，docs/reports/2026-11-28-perf-cpu2-completion-window.md）；可缓存store准备即done、退休沿生效，LSU加store队列（初值4项[待定]），设备store保持头授权（A00 D01/D06，docs/reports/2026-11-28-perf-cpu2-model-conformance.md） |
+| 2026-11-28 | v0.3 | 用户确认：完成记录改为单发射NONE/F 8项、FD 16项，双发射全部16项，全部LUTRAM共享队列（M01扫描，docs/reports/2026-11-28-perf-cpu2-completion-window.md）；可缓存store准备即done、退休沿生效，LSU加store队列（4项，M02定稿），设备store保持头授权（A00 D01/D06，docs/reports/2026-11-28-perf-cpu2-model-conformance.md） |
