@@ -4,7 +4,7 @@
 
 | IP 模块名 | 类型 | 规格 | 包装模块 | 使用者 | 创建说明 | 状态 |
 |---|---|---|---|---|---|---|
-| `ip_lutram_cpu2_rf` | 分布式 RAM，组合读 | 32×32 | `edrv32_ram_cpu2_rf` | RF×8、AGU读路径×2 | [ip_lutram_cpu2_rf.md](ip_lutram_cpu2_rf.md) | 整数探针待生成 |
+| `ip_lutram_cpu2_rf` | 分布式 RAM，组合读 | 32×32 | `edrv32_ram_cpu2_rf` | RF×8、AGU读路径×2；完成队列 `edrv32_ram_cpu2_completion`（8×32，高2位地址接0）共用 | [ip_lutram_cpu2_rf.md](ip_lutram_cpu2_rf.md) | 整数探针待生成 |
 | `ip_lutram_cpu2_btb` | 分布式 RAM，组合读 | 64×59 | `edrv32_ram_cpu2_btb` | 奇偶BTB×2 | [ip_lutram_cpu2_btb.md](ip_lutram_cpu2_btb.md) | 整数探针待生成 |
 | `ip_lutram_cpu2_fast` | 分布式 RAM，组合读 | 1024×2 | `edrv32_ram_cpu2_fast` | gshare四bank×三读副本，共12 | [ip_lutram_cpu2_fast.md](ip_lutram_cpu2_fast.md) | 整数探针待生成 |
 | `ip_ram_cpu2_cache_data` | DRM，同步读 | 2048×32 | `edrv32_ram_cpu2_cache_data` | I$×4、D$×4 | [ip_ram_cpu2_cache_data.md](ip_ram_cpu2_cache_data.md) | 整数探针待生成 |
@@ -13,6 +13,9 @@
 | `ip_ram_cpu2_tage_train` | DRM，同步读 | 512×16 | `edrv32_ram_cpu2_tage_train` | 四表训练副本，共4 | [ip_ram_cpu2_tage_train.md](ip_ram_cpu2_tage_train.md) | 整数探针待生成 |
 | `ip_ram_cpu2_base` | DRM，同步读 | 2048×2 | `edrv32_ram_cpu2_base` | 基表奇偶预测bank，共2 | [ip_ram_cpu2_base.md](ip_ram_cpu2_base.md) | 整数探针待生成 |
 | `ip_ram_cpu2_base_train` | DRM，同步读 | 4096×2 | `edrv32_ram_cpu2_base_train` | 基表训练副本×1 | [ip_ram_cpu2_base_train.md](ip_ram_cpu2_base_train.md) | 整数探针待生成 |
+| `ip_ram_cpu2_cache_data64` | DRM，同步读，8位字节写使能 | 2048×64 | `edrv32_ram_cpu2_cache_data64` | D$×2、单发射I$×2 | [ip_ram_cpu2_cache_data64.md](ip_ram_cpu2_cache_data64.md) | 整核待生成 |
+| `ip_ram_cpu2_cache_dtag` | DRM，同步读 | 512×20 | `edrv32_ram_cpu2_cache_dtag` | D$×2 | [ip_ram_cpu2_cache_dtag.md](ip_ram_cpu2_cache_dtag.md) | 整核待生成 |
+| `ip_ram_cpu2_cache_lru` | DRM，同步读 | 512×1 | `edrv32_ram_cpu2_cache_lru` | I$×1、D$×1 | [ip_ram_cpu2_cache_lru.md](ip_ram_cpu2_cache_lru.md) | 整核待生成 |
 | `ip_ram_icache_tag` | DRM 简单双口 RAM | 512 × 18 | `edrv32_ram_icache_tag` | I$ ×2 | [ip_ram_icache_tag.md](ip_ram_icache_tag.md) | 32 KiB（用户 2026-10-31 采用），卡 21 重新生成（模块名不变） |
 | `ip_ram_icache_data` | DRM 简单双口 RAM | 2048 × 64 | `edrv32_ram_icache_data` | I$ ×2 | [ip_ram_icache_data.md](ip_ram_icache_data.md) | 32 KiB（用户 2026-10-31 采用），卡 21 重新生成（模块名不变） |
 | `ip_ram_dcache_tag` | DRM 简单双口 RAM | 512 × 20 | `edrv32_ram_dcache_tag` | D$ ×4（2 路 + 2 份提前查询副本，cache-spec v0.10） | [ip_ram_dcache_tag.md](ip_ram_dcache_tag.md) | 需重新生成（cache-spec v0.9：{valid, dirty, tag}） |

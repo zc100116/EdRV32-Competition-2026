@@ -6,7 +6,7 @@
 | Module Name | `ip_lutram_cpu2_rf` |
 | 包装 | `rtl/tech/edrv32_ram_cpu2_rf.v` |
 | 器件 | PG2L200H-6 |
-| 使用者/实例数 | RF×8、AGU读路径×2 |
+| 使用者/实例数 | RF×8、AGU读路径×2；另被 `rtl/tech/edrv32_ram_cpu2_completion.v` 共用（地址高2位接0，实例数随配置） |
 | Write/Read Width | 32 / 32 |
 | Write/Read Depth | 32 / 32（地址 5 位） |
 | 时钟 | 同一个 clk_sys，上升沿，同步整字写 |

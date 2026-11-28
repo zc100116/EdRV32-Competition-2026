@@ -420,6 +420,29 @@ j=0,1按年龄，只有一条时在0。所有字段在该退休或陷阱事件�
 
 内存记分板同时用AXI/BFM观察真正外部副作用、trace观察提交意图；可缓存写对架构生效指写缓冲接受，不要求等待后续写回。若发生故障FSD，trace_trap仍给本条PC/高字地址，不能伪造一条退休来解释部分写。
 
+### 实现补充（2026-11-28，RTL第一波提问）
+
+**配置与物理端口。** 同名模块只有 `ISSUE_WIDTH`/`FPU_FORMAT` 两个参数且不得 ifdef，参数无法删端口；规格中"单发射无 j1/owner/source_wait 端口、NONE 无 FP 端口"按下述口径实现：内部模块物理端口取最大命名集合，逐信号展开、位宽按参数；不适用的配置在模块内 generate 不实例化相关逻辑，输出驱动常量0，输入不读，上层不连接（输入接0）。未读输入用一行 `verilator lint_off UNUSEDSIGNAL` 包住的归并 `unused_w`，六配置 lint 均须0告警。顶层外部端口六配置相同。
+
+**TAGE 的 D 预读（I01）。** issue 在本沿实际发射、带 F1 token 的条件分支，按程序槽 j=0..I−1 送 issue→TAGE：`predict_read{j}_valid`1、`predict_read{j}_tag`T、`predict_read{j}_index{p}`W、`predict_read{j}_tag{p}`10、`predict_read{j}_base_index`12。TAGE 用训练副本同步读，下一沿把各表当前行捕获进以完成 tag 关联的预读记录；记录等待期间侦听每次表写与待写项，同 index 就替换所存行（C08 同址老更新旁路）。EX/MEM 的 `predict_train_*` 按 `predict_train_tag` 找记录训练，provider/alternate/prediction 仍随 train 送来，不在预读时重复发送。TAGE 接 `age_head/cancel_valid/cancel_tag` 清被取消记录，训练完成释放记录。不靠固定拍推进。记录数取发射到 MEM 训练之间最多在途的条件分支数（由流水深度导出，写进 RTL 设计说明，不作参数）。
+
+**提交侧补充端口（I04）。**
+
+| 信号词干 | 方向 | 位宽 | 语义 |
+|---|---|---:|---|
+| decode_complete_valid / ready / tag / exception / cause / tval | issue→completion / 反向 / issue→completion | 1/1/T/1/4/32 | decode 生成的独立完成源：非法指令、ECALL/EBREAK、取指错误；格式同 `*_complete` |
+| lsu_complete_device | LSU→completion | 1 | 设备访问准备完成，登记为 `head{j}_device` |
+| head{j}_device | completion→commit | 1 | 头为 store、device 或 double_beat 时，commit 用 `commit_lsu_*` 授权，等 `commit_lsu_done` 后退休 |
+| lsu_complete_mem_addr / mem_data / mem_mask | LSU→completion | 32/64/8 | trace 访存元数据；completion 用普通寄存器保存（不用技术包装），经 `head{j}_mem_*` 只送 trace，FPGA 中无负载被综合删除 |
+| branch_redirect_valid / tag / pc | branch→completion、frontend | 1/T/32 | branch 内部选本沿最老误预测（含两管线 EX/MEM），注册输出 |
+| commit_redirect_valid / pc | commit→frontend | 1/32 | 陷阱、MRET、FENCE.I 及串行化重取；同沿优先于 branch 重定向 |
+| commit_cancel_valid / tag | commit→completion | 1/T | 陷阱/中断从头 tag 起取消；同沿优先于 branch |
+| mret_valid / csr_mepc | commit→CSR / CSR→commit | 1/32 | MRET 退休沿 CSR 恢复 MIE/MPIE；mepc 为已提交寄存值 |
+| irq_wake | CSR→commit | 1 | 任一 mie 允许的 pending，不看 MIE（CPU6.3 WFI 唤醒） |
+| fetch_stop | commit→frontend | 1 | WFI 退休后为1停取指，irq_wake 后清0 |
+
+completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，`cancel_tag`=该 tag+1（mod N），否则不发 cancel；`commit_cancel_valid` 同沿时取 commit 的值。空队列时的"下一应执行 PC"是 commit 内部寄存 `next_pc_r`（随退休、重定向、陷阱、MRET 更新），不设端口。
+
 ## 影响
 
 审核通过后需修改CPU spec2.2/2.3、3、4、5、6及9的C01–C09；FPU spec2.4、3、4、5.1/5.4/5.5及9的F01/F02/F04/F05；CPU testplan2/4/6/7的T02/T03及对应CV02–CV14；FPU testplan4/6/7的FT01/FT03及FV10–FV15。C10、F03/F06与FT03中的未测数值继续待定；旧cpu/cache规格不改，外部总线无差异。
