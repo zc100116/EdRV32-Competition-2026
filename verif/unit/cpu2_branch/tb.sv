@@ -166,11 +166,19 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
     reg wb1_valid_i=0;
     reg [T-1:0] wb1_tag_i=0;
     reg [31:0] wb1_data_i=0;
+    reg early_resp_valid_i=0;
+    reg [T-1:0] early_resp_tag_i=0;
+    reg early_resp_hit_i=0;
+    reg [31:0] early_resp_data_i=0;
     edrv32_cpu2_branch #(
         .ISSUE_WIDTH(ISSUE_WIDTH),
         .FPU_FORMAT(FPU_FORMAT)
     ) dut (
         .lsu_complete_device_i(lsu_complete_device_i),
+        .early_resp_valid_i(early_resp_valid_i),
+        .early_resp_tag_i(early_resp_tag_i),
+        .early_resp_hit_i(early_resp_hit_i),
+        .early_resp_data_i(early_resp_data_i),
         .wb0_valid_i(wb0_valid_i),
         .wb0_tag_i(wb0_tag_i),
         .wb0_data_i(wb0_data_i),
@@ -472,6 +480,19 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
             branch(p,32'h0000006f,0,0,2,1,32'h102,1,1);
         end
         if(ISSUE_WIDTH==2) begin
+            // An early miss must wait; the captured early hit supplies this branch source.
+            @(negedge clk_i);execute0_valid_i=1;execute0_late_i=1;execute0_tag_i=2;
+            execute0_instr_i=32'h1063;execute0_pc_i=32'h100;execute0_imm_i=32'h20;
+            execute0_source1_wait_i=1;execute0_source1_tag_i=0;
+            execute0_src1_i=0;execute0_src2_i=33;
+            tick();execute0_valid_i=0;
+            early_resp_valid_i=1;early_resp_tag_i=0;early_resp_data_i=33;
+            early_resp_hit_i=0;tick();
+            if(branch_complete_valid_o)$fatal(1,"failed early query released branch source");
+            early_resp_hit_i=1;tick();early_resp_valid_i=0;early_resp_hit_i=0;
+            if(!branch_complete_valid_o || branch_complete_next_pc_o!=32'h104)
+                $fatal(1,"captured early hit did not supply branch source");
+            tick();execute0_late_i=0;execute0_source1_wait_i=0;tick();
             for(integer pipeline=0;pipeline<2;pipeline++)begin
                 for(integer condition_code=0;condition_code<8;condition_code++)begin
                     if(condition_code!=2 && condition_code!=3)begin

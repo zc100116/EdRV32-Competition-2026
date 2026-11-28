@@ -1232,6 +1232,10 @@ module edrv32_cpu2_top #(
         .FPU_FORMAT(FPU_FORMAT)
     ) u_alu (
         .lsu_complete_device_i(lsu_complete_device_w),
+        .early_resp_valid_i(early_resp_valid_w),
+        .early_resp_tag_i(early_resp_tag_w),
+        .early_resp_hit_i(early_resp_hit_w),
+        .early_resp_data_i(early_resp_data_w),
         .wb0_valid_i(wb0_valid_w),
         .wb0_tag_i(wb0_tag_w),
         .wb0_data_i(wb0_data_w),
@@ -1324,6 +1328,10 @@ module edrv32_cpu2_top #(
         .FPU_FORMAT(FPU_FORMAT)
     ) u_branch (
         .lsu_complete_device_i(lsu_complete_device_w),
+        .early_resp_valid_i(early_resp_valid_w),
+        .early_resp_tag_i(early_resp_tag_w),
+        .early_resp_hit_i(early_resp_hit_w),
+        .early_resp_data_i(early_resp_data_w),
         .wb0_valid_i(wb0_valid_w),
         .wb0_tag_i(wb0_tag_w),
         .wb0_data_i(wb0_data_w),

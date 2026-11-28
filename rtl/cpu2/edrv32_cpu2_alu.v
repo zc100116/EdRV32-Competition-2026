@@ -9,6 +9,11 @@ module edrv32_cpu2_alu #(
 ) (
     // Execute inputs, completion snoops and per-pipeline result interfaces.
     input wire lsu_complete_device_i,
+    // Frozen early return: data was captured locally by LSU before operand capture.
+    input wire early_resp_valid_i,
+    input wire [(FPU_FORMAT=="FD" ? 4 : FPU_FORMAT=="F" ? 3 : 2)-1:0] early_resp_tag_i,
+    input wire early_resp_hit_i,
+    input wire [31:0] early_resp_data_i,
     input wire wb0_valid_i,
     input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] wb0_tag_i,
     input wire [31:0] wb0_data_i,
@@ -173,6 +178,8 @@ module edrv32_cpu2_alu #(
             wire stash_w = ex_early_w && !skid_valid_r && !ex_done_w;
             wire ex_hit1_w;
             wire [31:0] ex_capture1_w;
+            wire ex_source1_early_w = early_resp_valid_i && early_resp_hit_i &&
+                (early_resp_tag_i == ex_source1_tag_r);
             wire ex_source1_0_w = alu0_complete_valid_i && alu0_complete_ready_i &&
                 (alu0_complete_tag_i == ex_source1_tag_r);
             wire ex_source1_1_w = alu1_complete_valid_i && alu1_complete_ready_i &&
@@ -193,7 +200,7 @@ module edrv32_cpu2_alu #(
             wire ex_source1_wb0_w = wb0_valid_i && (wb0_tag_i == ex_source1_tag_r);
             wire ex_source1_wb1_w = (ISSUE_WIDTH == 2) && wb1_valid_i &&
                 (wb1_tag_i == ex_source1_tag_r);
-            assign ex_hit1_w = ex_source1_0_w ||
+            assign ex_hit1_w = ex_source1_early_w || ex_source1_0_w ||
                 ex_source1_1_w ||
                 ex_source1_2_w ||
                 ex_source1_3_w ||
@@ -201,7 +208,8 @@ module edrv32_cpu2_alu #(
                 ex_source1_5_w ||
                 ex_source1_6_w ||
                 ex_source1_7_w || ex_source1_wb0_w || ex_source1_wb1_w;
-            assign ex_capture1_w = ({32{ex_source1_0_w}} & alu0_complete_data_i[31:0]) |
+            assign ex_capture1_w = ({32{ex_source1_early_w}} & early_resp_data_i) |
+                ({32{ex_source1_0_w}} & alu0_complete_data_i[31:0]) |
                 ({32{ex_source1_1_w}} & alu1_complete_data_i[31:0]) |
                 ({32{ex_source1_2_w}} & branch_complete_data_i[31:0]) |
                 ({32{ex_source1_3_w}} & mul_complete_data_i[31:0]) |
@@ -213,6 +221,8 @@ module edrv32_cpu2_alu #(
                 ({32{ex_source1_wb1_w}} & wb1_data_i);
             wire ex_hit2_w;
             wire [31:0] ex_capture2_w;
+            wire ex_source2_early_w = early_resp_valid_i && early_resp_hit_i &&
+                (early_resp_tag_i == ex_source2_tag_r);
             wire ex_source2_0_w = alu0_complete_valid_i && alu0_complete_ready_i &&
                 (alu0_complete_tag_i == ex_source2_tag_r);
             wire ex_source2_1_w = alu1_complete_valid_i && alu1_complete_ready_i &&
@@ -233,7 +243,7 @@ module edrv32_cpu2_alu #(
             wire ex_source2_wb0_w = wb0_valid_i && (wb0_tag_i == ex_source2_tag_r);
             wire ex_source2_wb1_w = (ISSUE_WIDTH == 2) && wb1_valid_i &&
                 (wb1_tag_i == ex_source2_tag_r);
-            assign ex_hit2_w = ex_source2_0_w ||
+            assign ex_hit2_w = ex_source2_early_w || ex_source2_0_w ||
                 ex_source2_1_w ||
                 ex_source2_2_w ||
                 ex_source2_3_w ||
@@ -241,7 +251,8 @@ module edrv32_cpu2_alu #(
                 ex_source2_5_w ||
                 ex_source2_6_w ||
                 ex_source2_7_w || ex_source2_wb0_w || ex_source2_wb1_w;
-            assign ex_capture2_w = ({32{ex_source2_0_w}} & alu0_complete_data_i[31:0]) |
+            assign ex_capture2_w = ({32{ex_source2_early_w}} & early_resp_data_i) |
+                ({32{ex_source2_0_w}} & alu0_complete_data_i[31:0]) |
                 ({32{ex_source2_1_w}} & alu1_complete_data_i[31:0]) |
                 ({32{ex_source2_2_w}} & branch_complete_data_i[31:0]) |
                 ({32{ex_source2_3_w}} & mul_complete_data_i[31:0]) |
@@ -253,6 +264,8 @@ module edrv32_cpu2_alu #(
                 ({32{ex_source2_wb1_w}} & wb1_data_i);
             wire mem_hit1_w;
             wire [31:0] mem_capture1_w;
+            wire mem_source1_early_w = early_resp_valid_i && early_resp_hit_i &&
+                (early_resp_tag_i == mem_source1_tag_r);
             wire mem_source1_0_w = alu0_complete_valid_i && alu0_complete_ready_i &&
                 (alu0_complete_tag_i == mem_source1_tag_r);
             wire mem_source1_1_w = alu1_complete_valid_i && alu1_complete_ready_i &&
@@ -273,7 +286,7 @@ module edrv32_cpu2_alu #(
             wire mem_source1_wb0_w = wb0_valid_i && (wb0_tag_i == mem_source1_tag_r);
             wire mem_source1_wb1_w = (ISSUE_WIDTH == 2) && wb1_valid_i &&
                 (wb1_tag_i == mem_source1_tag_r);
-            assign mem_hit1_w = mem_source1_0_w ||
+            assign mem_hit1_w = mem_source1_early_w || mem_source1_0_w ||
                 mem_source1_1_w ||
                 mem_source1_2_w ||
                 mem_source1_3_w ||
@@ -281,7 +294,8 @@ module edrv32_cpu2_alu #(
                 mem_source1_5_w ||
                 mem_source1_6_w ||
                 mem_source1_7_w || mem_source1_wb0_w || mem_source1_wb1_w;
-            assign mem_capture1_w = ({32{mem_source1_0_w}} & alu0_complete_data_i[31:0]) |
+            assign mem_capture1_w = ({32{mem_source1_early_w}} & early_resp_data_i) |
+                ({32{mem_source1_0_w}} & alu0_complete_data_i[31:0]) |
                 ({32{mem_source1_1_w}} & alu1_complete_data_i[31:0]) |
                 ({32{mem_source1_2_w}} & branch_complete_data_i[31:0]) |
                 ({32{mem_source1_3_w}} & mul_complete_data_i[31:0]) |
@@ -293,6 +307,8 @@ module edrv32_cpu2_alu #(
                 ({32{mem_source1_wb1_w}} & wb1_data_i);
             wire mem_hit2_w;
             wire [31:0] mem_capture2_w;
+            wire mem_source2_early_w = early_resp_valid_i && early_resp_hit_i &&
+                (early_resp_tag_i == mem_source2_tag_r);
             wire mem_source2_0_w = alu0_complete_valid_i && alu0_complete_ready_i &&
                 (alu0_complete_tag_i == mem_source2_tag_r);
             wire mem_source2_1_w = alu1_complete_valid_i && alu1_complete_ready_i &&
@@ -313,7 +329,7 @@ module edrv32_cpu2_alu #(
             wire mem_source2_wb0_w = wb0_valid_i && (wb0_tag_i == mem_source2_tag_r);
             wire mem_source2_wb1_w = (ISSUE_WIDTH == 2) && wb1_valid_i &&
                 (wb1_tag_i == mem_source2_tag_r);
-            assign mem_hit2_w = mem_source2_0_w ||
+            assign mem_hit2_w = mem_source2_early_w || mem_source2_0_w ||
                 mem_source2_1_w ||
                 mem_source2_2_w ||
                 mem_source2_3_w ||
@@ -321,7 +337,8 @@ module edrv32_cpu2_alu #(
                 mem_source2_5_w ||
                 mem_source2_6_w ||
                 mem_source2_7_w || mem_source2_wb0_w || mem_source2_wb1_w;
-            assign mem_capture2_w = ({32{mem_source2_0_w}} & alu0_complete_data_i[31:0]) |
+            assign mem_capture2_w = ({32{mem_source2_early_w}} & early_resp_data_i) |
+                ({32{mem_source2_0_w}} & alu0_complete_data_i[31:0]) |
                 ({32{mem_source2_1_w}} & alu1_complete_data_i[31:0]) |
                 ({32{mem_source2_2_w}} & branch_complete_data_i[31:0]) |
                 ({32{mem_source2_3_w}} & mul_complete_data_i[31:0]) |
@@ -557,6 +574,8 @@ module edrv32_cpu2_alu #(
             wire stash_w = ex_early_w && !skid_valid_r && !ex_done_w;
             wire ex_hit1_w;
             wire [31:0] ex_capture1_w;
+            wire ex_source1_early_w = early_resp_valid_i && early_resp_hit_i &&
+                (early_resp_tag_i == ex_source1_tag_r);
             wire ex_source1_0_w = alu0_complete_valid_i && alu0_complete_ready_i &&
                 (alu0_complete_tag_i == ex_source1_tag_r);
             wire ex_source1_1_w = alu1_complete_valid_i && alu1_complete_ready_i &&
@@ -577,7 +596,7 @@ module edrv32_cpu2_alu #(
             wire ex_source1_wb0_w = wb0_valid_i && (wb0_tag_i == ex_source1_tag_r);
             wire ex_source1_wb1_w = (ISSUE_WIDTH == 2) && wb1_valid_i &&
                 (wb1_tag_i == ex_source1_tag_r);
-            assign ex_hit1_w = ex_source1_0_w ||
+            assign ex_hit1_w = ex_source1_early_w || ex_source1_0_w ||
                 ex_source1_1_w ||
                 ex_source1_2_w ||
                 ex_source1_3_w ||
@@ -585,7 +604,8 @@ module edrv32_cpu2_alu #(
                 ex_source1_5_w ||
                 ex_source1_6_w ||
                 ex_source1_7_w || ex_source1_wb0_w || ex_source1_wb1_w;
-            assign ex_capture1_w = ({32{ex_source1_0_w}} & alu0_complete_data_i[31:0]) |
+            assign ex_capture1_w = ({32{ex_source1_early_w}} & early_resp_data_i) |
+                ({32{ex_source1_0_w}} & alu0_complete_data_i[31:0]) |
                 ({32{ex_source1_1_w}} & alu1_complete_data_i[31:0]) |
                 ({32{ex_source1_2_w}} & branch_complete_data_i[31:0]) |
                 ({32{ex_source1_3_w}} & mul_complete_data_i[31:0]) |
@@ -597,6 +617,8 @@ module edrv32_cpu2_alu #(
                 ({32{ex_source1_wb1_w}} & wb1_data_i);
             wire ex_hit2_w;
             wire [31:0] ex_capture2_w;
+            wire ex_source2_early_w = early_resp_valid_i && early_resp_hit_i &&
+                (early_resp_tag_i == ex_source2_tag_r);
             wire ex_source2_0_w = alu0_complete_valid_i && alu0_complete_ready_i &&
                 (alu0_complete_tag_i == ex_source2_tag_r);
             wire ex_source2_1_w = alu1_complete_valid_i && alu1_complete_ready_i &&
@@ -617,7 +639,7 @@ module edrv32_cpu2_alu #(
             wire ex_source2_wb0_w = wb0_valid_i && (wb0_tag_i == ex_source2_tag_r);
             wire ex_source2_wb1_w = (ISSUE_WIDTH == 2) && wb1_valid_i &&
                 (wb1_tag_i == ex_source2_tag_r);
-            assign ex_hit2_w = ex_source2_0_w ||
+            assign ex_hit2_w = ex_source2_early_w || ex_source2_0_w ||
                 ex_source2_1_w ||
                 ex_source2_2_w ||
                 ex_source2_3_w ||
@@ -625,7 +647,8 @@ module edrv32_cpu2_alu #(
                 ex_source2_5_w ||
                 ex_source2_6_w ||
                 ex_source2_7_w || ex_source2_wb0_w || ex_source2_wb1_w;
-            assign ex_capture2_w = ({32{ex_source2_0_w}} & alu0_complete_data_i[31:0]) |
+            assign ex_capture2_w = ({32{ex_source2_early_w}} & early_resp_data_i) |
+                ({32{ex_source2_0_w}} & alu0_complete_data_i[31:0]) |
                 ({32{ex_source2_1_w}} & alu1_complete_data_i[31:0]) |
                 ({32{ex_source2_2_w}} & branch_complete_data_i[31:0]) |
                 ({32{ex_source2_3_w}} & mul_complete_data_i[31:0]) |
@@ -637,6 +660,8 @@ module edrv32_cpu2_alu #(
                 ({32{ex_source2_wb1_w}} & wb1_data_i);
             wire mem_hit1_w;
             wire [31:0] mem_capture1_w;
+            wire mem_source1_early_w = early_resp_valid_i && early_resp_hit_i &&
+                (early_resp_tag_i == mem_source1_tag_r);
             wire mem_source1_0_w = alu0_complete_valid_i && alu0_complete_ready_i &&
                 (alu0_complete_tag_i == mem_source1_tag_r);
             wire mem_source1_1_w = alu1_complete_valid_i && alu1_complete_ready_i &&
@@ -657,7 +682,7 @@ module edrv32_cpu2_alu #(
             wire mem_source1_wb0_w = wb0_valid_i && (wb0_tag_i == mem_source1_tag_r);
             wire mem_source1_wb1_w = (ISSUE_WIDTH == 2) && wb1_valid_i &&
                 (wb1_tag_i == mem_source1_tag_r);
-            assign mem_hit1_w = mem_source1_0_w ||
+            assign mem_hit1_w = mem_source1_early_w || mem_source1_0_w ||
                 mem_source1_1_w ||
                 mem_source1_2_w ||
                 mem_source1_3_w ||
@@ -665,7 +690,8 @@ module edrv32_cpu2_alu #(
                 mem_source1_5_w ||
                 mem_source1_6_w ||
                 mem_source1_7_w || mem_source1_wb0_w || mem_source1_wb1_w;
-            assign mem_capture1_w = ({32{mem_source1_0_w}} & alu0_complete_data_i[31:0]) |
+            assign mem_capture1_w = ({32{mem_source1_early_w}} & early_resp_data_i) |
+                ({32{mem_source1_0_w}} & alu0_complete_data_i[31:0]) |
                 ({32{mem_source1_1_w}} & alu1_complete_data_i[31:0]) |
                 ({32{mem_source1_2_w}} & branch_complete_data_i[31:0]) |
                 ({32{mem_source1_3_w}} & mul_complete_data_i[31:0]) |
@@ -677,6 +703,8 @@ module edrv32_cpu2_alu #(
                 ({32{mem_source1_wb1_w}} & wb1_data_i);
             wire mem_hit2_w;
             wire [31:0] mem_capture2_w;
+            wire mem_source2_early_w = early_resp_valid_i && early_resp_hit_i &&
+                (early_resp_tag_i == mem_source2_tag_r);
             wire mem_source2_0_w = alu0_complete_valid_i && alu0_complete_ready_i &&
                 (alu0_complete_tag_i == mem_source2_tag_r);
             wire mem_source2_1_w = alu1_complete_valid_i && alu1_complete_ready_i &&
@@ -697,7 +725,7 @@ module edrv32_cpu2_alu #(
             wire mem_source2_wb0_w = wb0_valid_i && (wb0_tag_i == mem_source2_tag_r);
             wire mem_source2_wb1_w = (ISSUE_WIDTH == 2) && wb1_valid_i &&
                 (wb1_tag_i == mem_source2_tag_r);
-            assign mem_hit2_w = mem_source2_0_w ||
+            assign mem_hit2_w = mem_source2_early_w || mem_source2_0_w ||
                 mem_source2_1_w ||
                 mem_source2_2_w ||
                 mem_source2_3_w ||
@@ -705,7 +733,8 @@ module edrv32_cpu2_alu #(
                 mem_source2_5_w ||
                 mem_source2_6_w ||
                 mem_source2_7_w || mem_source2_wb0_w || mem_source2_wb1_w;
-            assign mem_capture2_w = ({32{mem_source2_0_w}} & alu0_complete_data_i[31:0]) |
+            assign mem_capture2_w = ({32{mem_source2_early_w}} & early_resp_data_i) |
+                ({32{mem_source2_0_w}} & alu0_complete_data_i[31:0]) |
                 ({32{mem_source2_1_w}} & alu1_complete_data_i[31:0]) |
                 ({32{mem_source2_2_w}} & branch_complete_data_i[31:0]) |
                 ({32{mem_source2_3_w}} & mul_complete_data_i[31:0]) |
@@ -865,7 +894,8 @@ module edrv32_cpu2_alu #(
         end
     endgenerate
     /* verilator lint_off UNUSEDSIGNAL */
-    wire unused_w = ^{lsu_complete_device_i,
+    wire unused_w = ^{early_resp_valid_i, early_resp_tag_i, early_resp_hit_i,
+        early_resp_data_i, lsu_complete_device_i,
         wb0_valid_i,
         wb0_tag_i,
         wb0_data_i,

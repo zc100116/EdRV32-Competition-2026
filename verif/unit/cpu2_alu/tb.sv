@@ -72,8 +72,16 @@ module tb #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE");
     reg wb1_valid_i=0;
     reg [T-1:0] wb1_tag_i=0;
     reg [31:0] wb1_data_i=0;
+    reg early_resp_valid_i=0;
+    reg [T-1:0] early_resp_tag_i=0;
+    reg early_resp_hit_i=0;
+    reg [31:0] early_resp_data_i=0;
     edrv32_cpu2_alu #(.ISSUE_WIDTH(ISSUE_WIDTH),.FPU_FORMAT(FPU_FORMAT)) dut (
         .lsu_complete_device_i(lsu_complete_device_i),
+        .early_resp_valid_i(early_resp_valid_i),
+        .early_resp_tag_i(early_resp_tag_i),
+        .early_resp_hit_i(early_resp_hit_i),
+        .early_resp_data_i(early_resp_data_i),
         .wb0_valid_i(wb0_valid_i),
         .wb0_tag_i(wb0_tag_i),
         .wb0_data_i(wb0_data_i),
@@ -254,6 +262,15 @@ module tb #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE");
                     late_arithmetic(p,op('h10,6,0),32'h80000001,3,0,11,mask);
                 end
             end
+            // The LSU's captured early hit alone releases a waiting operand.
+            @(negedge clk_i);valid=1;late=1;wait1=1;wait2=0;
+            tag[0]=2;instr[0]=op(0,0,0);source1[0]=1;a[0]=0;b[0]=9;
+            tick();valid=0;tick();
+            early_resp_valid_i=1;early_resp_hit_i=0;early_resp_tag_i=1;
+            early_resp_data_i=33;tick();
+            if(done[0])$fatal(1,"failed early query released ALU source");
+            early_resp_hit_i=1;tick();early_resp_valid_i=0;early_resp_hit_i=0;
+            check(0,42,2);tick();late=0;wait1=0;
             // Same-group early ALU -> late ALU: operands capture at the intervening edge.
             @(negedge clk_i);valid=3;late=2;wait1=2;
             tag[0]=0;tag[1]=1;instr[0]=op(0,0,0);instr[1]=op(0,0,0);
