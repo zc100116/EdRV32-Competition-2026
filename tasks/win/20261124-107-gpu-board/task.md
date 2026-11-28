@@ -248,6 +248,27 @@
   4. 在 Prism Patrol 和 Candy Canyon 里各试一次控制菜单（enter 打开），把“模式”切到压测，记下 FPS 数字后回到正常模式。
 - **回传**：`uart/round11B-<步骤>.log`、`photo/round11B-*`、`video/round11B-*`（单个视频超过 100 MB 的只写 Windows 本地路径，不提交）；result.md 的“上板”表按步骤填写结果和观察，`gpu_test` 四个场景各占一行。
 
+## 6k. 第 12 轮（2026-11-28，降频 + 布通优先的上板测试工程）
+
+- **背景**：第 11 轮 A、B 两组上板都没有任何输出（用户 2026-11-28），判断为按目标频率超频运行后跑飞。本轮把时钟降到第 11 轮估算频率以下并留出余量，再上板确认功能。
+- **本轮改动**：
+  - 时钟目标：**clk_sys 100 MHz**（原 125）、**clk_gpu 120 MHz**（原 180）；clk_mem 保持 125 MHz（DDR IP 不动）。规格 gpu-soc-spec v0.4；约束 `fpga/constraints/edrv32_fpga_board_gpu_top.fdc` 已同步。`CLK_SYS_HZ` 已改为 100000000，BIOS 按它设置串口波特率。
+  - R-8（eecf2e30d）：clk_mem 读返回长路径切拍，包括 GPU 口读返回缓冲输出、DDR 读返回入口、网关 FIFO 写入前、板级 mem_ready。
+  - `src/` 下 4 个 ELF 已按 100 MHz 重新编译，名称不变。
+- **IP（用户 GUI）**：只重新生成两个 PLL，其余 IP 沿用第 11 轮工程。
+  - `ip_pll_sys`：CLKOUT0 改为 **100.000 MHz**，其余选项按 `fpga/ip/ip_pll_sys.md`。**仅本工程**这样改，视觉项目工程不改。
+  - `ip_pll_gpu`：CLKOUT0 改为 **120.000 MHz**，其余选项按 `fpga/ip/ip_pll_gpu.md`。
+  - 如果 IP Compiler 显示的实际频率不是 100.000 / 120.000 MHz，停下来，把显示的频率和分频参数写进 result.md，不要继续。
+- **工程**：复制第 11 轮 B 组工程为 `board_gpu_round12`。取本卡最新提交，移除旧源文件，重新执行导入脚本，从 Compile 开始。
+- **布局布线只跑一组，用第 11 轮 B 组参数**：`-plc_decongestion 4 -slack_weight 10 -pin_cost_increasing_speed 600 -logic_optimize_lut6d_combing_strategy 0 -dump_router_congestion_plot true`，在 GUI 中**取消勾选 Design Cells Duplication**。综合后不设频率门槛，直接跑布局布线。
+- **回传（布线后）**：
+  1. 是否布通；全部 `Use of` 行；
+  2. 时序汇总：每个时钟域的 WNS/TNS/WHS/THS，以及 Slow Corner 估算频率；
+  3. clk_sys、clk_gpu、clk_mem 各最差 200 条 setup 路径，一行一条；各域最差 20 条 setup 路径的逐级明细；最差 20 条 hold 路径。
+- **上板**：生成比特流后照第 6j 节步骤做（第 5 节第 5～8 步，再加 `gpu_test.elf` 四个场景），文件名前缀改为 `round12`。即使还有违例也照做。
+  - 第一项先确认：**下载后 BIOS 是否有串口输出**。没有的话，记下板上 LED 状态，按复位键再试一次，把现象写进 result.md，然后停止，不用继续后面的步骤。
+- **回传（上板）**：`uart/round12-<步骤>.log`、`photo/round12-*`、`video/round12-*`（单个视频超过 100 MB 只写本地路径）；result.md 的"上板"表按步骤填写，`gpu_test` 四个场景各占一行。
+
 ## 7. 通过判据
 
 - 布局布线完成（时序不满足也要完整回传报告，不判失败）。
