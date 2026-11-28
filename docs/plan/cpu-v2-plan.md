@@ -47,7 +47,7 @@
 | 编号 | 内容 | 执行者 | 依赖 | 验收标准 | 拟Task/分支 | 状态 |
 |---|---|---|---|---|---|---|
 | S01 | CPU/FPU v0.2规格、验证/实施方案及逐信号接口冻结；两种CPU×三格式固定结构 | C | P11 | C01–C09及F01/F02/F04/F05、T02/T03/FT01/FT03按用户2026-11-28决定转录；C10/F03/F06仍待测 | task-cpu-v2-spec-freeze / 协调者分支 | [x] 用户2026-11-28确认；v0.2审核草稿已形成 |
-| V01 | 按规格trace建立双域64位退休、CSR/FS、异常及逐beat副作用Spike比较器 | V | S01 | 已知正确/故意错误trace验证比较器，覆盖双退休、老退休+年轻异常及FSD部分写 | zc100116/gpu-dev 共用工作树 | [~] ctx_aaaef4b1a8e4 |
+| V01 | 按规格trace建立双域64位退休、CSR/FS、异常及逐beat副作用Spike比较器 | V | S01 | 已知正确/故意错误trace验证比较器，覆盖双退休、老退休+年轻异常及FSD部分写 | zc100116/gpu-dev 共用工作树 | [x] 98fe6c2a3（文件随协调者计划提交并入）：六配置 7/7 PASS，250 次仿真含 244 个故意错误流；覆盖边界见 verif/common/cpu2_trace/README.md |
 | V02 | 架构测试适配和受约束随机指令环境 | V | S01/V01 | I/M/Zicsr/Zba/F/D集、seed复现，配对/晚执行/提前地址/冲刷交叉生成 | task-cpu-v2-verif-isa / 派发时分支 | [ ] |
 | V03 | 建立单/双发射×NONE/F/FD六种固定配置的构建/lint/完整回归档位与性能输入 | V | S01/V01 | 两testplan所有测试项有test.yaml，6种全部full及seed0..9预算、Zba对应trace与perf区间固定 | task-cpu-v2-verif-matrix / 派发时分支 | [ ] |
 
