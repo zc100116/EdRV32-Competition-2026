@@ -1,0 +1,14 @@
+top: tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+simulator: verilator
+timeout: 120
+pass: PASS
+tier: smoke
+runner: python3 verif/unit/cpu2_fpu_fma32/run.py smoke --unit convert
+configuration: F (T=3) and FD (T=4), 32-bit sources/results; independent of ISSUE_WIDTH
+seed: Fraction arithmetic 0xF32F09, bit/conversion 0xF0207, protocol 0xF02A51
+model: exact Fraction and RISC-V bit semantics; optional F05 SoftFloat/TestFloat Release3e
+vectors: build/cpu2_fpu_convert/smoke.txt

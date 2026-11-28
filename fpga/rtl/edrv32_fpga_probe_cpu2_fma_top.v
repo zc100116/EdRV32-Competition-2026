@@ -6,6 +6,7 @@
 module edrv32_fpga_probe_cpu2_fma_top (
     // Single probe clock and externally injectable LFSR seed bits.
     input wire clk_i,
+    input wire rst_n_i,
     input wire [3:0] seed_i,
 
     // Registered folded observation of every result/flags bit.
@@ -25,25 +26,46 @@ module edrv32_fpga_probe_cpu2_fma_top (
         stimulus_r <= {stimulus_r[96:0], stimulus_r[100:97]
             ^ {4{stimulus_r[100] ^ stimulus_r[95] ^ stimulus_r[94] ^ stimulus_r[93]}}
             ^ seed_i};
-        a_r <= stimulus_r[31:0];
-        b_r <= stimulus_r[63:32];
-        c_r <= stimulus_r[95:64];
-        op_r <= stimulus_r[97:96];
-        rm_r <= stimulus_r[100] ? 3'b100 : {1'b0, stimulus_r[99:98]};
+        if (unit_req_ready_w) begin
+            a_r <= stimulus_r[31:0];
+            b_r <= stimulus_r[63:32];
+            c_r <= stimulus_r[95:64];
+            op_r <= stimulus_r[97:96];
+            rm_r <= stimulus_r[100] ? 3'b100 : {1'b0, stimulus_r[99:98]};
+        end
         result_r <= result_w;
         flags_r <= flags_w;
         observe_o <= result_r[3:0] ^ result_r[7:4] ^ result_r[11:8]
             ^ result_r[15:12] ^ result_r[19:16] ^ result_r[23:20]
             ^ result_r[27:24] ^ result_r[31:28] ^ flags_r[3:0] ^ {3'b0, flags_r[4]};
     end
-    edrv32_cpu2_fpu_fma32 u_fma (
+    wire unit_req_ready_w;
+    wire unused_resp_valid_w;
+    wire [2:0] unused_resp_tag_w;
+    wire unused_int_dest_w;
+    reg resp_ready_r;
+    always @(posedge clk_i) begin
+        resp_ready_r <= stimulus_r[0];
+    end
+    edrv32_cpu2_fpu_fma32 #(.FPU_FORMAT("F")) u_fma (
         .clk_i(clk_i),
-        .a_i(a_r),
-        .b_i(b_r),
-        .c_i(c_r),
-        .op_i(op_r),
-        .rm_i(rm_r),
-        .result_o(result_w),
-        .flags_o(flags_w)
+        .rst_n_i(rst_n_i),
+        .unit_req_valid_i(1'b1),
+        .unit_req_ready_o(unit_req_ready_w),
+        .unit_req_instr_i({25'b0, 3'b100, op_r, 2'b11}),
+        .unit_req_tag_i(3'b0),
+        .unit_req_src1_i(a_r),
+        .unit_req_src2_i(b_r),
+        .unit_req_src3_i(c_r),
+        .unit_req_rm_i(rm_r),
+        .unit_resp_valid_o(unused_resp_valid_w),
+        .unit_resp_ready_i(resp_ready_r),
+        .unit_resp_tag_o(unused_resp_tag_w),
+        .unit_resp_data_o(result_w),
+        .unit_resp_flags_o(flags_w),
+        .unit_resp_int_dest_o(unused_int_dest_w),
+        .age_head_i(3'b0),
+        .cancel_valid_i(1'b0),
+        .cancel_tag_i(3'b0)
     );
 endmodule

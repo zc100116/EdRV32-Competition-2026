@@ -3,8 +3,9 @@
 // Description: Full unsigned 24x24 product, two APMs and four sampling edges.
 // Clock domain: clk_sys.
 module edrv32_apm_cpu2_u24xu24 (
-    // Clock; the FMA advances on every clock.
+    // Clock; all six regional enables describe the same enabled sampling edge.
     input wire clk_i,
+    input wire [5:0] enable_i,
 
     // Normalized significands; X/Y registers are the first pipeline boundary.
     input wire [23:0] a_i,
@@ -21,7 +22,7 @@ module edrv32_apm_cpu2_u24xu24 (
 
     edrv32_apm_cpu2_head u_head (
         .clk_i(clk_i),
-        .enable_i(1'b1),
+        .enable_i(enable_i[0]),
         .x_i({1'b0, a_i}),
         .y_i({2'b0, b_i[15:0]}),
         .unused_cpi_i(48'b0),
@@ -30,17 +31,19 @@ module edrv32_apm_cpu2_u24xu24 (
     );
     edrv32_apm_cpu2_shift16 u_tail (
         .clk_i(clk_i),
-        .enable_i(1'b1),
+        .enable_i(enable_i[1]),
         .x_i({1'b0, tail_a_r}),
         .y_i({10'b0, tail_b_r}),
         .cpi_i(head_cpo_w),
         .cpo_o(unused_tail_cpo_w),
         .p_o(unused_tail_p_w)
     );
+    // Separate same-edge enables bound each external FF/macro CE leaf to 16 loads.
     always @(posedge clk_i) begin
-        tail_a_r <= a_i;
-        tail_b_r <= b_i[23:16];
-        residue_r <= unused_head_p_w[15:0];
+        if (enable_i[2]) tail_a_r[15:0] <= a_i[15:0];
+        if (enable_i[3]) tail_a_r[23:16] <= a_i[23:16];
+        if (enable_i[4]) tail_b_r <= b_i[23:16];
+        if (enable_i[5]) residue_r <= unused_head_p_w[15:0];
     end
     assign product_o = {unused_tail_p_w[31:0], residue_r};
 endmodule
