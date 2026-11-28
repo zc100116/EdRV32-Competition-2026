@@ -453,7 +453,7 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 
 **完成队列 PC（I04，用户 2026-11-28 确认）。** PC 在分配沿由 `allocate{j}_pc` 写 PC 宏，`*_complete` 不加 pc；无 rd 项仍占一个完成写槽（写 done/异常记录），模型口径不变。
 
-**early 与普通请求共读口（I05）。** 两者都由 LSU 发出，仲裁在 LSU 内完成，D$ 不另加预约端口：`dc_early_valid` 有效的拍，LSU 不新拉起普通读 `dc_req_valid`（early 优先，符合 CPU5.5"early 占用读口时不再接受另一普通读"）；若普通请求上一拍已拉起、仍在等待（valid 必须保持），本拍 early 让出读口，固定下一拍返回 `dc_early_hit=00`，该 load 走普通访问。`dc_req_ready` 仍只来自登记容量。实际请求 `dc_req_early=1` 只在紧接的下一拍被接受时复用 early 结果，否则按普通访问。
+**early 与普通请求共读口（I05）。** 两者都由 LSU 发出，仲裁在 LSU 内完成，D$ 不另加预约端口：`dc_early_valid` 有效的拍，LSU 不新拉起普通读 `dc_req_valid`（early 优先，符合 CPU5.5"early 占用读口时不再接受另一普通读"）；若普通请求上一拍已拉起、仍在等待（valid 必须保持），本拍 early 让出读口，固定下一拍返回 `dc_early_hit=00`，该 load 走普通访问。`dc_req_ready` 仍只来自登记容量。实际请求 `dc_req_early=1` 只在紧接的下一拍被接受时复用 early 结果，否则按普通访问。例外（I05b）：已登记且 valid/tag/hit 成功的 early 结果被 `dc_req_early=1` 复用时不占 RAM 读口，可与下一条 early 查询同拍接受；未命中 early 的优先级、ready 容量和端口不变。
 
 **空队列下一 PC（I04）。** `branch_complete` 增 `branch_complete_next_pc`32（不跳为 PC+4）；completion 每 bank 用一份 `edrv32_ram_cpu2_completion` 保存，随完成记录写入，给出 `head{j}_next_pc`；commit 退休控制类用它更新 `next_pc_r`，非控制类用 PC+4。
 
