@@ -496,6 +496,7 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 | D01 维护接口 | 新增 `lsu_store_drained`（LSU→D$，1 位，寄存计数导出）：LSU 已提交未排空 store 项为空；D$ 与写缓冲空共同门控 fence/维护 ready。已准备未提交项不计入（年轻 store 要等 FENCE 退休才提交，计入会死锁） |
 | D07 W1 交付边界 | 单发射 early_resp_valid/tag/hit/data 同时接 issue：源为本拍执行的合格短 load 的消费者先分配进本地待发项，下一拍由 LSU 寄存 hit/data 驱动 EX 源；未命中则等普通完成，不进 ALU、不重发 load；hit 不组合反馈 ID，背压时源数据保持。双发射沿用 MEM 捕获 |
 | D02/D03 BTB 读写时序 | BTB 查询只旁路已登记的 pending 写项，不旁路当拍 EX 训练（与模型 query 读沿前旧项一致，缩短 F1） |
+| D01 store 与 miss/维护 | 已准备可缓存 store 记录的是准备时的命中 way；D$ miss 或维护在已准备 store 存在时不得替换/失效行：miss 启动前等待已准备记录与 lsu_store_drained，miss 或维护已启动时年轻可缓存 store 的响应不置 prepared，保留上下文在其后重放。命中流不加拍、不加端口 |
 | D05 MUL / D07 W1 短 load / D08 CSR | 按规格 5.2 延迟表实现：MUL 消费者 EX 间隔 4；单发射合格且命中短 load 间隔 1（early 捕获结果在下一拍作为源寄存值供 ID/EX，不组合反馈 hit）；CSR 读 2 且有序边界不多于模型 II3 |
 
 ## 影响
