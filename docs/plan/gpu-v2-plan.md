@@ -34,11 +34,11 @@
 
 | 编号 | 内容 | 执行者（角色/模型） | 依赖 | 验收标准 | 分支或任务卡初值 | 状态 |
 |---|---|---|---|---|---|---|
-| G-P00 | 协调者确认探针接口/指标，准备最小IP说明、约束、导入与四张卡 | 协调者Claude；Windows用户+Codex Sol/medium | 规格草稿评审 | 输入commit/器件/版本/完整操作/产物/通过判据齐全；仅探针所需源文件 | tasks/win/<日期>-<号>-gpu-v2-probes | [ ] |
-| G-P01 | vec4 FP32 MUL/FMA与staged DP3/DP4探针，原生4lane、两APM/尾数乘积、独立加法树 | RTL Codex Sol/medium；Windows用户+Codex Sol/medium | G-P00 | 对Python位参考含抵消样本一致；报告12/13拍预算、II、200/150MHz时序、LUT/FF/APM；不得以融合DP替代 | task-gpu-v2-probe-fp32；Windows子卡fp32 | [ ] |
-| G-P02 | 小表SFU、II4混合预约、setup独立RCP表读口探针 | RTL Codex Sol/medium；Windows用户+Codex Sol/medium | G-P00 | M5/M6原语料逐位、512混合无预约冲突；实测延迟/时序、1DRM映射与scratch端口/资源 | task-gpu-v2-probe-sfu；Windows子卡sfu | [ ] |
-| G-P03 | source48 setup规格化/49×33完整积/60位整数重定位探针 | RTL Codex Sol/medium；Windows用户+Codex Sol/medium | G-P00 | area1/近共线/抵消/64边界与Python一致；完整积低位保留；200/150MHz资源与时序 | task-gpu-v2-probe-setup-arith；Windows子卡setup | [ ] |
-| G-P04 | RF/常量/program与setup72×92 bank的DRM映射/读写捕获探针 | RTL Codex Sol/medium；Windows用户+Codex Sol/medium | G-P00 | 单写入点、真实IP延迟/同址语义、最坏并发读写和bank冲突trace；实测DRM/CLMS/FF；核实C12行宽初值 | task-gpu-v2-probe-banks；Windows子卡banks | [ ] |
+| G-P00 | 协调者确认探针接口/指标，准备最小IP说明、约束、导入与四张卡 | 协调者Claude；Windows用户+Codex Sol/medium | 规格草稿评审 | 输入commit/器件/版本/完整操作/产物/通过判据齐全；仅探针所需源文件 | tasks/win/<日期>-<号>-gpu-v2-probes | [~] 探针约束 220 MHz（4.545 ns），两组 worker 已派；四张子卡在 RTL 完成后由协调者合并为一张 |
+| G-P01 | vec4 FP32 MUL/FMA与staged DP3/DP4探针，原生4lane、两APM/尾数乘积、独立加法树 | RTL Codex Sol/medium；Windows用户+Codex Sol/medium | G-P00 | 对Python位参考含抵消样本一致；报告12/13拍预算、II、200/150MHz时序、LUT/FF/APM；不得以融合DP替代 | task-gpu-v2-probe-fp32；Windows子卡fp32 | [~] GP-A ctx_894f0669c538（与 G-P02 合并） |
+| G-P02 | 小表SFU、II4混合预约、setup独立RCP表读口探针 | RTL Codex Sol/medium；Windows用户+Codex Sol/medium | G-P00 | M5/M6原语料逐位、512混合无预约冲突；实测延迟/时序、1DRM映射与scratch端口/资源 | task-gpu-v2-probe-sfu；Windows子卡sfu | [~] GP-A ctx_894f0669c538 |
+| G-P03 | source48 setup规格化/49×33完整积/60位整数重定位探针 | RTL Codex Sol/medium；Windows用户+Codex Sol/medium | G-P00 | area1/近共线/抵消/64边界与Python一致；完整积低位保留；200/150MHz资源与时序 | task-gpu-v2-probe-setup-arith；Windows子卡setup | [~] GP-B ctx_be3b879c4699（与 G-P04 合并） |
+| G-P04 | RF/常量/program与setup72×92 bank的DRM映射/读写捕获探针 | RTL Codex Sol/medium；Windows用户+Codex Sol/medium | G-P00 | 单写入点、真实IP延迟/同址语义、最坏并发读写和bank冲突trace；实测DRM/CLMS/FF；核实C12行宽初值 | task-gpu-v2-probe-banks；Windows子卡banks | [~] GP-B ctx_be3b879c4699 |
 | G-P05 | 审核四探针、修订延迟/资源/频率及算法/端口定稿项 | 协调者Claude | G-P01..04 | 原始报告与commit齐全；G2-01/06/07/08写入已确认结论或明确剩余待定，不删除失败样本 | task-gpu-v2-probe-review | [ ] |
 
 ### 3.2 Python模型与PC模拟器升级
