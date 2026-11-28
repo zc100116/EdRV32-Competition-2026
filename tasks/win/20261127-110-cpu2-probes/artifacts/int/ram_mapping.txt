@@ -1,0 +1,59 @@
+Post-route .prr hierarchy for distributed RAM and placed .netlist primitive instances for DRM.
+Total: 16 DRM36K + 21 DRM18K = 26.5 DRM36K-equivalent; 502 distributed-RAM LUTs.
+
+DRM instance | DRM18K | DRM36K
+u_fetch/g_bank[0].g_way[0].u_data | 0 | 2
+u_fetch/g_bank[0].g_way[0].u_tag | 1 | 0
+u_fetch/g_bank[0].g_way[1].u_data | 0 | 2
+u_fetch/g_bank[0].g_way[1].u_tag | 1 | 0
+u_fetch/g_bank[1].g_way[0].u_data | 0 | 2
+u_fetch/g_bank[1].g_way[0].u_tag | 1 | 0
+u_fetch/g_bank[1].g_way[1].u_data | 0 | 2
+u_fetch/g_bank[1].g_way[1].u_tag | 1 | 0
+u_id_agu/g_way[0].g_bank[0].u_data | 0 | 2
+u_id_agu/g_way[0].g_bank[1].u_data | 0 | 2
+u_id_agu/g_way[0].u_tag | 1 | 0
+u_id_agu/g_way[1].g_bank[0].u_data | 0 | 2
+u_id_agu/g_way[1].g_bank[1].u_data | 0 | 2
+u_id_agu/g_way[1].u_tag | 1 | 0
+u_tage/g_base_bank[0].u_predict | 1 | 0
+u_tage/g_base_bank[1].u_predict | 1 | 0
+u_tage/g_table[0].g_bank[0].u_predict | 1 | 0
+u_tage/g_table[0].g_bank[1].u_predict | 1 | 0
+u_tage/g_table[0].u_train | 1 | 0
+u_tage/g_table[1].g_bank[0].u_predict | 1 | 0
+u_tage/g_table[1].g_bank[1].u_predict | 1 | 0
+u_tage/g_table[1].u_train | 1 | 0
+u_tage/g_table[2].g_bank[0].u_predict | 1 | 0
+u_tage/g_table[2].g_bank[1].u_predict | 1 | 0
+u_tage/g_table[2].u_train | 1 | 0
+u_tage/g_table[3].g_bank[0].u_predict | 1 | 0
+u_tage/g_table[3].g_bank[1].u_predict | 1 | 0
+u_tage/g_table[3].u_train | 1 | 0
+u_tage/u_base_train | 1 | 0
+
+Distributed RAM instance | Generated IP | LUTRAM units
+u_fetch/g_bank[0]/u_btb | ip_lutram_cpu2_btb | 43
+u_fetch/g_bank[1]/u_btb | ip_lutram_cpu2_btb | 43
+u_id_agu/u_rf_bank0 | ip_lutram_cpu2_rf | 16
+u_id_agu/u_rf_bank1 | ip_lutram_cpu2_rf | 16
+u_rf/g_read[0]/u_bank0 | ip_lutram_cpu2_rf | 16
+u_rf/g_read[0]/u_bank1 | ip_lutram_cpu2_rf | 16
+u_rf/g_read[1]/u_bank0 | ip_lutram_cpu2_rf | 16
+u_rf/g_read[1]/u_bank1 | ip_lutram_cpu2_rf | 16
+u_rf/g_read[2]/u_bank0 | ip_lutram_cpu2_rf | 16
+u_rf/g_read[2]/u_bank1 | ip_lutram_cpu2_rf | 16
+u_rf/g_read[3]/u_bank0 | ip_lutram_cpu2_rf | 16
+u_rf/g_read[3]/u_bank1 | ip_lutram_cpu2_rf | 16
+u_tage/u_fast/g_copy[0]/g_bank[0]/u_ip | ip_lutram_cpu2_fast | 16
+u_tage/u_fast/g_copy[0]/g_bank[1]/u_ip | ip_lutram_cpu2_fast | 16
+u_tage/u_fast/g_copy[0]/g_bank[2]/u_ip | ip_lutram_cpu2_fast | 16
+u_tage/u_fast/g_copy[0]/g_bank[3]/u_ip | ip_lutram_cpu2_fast | 16
+u_tage/u_fast/g_copy[1]/g_bank[0]/u_ip | ip_lutram_cpu2_fast | 16
+u_tage/u_fast/g_copy[1]/g_bank[1]/u_ip | ip_lutram_cpu2_fast | 16
+u_tage/u_fast/g_copy[1]/g_bank[2]/u_ip | ip_lutram_cpu2_fast | 16
+u_tage/u_fast/g_copy[1]/g_bank[3]/u_ip | ip_lutram_cpu2_fast | 16
+u_tage/u_fast/g_copy[2]/g_bank[0]/u_ip | ip_lutram_cpu2_fast | 32
+u_tage/u_fast/g_copy[2]/g_bank[1]/u_ip | ip_lutram_cpu2_fast | 32
+u_tage/u_fast/g_copy[2]/g_bank[2]/u_ip | ip_lutram_cpu2_fast | 32
+u_tage/u_fast/g_copy[2]/g_bank[3]/u_ip | ip_lutram_cpu2_fast | 32

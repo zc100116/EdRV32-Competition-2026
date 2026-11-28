@@ -1,14 +1,32 @@
 # 卡 110 结果
 
-源码 HEAD 为 8a507b0f8430c0d434742a0f545d83d826631452。PDS 为 2022.2-SP6.1 build 138931，器件为 PG2L200H-6 FBB676。
+B 组使用 8a507b0f，A 组第 2 轮使用 f723be4c 的源码（本地提交 427a62d5）。PDS 为 2022.2-SP6.1 build 138931，器件为 PG2L200H-6 FBB676。
 
 | 工程 | 慢角 WNS / TNS (ns) | 慢角 WHS / THS (ns) | 估算 Fmax (MHz) | LUT / FF / DRM / APM / 分布式 RAM / IO | P&R 用时 |
 |---|---|---|---|---|---|
-| A int | 未取得 | 未取得 | 未取得 | 未取得 | Compile 失败 |
+| A int（第 2 轮） | +0.151 / 0.000 | +0.142 / 0.000 | 153.4684 | 4194 / 2676 / 26.5 / 0 / 502 / 4 | 1 分 48 秒 |
 | B fma | +0.356 / 0.000 | +0.212 / 0.000 | 158.4535 | 1836 / 1070 / 0 / 2 / 0 / 9 | 1 分 4 秒 |
 
 B 组布通 2515/2515 条网络。PDS 报告显示 6.667 ns 约束满足，快角 WNS / TNS 为 +3.043 / 0.000 ns，WHS / THS 为 +0.148 / 0.000 ns。
 表中的 LUT 是 PDS 模块层次表口径，器件使用表的 CLMA 与 CLMS LUT 槽位合计 1895。FMA 头、尾各使用 1 个 APM。
+
+## A 组第 2 轮
+
+Compile、综合、Device Map、布局布线均通过。布通 6381/6381 条网络，满足 6.667 ns 约束。快角 WNS 2.793 ns，WHS 0.100 ns。
+9 个 RAM IP 沿用第 1 轮生成结果。布线后占用 16 个 DRM36K、21 个 DRM18K 和 502 个分布式 RAM LUT。
+[阶段日志](artifacts/int/flow-excerpts.log) · [时序汇总](artifacts/int/timing_summary.txt) · [RAM 逐实例映射](artifacts/int/ram_mapping.txt)
+
+| 分段 | 裕量 (ns) | 级数 | 逻辑 / 布线 (ns) | 起点 → 终点 |
+|---|---:|---:|---:|---|
+| RF read | +2.331 | 2 | 0.392 / 3.557 | <code>id_agu_wb_mul_rd_r[1]/opit_0_srl/CLK</code> → <code>rf_id_data_r[97]/opit_0_L6Q_perm/I1</code> |
+| ID -> AGU | +5.331 | 0 | 0.213 / 0.866 | <code>id_agu_id_addr_r[10]/opit_0_AQ_perm/CLK</code> → <code>id_agu_ex_addr_r[10]/opit_0/D</code> |
+| Fetch IB | +0.151 | 7 | 2.732 / 3.457 | <code>u_fetch/g_bank[0].g_way[1].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB</code> → <code>u_fetch/g_ib[4].ib_candidates_r[3]/opit_0_L6Q_perm/RS</code> |
+| TAGE direction | +0.790 | 4 | 2.292 / 3.241 | <code>u_tage/g_table[3].g_bank[0].u_predict/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_tage/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB</code> → <code>tage_f2_provider_r[3]/opit_0_L5Q_perm/RS</code> |
+| TAGE shadow | +0.295 | 10 | 2.404 / 3.702 | <code>u_tage/pending_indices_r[27]/opit_0_L6Q_perm/CLK</code> → <code>u_tage/g_query[0].g_key[3].f2_shadow_tag_r/opit_0_AQ_perm/I4</code> |
+| DRM load | +1.680 | 3 | 2.209 / 2.376 | <code>u_id_agu/g_way[1].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB</code> → <code>u_id_agu/operand_data_r[1]/opit_0_L6Q_perm/I1</code> |
+| Other | +0.340 | 4 | 1.354 / 4.712 | <code>fetch_fill_addr_r[26]/opit_0_srl/CLK</code> → <code>tage_f1_fast_r[1]/opit_0_L6Q_perm/I5</code> |
+
+[每段最差 3 条路径](artifacts/int/segments.txt) · [最差 200 条建立路径](artifacts/int/setup_top200.txt)
 
 ## 关键段（每组最差一条）
 
@@ -27,7 +45,7 @@ B 组布通 2515/2515 条网络。PDS 报告显示 6.667 ns 约束满足，快�
 
 每组最差三条和 APM 专线明细见 [segments.txt](artifacts/fma/segments.txt)。全局最差路径位于 E8。
 
-## A 组报错
+## A 组第 1 轮报错
 
 01:33:05 的首次 Compile 启动时 IP 尚未生成齐全，出现以下错误。
 
@@ -69,7 +87,7 @@ B 组布通 2515/2515 条网络。PDS 报告显示 6.667 ns 约束满足，快�
 
 ## 未取得的项和原因
 
-- A 组停在 Compile，无法导出布局布线时序、资源、RAM 实际映射及高扇出报告。
+- A 组时序结论覆盖 clk_cpu2_int。PDS 提示 rst_n_i、stim_i 和 obs_o 无 I/O 时序约束。
 - B 组时序结论覆盖 FDC 中的 clk_sys。PDS 对 seed_i 和 observe_o 给出 I/O 未加时序约束的提示。
 - B 组高扇出表使用时序路径中可见的网络，另外保留 PDS 原生全局时钟扇出。
-- 卡 110 的整体验收要求两份工程都完成布局布线，本轮完成 B 组。
+- A 组高扇出表取自扩展时序路径可见网络，并附原生时钟扇出。两份工程均已完成布局布线。
