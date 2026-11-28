@@ -55,7 +55,7 @@
 
 | 编号 | 内容 | 执行者 | 依赖 | 验收标准 | 拟Task/分支 | 状态 |
 |---|---|---|---|---|---|---|
-| I01 | frontend/predictor/tage/tage_update/fetch/ib：单发射gshare4096无TAGE/BTB64/RAS4/IB4+4预留/64位8B对齐；双发射TAGE4×512+gshare4096/BTB128/RAS8/IB8+4预留/双bank及owner候选 | D | S01/P04/P06/P08 | CV07/CV08单元通过；单发射精简前端全部边界，双发射XOR折叠/训练待写/跨行逐字错误/寄存信用与恢复符合逐信号表 | zc100116/gpu-dev 共用工作树 | [~] ctx_705d05ba2d17 |
+| I01 | frontend/predictor/tage/tage_update/fetch/ib：单发射gshare4096无TAGE/BTB64/RAS4/IB4+4预留/64位8B对齐；双发射TAGE4×512+gshare4096/BTB128/RAS8/IB8+4预留/双bank及owner候选 | D | S01/P04/P06/P08 | CV07/CV08单元通过；单发射精简前端全部边界，双发射XOR折叠/训练待写/跨行逐字错误/寄存信用与恢复符合逐信号表 | zc100116/gpu-dev 共用工作树 | [x] 73d171b8f（I01 终端失效后由 I01b 复核提交），六配置 lint/smoke 通过 |
 | I02 | decode/issue/rf/id_agu/alu/branch：单发射2R1W与双发射4R2W LVT；程序槽/管线映射、配对、双域记分牌与本地晚操作数等待 | D | S01/P02/P08 | CV02–CV05通过；老A+年轻LSU互换、WAW按槽、early失败不重发、单发射无晚执行 | zc100116/gpu-dev 共用工作树 | [x] b533b26cf，六模块29项Verilator/26项Icarus通过 |
 | I03 | mul/div：单MUL全流水，单发射radix-2/双发射radix-4位长提前结束DIV；双发射共享输入按年龄选、单发射单入口 | D | S01 | CV06通过；MUL延迟4/II1，DIV正常单发射L=3+k、双发射L=3+ceil(k/2)/特殊L2、背压保持；回放独立修正拍并更新性能模型 | zc100116/gpu-dev 共用工作树 | [~] ctx_217cc3a26351 |
 | I04 | completion/commit/csr：NONE4项FF、F8/FD16共享bank；单发射2HPM（3–4）/双发射8HPM（3–10）、CSR/FS、年龄取消、精确中断与重定向 | D | S01 | CV09/CV10/CV14通过；head相对年龄/原子取消/完整提交边界、已捕获CSR源和FS逐事件正确；六配置端口容量一致 | zc100116/gpu-dev 共用工作树 | [x] 1eac54f59 + 评审返工 620f76631（记录瘦身，Yosys参考FF −1440） |
