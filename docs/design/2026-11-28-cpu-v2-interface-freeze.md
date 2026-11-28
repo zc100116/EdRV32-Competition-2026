@@ -457,9 +457,11 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 
 **空队列下一 PC（I04）。** `branch_complete` 增 `branch_complete_next_pc`32（不跳为 PC+4）；completion 每 bank 用一份 `edrv32_ram_cpu2_completion` 保存，随完成记录写入，给出 `head{j}_next_pc`；commit 退休控制类用它更新 `next_pc_r`，非控制类用 PC+4。
 
-**rs3 补读捕获（I02）。** commit→completion 的 `retire_count` 同时接 issue（`retire_count_i`）；issue 用 `age_head` 和 `retire_count` 得到本沿退休的 tag，若等于待补读 rs3 的生产 tag，就捕获同沿的 `fp_wb`（或整数 WB）数据。每拍最多一个 FP 目的写，不需要另加 wb tag。
+**rs3 补读捕获（I02，已被下文"WB 拍边界"取代）。** commit→completion 的 `retire_count` 同时接 issue（`retire_count_i`）；issue 用 `age_head` 和 `retire_count` 得到本沿退休的 tag，若等于待补读 rs3 的生产 tag，就捕获同沿的 `fp_wb`（或整数 WB）数据。每拍最多一个 FP 目的写，不需要另加 wb tag。
 
 **WB 区域复制（I01/I04）。** commit 另给 frontend `wb{j}_valid_copy`1、`wb{j}_rd_copy`5：与 `wb{j}_valid/rd` 同沿同值的独立寄存副本，加 `(* keep = "true", syn_preserve = 1 *)` 防止综合合并（沿探针第3轮写法）；fetch/IB 两区分接原件和副本，修正拍不变（CPU5.2"WB tag 应分区域复制"）。数据 `wb{j}_data` 不复制。单发射不实例化。
+
+**WB 拍边界（I04/I01/I02）。** `wb{j}_*`、`fp_wb_*` 是 commit 的寄存 WB 级输出：退休沿 t（`retire_count` 释放队头的同一沿）把退休项的 valid/rd/data 及新增 `wb{j}_tag`、`fp_wb_tag`（T）打入 WB 寄存器；周期 t+1 这些寄存值出现在端口上，沿 t+1 RF/LVT/FP RF 架构写入、IB 候选更新（"当沿架构写"指 WB 寄存值所在拍的结束沿）。周期 t+1 内 RF 用 WB 寄存值显式转发（CPU5.2，沿 RF 探针）。副本 `wb{j}_valid_copy/rd_copy` 与主口在同一退休沿各自寄存。MEM 等待源与 rs3 补读在沿 t+1 按 `wb{j}_tag`/`fp_wb_tag` 捕获 WB 数据——与架构写同沿，即"同沿 WB 数据供等待源"；被释放的 tag 最早在沿 t+1 重新分配、沿 t+2 之后才可能完成，不会混淆。issue 的 rs3 补读改用 `fp_wb_tag`，不再接 `retire_count`（取代上文"rs3 补读捕获"一段）。WB 级只装已退休项，不受取消影响。
 
 ## 影响
 
