@@ -6,6 +6,7 @@
 module tb;
     import edrv32_fpu_vectors_pkg::*;
     parameter [31:0] FPU_FORMAT = "F";
+    localparam B = FPU_FORMAT == "FD" ? 64 : 32;
     localparam T = FPU_FORMAT == "FD" ? 4 : 3;
     localparam N = 1 << T;
     reg clk;
@@ -17,16 +18,16 @@ module tb;
     reg req_valid;
     wire req_ready;
     reg [31:0] instr;
-    reg [31:0] src1;
-    reg [31:0] src2;
-    reg [31:0] src3;
+    reg [B-1:0] src1;
+    reg [B-1:0] src2;
+    reg [B-1:0] src3;
     reg [31:0] int_src;
     reg [2:0] rm;
     reg [T-1:0] req_tag;
     wire resp_valid;
     reg resp_ready;
     wire [T-1:0] resp_tag;
-    wire [31:0] resp_data;
+    wire [B-1:0] resp_data;
     wire [4:0] resp_flags;
     wire resp_int_dest;
     reg [T-1:0] age_head;
@@ -51,7 +52,7 @@ module tb;
         .cancel_valid_i(cancel_valid),
         .cancel_tag_i(cancel_tag)
     );
-    reg [31:0] expected [0:N-1];
+    reg [B-1:0] expected [0:N-1];
     reg [4:0] expected_flags [0:N-1];
     reg expected_dest [0:N-1];
     reg [31:0] expected_instr [0:N-1];
@@ -68,14 +69,14 @@ module tb;
     integer fields;
     integer cutoff;
     integer latency;
-    reg [31:0] reference_data;
+    reg [B-1:0] reference_data;
     reg [4:0] reference_flags;
     reg reference_dest;
     reg have_vector;
     reg eof;
     reg held;
     reg [T-1:0] held_tag;
-    reg [31:0] held_data;
+    reg [B-1:0] held_data;
     reg [4:0] held_flags;
     reg held_dest;
     reg [31:0] random_r;
@@ -123,31 +124,32 @@ module tb;
                     fields = vector_available ? 9 : -1;
                     instr = vector_w.instr;
                     rm = vector_w.rm;
-                    src1 = vector_w.src1[31:0];
-                    src2 = vector_w.src2[31:0];
-                    src3 = vector_w.src3[31:0];
+                    src1 = B'(vector_w.src1);
+                    src2 = B'(vector_w.src2);
+                    src3 = B'(vector_w.src3);
                     int_src = vector_w.int_src;
-                    reference_data = vector_w.result[31:0];
+                    reference_data = B'(vector_w.result);
                     reference_flags = vector_w.flags;
                     reference_dest = vector_w.int_dest;
                     // Emulate the top's specified boxing boundary before an S unit.
                     // FMV.X.W keeps raw low bits; integer-source operations ignore FP.
-                    if (FPU_FORMAT == "FD" && (1'b1)) begin
-                        if (vector_w.src1[63:32] != 32'hffffffff) src1 = 32'h7fc00000;
-                        if (vector_w.src2[63:32] != 32'hffffffff) src2 = 32'h7fc00000;
+                    if (FPU_FORMAT == "FD" && !instr[25]) begin
+                        if (vector_w.src1[63:32] != 32'hffffffff) src1 = B'(64'hffffffff7fc00000);
+                        if (vector_w.src2[63:32] != 32'hffffffff) src2 = B'(64'hffffffff7fc00000);
                     end
-                    vector_w.result = {32'b0, vector_w.result[31:0]};
                 end else begin
                 fields = $fscanf(fd, "%h %h %h %h %h %h %h %h %h\n",
                     instr, src1, src2, src3, int_src, rm,
                     reference_data, reference_flags, reference_dest);
+                    if (FPU_FORMAT == "FD" && !reference_dest)
+                        reference_data = B'(64'hffffffff00000000 | 64'(reference_data));
                     vector_w.instr = instr;
                     vector_w.rm = rm;
-                    vector_w.src1 = {32'b0,src1};
-                    vector_w.src2 = {32'b0,src2};
-                    vector_w.src3 = {32'b0,src3};
+                    vector_w.src1 = 64'(src1);
+                    vector_w.src2 = 64'(src2);
+                    vector_w.src3 = 64'(src3);
                     vector_w.int_src = int_src;
-                    vector_w.result = {32'b0,reference_data};
+                    vector_w.result = 64'(reference_data);
                     vector_w.flags = reference_flags;
                     vector_w.int_dest = reference_dest;
                 end
@@ -186,7 +188,7 @@ module tb;
                         !== {expected[resp_tag],expected_flags[resp_tag],expected_dest[resp_tag]}) begin
                         $display("tag=%0d cycle=%0d protocol_seed=f02a51",resp_tag,cycle);
                     end
-                    compare_response(saved_vector[resp_tag],{32'b0,resp_data},
+                    compare_response(saved_vector[resp_tag],64'(resp_data),
                         resp_flags,resp_int_dest);
                 end
                 if ({resp_data,resp_flags,resp_int_dest}
@@ -202,7 +204,7 @@ module tb;
                 end
                 latency = cycle - accepted_cycle[resp_tag];
                 if (accepted < 32) begin
-                    if (latency != (expected_instr[resp_tag][31:25] == 7'b0010000 ? 1 : 2)) begin
+                    if (latency != (expected_instr[resp_tag][31:26] == 6'b001000 ? 1 : 2)) begin
                         $fatal(1, "Latency mismatch instr=%08h cycles=%0d",
                             expected_instr[resp_tag],latency);
                     end
