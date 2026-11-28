@@ -45,42 +45,47 @@ Yosys 0.67+94；日志在`build/gpu2/yosys/`，回归日志回收到`build/gpu2/
 
 ## 算术探针
 
-依据：gpu-v2-spec v0.1 §2.4、M-8/M-6；G-P01 实现提交 `74fe746d2`（前置 `f674bc3e7`）；SFU数值阶段 `1fd8fefa7`。
-FP32 原生4lane、八颗APM；每 lane 保留完整48bit积，DP3第四积固定+0，独立三加法器平衡树。
-每 lane 第1拍捕获尾数/前导零，第2–5拍两APM级联；7拍舍入乘积旁路供 DP 使用。
-FMA 第2拍选公共指数，3/4拍分级对齐C，5拍等APM，6拍对齐乘积，7拍56bit正反加减；
-第8拍前导零/指数，第9拍规格化/GRS，第10拍RNE+pack，第11拍对齐，第12拍写返回队列。
-56bit 保留完整48bit积及7个低保护位；抵消时保留全部积位；比77bit实现省1563 LUT4/40 FF。
-DP 第7拍乘积舍入，第8–10拍两对独立加法，第11–13拍最终独立加法；最后pack直接写队列。
-两个返回端口分别是vec4和DP；都支持合法背压，总信用16；无背压II1，12/13拍检查通过。
-第11拍按已确认的vec4 12拍返回预约对齐；数据通路无全局stall/ready组合使能；五个队列写使能来自注册valid，ready为注册信用状态。
-新增第6拍乘积/C寄存切开移位与进位链；合并末拍舍入/pack，未增加算术拍数。
-队列是背压所需五份16×32 LUTRAM（80 LR分配额），不用DRM；FPGA端需生成 `ip_ram_gpu2_queue`。
-APM 用gpu2独立tech包装；head MODEZ=0、tail CPI>>>16，X/Y/MULT/P/CPO全寄存，裸积4拍。
+依据gpu-v2-spec v0.1 §2.4、M-8/M-6；FP32实现74fe746d2、SFU数值阶段1fd8fefa7；集成05b03d325。
+FP32原生4lane、八APM，完整48bit积；DP3第四积+0，独立三加法器平衡树，禁止融合DP。
+每lane第1拍捕获/LZ，第2–5拍两APM级联；第7拍舍入乘积旁路供DP。
+FMA第2拍公共指数，3/4拍对齐C，5拍等积，6拍对齐积，7拍56bit正反加减，
+8拍LZ/指数，9拍规格化/GRS，10拍RNE/pack，11拍按已确认返回预约对齐，12拍写队列。
+56bit保留完整积及7个低保护位，较77bit省1563 LUT4/40FF；未增加拍数。
+DP第7拍乘积舍入，8–10拍两对加法，11–13拍最终加法；末pack直接写队列，13拍按协调者确认保留。
+独立adder参考三段均24 LUT4：第一段product_o（第二层为u_pair01.result_o）→s1_small_r[0]，
+第二段s1_small_r[0]→s2_sum_r[25]，第三段s2_sum_r[10]→result_o[0]（最终层为队列写端）。
+单adder728 LUT4/197FF；两层各3拍，G-P05以真实PDS决定时序，不自行加拍。
+FP32双返回支持背压、总信用16、II1；五份16×32返回LUTRAM约80LR，无DRM。
+协调者已确认：M-6的64bit打包与M-7 §9.1 TDP36冲突，改一颗1024×36、32bit分项，
+A口在原4拍前端先后读LOG/INV，setup独立B口连续读RCP，保持1种子DRM/II4/原返回拍数。
+ROM地址RCP0..63、RSQ64..127、LOG128..176、INV177..225、EXP226..289；其余补0。
+SFU拍1拆分/首读，拍2读INV/数值转换，拍3字段/双表齐备，拍4写scratch并预取，拍5首次运算。
+两核心各10拍/II1；模预约(4,0)/(14,0)/(24,1)/(34,1)/(45,0)/(55,0)/(65,1)/(75,1)。
+四op分别用4/6/8/7槽，核心返回后2拍缩放和返回队列；无背压握手延迟47/68/88/78，混合II4。
+同步scratch与首次字段写同边沿转发；相隔10拍用核心返回旁路，11拍间隔用RAM同址转发，不加等待。
+七输入字段副本+七结果bank共14DRM；engine0不读LOG基值、末槽7无后继，较16bank规划省2DRM。
+metadata双副本32×21、双返回队列32×37共116LR分配额；总32信用支持背压，算术不全局停顿。
+forward数据寄存切开RAM同址路径，两个16bit选择叶限制扇出；metadata只流水20位，不搬87级宽记录。
+EXP小负残差用FMA(x,ln2,ln2/64)保留精度，无新增槽/APM；bb77b4d6保持3f7f5488。
 
-| Yosys LUT4参考，不含APM内部/队列内部 | LUT4 | 外部FF | APM/DRM/LR | 最长级数 |
+| 独立Yosys LUT4参考，不含IP内部FF/逻辑 | LUT4 | 外部FF | APM/DRM/LR | 最长级数 |
 |---|---:|---:|---|---:|
-| vec4+独立DP+返回队列控制 | 14421 | 4594 | 8/0/80 | 38 |
-| 含LFSR/输出折叠的FPGA顶层 | 14664 | 5042 | 8/0/80 | 38 |
-| lane含DP乘积旁路 | 3137 | 963 | 2/0/0 | 38 |
-| SFU十拍纯标量核，裁掉DP旁路 | 2320 | 833 | 2/0/0 | 38 |
+| FP32+DP历史参考74fe746d2 | 14421 | 4594 | 8/0/80 | 38 |
+| FP32 FPGA顶层历史参考 | 14664 | 5042 | 8/0/80 | 38 |
+| SFU完整单元 | 8061 | 3721 | 4/15/116 | 38 |
+| SFU FPGA顶层 | 8170 | 3817 | 4/15/116 | 38 |
 
-FP32关键段 `g_lane[0].u_scalar.s6_c_r[1]` → `s7_reverse_r[54]`；单SFU核同级段为
-`u_arithmetic.s6_c_r[1]` → `s7_forward_r[54]`。表含每两APM包装48个外部对齐/残数FF。
-使用 `python3 tools/gpu2/synth.py` 与 `synth_summary.py build/gpu2_synth/*.json`；
-Yosys 0.67+94，abc -lut4；脚本切开注册APM黑盒，原生ltp会错误穿越宏边界。
-LUT4未映射Pango进位链，不作为PDS逻辑级数或220MHz收敛证明；220/200/150MHz裕量均未取得。
-M-8 geometry 总预算17238 LUT；FP32加两SFU核参考已19061 LUT，尚未计其余几何，需真实PDS复核预算。
-FP32 smoke：10001 scalar/MUL/add +2048 vec/DP；full：200001 scalar/MUL/add +100000 vec/DP，逐位通过。
-参考为整数尾数/指数与显式RNE；测试含staged抵消、第四项NaN忽略、双返回背压、II1与12/13拍。
-特殊值逐位核对列为待定（IEEE开发初值），不计规格验收PASS；G2-07未定稿，未覆盖域不声称已验证。
-SFU已完成3拍数值前端、10拍标量核、2拍最终缩放；M5/M6 398760次原始调用整数参考逐位一致，
-前端398760例、缩放100000例通过；512混合请求3131预约的Python证明通过，尚无RTL预约集成。
-EXP的小负数残差用 `FMA(x,ln2,ln2/64)`，避免额外FP32残差舍入；原料bb77b4d6保持3f7f5488。
-SFU尚缺ROM/两引擎预约/scratch集成、FPGA顶层/filelist/约束/IP说明；G-P02未完成。
-待协调：M6要求64bit LOG+INV并与setup双读，但M7按TDP每口36bit规划；建议一颗1024×36，
-32bit分表，在原4拍前端先后读LOG/INV，setup独立B口，保持1DRM、II4和原返回拍数；待明确授权。
-复现：`python3 tools/regress.py smoke --path verif/unit/gpu2_fp32 -j 1`，full改档位；SFU改目录名。
-原始日志回收到 `build/gpu2_fp32/`、`build/gpu2_sfu/`、`build/gpu2_synth/`，不入库。
-风格15文件、Verilator --lint-only -Wall、PDS三类静态限制扫描均0告警/违例。
-状态：G-P01 Linux逐位通过、PDS未测；G-P02数值片段已验证，存储/预约架构决策待协调。
+SFU关键段g_engine[0].u_arithmetic.u_arithmetic.s6_c_r[0]→s7_forward_r[54]；FP32同级段s6_c_r→s7_reverse_r。
+每RAM bank有32bit转发数据及2选择FF；ROM捕获和LUTRAM按16/5位同边沿复制使能，不加拍。
+表为Yosys合并等价FF后的统计；PDS须保留使能副本，每对APM另48外部FF，物理FF以PDS为准。
+SFU4APM不变，15DRM含1种子/14scratch，较17DRM规划省2；LUT/FF高于M-6的3284/1864估算。
+FP32加SFU独立参考已22482 LUT4，超过M-8 geometry17238预算且未计其余几何，需PDS核实进位链/整片预算。
+复现python3 tools/gpu2/synth.py及synth_summary.py build/gpu2_synth/*.json；Yosys0.67+94，abc -lut4。
+脚本切开注册APM和存储IP边界，原生ltp会错误穿越宏；38/24级未映射Pango进位链，不等同PDS逻辑级数。
+full保留原执行398760调用，再补M6跳过的12405对underflow输入（49620调用），加512混合前缀；
+448892请求逐位通过、3119259次RTL发射；smoke另有256压力样本，不删超限或underflow。
+smoke前512请求连续II4/逐拍延迟检查，另256压力样本；setup并发/禁读保持、返回背压与scratch冲突断言覆盖。
+FP32原smoke/full含staged抵消、第四项NaN忽略、双口背压和12/13拍；特殊值仍为G2-07待定开发核对，不计规格PASS。
+测试入口python3 tools/regress.py smoke --path verif/unit/gpu2_sfu -j 1；full改档位并用gpu2_sfu/full路径。
+ROM镜像python3 -B tools/gpu2/gen_sfu_rom.py；IP说明/220MHz约束/导入/filelist已提供，日志在build/gpu2_sfu/及gpu2_synth/。
+状态：Linux逐位/静态检查通过；220/200/150MHz实际裕量、真实DRM/LUTRAM/CLMS仍需Windows PDS/ModelSim。
