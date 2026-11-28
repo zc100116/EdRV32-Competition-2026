@@ -2,7 +2,7 @@
 // Spec: fpu-spec 5.2, 5.3, 7.1; CPU v2 probe P09.
 // Description: Register-driven standalone FMA timing probe with serial seed input.
 //              Full input and result registers preserve both timing boundaries.
-// Clock domain: clk_sys (clk_i, constrained to 150 MHz).
+// Clock domain: clk_sys (clk_i, constrained to 165 MHz).
 module edrv32_fpga_probe_cpu2_fma_top (
     // Single probe clock and externally injectable LFSR seed bits.
     input wire clk_i,

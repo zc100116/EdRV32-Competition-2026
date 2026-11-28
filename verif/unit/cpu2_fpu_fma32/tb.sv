@@ -38,6 +38,11 @@ module tb;
     integer fields;
     integer total = 0;
     integer checked = 0;
+    reg [31:0] next_a;
+    reg [31:0] next_b;
+    reg [31:0] next_c;
+    reg [1:0] next_op;
+    reg [2:0] next_rm;
     reg [31:0] next_expected;
     reg [4:0] next_flags;
     initial begin
@@ -58,7 +63,14 @@ module tb;
                 valid[j] = valid[j-1];
             end
             fields = $fscanf(fd, "%h %h %h %h %h %h %h\n",
-                a, b, c, op, rm, next_expected, next_flags);
+                next_a, next_b, next_c, next_op, next_rm, next_expected, next_flags);
+            // Explicit assignments make fscanf-driven input changes visible to
+            // the event scheduler in both Verilator 5.020 and newer versions.
+            a = next_a;
+            b = next_b;
+            c = next_c;
+            op = next_op;
+            rm = next_rm;
             valid[0] = fields == 7;
             if (valid[0]) begin
                 total = total + 1;

@@ -38,6 +38,27 @@ E8预计算指数候选由19降至17级。仍明显超过估算，协调者 ask 
 `tools/check/verilog_style.py` 与 Verilator `--lint-only -Wall` 零告警；参考模型仅标准库 Fraction。
 影响/状态：探针与正式数据通路源码已实现；150 MHz未通过物理验证，不冻结F03、不加拍、不用multicycle。
 
+### 第 2 版（165 MHz 目标）
+
+保持8拍、II=1和2颗APM，独立约束改为6.061 ns；基线 `0a2199fc8`，新版为本小节所在提交。
+| 拍 | 工作变化 | Yosys XC7代理级数：前→后 |
+|---|---|---:|
+| E1 | 分类、输入LZ和特殊值保持原结构 | 10→9 |
+| E2 | 规格化和乘积指数保持原结构 | 9→9 |
+| E3 | 对齐量、下溢移位界限保持原结构 | 6→6 |
+| E4 | 对齐之外，提前算4组指数基值、floor比较阈值及舍入模式解码 | 4→4 |
+| E5 | 对齐/sticky保持；传递提前算好的指数和舍入控制 | 4→4 |
+| E6 | 加减/LZA保持；幅值选择按20位段复制保留寄存器 | 10→9 |
+| E7 | 单热粗移替代串联移位；低44位压成sticky；注册细移单热码、指数/溢出候选 | 12→9 |
+| E8 | 16种固定细移×3种校正并行；常量加1与舍入判定并行，进位预测选指数/flags | 17→10 |
+细移最多左移7位、校正再左移1位，压缩后的sticky最高到bit51，不改变guard(bit52)及保留位。
+复现：`python3 verif/unit/cpu2_fpu_fma32/levels.py`；Yosys 0.70+219，计数方法与首版相同。
+原始数据仍在 `build/cpu2_fpu_fma32/levels/`；映射全局变化会影响未改结构的级数，不作PDS时序结论。
+仿真主机不可达，经协调者允许改本机Verilator 5.020；smoke 131,120、full 1,121,120逐位全PASS。
+命令：`python3 verif/unit/cpu2_fpu_fma32/run.py smoke`；full复现：`python3 verif/unit/cpu2_fpu_fma32/vectors.py build/cpu2_fpu_fma32/full.txt --random 1000000` 后运行 `build/cpu2_fpu_fma32/obj/sim +VECTORS=build/cpu2_fpu_fma32/full.txt`。
+输入先读到临时变量再显式赋给DUT，修正5.020对fscanf直接驱动组合输入的调度；风格/lint零告警。
+状态：等待PDS按165 MHz实测WNS≥0，未把代理级数换算为频率或宣称物理达标。
+
 ## 整数探针
 
 背景/约束：P01/P03/P05/P07 按 cpu-v2-spec v0.1 5.2/5.4/5.5/7、C2-I4 实现满配结构；150 MHz 尚待 PDS。
