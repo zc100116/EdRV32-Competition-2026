@@ -119,6 +119,9 @@ module edrv32_gpu2_fp32_scalar (
         .b_i(s2_b_w),
         .product_o(s5_product_w)
     );
+    // Keep all 48 product bits plus seven low guard positions when cancellation is possible.
+    // E6 isolates product alignment from the narrower E7 carry chains; E10 combines RNE/pack.
+    // This replaces the 77-bit alignment without changing the ten-edge arithmetic contract.
     wire signed [9:0] s2_product_top_w;
     wire signed [9:0] s2_base_w;
     wire [9:0] s2_product_delta_w;

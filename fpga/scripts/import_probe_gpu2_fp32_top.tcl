@@ -1,5 +1,5 @@
 # File: import_probe_gpu2_fp32_top.tcl
-# Run after generating the IPs from fpga/ip/ip_*_cpu2_*.md.
+# Run after generating the IPs from fpga/ip/ip_ram_gpu2_queue.md.
 # Run in the PDS Tcl console from the FPGA project directory EdRV32-FPGA/<project>.
 # Generate ip_ram_gpu2_queue; APM primitives come from the PDS device library.
 set edrv32_repo [file normalize ../../EdRV32-Competition-2026]
