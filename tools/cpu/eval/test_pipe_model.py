@@ -10,6 +10,7 @@ from analyze import Instruction
 from pipe_model import (INORDER_VARIANTS, Predictor, Record, SLOT_CAUSES, fill_ib,
                         simulate, early_address_allowed, lcb_allowed)
 from collections import deque
+from v2_round4_structures import LoadMerge, QueuedOwners, RamTage, fold
 
 
 def instruction(pc, kind='alu', rd=0, sources=(), size=4, target=0):
@@ -26,6 +27,350 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_round4_merge_can_reuse_older_registered_id_address(self):
+        stream = [instruction(pc) for pc in range(0, 16, 4)] + [
+                  replace(instruction(16, 'load', rd=4), bits=0x2003),
+                  replace(instruction(20, 'load', rd=5), bits=0x2003),
+                  instruction(24, sources=(4, 5))]
+        addresses = [0] * 4 + [0x80000000, 0x80000004, 0, 0]
+        ordinary = LoadMerge(addresses, 8)
+        early = LoadMerge(addresses, 8, preserve_early=True)
+        options = dict(perfect_frontend=True, perfect_prediction=True,
+                       early_address='rf_wb')
+        a = run(stream, 'V3s', load_merge=ordinary, **options)
+        b = run(stream, 'V3s', load_merge=early, **options)
+        self.assertEqual(early.early_merged, 1)
+        self.assertEqual(b['early_loads'], 1)
+        self.assertEqual(b['slots_load_use'], 0)
+        self.assertEqual(b['cycles'], a['cycles'] - 1)
+
+    def test_round4_queued_lvt_tracks_wb_while_head_waits(self):
+        rf = QueuedOwners()
+        rf.write([(0, 4, 10), (1, 5, 20)])
+        head = rf.enqueue((4, 5, 0))
+        for value in range(4):
+            bank = value & 1
+            writes = [(bank, 4, 30 + value), (1 - bank, 5, 40 + value)]
+            self.assertEqual(rf.read(head, writes), [30 + value, 40 + value, 0])
+            rf.write(writes)
+            self.assertEqual(rf.read(head), [30 + value, 40 + value, 0])
+        writes = [(0, 4, 100), (1, 4, 200)]
+        self.assertEqual(rf.read(head, writes)[0], 200)
+        rf.write(writes)
+        incoming = rf.enqueue((4, 5))
+        self.assertEqual(rf.read(head)[0], 200)
+        self.assertEqual(rf.read(incoming), [200, 43])
+
+    def test_round4_sync_rf_qualifies_early_address_at_d2(self):
+        prefix = [instruction(pc) for pc in range(0, 24, 4)]
+        producer = [instruction(24, rd=4), instruction(28)]
+        options = dict(early_address='rf_wb', decode_split=True,
+                       perfect_frontend=True, perfect_prediction=True)
+        adjacent = prefix + producer + [instruction(32, 'load', rd=5, sources=(4,))]
+        future_wb = prefix + producer + [instruction(pc) for pc in range(32, 48, 4)] + [
+            instruction(48, 'load', rd=5, sources=(4,))]
+        self.assertEqual(run(adjacent, 'V3s', **options)['early_loads'], 0)
+        self.assertEqual(run(future_wb, 'V3s', **options)['early_loads'], 1)
+
+    def test_round4_zba_constant_shift_add_can_execute_late(self):
+        zba = replace(instruction(4, rd=5, sources=(4, 6)), bits=0x206222b3)
+        stream = [instruction(0, 'load', rd=4), zba]
+        result = run(stream, 'V3s', early_address='rf_wb', late_execute='alu',
+                     late_pair=True, perfect_frontend=True, perfect_prediction=True)
+        self.assertEqual(result['late_alu'], 1)
+        self.assertEqual(result['hpm1'], 1)
+
+    def test_round4_merge_checks_ex_and_serializes_different_chunks(self):
+        stream = [instruction(pc) for pc in range(0, 16, 4)] + [
+                  replace(instruction(16, 'load', rd=4), bits=0x2003),
+                  replace(instruction(20, 'load', rd=5), bits=0x2003),
+                  instruction(24, sources=(4, 5))]
+        options = dict(perfect_frontend=True, perfect_prediction=True,
+                       early_address='rf_wb')
+        same = LoadMerge([0] * 4 + [0x80000000, 0x80000004, 0, 0], 8)
+        different = LoadMerge([0] * 4 + [0x80000000, 0x80000008, 0, 0], 8)
+        a = run(stream, 'V3s', load_merge=same, **options)
+        b = run(stream, 'V3s', load_merge=different, **options)
+        self.assertEqual((same.candidates, same.merged, same.replays), (1, 1, 0))
+        self.assertEqual((different.merged, different.replays), (0, 1))
+        self.assertEqual(b['cycles'], a['cycles'] + 1)
+        self.assertEqual(a['early_loads'], 0)
+        self.assertEqual(a['slots_load_use'], 2)
+
+    def test_round4_merge_does_not_pair_raw_or_merge_mmio(self):
+        stream = [instruction(0, 'load', rd=4), instruction(4, 'load', sources=(4,))]
+        merge = LoadMerge([0x80000000, 0x80000000, 0], 8)
+        run(stream, 'V3s', load_merge=merge, perfect_frontend=True, perfect_prediction=True)
+        self.assertEqual(merge.candidates, 0)
+        records = [Record(replace(instruction(i * 4, 'load'), bits=0x2003),
+                          False, False, 0, 0, (), trace_index=i) for i in range(2)]
+        self.assertEqual(LoadMerge([0x40000000, 0x40000004], 8).resolve(records, True), 1)
+        self.assertEqual(LoadMerge([0x80000006, 0x80000004], 8).resolve(records, True), 1)
+
+    def test_round4_unaligned_fetch_reads_across_64bit_boundary(self):
+        from pipe_model import fetch_request
+        predictor = Predictor(128, 4096, 4)
+        response, next_pc, cross, _ = fetch_request(predictor, 4, None, unaligned=True)
+        self.assertEqual([pc for pc, _ in response], [4, 6, 8, 10])
+        self.assertEqual((next_pc, cross), (12, None))
+        branch = instruction(8, 'branch', target=64)
+        predictor.btb[2] = (branch, 64)
+        predictor.pht[4] = 3
+        response, next_pc, _, _ = fetch_request(predictor, 4, None, unaligned=True)
+        self.assertEqual(next_pc, 64)
+        self.assertEqual(response[-1][1][0][0].pc, 8)
+
+    def test_round4_tage_saved_provider_and_full_history_fold(self):
+        self.assertEqual(fold((1 << 130) | 1, 8), 5)
+        tage = RamTage(5, 512)
+        predicted, token = tage.predict(0x1000, False, 0)
+        self.assertFalse(predicted)
+        tage.update(0x1000, True, token)
+        tage.history = 0
+        predicted, token = tage.predict(0x1000, False, 0)
+        self.assertTrue(predicted)
+        self.assertEqual(token[1], 0)
+        self.assertEqual(tage.bits, 8192 + 12 + 8192 + 5 * 512 * 16 + 144)
+
+    def test_round4_bank_f2_keeps_truncated_second_query(self):
+        from pipe_model import fetch_request
+
+        class Opposite:
+            def predict(self, pc, taken, index):
+                return not taken, None
+
+        predictor = Predictor(128, 4096, 4, gshare_pc_shift=2,
+                              direction=Opposite(), second_level=True)
+        predictor.btb[0] = (instruction(0, 'branch', target=64), 64)
+        predictor.btb[1] = (instruction(4, 'branch', target=80), 80)
+        predictor.pht[0] = 3
+        response, target, _, _ = fetch_request(predictor, 0, None, unaligned=True)
+        self.assertEqual((len(response), target), (2, 64))
+        banks = response[0][1][3].banks
+        corrected = tuple((q[0], q[3].second, *q[2:]) for q in banks)
+        response, target, _, _ = fetch_request(predictor, 0, None, unaligned=True,
+                                               bank_queries=corrected)
+        self.assertEqual((len(response), target), (4, 80))
+
+    def test_round4_f2_exposed_call_updates_ras(self):
+        from unittest.mock import patch
+
+        class Opposite:
+            bits = 0
+
+            def predict(self, pc, taken, index):
+                return not taken, None
+
+            def update(self, pc, taken, token):
+                pass
+
+        branch = instruction(0, 'branch', target=32)
+        call = replace(instruction(4, 'jal', rd=1, target=16), push=True)
+        ret = replace(instruction(16, 'jalr', sources=(1,)), pop=True)
+
+        class WarmPredictor(Predictor):
+            def __init__(self, *args):
+                super().__init__(*args)
+                self.btb[0], self.btb[1], self.btb[4] = (branch, 32), (call, 16), (ret, 64)
+                self.pht[0] = 3
+
+        program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+        program.update({0: branch, 4: call, 16: ret, 8: instruction(8, 'serial')})
+        with patch('pipe_model.Predictor', WarmPredictor):
+            result = simulate(program, [0, 4, 16, 8], 0, 8, 'V3s', unaligned_fetch=True,
+                              direction_predictor=Opposite(), second_level=True,
+                              btb_entries=128, gshare_entries=4096, gshare_pc_shift=2)
+        self.assertEqual(result['control_misses'], 0)
+
+    def test_round3_ideal_supplier_keeps_baseline_predictions(self):
+        program = {pc: instruction(pc) for pc in range(0, 64, 4)}
+        program[0] = instruction(0, 'branch', target=16)
+        program[20] = instruction(20, 'serial')
+        captured = {}
+        trace = [0, 16, 20]
+        base = simulate(program, trace, 0, 20, 'V3s', prediction_capture=captured)
+        ideal = simulate(program, trace, 0, 20, 'V3s', perfect_frontend=True,
+                         fixed_predictions=captured)
+        self.assertEqual(base['direction_misses'], 1)
+        self.assertEqual(ideal['direction_misses'], base['direction_misses'])
+        self.assertLessEqual(ideal['cycles'], base['cycles'])
+
+    def test_round3_late_pair_uses_two_cycles_without_cascade(self):
+        stream = [instruction(0, rd=4), instruction(4, rd=5, sources=(4,)),
+                  instruction(8, 'load', rd=6, sources=(5,))]
+        options = dict(perfect_frontend=True, perfect_prediction=True,
+                       late_execute='alu', late_pair=True)
+        result = run(stream, 'V3s', **options)
+        self.assertEqual(result['late_alu'], 1)
+        self.assertEqual(result['hpm1'], 1)
+        self.assertEqual(result['cycles'], 3)
+
+    def test_round3_same_group_load_needs_early_return(self):
+        stream = [instruction(0, 'load', rd=4), instruction(4, sources=(4,))]
+        options = dict(perfect_frontend=True, perfect_prediction=True,
+                       late_execute='alu', late_pair=True)
+        normal = run(stream, 'V3s', **options)
+        early = run(stream, 'V3s', early_address='rf_wb', **options)
+        self.assertEqual(normal['hpm1'], 0)
+        self.assertEqual(early['hpm1'], 1)
+        self.assertEqual(early['late_alu'], 1)
+
+    def test_round3_mul_slots_keep_one_multiplier(self):
+        options = dict(perfect_frontend=True, perfect_prediction=True, slot1_mul=True)
+        for kinds in (('load', 'mul'), ('mul', 'load')):
+            mixed = [instruction(0, kinds[0]), instruction(4, kinds[1])]
+            self.assertEqual(run(mixed, 'V3s', **options)['hpm1'], 1)
+            lsu_options = dict(options, slot1_mul=False, slot1_lsu=True)
+            self.assertEqual(run(mixed, 'V3s', **lsu_options)['hpm1'], 1)
+        both_memory = [instruction(0, 'load'), instruction(4, 'store')]
+        self.assertEqual(run(both_memory, 'V3s', **lsu_options)['hpm1'], 0)
+        both = [instruction(0, 'mul'), instruction(4, 'mul')]
+        self.assertEqual(run(both, 'V3s', **options)['hpm1'], 0)
+        options['slot1_mul'] = 'dual'
+        self.assertEqual(run(both, 'V3s', **options)['hpm1'], 1)
+
+    def test_round3_two_controls_serialize_training(self):
+        stream = [instruction(pc, 'branch') for pc in range(0, 48, 4)]
+        result = run(stream, 'V3s', control_slots=2, perfect_frontend=True,
+                     perfect_prediction=True)
+        self.assertEqual(result['instructions'], 12)
+        self.assertLessEqual(result['training_peak'], 1)
+        self.assertGreater(result['slots_training_structural'], 0)
+
+    def test_round3_late_branch_resolves_in_mem(self):
+        stream = [instruction(0, rd=4), instruction(4, 'branch', sources=(4,)),
+                  instruction(8)]
+        result = run(stream, 'V3s', late_execute='alu_branch', late_pair=True,
+                     perfect_frontend=True, perfect_prediction=True)
+        self.assertEqual(result['late_branch'], 1)
+        self.assertEqual(result['hpm1'], 1)
+
+    def test_round3_jalr_can_exchange_with_single_lsu(self):
+        options = dict(perfect_frontend=True, perfect_prediction=True)
+        for kinds in (('load', 'jalr'), ('jalr', 'load')):
+            stream = [instruction(0, kinds[0]), instruction(4, kinds[1])]
+            self.assertEqual(run(stream, 'V3s', **options)['hpm1'], 0)
+            self.assertEqual(run(stream, 'V3s', slot1_control=True, **options)['hpm1'], 1)
+
+    def test_round2_divider_operands_ignore_hex_memory_text(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+        from run_v2_round2 import divider_cycles
+        program = {pc: instruction(pc) for pc in range(0, 16, 4)}
+        program[12] = replace(instruction(12, 'div'), bits=0x02c5c533)
+        log = ('core 0: 3 0x00000000 (0x00000013) x11 0x00000100\n'
+               'core 0: 3 0x00000004 (0x00000013) x12 0x00000004\n'
+               'core 0: 3 0x00000008 (0x00000013) mem 0x80000000 0x12345678\n'
+               'core 0: 3 0x0000000c (0x02c5c533) x10 0x00000040\n')
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'spike.log').write_text(log)
+            self.assertEqual(divider_cycles(root, program, list(program), 'radix4'), {3: 17})
+            self.assertEqual(divider_cycles(root, program, list(program), 'early-div'), {3: 8})
+            self.assertEqual(divider_cycles(root, program, list(program), 'radix4-early'),
+                             {3: 5})
+
+    def test_round2_rf_wb_address_rejects_live_ex_base(self):
+        stream = [instruction(0, rd=4), instruction(4, 'load', rd=5, sources=(4,)),
+                  instruction(8, 'load', rd=6, sources=(0,)),
+                  instruction(12, sources=(5, 6))]
+        result = run(stream, 'V3s', early_address='rf_wb', perfect_frontend=True,
+                     perfect_prediction=True)
+        self.assertEqual(result['early_loads'], 1)
+        self.assertEqual(result['loads'], 2)
+
+    def test_round2_late_alu_hides_load_but_not_multiply(self):
+        for kind, expected in (('load', 1), ('mul', 0)):
+            stream = [instruction(0, kind, rd=4), instruction(4, rd=5, sources=(4,)),
+                      instruction(8, sources=(5,))]
+            result = run(stream, 'V3s', late_execute='alu', perfect_frontend=True,
+                         perfect_prediction=True, mul_latency=2)
+            self.assertEqual(result['late_alu'], expected)
+
+    def test_round2_division_latency_reduces_real_serial_wait(self):
+        stream = [instruction(pc) for pc in range(0, 32, 4)] + [
+            instruction(32, 'div', rd=4), instruction(36, sources=(4,))]
+        baseline = run(stream, 'V3s', perfect_frontend=True, perfect_prediction=True)
+        fast = run(stream, 'V3s', perfect_frontend=True, perfect_prediction=True,
+                   division_cycles={8: 17})
+        self.assertEqual(baseline['cycles'] - fast['cycles'], 16)
+        self.assertEqual(baseline['instructions'], fast['instructions'])
+
+    def test_control_fusion_preserves_prediction_when_entering_second_member(self):
+        program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+        program[0] = replace(instruction(0, rd=3, sources=(1, 2)), bits=0x0020a1b3)
+        program[4] = replace(instruction(4, 'branch', sources=(3,), target=16),
+                             bits=0x18663)
+        program[16] = instruction(16, 'jalr', sources=(5,))
+        program[20] = instruction(20, 'serial')
+        trace = [0, 4, 8, 12, 16, 4, 8, 12, 16, 0, 4, 16, 4, 16, 20]
+        for predictor in (None, 'tournament'):
+            result = simulate(program, trace, 0, 20, 'V3s', e_penalty=2, d_penalty=1,
+                              fusion=('compare-branch',), direction_predictor=predictor,
+                              second_level=bool(predictor))
+            self.assertEqual(result['instructions'], len(trace) - 1)
+            self.assertEqual(result['fused'], 2)
+
+    def test_control_fusion_requires_one_fetch_query_group(self):
+        from ipc_structures import fuse_program
+        first = replace(instruction(4, rd=3, sources=(1, 2)), bits=0x0020a1b3)
+        branch = replace(instruction(8, 'branch', sources=(3,), target=32), bits=0x18663)
+        program, trace = fuse_program({4: first, 8: branch}, [4, 8],
+                                      ('compare-branch',), 0, 36)
+        self.assertEqual(trace, [4, 8])
+        self.assertEqual(program[4].size, 4)
+
+    def test_compare_fusion_does_not_match_multiply_high_encoding(self):
+        from ipc_structures import fuse_program
+        multiply = replace(instruction(0, 'mul', rd=3, sources=(1, 2)), bits=0x0220a1b3)
+        branch = replace(instruction(4, 'branch', sources=(3,), target=32), bits=0x18663)
+        program, trace = fuse_program({0: multiply, 4: branch}, [0, 4],
+                                      ('compare-branch',), -4, 36)
+        self.assertEqual(trace, [0, 4])
+        self.assertEqual(program[0].kind, 'mul')
+
+    def test_compare_branch_fusion_has_two_external_sources(self):
+        from ipc_structures import fuse_program
+        compare = replace(instruction(0, rd=3, sources=(1, 2)), bits=0x0020a1b3)
+        branch = replace(instruction(4, 'branch', sources=(3, 4), target=32), bits=0x18663)
+        program, trace = fuse_program({0: compare, 4: branch}, [0, 4],
+                                      ('compare-branch',), -4, 36)
+        self.assertEqual(trace, [0, 4])
+        self.assertEqual(program[0].kind, 'alu')
+
+    def test_single_issue_keeps_retirement_and_serializes_independent_alu(self):
+        stream = [instruction(pc, rd=1 + pc // 4) for pc in range(0, 64, 4)]
+        dual = run(stream, 'V3s', perfect_frontend=True, perfect_prediction=True)
+        single = run(stream, 'V3s', perfect_frontend=True, perfect_prediction=True,
+                     issue_width=1)
+        self.assertEqual(single['instructions'], dual['instructions'])
+        self.assertEqual(single['hpm1'], 0)
+        self.assertGreater(single['cycles'], dual['cycles'])
+
+    def test_compare_branch_fusion_keeps_architectural_destinations_and_target(self):
+        from ipc_structures import destinations, fuse_program
+        compare = replace(instruction(0, rd=3, sources=(1, 2)), bits=0x0020a1b3)
+        branch = replace(instruction(4, 'branch', sources=(3,), target=16), bits=0x18663)
+        program, trace = fuse_program({0: compare, 4: branch}, [0, 4],
+                                      ('compare-branch',), -4, 20)
+        self.assertEqual(trace, [0])
+        self.assertEqual(program[0].sources, (1, 2))
+        self.assertEqual(destinations(program[0]), (3,))
+        self.assertEqual(program[0].target, 16)
+        self.assertEqual(program[0].kind, 'branch')
+        predictor = Predictor(32, 512, 8)
+        predictor.btb[0] = branch, branch.target
+        predictor.pht[2] = 3
+        query = predictor.query(0)
+        ib = deque()
+        fill_ib(program, ib, [(pc, query) for pc in range(0, 8, 2)], pht_size=512)
+        self.assertTrue(ib[0].hit)
+        self.assertTrue(ib[0].taken)
+        self.assertEqual(ib[0].index, 2)
+        ib[0].next_pc = branch.target
+        predictor.update(ib[0])
+        self.assertEqual(predictor.btb[0][0].pc, branch.pc)
+
     def test_m2_early_source_is_an_already_registered_result(self):
         consumer = instruction(8, 'load', rd=3, sources=(2,))
         producer = Record(instruction(0, 'load', rd=2), False, False, 0, 0, (0, 0, 0))

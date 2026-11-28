@@ -259,6 +259,8 @@ module tb;
     reg w_contiguous = 0;
     reg [288:0] held_w;
     reg held_w_valid = 0;
+    reg held_gpu_rvalid = 0;
+    reg [259:0] held_gpu_r;
     reg [39:0] held_cmd;
     reg held_cmd_valid = 0;
     reg held_cmd_write = 0;
@@ -300,6 +302,7 @@ module tb;
             live_downstream = 0;
             w_contiguous <= 0;
             held_w_valid <= 0;
+            held_gpu_rvalid <= 0;
             held_cmd_valid <= 0;
             for (monitor_i = 0; monitor_i < 10; monitor_i = monitor_i + 1) begin
                 expected_head[monitor_i] = 0;
@@ -336,6 +339,11 @@ module tb;
                 $fatal(1, "FAIL W changed while stalled");
             held_w_valid <= ddr_wvalid_o && !ddr_wready_i;
             held_w <= {ddr_wlast_o,ddr_wstrb_o,ddr_wdata_o};
+            if (held_gpu_rvalid && (!rvalid[3] ||
+                {rid[3], rlast[3], rresp[7:6], rdata[1023:768]} !== held_gpu_r))
+                $fatal(1, "FAIL GPU R slice changed while stalled at %0t", $time);
+            held_gpu_rvalid <= rvalid[3] && !rready[3];
+            held_gpu_r <= {rid[3], rlast[3], rresp[7:6], rdata[1023:768]};
             if (w_contiguous && !ddr_wvalid_o) $fatal(1, "FAIL gap within W burst");
             if (ddr_arvalid_o && ddr_arready_i) begin
                 monitor_p = int'(ddr_arid_o[3:1]);

@@ -84,6 +84,10 @@ module edrv32_mem_xbar_rbuf_gpu (
     wire [258:0] ram_data_w;
     wire [258:0] pending_data_w;
     wire [4:0] take_w;
+    wire [4:0] stage_valid_w;
+    wire [4:0] stage_ready_w;
+    wire [4:0] stage_take_w;
+    wire [2:0] output_slot_w [0:4];
     reg [7:0] return_match_w;
     reg [2:0] return_slot_w;
     wire [6:0] return_addr_w;
@@ -183,6 +187,7 @@ module edrv32_mem_xbar_rbuf_gpu (
         end
     endgenerate
     assign take_w = rvalid_o & rready_i;
+    assign stage_take_w = stage_valid_w & stage_ready_w;
     assign last_take_w = take_w & rlast_o;
 
     edrv32_ram_mem_xbar_r u_ram (
@@ -205,10 +210,10 @@ module edrv32_mem_xbar_rbuf_gpu (
                     if (!rst_n_i) begin
                         skid_valid_copy_r <= 1'b0;
                     end else begin
-                        if (take_w[p]) begin
+                        if (stage_take_w[p]) begin
                             skid_valid_copy_r <= 1'b0;
                         end
-                        if (pending_valid_r[p] && !rready_i[p]) begin
+                        if (pending_valid_r[p] && !stage_ready_w[p]) begin
                             skid_valid_copy_r <= 1'b1;
                         end
                     end
@@ -218,11 +223,44 @@ module edrv32_mem_xbar_rbuf_gpu (
             end
             assign data_w[258:256] = skid_valid_r[p] ?
                 skid_data_r[p][258:256] : pending_data_w[258:256];
-            assign rvalid_o[p] = skid_valid_r[p] || pending_valid_r[p];
-            assign rid_o[p] = skid_valid_r[p] ? skid_id_r[p] : pending_id_r;
-            assign rdata_o[p*256 +: 256] = data_w[255:0];
-            assign rresp_o[p*2 +: 2] = data_w[257:256];
-            assign rlast_o[p] = data_w[258];
+            assign stage_valid_w[p] = skid_valid_r[p] || pending_valid_r[p];
+            if (p == 3) begin : g_gpu_slice
+                reg slice_valid_r;
+                reg [255:0] slice_data_r;
+                reg [1:0] slice_resp_r;
+                reg slice_last_r;
+                reg slice_id_r;
+                reg [2:0] slice_slot_r;
+                // The existing skid holds a RAM result when this elastic stage stalls.
+                assign stage_ready_w[p] = !slice_valid_r || rready_i[p];
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i) slice_valid_r <= 1'b0;
+                    else if (stage_ready_w[p]) slice_valid_r <= stage_valid_w[p];
+                end
+                always @(posedge clk_i) begin
+                    if (stage_take_w[p]) begin
+                        slice_data_r <= data_w[255:0];
+                        slice_resp_r <= data_w[257:256];
+                        slice_last_r <= data_w[258];
+                        slice_id_r <= skid_valid_r[p] ? skid_id_r[p] : pending_id_r;
+                        slice_slot_r <= skid_valid_r[p] ? skid_slot_r[p] : pending_slot_r;
+                    end
+                end
+                assign rvalid_o[p] = slice_valid_r;
+                assign rid_o[p] = slice_id_r;
+                assign rdata_o[p*256 +: 256] = slice_data_r;
+                assign rresp_o[p*2 +: 2] = slice_resp_r;
+                assign rlast_o[p] = slice_last_r;
+                assign output_slot_w[p] = slice_slot_r;
+            end else begin : g_direct
+                assign stage_ready_w[p] = rready_i[p];
+                assign rvalid_o[p] = stage_valid_w[p];
+                assign rid_o[p] = skid_valid_r[p] ? skid_id_r[p] : pending_id_r;
+                assign rdata_o[p*256 +: 256] = data_w[255:0];
+                assign rresp_o[p*2 +: 2] = data_w[257:256];
+                assign rlast_o[p] = data_w[258];
+                assign output_slot_w[p] = skid_valid_r[p] ? skid_slot_r[p] : pending_slot_r;
+            end
         end
     endgenerate
 
@@ -230,8 +268,7 @@ module edrv32_mem_xbar_rbuf_gpu (
         sent_take_w = 8'b0;
         for (take_port = 0; take_port < 5; take_port = take_port + 1) begin
             if (take_w[take_port]) begin
-                sent_take_w[skid_valid_r[take_port] ? skid_slot_r[take_port] :
-                    pending_slot_r] = 1'b1;
+                sent_take_w[output_slot_w[take_port]] = 1'b1;
             end
         end
         return_match_w = 8'b0;
@@ -264,7 +301,7 @@ module edrv32_mem_xbar_rbuf_gpu (
             ready_ports_w[match_port] = port_active_r[match_port] &&
                 !port_load_r[match_port] &&
                 port_ready_r[match_port] &&
-                (!rvalid_o[match_port] || rready_i[match_port]);
+                (!stage_valid_w[match_port] || stage_ready_w[match_port]);
         end
         fetch_w = |ready_ports_w;
         // One-hot selection keeps the RAM address off the encoded port/descriptor mux chain.
@@ -356,10 +393,10 @@ module edrv32_mem_xbar_rbuf_gpu (
                     // The delayed pulse belongs to the previous head at allocation.
                     port_return_r[skid_idx] <= 1'b0;
                 end
-                if (take_w[skid_idx]) begin
+                if (stage_take_w[skid_idx]) begin
                     skid_valid_r[skid_idx] <= 1'b0;
                 end
-                if (pending_valid_r[skid_idx] && !rready_i[skid_idx])
+                if (pending_valid_r[skid_idx] && !stage_ready_w[skid_idx])
                 begin
                     skid_valid_r[skid_idx] <= 1'b1;
                 end
@@ -418,7 +455,7 @@ module edrv32_mem_xbar_rbuf_gpu (
             pending_error_r <= error_r[fetch_slot_w];
             pending_last_r <= fetched_r[fetch_slot_w] + 5'd1 == length_r[fetch_slot_w];
         end
-        if (pending_r && !rready_i[pending_port_r]) begin
+        if (pending_r && !stage_ready_w[pending_port_r]) begin
             skid_data_r[pending_port_r] <= pending_data_w;
             skid_slot_r[pending_port_r] <= pending_slot_r;
             skid_id_r[pending_port_r] <= pending_id_r;

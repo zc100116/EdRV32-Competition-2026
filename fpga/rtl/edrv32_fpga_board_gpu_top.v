@@ -75,6 +75,11 @@ module edrv32_fpga_board_gpu_top (
     wire rst_board_n_w;
     wire ddr_init_done_w;
     wire mem_ready_w;
+    reg mem_ready_r;
+    // calib_done is a level; terminate its PHY fanout before SoC reset sequencing.
+    always @(posedge clk_mem_w) begin
+        mem_ready_r <= mem_ready_w;
+    end
 
     ip_pll_sys u_pll_sys (
         .clkin1(clk_i),
@@ -180,7 +185,7 @@ module edrv32_fpga_board_gpu_top (
         .eth_rx_clk_i(clk_eth_w),
         .eth_tx_clk_i(clk_eth_w),
         .rst_n_i(rst_board_n_w),
-        .mem_ready_i(mem_ready_w),
+        .mem_ready_i(mem_ready_r),
 
         // DDR controller AXI256 master.
         .ddr_awid_o(ddr_awid_w),

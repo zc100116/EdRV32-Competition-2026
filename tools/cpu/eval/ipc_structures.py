@@ -19,10 +19,16 @@ def operation(inst):
         return {0: 'addi', 1: 'slli', 4: 'xori', 5: 'srli' if bits >> 30 == 0 else 'srai',
                 6: 'ori', 7: 'andi'}.get(funct, 'other')
     if opcode == 0x33:
+        if bits >> 25 == 0x10 and funct in (2, 4, 6):
+            return {2: 'sh1add', 4: 'sh2add', 6: 'sh3add'}[funct]
+        if funct in (2, 3) and bits >> 25 == 0:
+            return 'compare'
         return {0: 'add' if bits >> 25 == 0 else 'other', 1: 'sll', 4: 'xor',
                 5: 'srl' if bits >> 30 == 0 else 'sra', 6: 'or', 7: 'and'}.get(funct, 'other')
     if opcode == 3 and funct in (1, 2, 4):
         return 'load'
+    if inst.kind == 'branch':
+        return 'branch'
     if inst.kind == 'jalr':
         return 'jalr'
     return 'other'
@@ -55,6 +61,13 @@ def fuse_program(program, trace, templates, begin, end):
             continue
         name = operation(first) + '-' + operation(second)
         if name not in templates:
+            continue
+        if name == 'compare-branch' and ((second.bits >> 12) & 7 not in (0, 1) or
+                any(source not in (0, first.rd) for source in second.sources)):
+            continue
+        # A control macro must share one fetch query/checkpoint with its compare
+        # or AUIPC. Cross-group control fusion needs separate prediction metadata.
+        if second.kind in {'branch', 'jal', 'jalr'} and first.pc >> 3 != second.pc >> 3:
             continue
         sources = tuple(dict.fromkeys(first.sources + tuple(
             source for source in second.sources if source != first.rd)))

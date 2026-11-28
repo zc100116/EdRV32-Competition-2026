@@ -12,7 +12,7 @@
 | 顶层 | `edrv32_fpga_board_gpu_top`（`fpga/rtl/edrv32_fpga_board_gpu_top.v`） |
 | 约束 | `fpga/constraints/edrv32_fpga_board_gpu_top.fdc` |
 | 导入脚本 | `fpga/scripts/import_board_gpu_top.tcl` |
-| 程序 | `src/gpu_hello.elf`（旋转立方体 + 100 个弹跳精灵 + 帧号文字 + 方波声音）；`src/gpu_render.elf`（ST-10 渲染测试）；`src/gpu_audio.elf`（ST-12 放音测试）。三者都链接在 DDR，用 BIOS 的 UART 或 ETH 加载 |
+| 程序 | `src/gpu_hello.elf`（旋转立方体 + 100 个弹跳精灵 + 帧号文字 + 方波声音）；`src/gpu_render.elf`（ST-10 渲染测试）；`src/gpu_audio.elf`（ST-12 放音测试）；`src/gpu_test.elf`（四合一测试游戏，第 6j 节）。四者都链接在 DDR，用 BIOS 的 UART 或 ETH 加载 |
 | 准备报告 | `docs/reports/2026-11-24-board-gpu-prep.md`（IP 清单、PLL、引脚、跨时钟域对照） |
 
 ## 3. 环境
@@ -226,9 +226,48 @@
   1. 布局报告中的全部 `Use of` 行，**特别是 `Use of CLMA`、`Use of CLMS`**；
   2. 是否布通；每次布线迭代的未布通数和用时；拥塞摘要；
   3. 布通的那组：第 6e 节的全部时序内容；
+     - **补充（2026-11-27）**：clk_sys 也要导出最差 200 条 setup 路径，一行一条。第一段综合时漏要了，布通组的结果里一并补上。布不通的那组，从 Device Map 后的时序报告导出同样内容；
+     - 如果 PDS 能按层次导出控制组合（control set）及各自的 FF 数，一并回传；导不出就写"未取得"。
   4. 布不通的那组：按第 6h 节补充要求第 1 条的方法，统计未布网的模块分布；
   5. APM 级联或 APM 列放置相关的告警或错误，回传原文。
 - 上板步骤（第 5 节第 5～8 步）本轮先不做，等协调者看过布线结果再定。
+
+## 6j. 第 11 轮 B 组上板（2026-11-27，用户决定带违例试跑）
+
+- **用哪个比特流**：第 11 轮 B 组工程 `G:/codex_project/EdRV32-FPGA/board_gpu_round11_B/board_gpu_round11_B.pds`。还没生成比特流的话，在该工程里只做 Generate Bitstream，不要重新综合或布线。A 组如果还在跑，不用等它。
+- **已知违例**（Slow Corner，按目标频率运行）：clk_gpu 目标 180 MHz、估算 135 MHz（WNS −1.852 ns）；clk_sys 目标 125 MHz、估算 109 MHz（WNS −1.152 ns）；clk_mem 目标 125 MHz、估算 114 MHz（WNS −0.764 ns）；`clk_rgmii_ref → clk_eth` hold −0.361 ns。所以画面错乱、死机、ETH 不通都可能出现。这次的目的就是看会出什么现象，**照实记录，不要改工程或参数重跑**。
+- **ETH 不通时**：程序改用 BIOS 的 UART 加载；游戏可以只用板上 4 个按键操作。把 ETH 失败时的串口输出原文记下来。
+- **步骤**：
+  1. 第 5 节第 5～8 步照做（BIOS、`gpu_render.elf`、`gpu_audio.elf`、`gpu_hello.elf`）。任何一步卡住或死机，记下现象和串口输出，按板上复位后继续下一步。
+  2. **新增：加载 `src/gpu_test.elf`**（四合一测试游戏，`zc100116/gpu-dev` 上的 `sw/apps/gpu_test`，链接在 DDR，入口 0x8000_0000）。开机菜单用左右键选择，enter 进入，bit3（ETH 为 Esc）回到菜单。四个场景依次进入：
+     - 2D：Prism Patrol（弹幕射击，自动开火，左右移动）；
+     - 3D：Candy Canyon（峡谷穿环飞行）；
+     - 2D：棱炉地宫（肉鸽地牢；bit0/bit1 转向、自动前进，bit2 短按翻滚）；
+     - 3D：云脊漫游（岛屿探索；bit0/bit1 转向、默认前进，bit2 短按停驻）。
+  3. 每个场景玩 1～2 分钟，各录一段约 30 秒的视频。记录：画面是否正常（错乱、闪烁、缺块、花屏）、是否卡死、左下角那一行的 FPS 和 CPU/GPU 耗时数字（拍照或抄下）、有无声音。
+  4. 在 Prism Patrol 和 Candy Canyon 里各试一次控制菜单（enter 打开），把“模式”切到压测，记下 FPS 数字后回到正常模式。
+- **回传**：`uart/round11B-<步骤>.log`、`photo/round11B-*`、`video/round11B-*`（单个视频超过 100 MB 的只写 Windows 本地路径，不提交）；result.md 的“上板”表按步骤填写结果和观察，`gpu_test` 四个场景各占一行。
+
+## 6k. 第 12 轮（2026-11-28，降频 + 布通优先的上板测试工程）
+
+- **背景**：第 11 轮 A、B 两组上板都没有任何输出（用户 2026-11-28），判断为按目标频率超频运行后跑飞。本轮把时钟降到第 11 轮估算频率以下并留出余量，再上板确认功能。
+- **本轮改动**：
+  - 时钟目标：**clk_sys 100 MHz**（原 125）、**clk_gpu 120 MHz**（原 180）；clk_mem 保持 125 MHz（DDR IP 不动）。规格 gpu-soc-spec v0.4；约束 `fpga/constraints/edrv32_fpga_board_gpu_top.fdc` 已同步。`CLK_SYS_HZ` 已改为 100000000，BIOS 按它设置串口波特率。
+  - R-8（eecf2e30d）：clk_mem 读返回长路径切拍，包括 GPU 口读返回缓冲输出、DDR 读返回入口、网关 FIFO 写入前、板级 mem_ready。
+  - `src/` 下 4 个 ELF 已按 100 MHz 重新编译，名称不变。
+- **IP（用户 GUI）**：只重新生成两个 PLL，其余 IP 沿用第 11 轮工程。
+  - `ip_pll_sys`：CLKOUT0 改为 **100.000 MHz**，其余选项按 `fpga/ip/ip_pll_sys.md`。**仅本工程**这样改，视觉项目工程不改。
+  - `ip_pll_gpu`：CLKOUT0 改为 **120.000 MHz**，其余选项按 `fpga/ip/ip_pll_gpu.md`。
+  - 如果 IP Compiler 显示的实际频率不是 100.000 / 120.000 MHz，停下来，把显示的频率和分频参数写进 result.md，不要继续。
+- **工程**：复制第 11 轮 B 组工程为 `board_gpu_round12`。取本卡最新提交，移除旧源文件，重新执行导入脚本，从 Compile 开始。
+- **布局布线只跑一组，用第 11 轮 B 组参数**：`-plc_decongestion 4 -slack_weight 10 -pin_cost_increasing_speed 600 -logic_optimize_lut6d_combing_strategy 0 -dump_router_congestion_plot true`，在 GUI 中**取消勾选 Design Cells Duplication**。综合后不设频率门槛，直接跑布局布线。
+- **回传（布线后）**：
+  1. 是否布通；全部 `Use of` 行；
+  2. 时序汇总：每个时钟域的 WNS/TNS/WHS/THS，以及 Slow Corner 估算频率；
+  3. clk_sys、clk_gpu、clk_mem 各最差 200 条 setup 路径，一行一条；各域最差 20 条 setup 路径的逐级明细；最差 20 条 hold 路径。
+- **上板**：生成比特流后照第 6j 节步骤做（第 5 节第 5～8 步，再加 `gpu_test.elf` 四个场景），文件名前缀改为 `round12`。即使还有违例也照做。
+  - 第一项先确认：**下载后 BIOS 是否有串口输出**。没有的话，记下板上 LED 状态，按复位键再试一次，把现象写进 result.md，然后停止，不用继续后面的步骤。
+- **回传（上板）**：`uart/round12-<步骤>.log`、`photo/round12-*`、`video/round12-*`（单个视频超过 100 MB 只写本地路径）；result.md 的"上板"表按步骤填写，`gpu_test` 四个场景各占一行。
 
 ## 7. 通过判据
 
@@ -270,6 +309,10 @@
 | 6 gpu_render | | |
 | 7 gpu_audio | | |
 | 8 gpu_hello | | |
+| 6j gpu_test Prism Patrol | | |
+| 6j gpu_test Candy Canyon | | |
+| 6j gpu_test 棱炉地宫 | | |
+| 6j gpu_test 云脊漫游 | | |
 
 ## 问题与偏离
 ```
