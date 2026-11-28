@@ -1,0 +1,137 @@
+// File: probe_tb.sv
+// Spec: cpu-v2-testplan CV15.
+// Clock: clk_sys.
+// Description: Read-only A00 cycle evidence; architectural expectations come from Spike.
+/* verilator lint_off BLKSEQ */
+module probe_tb;
+    parameter ISSUE_WIDTH = 2;
+    tb #(.ISSUE_WIDTH(ISSUE_WIDTH)) harness();
+    string path;
+    integer fd;
+    initial begin
+        if (!$value$plusargs("PROBE=%s", path)) $fatal(1, "missing PROBE");
+        fd = $fopen(path, "w");
+        $fwrite(fd, "cycle,allocate_credit,ib_credit,ib_head0_valid,ib_head0_pc,ib_head0_instr,i");
+        $fwrite(fd, "b_head1_valid,ib_head1_pc,ib_head1_instr,allocate_valid,allocate_ready,allo");
+        $fwrite(fd, "cate_count,allocate0_tag,allocate1_tag,execute0_valid,execute0_ready,execut");
+        $fwrite(fd, "e0_tag,execute0_pc,execute0_late,execute0_source1_wait,execute0_source2_wai");
+        $fwrite(fd, "t,execute1_valid,execute1_ready,execute1_tag,execute1_pc,execute1_late,exec");
+        $fwrite(fd, "ute1_source1_wait,execute1_source2_wait,alu0_complete_valid,alu0_complete_r");
+        $fwrite(fd, "eady,alu0_complete_tag,alu1_complete_valid,alu1_complete_ready,alu1_complet");
+        $fwrite(fd, "e_tag,branch_complete_valid,branch_complete_ready,branch_complete_tag,lsu_r");
+        $fwrite(fd, "eq_valid,lsu_req_ready,lsu_req_tag,lsu_req_early,early_req_valid,early_req_");
+        $fwrite(fd, "tag,early_resp_valid,early_resp_tag,early_resp_hit,dc_req_valid,dc_req_read");
+        $fwrite(fd, "y,dc_req_tag,dc_req_early,dc_resp_valid,dc_resp_ready,dc_resp_tag,dc_early_");
+        $fwrite(fd, "valid,dc_early_resp_valid,dc_early_hit,lsu_complete_valid,lsu_complete_read");
+        $fwrite(fd, "y,lsu_complete_tag,commit_lsu_valid,commit_lsu_ready,commit_lsu_done_valid,");
+        $fwrite(fd, "commit_lsu_done_ready,head0_valid,head0_done,head0_tag,head0_pc,head0_store");
+        $fwrite(fd, ",retire_count,mul_req_valid,mul_req_ready,mul_req_tag,mul_complete_valid,mu");
+        $fwrite(fd, "l_complete_ready,mul_complete_tag,div_req_valid,div_req_ready,div_req_tag,d");
+        $fwrite(fd, "iv_complete_valid,div_complete_ready,div_complete_tag,csr_req_valid,csr_req");
+        $fwrite(fd, "_ready,csr_req_tag,csr_complete_valid,csr_complete_ready,csr_complete_tag,b");
+        $fwrite(fd, "ranch_redirect_valid,branch_redirect_pc,f2_redirect_valid,ic_req_valid,ic_r");
+        $fwrite(fd, "eq_ready,ic_req_addr,ic_resp_valid,ic_resp_ready,lsu_state");
+        $fdisplay(fd, "");
+    end
+    always @(posedge harness.clk) begin
+        if (harness.rst_n) begin
+            $fwrite(fd, "%0d", harness.cycles);
+            $fwrite(fd, ",%0h", harness.dut.allocate_credit_w);
+            $fwrite(fd, ",%0h", harness.dut.ib_credit_w);
+            $fwrite(fd, ",%0h", harness.dut.ib_head0_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.ib_head0_pc_w);
+            $fwrite(fd, ",%0h", harness.dut.ib_head0_instr_w);
+            $fwrite(fd, ",%0h", harness.dut.ib_head1_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.ib_head1_pc_w);
+            $fwrite(fd, ",%0h", harness.dut.ib_head1_instr_w);
+            $fwrite(fd, ",%0h", harness.dut.allocate_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.allocate_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.allocate_count_w);
+            $fwrite(fd, ",%0h", harness.dut.allocate0_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.allocate1_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.execute0_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.execute0_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.execute0_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.execute0_pc_w);
+            $fwrite(fd, ",%0h", harness.dut.execute0_late_w);
+            $fwrite(fd, ",%0h", harness.dut.execute0_source1_wait_w);
+            $fwrite(fd, ",%0h", harness.dut.execute0_source2_wait_w);
+            $fwrite(fd, ",%0h", harness.dut.execute1_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.execute1_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.execute1_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.execute1_pc_w);
+            $fwrite(fd, ",%0h", harness.dut.execute1_late_w);
+            $fwrite(fd, ",%0h", harness.dut.execute1_source1_wait_w);
+            $fwrite(fd, ",%0h", harness.dut.execute1_source2_wait_w);
+            $fwrite(fd, ",%0h", harness.dut.alu0_complete_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.alu0_complete_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.alu0_complete_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.alu1_complete_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.alu1_complete_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.alu1_complete_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.branch_complete_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.branch_complete_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.branch_complete_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.lsu_req_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.lsu_req_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.lsu_req_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.lsu_req_early_w);
+            $fwrite(fd, ",%0h", harness.dut.early_req_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.early_req_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.early_resp_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.early_resp_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.early_resp_hit_w);
+            $fwrite(fd, ",%0h", harness.dut.dc_req_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.dc_req_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.dc_req_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.dc_req_early_w);
+            $fwrite(fd, ",%0h", harness.dut.dc_resp_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.dc_resp_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.dc_resp_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.dc_early_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.dc_early_resp_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.dc_early_hit_w);
+            $fwrite(fd, ",%0h", harness.dut.lsu_complete_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.lsu_complete_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.lsu_complete_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.commit_lsu_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.commit_lsu_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.commit_lsu_done_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.commit_lsu_done_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.head0_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.head0_done_w);
+            $fwrite(fd, ",%0h", harness.dut.head0_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.head0_pc_w);
+            $fwrite(fd, ",%0h", harness.dut.head0_store_w);
+            $fwrite(fd, ",%0h", harness.dut.retire_count_w);
+            $fwrite(fd, ",%0h", harness.dut.mul_req_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.mul_req_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.mul_req_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.mul_complete_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.mul_complete_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.mul_complete_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.div_req_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.div_req_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.div_req_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.div_complete_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.div_complete_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.div_complete_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.csr_req_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.csr_req_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.csr_req_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.csr_complete_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.csr_complete_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.csr_complete_tag_w);
+            $fwrite(fd, ",%0h", harness.dut.branch_redirect_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.branch_redirect_pc_w);
+            $fwrite(fd, ",%0h", harness.dut.f2_redirect_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.ic_req_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.ic_req_ready_w);
+            $fwrite(fd, ",%0h", harness.dut.ic_req_addr_w);
+            $fwrite(fd, ",%0h", harness.dut.ic_resp_valid_w);
+            $fwrite(fd, ",%0h", harness.dut.ic_resp_ready_w);
+            $fdisplay(fd, ",%0h", harness.dut.u_lsu.state_r);
+        end
+    end
+    final $fclose(fd);
+endmodule
