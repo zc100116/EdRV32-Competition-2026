@@ -1,7 +1,6 @@
 # File: import_probe_gpu2_banks_lutram_top.tcl
-# Run after generating the IPs from fpga/ip/ip_*_cpu2_*.md.
+# GPU v2 probe import; Generate ip_ram_gpu2_sdp72, ip_ram_gpu2_sdp36 and ip_lutram_gpu2_setup92 first.
 # Run in the PDS Tcl console from the FPGA project directory EdRV32-FPGA/<project>.
-# The source checkout is its sibling under codex_project (Windows builds B3I, B3V).
 set edrv32_repo [file normalize ../../EdRV32-Competition-2026]
 puts "edrv32: repo $edrv32_repo"
 set edrv32_top edrv32_fpga_probe_gpu2_banks_lutram_top
