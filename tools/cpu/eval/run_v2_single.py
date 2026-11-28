@@ -35,8 +35,8 @@ def main():
     args = parser.parse_args()
     directory = Path('build/cpu-v2/isa/zba') / args.workload
     program, symbols, trace = program_and_trace(directory)
-    addresses = memory_trace(directory, program, trace) if (args.completion_entries or
-                                                               args.completion_head_authorization) else None
+    addresses = memory_trace(directory, program, trace) if (
+        args.completion_entries or args.completion_head_authorization) else None
     divs = divider_cycles(directory, program, trace, 'early-div', complete_schedule=True)
     result = simulate(program, trace, symbols['start_time'], symbols['stop_time'],
                       'V3s', **BASES['small'], division_cycles=divs,

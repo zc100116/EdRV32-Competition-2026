@@ -69,6 +69,20 @@ class Pipeline(unittest.TestCase):
         self.assertEqual(head_only['cycles'], 57)
         self.assertEqual(head_only['completion_stall_cycles'], 0)
 
+    def test_completion_retired_window_keeps_prefix_queue_phase(self):
+        program = {pc: instruction(pc, 'store') if pc < 80 else
+                   instruction(pc, rd=10, sources=(10,)) for pc in range(0, 560, 4)}
+        program[480] = instruction(480, 'serial')
+        trace = list(range(0, 484, 4))
+        options = dict(perfect_frontend=True, perfect_prediction=True)
+        baseline = simulate(program, trace, 80, 480, 'V3s', **options)
+        head_only = simulate(program, trace, 80, 480, 'V3s',
+                             completion_head_authorization=True, **options)
+        # Prefix store backlog delays begin retirement; the retired ROI shortens.
+        self.assertEqual(baseline['cycles'], 100)
+        self.assertEqual(head_only['cycles'], 60)
+        self.assertEqual(head_only['instructions'], 100)
+
     def test_completion_order_width_and_cancellation(self):
         window = CompletionWindow(8, 1)
         records = [Record(instruction(pc), False, False, 0, 0, ()) for pc in range(3)]

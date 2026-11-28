@@ -81,13 +81,13 @@ def main():
                     merge = LoadMerge(addresses, read_bytes, merge_early) if read_bytes else None
                     options.update(division_cycles=divs['radix4-early' if base == 'full'
                                                        else 'early-div'], load_merge=merge)
+                    options.update(completion_entries=args.completion_entries,
+                                   completion_addresses=addresses,
+                                   completion_same_cycle_credit=args.completion_same_cycle_credit,
+                                   completion_head_authorization=args.completion_head_authorization)
                     result = simulate(program, trace, symbols['start_time'], symbols['stop_time'],
                                       'V3s', **options, frontend_probe=IcacheProbe(1),
-                                      frontend_registered_margin=True,
-                                      completion_entries=args.completion_entries,
-                                      completion_addresses=addresses,
-                                      completion_same_cycle_credit=args.completion_same_cycle_credit,
-                                      completion_head_authorization=args.completion_head_authorization)
+                                      frontend_registered_margin=True)
                     result.update(instructions=instructions, ipc=instructions / result['cycles'])
                     if merge:
                         result['merge'] = dict(candidates=merge.candidates, merged=merge.merged,
