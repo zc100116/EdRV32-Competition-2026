@@ -53,6 +53,9 @@ Rank | Slack (ns) | Logic levels | Logic / Route (ns) | Startpoint -> Endpoint
 3 | +1.558 | 0 | 1.644 / 1.122 | u_probe/g_program[4].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_gpu2_sdp36/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0] -> u_probe/g_program[4].capture_r[11]/opit_0/D
 
 Setup LUTRAM 读出寄存器 → 业务捕获寄存器
-未取得匹配的时序路径。
+Rank | Slack (ns) | Logic levels | Logic / Route (ns) | Startpoint -> Endpoint
+1 | +2.198 | 0 | 0.213 / 1.807 | u_probe/g_setup[31].u_ram/rd_data_r[33]/opit_0_32X2DL6QL5Q/CLK -> u_probe/g_setup[31].capture_r[33]/opit_0/D
+2 | +2.214 | 0 | 0.213 / 1.755 | u_probe/g_setup[61].u_ram/rd_data_r[75]/opit_0_32X2DL6QL5Q/CLK -> u_probe/g_setup[61].capture_r[75]/opit_0/D
+3 | +2.254 | 0 | 0.213 / 1.851 | u_probe/g_setup[42].u_ram/rd_data_r[67]/opit_0_32X2DL6QL5Q/CLK -> u_probe/g_setup[42].capture_r[67]/opit_0/D
 
 该映射使用 0 个 APM。

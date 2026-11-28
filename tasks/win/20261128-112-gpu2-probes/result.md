@@ -43,7 +43,7 @@ Banks 两方案均满足 220 MHz，LUTRAM 方案由 159 降至 15 个 DRM。FP32
 | setup | APM 原语间级联 | +2.734 |
 | banks | DRM 读出 → 业务捕获寄存器 | +0.444 |
 | banks_lutram | DRM 读出 → 业务捕获寄存器 | +1.422 |
-| banks_lutram | Setup LUTRAM 读出寄存器 → 业务捕获寄存器 | 未取得 |
+| banks_lutram | Setup LUTRAM 读出寄存器 → 业务捕获寄存器 | +2.198 |
 
 重点段优先取同口径最差 200 条路径，未出现在其中的路径使用 PDS 起终点过滤导出。各组目录保留原始报告、阶段日志和导出参数。
 
