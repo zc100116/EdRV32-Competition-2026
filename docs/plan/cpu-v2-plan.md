@@ -67,7 +67,7 @@
 | 编号 | 内容 | 执行者 | 依赖 | 验收标准 | 拟Task/分支 | 状态 |
 |---|---|---|---|---|---|---|
 | F01 | fpu_rf与issue源捕获接口：F固定3R、FD固定2R；统一S源副本和未读rs3生产版本 | D | S01/P08 | FV10/FV12通过；F N8/FD N16、单/双发射源数正确；rs3生产者退休同沿不丢值 | task-cpu-v2-fp-rf / 派发时分支 | [ ] |
-| F02 | fpu_fma32/fpu_convert/fpu_short及lz24/lza32：S ADD/MUL/FMA共享尾端、转换与短操作 | D | S01/P10 | FV02/FV04–FV07/FV09/FV11/FV16通过；逐位/flags及F03开发初值拍数报告；回收探针LUT | zc100116/gpu-dev 共用工作树 | [~] ctx_483ddc4f8fbb |
+| F02 | fpu_fma32/fpu_convert/fpu_short及lz24/lza32：S ADD/MUL/FMA共享尾端、转换与短操作 | D | S01/P10 | FV02/FV04–FV07/FV09/FV11/FV16通过；逐位/flags及F03开发初值拍数报告；回收探针LUT | zc100116/gpu-dev 共用工作树 | [x] 9b99a44cc/8b55b12df：ADD/MUL/FMA 5/7/8、转换3、比较2、符号1；有理数+SoftFloat smoke/full 通过；XC7 代理 LUT 4672，PG2L 留 F06 |
 | F03 | fpu_divsqrt：独立基4 S/D recurrence及本地完成/年龄取消 | D | S01/P10 | FV08逐位/flags通过；S19/D35初值按真实准备/迭代/尾端记录，完成背压与取消不丢结果 | zc100116/gpu-dev 共用工作树 | [~] ctx_b0b9b0650e90 |
 | F04 | fpu_fma64：D独立12APM完整106位积和D ADD/MUL/FMA共享尾端；只在FD实例化 | D | S01/F02 | FV06/FV07/FV09/FV16 D通过；Δe0/8/16及单次舍入正确，F03 D延迟/II实测输入齐全 | task-cpu-v2-fp64 / 派发时分支 | [ ] |
 | F05 | SoftFloat/TestFloat Release3e RISC-V包装及独立F/D参考/验证程序 | V | S01/V01 | FV01–FV09可运行；FT01 level2与每类seed0..9各10000操作；F仅S、FD S/D、NONE无状态的期望完整 | zc100116/gpu-dev 共用工作树 | [x] 99615ad9a：SoftFloat afdc157e/TestFloat a9c849f1，smoke 向量 F 52300/FD 109779 条，full 生成已实现未跑 |
