@@ -483,6 +483,18 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 
 **FP 单元完成背压（F02）。** 单元输出设 2 项 skid；流水使能（含 APM 包装新增的 `enable_i` 接 APM 时钟使能）是由 skid 占用算出的**寄存**信号，按规格 5.1 区域复制（根 ≤8、叶 ≤16）；`unit_req_ready` 用同一寄存使能。不得把下游 `unit_resp_ready` 组合接到流水使能或 req_ready。无背压时 II1。
 
+### 实现补充（2026-11-28，模型对齐 A00/M01）
+
+依据 `docs/reports/2026-11-28-perf-cpu2-model-conformance.md`（D01–D08）与 `docs/reports/2026-11-28-perf-cpu2-completion-window.md`。原则：周期模型是设计参照，RTL 比模型多拍按缺陷修。
+
+| 项 | 结论 |
+|---|---|
+| D06 完成记录（用户确认） | 单发射 NONE/F 8 项、FD 16 项；双发射全部 16 项；全部用 LUTRAM 共享队列，删除 NONE 4 项 FF 结构；不加"释放后次拍可用"短环信用。T/信用位宽按 N 导出 |
+| D01 可缓存 store（用户确认） | 准备即 done（异常此时确定），退休沿生效；`commit_store_count` 通知 LSU 按序标记，LSU store 队列（初值 4 项，C11）按序每拍至多一项经 dc_commit 进写缓冲，无 dc_done；`lsu_complete_device`→`head{j}_device` 区分设备/非缓存 store，后者保持 commit_lsu 授权 + done。年轻 load/early 与队列同字时本地等待排空后走普通访问 |
+| D02 W1 BTB | 规格 5.4/5.5 已定：单发射 64 项按 8B 取指组索引 PC[8:3]，项内存位置；双发射字索引奇偶 bank 共 128 项。RTL 字索引为实现错误 |
+| D03 恢复沿 | 注册恢复沿取消旧 I$/前端上下文，同沿用寄存目标 PC 发 F1；同沿 valid&&ready 接受的新请求属于恢复后上下文，取消只清旧项，新请求下一拍正常返回并预留 2 条 IB 信用；旧 AXI 收完不回送 |
+| D05 MUL / D07 W1 短 load / D08 CSR | 按规格 5.2 延迟表实现：MUL 消费者 EX 间隔 4；单发射合格且命中短 load 间隔 1（early 捕获结果在下一拍作为源寄存值供 ID/EX，不组合反馈 hit）；CSR 读 2 且有序边界不多于模型 II3 |
+
 ## 影响
 
 审核通过后需修改CPU spec2.2/2.3、3、4、5、6及9的C01–C09；FPU spec2.4、3、4、5.1/5.4/5.5及9的F01/F02/F04/F05；CPU testplan2/4/6/7的T02/T03及对应CV02–CV14；FPU testplan4/6/7的FT01/FT03及FV10–FV15。C10、F03/F06与FT03中的未测数值继续待定；旧cpu/cache规格不改，外部总线无差异。

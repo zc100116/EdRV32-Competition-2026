@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.2 |
+| 版本 | v0.3 |
 | 日期 | 2026-11-28 |
 | 状态 | 已确认（用户 2026-11-28 决定接口冻结与配置收敛）；C10、F03、F06 仍待实测 |
 | 范围 | 独立可移植 CPU v2 IP：整数核、L1 I$/D$ 及控制器、可选 FPU 集成 |
@@ -50,10 +50,12 @@ CPU 必须只提供以下两个构建参数；其他结构必须按固定表实�
 | FPU格式固定结构 | NONE | F | FD |
 |---|---|---|---|
 | FP RF / 源读口数 | 无 | 32×32 / 3 | 32×64 / 2 |
-| 全核完成记录数 N | 4，独立FF | 8，LUTRAM数据/PC+FF控制 | 16，LUTRAM数据/PC+FF控制 |
-| tag位宽 T / 数据位宽 B | 2 / 32 | 3 / 32 | 4 / 64 |
+| 全核完成记录数 N（单/双发射） | 8 / 16 | 8 / 16 | 16 / 16 |
+| tag位宽 T（单/双发射） / 数据位宽 B | 3/4 / 32 | 3/4 / 32 | 4/4 / 64 |
 | 单/双发射统一源端口数 S | 2 / 4 | 3 / 5 | 2 / 4 |
-| 分配信用位宽 | 3 | 4 | 5 |
+| 分配信用位宽（单/双发射） | 4/5 | 4/5 | 5/5 |
+
+全部配置的完成记录都是全核共享顺序完成队列：数据和PC用LUTRAM，valid/done/异常/flags/目的/年龄控制用FF。
 
 合法配置必须为2×3共6种，全部完整回归；本SoC板级必须为双发射满配+F。N/T/B/S是固定结构的局部常量，不是构建参数。
 
@@ -158,7 +160,7 @@ L为整数LSU，D为DIV，P为FP算术/转换/FP访存，S为CSR/系统/FENCE；
 | wb{j}_valid / rd / data | commit→RF/fetch/IB | 1/5/32 | 当沿架构写，j0老j1年轻，x0不写 |
 | fp_read{p}_addr / fp_read{p}_data | issue→FP RF / FP RF→issue | 5/B | p=0..R−1，异步读、本地捕获，f0可写 |
 | fp_wb_valid / rd / data | commit→FP RF | 1/5/B | 单写，当沿按序提交 |
-| allocate_credit | completion→issue | 3/4/5（NONE/F/FD） | 寄存空项信用，本拍提交不组合馈入 |
+| allocate_credit | completion→issue | log2(N)+1 | 寄存空项信用，本拍提交不组合馈入 |
 | allocate_valid / allocate_count / allocate_ready | issue→completion / issue→completion / completion→issue | 1/2/1 | 0..1（单发射）或0..2（双发射）项连续分配，原子对应执行接受；不足只发老项 |
 | allocate{j}_tag / pc / instr / rd / dest | issue→completion | T/32/32/5/2 | dest0无、1整数、2FP；存储/branch无rd但保留PC |
 | allocate{j}_csr_src | issue→completion | 32 | CSR源在发射沿捕获并随头项交给commit，其他类型忽略 |
@@ -192,9 +194,11 @@ CSR指令的源和操作编码随allocate登记，commit使用该份已捕获记
 | *_complete_exception / cause / tval | 单元→completion | 1/4/32 | 仅CPU6.1已定义同步异常，非法由decode生成同格式独立源 |
 | head{j}_valid / done / tag / pc / instr / rd / dest / data / flags | completion→commit | 1/1/T/32/32/5/2/B/5 | 按发射宽度设置头端口，data先捕获；单发射j=0，双发射j=0,1 |
 | head{j}_exception / cause / tval / store / divide / double_beat / csr_src | completion→commit | 1/4/32/1/1/1/32 | 提交按年龄，不越过未done头 |
+| lsu_complete_device / head{j}_device | LSU→completion / completion→commit | 1/1 | store准备结果为设备/非缓存，需头授权；可缓存store为0 |
+| commit_store_count | commit→LSU | 2 | 0..ISSUE_WIDTH，本拍退休的可缓存store条数，LSU按序标记最老未提交store项；无ready，不回done |
 | retire_count | commit→completion | 2 | 释放连续头0..1（单发射）或0..2（双发射），不能越过单FP写限制 |
-| commit_lsu_valid / ready / tag | commit↔LSU | 1/1/T | 头项授权副作用，ready代表LSU已接收授权，不代表已退休 |
-| commit_lsu_done_valid / ready / tag / error / fault_addr | LSU↔commit | 1/1/T/1/32 | store/设备/双beat不可撤销事务结束；错误转cause5/7 |
+| commit_lsu_valid / ready / tag | commit↔LSU | 1/1/T | 设备/非缓存头项授权副作用，ready代表LSU已接收授权，不代表已退休 |
+| commit_lsu_done_valid / ready / tag / error / fault_addr | LSU↔commit | 1/1/T/1/32 | 设备/非缓存访问（含双beat）不可撤销事务结束；错误转cause5/7 |
 | csr_req_valid / ready / tag / instr / src | issue↔CSR | 1/1/T/32/32 | 单发且先等更老达到有序边界；CSR读结果经完成源 |
 | csr_commit_valid / instr / src | commit→CSR | 1/32/32 | 本拍架构CSR写，不再重新读可能变化的源 |
 | fp_commit_flags_valid / fp_commit_flags / fp_commit_write | commit→CSR | 1/5/1 | 本拍累计flags；write表示FP目的写；F02置Dirty |
@@ -204,7 +208,7 @@ CSR指令的源和操作编码随allocate登记，commit使用该份已捕获记
 | trap_valid / trap_pc / trap_cause / trap_tval | commit→CSR | 1/32/32/32 | 已决定陷阱，cause含interrupt最高位 |
 | counter_retire_count / hpm_event | commit/各模块→CSR | 2/16 | 事件1..16脉冲/计数布尔，控制退休分支数另送hpm_branch_count[1:0] |
 
-普通load完成即done；store准备完成只表示地址/tag已备妥，commit须授权并等done再退休，不能把完成bank写成功当成副作用完成。FP→整数通过dest控制，单FP完成写口按结果目的域判定，整数结果仍使用槽0整数提交写口。
+普通load完成即done。可缓存store（含FSD两beat）准备完成即done：地址、数据、掩码、PMA与对齐异常在准备时确定，项留在LSU store队列；提交沿按普通项退休并经commit_store_count标记该项已提交，没有授权/done往返。设备/非缓存store准备完成只表示已备妥，commit须授权并等done再退休。FP→整数通过dest控制，单FP完成写口按结果目的域判定，整数结果仍使用槽0整数提交写口。
 
 ### 3.6 核与FPU及其各单元
 
@@ -234,9 +238,9 @@ FPU内部 top→fma32/fma64/divsqrt/convert/short 使用 `unit_req_valid/ready/i
 | dc_resp_tag / dc_resp_beat | D$→A | T/1 | 请求关联，不用“当前MEM指令”暗指 |
 | dc_resp_way_hit / dc_resp_way0_data / dc_resp_way1_data | D$→A | 2/32/32 | 独热路、本地按字节合并写缓冲，特殊返回走way0 |
 | dc_resp_error / dc_resp_device | D$→A | 各1 | error仅valid时有效；device为准备响应、尚未发设备事务 |
-| dc_commit_valid / dc_commit_ready / dc_commit_tag / dc_commit_beat | A↔D$ | 1/1/T/1 | 头授权后提交指定beat；ready是接收提交，设备还要等最终响应 |
+| dc_commit_valid / dc_commit_ready / dc_commit_tag / dc_commit_beat | A↔D$ | 1/1/T/1 | 已提交可缓存store按序排入写缓冲，或设备头授权后提交指定beat；ready是接收，设备还要等最终响应 |
 | dc_commit_data / dc_commit_mask | A→D$ | 32/4 | 可缓存store进入写缓冲的数据/掩码 |
-| dc_done_valid / dc_done_ready / dc_done_tag / dc_done_beat / dc_done_error / dc_done_data | D$↔A | 1/1/T/1/1/32 | 授权后store/设备真正完成；设备load结果此处交付 |
+| dc_done_valid / dc_done_ready / dc_done_tag / dc_done_beat / dc_done_error / dc_done_data | D$↔A | 1/1/T/1/1/32 | 授权后设备/非缓存访问真正完成；设备load结果此处交付；可缓存store排空不产生done |
 | dc_cancel_valid / dc_cancel_tag / dc_age_head | A→D$ | 1/T/T | 清未授权项，已有AXI继续收完而不回送旧实例 |
 | dc_early_valid / dc_early_addr / dc_early_tag | A→D$ | 1/32/T | 发射沿查询，使用同一物理读口 |
 | dc_early_resp_valid / dc_early_resp_tag / dc_early_hit / dc_early_way0_data / dc_early_way1_data | D$→A | 1/T/2/32/32 | 下一拍固定返回，失败hit00，LSU捕获后才供消费者 |
@@ -244,7 +248,7 @@ FPU内部 top→fma32/fma64/divsqrt/convert/short 使用 `unit_req_valid/ready/i
 | dc_fence_done | D$→commit | 1 | 已接受fence完成脉冲，无错误旁路 |
 | dc_wb_event / dc_miss_event | D$→CSR | 各1 | 写回AW/新miss事件，非请求等待拍数 |
 
-D$寄存准入需预留同步RAM返回及发现miss后一拍的已接受请求槽；不沿旧核静默丢第二请求。early占用读口时不再接受另一普通读，选择来自已登记的端口预约；其后实际请求 `dc_req_early=1` 时重用捕获结果，失败则普通访问本地顺延。缓存响应device只是准备阶段，LSU不把它当完成数据；提交头授权后才发设备AXI，最终dc_done后才退休。可缓存store直到提交不改架构内存，次拍排空写缓冲；FD若低beat已经排空不回滚。
+D$寄存准入需预留同步RAM返回及发现miss后一拍的已接受请求槽；不沿旧核静默丢第二请求。early占用读口时不再接受另一普通读，选择来自已登记的端口预约；其后实际请求 `dc_req_early=1` 时重用捕获结果，失败则普通访问本地顺延。缓存响应device只是准备阶段，LSU不把它当完成数据；提交头授权后才发设备AXI，最终dc_done后才退休。可缓存store直到提交不改架构内存。LSU store队列必须保存已准备未提交及已提交未排空的可缓存store beat，开发初值4项 **[待定]**（由模型在2/4项中扫描定稿）；已提交项按序每拍至多一项经dc_commit排入写缓冲，取消只清未提交项。年轻load（含early查询）与队列中任一项同字时，不得复用early结果，必须在LSU本地等待这些项排入写缓冲后再走普通访问，由写缓冲按字节合并；load返回路径不增加队列合并。队列满时只有store不能接收（ready来自寄存计数）。FENCE/维护必须等队列和写缓冲都空。
 
 ### 3.8 前端与 I$、维护控制
 
@@ -316,7 +320,7 @@ RF包装端口为 `clk_i`1、`wr_en_i`1、`wr_addr_i`5、`wr_data_i`32、`rd_add
 
 技术包装地址/数据位宽必须固定如下：RF为5/32；cache_data为11/32，cache_data64为11/64且mask8；cache_tag为9/19，cache_dtag为9/20，cache_lru为9/1。仅双发射的TAGE训练为9/16，预测奇偶bank为8/16；base训练为12/2，预测bank为11/2。通用端口中的A/D必须分别采用对应固定地址/数据位宽。
 
-仅双发射实例化TAGE：每表512×16，训练512×16；预测按双字奇偶bank各256×16、base预测2×2048×2；base训练4096×2。读/写地址宽度由深度导出；数据宽16/2，同步1R1W，写端无mask。两种配置fast异步4096×2按容量分bank；单发射BTB64，双发射BTB128按总容量奇偶bank，RAS为寄存状态。FPU RF必须为F32×32三读副本、FD32×64两读副本，异步单写；F共享完成每bank低32位为4×32、单/双发射4/6副本；FD低32位为8×32、单/双发射3/5副本，FD高32位8×32为3副本，另有F4×32/FD8×32 PC宏；NONE必须用4项FF，不实例化上述完成RAM，控制valid/flags为FF；S见2.2固定表；资源见fpu-spec 7.2，F06实际宏打包另定。
+仅双发射实例化TAGE：每表512×16，训练512×16；预测按双字奇偶bank各256×16、base预测2×2048×2；base训练4096×2。读/写地址宽度由深度导出；数据宽16/2，同步1R1W，写端无mask。两种配置fast异步4096×2按容量分bank；单发射BTB64，双发射BTB128按总容量奇偶bank，RAS为寄存状态。FPU RF必须为F32×32三读副本、FD32×64两读副本，异步单写；共享完成队列每bank深度N/2：低32位单发射NONE/F为4×32、其余为8×32，读副本S+1（NONE单/双发射3/5、F 4/6、FD 3/5）；FD高32位8×32为3副本；PC宏每bank N/2×32；控制valid/flags为FF；S见2.2固定表；资源见fpu-spec 7.2，F06实际宏打包另定。
 
 ### 3.11 退休trace（顶层内部线）
 
@@ -334,7 +338,7 @@ RF包装端口为 `clk_i`1、`wr_en_i`1、`wr_addr_i`5、`wr_data_i`32、`rd_add
 | trace_redirect_valid_w / trace_redirect_tag_w / trace_redirect_pc_w / trace_redirect_target_w / trace_redirect_stage_w / trace_redirect_cause_w | 1/T/32/32/2/2 | stage1F2、2EX、3MEM；cause1方向、2目标、3非控制误预测 |
 | trace_source{p}_valid_w / trace_source{p}_tag_w / trace_source{p}_domain_w | 1/T/1 | 每个实际等待/旁路源tag及整数/FP域，RF源valid0；端口号同源表 |
 
-内存记分板同时用AXI/BFM观察真正外部副作用、trace观察提交意图；可缓存写对架构生效指写缓冲接受，不要求等待后续写回。若发生故障FSD，trace_trap仍给本条PC/高字地址，不能伪造一条退休来解释部分写。
+内存记分板同时用AXI/BFM观察真正外部副作用、trace观察提交意图；可缓存写对架构生效指提交沿退休（LSU store队列标记已提交），不要求等待排入写缓冲或后续写回；trace_mem_effect只记录设备/非缓存store beat。若发生故障FSD，trace_trap仍给本条PC/高字地址，不能伪造一条退休来解释部分写。
 
 ## 4. 寄存器
 
@@ -406,7 +410,7 @@ RF包装端口为 `clk_i`1、`wr_en_i`1、`wr_addr_i`5、`wr_data_i`32、`rd_add
 
 各级必须使用局部 valid/credit，无全局停顿。ID必须只使用已登记容量发射；D$ hit/miss必须本地产生，不能组合穿透到ID/RF/IF。最老指令不就绪时必须阻止年轻越序发射；完成队列满必须反压新发射；已完成结果和前端可依各自容量推进。长操作必须用目的记分牌，不得冻结整核。
 
-NONE必须使用4项独立FF完成记录。含FP必须使用F为8项、FD为16项全核共享顺序完成队列，替换原4项；数据用LUTRAM、控制用FF。每拍最多提交ISSUE_WIDTH条、最多一个FP目的；store/设备副作用只能在最老且不可撤销时发生。冲刷必须按年龄取消年轻结果、flags和store。
+完成记录必须为2.2固定表的全核共享顺序完成队列（单发射NONE/F 8项、FD 16项，双发射16项）；数据/PC用LUTRAM、控制用FF。每拍最多提交ISSUE_WIDTH条、最多一个FP目的；可缓存store在退休沿对架构生效，设备副作用只能在最老且不可撤销时发生。冲刷必须按年龄取消年轻结果、flags和store。
 
 控制根应按区域注册复制，根扇出目标≤8、局部叶≤16，数据保持使能按不超过16位分区；数值为实现预算 **[待定]**，最终按PDS定稿。
 
@@ -476,7 +480,7 @@ D$必须有1项地址/32位数据/4位掩码写缓冲；提交后下一拍写阵
 
 FP算术、转换和访存必须进入执行管线0；双发射另一条只能为独立A，槽/管线映射必须符合2.3。FD固定2R FMA必须先捕获rs1/rs2、次拍读rs3，该拍可执行独立整数但不得再读新FP；F固定3R必须同拍捕获三源。整数域/FP域必须独立跟踪RAW/WAW，FP组内相关不得配对。
 
-共享队列必须按tag奇偶分两个单写bank，branch/store等无rd项也占一个完成写槽（写done/异常记录）；PC必须在分配沿由allocate{j}_pc写入PC宏（相邻tag落在不同bank，不与完成写冲突），完成源不携带PC；同bank和单FP写口冲突必须按年龄选择并保留年轻源本地结果。必须支持任意未提交完成项按tag转发，结果RAM低32位必须具备S+1份读取副本（单/双发射F为4/6、FD为3/5），FD高32位必须具备3份，PC每bank1份；输出必须本地捕获，不能深队列异步读直串EX。
+共享队列必须按tag奇偶分两个单写bank，branch/store等无rd项也占一个完成写槽（写done/异常记录）；PC必须在分配沿由allocate{j}_pc写入PC宏（相邻tag落在不同bank，不与完成写冲突），完成源不携带PC；同bank和单FP写口冲突必须按年龄选择并保留年轻源本地结果。必须支持任意未提交完成项按tag转发，结果RAM低32位必须具备S+1份读取副本（NONE单/双发射3/5、F 4/6、FD 3/5），FD高32位必须具备3份，PC每bank1份；输出必须本地捕获，不能深队列异步读直串EX。
 
 FLW/FSW必须占一个32位LSU beat；FLD/FSD必须低地址字再高地址字两个beat，共享一条指令和一个提交tag，FLD两字齐全才可使用，中间不得退休/响应中断。不承诺64位原子访存。必须按fpu-spec 5.5实现S4B/D8B自然对齐、逐beat错误与允许低beat部分存储。合法D必须不跨32B行。
 
@@ -533,6 +537,7 @@ FP32 FMA及其他FP预算见fpu-spec 7。L1命中必须每拍接受一个普通�
 
 | ID | 事项及开发初值 | 定稿时机/依据 |
 |---|---|---|
+| C11 | LSU可缓存store队列项数，开发初值4 | 模型扫描2/4项（含同字load等待），三负载与无限队列差<1%取最小值 |
 | C10 | 150/135MHz、资源及perf阈值；根扇出≤8/叶≤16、使能按≤16位分区均为实现预算；维护无写回访问组数+8/全clean干净32+8为预算，写回附加拍数待测 | RTL回归、整片PDS和上板；I03回放DIV独立修正拍，不把旧模型当保证 |
 
 FPU延迟/II和资源实测未决项必须见fpu-spec F03/F06；验证性能阈值必须见testplan T01/FT02。
@@ -546,3 +551,4 @@ FPU延迟/II和资源实测未决项必须见fpu-spec F03/F06；验证性能阈�
 | 2026-11-28 | v0.2 | 按用户决定将单发射固定为精简结构+Zba；双发射满配及NONE/F/FD固定结构不变，同步接口、验证、实施和模型结论 |
 | 2026-11-28 | v0.2 | 用户确认：完成队列PC改为分配沿写入，完成源不带PC，完成写仲裁与模型口径不变（I04提问，见 docs/design/2026-11-28-cpu-v2-interface-freeze.md 实现补充） |
 | 2026-11-28 | v0.2 | 用户确认：TAGE待写项占用时MEM/EX同拍训练，丢弃EX表写入（I01提问）；同规则用于fast gshare/BTB |
+| 2026-11-28 | v0.3 | 用户确认：完成记录改为单发射NONE/F 8项、FD 16项，双发射全部16项，全部LUTRAM共享队列（M01扫描，docs/reports/2026-11-28-perf-cpu2-completion-window.md）；可缓存store准备即done、退休沿生效，LSU加store队列（初值4项[待定]），设备store保持头授权（A00 D01/D06，docs/reports/2026-11-28-perf-cpu2-model-conformance.md） |
