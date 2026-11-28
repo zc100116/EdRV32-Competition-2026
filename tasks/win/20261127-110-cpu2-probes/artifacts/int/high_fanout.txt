@@ -1,50 +1,50 @@
-Post-route fanout reported on expanded slow-corner setup paths. Ranking covers nets printed in the export.
+Round 3 fanout from 14309 routed slow-corner setup paths. Ranking covers path-visible nets.
 
-Rank | Fanout | Net
-1 | 2757 | ntclkbufg_0
-2 | 419 | fetch_f1_pc_r[30]
-3 | 418 | fetch_f1_pc_r[31]
-4 | 246 | u_tage/ex_update_w
-5 | 217 | fetch_btb_pc_r[3]
-6 | 216 | fetch_btb_pc_r[4]
-7 | 215 | fetch_btb_pc_r[7]
-8 | 215 | fetch_btb_pc_r[8]
-9 | 214 | fetch_fill_addr_r[5]
-10 | 214 | fetch_fill_addr_r[6]
-11 | 210 | fetch_fill_addr_r[4]
-12 | 206 | fetch_fill_addr_r[7]
-13 | 206 | fetch_fill_addr_r[8]
-14 | 206 | fetch_fill_addr_r[9]
-15 | 192 | u_tage/fast_new_w [1]
-16 | 181 | u_tage/mem_update_w
-17 | 174 | tage_pending_w
-18 | 157 | u_fetch/f2_parity_r
-19 | 148 | fetch_fill_addr_r[10]
-20 | 106 | u_fetch/N124
-21 | 102 | fetch_btb_pc_r[23]
-22 | 102 | fetch_btb_pc_r[24]
-23 | 91 | fetch_btb_pc_r[5]
-24 | 90 | fetch_btb_pc_r[6]
-25 | 90 | u_fetch/N62
-26 | 88 | fetch_btb_pc_r[25]
-27 | 84 | fetch_btb_pc_r[22]
-28 | 83 | fetch_btb_pc_r[16]
-29 | 83 | fetch_btb_pc_r[17]
-30 | 83 | fetch_btb_pc_r[18]
-31 | 83 | fetch_btb_pc_r[19]
-32 | 82 | fetch_btb_pc_r[20]
-33 | 81 | fetch_btb_pc_r[21]
-34 | 78 | fetch_fill_addr_r[11]
-35 | 77 | u_tage/_N10144_inv
-36 | 73 | u_rf/wb_write_w [0]
-37 | 72 | fetch_f1_pc_r[2]
-38 | 71 | u_rf/wb_write_w [1]
-39 | 68 | u_fetch/g_bank[0].way_hit_w [1]
-40 | 65 | u_fetch/physical_pc_w[0] [7]
+Rank | Reported fanout | Net
+1 | 3177 | ntclkbufg_0
+2 | 246 | fetch_btb_pc_r[3]
+3 | 246 | fetch_btb_pc_r[4]
+4 | 246 | fetch_btb_pc_r[7]
+5 | 246 | fetch_btb_pc_r[8]
+6 | 245 | u_tage/ex_update_w
+7 | 222 | fetch_ib_remove_r[0]
+8 | 217 | u_tage/mem_update_w
+9 | 202 | tage_pending_w
+10 | 192 | tage_fast_index_r[0]
+11 | 192 | tage_fast_index_r[1]
+12 | 192 | tage_fast_index_r[2]
+13 | 192 | tage_fast_index_r[3]
+14 | 192 | tage_fast_index_r[4]
+15 | 192 | tage_fast_index_r[5]
+16 | 192 | u_tage/fast_new_w [1]
+17 | 128 | tage_fast_index_r[6]
+18 | 125 | u_fetch/g_enqueue[0].bank_w
+19 | 123 | u_fetch/N130
+20 | 120 | fetch_btb_pc_r[5]
+21 | 120 | fetch_btb_pc_r[6]
+22 | 107 | u_fetch/N260
+23 | 99 | rf_wb_rd_r[7]
+24 | 99 | rf_wb_rd_r[8]
+25 | 85 | rf_wb_rd_r[9]
+26 | 81 | rf_wb_rd_r[6]
+27 | 81 | u_fetch/physical_pc_w[0] [7]
+28 | 81 | u_fetch/physical_pc_w[0] [8]
+29 | 81 | u_fetch/physical_pc_w[1] [7]
+30 | 81 | u_fetch/physical_pc_w[1] [8]
+31 | 81 | u_tage/_N11024_inv
+32 | 80 | rf_wb_rd_r[0]
+33 | 80 | rf_wb_rd_r[1]
+34 | 80 | rf_wb_rd_r[2]
+35 | 80 | rf_wb_rd_r[3]
+36 | 79 | rf_wb_rd_r[4]
+37 | 78 | rf_wb_rd_r[5]
+38 | 77 | fetch_ib_remove_r[1]
+39 | 75 | u_fetch/g_bank[0].way_hit_w [1]
+40 | 73 | u_fetch/physical_pc_w[0] [6]
 
 Global Clock Info:
 +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | GClk Inst                | Site Of GClk Inst     | GClk Fanout Net     | Clock Loads     | Non_Clock Loads     | Driver Inst           | Driver Pin     | Site Of Driver Inst
 +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| clkbufg_0/gopclkbufg     | USCM_383_930          | ntclkbufg_0         | 2720            | 0                   | clk_i_ibuf/opit_1     | DI_TO_CLK      | IOLHR_16_1386
+| clkbufg_0/gopclkbufg     | USCM_383_930          | ntclkbufg_0         | 3140            | 0                   | clk_i_ibuf/opit_1     | DI_TO_CLK      | IOLHR_16_1386
 +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+

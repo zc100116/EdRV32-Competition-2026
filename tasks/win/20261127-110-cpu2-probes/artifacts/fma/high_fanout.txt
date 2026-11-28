@@ -1,51 +1,50 @@
-Post-route fanout as shown in reported slow-corner sequential setup paths.
-Coverage is limited to nets printed in those paths. If multiple counts appear, the largest reported count determines rank.
+Round 3 fanout from 3791 routed slow-corner setup paths. Ranking covers path-visible nets.
 
 Rank | Reported fanout | Net
-1 | 895 | ntclkbufg_0
-2 | 236 | u_fma/e7_right_w
-3 | 141 | u_fma/e5_far_r
-4 | 137 | u_fma/e7_shift_r [2]
-5 | 121 | u_fma/e7_shift_w [6]
-6 | 91 | u_fma/e6_reverse_select_r
-7 | 84 | u_fma/e4_right_r
-8 | 80 | u_fma/e5_c_sign_r
-9 | 80 | u_fma/e6_subtract_w
-10 | 79 | u_fma/e5_product_sign_r
-11 | 71 | u_fma/e7_shift_w [3]
-12 | 69 | u_fma/e3_right_r
-13 | 69 | u_fma/e4_limit_r [2]
-14 | 62 | u_fma/e4_shift_r [4]
-15 | 61 | _N5
-16 | 59 | u_fma/e8_increment_w
-17 | 50 | u_fma/e4_shift_r [3]
-18 | 47 | _N6
-19 | 43 | u_fma/e4_shift_r [5]
-20 | 38 | u_fma/e4_limit_r [0]
-21 | 38 | u_fma/e4_limit_r [1]
-22 | 38 | u_fma/e4_shift_r [6]
-23 | 36 | _N8
-24 | 34 | u_fma/e8_bias_w [8]
-25 | 33 | u_fma/_N6016
-26 | 33 | u_fma/_N6017
-27 | 32 | u_fma/e1_a_lz_r [3]
-28 | 31 | u_fma/e1_a_lz_r [2]
-29 | 31 | u_fma/e1_c_lz_r [2]
-30 | 31 | u_fma/e1_c_lz_r [3]
-31 | 29 | u_fma/e1_b_lz_r [2]
-32 | 29 | u_fma/e1_c_lz_r [1]
-33 | 29 | u_fma/e3_shift_r [0]
-34 | 29 | u_fma/e3_shift_r [1]
-35 | 28 | u_fma/e1_b_lz_r [3]
-36 | 28 | u_fma/e1_c_lz_r [0]
-37 | 28 | u_fma/e7_special_r
-38 | 27 | u_fma/_N6018
-39 | 27 | u_fma/e1_a_lz_r [1]
-40 | 27 | u_fma/e1_b_lz_r [1]
+1 | 901 | ntclkbufg_0
+2 | 354 | u_fma/e7_overflow_inf_r_inv
+3 | 142 | u_fma/e5_far_r
+4 | 112 | u_fma/e7_overflow_base_r
+5 | 84 | u_fma/e4_right_r
+6 | 80 | u_fma/e5_c_sign_r
+7 | 80 | u_fma/e6_subtract_w
+8 | 79 | u_fma/e5_product_sign_r
+9 | 78 | u_fma/e7_floor_r
+10 | 74 | u_fma/g_round[8].shifted_w [54]
+11 | 70 | u_fma/e4_limit_r [2]
+12 | 68 | u_fma/e3_right_r
+13 | 62 | u_fma/e4_shift_r [4]
+14 | 60 | u_fma/g_round[8].shifted_w [69]
+15 | 59 | u_fma/g_round[8].shifted_w [71]
+16 | 57 | u_fma/e7_overflow_inf_r
+17 | 52 | u_fma/e7_right_w
+18 | 50 | u_fma/e4_shift_r [3]
+19 | 49 | u_fma/g_round[8].shifted_w [53]
+20 | 48 | u_fma/g_round[8].shifted_w [68]
+21 | 45 | u_fma/e7_overflow_minus_r
+22 | 44 | u_fma/g_round[8].shifted_w [60]
+23 | 43 | u_fma/e4_shift_r [5]
+24 | 43 | u_fma/e4_shift_r [6]
+25 | 43 | u_fma/g_round[0].g_correction[0].increment_w
+26 | 41 | u_fma/g_round[0].g_correction[2].inexact_w
+27 | 41 | u_fma/g_round[8].shifted_w [62]
+28 | 41 | u_fma/g_round[8].shifted_w [70]
+29 | 40 | u_fma/_N5769
+30 | 40 | u_fma/g_round[0].g_correction[1].increment_w
+31 | 40 | u_fma/g_round[10].g_correction[2].increment_w
+32 | 40 | u_fma/g_round[8].shifted_w [55]
+33 | 40 | u_fma/g_round[8].shifted_w [61]
+34 | 39 | u_fma/e6_reverse_segment_r [2]
+35 | 39 | u_fma/g_round[13].g_correction[2].increment_w
+36 | 39 | u_fma/g_round[1].g_correction[1].increment_w
+37 | 39 | u_fma/g_round[8].shifted_w [56]
+38 | 38 | u_fma/e4_limit_r [0]
+39 | 38 | u_fma/e4_limit_r [1]
+40 | 38 | u_fma/g_round[6].g_correction[1].increment_w
 
 Global Clock Info:
 +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | GClk Inst                | Site Of GClk Inst     | GClk Fanout Net     | Clock Loads     | Non_Clock Loads     | Driver Inst           | Driver Pin     | Site Of Driver Inst
 +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| clkbufg_0/gopclkbufg     | USCM_383_882          | ntclkbufg_0         | 895             | 0                   | clk_i_ibuf/opit_1     | DI_TO_CLK      | IOLHR_724_786
+| clkbufg_0/gopclkbufg     | USCM_383_882          | ntclkbufg_0         | 901             | 0                   | clk_i_ibuf/opit_1     | DI_TO_CLK      | IOLHR_724_786
 +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+

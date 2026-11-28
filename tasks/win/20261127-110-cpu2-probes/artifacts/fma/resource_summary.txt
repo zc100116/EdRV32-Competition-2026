@@ -1,6 +1,5 @@
-Source: post-route .prr.
-Top-level module totals: LUT 1836, FF 1070, distributed RAM 0, APM 2, DRM 0, IO 9.
-Site summary counts occupied LUT slots: CLMA 1474 + CLMS 421 = 1895. Hierarchical LUT total is 1836.
+Round 3 post-route. Module hierarchy totals: LUT 3111, FF 1097, DRM36K-equivalent 0, APM 2, distributed RAM LUT 0, IO 9.
+Physical site LUT slots: 2476 CLMA + 838 CLMS = 3314.
 
 Device Utilization Summary :
 +------------------------------------------------------------------------------------+
@@ -11,14 +10,14 @@ Device Utilization Summary :
 | Use of APM                        | 2        | 740           | 1
 | Use of BKCL                       | 0        | 10            | 0
 | Use of CCS                        | 1        | 1             | 100
-| Use of CLMA                       | 468      | 30075         | 2
-|   FF                              | 852      | 240600        | 1
-|   LUT                             | 1474     | 120300        | 2
-|   LUT-FF pairs                    | 523      | 120300        | 1
-| Use of CLMS                       | 138      | 9875          | 2
-|   FF                              | 218      | 79000         | 1
-|   LUT                             | 421      | 39500         | 2
-|   LUT-FF pairs                    | 121      | 39500         | 1
+| Use of CLMA                       | 763      | 30075         | 3
+|   FF                              | 842      | 240600        | 1
+|   LUT                             | 2476     | 120300        | 3
+|   LUT-FF pairs                    | 491      | 120300        | 1
+| Use of CLMS                       | 250      | 9875          | 3
+|   FF                              | 255      | 79000         | 1
+|   LUT                             | 838      | 39500         | 3
+|   LUT-FF pairs                    | 115      | 39500         | 1
 |   Distributed RAM                 | 0        | 39500         | 0
 | Use of DDRPHY_CPD                 | 0        | 20            | 0
 | Use of DDRPHY_IOCLK_DIV           | 0        | 10            | 0
@@ -27,14 +26,14 @@ Device Utilization Summary :
 | Use of GCLK_INBUF_SYN             | 0        | 40            | 0
 | Use of GPLL                       | 0        | 10            | 0
 | Use of GSEB                       | 0        | 512           | 0
-| Use of HARD0                      | 160      | 25050         | 1
+| Use of HARD0                      | 271      | 25050         | 2
 | Use of HCKB                       | 1        | 120           | 1
 |  HCKB dataused                    | 0        | 120           | 0
 | Use of HCKMUX_TEST                | 0        | 10            | 0
 | Use of HSSTLP                     | 0        | 2             | 0
 | Use of IO                         | 9        | 400           | 3
-|   IOBD                            | 4        | 192           | 3
-|   IOBS                            | 5        | 208           | 3
+|   IOBD                            | 5        | 192           | 3
+|   IOBS                            | 4        | 208           | 2
 | Use of IOCKB                      | 0        | 40            | 0
 | Use of IOCKMUX_TEST               | 0        | 10            | 0
 | Use of IOLHR                      | 9        | 500           | 2

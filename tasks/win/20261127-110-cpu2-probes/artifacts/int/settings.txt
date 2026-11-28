@@ -1,5 +1,5 @@
-Round 2 final GUI run. Default P&R strategy (strategy name 0 in place_route/run.log).
-Clock: clk_cpu2_int on clk_i, 6.667 ns. Bitstream generation absent from this run.
+Round 3 final GUI commands. Default P&R strategy 0.
+FDC clock clk_cpu2_int on clk_i, period 6.061 ns, waveform 0.000 / 3.030 ns.
 
 set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
 compile -include_path {G:/codex_project/edrv32-card110/rtl/include} -compiler_directives {FPGA_MODE} -top_module edrv32_fpga_probe_cpu2_int_top

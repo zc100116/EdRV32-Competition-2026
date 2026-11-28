@@ -1,13 +1,23 @@
-Round 2 GUI run; source f723be4c, local 427a62d5. Original lines from run.log.
+Card 110 round 3, int. Source aafe7b7e, local 92cbf02d.
 
 Start DFF-inference.
 Executing : DFF-inference successfully.
-Executing : rtl-infer successfully. Time elapsed: 0.523s wall, 0.062s user + 0.062s system = 0.125s CPU (23.9%)
-Action compile: Real time elapsed is 0h:0m:6s
-Action synthesize: Real time elapsed is 0h:0m:20s
+Executing : rtl-infer successfully. Time elapsed: 0.555s wall, 0.078s user + 0.031s system = 0.109s CPU (19.7%)
+Action compile: Real time elapsed is 0h:0m:5s
+Action synthesize: Real time elapsed is 0h:0m:21s
 Action dev_map: Real time elapsed is 0h:0m:12s
-Unrouted nets at iteration 50 (0.045 sec): 0
-Total net: 6381, route succeed net: 6381
-Action pnr: Real time elapsed is 0h:1m:48s
+Total net: 6703, route succeed net: 6703
+Action pnr: Real time elapsed is 0h:1m:40s
 Report timing is finished successfully.
-Action report_timing: Real time elapsed is 0h:0m:20s
+Action report_timing: Real time elapsed is 0h:0m:18s
+
+Selected P&R log lines:
+strategy name : 0
+Total placement takes 1.91 sec.
+Unrouted nets at iteration 61 (0.049 sec): 0
+Total routing takes 41.40 sec.
+
+Timing I/O warnings:
+W: Timing-4087: Port 'obs_o' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'rst_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'stim_i' is not constrained, it is treated as combinational input.

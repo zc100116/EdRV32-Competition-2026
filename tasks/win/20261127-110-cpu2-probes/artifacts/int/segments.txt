@@ -1,37 +1,38 @@
-Slow-corner setup; group by native endpoint name. Search scope: expanded 15000-path output.
+Round 3 slow-corner setup, grouped by native endpoint name over all exported sequential setup paths.
+The task groups Fetch IB by ib_candidates_r. Other includes ib_instr_r.
 Slack (ns) | Logic levels | Logic / Route (ns) | Startpoint -> Endpoint
 
-RF read | 768 paths in this export
-+2.331 | 2 | 0.392 / 3.557 | id_agu_wb_mul_rd_r[1]/opit_0_srl/CLK -> rf_id_data_r[97]/opit_0_L6Q_perm/I1
-+2.422 | 2 | 0.427 / 3.433 | id_agu_wb_mul_rd_r[1]/opit_0_srl/CLK -> rf_id_data_r[69]/opit_0_L6Q_perm/I1
-+2.427 | 2 | 0.415 / 3.430 | id_agu_wb_mul_rd_r[1]/opit_0_srl/CLK -> rf_id_data_r[35]/opit_0_L6Q_perm/I1
+RF read | 768 matching paths
++2.249 | 2 | 0.690 / 2.734 | rf_id_rs_r[6]/opit_0/CLK -> rf_id_data_r[36]/opit_0_L6Q_perm/I0
++2.383 | 2 | 0.799 / 2.643 | rf_id_rs_r[6]/opit_0/CLK -> rf_id_data_r[37]/opit_0_L6Q_perm/I5
++2.385 | 2 | 0.711 / 2.580 | rf_id_rs_r[1]/opit_0/CLK -> rf_id_data_r[2]/opit_0_L6Q_perm/I1
 
-ID -> AGU | 32 paths in this export
-+5.331 | 0 | 0.213 / 0.866 | id_agu_id_addr_r[10]/opit_0_AQ_perm/CLK -> id_agu_ex_addr_r[10]/opit_0/D
-+5.354 | 0 | 0.213 / 0.843 | id_agu_id_addr_r[10]/opit_0_AQ_perm/CLK -> id_agu_ex_addr_r[9]/opit_0/D
-+5.356 | 0 | 0.213 / 0.844 | id_agu_id_addr_r[6]/opit_0_AQ_perm/CLK -> id_agu_ex_addr_r[4]/opit_0/D
+ID → AGU | 32 matching paths
++4.584 | 0 | 0.213 / 0.980 | id_agu_id_addr_r[14]/opit_0_AQ_perm/CLK -> id_agu_ex_addr_r[13]/opit_0/D
++4.687 | 0 | 0.213 / 0.878 | id_agu_id_addr_r[2]/opit_0_AQ_perm/CLK -> id_agu_ex_addr_r[2]/opit_0/D
++4.708 | 0 | 0.213 / 0.856 | id_agu_id_addr_r[14]/opit_0_AQ_perm/CLK -> id_agu_ex_addr_r[11]/opit_0/D
 
-Fetch IB | 385 paths in this export
-+0.151 | 7 | 2.732 / 3.457 | u_fetch/g_bank[0].g_way[1].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_fetch/g_ib[4].ib_candidates_r[3]/opit_0_L6Q_perm/RS
-+0.176 | 7 | 2.732 / 3.431 | u_fetch/g_bank[0].g_way[1].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_fetch/g_ib[4].ib_candidates_r[1]/opit_0_L6Q_perm/RS
-+0.187 | 7 | 2.768 / 3.409 | u_fetch/g_bank[0].g_way[1].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_fetch/g_ib[0].ib_candidates_r[1]/opit_0_L6Q_perm/I2
+Fetch IB candidates | 304 matching paths
++0.211 | 6 | 2.496 / 3.032 | u_fetch/g_bank[1].g_way[0].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_fetch/g_ib[10].ib_candidates_r[4:0]_1[1]/opit_0_L6Q_perm/RS
++0.237 | 5 | 2.818 / 2.789 | u_fetch/g_bank[1].g_way[1].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_fetch/g_ib[11].ib_candidates_r[4:0]_1[1]/opit_0_L6Q_perm/I3
++0.254 | 6 | 2.740 / 2.733 | u_fetch/g_bank[0].g_way[1].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_fetch/g_ib[10].ib_candidates_r[4:0]_1[3]/opit_0_L6Q_perm/I2
 
-TAGE direction | 51 paths in this export
-+0.790 | 4 | 2.292 / 3.241 | u_tage/g_table[3].g_bank[0].u_predict/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_tage/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> tage_f2_provider_r[3]/opit_0_L5Q_perm/RS
-+0.790 | 4 | 2.292 / 3.241 | u_tage/g_table[3].g_bank[0].u_predict/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_tage/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> tage_f2_provider_r[4]/opit_0_L6Q_perm/RS
-+0.942 | 4 | 2.637 / 2.714 | u_tage/g_table[1].g_bank[0].u_predict/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_tage/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> tage_f2_prediction_r[1]/opit_0_L6Q_perm/I0
+TAGE direction | 55 matching paths
++0.208 | 5 | 2.498 / 2.770 | u_tage/g_table[0].g_bank[0].u_predict/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_tage/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> tage_f2_alternate_r[0]/opit_0_L6Q_perm/I0
++0.265 | 5 | 2.498 / 2.756 | u_tage/g_table[0].g_bank[0].u_predict/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_tage/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> tage_f2_prediction_r[0]/opit_0_L6Q_perm/I2
++0.364 | 5 | 2.498 / 2.776 | u_tage/g_table[0].g_bank[0].u_predict/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_tage/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> tage_f2_alternate_r[0]/opit_0_L6Q_perm/I5
 
-TAGE shadow | 115 paths in this export
-+0.295 | 10 | 2.404 / 3.702 | u_tage/pending_indices_r[27]/opit_0_L6Q_perm/CLK -> u_tage/g_query[0].g_key[3].f2_shadow_tag_r/opit_0_AQ_perm/I4
-+0.404 | 10 | 2.365 / 3.541 | u_tage/pending_indices_r[27]/opit_0_L6Q_perm/CLK -> u_tage/g_query[1].g_key[3].f2_shadow_tag_r/opit_0_AQ_perm/I2
-+0.459 | 11 | 2.474 / 3.422 | u_tage/mem_indices_r[18]/opit_0/CLK -> u_tage/g_query[1].g_key[2].f2_shadow_tag_r/opit_0_L6Q_perm/I2
+TAGE shadow | 124 matching paths
++0.393 | 9 | 2.193 / 3.231 | u_tage/last_mask_r[1]/opit_0_L6Q_perm/CLK -> u_tage/g_query[0].g_key[1].f2_shadow_tag_r/opit_0_L6Q_perm/I5
++0.421 | 9 | 2.148 / 3.227 | u_tage/last_mask_r[1]/opit_0_L6Q_perm/CLK -> u_tage/g_query[1].g_key[1].f2_shadow_tag_r/opit_0_L6Q_perm/I4
++0.493 | 7 | 1.691 / 3.597 | u_tage/last_mask_r[1]/opit_0_L6Q_perm/CLK -> u_tage/g_query[1].g_key[1].f2_shadow_index_r/opit_0_L6Q_perm/I3
 
-DRM load | 192 paths in this export
-+1.680 | 3 | 2.209 / 2.376 | u_id_agu/g_way[1].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_id_agu/operand_data_r[1]/opit_0_L6Q_perm/I1
-+1.724 | 3 | 2.209 / 2.380 | u_id_agu/g_way[1].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_id_agu/operand_data_r[10]/opit_0_L6Q_perm/I2
-+1.747 | 3 | 2.209 / 2.316 | u_id_agu/g_way[1].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_id_agu/operand_data_r[23]/opit_0_L6Q_perm/I1
+DRM load | 194 matching paths
++1.409 | 2 | 2.119 / 2.139 | u_id_agu/g_way[1].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_id_agu/operand_data_r[21]/opit_0_L6Q_perm/I1
++1.532 | 2 | 2.119 / 1.994 | u_id_agu/g_way[1].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_id_agu/operand_data_r[22]/opit_0_L6Q_perm/I1
++1.682 | 2 | 2.119 / 1.830 | u_id_agu/g_way[1].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_id_agu/operand_data_r[1]/opit_0_L6Q_perm/I1
 
-Other | 12218 paths in this export
-+0.340 | 4 | 1.354 / 4.712 | fetch_fill_addr_r[26]/opit_0_srl/CLK -> tage_f1_fast_r[1]/opit_0_L6Q_perm/I5
-+0.381 | 10 | 2.342 / 3.784 | u_tage/mem_indices_r[15]/opit_0/CLK -> u_tage/g_table[3].g_bank[0].u_predict/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_tage/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/DA[3]
-+0.408 | 10 | 2.294 / 3.805 | u_tage/mem_indices_r[15]/opit_0/CLK -> u_tage/g_table[3].g_bank[0].u_predict/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_tage/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/DA[4]
+Other | 12832 matching paths
++0.121 | 6 | 2.536 / 2.926 | u_fetch/g_bank[1].g_way[0].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_fetch/g_ib[5].ib_instr_r[3]/opit_0_L6Q_perm/CE
++0.135 | 6 | 2.496 / 3.089 | u_fetch/g_bank[1].g_way[0].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_fetch/g_ib[10].ib_instr_r[31:0]_1[8]/opit_0_L6Q_perm/RS
++0.135 | 6 | 2.496 / 3.089 | u_fetch/g_bank[1].g_way[0].u_tag/u_ip/U_ipm2l_sdpram_ip_ram_cpu2_cache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB -> u_fetch/g_ib[10].ib_instr_r[31:0]_1[9]/opit_0_L6Q_perm/RS

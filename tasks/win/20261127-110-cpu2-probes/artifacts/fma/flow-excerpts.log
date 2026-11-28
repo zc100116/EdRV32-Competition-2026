@@ -1,0 +1,28 @@
+Card 110 round 3, fma. Source aafe7b7e, local 92cbf02d.
+
+Start DFF-inference.
+Executing : DFF-inference successfully.
+Executing : rtl-infer successfully. Time elapsed: 0.218s wall, 0.000s user + 0.031s system = 0.031s CPU (14.3%)
+Action compile: Real time elapsed is 0h:0m:5s
+Action synthesize: Real time elapsed is 0h:0m:24s
+Action dev_map: Real time elapsed is 0h:0m:11s
+Total net: 3795, route succeed net: 3795
+Action pnr: Real time elapsed is 0h:1m:23s
+Report timing is finished successfully.
+Action report_timing: Real time elapsed is 0h:0m:18s
+
+Selected P&R log lines:
+strategy name : 0
+Total placement takes 0.98 sec.
+Unrouted nets at iteration 49 (0.022 sec): 0
+Total routing takes 36.44 sec.
+
+Timing I/O warnings:
+W: Timing-4087: Port 'observe_o[0]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'observe_o[1]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'observe_o[2]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'observe_o[3]' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'seed_i[0]' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'seed_i[1]' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'seed_i[2]' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'seed_i[3]' is not constrained, it is treated as combinational input.

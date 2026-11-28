@@ -1,14 +1,13 @@
-Card 110 B, post-route timing. PDS 2022.2-SP6.1 build 138931.
-report_timing -input_db_file input-pnr.adf -delay_type min_max -max_path 5000 -nworst 1 -input_pins TRUE -force_to_run
-Scope: constrained clk_sys sequential paths. Expanded summary agrees with the GUI report.
-Expanded path counts per corner: 3571 setup and 3571 hold.
+Card 110 round 3, fma, source aafe7b7e. PDS 2022.2-SP6.1 build 138931, PG2L200H-6 FBB676.
+report_timing -input_db_file input-pnr.adf -delay_type min_max -max_path 16000 -nworst 1 -input_pins TRUE -force_to_run
+Expanded timing summary agrees with GUI. 3791 sequential setup paths and 3791 hold paths in the slow corner.
 
 Clock Summary:
 ****************************************************************************************************
                                                                          Clock   Non-clock
  Clock                    Period       Waveform            Type          Loads       Loads  Sources
 ----------------------------------------------------------------------------------------------------
- clk_sys                  6.6670       {0.0000 3.3330}     Declared        718         177  {clk_i}
+ clk_sys                  6.0610       {0.0000 3.0300}     Declared        724         177  {clk_i}
 ====================================================================================================
 
  Clock Groups:
@@ -22,7 +21,7 @@ Clock Summary:
                               Requested       Estimated      Requested      Estimated
  Clock                        Frequency       Frequency      Period         Period             Slack
 ----------------------------------------------------------------------------------------------------
- clk_sys                   149.9925 MHz    158.4535 MHz         6.6670         6.3110          0.356
+ clk_sys                   164.9893 MHz    179.1794 MHz         6.0610         5.5810          0.480
 ====================================================================================================
 
 Design Summary : All Constraints Met.
@@ -32,7 +31,7 @@ Setup Summary(Slow Corner):
                                                                           TNS Failing      TNS Total
  Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
 ----------------------------------------------------------------------------------------------------
- clk_sys                clk_sys                      0.356       0.000              0           3571
+ clk_sys                clk_sys                      0.480       0.000              0           3791
 ====================================================================================================
 
 Hold Summary(Slow Corner):
@@ -40,7 +39,7 @@ Hold Summary(Slow Corner):
                                                                           THS Failing      THS Total
  Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
 ----------------------------------------------------------------------------------------------------
- clk_sys                clk_sys                      0.212       0.000              0           3571
+ clk_sys                clk_sys                      0.195       0.000              0           3791
 ====================================================================================================
 
 Recovery Summary(Slow Corner):
@@ -62,7 +61,7 @@ Minimum Pulse Width Summary(Slow Corner):
                                                                          WPWS Failing     WPWS Total
  Clock                                            WPWS(ns)    TPWS(ns)      Endpoints      Endpoints
 ----------------------------------------------------------------------------------------------------
- clk_sys                                             2.679       0.000              0            718
+ clk_sys                                             2.376       0.000              0            724
 ====================================================================================================
 
 Setup Summary(Fast Corner):
@@ -70,7 +69,7 @@ Setup Summary(Fast Corner):
                                                                           TNS Failing      TNS Total
  Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
 ----------------------------------------------------------------------------------------------------
- clk_sys                clk_sys                      3.043       0.000              0           3571
+ clk_sys                clk_sys                      2.744       0.000              0           3791
 ====================================================================================================
 
 Hold Summary(Fast Corner):
@@ -78,7 +77,7 @@ Hold Summary(Fast Corner):
                                                                           THS Failing      THS Total
  Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
 ----------------------------------------------------------------------------------------------------
- clk_sys                clk_sys                      0.148       0.000              0           3571
+ clk_sys                clk_sys                      0.131       0.000              0           3791
 ====================================================================================================
 
 Recovery Summary(Fast Corner):
@@ -100,5 +99,5 @@ Minimum Pulse Width Summary(Fast Corner):
                                                                          WPWS Failing     WPWS Total
  Clock                                            WPWS(ns)    TPWS(ns)      Endpoints      Endpoints
 ----------------------------------------------------------------------------------------------------
- clk_sys                                             2.678       0.000              0            718
+ clk_sys                                             2.375       0.000              0            724
 ====================================================================================================
