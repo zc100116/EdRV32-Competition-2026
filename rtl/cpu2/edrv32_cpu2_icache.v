@@ -106,7 +106,8 @@ module edrv32_cpu2_icache #(
     wire fill_last_w;
     wire tag_install_w;
     wire [10:0] fill_addr_w;
-    wire [18:0] tag_w [0:3];
+    wire [18:0] tag0_w [0:1];
+    wire [18:0] tag1_w [0:1];
     wire [31:0] data_w [0:3];
     wire [1:0] hit0_w;
     wire [1:0] hit1_w;
@@ -142,10 +143,10 @@ module edrv32_cpu2_icache #(
         pipe_addr0_r[31:ROM_BITS] == EDRV32_ROM_BASE[31:ROM_BITS]);
     assign pma_error1_w = !(cacheable1_w ||
         pipe_addr1_r[31:ROM_BITS] == EDRV32_ROM_BASE[31:ROM_BITS]);
-    assign hit0_w = {tag_w[1][18] && tag_w[1][17:0] == pipe_addr0_r[31:14],
-                    tag_w[0][18] && tag_w[0][17:0] == pipe_addr0_r[31:14]};
-    assign hit1_w = {tag_w[3][18] && tag_w[3][17:0] == pipe_addr1_r[31:14],
-                    tag_w[2][18] && tag_w[2][17:0] == pipe_addr1_r[31:14]};
+    assign hit0_w = {tag0_w[1][18] && tag0_w[1][17:0] == pipe_addr0_r[31:14],
+                    tag0_w[0][18] && tag0_w[0][17:0] == pipe_addr0_r[31:14]};
+    assign hit1_w = {tag1_w[1][18] && tag1_w[1][17:0] == pipe_addr1_r[31:14],
+                    tag1_w[0][18] && tag1_w[0][17:0] == pipe_addr1_r[31:14]};
     assign complete0_w = done0_r[pipe_slot_r] || pma_error0_w ||
         (cacheable0_w && |hit0_w);
     assign complete1_w = done1_r[pipe_slot_r] || pma_error1_w ||
@@ -171,8 +172,8 @@ module edrv32_cpu2_icache #(
         pma_error0_w : error0_r[head_r];
     assign ic_resp_word1_error_o = response_pipe_w && !done1_r[head_r] ?
         pma_error1_w : error1_r[head_r];
-    assign replacement0_w = !tag_w[0][18] ? 1'b0 : !tag_w[1][18] ? 1'b1 : lru0_w;
-    assign replacement1_w = !tag_w[2][18] ? 1'b0 : !tag_w[3][18] ? 1'b1 : lru1_w;
+    assign replacement0_w = !tag0_w[0][18] ? 1'b0 : !tag0_w[1][18] ? 1'b1 : lru0_w;
+    assign replacement1_w = !tag1_w[0][18] ? 1'b0 : !tag1_w[1][18] ? 1'b1 : lru1_w;
     assign ic_inv_ready_o = !scan_r;
     assign inv_start_w = ic_inv_valid_i && ic_inv_ready_o;
     assign ic_inv_done_o = inv_done_r;
@@ -211,11 +212,11 @@ module edrv32_cpu2_icache #(
                 .wr_data_i(tag_data_w),
                 .rd_en_i(read_w),
                 .rd_addr_i(read_addr0_w[13:5]),
-                .rd_data_o(tag_w[way])
+                .rd_data_o(tag0_w[way])
             );
             if (ISSUE_WIDTH == 1) begin : g_single
                 wire [63:0] data64_w;
-                assign tag_w[2+way] = tag_w[way];
+                assign tag1_w[way] = tag0_w[way];
                 assign data_w[way] = data64_w[31:0];
                 assign data_w[2+way] = data64_w[63:32];
                 edrv32_ram_cpu2_cache_data64 u_data (
@@ -245,7 +246,7 @@ module edrv32_cpu2_icache #(
                     .wr_data_i(tag_data_w),
                     .rd_en_i(read_w),
                     .rd_addr_i(read_addr1_w[13:5]),
-                    .rd_data_o(tag_w[2+way])
+                    .rd_data_o(tag1_w[way])
                 );
                 edrv32_ram_cpu2_cache_data u_even (
                     .clk_i(clk_i),
