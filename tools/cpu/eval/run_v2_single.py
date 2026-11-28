@@ -31,7 +31,7 @@ def main():
     args = parser.parse_args()
     directory = Path('build/cpu-v2/isa/zba') / args.workload
     program, symbols, trace = program_and_trace(directory)
-    divs = divider_cycles(directory, program, trace, 'early-div')
+    divs = divider_cycles(directory, program, trace, 'early-div', complete_schedule=True)
     result = simulate(program, trace, symbols['start_time'], symbols['stop_time'],
                       'V3s', **BASES['small'], division_cycles=divs,
                       frontend_probe=IcacheProbe(1), frontend_registered_margin=True)

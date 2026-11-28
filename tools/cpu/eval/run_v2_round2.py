@@ -38,7 +38,7 @@ CONFIGS = {
 }
 
 
-def divider_cycles(directory, program, trace, mode):
+def divider_cycles(directory, program, trace, mode, *, complete_schedule=False):
     regs = [0] * 32
     cycles = {}
     index = 0
@@ -54,6 +54,7 @@ def divider_cycles(directory, program, trace, mode):
             if inst.kind == 'div':
                 a, b = regs[(inst.bits >> 15) & 31], regs[(inst.bits >> 20) & 31]
                 signed = ((inst.bits >> 12) & 7) in (4, 6)
+                special = b == 0 or (signed and a == 0x80000000 and b == 0xffffffff)
                 if signed:
                     a = abs(a - (1 << 32) if a >> 31 else a)
                     b = abs(b - (1 << 32) if b >> 31 else b)
@@ -63,7 +64,11 @@ def divider_cycles(directory, program, trace, mode):
                 radix4 = mode in ('radix4', 'radix4-early')
                 if mode == 'radix4':
                     steps = 32
-                cycles[index] = 1 + ((steps + 1) // 2 if radix4 else steps)
+                iterations = (steps + 1) // 2 if radix4 else steps
+                # pipe_model already spends one EX cycle in addition to division_left.
+                # C07 E0->E(3+n) therefore needs L-1=2+n waits; special E2 needs one.
+                cycles[index] = (1 if special else 2 + iterations) if complete_schedule else (
+                    1 + iterations)
             for reg, value in write.findall(match[2]):
                 if int(reg):
                     regs[int(reg)] = int(value, 16)

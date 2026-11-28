@@ -269,6 +269,17 @@ class Pipeline(unittest.TestCase):
             self.assertEqual(divider_cycles(root, program, list(program), 'early-div'), {3: 8})
             self.assertEqual(divider_cycles(root, program, list(program), 'radix4-early'),
                              {3: 5})
+            self.assertEqual(divider_cycles(root, program, list(program), 'early-div',
+                                            complete_schedule=True), {3: 9})
+            self.assertEqual(divider_cycles(root, program, list(program), 'radix4-early',
+                                            complete_schedule=True), {3: 6})
+            (root / 'spike.log').write_text(log.replace('0x00000004\n', '0x00000000\n'))
+            self.assertEqual(divider_cycles(root, program, list(program), 'early-div',
+                                            complete_schedule=True), {3: 1})
+            (root / 'spike.log').write_text(log.replace('0x00000100', '0x80000000').replace(
+                '0x00000004\n', '0xffffffff\n'))
+            self.assertEqual(divider_cycles(root, program, list(program), 'radix4-early',
+                                            complete_schedule=True), {3: 1})
 
     def test_round2_rf_wb_address_rejects_live_ex_base(self):
         stream = [instruction(0, rd=4), instruction(4, 'load', rd=5, sources=(4,)),

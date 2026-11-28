@@ -61,7 +61,7 @@ def main():
             directory = (args.zba_root if isa else args.input_root) / args.workload
             program, symbols, trace = program_and_trace(directory)
             addresses = memory_trace(directory, program, trace)
-            divs = {mode: divider_cycles(directory, program, trace, mode)
+            divs = {mode: divider_cycles(directory, program, trace, mode, complete_schedule=True)
                     for mode in ('early-div', 'radix4-early')}
             instructions = trace.index(symbols['stop_time']) - trace.index(symbols['start_time'])
             for base in args.bases:

@@ -1,0 +1,9 @@
+top: tb
+files: files.f
+defines:
+parameters: ISSUE_WIDTH=2 FPU_FORMAT=32\'h4644
+software:
+timeout: 180
+pass: PASS
+tier: smoke full
+simulator: verilator
