@@ -101,10 +101,35 @@ module tb;
     longint unsigned perf_early;
     longint unsigned perf_early_hit;
     longint unsigned perf_f2;
+    longint unsigned perf_bank_wait [0:5];
+    longint unsigned perf_late_alu_capture_block;
+    longint unsigned perf_late_load_capture_block;
+    longint unsigned perf_early_port_block;
+    longint unsigned perf_early_word_block;
+    longint unsigned perf_early_expired;
+    longint unsigned perf_pair_load_wait;
+    longint unsigned perf_pair_alu_wait;
+    longint unsigned perf_pair_mul_wait;
+    longint unsigned perf_pair_expired_load;
+    longint unsigned perf_pair_types [0:35];
+    bit branch_pending [0:1];
+    bit [(ISSUE_WIDTH==2?4:3)-1:0] branch_tag [0:1];
+    bit [(ISSUE_WIDTH==2?4:3)-1:0] branch_source1 [0:1];
+    bit [(ISSUE_WIDTH==2?4:3)-1:0] branch_source2 [0:1];
+    bit [31:0] branch_pc [0:1];
+    bit branch_wait1 [0:1];
+    bit branch_wait2 [0:1];
+    longint unsigned perf_branch_early_available;
+    longint unsigned perf_branch_early_delayed;
+    longint unsigned perf_branch_early_port;
+    longint unsigned perf_miss_store_waits;
+    longint unsigned perf_miss_store_cycles;
+    bit perf_miss_store_active;
+    bit [(ISSUE_WIDTH==2?4:3)-1:0] perf_miss_store_tag;
     longint unsigned perf_ic_miss_cycles;
     longint unsigned perf_dc_miss_cycles;
     bit store_head_active;
-    bit [1:0] store_head_tag;
+    bit [(ISSUE_WIDTH==2?4:3)-1:0] store_head_tag;
     longint unsigned store_head_run;
     longint unsigned store_head_min;
     longint unsigned perf_full_retiring;
@@ -120,17 +145,40 @@ module tb;
     longint unsigned recovery_start [0:2];
     longint unsigned perf_issue [0:2];
     longint unsigned perf_retire [0:2];
-    longint unsigned allocated_at [0:3];
-    integer record_kind [0:3];
+    longint unsigned allocated_at [0:(ISSUE_WIDTH==2?16:8)-1];
+    integer record_kind [0:(ISSUE_WIDTH==2?16:8)-1];
     longint unsigned kind_count [0:5];
     longint unsigned kind_lifetime [0:5];
     longint unsigned dispatch_count [0:5];
     longint unsigned dispatch_delay [0:5];
     integer trace_fd;
     string trace_path;
+    function automatic bit alu_blocked(input bit [(ISSUE_WIDTH==2?4:3)-1:0] tag);
+        return (dut.alu0_complete_valid_w && !dut.alu0_complete_ready_w &&
+                dut.alu0_complete_tag_w==tag) ||
+            (dut.alu1_complete_valid_w && !dut.alu1_complete_ready_w && dut.alu1_complete_tag_w==tag);
+    endfunction
+    function automatic bit load_blocked(input bit [(ISSUE_WIDTH==2?4:3)-1:0] tag);
+        return dut.lsu_complete_valid_w && !dut.lsu_complete_ready_w &&
+            !dut.lsu_complete_device_w && dut.lsu_complete_tag_w==tag;
+    endfunction
+    function automatic bit source_captured(input bit [(ISSUE_WIDTH==2?4:3)-1:0] tag);
+        source_captured =
+            (dut.early_resp_valid_w && dut.early_resp_hit_w && dut.early_resp_tag_w==tag) ||
+            (dut.alu0_complete_valid_w && dut.alu0_complete_ready_w && dut.alu0_complete_tag_w==tag) ||
+            (dut.alu1_complete_valid_w && dut.alu1_complete_ready_w && dut.alu1_complete_tag_w==tag) ||
+            (dut.branch_complete_valid_w && dut.branch_complete_ready_w && dut.branch_complete_tag_w==tag) ||
+            (dut.mul_complete_valid_w && dut.mul_complete_ready_w && dut.mul_complete_tag_w==tag) ||
+            (dut.div_complete_valid_w && dut.div_complete_ready_w && dut.div_complete_tag_w==tag) ||
+            (dut.lsu_complete_valid_w && dut.lsu_complete_ready_w &&
+                !dut.lsu_complete_device_w && dut.lsu_complete_tag_w==tag) ||
+            (dut.csr_complete_valid_w && dut.csr_complete_ready_w && dut.csr_complete_tag_w==tag) ||
+            (dut.wb0_valid_w && dut.wb0_tag_w==tag) ||
+            (dut.wb1_valid_w && dut.wb1_tag_w==tag);
+    endfunction
     initial begin
         if (!$value$plusargs("MEM_HEX=%s", mem_hex)) $fatal(1, "FAIL missing MEM_HEX");
-        if (!$value$plusargs("TOHOST_ADDR=%h", tohost_addr))
+        if (!$value$plusargs("TOHOST_ADDR=%h", tohost_addr) && !$test$plusargs("PERF_ONLY"))
             $fatal(1, "FAIL missing TOHOST_ADDR");
         if (!$value$plusargs("MAX_CYCLES=%d", cycle_limit)) cycle_limit = 1000000;
         if ($value$plusargs("TRACE=%s", trace_path)) trace_fd = $fopen(trace_path, "w");
@@ -165,6 +213,15 @@ module tb;
             perf_f2 = 0;
             perf_ic_miss_cycles=0;perf_dc_miss_cycles=0;
             store_head_active=0;store_head_run=0;store_head_min='1;
+            for(int k=0;k<6;k++)perf_bank_wait[k]=0;
+            perf_late_alu_capture_block=0;perf_late_load_capture_block=0;
+            perf_early_port_block=0;perf_early_word_block=0;perf_early_expired=0;
+            perf_pair_load_wait=0;perf_pair_alu_wait=0;perf_pair_mul_wait=0;
+            perf_pair_expired_load=0;
+            perf_branch_early_available=0;perf_branch_early_delayed=0;perf_branch_early_port=0;
+            for(int k=0;k<36;k++)perf_pair_types[k]=0;
+            for(int k=0;k<2;k++)branch_pending[k]=0;
+            perf_miss_store_waits=0;perf_miss_store_cycles=0;perf_miss_store_active=0;
             perf_full_retiring=0;perf_full_store=0;perf_full_load=0;
             perf_pair_credit=0;perf_pair_operand=0;perf_pair_channel=0;
             for(int k=0;k<3;k++) begin
@@ -209,6 +266,58 @@ module tb;
                     dut.branch_complete_valid_w, dut.branch_complete_ready_w,
                     dut.branch_complete_tag_w);
             end
+            if ($test$plusargs("CONTROL_LOG") && cycles+4>=cycle_limit) begin
+                $display("LSU state%0d tag%h req%b/%b complete%b/%b SQ valid%b committed%b count%0d/%0d head%0d tail%0d drain%b/%b tag%h",
+                    dut.u_lsu.state_r,dut.u_lsu.tag_r,dut.lsu_req_valid_w,dut.lsu_req_ready_w,
+                    dut.lsu_complete_valid_w,dut.lsu_complete_ready_w,dut.u_lsu.sq_valid_r,
+                    dut.u_lsu.sq_committed_r,dut.u_lsu.sq_count_r,dut.u_lsu.sq_reserved_r,
+                    dut.u_lsu.sq_head_r,dut.u_lsu.sq_tail_r,dut.dc_commit_valid_w,
+                    dut.dc_commit_ready_w,dut.dc_commit_tag_w);
+                $display("DC state%0d count%0d head%0d valid%b resolved%b pipe%b/%b tag%h addr%h pending%b wait%b refresh%b stale%b",
+                    dut.u_dcache.state_r,dut.u_dcache.count_r,dut.u_dcache.head_r,
+                    dut.u_dcache.valid_r,dut.u_dcache.resolved_r,dut.u_dcache.pipe_valid_r,
+                    dut.u_dcache.pipe_miss_w,dut.u_dcache.pipe_tag_r,dut.u_dcache.pipe_addr_r,
+                    dut.u_dcache.pending_valid_r,dut.u_dcache.store_drain_wait_w,
+                    dut.u_dcache.refresh_busy_r,dut.u_dcache.pending_stale_r);
+            end
+            // Track each accepted late branch using only its public execute/return channels.
+            for(int p=0;p<2;p++)begin
+                if(branch_pending[p])begin
+                    bit early1,early2;
+                    early1=dut.early_resp_valid_w && dut.early_resp_hit_w &&
+                        dut.early_resp_tag_w==branch_source1[p];
+                    early2=dut.early_resp_valid_w && dut.early_resp_hit_w &&
+                        dut.early_resp_tag_w==branch_source2[p];
+                    if(perf_started && (branch_wait1[p] || branch_wait2[p]) &&
+                        (!branch_wait1[p] || early1) && (!branch_wait2[p] || early2))begin
+                        perf_branch_early_available++;
+                        if(!dut.branch_complete_valid_w || dut.branch_complete_tag_w!=branch_tag[p])begin
+                            perf_branch_early_delayed++;
+                            perf_branch_early_port+=64'(dut.branch_complete_valid_w);
+                            if(perf_branch_early_delayed<=4)
+                                $display("BR_EARLY_WAIT cycle=%0d pc=%h tag=%h early=%h other_valid=%b",
+                                    cycles,branch_pc[p],branch_tag[p],dut.early_resp_tag_w,
+                                    dut.branch_complete_valid_w);
+                        end
+                    end
+                    if(source_captured(branch_source1[p]))branch_wait1[p]=0;
+                    if(source_captured(branch_source2[p]))branch_wait2[p]=0;
+                    if(dut.branch_complete_valid_w && dut.branch_complete_ready_w &&
+                        dut.branch_complete_tag_w==branch_tag[p])branch_pending[p]=0;
+                    if(dut.cancel_valid_w && ((branch_tag[p]-dut.age_head_w)>=
+                        (dut.cancel_tag_w-dut.age_head_w)))branch_pending[p]=0;
+                end
+            end
+            if(dut.branch_execute0_valid_w && dut.branch_execute0_ready_w && dut.execute0_late_w)begin
+                branch_pending[0]=1;branch_tag[0]=dut.execute0_tag_w;branch_pc[0]=dut.execute0_pc_w;
+                branch_source1[0]=dut.execute0_source1_tag_w;branch_source2[0]=dut.execute0_source2_tag_w;
+                branch_wait1[0]=dut.execute0_source1_wait_w;branch_wait2[0]=dut.execute0_source2_wait_w;
+            end
+            if(dut.branch_execute1_valid_w && dut.branch_execute1_ready_w && dut.execute1_late_w)begin
+                branch_pending[1]=1;branch_tag[1]=dut.execute1_tag_w;branch_pc[1]=dut.execute1_pc_w;
+                branch_source1[1]=dut.execute1_source1_tag_w;branch_source2[1]=dut.execute1_source2_tag_w;
+                branch_wait1[1]=dut.execute1_source1_wait_w;branch_wait2[1]=dut.execute1_source2_wait_w;
+            end
             if (dut.trace_trap_w)
                 $display("TRAP pc=%08x cause=%08x tval=%08x cycle=%0d",
                     dut.trace_trap_pc_w, dut.trace_cause_w, dut.trace_tval_w, cycles);
@@ -250,7 +359,67 @@ module tb;
                     perf_full_store+=64'(dut.head0_valid_w && dut.head0_store_w);
                     perf_full_load+=64'(dut.head0_valid_w && dut.head0_trace_instr_w[6:0]==7'h03);
                 end
+                perf_bank_wait[0]+=64'(dut.alu0_complete_valid_w && !dut.alu0_complete_ready_w);
+                perf_bank_wait[1]+=64'(dut.alu1_complete_valid_w && !dut.alu1_complete_ready_w);
+                perf_bank_wait[2]+=64'(dut.lsu_complete_valid_w && !dut.lsu_complete_ready_w);
+                perf_bank_wait[3]+=64'(dut.mul_complete_valid_w && !dut.mul_complete_ready_w);
+                perf_bank_wait[4]+=64'(dut.div_complete_valid_w && !dut.div_complete_ready_w);
+                perf_bank_wait[5]+=64'(dut.branch_complete_valid_w && !dut.branch_complete_ready_w);
+                if(dut.execute0_valid_w && dut.execute0_ready_w && dut.execute0_late_w)begin
+                    if((dut.execute0_source1_wait_w && alu_blocked(dut.execute0_source1_tag_w)) ||
+                        (dut.execute0_source2_wait_w && alu_blocked(dut.execute0_source2_tag_w)))begin
+                        perf_late_alu_capture_block++;
+                        if(perf_late_alu_capture_block<=4)
+                            $display("LATE_BANK_WAIT cycle=%0d pc=%h tags=%h/%h branch=%b",
+                                cycles,dut.execute0_pc_w,dut.execute0_source1_tag_w,
+                                dut.execute0_source2_tag_w,dut.execute0_branch_w);
+                    end
+                    if((dut.execute0_source1_wait_w && load_blocked(dut.execute0_source1_tag_w)) ||
+                        (dut.execute0_source2_wait_w && load_blocked(dut.execute0_source2_tag_w)))
+                        perf_late_load_capture_block++;
+                end
+                if(dut.execute1_valid_w && dut.execute1_ready_w && dut.execute1_late_w)begin
+                    if((dut.execute1_source1_wait_w && alu_blocked(dut.execute1_source1_tag_w)) ||
+                        (dut.execute1_source2_wait_w && alu_blocked(dut.execute1_source2_tag_w)))begin
+                        perf_late_alu_capture_block++;
+                        if(perf_late_alu_capture_block<=4)
+                            $display("LATE_BANK_WAIT cycle=%0d pc=%h tags=%h/%h branch=%b",
+                                cycles,dut.execute1_pc_w,dut.execute1_source1_tag_w,
+                                dut.execute1_source2_tag_w,dut.execute1_branch_w);
+                    end
+                    if((dut.execute1_source1_wait_w && load_blocked(dut.execute1_source1_tag_w)) ||
+                        (dut.execute1_source2_wait_w && load_blocked(dut.execute1_source2_tag_w)))
+                        perf_late_load_capture_block++;
+                end
+                if(dut.early_req_valid_w && dut.u_lsu.early_block_w) begin
+                    if(dut.u_lsu.early_conflict_w)perf_early_word_block++;
+                    else perf_early_port_block++;
+                end
+                if(dut.dc_req_valid_w && dut.dc_req_ready_w && dut.dc_req_early_w &&
+                    !dut.u_lsu.early_reuse_w)perf_early_expired++;
                 if(dut.issue_hpm_w[1]) begin
+                    perf_pair_types[6*instruction_kind(dut.ib_head0_instr_w)+
+                        instruction_kind(dut.ib_head1_instr_w)]++;
+                    if(!dut.u_issue.d1_sources_w)begin
+                        bit load_wait,alu_wait,mul_wait,expired_load;
+                        load_wait=0;alu_wait=0;mul_wait=0;expired_load=0;
+                        if(dut.u_issue.d1_wait1_w)begin
+                            load_wait|=dut.u_issue.entry_class_w[dut.u_issue.q11_tag_w]==3;
+                            alu_wait|=dut.u_issue.entry_class_w[dut.u_issue.q11_tag_w]==0;
+                            mul_wait|=dut.u_issue.entry_class_w[dut.u_issue.q11_tag_w]==4;
+                            expired_load|=dut.u_issue.entry_class_w[dut.u_issue.q11_tag_w]==3 &&
+                                dut.u_issue.entry_countdown_w[dut.u_issue.q11_tag_w]==0;
+                        end
+                        if(dut.u_issue.d1_wait2_w)begin
+                            load_wait|=dut.u_issue.entry_class_w[dut.u_issue.q12_tag_w]==3;
+                            alu_wait|=dut.u_issue.entry_class_w[dut.u_issue.q12_tag_w]==0;
+                            mul_wait|=dut.u_issue.entry_class_w[dut.u_issue.q12_tag_w]==4;
+                            expired_load|=dut.u_issue.entry_class_w[dut.u_issue.q12_tag_w]==3 &&
+                                dut.u_issue.entry_countdown_w[dut.u_issue.q12_tag_w]==0;
+                        end
+                        perf_pair_load_wait+=64'(load_wait);perf_pair_alu_wait+=64'(alu_wait);
+                        perf_pair_mul_wait+=64'(mul_wait);perf_pair_expired_load+=64'(expired_load);
+                    end
                     if(dut.allocate_credit_w<2) perf_pair_credit++;
                     else if(!dut.u_issue.d1_sources_w) perf_pair_operand++;
                     else perf_pair_channel++;
@@ -268,6 +437,19 @@ module tb;
                         recovery_cycles[k]+=cycles-recovery_start[k];
                         recovery_valid[k]=0;
                     end
+                end
+                if(dut.u_dcache.miss_store_wait_w && !perf_miss_store_active) begin
+                    perf_miss_store_waits++;
+                    perf_miss_store_active=1;
+                    perf_miss_store_tag=dut.u_dcache.pipe_tag_r;
+                end
+                if(perf_miss_store_active) begin
+                    if((dut.u_dcache.state_r!=0 && !dut.u_dcache.miss_refresh_r &&
+                        !dut.u_dcache.wb_maint_r) || (dut.dc_resp_valid_w &&
+                        dut.dc_resp_tag_w==perf_miss_store_tag) || (dut.dc_cancel_valid_w &&
+                        ((perf_miss_store_tag-dut.age_head_w)>=
+                        (dut.dc_cancel_tag_w-dut.age_head_w)))) perf_miss_store_active=0;
+                    else perf_miss_store_cycles++;
                 end
                 perf_ic_miss_cycles+=64'(dut.icache_debug_miss_w);
                 perf_dc_miss_cycles+=64'(dut.dcache_debug_miss_w);
@@ -299,6 +481,21 @@ module tb;
                             perf_instructions,perf_full,perf_ib_empty,perf_lsu_busy);
                         $display("store_head=%0d early=%0d early_hit=%0d f2=%0d",
                             perf_store_head,perf_early,perf_early_hit,perf_f2);
+                        $display("BANK_WAIT alu0=%0d alu1=%0d lsu=%0d mul=%0d div=%0d branch=%0d",
+                            perf_bank_wait[0],perf_bank_wait[1],perf_bank_wait[2],perf_bank_wait[3],
+                            perf_bank_wait[4],perf_bank_wait[5]);
+                        $display("LATE_CAPTURE_BLOCK alu=%0d load=%0d",
+                            perf_late_alu_capture_block,perf_late_load_capture_block);
+                        $display("EARLY_DETAIL port_block=%0d word_block=%0d expired=%0d",
+                            perf_early_port_block,perf_early_word_block,perf_early_expired);
+                        $display("PAIR_OPERAND load=%0d alu=%0d mul=%0d expired_load=%0d",
+                            perf_pair_load_wait,perf_pair_alu_wait,perf_pair_mul_wait,perf_pair_expired_load);
+                        $display("BR_EARLY available=%0d delayed=%0d other_result=%0d",
+                            perf_branch_early_available,perf_branch_early_delayed,perf_branch_early_port);
+                        for(int k=0;k<36;k++)if(perf_pair_types[k]!=0)
+                            $display("PAIR_STRUCT older=%0d younger=%0d count=%0d",k/6,k%6,perf_pair_types[k]);
+                        $display("MISS_STORE_WAIT events=%0d cycles=%0d",
+                            perf_miss_store_waits,perf_miss_store_cycles);
                         $display("MISS_CYCLES ic=%0d dc=%0d",
                             perf_ic_miss_cycles,perf_dc_miss_cycles);
                         $display("STORE_HEAD_MIN cycles=%0d",store_head_min);
@@ -333,8 +530,8 @@ module tb;
                         $fdisplay(trace_fd, "%0d %08x %08x %0d %08x", cycles,
                             dut.trace_pc_w[j*32 +: 32], dut.trace_instr_w[j*32 +: 32],
                             dut.trace_rd_w[j*5 +: 5], dut.trace_rd_data_w[j*64 +: 32]);
-                    if (dut.trace_mem_valid_w[j] && dut.trace_mem_store_w[j] &&
-                        dut.trace_mem_addr_w[j*32 +: 32] == tohost_addr &&
+                    if (!$test$plusargs("PERF_ONLY") && dut.trace_mem_valid_w[j] &&
+                        dut.trace_mem_store_w[j] && dut.trace_mem_addr_w[j*32 +: 32] == tohost_addr &&
                         dut.trace_mem_data_w[j*64 +: 32] != 0) begin
                         if (dut.trace_mem_data_w[j*64 +: 32] != 1)
                             $fatal(1, "FAIL tohost=%08x pc=%08x cycle=%0d",
@@ -360,7 +557,7 @@ module tb;
         endcase
     endfunction
     /* verilator lint_on UNUSEDSIGNAL */
-    task automatic dispatch(input bit [1:0] tag);
+    task automatic dispatch(input bit [(ISSUE_WIDTH==2?4:3)-1:0] tag);
         dispatch_count[record_kind[tag]]++;
         dispatch_delay[record_kind[tag]]+=cycles-allocated_at[tag];
     endtask

@@ -20,13 +20,21 @@ def main():
     image.mkdir(parents=True, exist_ok=True)
     subprocess.run([sys.executable, str(ROOT / 'tools/elf2mem.py'), str(args.elf), str(image)],
                    check=True, stdout=subprocess.DEVNULL)
-    entry = struct.unpack_from('<I', args.elf.read_bytes(), 24)[0]
+    blob = args.elf.read_bytes()
+    entry = struct.unpack_from('<I', blob, 24)[0]
     boot = struct.pack('<II', (((entry + 0x800) >> 12) << 12) | 0x2b7,
                        ((entry & 0xfff) << 20) | 0x28067)
     memory = []
     for region, base in [('rom', 0), ('sram', 0x10000000), ('ddr', 0x80000000)]:
         for line in (image / (region + '.hex')).read_text().splitlines():
             memory.append(f'@{int(line[1:], 16)+base:08x}' if line.startswith('@') else line)
+    # ELF PT_LOAD declares zero-filled memory beyond the file bytes (including .bss).
+    header = struct.unpack_from('<16sHHIIIIIHHHHHH', blob)
+    for index in range(header[10]):
+        kind, _offset, _vaddr, address, size, memory_size, _flags, _align = (
+            struct.unpack_from('<IIIIIIII', blob, header[5] + index * header[9]))
+        if kind == 1 and memory_size > size:
+            memory += [f'@{address+size:08x}'] + ['00'] * (memory_size-size)
     if entry != 0:
         memory += ['@00000000'] + [f'{byte:02x}' for byte in boot]
     (image / 'mem.hex').write_text('\n'.join(memory)+'\n')
@@ -45,7 +53,7 @@ def main():
             subprocess.run(command, cwd=ROOT / 'verif/block/cpu2_core', stdout=log,
                            stderr=subprocess.STDOUT, check=True)
     command = [str(out / 'Vtb'), '+MEM_HEX='+str(image / 'mem.hex'),
-               '+TOHOST_ADDR='+symbols['tohost'], '+PERF_BEGIN='+symbols['start_time'],
+               '+PERF_BEGIN='+symbols['start_time'],
                '+PERF_END='+symbols['stop_time'], '+PERF_ONLY', '+MAX_CYCLES=20000000']
     result = subprocess.run(command, cwd=ROOT, text=True, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
