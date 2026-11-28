@@ -8,6 +8,7 @@ import json
 import math
 from pathlib import Path
 
+from ooo_model import memory_trace
 from pipe_model import program_and_trace, simulate
 from run_frontend_t2_eval import IcacheProbe
 from run_v2_round2 import divider_cycles
@@ -28,19 +29,23 @@ def resources():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('workload', choices=('coremark', 'vision', 'render'))
+    parser.add_argument('--completion-entries', type=int, default=4)
     args = parser.parse_args()
     directory = Path('build/cpu-v2/isa/zba') / args.workload
     program, symbols, trace = program_and_trace(directory)
+    addresses = memory_trace(directory, program, trace) if args.completion_entries else None
     divs = divider_cycles(directory, program, trace, 'early-div', complete_schedule=True)
     result = simulate(program, trace, symbols['start_time'], symbols['stop_time'],
                       'V3s', **BASES['small'], division_cycles=divs,
+                      completion_entries=args.completion_entries, completion_addresses=addresses,
                       frontend_probe=IcacheProbe(1), frontend_registered_margin=True)
     instructions = trace.index(symbols['stop_time']) - trace.index(symbols['start_time'])
     result.update(workload=args.workload, name='single-small-zba', instructions=instructions,
                   ipc=instructions / result['cycles'], resources=resources())
     if args.workload == 'coremark':
         result['coremark_per_mhz'] = 1e7 / result['cycles']
-    output = Path('build/cpu-v2-single') / (args.workload + '.json')
+    suffix = f'-n{args.completion_entries}' if args.completion_entries else ''
+    output = Path('build/cpu-v2-single') / (args.workload + suffix + '.json')
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(result, indent=2) + '\n')
     print(json.dumps(result), flush=True)

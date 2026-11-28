@@ -56,6 +56,53 @@ class Record:
     adjacent_base: bool = False
     serial_pair: bool = False
     memory_checked: bool = False
+    completion_order: int = -1
+
+
+# M01 / CPU5.6: provisional I06P minimum, grant -> done capture -> retirement.
+STORE_HEAD_CYCLES = 2
+
+
+class CompletionWindow:
+    """CPU5.1: ordered entries, registered done and next-cycle freed credit."""
+
+    def __init__(self, capacity, width):
+        self.capacity = capacity
+        self.width = width
+        self.entries = deque()
+        self.credit = capacity
+        self.sequence = 0
+
+    def allocate(self, record, tick, latency, side_effect=False, beats=1):
+        record.completion_order = self.sequence
+        self.sequence += 1
+        # latency is issue-to-result capture; retirement observes done next edge.
+        self.entries.append([record, tick + latency + 1, side_effect, beats])
+        self.credit -= 1
+
+    def edge(self, tick):
+        self.credit = self.capacity - len(self.entries)
+        retired = []
+        for _ in range(self.width):
+            if not self.entries:
+                break
+            entry = self.entries[0]
+            record, ready, side_effect, beats = entry
+            if tick < ready:
+                break
+            if side_effect:
+                if retired:
+                    break
+                # Only the head gets authorization; no younger side effect pairs.
+                entry[1] = tick + STORE_HEAD_CYCLES + beats - 1
+                entry[2] = False
+                break
+            retired.append(self.entries.popleft()[0])
+        return retired
+
+    def cancel_after(self, record):
+        while self.entries and self.entries[-1][0].completion_order > record.completion_order:
+            self.entries.pop()
 
 
 class Predictor:
@@ -314,7 +361,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
              slot1_mul=False, slot1_lsu=False, control_slots=1, slot1_control=False,
              ideal_pairing=False,
              fetch_bytes=None, queue_depth=None, prediction_capture=None,
-             fixed_predictions=None, unaligned_fetch=False, load_merge=None):
+             fixed_predictions=None, unaligned_fetch=False, load_merge=None,
+             completion_entries=None, completion_addresses=None):
     if fusion:
         program, trace = fuse_program(program, trace, fusion, begin, end)
     changes = INORDER_VARIANTS.get(variant, {})
@@ -349,6 +397,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                         loads=0, adjacent_load_base=0, serial_pairs=0,
                         cache_instructions=0, cache_hits=0, branches=0, direction_misses=0,
                         f2_corrections=0, control_misses=0)
+    window = CompletionWindow(completion_entries, issue_width) if completion_entries else None
+    window_stalls = 0
     retired_instructions = 0
     last_writes = {}
     previous_instruction = None
@@ -571,7 +621,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         ending = False
         retired_controls = 0
         retired_late = [0, 0, 0]
-        retirement = w2 if registered_control else w
+        retirement = window.edge(tick) if window else w2 if registered_control else w
         for record in retirement:
             pc = record.instruction.pc
             if prediction_capture is not None and record.trace_index >= 0 and (
@@ -689,7 +739,9 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             division_left -= 1
             redirect = None
         events[16] = int(m_redirect is not None or redirect is not None)
-        available = not (m_redirect or redirect or applied_redirect or div_wait or
+        window_blocked = bool(window and window.credit < issue_width)
+        window_stalls += active and window_blocked
+        available = not (window_blocked or m_redirect or redirect or applied_redirect or div_wait or
                          blocked_ideal or e_stall or registered_redirect)
         events[12] = int(not ib and available)
         if ib and e:
@@ -951,8 +1003,30 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                                      division_cycles is not None and record.trace_index >= 0
                                      else 33)
 
+        if window:
+            for record in issued:
+                inst = record.instruction
+                latency = record.result_latency or latencies.get(inst.kind, 1)
+                if record.late:
+                    latency = max(latency, 2)
+                if inst.kind == 'div':
+                    latency = division_left + 1
+                address = (completion_addresses[record.trace_index] if
+                           completion_addresses is not None and record.trace_index >= 0 else 0)
+                device = (inst.kind in {'load', 'store'} and
+                          completion_addresses is not None and not (
+                          0x10000000 <= address < 0x10010000 or
+                          0x80000000 <= address < 0xc0000000))
+                beats = 2 if inst.bits & 0x7f in {0x07, 0x27} and (
+                    (inst.bits >> 12) & 7) == 3 else 1
+                window.allocate(record, tick, latency + int(decode_split),
+                                inst.kind == 'store' or device or beats == 2, beats)
+
         # F2 can append the arriving hit and drain two instructions into IB in the same cycle.
         decision = m_redirect or redirect or d_redirect
+        if window and (m_redirect or redirect or d_redirect or applied_redirect):
+            window.cancel_after(applied_redirect[1] if applied_redirect else
+                                m_redirect or redirect or d_redirect)
         decision_stage = 'm' if m_redirect else 'e' if redirect else 'd'
         if decode_split and decision_stage in {'e', 'm'} and decision:
             decode_pending = []
@@ -1193,6 +1267,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             if empty:
                 if e_stall:
                     cause = 'training_structural'
+                elif window_blocked:
+                    cause = 'other_result'
                 elif recovery:
                     cause = recovery
                 elif front_empty or trace_exhausted and not csr_wait:
@@ -1231,8 +1307,10 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         tick += 1
     result = dict(cycles=cycles, instructions=2 * counters[1] + counters[2],
                   **{f'hpm{i}': counters[i] for i in range(1, 17)})
-    if fusion:
+    if fusion or window:
         result['instructions'] = retired_instructions
+    if window:
+        result.update(completion_entries=completion_entries, completion_stall_cycles=window_stalls)
     result.update(experimental)
     result['predictor_bits'] = predictor.direction.bits if predictor.direction else 2 * pht
     result['ipc'] = result['instructions'] / result['cycles']

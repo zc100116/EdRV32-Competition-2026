@@ -48,6 +48,7 @@ def main():
     parser.add_argument('--input-root', type=Path, default=Path('build/v017/input'))
     parser.add_argument('--zba-root', type=Path, default=Path('build/cpu-v2/isa/zba'))
     parser.add_argument('--output', type=Path)
+    parser.add_argument('--completion-entries', type=int, default=4)
     args = parser.parse_args()
     output = args.output or Path('build/cpu-v2-round4') / (args.workload + '.jsonl')
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -80,7 +81,9 @@ def main():
                                                        else 'early-div'], load_merge=merge)
                     result = simulate(program, trace, symbols['start_time'], symbols['stop_time'],
                                       'V3s', **options, frontend_probe=IcacheProbe(1),
-                                      frontend_registered_margin=True)
+                                      frontend_registered_margin=True,
+                                      completion_entries=args.completion_entries,
+                                      completion_addresses=addresses)
                     result.update(instructions=instructions, ipc=instructions / result['cycles'])
                     if merge:
                         result['merge'] = dict(candidates=merge.candidates, merged=merge.merged,

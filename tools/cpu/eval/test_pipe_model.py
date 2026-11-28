@@ -7,7 +7,7 @@ import unittest
 
 from ipc_structures import Direction, FUSIONS, Macro
 from analyze import Instruction
-from pipe_model import (INORDER_VARIANTS, Predictor, Record, SLOT_CAUSES, fill_ib,
+from pipe_model import (CompletionWindow, INORDER_VARIANTS, Predictor, Record, SLOT_CAUSES, fill_ib,
                         simulate, early_address_allowed, lcb_allowed)
 from collections import deque
 from v2_round4_structures import LoadMerge, QueuedOwners, RamTage, fold
@@ -27,6 +27,59 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_completion_done_retire_credit_edges(self):
+        window = CompletionWindow(4, 2)
+        records = [Record(instruction(pc), False, False, 0, 0, ()) for pc in range(4)]
+        self.assertEqual(window.edge(0), [])
+        for record in records[:2]:
+            window.allocate(record, 0, 1)
+        self.assertEqual(window.edge(1), [])
+        for record in records[2:]:
+            window.allocate(record, 1, 1)
+        self.assertEqual(window.edge(2), records[:2])
+        self.assertEqual(window.credit, 0)
+        self.assertEqual(window.edge(3), records[2:])
+        self.assertEqual(window.credit, 2)
+
+    def test_completion_order_width_and_cancellation(self):
+        window = CompletionWindow(8, 1)
+        records = [Record(instruction(pc), False, False, 0, 0, ()) for pc in range(3)]
+        for record, latency in zip(records, (4, 1, 1)):
+            window.allocate(record, 0, latency)
+        self.assertEqual(window.edge(2), [])
+        window.cancel_after(records[1])
+        self.assertEqual(window.edge(5), records[:1])
+        self.assertEqual(window.edge(6), records[1:2])
+        self.assertEqual(window.edge(7), [])
+
+    def test_completion_head_authorization_done_and_beats(self):
+        for beats in (1, 2):
+            window = CompletionWindow(4, 2)
+            older = Record(instruction(0, 'load'), False, False, 0, 0, ())
+            store = Record(instruction(4, 'store'), False, False, 0, 0, ())
+            window.allocate(older, 0, 3)
+            window.allocate(store, 0, 1, True, beats)
+            self.assertEqual(window.edge(2), [])
+            self.assertEqual(window.edge(4), [older])
+            # The store becomes head after the edge; authorization is at tick 5.
+            self.assertEqual(window.edge(5), [])
+            if beats == 2:
+                self.assertEqual(window.edge(7), [])
+            self.assertEqual(window.edge(6 + beats), [store])
+            self.assertEqual(window.credit, 3)
+            window.edge(7 + beats)
+            self.assertEqual(window.credit, 4)
+
+    def test_completion_dual_alu_four_thirds_limit(self):
+        options = dict(perfect_frontend=True, perfect_prediction=True, completion_entries=4)
+        stream = [instruction(pc) for pc in range(0, 1200, 4)]
+        result = run(stream, 'V3s', **options)
+        self.assertGreater(result['completion_stall_cycles'], 0)
+        self.assertAlmostEqual(result['ipc'], 4 / 3, delta=.02)
+        self.assertEqual(result['instructions'], 300)
+        self.assertLess(run(stream, 'V3s', **dict(options, completion_entries=8))['cycles'],
+                        result['cycles'])
+
     def test_round4_merge_can_reuse_older_registered_id_address(self):
         stream = [instruction(pc) for pc in range(0, 16, 4)] + [
                   replace(instruction(16, 'load', rd=4), bits=0x2003),
