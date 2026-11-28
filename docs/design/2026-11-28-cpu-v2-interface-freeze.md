@@ -457,6 +457,8 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 
 **空队列下一 PC（I04）。** `branch_complete` 增 `branch_complete_next_pc`32（不跳为 PC+4）；completion 每 bank 用一份 `edrv32_ram_cpu2_completion` 保存，随完成记录写入，给出 `head{j}_next_pc`；commit 退休控制类用它更新 `next_pc_r`，非控制类用 PC+4。
 
+**rs3 补读捕获（I02）。** commit→completion 的 `retire_count` 同时接 issue（`retire_count_i`）；issue 用 `age_head` 和 `retire_count` 得到本沿退休的 tag，若等于待补读 rs3 的生产 tag，就捕获同沿的 `fp_wb`（或整数 WB）数据。每拍最多一个 FP 目的写，不需要另加 wb tag。
+
 ## 影响
 
 审核通过后需修改CPU spec2.2/2.3、3、4、5、6及9的C01–C09；FPU spec2.4、3、4、5.1/5.4/5.5及9的F01/F02/F04/F05；CPU testplan2/4/6/7的T02/T03及对应CV02–CV14；FPU testplan4/6/7的FT01/FT03及FV10–FV15。C10、F03/F06与FT03中的未测数值继续待定；旧cpu/cache规格不改，外部总线无差异。
