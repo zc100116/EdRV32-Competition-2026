@@ -1,4 +1,5 @@
 +incdir+../include
+../common/edrv32_reset_copy.v
 ../tech/edrv32_ram_cpu2_base.v
 ../tech/edrv32_ram_cpu2_base_train.v
 ../tech/edrv32_ram_cpu2_btb.v
