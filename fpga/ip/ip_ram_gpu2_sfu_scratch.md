@@ -8,7 +8,7 @@
 | 时钟 | wr_clk/rd_clk均接clk_gpu，上升沿；开启rd_clk_en端口并固定接1 |
 | 额外地址 / 输入寄存器 | 关闭 |
 | 延迟 | 阵列读1拍，关闭额外输出寄存器 |
-| Write mode | Old Data / Read First；包装外部同边沿转发保证接口返回新字 |
+| Write mode | 不依赖 RAM 碰撞结果：同址时包装用外部同边沿转发返回新字；用 PDS 默认（NORMAL_WRITE） |
 | Reset / Initialization / Byte Enable | 不复位数据/内容；wr_rst/rd_rst固定为0；无初始化和byte enable |
 | 端口 | wr_clk、wr_rst、wr_en、wr_addr[9:0]、wr_data[31:0]、rd_clk、rd_rst、rd_clk_en、rd_addr[9:0]、rd_data[31:0] |
 | 包装 / 数量 | `edrv32_ram_gpu2_sfu_scratch`，四输入字段按消费者分7份（engine0不读LOG基值），中间结果7份，共14DRM |

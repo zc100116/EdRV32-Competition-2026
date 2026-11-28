@@ -16,10 +16,12 @@ module edrv32_ram_gpu2_queue (
 );
 `ifdef EDRV32_FPGA_MEMORY_MODE
     ip_ram_gpu2_queue u_ip (
-        .clk(clk_i),
+        .wr_clk(clk_i),
         .wr_en(wr_en_i),
         .wr_addr(wr_addr_i),
         .wr_data(wr_data_i),
+        .rd_clk(clk_i),
+        .rst(1'b0),
         .rd_addr(rd_addr_i),
         .rd_data(rd_data_o)
     );

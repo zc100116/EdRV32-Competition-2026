@@ -38,9 +38,14 @@ PDS 2022.2-SP6.1，PG2L200H-6 FBB676，与卡 111 相同。
 | 2 | U | 在工程目录的 PDS Tcl 控制台执行 `source ../../EdRV32-Competition-2026/fpga/scripts/<导入脚本>`；确认工程的 include 路径含仓库 `rtl/include`（卡 111 曾因 include 为空报 Verilog-4104） |
 | 3 | U | 默认参数跑综合、Device Map、布局布线；关闭 Generate Bitstream 的 Auto Run |
 | 4 | C | 各工程导出报告（导出命令同卡 111），按第 6 节整理 |
+| 4b | C | ModelSim 核实 DRM 同址读写：把 `src/check_drm_collision.do` 中 `ip_dirs` 改成本机 B、D 工程 ipcore 下三个 IP 的目录（以及 `vendor_root`），执行 `vsim -c -do "do <该文件绝对路径>"`，原样记录 PASS/FAIL 和输出。sdp72/sdp36 期望同沿读到旧字；scratch 包装自带同沿转发，期望新字。FAIL 不影响第 3、4 步的时序回传 |
 | 5 | C | 填写 result.md，提交推送 |
 
 五个工程互不依赖，可以同时跑。某一步报错，把报错原文写进 result.md 后停下，不要改 RTL 或约束。APM 相关告警（级联、CPI/CPO、内部寄存器）和 DRM/LUTRAM 推断告警原文照录。
+
+补充（2026-11-28，用户 Windows 端反馈）：
+- `ip_ram_gpu2_queue` 的 PDS 模板端口为 `wr_clk`/`rd_clk`/`rst`，包装已改为两时钟都接 `clk_i`、`rst` 接 0（异步读、无输出寄存器不变），重新拉本卡最新提交即可。
+- DRM Simple Dual Port 的 GUI 没有 Old Data 选项：sdp72/sdp36/sfu_scratch 按默认生成，继续布局布线；同址语义由第 4b 步 ModelSim 核实（时序和资源与该语义无关）。
 
 ## 6. 产物
 

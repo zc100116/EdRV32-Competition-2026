@@ -16,7 +16,7 @@
 | Write Enable | 开启整字写使能；Byte Write Enable 关闭 |
 | Read Clock Enable | 开启；rd_clk_en=0 时保持内部读寄存器 |
 | Output Register | **关闭**；RAM 本身同步读 1 拍，业务模块另有外部捕获 1 拍 |
-| Read-during-write / Write Mode | Read First / Old Data，同一上升沿同址返回写入前整字 |
+| Read-during-write / Write Mode | GUI 无该选项，用默认（模板 NORMAL_WRITE，只约束写口自身读出）；接口要求同一上升沿跨端口同址读返回写入前整字，由卡 112 `src/check_drm_collision.do` 在 ModelSim 用厂商 GTP_DRM 模型核实 |
 | Reset | 不复位内容/数据；生成 wr_rst/rd_rst 接 0 |
 | Initialization | None，无初始化文件；内容和数据输出上电未定义 |
 

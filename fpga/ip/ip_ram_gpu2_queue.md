@@ -14,7 +14,7 @@
 | 使用者 | `edrv32_gpu2_fp32`，vec4 四份和 DP 一份，总计五份 |
 | 包装 | `rtl/tech/edrv32_ram_gpu2_queue.v` |
 
-期望端口：`clk`、`wr_en` 各1位；`wr_addr`/`rd_addr` 各4位；
+期望端口（PDS 2022.2-SP6.1 实际模板，卡 112）：`wr_clk`、`rd_clk`、`rst`、`wr_en` 各1位，包装把两个时钟都接 `clk_i`、`rst` 接 0；`wr_addr`/`rd_addr` 各4位；
 `wr_data` 输入32位，`rd_data` 输出32位。生成后文件留在本地 FPGA 工程，加入
 探针工程；不得提交生成文件。每实例预期16个32bit LUTRAM原语分配额（合计80 LR），
 实际 LUTRAM/LUT/FF 以 PDS 报告为准。数据队列用于任意下游合法背压；自由运行
