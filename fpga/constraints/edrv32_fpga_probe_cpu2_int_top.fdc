@@ -1,5 +1,5 @@
-# CPU v2 integer path probe; 150 MHz planning constraint, no PLL.
-create_clock -name {clk_cpu2_int} [get_ports {clk_i}] -period {6.667} -waveform {0.000 3.333}
+# CPU v2 integer path probe; 165 MHz margin constraint, no PLL.
+create_clock -name {clk_cpu2_int} [get_ports {clk_i}] -period {6.061} -waveform {0.000 3.030}
 
 define_attribute {p:clk_i} {PAP_IO_DIRECTION} {INPUT}
 define_attribute {p:clk_i} {PAP_IO_LOC} {D18}

@@ -16,23 +16,24 @@ module edrv32_fpga_probe_cpu2_int_top (
             stimulus_r <= {stimulus_r[254:0], stimulus_r[255] ^ stimulus_r[253] ^
                 stimulus_r[250] ^ stimulus_r[245] ^ stim_i};
     end
-    reg [19:0] rf_id_rs_r;
+    // Preserve each consumer's capture region; shared stimulus bits must not merge regions.
+    (* keep = "true", syn_preserve = 1 *) reg [19:0] rf_id_rs_r;
     always @(posedge clk_i) begin
         rf_id_rs_r <= stimulus_r[0 +: 20];
     end
-    reg [3:0] rf_id_owner_r;
+    (* keep = "true", syn_preserve = 1 *) reg [3:0] rf_id_owner_r;
     always @(posedge clk_i) begin
         rf_id_owner_r <= stimulus_r[19 +: 4];
     end
-    reg [1:0] rf_wb_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg [1:0] rf_wb_valid_r;
     always @(posedge clk_i) begin
         rf_wb_valid_r <= stimulus_r[38 +: 2];
     end
-    reg [9:0] rf_wb_rd_r;
+    (* keep = "true", syn_preserve = 1 *) reg [9:0] rf_wb_rd_r;
     always @(posedge clk_i) begin
         rf_wb_rd_r <= stimulus_r[57 +: 10];
     end
-    reg [63:0] rf_wb_data_r;
+    (* keep = "true", syn_preserve = 1 *) reg [63:0] rf_wb_data_r;
     always @(posedge clk_i) begin
         rf_wb_data_r <= stimulus_r[76 +: 64];
     end
@@ -57,55 +58,55 @@ module edrv32_fpga_probe_cpu2_int_top (
         .lvt_o(rf_lvt_w),
         .id_data_o(rf_id_data_w)
     );
-    reg fetch_f1_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg fetch_f1_valid_r;
     always @(posedge clk_i) begin
         fetch_f1_valid_r <= stimulus_r[95 +: 1];
     end
-    reg [31:0] fetch_f1_pc_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:0] fetch_f1_pc_r;
     always @(posedge clk_i) begin
         fetch_f1_pc_r <= stimulus_r[114 +: 32];
     end
-    reg [1:0] fetch_f1_direction_r;
+    (* keep = "true", syn_preserve = 1 *) reg [1:0] fetch_f1_direction_r;
     always @(posedge clk_i) begin
         fetch_f1_direction_r <= stimulus_r[133 +: 2];
     end
-    reg fetch_fill_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg fetch_fill_valid_r;
     always @(posedge clk_i) begin
         fetch_fill_valid_r <= stimulus_r[152 +: 1];
     end
-    reg fetch_fill_way_r;
+    (* keep = "true", syn_preserve = 1 *) reg fetch_fill_way_r;
     always @(posedge clk_i) begin
         fetch_fill_way_r <= stimulus_r[171 +: 1];
     end
-    reg [31:0] fetch_fill_addr_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:0] fetch_fill_addr_r;
     always @(posedge clk_i) begin
         fetch_fill_addr_r <= stimulus_r[190 +: 32];
     end
-    reg [31:0] fetch_fill_instr_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:0] fetch_fill_instr_r;
     always @(posedge clk_i) begin
         fetch_fill_instr_r <= stimulus_r[209 +: 32];
     end
-    reg fetch_fill_line_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg fetch_fill_line_valid_r;
     always @(posedge clk_i) begin
         fetch_fill_line_valid_r <= stimulus_r[228 +: 1];
     end
-    reg fetch_btb_write_r;
+    (* keep = "true", syn_preserve = 1 *) reg fetch_btb_write_r;
     always @(posedge clk_i) begin
         fetch_btb_write_r <= stimulus_r[247 +: 1];
     end
-    reg [31:0] fetch_btb_pc_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:0] fetch_btb_pc_r;
     always @(posedge clk_i) begin
         fetch_btb_pc_r <= stimulus_r[41 +: 32];
     end
-    reg [31:0] fetch_btb_target_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:0] fetch_btb_target_r;
     always @(posedge clk_i) begin
         fetch_btb_target_r <= stimulus_r[60 +: 32];
     end
-    reg [2:0] fetch_btb_type_r;
+    (* keep = "true", syn_preserve = 1 *) reg [2:0] fetch_btb_type_r;
     always @(posedge clk_i) begin
         fetch_btb_type_r <= stimulus_r[50 +: 3];
     end
-    reg [31:1] fetch_lvt_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:1] fetch_lvt_r;
     always @(posedge clk_i) begin
         fetch_lvt_r <= stimulus_r[97 +: 31];
     end
@@ -117,11 +118,11 @@ module edrv32_fpga_probe_cpu2_int_top (
     always @(posedge clk_i) begin
         fetch_wb_rd_r <= stimulus_r[114 +: 10];
     end
-    reg fetch_ib_accept_r;
+    (* keep = "true", syn_preserve = 1 *) reg fetch_ib_accept_r;
     always @(posedge clk_i) begin
         fetch_ib_accept_r <= stimulus_r[124 +: 1];
     end
-    reg [1:0] fetch_ib_remove_r;
+    (* keep = "true", syn_preserve = 1 *) reg [1:0] fetch_ib_remove_r;
     always @(posedge clk_i) begin
         fetch_ib_remove_r <= stimulus_r[144 +: 2];
     end
@@ -222,11 +223,11 @@ module edrv32_fpga_probe_cpu2_int_top (
         .f2_target_o(fetch_f2_target_w),
         .f2_type_o(fetch_f2_type_w)
     );
-    reg tage_f1_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg tage_f1_valid_r;
     always @(posedge clk_i) begin
         tage_f1_valid_r <= stimulus_r[162 +: 1];
     end
-    reg [31:0] tage_f1_pc_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:0] tage_f1_pc_r;
     always @(posedge clk_i) begin
         tage_f1_pc_r <= stimulus_r[212 +: 32];
     end
@@ -270,59 +271,59 @@ module edrv32_fpga_probe_cpu2_int_top (
     always @(posedge clk_i) begin
         tage_f2_base_indices_r <= tage_f2_base_indices_w;
     end
-    reg tage_d_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg tage_d_valid_r;
     always @(posedge clk_i) begin
         tage_d_valid_r <= stimulus_r[200 +: 1];
     end
-    reg [35:0] tage_d_indices_r;
+    (* keep = "true", syn_preserve = 1 *) reg [35:0] tage_d_indices_r;
     always @(posedge clk_i) begin
         tage_d_indices_r <= stimulus_r[33 +: 36];
     end
-    reg [39:0] tage_d_tags_r;
+    (* keep = "true", syn_preserve = 1 *) reg [39:0] tage_d_tags_r;
     always @(posedge clk_i) begin
         tage_d_tags_r <= stimulus_r[60 +: 40];
     end
-    reg [11:0] tage_d_base_index_r;
+    (* keep = "true", syn_preserve = 1 *) reg [11:0] tage_d_base_index_r;
     always @(posedge clk_i) begin
         tage_d_base_index_r <= stimulus_r[23 +: 12];
     end
-    reg [2:0] tage_d_provider_r;
+    (* keep = "true", syn_preserve = 1 *) reg [2:0] tage_d_provider_r;
     always @(posedge clk_i) begin
         tage_d_provider_r <= stimulus_r[24 +: 3];
     end
-    reg tage_d_prediction_r;
+    (* keep = "true", syn_preserve = 1 *) reg tage_d_prediction_r;
     always @(posedge clk_i) begin
         tage_d_prediction_r <= stimulus_r[39 +: 1];
     end
-    reg tage_d_alternate_r;
+    (* keep = "true", syn_preserve = 1 *) reg tage_d_alternate_r;
     always @(posedge clk_i) begin
         tage_d_alternate_r <= stimulus_r[58 +: 1];
     end
-    reg tage_ex_resolve_r;
+    (* keep = "true", syn_preserve = 1 *) reg tage_ex_resolve_r;
     always @(posedge clk_i) begin
         tage_ex_resolve_r <= stimulus_r[77 +: 1];
     end
-    reg tage_ex_taken_r;
+    (* keep = "true", syn_preserve = 1 *) reg tage_ex_taken_r;
     always @(posedge clk_i) begin
         tage_ex_taken_r <= stimulus_r[96 +: 1];
     end
-    reg tage_mem_resolve_r;
+    (* keep = "true", syn_preserve = 1 *) reg tage_mem_resolve_r;
     always @(posedge clk_i) begin
         tage_mem_resolve_r <= stimulus_r[115 +: 1];
     end
-    reg tage_mem_taken_r;
+    (* keep = "true", syn_preserve = 1 *) reg tage_mem_taken_r;
     always @(posedge clk_i) begin
         tage_mem_taken_r <= stimulus_r[134 +: 1];
     end
-    reg tage_fast_update_r;
+    (* keep = "true", syn_preserve = 1 *) reg tage_fast_update_r;
     always @(posedge clk_i) begin
         tage_fast_update_r <= stimulus_r[153 +: 1];
     end
-    reg [11:0] tage_fast_index_r;
+    (* keep = "true", syn_preserve = 1 *) reg [11:0] tage_fast_index_r;
     always @(posedge clk_i) begin
         tage_fast_index_r <= stimulus_r[194 +: 12];
     end
-    reg tage_fast_taken_r;
+    (* keep = "true", syn_preserve = 1 *) reg tage_fast_taken_r;
     always @(posedge clk_i) begin
         tage_fast_taken_r <= stimulus_r[191 +: 1];
     end
@@ -360,91 +361,91 @@ module edrv32_fpga_probe_cpu2_int_top (
         .fast_taken_i(tage_fast_taken_r),
         .pending_o(tage_pending_w)
     );
-    reg id_agu_id_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg id_agu_id_valid_r;
     always @(posedge clk_i) begin
         id_agu_id_valid_r <= stimulus_r[210 +: 1];
     end
-    reg id_agu_id_load_r;
+    (* keep = "true", syn_preserve = 1 *) reg id_agu_id_load_r;
     always @(posedge clk_i) begin
         id_agu_id_load_r <= stimulus_r[229 +: 1];
     end
-    reg id_agu_id_store_r;
+    (* keep = "true", syn_preserve = 1 *) reg id_agu_id_store_r;
     always @(posedge clk_i) begin
         id_agu_id_store_r <= stimulus_r[248 +: 1];
     end
-    reg [4:0] id_agu_id_rs1_r;
+    (* keep = "true", syn_preserve = 1 *) reg [4:0] id_agu_id_rs1_r;
     always @(posedge clk_i) begin
         id_agu_id_rs1_r <= stimulus_r[23 +: 5];
     end
-    reg [4:0] id_agu_id_candidates_r;
+    (* keep = "true", syn_preserve = 1 *) reg [4:0] id_agu_id_candidates_r;
     always @(posedge clk_i) begin
         id_agu_id_candidates_r <= stimulus_r[42 +: 5];
     end
-    reg [31:0] id_agu_id_imm_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:0] id_agu_id_imm_r;
     always @(posedge clk_i) begin
         id_agu_id_imm_r <= stimulus_r[142 +: 32];
     end
-    reg [1:0] id_agu_wb_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg [1:0] id_agu_wb_valid_r;
     always @(posedge clk_i) begin
         id_agu_wb_valid_r <= stimulus_r[71 +: 2];
     end
-    reg [9:0] id_agu_wb_rd_r;
+    (* keep = "true", syn_preserve = 1 *) reg [9:0] id_agu_wb_rd_r;
     always @(posedge clk_i) begin
         id_agu_wb_rd_r <= stimulus_r[114 +: 10];
     end
-    reg [63:0] id_agu_wb_data_r;
+    (* keep = "true", syn_preserve = 1 *) reg [63:0] id_agu_wb_data_r;
     always @(posedge clk_i) begin
         id_agu_wb_data_r <= stimulus_r[102 +: 64];
     end
-    reg id_agu_older_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg id_agu_older_valid_r;
     always @(posedge clk_i) begin
         id_agu_older_valid_r <= stimulus_r[125 +: 1];
     end
-    reg [4:0] id_agu_older_rd_r;
+    (* keep = "true", syn_preserve = 1 *) reg [4:0] id_agu_older_rd_r;
     always @(posedge clk_i) begin
         id_agu_older_rd_r <= stimulus_r[156 +: 5];
     end
-    reg [1:0] id_agu_ex_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg [1:0] id_agu_ex_valid_r;
     always @(posedge clk_i) begin
         id_agu_ex_valid_r <= stimulus_r[166 +: 2];
     end
-    reg [9:0] id_agu_ex_rd_r;
+    (* keep = "true", syn_preserve = 1 *) reg [9:0] id_agu_ex_rd_r;
     always @(posedge clk_i) begin
         id_agu_ex_rd_r <= stimulus_r[209 +: 10];
     end
-    reg [1:0] id_agu_mem_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg [1:0] id_agu_mem_valid_r;
     always @(posedge clk_i) begin
         id_agu_mem_valid_r <= stimulus_r[204 +: 2];
     end
-    reg [9:0] id_agu_mem_rd_r;
+    (* keep = "true", syn_preserve = 1 *) reg [9:0] id_agu_mem_rd_r;
     always @(posedge clk_i) begin
         id_agu_mem_rd_r <= stimulus_r[0 +: 10];
     end
-    reg [1:0] id_agu_wb_mul_pending_r;
+    (* keep = "true", syn_preserve = 1 *) reg [1:0] id_agu_wb_mul_pending_r;
     always @(posedge clk_i) begin
         id_agu_wb_mul_pending_r <= stimulus_r[242 +: 2];
     end
-    reg [9:0] id_agu_wb_mul_rd_r;
+    (* keep = "true", syn_preserve = 1 *) reg [9:0] id_agu_wb_mul_rd_r;
     always @(posedge clk_i) begin
         id_agu_wb_mul_rd_r <= stimulus_r[38 +: 10];
     end
-    reg id_agu_fill_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg id_agu_fill_valid_r;
     always @(posedge clk_i) begin
         id_agu_fill_valid_r <= stimulus_r[21 +: 1];
     end
-    reg id_agu_fill_way_r;
+    (* keep = "true", syn_preserve = 1 *) reg id_agu_fill_way_r;
     always @(posedge clk_i) begin
         id_agu_fill_way_r <= stimulus_r[40 +: 1];
     end
-    reg [31:0] id_agu_fill_addr_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:0] id_agu_fill_addr_r;
     always @(posedge clk_i) begin
         id_agu_fill_addr_r <= stimulus_r[183 +: 32];
     end
-    reg [31:0] id_agu_fill_data_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:0] id_agu_fill_data_r;
     always @(posedge clk_i) begin
         id_agu_fill_data_r <= stimulus_r[202 +: 32];
     end
-    reg id_agu_fill_line_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg id_agu_fill_line_valid_r;
     always @(posedge clk_i) begin
         id_agu_fill_line_valid_r <= stimulus_r[97 +: 1];
     end

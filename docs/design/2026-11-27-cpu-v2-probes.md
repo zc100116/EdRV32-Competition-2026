@@ -88,3 +88,24 @@ lint：`(cd rtl/filelists && ../../tools/check/lint.sh -DSIM_MODE --top-module e
 PDS 2022.2-SP6.1 在 rtl-infer/DFF-inference 崩溃：generate 展开的多个 always 写同一模块级 reg 数组。
 整数探针改为每次迭代独占局部 reg，由同作用域 assign 接到模块级扁平 wire，读取使用常量位段。
 RF LVT 同样拆为局部位寄存器；不跨 generate 层次引用、不切片局部数组，保持原有行为与拍边界。
+
+### 第 2 版（165 MHz 目标）
+
+F2 两路分别提取 rs、并行查询 LVT/WB，再选路；保留并行结果，避免综合重新串接 tag→LVT。
+WB 在存活项移动前修正，新项在入队前并行修正；每区六项+一个 bank 两路，共16个源操作数。
+IB 增加同沿维护的13位独热信用，移除插入位置的减法/加法比较；不加拍，容量/吞吐/对外时序不变。
+TAGE 训练索引相等关系随已有 EX/MEM/待写项同沿注册，F1 对各旁路源并行比较 index/tag 后合并。
+顶层保留各消费区域的激励捕获寄存器，禁止共享 stimulus 位跨区域合并；约束改为6.061ns。
+
+| 路径（ABC LUT6参考） | 基线 → 第2版 |
+|---|---:|
+| I$读出→IB候选 | 15 → 9 |
+| TAGE RAM→F2 provider/alternate | 13 → 12 |
+| 待写任意寄存器/仅index→F1命中 | 22/22 → 18/6 |
+| MEM index→F1命中/训练捕获/RAM写端口 | 22/11/19 → 15/6/15 |
+| RF读/ID→AGU/DRM→操作数 | 5/17/4 → 5/17/4 |
+基线 `0a2199fc8`；新版为本小节同提交；命令 `python3 verif/unit/cpu2_tage/levels.py`（Yosys 0.70+219）。
+原始输出 `build/cpu2_int/levels/{synth.log,mapped.json,levels.txt}`；同步RAM/FF切断，不代表PDS级数或频率。
+探针相关激励可让MEM index与tag寄存器合并别名；最长旁路控制/训练标签链仍需PDS验证165MHz，未宣称达标。
+协调者同意仿真主机断连后改本机：四个smoke均PASS，命令 `for m in rf fetch tage id_agu; do python3 tools/regress.py smoke --path verif/unit/cpu2_$m -j 1; done`。
+风格检查与Verilator 5.020 `--lint-only -Wall`零告警；未引入generate层次引用、局部数组切片或多always分写。
