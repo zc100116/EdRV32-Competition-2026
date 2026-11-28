@@ -14,8 +14,6 @@ module edrv32_cpu2_csr #(
     input wire [31:0] csr_req_instr_i,
     input wire [31:0] csr_req_src_i,
     input wire csr_commit_valid_i,
-    input wire [31:0] csr_commit_instr_i,
-    input wire [31:0] csr_commit_src_i,
     output wire csr_complete_valid_o,
     input wire csr_complete_ready_i,
     output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] csr_complete_tag_o,
@@ -92,6 +90,7 @@ module edrv32_cpu2_csr #(
     reg [31:0] complete_data_r;
     reg complete_exception_r;
     reg [31:0] complete_instr_r;
+    reg [31:0] complete_src_r;
     wire [T-1:0] cancel_distance_w;
     wire [T-1:0] complete_distance_w;
     wire complete_cancel_w;
@@ -111,14 +110,14 @@ module edrv32_cpu2_csr #(
     assign trap_target_o = {mtvec_r[31:2], 2'b0} +
         ((mtvec_r[0] && trap_cause_i[31]) ? {2'b0, trap_cause_i[29:0]} << 2 : 32'b0);
     assign req_addr_w = csr_req_instr_i[31:20];
-    assign commit_addr_w = csr_commit_instr_i[31:20];
+    assign commit_addr_w = complete_instr_r[31:20];
     assign req_write_w = csr_req_instr_i[13:12] == 2'b01 ||
         csr_req_instr_i[19:15] != 5'b0;
     assign commit_write_w = csr_commit_valid_i && !trap_valid_i &&
-        csr_commit_instr_i[6:0] == 7'h73 && csr_commit_instr_i[14:12] != 3'b0 &&
-        (csr_commit_instr_i[13:12] == 2'b01 || csr_commit_instr_i[19:15] != 5'b0);
-    assign commit_operand_w = csr_commit_instr_i[14] ?
-        {27'b0, csr_commit_instr_i[19:15]} : csr_commit_src_i;
+        complete_instr_r[6:0] == 7'h73 && complete_instr_r[14:12] != 3'b0 &&
+        (complete_instr_r[13:12] == 2'b01 || complete_instr_r[19:15] != 5'b0);
+    assign commit_operand_w = complete_instr_r[14] ?
+        {27'b0, complete_instr_r[19:15]} : complete_src_r;
     assign mret_w = mret_valid_i;
     assign req_illegal_w = csr_req_instr_i[14:12] != 3'b0 &&
         (!req_exists_w || (req_write_w &&
@@ -326,7 +325,7 @@ module edrv32_cpu2_csr #(
     assign commit_read_w = complete_data_r;
     always @(*) begin
         commit_data_w = commit_operand_w;
-        case (csr_commit_instr_i[13:12])
+        case (complete_instr_r[13:12])
             2'b10: commit_data_w = commit_read_w | commit_operand_w;
             2'b11: commit_data_w = commit_read_w & ~commit_operand_w;
             default: commit_data_w = commit_operand_w;
@@ -365,6 +364,7 @@ module edrv32_cpu2_csr #(
             complete_data_r <= req_read_w;
             complete_exception_r <= req_illegal_w;
             complete_instr_r <= csr_req_instr_i;
+            complete_src_r <= csr_req_src_i;
         end
     end
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -543,6 +543,7 @@ module edrv32_cpu2_csr #(
     assign trace_csr_addr_w = {{(12*(ISSUE_WIDTH-1)){1'b0}}, commit_addr_w};
     assign trace_csr_data_w = {{(32*(ISSUE_WIDTH-1)){1'b0}}, trace_csr_value_w};
     always @(*) begin
+        trace_event_idx = 0;
         trace_csr_value_w = commit_data_w;
         case (commit_addr_w)
             12'h001: trace_csr_value_w = {27'b0, commit_data_w[4:0]};
@@ -581,8 +582,7 @@ module edrv32_cpu2_csr #(
     wire unused_w = ^{
         trace_csr_valid_w, trace_csr_addr_w, trace_csr_data_w,
         trace_fflags_w, trace_frm_w, trace_fs_w,
-        csr_req_src_i,
-        csr_commit_instr_i[11:7],
+        complete_instr_r[11:7],
         trap_pc_i[1:0],
         event_r[3]
     };

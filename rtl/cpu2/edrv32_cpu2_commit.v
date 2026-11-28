@@ -12,10 +12,10 @@ module edrv32_cpu2_commit #(
     input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head0_tag_i,
     input wire [31:0] head0_pc_i,
     input wire [31:0] head0_next_pc_i,
-    input wire [31:0] head0_instr_i,
+    input wire [3:0] head0_kind_i,
+    input wire [31:0] head0_trace_instr_i,
     input wire [4:0] head0_rd_i,
     input wire [1:0] head0_dest_i,
-    input wire [31:0] head0_csr_src_i,
     input wire head0_store_i,
     input wire head0_divide_i,
     input wire head0_double_beat_i,
@@ -39,10 +39,10 @@ module edrv32_cpu2_commit #(
     input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head1_tag_i,
     input wire [31:0] head1_pc_i,
     input wire [31:0] head1_next_pc_i,
-    input wire [31:0] head1_instr_i,
+    input wire [3:0] head1_kind_i,
+    input wire [31:0] head1_trace_instr_i,
     input wire [4:0] head1_rd_i,
     input wire [1:0] head1_dest_i,
-    input wire [31:0] head1_csr_src_i,
     input wire head1_store_i,
     input wire head1_divide_i,
     input wire head1_double_beat_i,
@@ -84,8 +84,6 @@ module edrv32_cpu2_commit #(
     input wire [31:0] commit_lsu_done_fault_addr_i,
     input wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] commit_lsu_done_data_i,
     output wire csr_commit_valid_o,
-    output wire [31:0] csr_commit_instr_o,
-    output wire [31:0] csr_commit_src_o,
     output wire fp_commit_flags_valid_o,
     output wire [4:0] fp_commit_flags_o,
     output wire fp_commit_write_o,
@@ -114,6 +112,14 @@ module edrv32_cpu2_commit #(
     output wire [1:0] counter_retire_count_o,
     output wire [1:0] hpm_branch_count_o
 );
+    // Commit-only classification: four bits cover the nine mutually exclusive kinds.
+    localparam [3:0] C_FENCE = 4'd1;
+    localparam [3:0] C_FENCE_I = 4'd2;
+    localparam [3:0] C_MRET = 4'd4;
+    localparam [3:0] C_WFI = 4'd5;
+    localparam [3:0] C_CSR = 4'd6;
+    localparam [3:0] C_CONTROL = 4'd7;
+    localparam [3:0] C_FP = 4'd8;
     localparam T = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
     localparam B = FPU_FORMAT == "FD" ? 64 : 32;
     localparam S_IDLE = 3'd0;
@@ -176,12 +182,12 @@ module edrv32_cpu2_commit #(
         head1_distance_w > (branch_redirect_tag_i - age_head_i);
     assign memory0_w = head0_store_i || head0_device_i || head0_double_beat_i;
     assign memory1_w = head1_store_i || head1_device_i || head1_double_beat_i;
-    assign fence0_w = head0_instr_i[6:0] == 7'h0f;
-    assign fence_i0_w = fence0_w && head0_instr_i[14:12] == 3'b001;
-    assign system0_w = head0_instr_i[6:0] == 7'h73 || fence0_w;
-    assign system1_w = head1_instr_i[6:0] == 7'h73 || head1_instr_i[6:0] == 7'h0f;
-    assign mret0_w = head0_instr_i == 32'h30200073;
-    assign wfi0_w = head0_instr_i == 32'h10500073;
+    assign fence0_w = head0_kind_i == C_FENCE || head0_kind_i == C_FENCE_I;
+    assign fence_i0_w = head0_kind_i == C_FENCE_I;
+    assign system0_w = head0_kind_i >= C_FENCE && head0_kind_i <= C_CSR;
+    assign system1_w = head1_kind_i >= C_FENCE && head1_kind_i <= C_CSR;
+    assign mret0_w = head0_kind_i == C_MRET;
+    assign wfi0_w = head0_kind_i == C_WFI;
     assign indivisible_w =
         (head0_valid_i && (head0_divide_i || head0_double_beat_i)) ||
         state_r == S_LSU || (state_r != S_IDLE && fence_i0_w);
@@ -195,7 +201,7 @@ module edrv32_cpu2_commit #(
         (memory0_w ? lsu_done_w : fence0_w ? state_r == S_FENCE_DONE : 1'b1);
     assign fault1_w = ISSUE_WIDTH == 2 && retire0_w && !system0_w && head1_valid_i &&
         head1_done_i && !head1_cancel_w && head1_exception_i;
-    assign fp_int1_w = head1_dest_i == 2'd1 && head1_instr_i[6:0] == 7'h53;
+    assign fp_int1_w = head1_dest_i == 2'd1 && head1_kind_i == C_FP;
     assign fp_int1_retire_w = retire1_w && fp_int1_w;
     assign retire1_w = ISSUE_WIDTH == 2 && retire0_w && !system0_w &&
         head1_valid_i && head1_done_i && !head1_cancel_w && !head1_exception_i &&
@@ -224,10 +230,7 @@ module edrv32_cpu2_commit #(
     assign fp_commit_flags_o = FPU_FORMAT == "NONE" ? 5'b0 :
         ({5{retire0_w}} & head0_flags_i) | ({5{retire1_w}} & head1_flags_i);
     assign fp_commit_write_o = fp_wb_valid_w;
-    assign csr_commit_valid_o = retire0_w && head0_instr_i[6:0] == 7'h73 &&
-        head0_instr_i[14:12] != 0;
-    assign csr_commit_instr_o = head0_instr_i;
-    assign csr_commit_src_o = head0_csr_src_i;
+    assign csr_commit_valid_o = retire0_w && head0_kind_i == C_CSR;
     assign mret_valid_o = retire0_w && mret0_w;
     assign commit_lsu_valid_o = state_r == S_IDLE && head0_valid_i && head0_done_i &&
         memory0_w && !fault0_w && !irq_take_w && !head0_cancel_w;
@@ -255,15 +258,10 @@ module edrv32_cpu2_commit #(
     assign commit_redirect_valid_o = redirect_r;
     assign commit_redirect_pc_o = redirect_pc_r;
     assign fetch_stop_o = stop_r;
-    assign control0_w = head0_instr_i[6:0] == 7'h63 ||
-        head0_instr_i[6:0] == 7'h6f || head0_instr_i[6:0] == 7'h67;
-    assign control1_w = head1_instr_i[6:0] == 7'h63 ||
-        head1_instr_i[6:0] == 7'h6f || head1_instr_i[6:0] == 7'h67;
-    assign hpm_branch_count_o =
-        {1'b0, retire0_w && (head0_instr_i[6:0] == 7'h63 ||
-        head0_instr_i[6:0] == 7'h6f || head0_instr_i[6:0] == 7'h67)} +
-        {1'b0, retire1_w && (head1_instr_i[6:0] == 7'h63 ||
-        head1_instr_i[6:0] == 7'h6f || head1_instr_i[6:0] == 7'h67)};
+    assign control0_w = head0_kind_i == C_CONTROL;
+    assign control1_w = head1_kind_i == C_CONTROL;
+    assign hpm_branch_count_o = {1'b0, retire0_w && control0_w} +
+        {1'b0, retire1_w && control1_w};
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             state_r <= S_IDLE;
@@ -450,14 +448,14 @@ module edrv32_cpu2_commit #(
     wire [31:0] trace_tval_w;
     assign trace_valid_w[0] = retire0_w;
     assign trace_pc_w[31:0] = head0_pc_i;
-    assign trace_instr_w[31:0] = head0_instr_i;
+    assign trace_instr_w[31:0] = head0_trace_instr_i;
     assign trace_rd_w[4:0] = head0_rd_i;
     assign trace_rd_domain_w[1:0] = head0_dest_i;
     assign trace_rd_data_w[63:0] = {{(64-B){1'b0}}, retire_data0_w};
     assign trace_flags_w[4:0] = head0_flags_i;
-    assign trace_mem_valid_w[0] = retire0_w && (head0_instr_i[6:0] == 7'h03 ||
-        head0_instr_i[6:0] == 7'h07 || head0_instr_i[6:0] == 7'h23 ||
-        head0_instr_i[6:0] == 7'h27);
+    assign trace_mem_valid_w[0] = retire0_w && (head0_trace_instr_i[6:0] == 7'h03 ||
+        head0_trace_instr_i[6:0] == 7'h07 || head0_trace_instr_i[6:0] == 7'h23 ||
+        head0_trace_instr_i[6:0] == 7'h27);
     assign trace_mem_store_w[0] = head0_store_i;
     assign trace_mem_addr_w[31:0] = head0_mem_addr_i;
     assign trace_mem_data_w[63:0] = head0_device_i && !head0_store_i ?
@@ -467,14 +465,14 @@ module edrv32_cpu2_commit #(
         if (ISSUE_WIDTH == 2) begin : g_trace1
             assign trace_valid_w[1] = retire1_w;
             assign trace_pc_w[63:32] = head1_pc_i;
-            assign trace_instr_w[63:32] = head1_instr_i;
+            assign trace_instr_w[63:32] = head1_trace_instr_i;
             assign trace_rd_w[9:5] = head1_rd_i;
             assign trace_rd_domain_w[3:2] = head1_dest_i;
             assign trace_rd_data_w[127:64] = {{(64-B){1'b0}}, retire_data1_w};
             assign trace_flags_w[9:5] = head1_flags_i;
-            assign trace_mem_valid_w[1] = retire1_w && (head1_instr_i[6:0] == 7'h03 ||
-                head1_instr_i[6:0] == 7'h07 || head1_instr_i[6:0] == 7'h23 ||
-                head1_instr_i[6:0] == 7'h27);
+            assign trace_mem_valid_w[1] = retire1_w && (head1_trace_instr_i[6:0] == 7'h03 ||
+                head1_trace_instr_i[6:0] == 7'h07 || head1_trace_instr_i[6:0] == 7'h23 ||
+                head1_trace_instr_i[6:0] == 7'h27);
             assign trace_mem_store_w[1] = head1_store_i;
             assign trace_mem_addr_w[63:32] = head1_mem_addr_i;
             assign trace_mem_data_w[127:64] = head1_mem_data_i;
@@ -488,9 +486,9 @@ module edrv32_cpu2_commit #(
     // Unused configuration fields and internal architectural observation wires.
     /* verilator lint_off UNUSEDSIGNAL */
     wire unused_w = ^{
-        head1_instr_i, head1_mem_addr_i, head1_mem_data_i, head1_mem_mask_i,
+        head1_trace_instr_i, head1_mem_addr_i, head1_mem_data_i, head1_mem_mask_i,
         fp_wb_rd_w, fp_wb_data_w,
-        head1_divide_i, head1_csr_src_i,
+        head1_divide_i,
         cancel_valid_i,
         commit_lsu_done_tag_i,
         cancel_distance_w,

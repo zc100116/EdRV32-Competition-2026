@@ -7,15 +7,16 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
     localparam N = FPU_FORMAT == "FD" ? 16 : FPU_FORMAT == "F" ? 8 : 4;
     localparam T = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
     localparam B = FPU_FORMAT == "FD" ? 64 : 32;
+    reg [31:0] trace_noise;
     reg clk_i;
     reg rst_n_i;
     reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head0_tag_i;
     reg [31:0] head0_pc_i;
     reg [31:0] head0_next_pc_i;
     reg [31:0] head0_instr_i;
+    wire [3:0] head0_kind_i;
     reg [4:0] head0_rd_i;
     reg [1:0] head0_dest_i;
-    reg [31:0] head0_csr_src_i;
     reg head0_store_i;
     reg head0_divide_i;
     reg head0_double_beat_i;
@@ -40,9 +41,9 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
     reg [31:0] head1_pc_i;
     reg [31:0] head1_next_pc_i;
     reg [31:0] head1_instr_i;
+    wire [3:0] head1_kind_i;
     reg [4:0] head1_rd_i;
     reg [1:0] head1_dest_i;
-    reg [31:0] head1_csr_src_i;
     reg head1_store_i;
     reg head1_divide_i;
     reg head1_double_beat_i;
@@ -84,8 +85,6 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
     reg [31:0] commit_lsu_done_fault_addr_i;
     reg [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] commit_lsu_done_data_i;
     wire csr_commit_valid_o;
-    wire [31:0] csr_commit_instr_o;
-    wire [31:0] csr_commit_src_o;
     wire fp_commit_flags_valid_o;
     wire [4:0] fp_commit_flags_o;
     wire fp_commit_write_o;
@@ -119,10 +118,10 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
         .head0_tag_i(head0_tag_i),
         .head0_pc_i(head0_pc_i),
         .head0_next_pc_i(head0_next_pc_i),
-        .head0_instr_i(head0_instr_i),
+        .head0_kind_i(head0_kind_i),
+        .head0_trace_instr_i(head0_instr_i ^ trace_noise),
         .head0_rd_i(head0_rd_i),
         .head0_dest_i(head0_dest_i),
-        .head0_csr_src_i(head0_csr_src_i),
         .head0_store_i(head0_store_i),
         .head0_divide_i(head0_divide_i),
         .head0_double_beat_i(head0_double_beat_i),
@@ -146,10 +145,10 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
         .head1_tag_i(head1_tag_i),
         .head1_pc_i(head1_pc_i),
         .head1_next_pc_i(head1_next_pc_i),
-        .head1_instr_i(head1_instr_i),
+        .head1_kind_i(head1_kind_i),
+        .head1_trace_instr_i(head1_instr_i ^ trace_noise),
         .head1_rd_i(head1_rd_i),
         .head1_dest_i(head1_dest_i),
-        .head1_csr_src_i(head1_csr_src_i),
         .head1_store_i(head1_store_i),
         .head1_divide_i(head1_divide_i),
         .head1_double_beat_i(head1_double_beat_i),
@@ -191,8 +190,6 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
         .commit_lsu_done_fault_addr_i(commit_lsu_done_fault_addr_i),
         .commit_lsu_done_data_i(commit_lsu_done_data_i),
         .csr_commit_valid_o(csr_commit_valid_o),
-        .csr_commit_instr_o(csr_commit_instr_o),
-        .csr_commit_src_o(csr_commit_src_o),
         .fp_commit_flags_valid_o(fp_commit_flags_valid_o),
         .fp_commit_flags_o(fp_commit_flags_o),
         .fp_commit_write_o(fp_commit_write_o),
@@ -221,6 +218,21 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
         .counter_retire_count_o(counter_retire_count_o),
         .hpm_branch_count_o(hpm_branch_count_o)
     );
+    // Interface classification model; original words remain trace-only stimuli.
+    function [3:0] commit_kind(input [31:0] instr);
+        begin
+            if(instr==32'h30200073) commit_kind=4;
+            else if(instr==32'h10500073) commit_kind=5;
+            else if(instr[6:0]==7'h0f) commit_kind=instr[14:12]==1 ? 2:1;
+            else if(instr[6:0]==7'h73) commit_kind=instr[14:12]!=0 ? 6:3;
+            else if(instr[6:0]==7'h63 || instr[6:0]==7'h67 || instr[6:0]==7'h6f)
+                commit_kind=7;
+            else if(instr[6:0]==7'h53) commit_kind=8;
+            else commit_kind=0;
+        end
+    endfunction
+    assign head0_kind_i=commit_kind(head0_instr_i);
+    assign head1_kind_i=commit_kind(head1_instr_i);
     always #5 clk_i = ~clk_i;
     task tick; begin @(posedge clk_i); #1; end endtask
     task check(input condition, input [511:0] label);
@@ -238,7 +250,7 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
             check(!wb0_valid_copy_o && !wb1_valid_copy_o,"single issue has no WB copies");
     end
     initial begin
-        finished=0;
+        finished=0; trace_noise=0;
         clk_i='0;
         rst_n_i='0;
         head0_tag_i='0;
@@ -247,7 +259,6 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
         head0_instr_i='0;
         head0_rd_i='0;
         head0_dest_i='0;
-        head0_csr_src_i='0;
         head0_store_i='0;
         head0_divide_i='0;
         head0_double_beat_i='0;
@@ -268,7 +279,6 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
         head1_instr_i='0;
         head1_rd_i='0;
         head1_dest_i='0;
-        head1_csr_src_i='0;
         head1_store_i='0;
         head1_divide_i='0;
         head1_double_beat_i='0;
@@ -310,6 +320,11 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
         head1_valid_i=1; head1_done_i=1; head1_pc_i=32'h1004; head1_tag_i=1;
         head1_instr_i=32'h13; head1_rd_i=1; head1_dest_i=1; head1_data_i=22;
         #1; check(32'(retire_count_o)==ISSUE_WIDTH,"retire ordered prefix");
+        trace_noise=head0_instr_i ^ 32'h30200073;
+        #1; check(32'(retire_count_o)==ISSUE_WIDTH && !mret_valid_o,
+            "trace instruction cannot change retirement behavior");
+        check(dut.trace_instr_w[31:0]==32'h30200073,"trace word remains observable");
+        trace_noise=0;
         check(!wb0_valid_o,"WB has no combinational retirement path");
         tick();
         check(wb0_valid_o && wb0_tag_o==0 && wb0_data_o==11,"older RF write");

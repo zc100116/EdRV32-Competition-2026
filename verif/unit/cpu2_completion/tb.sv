@@ -34,10 +34,10 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
     wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head0_tag_o;
     wire [31:0] head0_pc_o;
     wire [31:0] head0_next_pc_o;
-    wire [31:0] head0_instr_o;
+    wire [3:0] head0_kind_o;
+    wire [31:0] head0_trace_instr_o;
     wire [4:0] head0_rd_o;
     wire [1:0] head0_dest_o;
-    wire [31:0] head0_csr_src_o;
     wire head0_store_o;
     wire head0_divide_o;
     wire head0_double_beat_o;
@@ -64,10 +64,10 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
     wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head1_tag_o;
     wire [31:0] head1_pc_o;
     wire [31:0] head1_next_pc_o;
-    wire [31:0] head1_instr_o;
+    wire [3:0] head1_kind_o;
+    wire [31:0] head1_trace_instr_o;
     wire [4:0] head1_rd_o;
     wire [1:0] head1_dest_o;
-    wire [31:0] head1_csr_src_o;
     wire head1_store_o;
     wire head1_divide_o;
     wire head1_double_beat_o;
@@ -208,10 +208,10 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
         .head0_tag_o(head0_tag_o),
         .head0_pc_o(head0_pc_o),
         .head0_next_pc_o(head0_next_pc_o),
-        .head0_instr_o(head0_instr_o),
+        .head0_kind_o(head0_kind_o),
+        .head0_trace_instr_o(head0_trace_instr_o),
         .head0_rd_o(head0_rd_o),
         .head0_dest_o(head0_dest_o),
-        .head0_csr_src_o(head0_csr_src_o),
         .head0_store_o(head0_store_o),
         .head0_divide_o(head0_divide_o),
         .head0_double_beat_o(head0_double_beat_o),
@@ -238,10 +238,10 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
         .head1_tag_o(head1_tag_o),
         .head1_pc_o(head1_pc_o),
         .head1_next_pc_o(head1_next_pc_o),
-        .head1_instr_o(head1_instr_o),
+        .head1_kind_o(head1_kind_o),
+        .head1_trace_instr_o(head1_trace_instr_o),
         .head1_rd_o(head1_rd_o),
         .head1_dest_o(head1_dest_o),
-        .head1_csr_src_o(head1_csr_src_o),
         .head1_store_o(head1_store_o),
         .head1_divide_o(head1_divide_o),
         .head1_double_beat_o(head1_double_beat_o),
@@ -512,6 +512,52 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
             reset_queue();
         end
     endtask
+    reg [31:0] kind_words [0:8];
+    task check_compact_records;
+        integer kind_index;
+        begin
+            kind_words[0]=32'h00000013;
+            kind_words[1]=32'h0000000f;
+            kind_words[2]=32'h0000100f;
+            kind_words[3]=32'h00000073;
+            kind_words[4]=32'h30200073;
+            kind_words[5]=32'h10500073;
+            kind_words[6]=32'h34009073;
+            kind_words[7]=32'h0000006f;
+            kind_words[8]=32'h00000053;
+            for(kind_index=0;kind_index<9;kind_index=kind_index+1) begin
+                reset_queue();
+                allocate_valid_i=1; allocate_count_i=2'(ISSUE_WIDTH);
+                allocate0_tag_i=0; allocate1_tag_i=1;
+                allocate0_instr_i=kind_words[kind_index];
+                allocate1_instr_i=kind_words[8-kind_index];
+                allocate0_dest_i=1; allocate1_dest_i=1;
+                tick(); allocate_valid_i=0;
+                allocate0_instr_i=32'hffffffff; allocate1_instr_i=32'hffffffff;
+                #1;
+                check(head0_kind_o==4'(kind_index),"compact commit kind 0");
+                check(head0_trace_instr_o==kind_words[kind_index],"trace instruction 0");
+                if(ISSUE_WIDTH==2) begin
+                    check(head1_kind_o==4'(8-kind_index),"compact commit kind 1");
+                    check(head1_trace_instr_o==kind_words[8-kind_index],"trace instruction 1");
+                end
+                alu0_complete_valid_i=1; alu0_complete_tag_i=0;
+                alu0_complete_data_i=B'(32'hfeedface); alu0_complete_exception_i=1;
+                alu0_complete_cause_i=5; alu0_complete_tval_i=32'h12340000+32'(kind_index);
+                mul_complete_valid_i=(ISSUE_WIDTH==2); mul_complete_tag_i=1;
+                mul_complete_data_i=B'(32'hdeadbeef); mul_complete_exception_i=1;
+                mul_complete_cause_i=7; mul_complete_tval_i=32'habcd0000+32'(kind_index);
+                tick(); alu0_complete_valid_i=0; mul_complete_valid_i=0;
+                check(head0_exception_o && head0_tval_o==32'h12340000+32'(kind_index),
+                    "exception tval replaces result low word 0");
+                if(ISSUE_WIDTH==2)
+                    check(head1_exception_o && head1_tval_o==32'habcd0000+32'(kind_index),
+                        "exception tval replaces result low word 1");
+            end
+            alu0_complete_exception_i=0; mul_complete_exception_i=0;
+            reset_queue();
+        end
+    endtask
     initial begin
         finished=0;
         clk_i='0;
@@ -767,6 +813,7 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
         #1; check(cancel_valid_o && cancel_tag_o==0,"wrapped branch boundary");
         tick(); branch_redirect_valid_i=0;
         check(allocate_credit_o==1 && age_head_o==1,"wrapped cancellation preserves older prefix");
+        check_compact_records();
         random_queue();
         finished=1;
     end

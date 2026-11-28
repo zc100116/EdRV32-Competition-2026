@@ -34,10 +34,10 @@ module edrv32_cpu2_completion #(
     output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head0_tag_o,
     output wire [31:0] head0_pc_o,
     output wire [31:0] head0_next_pc_o,
-    output wire [31:0] head0_instr_o,
+    output wire [3:0] head0_kind_o,
+    output wire [31:0] head0_trace_instr_o,
     output wire [4:0] head0_rd_o,
     output wire [1:0] head0_dest_o,
-    output wire [31:0] head0_csr_src_o,
     output wire head0_store_o,
     output wire head0_divide_o,
     output wire head0_double_beat_o,
@@ -64,10 +64,10 @@ module edrv32_cpu2_completion #(
     output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head1_tag_o,
     output wire [31:0] head1_pc_o,
     output wire [31:0] head1_next_pc_o,
-    output wire [31:0] head1_instr_o,
+    output wire [3:0] head1_kind_o,
+    output wire [31:0] head1_trace_instr_o,
     output wire [4:0] head1_rd_o,
     output wire [1:0] head1_dest_o,
-    output wire [31:0] head1_csr_src_o,
     output wire head1_store_o,
     output wire head1_divide_o,
     output wire head1_double_beat_o,
@@ -181,6 +181,16 @@ module edrv32_cpu2_completion #(
     input wire [63:0] lsu_complete_mem_data_i,
     input wire [7:0] lsu_complete_mem_mask_i
 );
+    // Commit-only classification: four bits cover the nine mutually exclusive kinds.
+    localparam [3:0] C_REGULAR = 4'd0;
+    localparam [3:0] C_FENCE = 4'd1;
+    localparam [3:0] C_FENCE_I = 4'd2;
+    localparam [3:0] C_SYSTEM = 4'd3;
+    localparam [3:0] C_MRET = 4'd4;
+    localparam [3:0] C_WFI = 4'd5;
+    localparam [3:0] C_CSR = 4'd6;
+    localparam [3:0] C_CONTROL = 4'd7;
+    localparam [3:0] C_FP = 4'd8;
     localparam N = FPU_FORMAT == "FD" ? 16 : FPU_FORMAT == "F" ? 8 : 4;
     localparam T = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
     localparam B = FPU_FORMAT == "FD" ? 64 : 32;
@@ -200,15 +210,15 @@ module edrv32_cpu2_completion #(
     wire [31:0] pc_w [0:N-1];
     wire [31:0] next_pc_w [0:N-1];
     wire [B-1:0] data_w [0:N-1];
-    wire [31:0] instr_w [0:N-1];
+    wire [3:0] kind_w [0:N-1];
+    wire [31:0] trace_instr_w [0:N-1];
+    wire [3:0] allocate_kind_w [0:1];
     wire [4:0] rd_w [0:N-1];
-    wire [31:0] csr_src_w [0:N-1];
     wire [N-1:0] store_w;
     wire [N-1:0] divide_w;
     wire [N-1:0] double_beat_w;
     wire [N-1:0] exception_w;
     wire [3:0] cause_w [0:N-1];
-    wire [31:0] tval_w [0:N-1];
     wire [4:0] flags_w [0:N-1];
     wire [31:0] mem_addr_w [0:N-1];
     wire [63:0] mem_data_w [0:N-1];
@@ -219,6 +229,7 @@ module edrv32_cpu2_completion #(
     wire [T-1:0] result_tag_w [0:8];
     wire [T-1:0] result_distance_w [0:8];
     wire [B-1:0] result_data_w [0:8];
+    wire [B-1:0] result_payload_w [0:8];
     wire [4:0] result_flags_w [0:8];
     wire [8:0] result_exception_w;
     wire [3:0] result_cause_w [0:8];
@@ -350,12 +361,43 @@ module edrv32_cpu2_completion #(
     assign source_tag_w[4] = source4_tag_i;
     assign source_valid_w[4] = source4_valid_i;
     assign source_domain_w[4] = source4_domain_i;
+    genvar slot;
+    generate
+        for (slot = 0; slot < 2; slot = slot + 1) begin : g_allocate_kind
+            wire [31:0] instr_w;
+            reg [3:0] decoded_kind_w;
+            assign instr_w = slot == 0 ? allocate0_instr_i : allocate1_instr_i;
+            assign allocate_kind_w[slot] = decoded_kind_w;
+            always @(*) begin
+                decoded_kind_w = C_REGULAR;
+                case (instr_w[6:0])
+                    7'h0f: decoded_kind_w = instr_w[14:12] == 3'b001 ? C_FENCE_I : C_FENCE;
+                    7'h73: begin
+                        if (instr_w == 32'h30200073)
+                            decoded_kind_w = C_MRET;
+                        else if (instr_w == 32'h10500073)
+                            decoded_kind_w = C_WFI;
+                        else if (instr_w[14:12] != 3'b0)
+                            decoded_kind_w = C_CSR;
+                        else
+                            decoded_kind_w = C_SYSTEM;
+                    end
+                    7'h63, 7'h6f, 7'h67: decoded_kind_w = C_CONTROL;
+                    7'h53: decoded_kind_w = C_FP;
+                    default: decoded_kind_w = C_REGULAR;
+                endcase
+            end
+        end
+    endgenerate
     // Pairwise comparisons form independent age winners, without a serial scan.
     genvar r;
     genvar other;
     generate
         for (r = 0; r < 9; r = r + 1) begin : g_arbitrate
             wire [8:0] older_w;
+            // Exceptions have no result: the same data write stores their mtval.
+            assign result_payload_w[r] = result_exception_w[r] ?
+                {{(B-32){1'b0}}, result_tval_w[r]} : result_data_w[r];
             assign result_distance_w[r] = result_tag_w[r] - head_r;
             assign result_fp_w[r] = dest_w[result_tag_w[r]] == 2'd2;
             for (other = 0; other < 9; other = other + 1) begin : g_compare
@@ -375,16 +417,16 @@ module edrv32_cpu2_completion #(
             reg valid_r;
             reg done_r;
             reg device_r;
-            reg [31:0] instr_r;
+            reg [3:0] kind_r;
+            // Trace is the only consumer of the original instruction word.
+            reg [31:0] trace_instr_r;
             reg [4:0] rd_r;
             reg [1:0] dest_r;
-            reg [31:0] csr_src_r;
             reg store_r;
             reg divide_r;
             reg double_beat_r;
             reg exception_r;
             reg [3:0] cause_r;
-            reg [31:0] tval_r;
             reg [4:0] flags_r;
             reg [31:0] mem_addr_r;
             reg [63:0] mem_data_r;
@@ -398,7 +440,6 @@ module edrv32_cpu2_completion #(
             reg [4:0] selected_flags_w;
             reg selected_exception_w;
             reg [3:0] selected_cause_w;
-            reg [31:0] selected_tval_w;
             integer k;
             assign distance_w = TAG - head_r;
             assign cancel_w = cancel_valid_o && distance_w >= cancel_distance_w;
@@ -414,28 +455,25 @@ module edrv32_cpu2_completion #(
                 selected_flags_w = 5'b0;
                 selected_exception_w = 1'b0;
                 selected_cause_w = 4'b0;
-                selected_tval_w = 32'b0;
                 for (k = 0; k < 9; k = k + 1) begin
                     selected_flags_w = selected_flags_w | ({5{accept_w[k]}} & result_flags_w[k]);
                     selected_exception_w = selected_exception_w |
                         (accept_w[k] && result_exception_w[k]);
                     selected_cause_w = selected_cause_w | ({4{accept_w[k]}} & result_cause_w[k]);
-                    selected_tval_w = selected_tval_w | ({32{accept_w[k]}} & result_tval_w[k]);
                 end
             end
             assign valid_w[q] = valid_r;
             assign done_w[q] = done_r;
             assign device_w[q] = device_r;
-            assign instr_w[q] = instr_r;
+            assign kind_w[q] = kind_r;
+            assign trace_instr_w[q] = trace_instr_r;
             assign rd_w[q] = rd_r;
             assign dest_w[q] = dest_r;
-            assign csr_src_w[q] = csr_src_r;
             assign store_w[q] = store_r;
             assign divide_w[q] = divide_r;
             assign double_beat_w[q] = double_beat_r;
             assign exception_w[q] = exception_r;
             assign cause_w[q] = cause_r;
-            assign tval_w[q] = tval_r;
             assign flags_w[q] = flags_r;
             assign mem_addr_w[q] = mem_addr_r;
             assign mem_data_w[q] = mem_data_r;
@@ -464,10 +502,10 @@ module edrv32_cpu2_completion #(
             end
             always @(posedge clk_i) begin
                 if (allocate0_w || allocate1_w) begin
-                    instr_r <= allocate1_w ? allocate1_instr_i : allocate0_instr_i;
+                    kind_r <= allocate1_w ? allocate_kind_w[1] : allocate_kind_w[0];
+                    trace_instr_r <= allocate1_w ? allocate1_instr_i : allocate0_instr_i;
                     rd_r <= allocate1_w ? allocate1_rd_i : allocate0_rd_i;
                     dest_r <= allocate1_w ? allocate1_dest_i : allocate0_dest_i;
-                    csr_src_r <= allocate1_w ? allocate1_csr_src_i : allocate0_csr_src_i;
                     store_r <= allocate1_w ? allocate1_store_i : allocate0_store_i;
                     divide_r <= allocate1_w ? allocate1_divide_i : allocate0_divide_i;
                     double_beat_r <= allocate1_w ?
@@ -476,7 +514,6 @@ module edrv32_cpu2_completion #(
                 if (|accept_w) begin
                     flags_r <= selected_flags_w;
                     cause_r <= selected_cause_w;
-                    tval_r <= selected_tval_w;
                 end
                 if (accept_w[5]) begin
                     mem_addr_r <= lsu_complete_mem_addr_i;
@@ -497,7 +534,7 @@ module edrv32_cpu2_completion #(
                     selected_data_w = 32'b0;
                     for (i = 0; i < 9; i = i + 1)
                         selected_data_w = selected_data_w |
-                            ({32{accept_w[i]}} & result_data_w[i]);
+                            ({32{accept_w[i]}} & result_payload_w[i]);
                 end
                 always @(posedge clk_i) begin
                     if (allocate0_w || allocate1_w)
@@ -578,7 +615,7 @@ module edrv32_cpu2_completion #(
                         result_tag_w[r][0] == (bank == 1) &&
                         !(cancel_valid_o && result_distance_w[r] >= cancel_distance_w);
                     assign tag_term_w[r] = {T{bank_accept_w[r]}} & result_tag_w[r];
-                    assign data_term_w[r] = {B{bank_accept_w[r]}} & result_data_w[r];
+                    assign data_term_w[r] = {B{bank_accept_w[r]}} & result_payload_w[r];
                 end
                 assign write_w = |bank_accept_w;
                 assign write_tag_w =
@@ -669,10 +706,10 @@ module edrv32_cpu2_completion #(
                 bank_next_pc_w[1] : bank_next_pc_w[0]);
             assign head0_pc_o = FPU_FORMAT == "NONE" ? pc_w[head_tag_w[0]] :
                 (head_tag_w[0][0] ? bank_pc_w[1] : bank_pc_w[0]);
-            assign head0_instr_o = instr_w[head_tag_w[0]];
+            assign head0_kind_o = kind_w[head_tag_w[0]];
+            assign head0_trace_instr_o = trace_instr_w[head_tag_w[0]];
             assign head0_rd_o = rd_w[head_tag_w[0]];
             assign head0_dest_o = dest_w[head_tag_w[0]];
-            assign head0_csr_src_o = csr_src_w[head_tag_w[0]];
             assign head0_store_o = store_w[head_tag_w[0]];
             assign head0_divide_o = divide_w[head_tag_w[0]];
             assign head0_double_beat_o = double_beat_w[head_tag_w[0]];
@@ -684,7 +721,7 @@ module edrv32_cpu2_completion #(
             assign head0_flags_o = flags_w[head_tag_w[0]];
             assign head0_exception_o = exception_w[head_tag_w[0]];
             assign head0_cause_o = cause_w[head_tag_w[0]];
-            assign head0_tval_o = tval_w[head_tag_w[0]];
+            assign head0_tval_o = head0_data_o[31:0];
             assign head0_device_o = device_w[head_tag_w[0]];
             assign head0_mem_addr_o = mem_addr_w[head_tag_w[0]];
             assign head0_mem_data_o = mem_data_w[head_tag_w[0]];
@@ -693,10 +730,10 @@ module edrv32_cpu2_completion #(
             assign head0_tag_o = 'b0;
             assign head0_pc_o = 'b0;
             assign head0_next_pc_o = 'b0;
-            assign head0_instr_o = 'b0;
+            assign head0_kind_o = 'b0;
+            assign head0_trace_instr_o = 'b0;
             assign head0_rd_o = 'b0;
             assign head0_dest_o = 'b0;
-            assign head0_csr_src_o = 'b0;
             assign head0_store_o = 'b0;
             assign head0_divide_o = 'b0;
             assign head0_double_beat_o = 'b0;
@@ -721,10 +758,10 @@ module edrv32_cpu2_completion #(
                 bank_next_pc_w[1] : bank_next_pc_w[0]);
             assign head1_pc_o = FPU_FORMAT == "NONE" ? pc_w[head_tag_w[1]] :
                 (head_tag_w[1][0] ? bank_pc_w[1] : bank_pc_w[0]);
-            assign head1_instr_o = instr_w[head_tag_w[1]];
+            assign head1_kind_o = kind_w[head_tag_w[1]];
+            assign head1_trace_instr_o = trace_instr_w[head_tag_w[1]];
             assign head1_rd_o = rd_w[head_tag_w[1]];
             assign head1_dest_o = dest_w[head_tag_w[1]];
-            assign head1_csr_src_o = csr_src_w[head_tag_w[1]];
             assign head1_store_o = store_w[head_tag_w[1]];
             assign head1_divide_o = divide_w[head_tag_w[1]];
             assign head1_double_beat_o = double_beat_w[head_tag_w[1]];
@@ -736,7 +773,7 @@ module edrv32_cpu2_completion #(
             assign head1_flags_o = flags_w[head_tag_w[1]];
             assign head1_exception_o = exception_w[head_tag_w[1]];
             assign head1_cause_o = cause_w[head_tag_w[1]];
-            assign head1_tval_o = tval_w[head_tag_w[1]];
+            assign head1_tval_o = head1_data_o[31:0];
             assign head1_device_o = device_w[head_tag_w[1]];
             assign head1_mem_addr_o = mem_addr_w[head_tag_w[1]];
             assign head1_mem_data_o = mem_data_w[head_tag_w[1]];
@@ -745,10 +782,10 @@ module edrv32_cpu2_completion #(
             assign head1_tag_o = 'b0;
             assign head1_pc_o = 'b0;
             assign head1_next_pc_o = 'b0;
-            assign head1_instr_o = 'b0;
+            assign head1_kind_o = 'b0;
+            assign head1_trace_instr_o = 'b0;
             assign head1_rd_o = 'b0;
             assign head1_dest_o = 'b0;
-            assign head1_csr_src_o = 'b0;
             assign head1_store_o = 'b0;
             assign head1_divide_o = 'b0;
             assign head1_double_beat_o = 'b0;
@@ -840,6 +877,7 @@ module edrv32_cpu2_completion #(
     // Unused configuration fields and internal architectural observation wires.
     /* verilator lint_off UNUSEDSIGNAL */
     wire unused_w = ^{
+        allocate0_csr_src_i, allocate1_csr_src_i,
         branch_redirect_pc_i,
         fp_resp_int_dest_i,
         source_valid_w,

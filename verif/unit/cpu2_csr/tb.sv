@@ -15,8 +15,6 @@ module check_csr #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE")
     reg [31:0] csr_req_instr_i;
     reg [31:0] csr_req_src_i;
     reg csr_commit_valid_i;
-    reg [31:0] csr_commit_instr_i;
-    reg [31:0] csr_commit_src_i;
     wire csr_complete_valid_o;
     reg csr_complete_ready_i;
     wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] csr_complete_tag_o;
@@ -59,8 +57,6 @@ module check_csr #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE")
         .csr_req_instr_i(csr_req_instr_i),
         .csr_req_src_i(csr_req_src_i),
         .csr_commit_valid_i(csr_commit_valid_i),
-        .csr_commit_instr_i(csr_commit_instr_i),
-        .csr_commit_src_i(csr_commit_src_i),
         .csr_complete_valid_o(csr_complete_valid_o),
         .csr_complete_ready_i(csr_complete_ready_i),
         .csr_complete_tag_o(csr_complete_tag_o),
@@ -103,11 +99,19 @@ module check_csr #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE")
     endtask
     integer k;
     reg [31:0] observed;
-    task write_csr(input [11:0] addr, input [31:0] value);
+    task access_csr(input [31:0] instr, input [31:0] src);
         begin
-            csr_commit_valid_i=1; csr_commit_instr_i={addr,5'd1,3'b001,5'd0,7'h73};
-            csr_commit_src_i=value; tick(); csr_commit_valid_i=0;
+            csr_req_valid_i=1; csr_req_instr_i=instr; csr_req_src_i=src;
+            tick(); csr_req_valid_i=0;
+            check(csr_complete_valid_o && !csr_complete_exception_o,"write response");
+            csr_complete_ready_i=1; tick(); csr_complete_ready_i=0;
+            // The request bus changes while the saved command and source await retirement.
+            csr_req_instr_i=0; csr_req_src_i=32'hfeed1234;
+            csr_commit_valid_i=1; tick(); csr_commit_valid_i=0;
         end
+    endtask
+    task write_csr(input [11:0] addr, input [31:0] value);
+        access_csr({addr,5'd1,3'b001,5'd0,7'h73},value);
     endtask
     task read_csr(input [11:0] addr, input illegal, input [31:0] expected);
         begin
@@ -135,8 +139,7 @@ module check_csr #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE")
             csr_complete_ready_i=1; tick(); csr_complete_ready_i=0;
             repeat(3) tick();
             csr_commit_valid_i=1;
-            csr_commit_instr_i={12'hb00,5'd1,3'b010,5'd1,7'h73};
-            csr_commit_src_i=128;
+            csr_req_instr_i=0; csr_req_src_i=0;
             tick(); csr_commit_valid_i=0;
             read_csr(12'hc00,0,228);
             write_csr(12'h320,32'hffffffff);
@@ -151,8 +154,6 @@ module check_csr #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE")
         csr_req_instr_i='0;
         csr_req_src_i='0;
         csr_commit_valid_i='0;
-        csr_commit_instr_i='0;
-        csr_commit_src_i='0;
         csr_complete_ready_i='0;
         age_head_i='0;
         cancel_valid_i='0;
@@ -218,12 +219,9 @@ module check_csr #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE")
         write_csr(12'h304,32'hffffffff); read_csr(12'h304,0,32'h888);
         // Set/clear and immediate operations use the captured source and uimm.
         write_csr(12'h340,32'h10); read_csr(12'h340,0,32'h10);
-        csr_commit_valid_i=1; csr_commit_instr_i={12'h340,5'd1,3'b010,5'd0,7'h73};
-        csr_commit_src_i=3; tick(); csr_commit_valid_i=0; read_csr(12'h340,0,32'h13);
-        csr_commit_valid_i=1; csr_commit_instr_i={12'h340,5'd1,3'b011,5'd0,7'h73};
-        csr_commit_src_i=1; tick(); csr_commit_valid_i=0; read_csr(12'h340,0,32'h12);
-        csr_commit_valid_i=1; csr_commit_instr_i={12'h340,5'd7,3'b101,5'd0,7'h73};
-        csr_commit_src_i=32'hffff; tick(); csr_commit_valid_i=0; read_csr(12'h340,0,7);
+        access_csr({12'h340,5'd1,3'b010,5'd0,7'h73},3); read_csr(12'h340,0,32'h13);
+        access_csr({12'h340,5'd1,3'b011,5'd0,7'h73},1); read_csr(12'h340,0,32'h12);
+        access_csr({12'h340,5'd7,3'b101,5'd0,7'h73},32'hffff); read_csr(12'h340,0,7);
         // Software writes win over simultaneous counter increments.
         write_csr(12'h320,0); write_csr(12'hb00,99); read_csr(12'hc00,0,99);
         counter_retire_count_i=2'(ISSUE_WIDTH);
