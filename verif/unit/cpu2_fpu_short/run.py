@@ -22,10 +22,10 @@ def main():
     vectors=out/'smoke.txt'
     generate(vectors,unit,'smoke')
     sources=expand_files(ROOT/f'verif/unit/cpu2_fpu_{unit}/files.f')
-    for fmt in ('F','FD'):
-        obj=out/('obj_'+fmt)
+    for issue_width, fmt in ((1,'F'),(1,'FD'),(2,'F'),(2,'FD')):
+        obj=out/(f'obj_w{issue_width}_'+fmt)
         subprocess.run(['verilator','--binary','--timing','-Wall','--top-module','tb',
-                        '-DSIM_MODE','-GFPU_FORMAT="'+fmt+'"',*sources,
+                        '-DSIM_MODE',f'-GISSUE_WIDTH={issue_width}','-GFPU_FORMAT="'+fmt+'"',*sources,
                         '--Mdir',str(obj),'-o','sim','-j','1'],cwd=ROOT,check=True)
         if fmt=='F':
             subprocess.run([str(obj/'sim'),'+VECTORS='+str(vectors)],cwd=ROOT,check=True)

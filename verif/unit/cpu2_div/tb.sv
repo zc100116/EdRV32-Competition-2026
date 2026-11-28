@@ -5,7 +5,7 @@
 module tb;
     parameter ISSUE_WIDTH = 2;
     parameter [31:0] FPU_FORMAT = "NONE";
-    localparam T = FPU_FORMAT == "NONE" ? 2 : FPU_FORMAT == "F" ? 3 : 4;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam B = FPU_FORMAT == "FD" ? 64 : 32;
     localparam N = 1 << T;
     reg clk = 0;

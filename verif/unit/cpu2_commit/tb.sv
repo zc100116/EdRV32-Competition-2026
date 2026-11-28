@@ -4,13 +4,13 @@
 // Public-interface CV09/CV10 checks for all six fixed configurations.
 module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE")
     (output reg finished);
-    localparam N = FPU_FORMAT == "FD" ? 16 : FPU_FORMAT == "F" ? 8 : 4;
-    localparam T = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
+    localparam N = ISSUE_WIDTH == 2 || FPU_FORMAT == "FD" ? 16 : 8;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam B = FPU_FORMAT == "FD" ? 64 : 32;
     reg [31:0] trace_noise;
     reg clk_i;
     reg rst_n_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head0_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] head0_tag_i;
     reg [31:0] head0_pc_i;
     reg [31:0] head0_next_pc_i;
     reg [31:0] head0_instr_i;
@@ -31,13 +31,13 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
     reg [31:0] head0_mem_addr_i;
     reg [63:0] head0_mem_data_i;
     reg [7:0] head0_mem_mask_i;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] wb0_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] wb0_tag_o;
     wire wb0_valid_copy_o;
     wire [4:0] wb0_rd_copy_o;
     wire wb0_valid_o;
     wire [4:0] wb0_rd_o;
     wire [31:0] wb0_data_o;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head1_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] head1_tag_i;
     reg [31:0] head1_pc_i;
     reg [31:0] head1_next_pc_i;
     reg [31:0] head1_instr_i;
@@ -58,29 +58,30 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
     reg [31:0] head1_mem_addr_i;
     reg [63:0] head1_mem_data_i;
     reg [7:0] head1_mem_mask_i;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] wb1_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] wb1_tag_o;
     wire wb1_valid_copy_o;
     wire [4:0] wb1_rd_copy_o;
     wire wb1_valid_o;
     wire [4:0] wb1_rd_o;
     wire [31:0] wb1_data_o;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] age_head_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] age_head_i;
     reg cancel_valid_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] cancel_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] cancel_tag_i;
     reg branch_redirect_valid_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] branch_redirect_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] branch_redirect_tag_i;
     reg [31:0] branch_redirect_pc_i;
+    wire [1:0] commit_store_count_o;
     wire [1:0] retire_count_o;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] fp_wb_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] fp_wb_tag_o;
     wire fp_wb_valid_o;
     wire [4:0] fp_wb_rd_o;
     wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] fp_wb_data_o;
     wire commit_lsu_valid_o;
     reg commit_lsu_ready_i;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] commit_lsu_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] commit_lsu_tag_o;
     reg commit_lsu_done_valid_i;
     wire commit_lsu_done_ready_o;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] commit_lsu_done_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] commit_lsu_done_tag_i;
     reg commit_lsu_done_error_i;
     reg [31:0] commit_lsu_done_fault_addr_i;
     reg [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] commit_lsu_done_data_i;
@@ -99,7 +100,7 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
     wire [31:0] trap_cause_o;
     wire [31:0] trap_tval_o;
     wire commit_cancel_valid_o;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] commit_cancel_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] commit_cancel_tag_o;
     wire commit_redirect_valid_o;
     wire [31:0] commit_redirect_pc_o;
     wire fetch_stop_o;
@@ -175,6 +176,7 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
         .branch_redirect_valid_i(branch_redirect_valid_i),
         .branch_redirect_tag_i(branch_redirect_tag_i),
         .branch_redirect_pc_i(branch_redirect_pc_i),
+        .commit_store_count_o(commit_store_count_o),
         .retire_count_o(retire_count_o),
         .fp_wb_tag_o(fp_wb_tag_o),
         .fp_wb_valid_o(fp_wb_valid_o),
@@ -369,8 +371,11 @@ module check_commit #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE
         #1; check(!trap_valid_o,"head DIV cannot interrupt");
         head0_divide_i=0; #1; check(trap_valid_o,"ordinary long FP can interrupt");
         irq_pending_i=0; head0_done_i=1; head1_valid_i=0;
-        // Store authorization is separate from completion and held until accepted.
+        // Cached stores retire as ordinary prepared entries; devices retain authorization.
         head0_store_i=1; head0_instr_i=32'h23; head0_dest_i=0;
+        #1;check(retire_count_o==1 && commit_store_count_o==1 && !commit_lsu_valid_o,
+            "cached store retirement mark");
+        head0_device_i=1;
         #1; check(commit_lsu_valid_o && retire_count_o==0,"store awaits authorization");
         tick(); check(commit_lsu_valid_o,"authorization backpressure");
         commit_lsu_ready_i=1; tick(); commit_lsu_ready_i=0;

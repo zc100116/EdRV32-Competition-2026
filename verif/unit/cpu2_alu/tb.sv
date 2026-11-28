@@ -1,6 +1,6 @@
 // CV05 arithmetic/latency/cancel oracle drives only public interfaces.
 module tb #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE");
-    localparam T=FPU_FORMAT=="NONE"?2:FPU_FORMAT=="F"?3:4;
+    localparam T=ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam B=FPU_FORMAT=="FD"?64:32;
     reg clk_i=0;
     reg rst_n_i=0;
@@ -269,8 +269,30 @@ module tb #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE");
             early_resp_valid_i=1;early_resp_hit_i=0;early_resp_tag_i=1;
             early_resp_data_i=33;tick();
             if(done[0])$fatal(1,"failed early query released ALU source");
-            early_resp_hit_i=1;tick();early_resp_valid_i=0;early_resp_hit_i=0;
-            check(0,42,2);tick();late=0;wait1=0;
+            early_resp_hit_i=1;#1;check(0,42,2);tick();
+            early_resp_valid_i=0;early_resp_hit_i=0;late=0;wait1=0;
+            // BE1: ready MEM replacement reuses EX skid, preserving its locked output.
+            for (int canceled=0;canceled<2;canceled++) begin
+                @(negedge clk_i);valid=1;late=1;wait1=1;wait2=0;
+                tag[0]=2;source1[0]=1;instr[0]=op(0,0,0);a[0]=0;b[0]=9;
+                tick();
+                @(negedge clk_i);tag[0]=3;source1[0]=4;accept[0]=0;tick();
+                @(negedge clk_i);valid=0;
+                early_resp_valid_i=1;early_resp_hit_i=1;early_resp_tag_i=1;
+                early_resp_data_i=33;#1;
+                if(!ready[0])$fatal(1,"registered ready MEM could not be replaced");
+                check(0,42,2);tick();valid=0;
+                early_resp_valid_i=0;early_resp_hit_i=0;check(0,42,2);
+                @(negedge clk_i);early_resp_valid_i=1;early_resp_hit_i=1;
+                early_resp_tag_i=4;early_resp_data_i=50;tick();
+                early_resp_valid_i=0;early_resp_hit_i=0;
+                if(canceled!=0)begin cancel=1;cancel_tag=3;tick();cancel=0;end
+                repeat(3)begin check(0,42,2);tick();end
+                accept[0]=1;tick();
+                if(canceled==0)begin check(0,59,3);tick();end
+                if(done[0])$fatal(1,"MEM replacement duplicate or canceled result");
+                late=0;wait1=0;
+            end
             // Same-group early ALU -> late ALU: operands capture at the intervening edge.
             @(negedge clk_i);valid=3;late=2;wait1=2;
             tag[0]=0;tag[1]=1;instr[0]=op(0,0,0);instr[1]=op(0,0,0);

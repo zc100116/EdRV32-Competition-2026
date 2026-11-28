@@ -19,12 +19,12 @@ def main():
                  2000 if args.tier == 'smoke' else 200000)
     here = Path(__file__).resolve().parent
     sources = [str((here / line).resolve()) for line in (here / 'files.f').read_text().splitlines()]
-    for fmt in ('F', 'FD'):
+    for issue_width, fmt in ((1, 'F'), (1, 'FD'), (2, 'F'), (2, 'FD')):
         subprocess.run(['verilator', '--binary', '--timing', '-Wall', '--top-module', 'tb',
-                        '-GFPU_FORMAT=' + str(int.from_bytes(fmt.encode(), 'big')),
-                        *sources, '--Mdir', str(out / fmt), '-o', 'sim', '-j', '1'],
+                        f'-GISSUE_WIDTH={issue_width}', '-GFPU_FORMAT=' + str(int.from_bytes(fmt.encode(), 'big')),
+                        *sources, '--Mdir', str(out / f'w{issue_width}_{fmt}'), '-o', 'sim', '-j', '1'],
                        cwd=ROOT, check=True)
-        subprocess.run([str(out / fmt / 'sim'),
+        subprocess.run([str(out / f'w{issue_width}_{fmt}' / 'sim'),
                         '+S=' + str(out / f'{args.tier}32.txt'),
                         '+D=' + str(out / f'{args.tier}64.txt')], cwd=ROOT, check=True)
 

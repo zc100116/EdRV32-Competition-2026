@@ -4,25 +4,25 @@
 // Public-interface CV09/CV10 checks for all six fixed configurations.
 module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE")
     (output reg finished);
-    localparam N = FPU_FORMAT == "FD" ? 16 : FPU_FORMAT == "F" ? 8 : 4;
-    localparam T = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
+    localparam N = ISSUE_WIDTH == 2 || FPU_FORMAT == "FD" ? 16 : 8;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam B = FPU_FORMAT == "FD" ? 64 : 32;
     reg clk_i;
     reg rst_n_i;
     reg allocate_valid_i;
     reg [1:0] allocate_count_i;
     wire allocate_ready_o;
-    wire [(FPU_FORMAT == "FD" ? 5 : FPU_FORMAT == "F" ? 4 : 3)-1:0] allocate_credit_o;
+    wire [(ISSUE_WIDTH == 2 || FPU_FORMAT == "FD" ? 5 : 4)-1:0] allocate_credit_o;
     reg [1:0] retire_count_i;
     reg commit_cancel_valid_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] commit_cancel_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] commit_cancel_tag_i;
     reg branch_redirect_valid_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] branch_redirect_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] branch_redirect_tag_i;
     reg [31:0] branch_redirect_pc_i;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] age_head_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] age_head_o;
     wire cancel_valid_o;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] cancel_tag_o;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] allocate0_tag_i;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] cancel_tag_o;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] allocate0_tag_i;
     reg [31:0] allocate0_pc_i;
     reg [31:0] allocate0_instr_i;
     reg [4:0] allocate0_rd_i;
@@ -31,7 +31,7 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
     reg allocate0_store_i;
     reg allocate0_divide_i;
     reg allocate0_double_beat_i;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head0_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] head0_tag_o;
     wire [31:0] head0_pc_o;
     wire [31:0] head0_next_pc_o;
     wire [3:0] head0_kind_o;
@@ -52,7 +52,7 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
     wire [31:0] head0_mem_addr_o;
     wire [63:0] head0_mem_data_o;
     wire [7:0] head0_mem_mask_o;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] allocate1_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] allocate1_tag_i;
     reg [31:0] allocate1_pc_i;
     reg [31:0] allocate1_instr_i;
     reg [4:0] allocate1_rd_i;
@@ -61,7 +61,7 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
     reg allocate1_store_i;
     reg allocate1_divide_i;
     reg allocate1_double_beat_i;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head1_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] head1_tag_o;
     wire [31:0] head1_pc_o;
     wire [31:0] head1_next_pc_o;
     wire [3:0] head1_kind_o;
@@ -82,33 +82,33 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
     wire [31:0] head1_mem_addr_o;
     wire [63:0] head1_mem_data_o;
     wire [7:0] head1_mem_mask_o;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] source0_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source0_tag_i;
     reg source0_valid_i;
     reg source0_domain_i;
     wire source0_ready_o;
     wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] source0_data_o;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] source1_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source1_tag_i;
     reg source1_valid_i;
     reg source1_domain_i;
     wire source1_ready_o;
     wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] source1_data_o;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] source2_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source2_tag_i;
     reg source2_valid_i;
     reg source2_domain_i;
     wire source2_ready_o;
     wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] source2_data_o;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] source3_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source3_tag_i;
     reg source3_valid_i;
     reg source3_domain_i;
     wire source3_ready_o;
     wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] source3_data_o;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] source4_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source4_tag_i;
     reg source4_valid_i;
     reg source4_domain_i;
     wire source4_ready_o;
     wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] source4_data_o;
     reg alu0_complete_valid_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] alu0_complete_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] alu0_complete_tag_i;
     reg [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] alu0_complete_data_i;
     reg [4:0] alu0_complete_flags_i;
     reg alu0_complete_exception_i;
@@ -116,7 +116,7 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
     reg [31:0] alu0_complete_tval_i;
     wire alu0_complete_ready_o;
     reg alu1_complete_valid_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] alu1_complete_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] alu1_complete_tag_i;
     reg [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] alu1_complete_data_i;
     reg [4:0] alu1_complete_flags_i;
     reg alu1_complete_exception_i;
@@ -125,7 +125,7 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
     wire alu1_complete_ready_o;
     reg [31:0] branch_complete_next_pc_i;
     reg branch_complete_valid_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] branch_complete_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] branch_complete_tag_i;
     reg [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] branch_complete_data_i;
     reg [4:0] branch_complete_flags_i;
     reg branch_complete_exception_i;
@@ -133,7 +133,7 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
     reg [31:0] branch_complete_tval_i;
     wire branch_complete_ready_o;
     reg mul_complete_valid_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] mul_complete_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] mul_complete_tag_i;
     reg [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] mul_complete_data_i;
     reg [4:0] mul_complete_flags_i;
     reg mul_complete_exception_i;
@@ -141,7 +141,7 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
     reg [31:0] mul_complete_tval_i;
     wire mul_complete_ready_o;
     reg div_complete_valid_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] div_complete_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] div_complete_tag_i;
     reg [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] div_complete_data_i;
     reg [4:0] div_complete_flags_i;
     reg div_complete_exception_i;
@@ -149,7 +149,7 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
     reg [31:0] div_complete_tval_i;
     wire div_complete_ready_o;
     reg lsu_complete_valid_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] lsu_complete_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] lsu_complete_tag_i;
     reg [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] lsu_complete_data_i;
     reg [4:0] lsu_complete_flags_i;
     reg lsu_complete_exception_i;
@@ -157,7 +157,7 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
     reg [31:0] lsu_complete_tval_i;
     wire lsu_complete_ready_o;
     reg csr_complete_valid_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] csr_complete_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] csr_complete_tag_i;
     reg [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] csr_complete_data_i;
     reg [4:0] csr_complete_flags_i;
     reg csr_complete_exception_i;
@@ -165,12 +165,12 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
     reg [31:0] csr_complete_tval_i;
     wire csr_complete_ready_o;
     reg fp_resp_valid_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] fp_resp_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] fp_resp_tag_i;
     reg [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] fp_resp_data_i;
     reg [4:0] fp_resp_flags_i;
     wire fp_resp_ready_o;
     reg decode_complete_valid_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] decode_complete_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] decode_complete_tag_i;
     reg decode_complete_exception_i;
     reg [3:0] decode_complete_cause_i;
     reg [31:0] decode_complete_tval_i;
@@ -453,7 +453,7 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
                     mul_complete_tag_i=T'(pending1); mul_complete_data_i=model_data[pending1];
                 end
                 expected0=1; expected1=1;
-                if(FPU_FORMAT!="NONE" && pending0>=0 && pending1>=0 &&
+                if(pending0>=0 && pending1>=0 &&
                     ((pending0%2)==(pending1%2) ||
                     (model_dest[pending0]==2 && model_dest[pending1]==2))) begin
                     expected0=((pending0-model_head+N)%N)<((pending1-model_head+N)%N);
@@ -508,7 +508,7 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
             end
             check(completed_total>100,"random queue keeps progressing");
             if(ISSUE_WIDTH==2) check(dual_total>0,"random dual retirement covered");
-            if(FPU_FORMAT!="NONE") check(held_total>0,"random completion backpressure covered");
+            check(held_total>0,"random completion backpressure covered");
             reset_queue();
         end
     endtask
@@ -684,7 +684,7 @@ module check_completion #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="
         end
         #1; check(branch_complete_ready_o,"older bank winner");
         check((FPU_FORMAT=="NONE" ? mul_complete_ready_o:lsu_complete_ready_o)==
-            (FPU_FORMAT=="NONE"),"bank contention");
+            1'b0,"bank contention");
         tick(); branch_complete_valid_i=0;
         check(head0_done_o && head0_pc_o==32'h1000,"old head completion PC");
         // Independent younger completion proceeds while the oldest is held.

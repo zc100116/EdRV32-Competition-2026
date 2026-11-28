@@ -1,7 +1,7 @@
 // File: edrv32_cpu2_completion.v
 // Spec: cpu-v2-spec 3.2, 3.4, 3.5, 5.1, 5.6; fpu-spec 5.4.
 // Description: Shared in-order allocation records and age-arbitrated result banks.
-// Independent FF records for NONE; replicated asynchronous RAM for F/FD.
+// Replicated asynchronous LUTRAM data and PC banks for every configuration.
 // Clock domain: clk_sys.
 module edrv32_cpu2_completion #(
     parameter ISSUE_WIDTH = 2,
@@ -12,17 +12,17 @@ module edrv32_cpu2_completion #(
     input wire allocate_valid_i,
     input wire [1:0] allocate_count_i,
     output wire allocate_ready_o,
-    output wire [(FPU_FORMAT == "FD" ? 5 : FPU_FORMAT == "F" ? 4 : 3)-1:0] allocate_credit_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?5:4)-1:0] allocate_credit_o,
     input wire [1:0] retire_count_i,
     input wire commit_cancel_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] commit_cancel_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] commit_cancel_tag_i,
     input wire branch_redirect_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] branch_redirect_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] branch_redirect_tag_i,
     input wire [31:0] branch_redirect_pc_i,
-    output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] age_head_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] age_head_o,
     output wire cancel_valid_o,
-    output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] cancel_tag_o,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] allocate0_tag_i,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] cancel_tag_o,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] allocate0_tag_i,
     input wire [31:0] allocate0_pc_i,
     input wire [31:0] allocate0_instr_i,
     input wire [4:0] allocate0_rd_i,
@@ -31,7 +31,7 @@ module edrv32_cpu2_completion #(
     input wire allocate0_store_i,
     input wire allocate0_divide_i,
     input wire allocate0_double_beat_i,
-    output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head0_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] head0_tag_o,
     output wire [31:0] head0_pc_o,
     output wire [31:0] head0_next_pc_o,
     output wire [3:0] head0_kind_o,
@@ -52,7 +52,7 @@ module edrv32_cpu2_completion #(
     output wire [31:0] head0_mem_addr_o,
     output wire [63:0] head0_mem_data_o,
     output wire [7:0] head0_mem_mask_o,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] allocate1_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] allocate1_tag_i,
     input wire [31:0] allocate1_pc_i,
     input wire [31:0] allocate1_instr_i,
     input wire [4:0] allocate1_rd_i,
@@ -61,7 +61,7 @@ module edrv32_cpu2_completion #(
     input wire allocate1_store_i,
     input wire allocate1_divide_i,
     input wire allocate1_double_beat_i,
-    output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head1_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] head1_tag_o,
     output wire [31:0] head1_pc_o,
     output wire [31:0] head1_next_pc_o,
     output wire [3:0] head1_kind_o,
@@ -82,33 +82,33 @@ module edrv32_cpu2_completion #(
     output wire [31:0] head1_mem_addr_o,
     output wire [63:0] head1_mem_data_o,
     output wire [7:0] head1_mem_mask_o,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] source0_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source0_tag_i,
     input wire source0_valid_i,
     input wire source0_domain_i,
     output wire source0_ready_o,
     output wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] source0_data_o,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] source1_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source1_tag_i,
     input wire source1_valid_i,
     input wire source1_domain_i,
     output wire source1_ready_o,
     output wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] source1_data_o,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] source2_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source2_tag_i,
     input wire source2_valid_i,
     input wire source2_domain_i,
     output wire source2_ready_o,
     output wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] source2_data_o,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] source3_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source3_tag_i,
     input wire source3_valid_i,
     input wire source3_domain_i,
     output wire source3_ready_o,
     output wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] source3_data_o,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] source4_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source4_tag_i,
     input wire source4_valid_i,
     input wire source4_domain_i,
     output wire source4_ready_o,
     output wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] source4_data_o,
     input wire alu0_complete_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] alu0_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] alu0_complete_tag_i,
     input wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] alu0_complete_data_i,
     input wire [4:0] alu0_complete_flags_i,
     input wire alu0_complete_exception_i,
@@ -116,7 +116,7 @@ module edrv32_cpu2_completion #(
     input wire [31:0] alu0_complete_tval_i,
     output wire alu0_complete_ready_o,
     input wire alu1_complete_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] alu1_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] alu1_complete_tag_i,
     input wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] alu1_complete_data_i,
     input wire [4:0] alu1_complete_flags_i,
     input wire alu1_complete_exception_i,
@@ -125,7 +125,7 @@ module edrv32_cpu2_completion #(
     output wire alu1_complete_ready_o,
     input wire [31:0] branch_complete_next_pc_i,
     input wire branch_complete_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] branch_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] branch_complete_tag_i,
     input wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] branch_complete_data_i,
     input wire [4:0] branch_complete_flags_i,
     input wire branch_complete_exception_i,
@@ -133,7 +133,7 @@ module edrv32_cpu2_completion #(
     input wire [31:0] branch_complete_tval_i,
     output wire branch_complete_ready_o,
     input wire mul_complete_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] mul_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] mul_complete_tag_i,
     input wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] mul_complete_data_i,
     input wire [4:0] mul_complete_flags_i,
     input wire mul_complete_exception_i,
@@ -141,7 +141,7 @@ module edrv32_cpu2_completion #(
     input wire [31:0] mul_complete_tval_i,
     output wire mul_complete_ready_o,
     input wire div_complete_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] div_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] div_complete_tag_i,
     input wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] div_complete_data_i,
     input wire [4:0] div_complete_flags_i,
     input wire div_complete_exception_i,
@@ -149,7 +149,7 @@ module edrv32_cpu2_completion #(
     input wire [31:0] div_complete_tval_i,
     output wire div_complete_ready_o,
     input wire lsu_complete_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] lsu_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] lsu_complete_tag_i,
     input wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] lsu_complete_data_i,
     input wire [4:0] lsu_complete_flags_i,
     input wire lsu_complete_exception_i,
@@ -157,7 +157,7 @@ module edrv32_cpu2_completion #(
     input wire [31:0] lsu_complete_tval_i,
     output wire lsu_complete_ready_o,
     input wire csr_complete_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] csr_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] csr_complete_tag_i,
     input wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] csr_complete_data_i,
     input wire [4:0] csr_complete_flags_i,
     input wire csr_complete_exception_i,
@@ -165,12 +165,12 @@ module edrv32_cpu2_completion #(
     input wire [31:0] csr_complete_tval_i,
     output wire csr_complete_ready_o,
     input wire fp_resp_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] fp_resp_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] fp_resp_tag_i,
     input wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] fp_resp_data_i,
     input wire [4:0] fp_resp_flags_i,
     output wire fp_resp_ready_o,
     input wire decode_complete_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] decode_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] decode_complete_tag_i,
     input wire decode_complete_exception_i,
     input wire [3:0] decode_complete_cause_i,
     input wire [31:0] decode_complete_tval_i,
@@ -191,8 +191,8 @@ module edrv32_cpu2_completion #(
     localparam [3:0] C_CSR = 4'd6;
     localparam [3:0] C_CONTROL = 4'd7;
     localparam [3:0] C_FP = 4'd8;
-    localparam N = FPU_FORMAT == "FD" ? 16 : FPU_FORMAT == "F" ? 8 : 4;
-    localparam T = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
+    localparam N = ISSUE_WIDTH == 2 || FPU_FORMAT == "FD" ? 16 : 8;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam B = FPU_FORMAT == "FD" ? 64 : 32;
     localparam S = FPU_FORMAT == "F" ? (ISSUE_WIDTH == 1 ? 3 : 5) : 2*ISSUE_WIDTH;
     localparam [T:0] DEPTH = {1'b1, {T{1'b0}}};
@@ -207,9 +207,6 @@ module edrv32_cpu2_completion #(
     wire [N-1:0] done_w;
     wire [N-1:0] device_w;
     wire [1:0] dest_w [0:N-1];
-    wire [31:0] pc_w [0:N-1];
-    wire [31:0] next_pc_w [0:N-1];
-    wire [B-1:0] data_w [0:N-1];
     wire [3:0] kind_w [0:N-1];
     wire [31:0] trace_instr_w [0:N-1];
     wire [3:0] allocate_kind_w [0:1];
@@ -406,7 +403,7 @@ module edrv32_cpu2_completion #(
                     (result_tag_w[other][0] == result_tag_w[r][0] ||
                     (result_fp_w[other] && result_fp_w[r]));
             end
-            assign result_grant_w[r] = FPU_FORMAT == "NONE" ? 1'b1 : !(|older_w);
+            assign result_grant_w[r] = !(|older_w);
         end
     endgenerate
     // One independent control record per slot avoids PDS array multiple writers.
@@ -521,34 +518,6 @@ module edrv32_cpu2_completion #(
                     mem_mask_r <= lsu_complete_mem_mask_i;
                 end
             end
-            if (FPU_FORMAT == "NONE") begin : g_ff_data
-                reg [31:0] pc_r;
-                reg [31:0] next_pc_r;
-                assign next_pc_w[q] = next_pc_r;
-                reg [31:0] data_r;
-                reg [31:0] selected_data_w;
-                integer i;
-                assign pc_w[q] = pc_r;
-                assign data_w[q] = data_r;
-                always @(*) begin
-                    selected_data_w = 32'b0;
-                    for (i = 0; i < 9; i = i + 1)
-                        selected_data_w = selected_data_w |
-                            ({32{accept_w[i]}} & result_payload_w[i]);
-                end
-                always @(posedge clk_i) begin
-                    if (allocate0_w || allocate1_w)
-                        pc_r <= allocate1_w ? allocate1_pc_i : allocate0_pc_i;
-                    if (|accept_w)
-                        data_r <= selected_data_w;
-                    if (accept_w[2])
-                        next_pc_r <= branch_complete_next_pc_i;
-                end
-            end else begin : g_no_ff_data
-                assign pc_w[q] = 32'b0;
-                assign next_pc_w[q] = 32'b0;
-                assign data_w[q] = {B{1'b0}};
-            end
         end
     endgenerate
     wire [31:0] bank_low_w [0:2*(S+1)-1];
@@ -559,9 +528,7 @@ module edrv32_cpu2_completion #(
     genvar bank;
     genvar copy;
     generate
-        if (FPU_FORMAT != "NONE") begin : g_ram
-            localparam BANKS = 2;
-            for (bank = 0; bank < BANKS; bank = bank + 1) begin : g_bank
+            for (bank = 0; bank < 2; bank = bank + 1) begin : g_bank
                 wire write_w;
                 wire [T-1:0] write_tag_w;
                 wire [B-1:0] write_data_w;
@@ -682,30 +649,13 @@ module edrv32_cpu2_completion #(
                     assign bank_high_w[bank*3+2] = 32'b0;
                 end
             end
-        end else begin : g_no_ram
-            localparam LOW_COPIES = 2*(S+1);
-            for (copy = 0; copy < LOW_COPIES; copy = copy + 1) begin : g_low
-                assign bank_low_w[copy] = 32'b0;
-            end
-            for (copy = 0; copy < 6; copy = copy + 1) begin : g_high
-                assign bank_high_w[copy] = 32'b0;
-            end
-            assign bank_head_data_w[0] = {B{1'b0}};
-            assign bank_head_data_w[1] = {B{1'b0}};
-            assign bank_next_pc_w[0] = 32'b0;
-            assign bank_next_pc_w[1] = 32'b0;
-            assign bank_pc_w[0] = 32'b0;
-            assign bank_pc_w[1] = 32'b0;
-        end
     endgenerate
     generate
         if (0 < ISSUE_WIDTH) begin : g_head0
             assign head0_tag_o = head_tag_w[0];
-            assign head0_next_pc_o = FPU_FORMAT == "NONE" ?
-                next_pc_w[head_tag_w[0]] : (head_tag_w[0][0] ?
+            assign head0_next_pc_o = (head_tag_w[0][0] ?
                 bank_next_pc_w[1] : bank_next_pc_w[0]);
-            assign head0_pc_o = FPU_FORMAT == "NONE" ? pc_w[head_tag_w[0]] :
-                (head_tag_w[0][0] ? bank_pc_w[1] : bank_pc_w[0]);
+            assign head0_pc_o = (head_tag_w[0][0] ? bank_pc_w[1] : bank_pc_w[0]);
             assign head0_kind_o = kind_w[head_tag_w[0]];
             assign head0_trace_instr_o = trace_instr_w[head_tag_w[0]];
             assign head0_rd_o = rd_w[head_tag_w[0]];
@@ -715,8 +665,7 @@ module edrv32_cpu2_completion #(
             assign head0_double_beat_o = double_beat_w[head_tag_w[0]];
             assign head0_valid_o = valid_w[head_tag_w[0]];
             assign head0_done_o = done_w[head_tag_w[0]];
-            assign head0_data_o = FPU_FORMAT == "NONE" ?
-                data_w[head_tag_w[0]] : (head_tag_w[0][0] ?
+            assign head0_data_o = (head_tag_w[0][0] ?
                 bank_head_data_w[1] : bank_head_data_w[0]);
             assign head0_flags_o = flags_w[head_tag_w[0]];
             assign head0_exception_o = exception_w[head_tag_w[0]];
@@ -753,11 +702,9 @@ module edrv32_cpu2_completion #(
     generate
         if (1 < ISSUE_WIDTH) begin : g_head1
             assign head1_tag_o = head_tag_w[1];
-            assign head1_next_pc_o = FPU_FORMAT == "NONE" ?
-                next_pc_w[head_tag_w[1]] : (head_tag_w[1][0] ?
+            assign head1_next_pc_o = (head_tag_w[1][0] ?
                 bank_next_pc_w[1] : bank_next_pc_w[0]);
-            assign head1_pc_o = FPU_FORMAT == "NONE" ? pc_w[head_tag_w[1]] :
-                (head_tag_w[1][0] ? bank_pc_w[1] : bank_pc_w[0]);
+            assign head1_pc_o = (head_tag_w[1][0] ? bank_pc_w[1] : bank_pc_w[0]);
             assign head1_kind_o = kind_w[head_tag_w[1]];
             assign head1_trace_instr_o = trace_instr_w[head_tag_w[1]];
             assign head1_rd_o = rd_w[head_tag_w[1]];
@@ -767,8 +714,7 @@ module edrv32_cpu2_completion #(
             assign head1_double_beat_o = double_beat_w[head_tag_w[1]];
             assign head1_valid_o = valid_w[head_tag_w[1]];
             assign head1_done_o = done_w[head_tag_w[1]];
-            assign head1_data_o = FPU_FORMAT == "NONE" ?
-                data_w[head_tag_w[1]] : (head_tag_w[1][0] ?
+            assign head1_data_o = (head_tag_w[1][0] ?
                 bank_head_data_w[1] : bank_head_data_w[0]);
             assign head1_flags_o = flags_w[head_tag_w[1]];
             assign head1_exception_o = exception_w[head_tag_w[1]];
@@ -811,8 +757,7 @@ module edrv32_cpu2_completion #(
                     bank_high_w[3+0] : bank_high_w[0]), (source0_tag_i[0] ?
                     bank_low_w[S+1+0] : bank_low_w[0])};
             end else begin : g_word
-                assign source0_data_o = FPU_FORMAT == "NONE" ?
-                    data_w[source0_tag_i] : {{(B-32){1'b0}},
+                assign source0_data_o = {{(B-32){1'b0}},
                     (source0_tag_i[0] ? bank_low_w[S+1+0] : bank_low_w[0])};
             end
         end else begin : g_absent_source0
@@ -829,8 +774,7 @@ module edrv32_cpu2_completion #(
                     bank_high_w[3+1] : bank_high_w[1]), (source1_tag_i[0] ?
                     bank_low_w[S+1+1] : bank_low_w[1])};
             end else begin : g_word
-                assign source1_data_o = FPU_FORMAT == "NONE" ?
-                    data_w[source1_tag_i] : {{(B-32){1'b0}},
+                assign source1_data_o = {{(B-32){1'b0}},
                     (source1_tag_i[0] ? bank_low_w[S+1+1] : bank_low_w[1])};
             end
         end else begin : g_absent_source1
@@ -842,8 +786,7 @@ module edrv32_cpu2_completion #(
         if (2 < S) begin : g_source2
             assign source2_ready_o = source2_valid_i && valid_w[source2_tag_i] &&
                 done_w[source2_tag_i] && !device_w[source2_tag_i];
-                assign source2_data_o = FPU_FORMAT == "NONE" ?
-                    data_w[source2_tag_i] : {{(B-32){1'b0}},
+                assign source2_data_o = {{(B-32){1'b0}},
                     (source2_tag_i[0] ? bank_low_w[S+1+2] : bank_low_w[2])};
         end else begin : g_absent_source2
             assign source2_ready_o = 1'b0;
@@ -854,8 +797,7 @@ module edrv32_cpu2_completion #(
         if (3 < S) begin : g_source3
             assign source3_ready_o = source3_valid_i && valid_w[source3_tag_i] &&
                 done_w[source3_tag_i] && !device_w[source3_tag_i];
-                assign source3_data_o = FPU_FORMAT == "NONE" ?
-                    data_w[source3_tag_i] : {{(B-32){1'b0}},
+                assign source3_data_o = {{(B-32){1'b0}},
                     (source3_tag_i[0] ? bank_low_w[S+1+3] : bank_low_w[3])};
         end else begin : g_absent_source3
             assign source3_ready_o = 1'b0;
@@ -866,8 +808,7 @@ module edrv32_cpu2_completion #(
         if (4 < S) begin : g_source4
             assign source4_ready_o = source4_valid_i && valid_w[source4_tag_i] &&
                 done_w[source4_tag_i] && !device_w[source4_tag_i];
-                assign source4_data_o = FPU_FORMAT == "NONE" ?
-                    data_w[source4_tag_i] : {{(B-32){1'b0}},
+                assign source4_data_o = {{(B-32){1'b0}},
                     (source4_tag_i[0] ? bank_low_w[S+1+4] : bank_low_w[4])};
         end else begin : g_absent_source4
             assign source4_ready_o = 1'b0;

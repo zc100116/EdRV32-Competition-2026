@@ -85,7 +85,7 @@ module edrv32_cpu2_top #(
         .rst_n_i(rst_n_i),
         .rst_n_o(rst_commit_cache_n_w)
     );
-    localparam T = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam RAS_DATA = ISSUE_WIDTH == 2 ? 256 : 128;
     localparam RAS_PTR = ISSUE_WIDTH == 2 ? 3 : 2;
     localparam RAS_COUNT = ISSUE_WIDTH == 2 ? 4 : 3;
@@ -248,35 +248,35 @@ module edrv32_cpu2_top #(
     wire [T-1:0] cancel_tag_w;
     wire alu0_complete_valid_w;
     wire alu0_complete_ready_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] alu0_complete_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] alu0_complete_tag_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] alu0_complete_data_w;
     wire alu1_complete_valid_w;
     wire alu1_complete_ready_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] alu1_complete_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] alu1_complete_tag_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] alu1_complete_data_w;
     wire branch_complete_valid_w;
     wire branch_complete_ready_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] branch_complete_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] branch_complete_tag_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] branch_complete_data_w;
     wire mul_complete_valid_w;
     wire mul_complete_ready_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] mul_complete_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] mul_complete_tag_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] mul_complete_data_w;
     wire div_complete_valid_w;
     wire div_complete_ready_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] div_complete_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] div_complete_tag_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] div_complete_data_w;
     wire lsu_complete_valid_w;
     wire lsu_complete_ready_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] lsu_complete_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] lsu_complete_tag_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] lsu_complete_data_w;
     wire csr_complete_valid_w;
     wire csr_complete_ready_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] csr_complete_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] csr_complete_tag_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] csr_complete_data_w;
     wire fp_resp_valid_w;
     wire fp_resp_ready_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] fp_resp_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] fp_resp_tag_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_resp_data_w;
     wire lsu_complete_device_w;
     wire [2-1:0] csr_fs_w;
@@ -294,9 +294,9 @@ module edrv32_cpu2_top #(
     wire id_owner3_w;
     wire [32-1:0] id_data3_w;
     wire [32-1:0] wb0_data_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] wb0_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] wb0_tag_w;
     wire [32-1:0] wb1_data_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] wb1_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] wb1_tag_w;
     wire [5-1:0] fp_read0_addr_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_read0_data_w;
     wire [5-1:0] fp_read1_addr_w;
@@ -306,12 +306,12 @@ module edrv32_cpu2_top #(
     wire fp_wb_valid_w;
     wire [5-1:0] fp_wb_rd_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_wb_data_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] fp_wb_tag_w;
-    wire [(FPU_FORMAT>"FD"?3:FPU_FORMAT>"F"?5:4)-1:0] allocate_credit_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] fp_wb_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?5:4)-1:0] allocate_credit_w;
     wire allocate_ready_w;
     wire allocate_valid_w;
     wire [2-1:0] allocate_count_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] allocate0_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] allocate0_tag_w;
     wire [32-1:0] allocate0_pc_w;
     wire [32-1:0] allocate0_instr_w;
     wire [5-1:0] allocate0_rd_w;
@@ -320,7 +320,7 @@ module edrv32_cpu2_top #(
     wire allocate0_store_w;
     wire allocate0_divide_w;
     wire allocate0_double_beat_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] allocate1_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] allocate1_tag_w;
     wire [32-1:0] allocate1_pc_w;
     wire [32-1:0] allocate1_instr_w;
     wire [5-1:0] allocate1_rd_w;
@@ -330,41 +330,41 @@ module edrv32_cpu2_top #(
     wire allocate1_divide_w;
     wire allocate1_double_beat_w;
     wire source0_valid_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source0_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source0_tag_w;
     wire source0_domain_w;
     wire source0_ready_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source0_data_w;
     wire source1_valid_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source1_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source1_tag_w;
     wire source1_domain_w;
     wire source1_ready_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source1_data_w;
     wire source2_valid_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source2_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source2_tag_w;
     wire source2_domain_w;
     wire source2_ready_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source2_data_w;
     wire source3_valid_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source3_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source3_tag_w;
     wire source3_domain_w;
     wire source3_ready_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source3_data_w;
     wire source4_valid_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source4_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source4_tag_w;
     wire source4_domain_w;
     wire source4_ready_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source4_data_w;
     wire execute0_ready_w;
     wire execute0_valid_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute0_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute0_tag_w;
     wire [32-1:0] execute0_pc_w;
     wire [32-1:0] execute0_instr_w;
     wire [32-1:0] execute0_src1_w;
     wire [32-1:0] execute0_src2_w;
     wire [32-1:0] execute0_imm_w;
     wire execute0_late_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute0_source1_tag_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute0_source2_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute0_source1_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute0_source2_tag_w;
     wire execute0_source1_wait_w;
     wire execute0_source2_wait_w;
     wire execute0_predict_taken_w;
@@ -387,15 +387,15 @@ module edrv32_cpu2_top #(
     wire [(ISSUE_WIDTH+2)-1:0] execute0_ras_count_w;
     wire execute1_ready_w;
     wire execute1_valid_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute1_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute1_tag_w;
     wire [32-1:0] execute1_pc_w;
     wire [32-1:0] execute1_instr_w;
     wire [32-1:0] execute1_src1_w;
     wire [32-1:0] execute1_src2_w;
     wire [32-1:0] execute1_imm_w;
     wire execute1_late_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute1_source1_tag_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute1_source2_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute1_source1_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute1_source2_tag_w;
     wire execute1_source1_wait_w;
     wire execute1_source2_wait_w;
     wire execute1_predict_taken_w;
@@ -418,31 +418,31 @@ module edrv32_cpu2_top #(
     wire [(ISSUE_WIDTH+2)-1:0] execute1_ras_count_w;
     wire mul_req_ready_w;
     wire mul_req_valid_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] mul_req_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] mul_req_tag_w;
     wire [32-1:0] mul_req_instr_w;
     wire [32-1:0] mul_req_src1_w;
     wire [32-1:0] mul_req_src2_w;
     wire div_req_ready_w;
     wire div_req_valid_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] div_req_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] div_req_tag_w;
     wire [32-1:0] div_req_instr_w;
     wire [32-1:0] div_req_src1_w;
     wire [32-1:0] div_req_src2_w;
     wire lsu_req_ready_w;
     wire lsu_req_valid_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] lsu_req_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] lsu_req_tag_w;
     wire [32-1:0] lsu_req_instr_w;
     wire [32-1:0] lsu_req_addr_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] lsu_req_store_data_w;
     wire lsu_req_early_w;
     wire csr_req_ready_w;
     wire csr_req_valid_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] csr_req_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] csr_req_tag_w;
     wire [32-1:0] csr_req_instr_w;
     wire [32-1:0] csr_req_src_w;
     wire fp_req_ready_w;
     wire fp_req_valid_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] fp_req_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] fp_req_tag_w;
     wire [32-1:0] fp_req_instr_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_req_src1_w;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_req_src2_w;
@@ -451,10 +451,10 @@ module edrv32_cpu2_top #(
     wire [3-1:0] fp_req_rm_w;
     wire early_req_valid_w;
     wire [32-1:0] early_req_addr_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] early_req_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] early_req_tag_w;
     wire decode_complete_ready_w;
     wire decode_complete_valid_w;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] decode_complete_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] decode_complete_tag_w;
     wire decode_complete_exception_w;
     wire [4-1:0] decode_complete_cause_w;
     wire [32-1:0] decode_complete_tval_w;
@@ -497,8 +497,8 @@ module edrv32_cpu2_top #(
     wire [31:0] div_complete_tval_w;
     wire [1:0] retire_count_w;
     wire commit_cancel_valid_w;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] commit_cancel_tag_w;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head0_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] commit_cancel_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] head0_tag_w;
     wire [31:0] head0_pc_w;
     wire [31:0] head0_next_pc_w;
     wire [3:0] head0_kind_w;
@@ -519,7 +519,7 @@ module edrv32_cpu2_top #(
     wire [31:0] head0_mem_addr_w;
     wire [63:0] head0_mem_data_w;
     wire [7:0] head0_mem_mask_w;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head1_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] head1_tag_w;
     wire [31:0] head1_pc_w;
     wire [31:0] head1_next_pc_w;
     wire [3:0] head1_kind_w;
@@ -553,12 +553,14 @@ module edrv32_cpu2_top #(
     wire [31:0] lsu_complete_mem_addr_w;
     wire [63:0] lsu_complete_mem_data_w;
     wire [7:0] lsu_complete_mem_mask_w;
+    wire [1:0] commit_store_count_w;
+    wire lsu_store_drained_w;
     wire commit_lsu_valid_w;
     wire commit_lsu_ready_w;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] commit_lsu_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] commit_lsu_tag_w;
     wire commit_lsu_done_valid_w;
     wire commit_lsu_done_ready_w;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] commit_lsu_done_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] commit_lsu_done_tag_w;
     wire commit_lsu_done_error_w;
     wire [31:0] commit_lsu_done_fault_addr_w;
     wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] commit_lsu_done_data_w;
@@ -612,12 +614,12 @@ module edrv32_cpu2_top #(
     wire [2:0] trace_frm_w;
     wire [1:0] trace_fs_w;
     wire early_resp_valid_w;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] early_resp_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] early_resp_tag_w;
     wire early_resp_hit_w;
     wire [31:0] early_resp_data_w;
     wire dc_req_valid_w;
     wire dc_req_ready_w;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_req_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_req_tag_w;
     wire dc_req_beat_w;
     wire [31:0] dc_req_addr_w;
     wire dc_req_store_w;
@@ -627,7 +629,7 @@ module edrv32_cpu2_top #(
     wire dc_req_early_w;
     wire dc_resp_valid_w;
     wire dc_resp_ready_w;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_resp_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_resp_tag_w;
     wire dc_resp_beat_w;
     wire [1:0] dc_resp_way_hit_w;
     wire [31:0] dc_resp_way0_data_w;
@@ -636,27 +638,27 @@ module edrv32_cpu2_top #(
     wire dc_resp_device_w;
     wire dc_commit_valid_w;
     wire dc_commit_ready_w;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_commit_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_commit_tag_w;
     wire dc_commit_beat_w;
     wire [31:0] dc_commit_data_w;
     wire [3:0] dc_commit_mask_w;
     wire dc_done_valid_w;
     wire dc_done_ready_w;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_done_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_done_tag_w;
     wire dc_done_beat_w;
     wire dc_done_error_w;
     wire [31:0] dc_done_data_w;
     wire dc_early_valid_w;
     wire [31:0] dc_early_addr_w;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_early_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_early_tag_w;
     wire dc_early_resp_valid_w;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_early_resp_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_early_resp_tag_w;
     wire [1:0] dc_early_hit_w;
     wire [31:0] dc_early_way0_data_w;
     wire [31:0] dc_early_way1_data_w;
     wire dc_cancel_valid_w;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_cancel_tag_w;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_age_head_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_cancel_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_age_head_w;
     wire ic_miss_event_w;
     wire icache_debug_miss_w;
     wire maint_req_valid_w;
@@ -670,7 +672,7 @@ module edrv32_cpu2_top #(
     wire dc_wb_event_w;
     wire dc_miss_event_w;
     wire trace_mem_effect_valid_w;
-    wire [(FPU_FORMAT=="FD" ? 4 : FPU_FORMAT=="F" ? 3 : 2)-1:0] trace_mem_effect_tag_w;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] trace_mem_effect_tag_w;
     wire [31:0] trace_mem_effect_addr_w;
     wire [31:0] trace_mem_effect_data_w;
     wire [3:0] trace_mem_effect_mask_w;
@@ -924,6 +926,10 @@ module edrv32_cpu2_top #(
         .div_complete_ready_i(div_complete_ready_w),
         .div_complete_tag_i(div_complete_tag_w),
         .div_complete_data_i(div_complete_data_w),
+        .early_resp_valid_i(early_resp_valid_w),
+        .early_resp_tag_i(early_resp_tag_w),
+        .early_resp_hit_i(early_resp_hit_w),
+        .early_resp_data_i(early_resp_data_w),
         .lsu_complete_valid_i(lsu_complete_valid_w),
         .lsu_complete_ready_i(lsu_complete_ready_w),
         .lsu_complete_tag_i(lsu_complete_tag_w),
@@ -1799,6 +1805,7 @@ module edrv32_cpu2_top #(
         .branch_redirect_valid_i(branch_redirect_valid_w),
         .branch_redirect_tag_i(branch_redirect_tag_w),
         .branch_redirect_pc_i(branch_redirect_pc_w),
+        .commit_store_count_o(commit_store_count_w),
         .retire_count_o(retire_count_w),
         .fp_wb_tag_o(fp_wb_tag_w),
         .fp_wb_valid_o(fp_wb_valid_w),
@@ -1918,6 +1925,7 @@ module edrv32_cpu2_top #(
 
     // lsu: frozen per-signal interfaces.
     edrv32_cpu2_lsu #(
+        .ISSUE_WIDTH(ISSUE_WIDTH),
         .FPU_FORMAT(FPU_FORMAT)
     ) u_lsu (
         .clk_i(clk_i),
@@ -1948,6 +1956,8 @@ module edrv32_cpu2_top #(
         .lsu_complete_mem_addr_o(lsu_complete_mem_addr_w),
         .lsu_complete_mem_data_o(lsu_complete_mem_data_w),
         .lsu_complete_mem_mask_o(lsu_complete_mem_mask_w),
+        .commit_store_count_i(commit_store_count_w),
+        .lsu_store_drained_o(lsu_store_drained_w),
         .commit_lsu_valid_i(commit_lsu_valid_w),
         .commit_lsu_ready_o(commit_lsu_ready_w),
         .commit_lsu_tag_i(commit_lsu_tag_w),
@@ -2046,6 +2056,7 @@ module edrv32_cpu2_top #(
 
     // dcache: frozen per-signal interfaces.
     edrv32_cpu2_dcache #(
+        .ISSUE_WIDTH(ISSUE_WIDTH),
         .FPU_FORMAT(FPU_FORMAT)
     ) u_dcache (
         .clk_i(clk_i),
@@ -2121,6 +2132,7 @@ module edrv32_cpu2_top #(
         .dc_cancel_valid_i(dc_cancel_valid_w),
         .dc_cancel_tag_i(dc_cancel_tag_w),
         .dc_age_head_i(dc_age_head_w),
+        .lsu_store_drained_i(lsu_store_drained_w),
         .dc_fence_valid_i(dc_fence_valid_w),
         .dc_fence_ready_o(dc_fence_ready_w),
         .dc_fence_clean_all_i(dc_fence_clean_all_w),

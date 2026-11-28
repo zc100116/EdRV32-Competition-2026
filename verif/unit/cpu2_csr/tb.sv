@@ -4,28 +4,28 @@
 // Public-interface CV09/CV10 checks for all six fixed configurations.
 module check_csr #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="NONE")
     (output reg finished);
-    localparam N = FPU_FORMAT == "FD" ? 16 : FPU_FORMAT == "F" ? 8 : 4;
-    localparam T = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
+    localparam N = ISSUE_WIDTH == 2 || FPU_FORMAT == "FD" ? 16 : 8;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam B = FPU_FORMAT == "FD" ? 64 : 32;
     reg clk_i;
     reg rst_n_i;
     reg csr_req_valid_i;
     wire csr_req_ready_o;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] csr_req_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] csr_req_tag_i;
     reg [31:0] csr_req_instr_i;
     reg [31:0] csr_req_src_i;
     reg csr_commit_valid_i;
     wire csr_complete_valid_o;
     reg csr_complete_ready_i;
-    wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] csr_complete_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] csr_complete_tag_o;
     wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] csr_complete_data_o;
     wire [4:0] csr_complete_flags_o;
     wire csr_complete_exception_o;
     wire [3:0] csr_complete_cause_o;
     wire [31:0] csr_complete_tval_o;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] age_head_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] age_head_i;
     reg cancel_valid_i;
-    reg [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] cancel_tag_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] cancel_tag_i;
     reg fp_commit_flags_valid_i;
     reg [4:0] fp_commit_flags_i;
     reg fp_commit_write_i;

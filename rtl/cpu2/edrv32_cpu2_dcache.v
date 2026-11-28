@@ -3,6 +3,7 @@
 // Description: Shared read port, two reserved response contexts and tagged store preparation.
 // One write buffer and serialized maintenance/refill use synchronous RAM. Clock: clk_sys.
 module edrv32_cpu2_dcache #(
+    parameter ISSUE_WIDTH = 2,
     parameter [31:0] FPU_FORMAT = "NONE"
 ) (
     // Clock and reset.
@@ -12,7 +13,7 @@ module edrv32_cpu2_dcache #(
     // LSU request and prepared response.
     input wire dc_req_valid_i,
     output wire dc_req_ready_o,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_req_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_req_tag_i,
     input wire dc_req_beat_i,
     input wire [31:0] dc_req_addr_i,
     input wire dc_req_store_i,
@@ -22,7 +23,7 @@ module edrv32_cpu2_dcache #(
     input wire dc_req_early_i,
     output wire dc_resp_valid_o,
     input wire dc_resp_ready_i,
-    output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_resp_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_resp_tag_o,
     output wire dc_resp_beat_o,
     output wire [1:0] dc_resp_way_hit_o,
     output wire [31:0] dc_resp_way0_data_o,
@@ -33,13 +34,13 @@ module edrv32_cpu2_dcache #(
     // Head authorization and final beat completion.
     input wire dc_commit_valid_i,
     output wire dc_commit_ready_o,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_commit_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_commit_tag_i,
     input wire dc_commit_beat_i,
     input wire [31:0] dc_commit_data_i,
     input wire [3:0] dc_commit_mask_i,
     output wire dc_done_valid_o,
     input wire dc_done_ready_i,
-    output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_done_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_done_tag_o,
     output wire dc_done_beat_o,
     output wire dc_done_error_o,
     output wire [31:0] dc_done_data_o,
@@ -47,9 +48,9 @@ module edrv32_cpu2_dcache #(
     // Shared-port early query.
     input wire dc_early_valid_i,
     input wire [31:0] dc_early_addr_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_early_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_early_tag_i,
     output wire dc_early_resp_valid_o,
-    output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_early_resp_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_early_resp_tag_o,
     output wire [1:0] dc_early_hit_o,
     output wire [31:0] dc_early_way0_data_o,
     output wire [31:0] dc_early_way1_data_o,
@@ -87,8 +88,9 @@ module edrv32_cpu2_dcache #(
 
     // Age cancellation and fences.
     input wire dc_cancel_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_cancel_tag_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] dc_age_head_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_cancel_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] dc_age_head_i,
+    input wire lsu_store_drained_i,
     input wire dc_fence_valid_i,
     output wire dc_fence_ready_o,
     input wire dc_fence_clean_all_i,
@@ -109,7 +111,7 @@ module edrv32_cpu2_dcache #(
     output wire dc_miss_event_o,
     // I06: architectural store beat observation, no IP external ports.
     output wire trace_mem_effect_valid_o,
-    output wire [(FPU_FORMAT=="FD" ? 4 : FPU_FORMAT=="F" ? 3 : 2)-1:0] trace_mem_effect_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] trace_mem_effect_tag_o,
     output wire [31:0] trace_mem_effect_addr_o,
     output wire [31:0] trace_mem_effect_data_o,
     output wire [3:0] trace_mem_effect_mask_o,
@@ -118,7 +120,7 @@ module edrv32_cpu2_dcache #(
     /* verilator lint_off UNUSEDPARAM */
     `include "edrv32_soc_map.vh"
     /* verilator lint_on UNUSEDPARAM */
-    localparam T = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam N = 1 << T;
     localparam ROM_BITS = $clog2(EDRV32_ROM_SIZE);
     localparam SRAM_BITS = $clog2(EDRV32_SRAM_SIZE);
@@ -184,6 +186,16 @@ module edrv32_cpu2_dcache #(
     reg [31:0] pipe_early1_r;
     reg [1:0] pipe_early_hit_r;
     reg [2*N-1:0] pending_valid_r;
+    reg [2*N-1:0] pending_stale_r;
+    reg refresh_busy_r;
+    reg pipe_refresh_r;
+    reg miss_refresh_r;
+    reg refresh_error_r;
+    reg [T:0] refresh_index_r;
+    wire refresh_needed_w;
+    wire refresh_start_w;
+    wire refresh_failed_w;
+    wire invalidate_accept_w;
     reg [31:0] pending_addr_r [0:2*N-1];
     reg pending_store_r [0:2*N-1];
     reg pending_device_r [0:2*N-1];
@@ -254,10 +266,15 @@ module edrv32_cpu2_dcache #(
     wire promote_w;
     wire array_free_w;
     wire early_read_w;
+    wire [2*N-1:0] pending_cached_store_w;
+    wire store_drain_wait_w;
+    wire miss_store_wait_w;
+    wire unused_observation_w = miss_store_wait_w;
     wire [2*N-1:0] early_conflict_w;
     wire [1:0] early_hit_w;
     wire [1:0] hit_w;
     wire pipe_use_w;
+    wire pipe_ordered_w;
     wire pipe_resolved_w;
     wire pipe_miss_w;
     wire response_pipe_w;
@@ -330,16 +347,23 @@ module edrv32_cpu2_dcache #(
     assign data1_w = data_way_w[1];
     assign array_free_w = !scan_r && state_r == S_IDLE && maint_state_r == M_IDLE &&
         device_state_r == D_IDLE;
-    assign dc_req_ready_o = !scan_r && count_r < 2 && state_r == S_IDLE &&
+    assign dc_req_ready_o = !scan_r && !refresh_busy_r && count_r < 2 && state_r == S_IDLE &&
         (!valid_r[head_r] || pipe_valid_r || resolved_r[head_r]);
     assign accept_w = dc_req_valid_i && dc_req_ready_o;
     assign pop_w = dc_resp_valid_o && dc_resp_ready_i;
-    assign replay_w = !pipe_valid_r && array_free_w && valid_r[head_r] &&
+    assign replay_w = !refresh_busy_r && !pipe_valid_r && array_free_w && valid_r[head_r] &&
         !resolved_r[head_r];
-    assign query_w = accept_w || replay_w;
-    assign query_addr_w = replay_w ? addr_r[head_r] : dc_req_addr_i;
-    assign query_store_w = replay_w ? store_r[head_r] : dc_req_store_i;
-    assign query_size_w = replay_w ? size_r[head_r] : dc_req_size_i;
+    assign refresh_needed_w = pending_stale_r[commit_index_w] &&
+        pending_store_r[commit_index_w] && !pending_device_r[commit_index_w];
+    assign refresh_failed_w = refresh_error_r && refresh_index_r == commit_index_w;
+    assign refresh_start_w = dc_commit_valid_i && refresh_needed_w && !refresh_busy_r &&
+        array_free_w && !maint_accept_w && !fence_accept_w;
+    assign query_w = refresh_start_w || accept_w || replay_w;
+    assign query_addr_w = refresh_start_w ? pending_addr_r[commit_index_w] :
+        replay_w ? addr_r[head_r] : dc_req_addr_i;
+    assign query_store_w = refresh_start_w || (replay_w ? store_r[head_r] : dc_req_store_i);
+    assign query_size_w = refresh_start_w ? pending_size_r[commit_index_w] :
+        replay_w ? size_r[head_r] : dc_req_size_i;
     assign query_rom_w = query_addr_w[31:ROM_BITS] == EDRV32_ROM_BASE[31:ROM_BITS];
     assign query_cached_w =
         query_addr_w[31:SRAM_BITS] == EDRV32_SRAM_BASE[31:SRAM_BITS] ||
@@ -352,25 +376,34 @@ module edrv32_cpu2_dcache #(
         query_addr_w[31:ALIAS_BITS] == EDRV32_DDR_UNCACHED_BASE[31:ALIAS_BITS];
     assign query_device_w = query_device_region_w || (query_rom_w && !query_store_w);
     assign query_error_w = !(query_cached_w || query_device_w);
-    assign promote_w = accept_w && dc_req_early_i && early_valid_r &&
+    assign promote_w = accept_w && !refresh_start_w && dc_req_early_i && early_valid_r &&
         early_tag_r == dc_req_tag_i && |dc_early_hit_o;
     assign read_array_w = query_w && array_free_w && !promote_w;
     assign early_read_w = dc_early_valid_i && array_free_w && !read_array_w;
     assign port_addr_w = early_read_w ? dc_early_addr_i : query_addr_w;
-    assign pipe_use_w = pipe_valid_r && !resolved_r[pipe_slot_r];
+    assign pipe_use_w = pipe_valid_r && (pipe_refresh_r || !resolved_r[pipe_slot_r]);
     assign hit_w = pipe_early_r ? pipe_early_hit_r :
         {tag1_w[19] && tag1_w[17:0] == pipe_addr_r[31:14],
         tag0_w[19] && tag0_w[17:0] == pipe_addr_r[31:14]};
+    // A blocked older miss owns replay; younger lookups cannot start a fill/preparation.
+    assign pipe_ordered_w = pipe_refresh_r || pipe_slot_r == head_r ||
+        !valid_r[head_r] || resolved_r[head_r];
     assign pipe_resolved_w = pipe_error_r || pipe_device_r ||
-        (pipe_cached_r && pipe_array_r && |hit_w);
-    assign pipe_miss_w = pipe_use_w && pipe_cached_r && pipe_array_r && !(|hit_w) &&
-        state_r == S_IDLE && maint_state_r == M_IDLE &&
+        (pipe_cached_r && pipe_array_r && |hit_w &&
+        (!pipe_store_r || (state_r == S_IDLE && maint_state_r == M_IDLE &&
+        pipe_ordered_w)));
+    assign pipe_miss_w = pipe_use_w && pipe_ordered_w && pipe_cached_r &&
+        pipe_array_r && !(|hit_w) && state_r == S_IDLE && maint_state_r == M_IDLE &&
         device_state_r == D_IDLE && !commit_device_w;
+    assign store_drain_wait_w = |pending_cached_store_w || !lsu_store_drained_i;
+    assign miss_store_wait_w = pipe_miss_w && !pipe_refresh_r &&
+        !pipe_canceled_w && store_drain_wait_w;
     assign pipe_age_w = pipe_tag_r - dc_age_head_i;
     assign cancel_age_w = dc_cancel_tag_i - dc_age_head_i;
-    assign pipe_canceled_w = canceled_r[pipe_slot_r] ||
-        (dc_cancel_valid_i && pipe_age_w >= cancel_age_w);
-    assign response_pipe_w = pipe_use_w && pipe_slot_r == head_r && pipe_resolved_w;
+    assign pipe_canceled_w = !pipe_refresh_r && (canceled_r[pipe_slot_r] ||
+        (dc_cancel_valid_i && pipe_age_w >= cancel_age_w));
+    assign response_pipe_w = pipe_use_w && !pipe_refresh_r &&
+        pipe_slot_r == head_r && pipe_resolved_w;
     assign dc_resp_valid_o = valid_r[head_r] && !canceled_r[head_r] &&
         (resolved_r[head_r] || response_pipe_w) &&
         (maint_state_r == M_IDLE || (response_pipe_w ? pipe_device_r || pipe_error_r :
@@ -416,9 +449,12 @@ module edrv32_cpu2_dcache #(
     assign commit_index_w = {dc_commit_tag_i, dc_commit_beat_i};
     assign done_space_w = !done_valid_r || dc_done_ready_i;
     assign dc_commit_ready_o = !scan_r && done_space_w && device_state_r == D_IDLE &&
-        state_r == S_IDLE && (pending_device_r[commit_index_w] || maint_state_r == M_IDLE);
+        state_r == S_IDLE && !refresh_busy_r && !refresh_needed_w &&
+        (pending_device_r[commit_index_w] ||
+        maint_state_r == M_IDLE || maint_state_r == M_START);
     assign commit_fire_w = dc_commit_valid_i && dc_commit_ready_o;
-    assign commit_cached_w = commit_fire_w && !pending_device_r[commit_index_w];
+    assign commit_cached_w = commit_fire_w && !pending_device_r[commit_index_w] &&
+        !refresh_failed_w;
     assign commit_device_w = commit_fire_w && pending_device_r[commit_index_w];
     assign dc_done_valid_o = done_valid_r;
     assign dc_done_tag_o = done_tag_r;
@@ -437,9 +473,12 @@ module edrv32_cpu2_dcache #(
     assign early_shift1_w = data1_w >> {early_addr_r[2:0], 3'd0};
     assign dc_early_way1_data_o = early_shift1_w[31:0];
     assign device_shift_w = axi_rdata_i >> {device_addr_r[2:0], 3'd0};
-    assign maint_req_ready_o = !scan_r && maint_state_r == M_IDLE;
+    assign maint_req_ready_o = !scan_r && maint_state_r == M_IDLE &&
+        lsu_store_drained_i && !buffer_valid_r;
     assign dc_fence_ready_o = maint_req_ready_o && !maint_req_valid_i;
     assign maint_accept_w = maint_req_valid_i && maint_req_ready_o;
+    assign invalidate_accept_w = maint_accept_w && maint_size_i != 0 &&
+        (maint_cmd_i == 2 || maint_cmd_i == 3);
     assign fence_accept_w = dc_fence_valid_i && dc_fence_ready_o;
     assign maint_busy_o = maint_state_r != M_IDLE;
     assign dc_fence_done_o = fence_done_r;
@@ -526,6 +565,8 @@ module edrv32_cpu2_dcache #(
     generate
         for (record = 0; record < 2*N; record = record + 1) begin : g_conflict
             // Comparison leaves are independent; the reduction only qualifies an early hit.
+            assign pending_cached_store_w[record] = pending_valid_r[record] &&
+                pending_store_r[record] && !pending_device_r[record] && !pending_stale_r[record];
             assign early_conflict_w[record] = pending_valid_r[record] &&
                 pending_store_r[record] &&
                 pending_addr_r[record][31:2] == dc_early_addr_i[31:2];
@@ -611,6 +652,11 @@ module edrv32_cpu2_dcache #(
             count_r <= 2'd0;
             pipe_valid_r <= 1'b0;
             pending_valid_r <= 0;
+            pending_stale_r <= 0;
+            refresh_busy_r <= 1'b0;
+            pipe_refresh_r <= 1'b0;
+            miss_refresh_r <= 1'b0;
+            refresh_error_r <= 1'b0;
             buffer_valid_r <= 1'b0;
             early_valid_r <= 1'b0;
             early_grant_r <= 1'b0;
@@ -629,6 +675,12 @@ module edrv32_cpu2_dcache #(
             wb_err_r <= 1'b0;
             lru_valid_r <= 1'b0;
             pipe_valid_r <= query_w;
+            if (query_w) pipe_refresh_r <= refresh_start_w;
+            if (refresh_start_w) begin
+                refresh_busy_r <= 1'b1;
+                refresh_error_r <= 1'b0;
+            end
+            if (commit_fire_w && refresh_failed_w) refresh_error_r <= 1'b0;
             early_valid_r <= dc_early_valid_i && !(dc_cancel_valid_i &&
                 ((dc_early_tag_i - dc_age_head_i) >= cancel_age_w));
             early_grant_r <= early_read_w && !(|early_conflict_w) &&
@@ -653,23 +705,40 @@ module edrv32_cpu2_dcache #(
                 tail_r <= !tail_r;
             end
             if (pipe_use_w && pipe_resolved_w) begin
-                resolved_r[pipe_slot_r] <= 1'b1;
-                if (!pipe_canceled_w && !pipe_error_r && (pipe_store_r || pipe_device_r))
-                    pending_valid_r[pipe_index_w] <= 1'b1;
+                if (pipe_refresh_r) begin
+                    refresh_busy_r <= 1'b0;
+                    pending_stale_r[refresh_index_r] <= 1'b0;
+                    pending_valid_r[refresh_index_r] <= 1'b1;
+                end else begin
+                    resolved_r[pipe_slot_r] <= 1'b1;
+                    if (!pipe_canceled_w && !pipe_error_r && (pipe_store_r || pipe_device_r)) begin
+                        pending_valid_r[pipe_index_w] <= 1'b1;
+                        pending_stale_r[pipe_index_w] <= 1'b0;
+                    end
+                end
                 lru_valid_r <= pipe_cached_r && |hit_w;
             end
             if (fill_last_w) begin
-                resolved_r[miss_slot_r] <= 1'b1;
-                if (!canceled_r[miss_slot_r] && store_r[miss_slot_r] &&
-                    !(fill_error_r || |axi_rresp_i))
-                    pending_valid_r[{tag_r[miss_slot_r], beat_r[miss_slot_r]}] <= 1'b1;
+                if (miss_refresh_r) begin
+                    refresh_busy_r <= 1'b0;
+                    refresh_error_r <= fill_error_r || |axi_rresp_i;
+                    pending_stale_r[refresh_index_r] <= 1'b0;
+                    pending_valid_r[refresh_index_r] <= !(fill_error_r || |axi_rresp_i);
+                    if (fill_error_r || |axi_rresp_i) wb_err_r <= 1'b1;
+                end else begin
+                    resolved_r[miss_slot_r] <= 1'b1;
+                    if (!canceled_r[miss_slot_r] && store_r[miss_slot_r] &&
+                        !(fill_error_r || |axi_rresp_i)) begin
+                        pending_valid_r[{tag_r[miss_slot_r], beat_r[miss_slot_r]}] <= 1'b1;
+                        pending_stale_r[{tag_r[miss_slot_r], beat_r[miss_slot_r]}] <= 1'b0;
+                    end
+                end
                 lru_valid_r <= tag_fill_w;
             end
+            // Invalid records have no transaction; fresh preparation replaces their stale bit.
+            if (invalidate_accept_w || (pipe_miss_w && pipe_refresh_r))
+                pending_stale_r <= {2*N{1'b1}};
             if (commit_fire_w) pending_valid_r[commit_index_w] <= 1'b0;
-            if (commit_cached_w) begin
-                done_valid_r <= 1'b1;
-                done_error_r <= 1'b0;
-            end
             if (dc_cancel_valid_i) begin
                 if (valid_r[0] && ((tag_r[0] - dc_age_head_i) >= cancel_age_w))
                     canceled_r[0] <= 1'b1;
@@ -693,7 +762,8 @@ module edrv32_cpu2_dcache #(
                 case (state_r)
                     S_IDLE: begin
                         if (pipe_miss_w && device_state_r == D_IDLE && !commit_device_w &&
-                            !pipe_canceled_w) begin
+                            !pipe_canceled_w && (!store_drain_wait_w || pipe_refresh_r)) begin
+                            miss_refresh_r <= pipe_refresh_r;
                             state_r <= victim_dirty_w ? S_WB_AR : S_FILL_AR;
                             bus_beat_r <= 2'd0;
                             fill_error_r <= 1'b0;
@@ -737,7 +807,10 @@ module edrv32_cpu2_dcache #(
             end else begin
                 case (maint_state_r)
                     M_START: begin
-                        if (!buffer_valid_r && state_r == S_IDLE && !pipe_valid_r) begin
+                        // Old commits were drained at acceptance. Newly committed stale
+                        // targets must retry after invalidation, rather than block its scan.
+                        if ((maint_inv_w || lsu_store_drained_i) && !buffer_valid_r &&
+                            state_r == S_IDLE && !pipe_valid_r) begin
                             if (maint_cmd_r == 0 || maint_left_r == 0) begin
                                 maint_state_r <= M_IDLE;
                                 fence_done_r <= maint_fence_r;
@@ -839,11 +912,14 @@ module edrv32_cpu2_dcache #(
             store_r[tail_r] <= dc_req_store_i;
             size_r[tail_r] <= dc_req_size_i;
         end
+        if (refresh_start_w) refresh_index_r <= commit_index_w;
         if (query_w) begin
-            pipe_slot_r <= replay_w ? head_r : tail_r;
+            pipe_slot_r <= refresh_start_w ? head_r : replay_w ? head_r : tail_r;
             pipe_addr_r <= query_addr_w;
-            pipe_tag_r <= replay_w ? tag_r[head_r] : dc_req_tag_i;
-            pipe_beat_r <= replay_w ? beat_r[head_r] : dc_req_beat_i;
+            pipe_tag_r <= refresh_start_w ? dc_commit_tag_i :
+                replay_w ? tag_r[head_r] : dc_req_tag_i;
+            pipe_beat_r <= refresh_start_w ? dc_commit_beat_i :
+                replay_w ? beat_r[head_r] : dc_req_beat_i;
             pipe_store_r <= query_store_w;
             pipe_size_r <= query_size_w;
             pipe_array_r <= array_free_w;
@@ -865,7 +941,7 @@ module edrv32_cpu2_dcache #(
         early_cached_r <=
             dc_early_addr_i[31:SRAM_BITS] == EDRV32_SRAM_BASE[31:SRAM_BITS] ||
             dc_early_addr_i[31:DDR_BITS] == EDRV32_DDR_BASE[31:DDR_BITS];
-        if (pipe_use_w && pipe_resolved_w) begin
+        if (pipe_use_w && pipe_resolved_w && !pipe_refresh_r) begin
             result0_r[pipe_slot_r] <= response0_w;
             result1_r[pipe_slot_r] <= response1_w;
             result_hit_r[pipe_slot_r] <= pipe_device_r || pipe_error_r ? 2'b01 : hit_w;
@@ -876,8 +952,13 @@ module edrv32_cpu2_dcache #(
                 pending_store_r[pipe_index_w] <= pipe_store_r;
                 pending_device_r[pipe_index_w] <= pipe_device_r;
                 pending_size_r[pipe_index_w] <= pipe_size_r;
-            pending_way_r[pipe_index_w] <= hit_w[1];
+                pending_way_r[pipe_index_w] <= hit_w[1];
             end
+            lru_set_r <= pipe_addr_r[13:5];
+            lru_data_r <= !hit_w[1];
+        end
+        if (pipe_use_w && pipe_resolved_w && pipe_refresh_r) begin
+            pending_way_r[refresh_index_r] <= hit_w[1];
             lru_set_r <= pipe_addr_r[13:5];
             lru_data_r <= !hit_w[1];
         end
@@ -888,9 +969,10 @@ module edrv32_cpu2_dcache #(
             wb_addr_r <= {replacement_w ? tag1_w[17:0] : tag0_w[17:0],
                         pipe_addr_r[13:5], 5'd0};
         end
-        if (state_r == S_FILL && axi_rvalid_i && bus_beat_r == miss_addr_r[4:3])
+        if (state_r == S_FILL && !miss_refresh_r && axi_rvalid_i &&
+            bus_beat_r == miss_addr_r[4:3])
             result0_r[miss_slot_r] <= fill_word_w >> {miss_addr_r[1:0], 3'd0};
-        if (fill_last_w) begin
+        if (fill_last_w && !miss_refresh_r) begin
             result_hit_r[miss_slot_r] <= 2'b01;
             result_error_r[miss_slot_r] <= fill_error_r || |axi_rresp_i;
             result_device_r[miss_slot_r] <= 1'b0;
@@ -904,6 +986,12 @@ module edrv32_cpu2_dcache #(
             end
             lru_set_r <= miss_addr_r[13:5];
             lru_data_r <= !victim_r;
+        end
+        if (fill_last_w && miss_refresh_r) begin
+            pending_way_r[refresh_index_r] <= victim_r;
+            lru_set_r <= miss_addr_r[13:5];
+            lru_data_r <= !victim_r;
+            if (fill_error_r || |axi_rresp_i) wb_err_addr_r <= miss_addr_r;
         end
         if (commit_cached_w) begin
             buffer_addr_r <= pending_addr_r[commit_index_w];
@@ -964,12 +1052,11 @@ module edrv32_cpu2_dcache #(
     end
     wire trace_device_write_w;
     assign trace_device_write_w = device_state_r == D_WRITE && !device_w_r && axi_wready_i;
-    assign trace_mem_effect_valid_o = commit_cached_w || trace_device_write_w;
-    assign trace_mem_effect_tag_o = trace_device_write_w ?
-        device_index_r[T:1] : dc_commit_tag_i;
-    assign trace_mem_effect_addr_o = trace_device_write_w ?
-        device_addr_r : pending_addr_r[commit_index_w];
-    assign trace_mem_effect_data_o = trace_device_write_w ? device_data_r : dc_commit_data_i;
-    assign trace_mem_effect_mask_o = trace_device_write_w ? device_mask_r : dc_commit_mask_i;
+    // Cached stores became architectural at retirement; only device beats report effects.
+    assign trace_mem_effect_valid_o = trace_device_write_w;
+    assign trace_mem_effect_tag_o = device_index_r[T:1];
+    assign trace_mem_effect_addr_o = device_addr_r;
+    assign trace_mem_effect_data_o = device_data_r;
+    assign trace_mem_effect_mask_o = device_mask_r;
     assign debug_miss_o = state_r != S_IDLE;
 endmodule

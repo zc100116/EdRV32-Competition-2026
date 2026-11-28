@@ -1,13 +1,13 @@
 // CV02/CV04/CV05 independent program-slot/type/age oracle and execution stubs.
 module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
-    localparam T=FPU_FORMAT=="NONE"?2:FPU_FORMAT=="F"?3:4;
+    localparam T=ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam N=2**T;
     localparam B=FPU_FORMAT=="FD"?64:32;
     reg clk_i=0;
     reg rst_n_i=0;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] age_head_i;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] age_head_i;
     reg cancel_valid_i=0;
-    reg [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] cancel_tag_i=0;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] cancel_tag_i=0;
     reg [2-1:0] csr_fs_i=0;
     reg [3-1:0] csr_frm_i=0;
     reg ib_head0_valid_i=0;
@@ -72,11 +72,11 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
     reg wb0_valid_i=0;
     reg [5-1:0] wb0_rd_i=0;
     reg [32-1:0] wb0_data_i=0;
-    reg [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] wb0_tag_i=0;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] wb0_tag_i=0;
     reg wb1_valid_i=0;
     reg [5-1:0] wb1_rd_i=0;
     reg [32-1:0] wb1_data_i=0;
-    reg [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] wb1_tag_i=0;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] wb1_tag_i=0;
     wire [5-1:0] fp_read0_addr_o;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_read0_data_i;
     wire [5-1:0] fp_read1_addr_o;
@@ -86,12 +86,12 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
     reg fp_wb_valid_i=0;
     reg [5-1:0] fp_wb_rd_i=0;
     reg [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_wb_data_i=0;
-    reg [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] fp_wb_tag_i=0;
-    wire [(FPU_FORMAT>"FD"?3:FPU_FORMAT>"F"?5:4)-1:0] allocate_credit_i;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] fp_wb_tag_i=0;
+    wire [(ISSUE_WIDTH == 2 || FPU_FORMAT == "FD" ? 5 : 4)-1:0] allocate_credit_i;
     reg allocate_ready_i=0;
     wire allocate_valid_o;
     wire [2-1:0] allocate_count_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] allocate0_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] allocate0_tag_o;
     wire [32-1:0] allocate0_pc_o;
     wire [32-1:0] allocate0_instr_o;
     wire [5-1:0] allocate0_rd_o;
@@ -100,7 +100,7 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
     wire allocate0_store_o;
     wire allocate0_divide_o;
     wire allocate0_double_beat_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] allocate1_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] allocate1_tag_o;
     wire [32-1:0] allocate1_pc_o;
     wire [32-1:0] allocate1_instr_o;
     wire [5-1:0] allocate1_rd_o;
@@ -110,41 +110,41 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
     wire allocate1_divide_o;
     wire allocate1_double_beat_o;
     wire source0_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source0_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source0_tag_o;
     wire source0_domain_o;
     wire source0_ready_i;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source0_data_i;
     wire source1_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source1_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source1_tag_o;
     wire source1_domain_o;
     wire source1_ready_i;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source1_data_i;
     wire source2_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source2_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source2_tag_o;
     wire source2_domain_o;
     wire source2_ready_i;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source2_data_i;
     wire source3_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source3_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source3_tag_o;
     wire source3_domain_o;
     wire source3_ready_i;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source3_data_i;
     wire source4_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source4_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source4_tag_o;
     wire source4_domain_o;
     wire source4_ready_i;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source4_data_i;
     reg execute0_ready_i=0;
     wire execute0_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute0_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute0_tag_o;
     wire [32-1:0] execute0_pc_o;
     wire [32-1:0] execute0_instr_o;
     wire [32-1:0] execute0_src1_o;
     wire [32-1:0] execute0_src2_o;
     wire [32-1:0] execute0_imm_o;
     wire execute0_late_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute0_source1_tag_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute0_source2_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute0_source1_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute0_source2_tag_o;
     wire execute0_source1_wait_o;
     wire execute0_source2_wait_o;
     wire execute0_predict_taken_o;
@@ -167,15 +167,15 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
     wire [(ISSUE_WIDTH+2)-1:0] execute0_ras_count_o;
     reg execute1_ready_i=0;
     wire execute1_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute1_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute1_tag_o;
     wire [32-1:0] execute1_pc_o;
     wire [32-1:0] execute1_instr_o;
     wire [32-1:0] execute1_src1_o;
     wire [32-1:0] execute1_src2_o;
     wire [32-1:0] execute1_imm_o;
     wire execute1_late_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute1_source1_tag_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute1_source2_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute1_source1_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute1_source2_tag_o;
     wire execute1_source1_wait_o;
     wire execute1_source2_wait_o;
     wire execute1_predict_taken_o;
@@ -198,31 +198,31 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
     wire [(ISSUE_WIDTH+2)-1:0] execute1_ras_count_o;
     reg mul_req_ready_i=0;
     wire mul_req_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] mul_req_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] mul_req_tag_o;
     wire [32-1:0] mul_req_instr_o;
     wire [32-1:0] mul_req_src1_o;
     wire [32-1:0] mul_req_src2_o;
     reg div_req_ready_i=0;
     wire div_req_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] div_req_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] div_req_tag_o;
     wire [32-1:0] div_req_instr_o;
     wire [32-1:0] div_req_src1_o;
     wire [32-1:0] div_req_src2_o;
     reg lsu_req_ready_i=0;
     wire lsu_req_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] lsu_req_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] lsu_req_tag_o;
     wire [32-1:0] lsu_req_instr_o;
     wire [32-1:0] lsu_req_addr_o;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] lsu_req_store_data_o;
     wire lsu_req_early_o;
     reg csr_req_ready_i=0;
     wire csr_req_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] csr_req_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] csr_req_tag_o;
     wire [32-1:0] csr_req_instr_o;
     wire [32-1:0] csr_req_src_o;
     reg fp_req_ready_i=0;
     wire fp_req_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] fp_req_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] fp_req_tag_o;
     wire [32-1:0] fp_req_instr_o;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_req_src1_o;
     wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_req_src2_o;
@@ -231,15 +231,15 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
     wire [3-1:0] fp_req_rm_o;
     wire early_req_valid_o;
     wire [32-1:0] early_req_addr_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] early_req_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] early_req_tag_o;
     reg decode_complete_ready_i=0;
     wire decode_complete_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] decode_complete_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] decode_complete_tag_o;
     wire decode_complete_exception_o;
     wire [4-1:0] decode_complete_cause_o;
     wire [32-1:0] decode_complete_tval_o;
     wire predict_read0_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] predict_read0_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] predict_read0_tag_o;
     wire [9-1:0] predict_read0_index0_o;
     wire [9-1:0] predict_read0_index1_o;
     wire [9-1:0] predict_read0_index2_o;
@@ -250,7 +250,7 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
     wire [10-1:0] predict_read0_tag3_o;
     wire [12-1:0] predict_read0_base_index_o;
     wire predict_read1_valid_o;
-    wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] predict_read1_tag_o;
+    wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] predict_read1_tag_o;
     wire [9-1:0] predict_read1_index0_o;
     wire [9-1:0] predict_read1_index1_o;
     wire [9-1:0] predict_read1_index2_o;
@@ -262,35 +262,39 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
     wire [12-1:0] predict_read1_base_index_o;
     reg alu0_complete_valid_i=0;
     reg alu0_complete_ready_i=0;
-    reg [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] alu0_complete_tag_i=0;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] alu0_complete_tag_i=0;
     reg [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] alu0_complete_data_i=0;
     reg alu1_complete_valid_i=0;
     reg alu1_complete_ready_i=0;
-    reg [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] alu1_complete_tag_i=0;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] alu1_complete_tag_i=0;
     reg [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] alu1_complete_data_i=0;
     reg branch_complete_valid_i=0;
     reg branch_complete_ready_i=0;
-    reg [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] branch_complete_tag_i=0;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] branch_complete_tag_i=0;
     reg [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] branch_complete_data_i=0;
     reg mul_complete_valid_i=0;
     reg mul_complete_ready_i=0;
-    reg [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] mul_complete_tag_i=0;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] mul_complete_tag_i=0;
     reg [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] mul_complete_data_i=0;
     reg div_complete_valid_i=0;
     reg div_complete_ready_i=0;
-    reg [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] div_complete_tag_i=0;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] div_complete_tag_i=0;
     reg [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] div_complete_data_i=0;
+    reg early_resp_valid_i=0;
+    reg [T-1:0] early_resp_tag_i=0;
+    reg early_resp_hit_i=0;
+    reg [31:0] early_resp_data_i=0;
     reg lsu_complete_valid_i=0;
     reg lsu_complete_ready_i=0;
-    reg [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] lsu_complete_tag_i=0;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] lsu_complete_tag_i=0;
     reg [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] lsu_complete_data_i=0;
     reg csr_complete_valid_i=0;
     reg csr_complete_ready_i=0;
-    reg [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] csr_complete_tag_i=0;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] csr_complete_tag_i=0;
     reg [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] csr_complete_data_i=0;
     reg fp_resp_valid_i=0;
     reg fp_resp_ready_i=0;
-    reg [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] fp_resp_tag_i=0;
+    reg [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] fp_resp_tag_i=0;
     reg [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_resp_data_i=0;
     reg [T:0] occupied=0;
     reg [T-1:0] model_head=0;
@@ -368,6 +372,10 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
         .div_complete_ready_i(div_complete_ready_i),
         .div_complete_tag_i(div_complete_tag_i),
         .div_complete_data_i(div_complete_data_i),
+        .early_resp_valid_i(early_resp_valid_i),
+        .early_resp_tag_i(early_resp_tag_i),
+        .early_resp_hit_i(early_resp_hit_i),
+        .early_resp_data_i(early_resp_data_i),
         .lsu_complete_valid_i(lsu_complete_valid_i),
         .lsu_complete_ready_i(lsu_complete_ready_i),
         .lsu_complete_tag_i(lsu_complete_tag_i),
@@ -643,10 +651,18 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
         .issue_pair_cause_o(),
         .issue_wait_o()
     );
+    reg csr_seen=0;
+    reg [T-1:0] csr_seen_tag;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if(!rst_n_i)csr_seen<=0;
+        else if(csr_req_valid_o && csr_req_ready_i)csr_seen<=1;
+    end
+    always @(posedge clk_i)if(csr_req_valid_o && csr_req_ready_i)csr_seen_tag<=csr_req_tag_o;
     task tick; @(posedge clk_i); #1; endtask
     task clear;
         @(negedge clk_i);rst_n_i=0;ib_head0_valid_i=0;ib_head1_valid_i=0;
         cancel_valid_i=0;retire=0;fp_wb_valid_i=0;
+        early_resp_valid_i=0;early_resp_hit_i=0;
         for(integer t=0;t<N;t++)done[t]=0;
         tick();rst_n_i=1;tick();
     endtask
@@ -683,7 +699,8 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
             4:observed=mul_req_valid_o&&mul_req_tag_o==T'(expected_tag);
             5:observed=div_req_valid_o&&div_req_tag_o==T'(expected_tag);
             6:observed=fp_req_valid_o&&fp_req_tag_o==T'(expected_tag);
-            7:observed=csr_req_valid_o&&csr_req_tag_o==T'(expected_tag);
+            7:observed=(csr_req_valid_o&&csr_req_tag_o==T'(expected_tag)) ||
+                (csr_seen&&csr_seen_tag==T'(expected_tag));
             default:observed=0;
         endcase
         if(!observed)$fatal(1,"route kind%0d pipe%0d tag%0d at%0t",kind,pipe,expected_tag,$time);
@@ -771,6 +788,20 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
             tick();producer_cycle=cycle_count;
             alu0_complete_valid_i=0;if(ordinary!=0)done[0]=1;
             ib_head0_instr_i=instruction(0,7,6,3)|32'h1000;#1;
+            if(ISSUE_WIDTH==1 && ordinary==0) begin
+                if(!allocate_valid_o)$fatal(1,"short consumer did not reserve local entry");
+                execute0_ready_i=0;
+                tick();ib_head0_valid_i=0;
+                #1;if(execute0_valid_o)$fatal(1,"short consumer executed without captured hit");
+                early_resp_valid_i=1;early_resp_tag_i=0;
+                early_resp_hit_i=1;early_resp_data_i=5;#1;
+                if(!execute0_valid_o || execute0_src1_o!=5 || execute0_late_o ||
+                    cycle_count-producer_cycle!=1)$fatal(1,"registered short-load EX interval");
+                tick();early_resp_valid_i=0;early_resp_hit_i=0;
+                repeat(2)begin tick();if(!execute0_valid_o || execute0_src1_o!=5)
+                    $fatal(1,"short source not retained under EX backpressure");end
+                execute0_ready_i=1;tick();
+            end else begin
             if(allocate_valid_o)$fatal(1,"load source available before its specified return");
             if(ordinary!=0)begin
                 tick();if(allocate_valid_o)$fatal(1,"ordinary load returned at distance 1");
@@ -781,6 +812,23 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
             tick();ib_head0_valid_i=0;lsu_complete_valid_i=0;#1;
             if(cycle_count-producer_cycle!==ordinary+1 || execute0_src1_o!==5 || execute0_late_o)
                 $fatal(1,"load distance expected%0d got%0d",ordinary+1,cycle_count-producer_cycle);
+            end
+        end
+        if(ISSUE_WIDTH==1) begin
+            clear();@(negedge clk_i);ib_head0_valid_i=1;
+            ib_head0_instr_i=instruction(3,6,4,0);tick();
+            ib_head0_instr_i=instruction(0,7,6,3);#1;
+            if(!allocate_valid_o)$fatal(1,"failed-short consumer local allocation");
+            tick();ib_head0_valid_i=0;early_resp_valid_i=1;early_resp_tag_i=0;
+            early_resp_hit_i=0;#1;
+            if(execute0_valid_o)$fatal(1,"failed early result used");
+            tick();early_resp_valid_i=0;
+            lsu_complete_valid_i=1;lsu_complete_ready_i=1;
+            lsu_complete_tag_i=0;lsu_complete_data_i=9;
+            tick();lsu_complete_valid_i=0;#1;
+            if(!execute0_valid_o || execute0_src1_o!=9)
+                $fatal(1,"failed short load did not capture ordinary completion");
+            tick();
         end
         // An early query whose ordinary request misses the next edge expires, without reallocation.
         clear();lsu_req_ready_i=0;@(negedge clk_i);ib_head0_valid_i=1;
@@ -815,6 +863,34 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
         tick();ib_head0_valid_i=0;alu0_complete_valid_i=0;#1;
         if(!execute0_valid_o || execute0_late_o || execute0_src1_o!==32'h123)
             $fatal(1,"same-edge result lost between ID/EX and completion bank");
+        // BE1: a bank-blocked ALU result still forwards to the next load address.
+        for(int pipe=0;pipe<ISSUE_WIDTH;pipe++)begin
+            clear();@(negedge clk_i);ib_head0_valid_i=1;
+            ib_head0_instr_i=instruction(0,6,2,3);tick();
+            ib_head0_instr_i=instruction(3,7,6,0);#1;
+            if(allocate_valid_o)$fatal(1,"load used unavailable ALU address");
+            alu0_complete_valid_i=(pipe==0);alu1_complete_valid_i=(pipe==1);
+            alu0_complete_ready_i=0;alu1_complete_ready_i=0;
+            alu0_complete_tag_i=0;alu1_complete_tag_i=0;
+            alu0_complete_data_i=B'(32'h10000400);alu1_complete_data_i=B'(32'h10000400);
+            #1;if(!allocate_valid_o || early_req_valid_o)
+                $fatal(1,"bank-blocked result did not feed ordinary load");
+            tick();ib_head0_valid_i=0;alu0_complete_valid_i=0;alu1_complete_valid_i=0;#1;
+            if(!lsu_req_valid_o || lsu_req_addr_o!=32'h10000400)
+                $fatal(1,"blocked ALU address lost at source capture");
+            @(negedge clk_i);cancel_valid_i=1;cancel_tag_i=0;tick();
+            cancel_valid_i=0;tick();
+            @(negedge clk_i);ib_head0_valid_i=1;
+            ib_head0_instr_i=instruction(0,6,2,3);tick();
+            ib_head0_instr_i=instruction(3,7,6,0);#1;
+            if(allocate_valid_o)$fatal(1,"canceled skid value leaked into reused tag");
+            alu0_complete_valid_i=1;alu0_complete_tag_i=0;
+            alu0_complete_data_i=B'(32'h10000800);#1;
+            if(!allocate_valid_o)$fatal(1,"reused tag did not accept new result");
+            tick();ib_head0_valid_i=0;alu0_complete_valid_i=0;#1;
+            if(!lsu_req_valid_o || lsu_req_addr_o!=32'h10000800)
+                $fatal(1,"old skid value survived tag reuse");
+        end
         // An uncommitted but completed rs1 still disqualifies early AGU.
         clear();@(negedge clk_i);ib_head0_valid_i=1;
         ib_head0_instr_i=instruction(0,6,2,3);tick();
@@ -828,11 +904,16 @@ module tb #(parameter ISSUE_WIDTH=2,parameter [31:0] FPU_FORMAT="NONE");
         ib_head0_instr_i=instruction(0,7,6,3)|32'h1000;
         lsu_complete_valid_i=1;lsu_complete_ready_i=1;lsu_complete_tag_i=0;
         lsu_complete_data_i=B'(32'hbad);lsu_complete_device_i=1;#1;
-        if(allocate_valid_o)$fatal(1,"device preparation bypassed as source data");
+        if(allocate_valid_o !== (ISSUE_WIDTH==1))
+            $fatal(1,"device preparation/local short reservation boundary");
         tick();lsu_complete_valid_i=0;lsu_complete_device_i=0;
+        if(ISSUE_WIDTH==1)begin
+            ib_head0_valid_i=0;#1;
+            if(execute0_valid_o)$fatal(1,"device preparation executed as short result");
+        end
         @(negedge clk_i);retire=1;tick();retire=0;
         wb0_valid_i=1;wb0_rd_i=6;wb0_tag_i=0;wb0_data_i=32'h123;#1;
-        if(!allocate_valid_o)$fatal(1,"device final WB unavailable to ID");
+        if(ISSUE_WIDTH==2 && !allocate_valid_o)$fatal(1,"device final WB unavailable to ID");
         tick();ib_head0_valid_i=0;wb0_valid_i=0;#1;
         if(execute0_src1_o!==32'h123)$fatal(1,"device final data lost at ID/EX");
         // Local unit backpressure does not freeze another execution class.

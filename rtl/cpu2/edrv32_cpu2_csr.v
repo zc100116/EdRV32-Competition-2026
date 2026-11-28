@@ -10,21 +10,21 @@ module edrv32_cpu2_csr #(
     input wire rst_n_i,
     input wire csr_req_valid_i,
     output wire csr_req_ready_o,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] csr_req_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] csr_req_tag_i,
     input wire [31:0] csr_req_instr_i,
     input wire [31:0] csr_req_src_i,
     input wire csr_commit_valid_i,
     output wire csr_complete_valid_o,
     input wire csr_complete_ready_i,
-    output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] csr_complete_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] csr_complete_tag_o,
     output wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] csr_complete_data_o,
     output wire [4:0] csr_complete_flags_o,
     output wire csr_complete_exception_o,
     output wire [3:0] csr_complete_cause_o,
     output wire [31:0] csr_complete_tval_o,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] age_head_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] age_head_i,
     input wire cancel_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] cancel_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] cancel_tag_i,
     input wire fp_commit_flags_valid_i,
     input wire [4:0] fp_commit_flags_i,
     input wire fp_commit_write_i,
@@ -55,7 +55,7 @@ module edrv32_cpu2_csr #(
     output wire [2:0] trace_frm_o,
     output wire [1:0] trace_fs_o
 );
-    localparam T = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam H = ISSUE_WIDTH == 1 ? 2 : 8;
     localparam [31:0] MISA = 32'h40001100 |
         (FPU_FORMAT == "NONE" ? 32'b0 : 32'h20) |

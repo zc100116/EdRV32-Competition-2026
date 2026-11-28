@@ -2,11 +2,11 @@
 // Spec: fpu-spec 2.2, 3.1, 5.3-5.4; fpu-testplan FV08/FV11/FV15.
 // Description: Bit-exact Fraction vectors plus boundary-age cancellation and backpressure.
 // Clock domain: simulation clk_sys.
-module tb #(
+module tb #(parameter ISSUE_WIDTH=2,
     parameter [31:0] FPU_FORMAT = "F"
 );
     localparam B = FPU_FORMAT == "FD" ? 64 : 32;
-    localparam T = FPU_FORMAT == "FD" ? 4 : 3;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     reg clk;
     initial begin
         clk = 0;
@@ -30,6 +30,7 @@ module tb #(
     reg cancel = 0;
     reg [T-1:0] boundary = 0;
     edrv32_cpu2_fpu_divsqrt #(
+        .ISSUE_WIDTH(ISSUE_WIDTH),
         .FPU_FORMAT(FPU_FORMAT)
     ) u_dut (
         .clk_i(clk),

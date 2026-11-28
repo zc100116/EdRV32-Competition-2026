@@ -2,9 +2,9 @@
 // Spec: cpu-v2-testplan CV11/CV12.
 // Description: AXI64 byte memory and independent architectural store scoreboard.
 // Clock: clk_sys.
-module tb # (parameter FORMAT = 0);
+module tb # (parameter ISSUE_WIDTH=2, parameter FORMAT = 0);
     localparam [31:0] FPU_FORMAT = FORMAT == 2 ? "FD" : FORMAT == 1 ? "F" : "NONE";
-    localparam T = FORMAT == 2 ? 4 : FORMAT == 1 ? 3 : 2;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     reg clk_i = 0;
     reg rst_n_i = 0;
     reg [T-1:0] dc_req_tag_i = 0;
@@ -43,12 +43,14 @@ module tb # (parameter FORMAT = 0);
     wire dc_commit_ready_o;
     reg dc_commit_beat_i = 0;
     wire dc_done_valid_o;
+    wire trace_effect_valid;
     reg dc_done_ready_i = 0;
     wire dc_done_beat_o;
     wire dc_done_error_o;
     reg dc_cancel_valid_i = 0;
     reg dc_early_valid_i = 0;
     wire dc_early_resp_valid_o;
+    reg lsu_store_drained_i = 1;
     reg dc_fence_valid_i = 0;
     wire dc_fence_ready_o;
     reg dc_fence_clean_all_i = 0;
@@ -93,7 +95,8 @@ module tb # (parameter FORMAT = 0);
     reg axi_bvalid_i = 0;
     wire axi_bready_o;
     always #5 clk_i = ~clk_i;
-    edrv32_cpu2_dcache #(.FPU_FORMAT(FPU_FORMAT)) dut (
+    edrv32_cpu2_dcache #(
+        .ISSUE_WIDTH(ISSUE_WIDTH),.FPU_FORMAT(FPU_FORMAT)) dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .dc_req_tag_i(dc_req_tag_i),
@@ -138,6 +141,7 @@ module tb # (parameter FORMAT = 0);
         .dc_cancel_valid_i(dc_cancel_valid_i),
         .dc_early_valid_i(dc_early_valid_i),
         .dc_early_resp_valid_o(dc_early_resp_valid_o),
+        .lsu_store_drained_i(lsu_store_drained_i),
         .dc_fence_valid_i(dc_fence_valid_i),
         .dc_fence_ready_o(dc_fence_ready_o),
         .dc_fence_clean_all_i(dc_fence_clean_all_i),
@@ -182,7 +186,7 @@ module tb # (parameter FORMAT = 0);
         .axi_bvalid_i(axi_bvalid_i),
         .axi_bready_o(axi_bready_o),
         // I06 observation-only outputs.
-        .trace_mem_effect_valid_o(),
+        .trace_mem_effect_valid_o(trace_effect_valid),
         .trace_mem_effect_tag_o(),
         .trace_mem_effect_addr_o(),
         .trace_mem_effect_data_o(),
@@ -260,6 +264,8 @@ module tb # (parameter FORMAT = 0);
             pull = pull + 1;
             responses <= responses + 1;
         end
+        if (trace_effect_valid !== (axi_wvalid_o && axi_wready_i && write_busy && write_len==0))
+            $fatal(1,"trace effect must describe only a device store AXI beat");
         axi_arready_i <= !read_busy && cycle % 3 != 0;
         if (axi_arvalid_o && axi_arready_i) begin
             if (axi_arid_o != 0 || axi_arburst_o != 1 ||
@@ -362,6 +368,7 @@ module tb # (parameter FORMAT = 0);
         dc_commit_data_i = data;
         dc_commit_mask_i = mask;
         dc_commit_valid_i = 1;
+        #1;
         while (!dc_commit_ready_o) step();
         tick();
         step();
@@ -370,6 +377,14 @@ module tb # (parameter FORMAT = 0);
             for (int b = 0; b < 4; b++) begin
                 if (mask[b]) reference_memory[index_of(addr)+b] = data[b*8 +: 8];
             end
+        end
+        if (addr[31:28] == 1 || addr[31:28] == 8) begin
+            repeat (3) begin
+                tick();
+                if (dc_done_valid_o) $fatal(1, "cached commit must not return done");
+            end
+            step();
+            return;
         end
         while (!dc_done_valid_o) tick();
         if (dc_done_tag_o != tag || dc_done_beat_o != beat || dc_done_error_o != error)
@@ -427,6 +442,10 @@ module tb # (parameter FORMAT = 0);
     endtask
     initial begin
         #10000000;
+        $display("debug state=%0d maint=%0d device=%0d refresh=%b/%h stale=%b need=%b commit=%b/%b index=%h pending_device=%b pipe=%b/%b",
+            dut.state_r,dut.maint_state_r,dut.device_state_r,dut.refresh_busy_r,dut.refresh_index_r,
+            dut.pending_stale_r,dut.refresh_needed_w,dc_commit_valid_i,dc_commit_ready_o,
+            dut.commit_index_w,dut.pending_device_r[dut.commit_index_w],dut.pipe_valid_r,dut.pipe_refresh_r);
         $fatal(1, "timeout push%0d pull%0d", push, pull);
     end
     initial begin
@@ -484,22 +503,77 @@ module tb # (parameter FORMAT = 0);
             drain();
             if (ar_count != before_ar) $fatal(1, "warm cache miss");
         end
+        // A prepared store must not lose its target to younger same-set miss traffic.
+        send(32'h10000004,1,2,0,T'(2),0,0);drain();
+        fork
+            begin load(32'h10004004);load(32'h80008004);end
+            begin
+                repeat(30)tick();
+                authorize(32'h10000004,T'(2),0,32'hcafed00d,4'hf,0,1);
+            end
+        join
+        load(32'h10000004);
+        load(32'h10000000);
+        // Invalidation makes prepared targets stale: commit rechecks and allocates again.
+        begin
+            int before_ar;
+            int before_errors;
+            send(32'h10000004,1,2,0,T'(2),0,0);drain();
+            maintain(3,32'h10000000,32);
+            before_ar=ar_count;
+            authorize(32'h10000004,T'(2),0,32'hdeadbeef,4'hf,0,1);
+            if(ar_count!=before_ar+1)$fatal(1,"stale store did not write-allocate");
+            load(32'h10000004);load(32'h10000000);
+            send(32'h10000004,1,2,0,T'(2),0,0);drain();
+            maintain(3,32'h10000000,32);
+            load(32'h10000000);
+            before_ar=ar_count;
+            authorize(32'h10000004,T'(2),0,32'h55aa55aa,4'hf,0,1);
+            if(ar_count!=before_ar)$fatal(1,"stale hit unnecessarily allocated");
+            load(32'h10000004);
+            // Already retired store metadata survives an age cancellation before its retry.
+            send(32'h10000004,1,2,0,T'(0),0,0);drain();
+            maintain(3,32'h10000000,32);
+            step();dc_age_head_i=T'(1);dc_cancel_tag_i=T'(1);dc_cancel_valid_i=1;
+            tick();step();dc_cancel_valid_i=0;
+            authorize(32'h10000004,T'(0),0,32'h12345678,4'hf,0,1);
+            dc_age_head_i=0;load(32'h10000004);load(32'h10000000);
+            send(32'h10000004,1,2,0,T'(2),0,0);drain();
+            step();maint_cmd_i=3;maint_addr_i=32'h10000000;maint_size_i=32;
+            maint_req_valid_i=1;#1;
+            while(!maint_req_ready_o)step();
+            tick();step();maint_req_valid_i=0;lsu_store_drained_i=0;
+            authorize(32'h10000004,T'(2),0,32'h87654321,4'hf,0,1);
+            lsu_store_drained_i=1;
+            while(maint_busy_o)tick();
+            load(32'h10000004);load(32'h10000000);
+            // A post-retirement allocation error is asynchronous, with no done response.
+            send(32'h10000004,1,2,0,T'(1),0,0);drain();
+            maintain(3,32'h10000000,32);
+            read_error_line=32'h10000000;before_errors=wb_errors;
+            authorize(32'h10000004,T'(1),0,32'hbad,4'hf,1,1);
+            if(wb_errors!=before_errors+1 || last_wb_error!=32'h10000004)
+                $fatal(1,"stale allocation error IRQ/address");
+            read_error_line=32'hffffffff;
+            load(32'h10000004);load(32'h10000000);
+        end
         // Reserve both contexts on adjacent edges before the first miss can block ready.
         // Check both a retained hit and a second miss behind that miss.
-        for (int pair = 0; pair < 2; pair++) begin
+        for (int pair = 0; pair < 3; pair++) begin
             step();
             for (int i = 0; i < 2; i++) begin
                 if (!dc_req_ready_o) $fatal(1, "miss lookahead admission");
                 dc_req_addr_i = pair == 0 ?
-                    (i == 0 ? 32'h80010000 : 32'h10000000) :
-                    (i == 0 ? 32'h80010020 : 32'h80010040);
+                    (i == 0 ? 32'h80010000 : 32'h10000000) : pair == 1 ?
+                    (i == 0 ? 32'h80010020 : 32'h80010040) :
+                    (i == 0 ? 32'h80010060 : 32'h10000004);
                 dc_req_valid_i = 1;
-                dc_req_store_i = 0;
+                dc_req_store_i = pair==2 && i==1;
                 dc_req_tag_i = T'(i);
                 expected_addr[push % 128] = dc_req_addr_i;
                 expected_tag[push % 128] = T'(i);
                 expected_beat[push % 128] = 0;
-                expected_store[push % 128] = 0;
+                expected_store[push % 128] = dc_req_store_i;
                 expected_device[push % 128] = 0;
                 expected_error[push % 128] = 0;
                 push++;
@@ -508,7 +582,53 @@ module tb # (parameter FORMAT = 0);
             end
             dc_req_valid_i = 0;
             drain();
+            if(pair==2)authorize(32'h10000004,T'(1),0,32'h12345678,4'hf,0,1);
         end
+        // Maintenance cannot accept until already committed LSU stores are drained.
+        step();lsu_store_drained_i=0;dc_fence_valid_i=1;
+        repeat(3)begin
+            #1;if(dc_fence_ready_o || maint_req_ready_o)$fatal(1,"fence bypassed LSU drain");
+            tick();step();
+        end
+        dc_fence_valid_i=0;lsu_store_drained_i=1;
+        // A commit arriving just after maintenance acceptance may drain while M_START waits.
+        send(32'h10000004,1,2,0,T'(0),0,0);drain();
+        step();dc_fence_valid_i=1;dc_fence_clean_all_i=0;
+        while(!dc_fence_ready_o)step();
+        tick();step();dc_fence_valid_i=0;lsu_store_drained_i=0;
+        repeat(3)begin
+            tick();if(dc_fence_done_o)$fatal(1,"fence finished with newly committed LSU stores");
+        end
+        authorize(32'h10000004,T'(0),0,32'h12345678,4'hf,0,1);
+        lsu_store_drained_i=1;
+        while(!dc_fence_done_o)tick();
+        step();
+        // BE1: younger hit-store cannot reserve a way while an older miss waits to drain.
+        load(32'h10000100);
+        send(32'h10000100,1,2,0,T'(0),0,0);drain();
+        send(32'h80020100,0,2,0,T'(1),0,0);
+        send(32'h10000104,1,2,0,T'(2),0,0);
+        repeat(4)tick();
+        authorize(32'h10000100,T'(0),0,32'habcdef01,4'hf,0,1);
+        drain();
+        authorize(32'h10000104,T'(2),0,32'habcdef02,4'hf,0,1);
+        load(32'h10000100);load(32'h10000104);
+        // Drain the old store exactly when a younger miss lookup overtakes a blocked miss.
+        load(32'h10000200);
+        send(32'h10000200,1,2,0,T'(0),0,0);drain();
+        send(32'h80020200,0,2,0,T'(1),0,0);
+        expected_addr[push%128]=32'h80024200;expected_tag[push%128]=T'(2);
+        expected_beat[push%128]=0;expected_store[push%128]=1;
+        expected_device[push%128]=0;expected_error[push%128]=0;push++;
+        dc_req_valid_i=1;dc_req_addr_i=32'h80024200;dc_req_store_i=1;
+        dc_req_size_i=2;dc_req_beat_i=0;dc_req_tag_i=T'(2);
+        dc_commit_valid_i=1;dc_commit_tag_i=T'(0);dc_commit_beat_i=0;
+        dc_commit_data_i=32'habcdef03;dc_commit_mask_i=4'hf;#1;
+        if(!dc_req_ready_o || !dc_commit_ready_o)$fatal(1,"miss-overtake stimulus not ready");
+        tick();step();dc_req_valid_i=0;dc_commit_valid_i=0;
+        for(int b=0;b<4;b++)reference_memory[index_of(32'h10000200)+b]=8'(32'habcdef03>>(b*8));
+        drain();authorize(32'h80024200,T'(2),0,32'habcdef04,4'hf,0,1);
+        load(32'h10000200);load(32'h80024200);
         // All byte masks merge independently and survive full clean.
         for (int mask = 1; mask < 16; mask++) begin
             store_word(32'h10000008, 32'h11223344 ^ (32'(mask)*32'h10101010), 4'(mask));

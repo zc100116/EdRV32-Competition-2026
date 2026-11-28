@@ -3,6 +3,7 @@
 // Description: Single/double-precision convert unit with local completion and age cancellation.
 // Clock domain: clk_sys.
 module edrv32_cpu2_fpu_convert #(
+    parameter ISSUE_WIDTH = 2,
     parameter [31:0] FPU_FORMAT = "F"
 ) (
     // Clock and reset.
@@ -13,7 +14,7 @@ module edrv32_cpu2_fpu_convert #(
     input wire unit_req_valid_i,
     output wire unit_req_ready_o,
     input wire [31:0] unit_req_instr_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : 3)-1:0] unit_req_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] unit_req_tag_i,
     input wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] unit_req_src1_i,
     input wire [31:0] unit_req_int_src_i,
     input wire [2:0] unit_req_rm_i,
@@ -21,18 +22,18 @@ module edrv32_cpu2_fpu_convert #(
     // Local completion, held through arbitration backpressure.
     output wire unit_resp_valid_o,
     input wire unit_resp_ready_i,
-    output wire [(FPU_FORMAT == "FD" ? 4 : 3)-1:0] unit_resp_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] unit_resp_tag_o,
     output wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] unit_resp_data_o,
     output wire [4:0] unit_resp_flags_o,
     output wire unit_resp_int_dest_o,
 
     // Head-relative inclusive cancellation.
-    input wire [(FPU_FORMAT == "FD" ? 4 : 3)-1:0] age_head_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] age_head_i,
     input wire cancel_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : 3)-1:0] cancel_tag_i
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] cancel_tag_i
 );
     localparam B = FPU_FORMAT == "FD" ? 64 : 32;
-    localparam T = FPU_FORMAT == "FD" ? 4 : 3;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     wire to_float_w;
     wire unsigned_w;
     wire fast_w;

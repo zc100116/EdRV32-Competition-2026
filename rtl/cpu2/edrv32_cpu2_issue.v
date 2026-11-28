@@ -10,43 +10,48 @@ module edrv32_cpu2_issue #(
     // Accepted results also capture sources at the ID/EX allocation edge.
     input wire alu0_complete_valid_i,
     input wire alu0_complete_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] alu0_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] alu0_complete_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] alu0_complete_data_i,
     input wire alu1_complete_valid_i,
     input wire alu1_complete_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] alu1_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] alu1_complete_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] alu1_complete_data_i,
     input wire branch_complete_valid_i,
     input wire branch_complete_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] branch_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] branch_complete_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] branch_complete_data_i,
     input wire mul_complete_valid_i,
     input wire mul_complete_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] mul_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] mul_complete_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] mul_complete_data_i,
     input wire div_complete_valid_i,
     input wire div_complete_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] div_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] div_complete_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] div_complete_data_i,
+    // Registered LSU early response; never used in ID qualification.
+    input wire early_resp_valid_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] early_resp_tag_i,
+    input wire early_resp_hit_i,
+    input wire [31:0] early_resp_data_i,
     input wire lsu_complete_valid_i,
     input wire lsu_complete_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] lsu_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] lsu_complete_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] lsu_complete_data_i,
     input wire csr_complete_valid_i,
     input wire csr_complete_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] csr_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] csr_complete_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] csr_complete_data_i,
     input wire fp_resp_valid_i,
     input wire fp_resp_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] fp_resp_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] fp_resp_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_resp_data_i,
     // IB heads, architectural RF, shared completion sources, and registered execution entries.
     input wire lsu_complete_device_i,
     input wire clk_i,
     input wire rst_n_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] age_head_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] age_head_i,
     input wire cancel_valid_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] cancel_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] cancel_tag_i,
     input wire [2-1:0] csr_fs_i,
     input wire [3-1:0] csr_frm_i,
     input wire ib_head0_valid_i,
@@ -111,11 +116,11 @@ module edrv32_cpu2_issue #(
     input wire wb0_valid_i,
     input wire [5-1:0] wb0_rd_i,
     input wire [32-1:0] wb0_data_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] wb0_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] wb0_tag_i,
     input wire wb1_valid_i,
     input wire [5-1:0] wb1_rd_i,
     input wire [32-1:0] wb1_data_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] wb1_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] wb1_tag_i,
     output wire [5-1:0] fp_read0_addr_o,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_read0_data_i,
     output wire [5-1:0] fp_read1_addr_o,
@@ -125,12 +130,12 @@ module edrv32_cpu2_issue #(
     input wire fp_wb_valid_i,
     input wire [5-1:0] fp_wb_rd_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_wb_data_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] fp_wb_tag_i,
-    input wire [(FPU_FORMAT>"FD"?3:FPU_FORMAT>"F"?5:4)-1:0] allocate_credit_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] fp_wb_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?5:4)-1:0] allocate_credit_i,
     input wire allocate_ready_i,
     output wire allocate_valid_o,
     output wire [2-1:0] allocate_count_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] allocate0_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] allocate0_tag_o,
     output wire [32-1:0] allocate0_pc_o,
     output wire [32-1:0] allocate0_instr_o,
     output wire [5-1:0] allocate0_rd_o,
@@ -139,7 +144,7 @@ module edrv32_cpu2_issue #(
     output wire allocate0_store_o,
     output wire allocate0_divide_o,
     output wire allocate0_double_beat_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] allocate1_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] allocate1_tag_o,
     output wire [32-1:0] allocate1_pc_o,
     output wire [32-1:0] allocate1_instr_o,
     output wire [5-1:0] allocate1_rd_o,
@@ -149,41 +154,41 @@ module edrv32_cpu2_issue #(
     output wire allocate1_divide_o,
     output wire allocate1_double_beat_o,
     output wire source0_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source0_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source0_tag_o,
     output wire source0_domain_o,
     input wire source0_ready_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source0_data_i,
     output wire source1_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source1_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source1_tag_o,
     output wire source1_domain_o,
     input wire source1_ready_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source1_data_i,
     output wire source2_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source2_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source2_tag_o,
     output wire source2_domain_o,
     input wire source2_ready_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source2_data_i,
     output wire source3_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source3_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source3_tag_o,
     output wire source3_domain_o,
     input wire source3_ready_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source3_data_i,
     output wire source4_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] source4_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] source4_tag_o,
     output wire source4_domain_o,
     input wire source4_ready_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] source4_data_i,
     input wire execute0_ready_i,
     output wire execute0_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute0_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute0_tag_o,
     output wire [32-1:0] execute0_pc_o,
     output wire [32-1:0] execute0_instr_o,
     output wire [32-1:0] execute0_src1_o,
     output wire [32-1:0] execute0_src2_o,
     output wire [32-1:0] execute0_imm_o,
     output wire execute0_late_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute0_source1_tag_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute0_source2_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute0_source1_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute0_source2_tag_o,
     output wire execute0_source1_wait_o,
     output wire execute0_source2_wait_o,
     output wire execute0_predict_taken_o,
@@ -206,15 +211,15 @@ module edrv32_cpu2_issue #(
     output wire [(ISSUE_WIDTH+2)-1:0] execute0_ras_count_o,
     input wire execute1_ready_i,
     output wire execute1_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute1_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute1_tag_o,
     output wire [32-1:0] execute1_pc_o,
     output wire [32-1:0] execute1_instr_o,
     output wire [32-1:0] execute1_src1_o,
     output wire [32-1:0] execute1_src2_o,
     output wire [32-1:0] execute1_imm_o,
     output wire execute1_late_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute1_source1_tag_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute1_source2_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute1_source1_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute1_source2_tag_o,
     output wire execute1_source1_wait_o,
     output wire execute1_source2_wait_o,
     output wire execute1_predict_taken_o,
@@ -237,31 +242,31 @@ module edrv32_cpu2_issue #(
     output wire [(ISSUE_WIDTH+2)-1:0] execute1_ras_count_o,
     input wire mul_req_ready_i,
     output wire mul_req_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] mul_req_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] mul_req_tag_o,
     output wire [32-1:0] mul_req_instr_o,
     output wire [32-1:0] mul_req_src1_o,
     output wire [32-1:0] mul_req_src2_o,
     input wire div_req_ready_i,
     output wire div_req_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] div_req_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] div_req_tag_o,
     output wire [32-1:0] div_req_instr_o,
     output wire [32-1:0] div_req_src1_o,
     output wire [32-1:0] div_req_src2_o,
     input wire lsu_req_ready_i,
     output wire lsu_req_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] lsu_req_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] lsu_req_tag_o,
     output wire [32-1:0] lsu_req_instr_o,
     output wire [32-1:0] lsu_req_addr_o,
     output wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] lsu_req_store_data_o,
     output wire lsu_req_early_o,
     input wire csr_req_ready_i,
     output wire csr_req_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] csr_req_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] csr_req_tag_o,
     output wire [32-1:0] csr_req_instr_o,
     output wire [32-1:0] csr_req_src_o,
     input wire fp_req_ready_i,
     output wire fp_req_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] fp_req_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] fp_req_tag_o,
     output wire [32-1:0] fp_req_instr_o,
     output wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_req_src1_o,
     output wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_req_src2_o,
@@ -270,15 +275,15 @@ module edrv32_cpu2_issue #(
     output wire [3-1:0] fp_req_rm_o,
     output wire early_req_valid_o,
     output wire [32-1:0] early_req_addr_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] early_req_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] early_req_tag_o,
     input wire decode_complete_ready_i,
     output wire decode_complete_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] decode_complete_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] decode_complete_tag_o,
     output wire decode_complete_exception_o,
     output wire [4-1:0] decode_complete_cause_o,
     output wire [32-1:0] decode_complete_tval_o,
     output wire predict_read0_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] predict_read0_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] predict_read0_tag_o,
     output wire [9-1:0] predict_read0_index0_o,
     output wire [9-1:0] predict_read0_index1_o,
     output wire [9-1:0] predict_read0_index2_o,
@@ -289,7 +294,7 @@ module edrv32_cpu2_issue #(
     output wire [10-1:0] predict_read0_tag3_o,
     output wire [12-1:0] predict_read0_base_index_o,
     output wire predict_read1_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] predict_read1_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] predict_read1_tag_o,
     output wire [9-1:0] predict_read1_index0_o,
     output wire [9-1:0] predict_read1_index1_o,
     output wire [9-1:0] predict_read1_index2_o,
@@ -304,7 +309,7 @@ module edrv32_cpu2_issue #(
     output reg [2:0] issue_pair_cause_o,
     output reg issue_wait_o
 );
-    localparam T = FPU_FORMAT=="NONE" ? 2 : FPU_FORMAT=="F" ? 3 : 4;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam N = 2**T;
     localparam [T:0] N_COUNT = N;
     localparam B = FPU_FORMAT=="FD" ? 64 : 32;
@@ -473,6 +478,7 @@ module edrv32_cpu2_issue #(
     wire entry_late_w [0:N-1];
     wire [T-1:0] entry_source1_tag_w [0:N-1];
     wire [T-1:0] entry_source2_tag_w [0:N-1];
+    wire entry_dispatch_ready_w [0:N-1];
     wire entry_source1_wait_w [0:N-1];
     wire entry_source2_wait_w [0:N-1];
     wire entry_early_w [0:N-1];
@@ -670,9 +676,9 @@ module edrv32_cpu2_issue #(
     endgenerate
     // EX/MEM-to-ID/EX capture has a register at the consumer; no same-stage carry chain.
     wire capture0_0_w = logical_valid_w[0] && alu0_complete_valid_i &&
-        alu0_complete_ready_i && (alu0_complete_tag_i == logical_tag_w[0]);
+        (alu0_complete_tag_i == logical_tag_w[0]);
     wire capture0_1_w = logical_valid_w[0] && alu1_complete_valid_i &&
-        alu1_complete_ready_i && (alu1_complete_tag_i == logical_tag_w[0]);
+        (alu1_complete_tag_i == logical_tag_w[0]);
     wire capture0_2_w = logical_valid_w[0] && branch_complete_valid_i &&
         branch_complete_ready_i && (branch_complete_tag_i == logical_tag_w[0]);
     wire capture0_3_w = logical_valid_w[0] && mul_complete_valid_i &&
@@ -703,9 +709,9 @@ module edrv32_cpu2_issue #(
         ({B{capture0_6_w}} & csr_complete_data_i) |
         ({B{capture0_7_w}} & fp_resp_data_i);
     wire capture1_0_w = logical_valid_w[1] && alu0_complete_valid_i &&
-        alu0_complete_ready_i && (alu0_complete_tag_i == logical_tag_w[1]);
+        (alu0_complete_tag_i == logical_tag_w[1]);
     wire capture1_1_w = logical_valid_w[1] && alu1_complete_valid_i &&
-        alu1_complete_ready_i && (alu1_complete_tag_i == logical_tag_w[1]);
+        (alu1_complete_tag_i == logical_tag_w[1]);
     wire capture1_2_w = logical_valid_w[1] && branch_complete_valid_i &&
         branch_complete_ready_i && (branch_complete_tag_i == logical_tag_w[1]);
     wire capture1_3_w = logical_valid_w[1] && mul_complete_valid_i &&
@@ -736,9 +742,9 @@ module edrv32_cpu2_issue #(
         ({B{capture1_6_w}} & csr_complete_data_i) |
         ({B{capture1_7_w}} & fp_resp_data_i);
     wire capture2_0_w = logical_valid_w[2] && alu0_complete_valid_i &&
-        alu0_complete_ready_i && (alu0_complete_tag_i == logical_tag_w[2]);
+        (alu0_complete_tag_i == logical_tag_w[2]);
     wire capture2_1_w = logical_valid_w[2] && alu1_complete_valid_i &&
-        alu1_complete_ready_i && (alu1_complete_tag_i == logical_tag_w[2]);
+        (alu1_complete_tag_i == logical_tag_w[2]);
     wire capture2_2_w = logical_valid_w[2] && branch_complete_valid_i &&
         branch_complete_ready_i && (branch_complete_tag_i == logical_tag_w[2]);
     wire capture2_3_w = logical_valid_w[2] && mul_complete_valid_i &&
@@ -769,9 +775,9 @@ module edrv32_cpu2_issue #(
         ({B{capture2_6_w}} & csr_complete_data_i) |
         ({B{capture2_7_w}} & fp_resp_data_i);
     wire capture3_0_w = logical_valid_w[3] && alu0_complete_valid_i &&
-        alu0_complete_ready_i && (alu0_complete_tag_i == logical_tag_w[3]);
+        (alu0_complete_tag_i == logical_tag_w[3]);
     wire capture3_1_w = logical_valid_w[3] && alu1_complete_valid_i &&
-        alu1_complete_ready_i && (alu1_complete_tag_i == logical_tag_w[3]);
+        (alu1_complete_tag_i == logical_tag_w[3]);
     wire capture3_2_w = logical_valid_w[3] && branch_complete_valid_i &&
         branch_complete_ready_i && (branch_complete_tag_i == logical_tag_w[3]);
     wire capture3_3_w = logical_valid_w[3] && mul_complete_valid_i &&
@@ -802,9 +808,9 @@ module edrv32_cpu2_issue #(
         ({B{capture3_6_w}} & csr_complete_data_i) |
         ({B{capture3_7_w}} & fp_resp_data_i);
     wire capture4_0_w = logical_valid_w[4] && alu0_complete_valid_i &&
-        alu0_complete_ready_i && (alu0_complete_tag_i == logical_tag_w[4]);
+        (alu0_complete_tag_i == logical_tag_w[4]);
     wire capture4_1_w = logical_valid_w[4] && alu1_complete_valid_i &&
-        alu1_complete_ready_i && (alu1_complete_tag_i == logical_tag_w[4]);
+        (alu1_complete_tag_i == logical_tag_w[4]);
     wire capture4_2_w = logical_valid_w[4] && branch_complete_valid_i &&
         branch_complete_ready_i && (branch_complete_tag_i == logical_tag_w[4]);
     wire capture4_3_w = logical_valid_w[4] && mul_complete_valid_i &&
@@ -835,9 +841,9 @@ module edrv32_cpu2_issue #(
         ({B{capture4_6_w}} & csr_complete_data_i) |
         ({B{capture4_7_w}} & fp_resp_data_i);
     wire capture5_0_w = logical_valid_w[5] && alu0_complete_valid_i &&
-        alu0_complete_ready_i && (alu0_complete_tag_i == logical_tag_w[5]);
+        (alu0_complete_tag_i == logical_tag_w[5]);
     wire capture5_1_w = logical_valid_w[5] && alu1_complete_valid_i &&
-        alu1_complete_ready_i && (alu1_complete_tag_i == logical_tag_w[5]);
+        (alu1_complete_tag_i == logical_tag_w[5]);
     wire capture5_2_w = logical_valid_w[5] && branch_complete_valid_i &&
         branch_complete_ready_i && (branch_complete_tag_i == logical_tag_w[5]);
     wire capture5_3_w = logical_valid_w[5] && mul_complete_valid_i &&
@@ -1074,7 +1080,8 @@ module edrv32_cpu2_issue #(
             for (leaf=0; leaf<N; leaf=leaf+1) begin : g_leaf
                 localparam [T-1:0] TAG = leaf;
                 wire pending_w = entry_pending_w[leaf] && (entry_channel_w[leaf] == 3'd0);
-                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf];
+                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf] &&
+                    entry_dispatch_ready_w[leaf];
                 assign tree_count_w[N-1+leaf] = {{T{1'b0}}, pending_w};
                 assign tree_tag_w[N-1+leaf] = TAG;
             end
@@ -1102,7 +1109,8 @@ module edrv32_cpu2_issue #(
                 localparam [T-1:0] TAG = leaf;
                 wire pending_w = (ISSUE_WIDTH == 2) && entry_pending_w[leaf] &&
                     (entry_channel_w[leaf] == 3'd1);
-                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf];
+                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf] &&
+                    entry_dispatch_ready_w[leaf];
                 assign tree_count_w[N-1+leaf] = {{T{1'b0}}, pending_w};
                 assign tree_tag_w[N-1+leaf] = TAG;
             end
@@ -1129,7 +1137,8 @@ module edrv32_cpu2_issue #(
             for (leaf=0; leaf<N; leaf=leaf+1) begin : g_leaf
                 localparam [T-1:0] TAG = leaf;
                 wire pending_w = entry_pending_w[leaf] && (entry_channel_w[leaf] == 3'd2);
-                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf];
+                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf] &&
+                    entry_dispatch_ready_w[leaf];
                 assign tree_count_w[N-1+leaf] = {{T{1'b0}}, pending_w};
                 assign tree_tag_w[N-1+leaf] = TAG;
             end
@@ -1156,7 +1165,8 @@ module edrv32_cpu2_issue #(
             for (leaf=0; leaf<N; leaf=leaf+1) begin : g_leaf
                 localparam [T-1:0] TAG = leaf;
                 wire pending_w = entry_pending_w[leaf] && (entry_channel_w[leaf] == 3'd3);
-                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf];
+                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf] &&
+                    entry_dispatch_ready_w[leaf];
                 assign tree_count_w[N-1+leaf] = {{T{1'b0}}, pending_w};
                 assign tree_tag_w[N-1+leaf] = TAG;
             end
@@ -1183,7 +1193,8 @@ module edrv32_cpu2_issue #(
             for (leaf=0; leaf<N; leaf=leaf+1) begin : g_leaf
                 localparam [T-1:0] TAG = leaf;
                 wire pending_w = entry_pending_w[leaf] && (entry_channel_w[leaf] == 3'd4);
-                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf];
+                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf] &&
+                    entry_dispatch_ready_w[leaf];
                 assign tree_count_w[N-1+leaf] = {{T{1'b0}}, pending_w};
                 assign tree_tag_w[N-1+leaf] = TAG;
             end
@@ -1210,7 +1221,8 @@ module edrv32_cpu2_issue #(
             for (leaf=0; leaf<N; leaf=leaf+1) begin : g_leaf
                 localparam [T-1:0] TAG = leaf;
                 wire pending_w = entry_pending_w[leaf] && (entry_channel_w[leaf] == 3'd5);
-                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf];
+                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf] &&
+                    entry_dispatch_ready_w[leaf];
                 assign tree_count_w[N-1+leaf] = {{T{1'b0}}, pending_w};
                 assign tree_tag_w[N-1+leaf] = TAG;
             end
@@ -1237,7 +1249,8 @@ module edrv32_cpu2_issue #(
             for (leaf=0; leaf<N; leaf=leaf+1) begin : g_leaf
                 localparam [T-1:0] TAG = leaf;
                 wire pending_w = entry_pending_w[leaf] && (entry_channel_w[leaf] == 3'd6);
-                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf];
+                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf] &&
+                    entry_dispatch_ready_w[leaf];
                 assign tree_count_w[N-1+leaf] = {{T{1'b0}}, pending_w};
                 assign tree_tag_w[N-1+leaf] = TAG;
             end
@@ -1264,7 +1277,8 @@ module edrv32_cpu2_issue #(
             for (leaf=0; leaf<N; leaf=leaf+1) begin : g_leaf
                 localparam [T-1:0] TAG = leaf;
                 wire pending_w = entry_pending_w[leaf] && (entry_channel_w[leaf] == 3'd7);
-                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf];
+                assign tree_valid_w[N-1+leaf] = pending_w && !entry_third_w[leaf] &&
+                    entry_dispatch_ready_w[leaf];
                 assign tree_count_w[N-1+leaf] = {{T{1'b0}}, pending_w};
                 assign tree_tag_w[N-1+leaf] = TAG;
             end
@@ -1309,7 +1323,15 @@ module edrv32_cpu2_issue #(
     wire d0_late_w = (ISSUE_WIDTH == 2) && d0_late_supported_w &&
         (d0_wait1_w || d0_wait2_w) &&
         (!d0_wait1_w || d0_defer1_w) && (!d0_wait2_w || d0_defer2_w);
-    wire d0_sources_w = ((!d0_wait1_w && !d0_wait2_w) || d0_late_w) &&
+    // Predict only the registered early candidate, independently of the hit result.
+    wire d0_short1_w = ISSUE_WIDTH == 1 && d0_wait1_w && !d0_rs1_domain_w &&
+        entry_early_w[q01_tag_w] && entry_pending_w[q01_tag_w] &&
+        entry_channel_w[q01_tag_w] == 3'd4 && channel_count_w[4] == 1 && lsu_req_ready_i;
+    wire d0_short2_w = ISSUE_WIDTH == 1 && d0_wait2_w && !d0_rs2_domain_w &&
+        entry_early_w[q02_tag_w] && entry_pending_w[q02_tag_w] &&
+        entry_channel_w[q02_tag_w] == 3'd4 && channel_count_w[4] == 1 && lsu_req_ready_i;
+    wire d0_sources_w = (((!d0_wait1_w || d0_short1_w) &&
+        (!d0_wait2_w || d0_short2_w)) || d0_late_w) &&
         (!d0_rs3_used_w || (FPU_FORMAT == "FD") || value_ready_w[2]);
     wire d0_ordered_w = (d0_class_w != 3'd7) || (allocate_credit_i == N);
     wire [2:0] d0_base_channel_w = d0_exception_w ? 3'd7 :
@@ -1551,9 +1573,11 @@ module edrv32_cpu2_issue #(
             reg [3-1:0] channel_r;
             assign entry_channel_w[entry] = channel_r;
             reg [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] src1_r;
-            assign entry_src1_w[entry] = src1_r;
+            wire short1_w;
+            wire short2_w;
+            assign entry_src1_w[entry] = short1_w ? {{(B-32){1'b0}}, early_resp_data_i} : src1_r;
             reg [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] src2_r;
-            assign entry_src2_w[entry] = src2_r;
+            assign entry_src2_w[entry] = short2_w ? {{(B-32){1'b0}}, early_resp_data_i} : src2_r;
             reg [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] src3_r;
             assign entry_src3_w[entry] = src3_r;
             reg [32-1:0] imm_r;
@@ -1568,6 +1592,18 @@ module edrv32_cpu2_issue #(
             assign entry_source1_wait_w[entry] = source1_wait_r;
             reg source2_wait_r;
             assign entry_source2_wait_w[entry] = source2_wait_r;
+            assign short1_w = ISSUE_WIDTH == 1 && source1_wait_r &&
+                early_resp_valid_i && early_resp_hit_i && early_resp_tag_i == source1_tag_r;
+            assign short2_w = ISSUE_WIDTH == 1 && source2_wait_r &&
+                early_resp_valid_i && early_resp_hit_i && early_resp_tag_i == source2_tag_r;
+            assign entry_dispatch_ready_w[entry] = ISSUE_WIDTH == 2 ||
+                ((!source1_wait_r || short1_w) && (!source2_wait_r || short2_w));
+            wire ordinary1_w = lsu_complete_valid_i && lsu_complete_ready_i &&
+                !lsu_complete_device_i && lsu_complete_tag_i == source1_tag_r;
+            wire ordinary2_w = lsu_complete_valid_i && lsu_complete_ready_i &&
+                !lsu_complete_device_i && lsu_complete_tag_i == source2_tag_r;
+            wire retired1_w = wb0_valid_i && wb0_tag_i == source1_tag_r;
+            wire retired2_w = wb0_valid_i && wb0_tag_i == source2_tag_r;
             reg early_r;
             assign entry_early_w[entry] = early_r;
             reg [3-1:0] rm_r;
@@ -1646,7 +1682,7 @@ module edrv32_cpu2_issue #(
                         third_r <= 1'b0;
                     if (capture0_w) begin
                         valid_r <= 1'b1;
-                        pending_r <= 1'b1;
+                        pending_r <= !(channel0_w == 3'd5 && csr_req_ready_i);
                         third_r <= third_start0_w && !start_wb_w;
                         countdown_r <= d0_class_w == 3'd4 ? 3'd4 :
                             (d0_late_w) ? 3'd2 : 3'd1;
@@ -1661,6 +1697,18 @@ module edrv32_cpu2_issue #(
                 end
             end
             always @(posedge clk_i) begin
+                if (ISSUE_WIDTH == 1 && pending_r) begin
+                    if (source1_wait_r && (short1_w || ordinary1_w || retired1_w)) begin
+                        src1_r <= short1_w ? {{(B-32){1'b0}}, early_resp_data_i} :
+                            ordinary1_w ? lsu_complete_data_i : {{(B-32){1'b0}}, wb0_data_i};
+                        source1_wait_r <= 1'b0;
+                    end
+                    if (source2_wait_r && (short2_w || ordinary2_w || retired2_w)) begin
+                        src2_r <= short2_w ? {{(B-32){1'b0}}, early_resp_data_i} :
+                            ordinary2_w ? lsu_complete_data_i : {{(B-32){1'b0}}, wb0_data_i};
+                        source2_wait_r <= 1'b0;
+                    end
+                end
                 if (pending_r && (channel_r == 3'd4))
                     early_r <= 1'b0;
                 if (third_capture_w && (third_owner_r == ENTRY))
@@ -1787,7 +1835,7 @@ module edrv32_cpu2_issue #(
     endgenerate
     assign execute0_valid_o = (ISSUE_WIDTH > 0) && channel_valid_w[0];
     assign execute0_tag_o = (ISSUE_WIDTH > 0) ?
-        channel_tag_w[0] : {(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3){1'b0}};
+        channel_tag_w[0] : {(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3){1'b0}};
     assign execute0_pc_o = (ISSUE_WIDTH > 0) ?
         entry_pc_w[channel_tag_w[0]] : {32{1'b0}};
     assign execute0_instr_o = (ISSUE_WIDTH > 0) ?
@@ -1801,9 +1849,9 @@ module edrv32_cpu2_issue #(
     assign execute0_late_o = (ISSUE_WIDTH == 2) ?
         entry_late_w[channel_tag_w[0]] : 1'b0;
     assign execute0_source1_tag_o = (ISSUE_WIDTH == 2) ?
-        entry_source1_tag_w[channel_tag_w[0]] : {(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3){1'b0}};
+        entry_source1_tag_w[channel_tag_w[0]] : {(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3){1'b0}};
     assign execute0_source2_tag_o = (ISSUE_WIDTH == 2) ?
-        entry_source2_tag_w[channel_tag_w[0]] : {(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3){1'b0}};
+        entry_source2_tag_w[channel_tag_w[0]] : {(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3){1'b0}};
     assign execute0_source1_wait_o = (ISSUE_WIDTH == 2) ?
         entry_source1_wait_w[channel_tag_w[0]] : 1'b0;
     assign execute0_source2_wait_o = (ISSUE_WIDTH == 2) ?
@@ -1846,7 +1894,7 @@ module edrv32_cpu2_issue #(
         entry_ras_count_w[channel_tag_w[0]] : {(ISSUE_WIDTH+2){1'b0}};
     assign execute1_valid_o = (ISSUE_WIDTH > 1) && channel_valid_w[1];
     assign execute1_tag_o = (ISSUE_WIDTH > 1) ?
-        channel_tag_w[1] : {(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3){1'b0}};
+        channel_tag_w[1] : {(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3){1'b0}};
     assign execute1_pc_o = (ISSUE_WIDTH > 1) ?
         entry_pc_w[channel_tag_w[1]] : {32{1'b0}};
     assign execute1_instr_o = (ISSUE_WIDTH > 1) ?
@@ -1860,9 +1908,9 @@ module edrv32_cpu2_issue #(
     assign execute1_late_o = (ISSUE_WIDTH == 2) ?
         entry_late_w[channel_tag_w[1]] : 1'b0;
     assign execute1_source1_tag_o = (ISSUE_WIDTH == 2) ?
-        entry_source1_tag_w[channel_tag_w[1]] : {(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3){1'b0}};
+        entry_source1_tag_w[channel_tag_w[1]] : {(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3){1'b0}};
     assign execute1_source2_tag_o = (ISSUE_WIDTH == 2) ?
-        entry_source2_tag_w[channel_tag_w[1]] : {(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3){1'b0}};
+        entry_source2_tag_w[channel_tag_w[1]] : {(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3){1'b0}};
     assign execute1_source1_wait_o = (ISSUE_WIDTH == 2) ?
         entry_source1_wait_w[channel_tag_w[1]] : 1'b0;
     assign execute1_source2_wait_o = (ISSUE_WIDTH == 2) ?
@@ -1919,13 +1967,17 @@ module edrv32_cpu2_issue #(
     assign lsu_req_addr_o = entry_src1_w[channel_tag_w[4]][31:0]+entry_imm_w[channel_tag_w[4]];
     assign lsu_req_store_data_o = entry_src2_w[channel_tag_w[4]];
     assign lsu_req_early_o = entry_early_w[channel_tag_w[4]] && lsu_req_ready_i;
-    assign csr_req_valid_o = channel_valid_w[5];
-    assign csr_req_tag_o = channel_tag_w[5];
-    assign csr_req_instr_o = entry_instr_w[channel_tag_w[5]];
-    assign csr_req_src_o = entry_src1_w[channel_tag_w[5]][31:0];
+    // Ordered CSR allocation already observes an empty completion queue.
+    // Reuse that capture edge at the CSR request register instead of another pending hop.
+    wire csr_allocate_w = allocate0_w && channel0_w == 3'd5;
+    assign csr_req_valid_o = channel_valid_w[5] || csr_allocate_w;
+    assign csr_req_tag_o = csr_allocate_w ? tag0_w : channel_tag_w[5];
+    assign csr_req_instr_o = csr_allocate_w ? ib_head0_instr_i : entry_instr_w[channel_tag_w[5]];
+    assign csr_req_src_o = csr_allocate_w ? value_w[0][31:0] :
+        entry_src1_w[channel_tag_w[5]][31:0];
     assign fp_req_valid_o = (FPU_FORMAT != "NONE") && channel_valid_w[6];
     assign fp_req_tag_o = (FPU_FORMAT != "NONE") ?
-        channel_tag_w[6] : {(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3){1'b0}};
+        channel_tag_w[6] : {(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3){1'b0}};
     assign fp_req_instr_o = (FPU_FORMAT != "NONE") ?
         entry_instr_w[channel_tag_w[6]] : {32{1'b0}};
     assign fp_req_src1_o = (FPU_FORMAT != "NONE") ?
@@ -1944,7 +1996,7 @@ module edrv32_cpu2_issue #(
     assign decode_complete_cause_o = entry_cause_w[channel_tag_w[7]];
     assign decode_complete_tval_o = entry_tval_w[channel_tag_w[7]];
     /* verilator lint_off UNUSEDSIGNAL */
-    wire unused_w = ^{clk_i,
+    wire unused_w = ^{clk_i, alu0_complete_ready_i, alu1_complete_ready_i,
         rst_n_i,
         age_head_i,
         cancel_valid_i,

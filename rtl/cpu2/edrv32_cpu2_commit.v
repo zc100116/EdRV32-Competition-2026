@@ -9,7 +9,7 @@ module edrv32_cpu2_commit #(
 ) (
     input wire clk_i,
     input wire rst_n_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head0_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] head0_tag_i,
     input wire [31:0] head0_pc_i,
     input wire [31:0] head0_next_pc_i,
     input wire [3:0] head0_kind_i,
@@ -30,13 +30,13 @@ module edrv32_cpu2_commit #(
     input wire [31:0] head0_mem_addr_i,
     input wire [63:0] head0_mem_data_i,
     input wire [7:0] head0_mem_mask_i,
-    output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] wb0_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] wb0_tag_o,
     output wire wb0_valid_copy_o,
     output wire [4:0] wb0_rd_copy_o,
     output wire wb0_valid_o,
     output wire [4:0] wb0_rd_o,
     output wire [31:0] wb0_data_o,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] head1_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] head1_tag_i,
     input wire [31:0] head1_pc_i,
     input wire [31:0] head1_next_pc_i,
     input wire [3:0] head1_kind_i,
@@ -57,29 +57,30 @@ module edrv32_cpu2_commit #(
     input wire [31:0] head1_mem_addr_i,
     input wire [63:0] head1_mem_data_i,
     input wire [7:0] head1_mem_mask_i,
-    output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] wb1_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] wb1_tag_o,
     output wire wb1_valid_copy_o,
     output wire [4:0] wb1_rd_copy_o,
     output wire wb1_valid_o,
     output wire [4:0] wb1_rd_o,
     output wire [31:0] wb1_data_o,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] age_head_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] age_head_i,
     input wire cancel_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] cancel_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] cancel_tag_i,
     input wire branch_redirect_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] branch_redirect_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] branch_redirect_tag_i,
     input wire [31:0] branch_redirect_pc_i,
+    output wire [1:0] commit_store_count_o,
     output wire [1:0] retire_count_o,
-    output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] fp_wb_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] fp_wb_tag_o,
     output wire fp_wb_valid_o,
     output wire [4:0] fp_wb_rd_o,
     output wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] fp_wb_data_o,
     output wire commit_lsu_valid_o,
     input wire commit_lsu_ready_i,
-    output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] commit_lsu_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] commit_lsu_tag_o,
     input wire commit_lsu_done_valid_i,
     output wire commit_lsu_done_ready_o,
-    input wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] commit_lsu_done_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] commit_lsu_done_tag_i,
     input wire commit_lsu_done_error_i,
     input wire [31:0] commit_lsu_done_fault_addr_i,
     input wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] commit_lsu_done_data_i,
@@ -98,7 +99,7 @@ module edrv32_cpu2_commit #(
     output wire [31:0] trap_cause_o,
     output wire [31:0] trap_tval_o,
     output wire commit_cancel_valid_o,
-    output wire [(FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2)-1:0] commit_cancel_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] commit_cancel_tag_o,
     output wire commit_redirect_valid_o,
     output wire [31:0] commit_redirect_pc_o,
     output wire fetch_stop_o,
@@ -141,7 +142,7 @@ module edrv32_cpu2_commit #(
     localparam [3:0] C_CSR = 4'd6;
     localparam [3:0] C_CONTROL = 4'd7;
     localparam [3:0] C_FP = 4'd8;
-    localparam T = FPU_FORMAT == "FD" ? 4 : FPU_FORMAT == "F" ? 3 : 2;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam B = FPU_FORMAT == "FD" ? 64 : 32;
     localparam S_IDLE = 3'd0;
     localparam S_LSU = 3'd1;
@@ -201,8 +202,8 @@ module edrv32_cpu2_commit #(
         head0_distance_w > (branch_redirect_tag_i - age_head_i);
     assign head1_cancel_w = branch_redirect_valid_i &&
         head1_distance_w > (branch_redirect_tag_i - age_head_i);
-    assign memory0_w = head0_store_i || head0_device_i || head0_double_beat_i;
-    assign memory1_w = head1_store_i || head1_device_i || head1_double_beat_i;
+    assign memory0_w = head0_device_i;
+    assign memory1_w = head1_device_i;
     assign fence0_w = head0_kind_i == C_FENCE || head0_kind_i == C_FENCE_I;
     assign fence_i0_w = head0_kind_i == C_FENCE_I;
     assign system0_w = head0_kind_i >= C_FENCE && head0_kind_i <= C_CSR;
@@ -231,6 +232,8 @@ module edrv32_cpu2_commit #(
         !(fp_int1_w && head0_dest_i == 2'd1 && head0_rd_i != 0);
     assign retire_count_o = {1'b0, retire0_w} + {1'b0, retire1_w};
     assign counter_retire_count_o = retire_count_o;
+    assign commit_store_count_o = {1'b0,retire0_w && head0_store_i && !head0_device_i} +
+        {1'b0,retire1_w && head1_store_i && !head1_device_i};
     assign retire_data0_w = head0_device_i ? commit_lsu_done_data_i : head0_data_i;
     assign retire_data1_w = head1_data_i;
     // FP-to-integer results always occupy integer port zero, preserving port one.
@@ -510,7 +513,7 @@ module edrv32_cpu2_commit #(
     assign trace_tval_w = trap_tval_o;
     // Unused configuration fields and internal architectural observation wires.
     /* verilator lint_off UNUSEDSIGNAL */
-    wire unused_w = ^{
+    wire unused_w = ^{head1_double_beat_i,
         head1_trace_instr_i, head1_mem_addr_i, head1_mem_data_i, head1_mem_mask_i,
         fp_wb_rd_w, fp_wb_data_w,
         head1_divide_i,

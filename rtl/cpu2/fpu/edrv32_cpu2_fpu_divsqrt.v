@@ -4,6 +4,7 @@
 //              Independent S and optional D datapaths hold completion under backpressure.
 // Clock domain: clk_sys.
 module edrv32_cpu2_fpu_divsqrt #(
+    parameter ISSUE_WIDTH = 2,
     parameter [31:0] FPU_FORMAT = "F"
 ) (
     // Clock and reset: only ownership and schedule registers reset.
@@ -14,7 +15,7 @@ module edrv32_cpu2_fpu_divsqrt #(
     input wire unit_req_valid_i,
     output wire unit_req_ready_o,
     input wire [31:0] unit_req_instr_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : 3)-1:0] unit_req_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] unit_req_tag_i,
     input wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] unit_req_src1_i,
     input wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] unit_req_src2_i,
     input wire [2:0] unit_req_rm_i,
@@ -22,17 +23,17 @@ module edrv32_cpu2_fpu_divsqrt #(
     // Local held result. Narrow result extension belongs to fpu_top.
     output wire unit_resp_valid_o,
     input wire unit_resp_ready_i,
-    output wire [(FPU_FORMAT == "FD" ? 4 : 3)-1:0] unit_resp_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] unit_resp_tag_o,
     output wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] unit_resp_data_o,
     output wire [4:0] unit_resp_flags_o,
     output wire unit_resp_int_dest_o,
 
     // Inclusive cancellation by queue-head-relative age, including acceptance.
-    input wire [(FPU_FORMAT == "FD" ? 4 : 3)-1:0] age_head_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] age_head_i,
     input wire cancel_valid_i,
-    input wire [(FPU_FORMAT == "FD" ? 4 : 3)-1:0] cancel_tag_i
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] cancel_tag_i
 );
-    localparam TAG_WIDTH = FPU_FORMAT == "FD" ? 4 : 3;
+    localparam TAG_WIDTH = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     reg busy_r;
     reg done_r;
     reg [5:0] phase_r;

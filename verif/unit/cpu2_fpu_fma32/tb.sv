@@ -3,10 +3,9 @@
 // Description: Exact-reference scoreboarding, completion stalls, inclusive cancellation
 // and tag wraparound; expected values depend only on external input vectors.
 // Clock domain: simulation clk_sys.
-module tb;
+module tb #(parameter ISSUE_WIDTH=2, parameter [31:0] FPU_FORMAT="F");
     import edrv32_fpu_vectors_pkg::*;
-    parameter [31:0] FPU_FORMAT = "F";
-    localparam T = FPU_FORMAT == "FD" ? 4 : 3;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam N = 1 << T;
     reg clk;
     initial begin
@@ -32,7 +31,8 @@ module tb;
     reg [T-1:0] age_head;
     reg cancel_valid;
     reg [T-1:0] cancel_tag;
-    edrv32_cpu2_fpu_fma32 #(.FPU_FORMAT(FPU_FORMAT)) u_dut (
+    edrv32_cpu2_fpu_fma32 #(
+        .ISSUE_WIDTH(ISSUE_WIDTH),.FPU_FORMAT(FPU_FORMAT)) u_dut (
         .clk_i(clk),
         .rst_n_i(rst_n),
         .unit_req_valid_i(req_valid),

@@ -2,9 +2,9 @@
 // Spec: cpu-v2-testplan CV11/CV13; fpu-spec 5.5.
 // Description: External D$ responder checks preparation, authorization and ordered beat errors.
 // Clock: clk_sys.
-module tb # (parameter FORMAT = 2);
+module tb # (parameter ISSUE_WIDTH=2, parameter FORMAT = 2);
     localparam FPU_FORMAT = FORMAT == 2 ? "FD" : FORMAT == 1 ? "F" : "NONE";
-    localparam T = FORMAT == 2 ? 4 : FORMAT == 1 ? 3 : 2;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam B = FORMAT == 2 ? 64 : 32;
     reg clk_i = 0;
     reg rst_n_i = 0;
@@ -37,6 +37,8 @@ module tb # (parameter FORMAT = 2);
     wire [63:0] lsu_complete_mem_data_o;
     wire [7:0] lsu_complete_mem_mask_o;
     reg lsu_complete_ready_i = 0;
+    reg [1:0] commit_store_count_i = 0;
+    wire lsu_store_drained_o;
     reg commit_lsu_valid_i = 0;
     wire commit_lsu_ready_o;
     reg [T-1:0] commit_lsu_tag_i = 0;
@@ -89,7 +91,8 @@ module tb # (parameter FORMAT = 2);
     reg [31:0] dc_early_way0_data_i = 0;
     reg [31:0] dc_early_way1_data_i = 0;
     always #5 clk_i = ~clk_i;
-    edrv32_cpu2_lsu #(.FPU_FORMAT(FPU_FORMAT)) dut (
+    edrv32_cpu2_lsu #(
+        .ISSUE_WIDTH(ISSUE_WIDTH),.FPU_FORMAT(FPU_FORMAT)) dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .lsu_req_valid_i(lsu_req_valid_i),
@@ -121,6 +124,8 @@ module tb # (parameter FORMAT = 2);
         .lsu_complete_mem_data_o(lsu_complete_mem_data_o),
         .lsu_complete_mem_mask_o(lsu_complete_mem_mask_o),
         .lsu_complete_ready_i(lsu_complete_ready_i),
+        .commit_store_count_i(commit_store_count_i),
+        .lsu_store_drained_o(lsu_store_drained_o),
         .commit_lsu_valid_i(commit_lsu_valid_i),
         .commit_lsu_ready_o(commit_lsu_ready_o),
         .commit_lsu_tag_i(commit_lsu_tag_i),
@@ -296,6 +301,15 @@ module tb # (parameter FORMAT = 2);
         lsu_complete_ready_i = 0;
     endtask
     task automatic authorize;
+        if (lsu_req_addr_i[31:28] == 1 || lsu_req_addr_i[31:28] == 8) begin
+            step();
+            if (commit_lsu_ready_o) $fatal(1, "cached access retained head authorization");
+            commit_store_count_i = lsu_req_instr_i[5] ? 1 : 0;
+            tick();
+            step();
+            commit_store_count_i = 0;
+            return;
+        end
         repeat (2) begin
             tick();
             if (dc_commit_valid_o) $fatal(1, "side effect before authorization");
@@ -321,6 +335,10 @@ module tb # (parameter FORMAT = 2);
             $fatal(1, "commit association/data beat %b data %h", committed_beat[commit_served % 128],
                    committed_data[commit_served % 128]);
         commit_served++;
+        if (lsu_req_addr_i[31:28] == 1 || lsu_req_addr_i[31:28] == 8) begin
+            if (commit_lsu_done_valid_o) $fatal(1, "cached store returned done");
+            return;
+        end
         step();
         dc_done_valid_i = 1;
         dc_done_tag_i = lsu_req_tag_i;
@@ -336,6 +354,11 @@ module tb # (parameter FORMAT = 2);
         dc_done_valid_i = 0;
     endtask
     task automatic done(input [63:0] expected, input bit error, input [31:0] fault);
+        if (lsu_req_addr_i[31:28] == 1 || lsu_req_addr_i[31:28] == 8) begin
+            if (commit_lsu_done_valid_o) $fatal(1, "cached access returned final done");
+            while (!lsu_store_drained_o) begin tick(); step(); end
+            return;
+        end
         while (!commit_lsu_done_valid_o) step();
         if (commit_lsu_done_tag_o != lsu_req_tag_i || commit_lsu_done_error_o != error)
             $fatal(1, "done association/error");
@@ -349,6 +372,110 @@ module tb # (parameter FORMAT = 2);
         tick();
         step();
         commit_lsu_done_ready_i = 0;
+    endtask
+    task automatic cached_store_stream;
+        int sent;
+        int completed;
+        int marked;
+        int drained;
+        int elapsed;
+        bit pending;
+        bit next_pending;
+        bit accepted;
+        bit completed_now;
+        bit mark_pending;
+        reg [T-1:0] pending_tag;
+        reg [T-1:0] next_tag;
+        sent=0;completed=0;marked=0;drained=0;elapsed=0;
+        pending=0;mark_pending=0;pending_tag=0;
+        step();lsu_complete_ready_i=1;
+        while(drained<8) begin
+            lsu_req_valid_i=sent<8;lsu_req_instr_i=32'h2023;
+            lsu_req_tag_i=T'(sent);lsu_req_addr_i=32'h10001000+32'((sent%2)*4);
+            lsu_req_store_data_i=B'(32'habc00000+32'(sent));
+            dc_resp_valid_i=pending;dc_resp_tag_i=pending_tag;
+            dc_resp_way_hit_i=1;dc_resp_error_i=0;dc_resp_device_i=0;
+            commit_store_count_i=mark_pending?1:0;
+            #1;
+            accepted=lsu_req_valid_i&&lsu_req_ready_o;
+            next_pending=dc_req_valid_o&&dc_req_ready_i;
+            next_tag=dc_req_tag_o;
+            completed_now=lsu_complete_valid_o&&lsu_complete_ready_i;
+            if(sent<8 && (!accepted || !next_pending))
+                $fatal(1,"store stream admission n=%0d reserved capacity",sent);
+            if(completed_now) begin
+                if(lsu_complete_tag_o!=T'(completed) || lsu_complete_exception_o ||
+                    lsu_complete_device_o || lsu_complete_mem_data_o!=64'(32'habc00000+32'(completed)))
+                    $fatal(1,"store prepare order n=%0d",completed);
+                completed++;
+            end
+            if(dc_commit_valid_o&&dc_commit_ready_i) begin
+                if(drained>=marked || dc_commit_tag_o!=T'(drained) || dc_commit_beat_o ||
+                    dc_commit_data_o!=32'habc00000+32'(drained) || dc_commit_mask_o!=4'hf)
+                    $fatal(1,"store drain order n=%0d marked=%0d",drained,marked);
+                drained++;
+            end
+            if(commit_lsu_done_valid_o)$fatal(1,"cache stream generated done");
+            tick();step();
+            if(accepted)sent++;
+            if(mark_pending)marked++;
+            mark_pending=completed_now;
+            pending=next_pending;pending_tag=next_tag;
+            elapsed++;
+            if(elapsed>16)$fatal(1,"store stream stalled");
+        end
+        lsu_req_valid_i=0;dc_resp_valid_i=0;commit_store_count_i=0;lsu_complete_ready_i=0;
+        served=requests;commit_served=commits;
+        if(sent!=8 || completed!=8 || marked!=8 || !lsu_store_drained_o)
+            $fatal(1,"store stream final accounting");
+    endtask
+    task automatic store_queue_boundaries;
+        int first_commit;
+        first_commit=commits;
+        for(int n=0;n<4;n++)begin
+            issue(32'h2023,32'h10002000+32'(n*4),64'(32'h10+32'(n)),T'(n));
+            prep(0,32'h10002000+32'(n*4),0,0,0);
+            complete(0,0,0,0,0);
+        end
+        step();lsu_req_valid_i=1;lsu_req_instr_i=32'h2023;lsu_req_tag_i=T'(4);
+        #1;if(lsu_req_ready_o || dc_commit_valid_o || !lsu_store_drained_o)
+            $fatal(1,"full uncommitted store queue capacity/drained status");
+        // A load uses the local transaction slot even when only store capacity is full.
+        lsu_req_instr_i=32'h2003;lsu_req_addr_i=32'h10002000;
+        #1;if(!lsu_req_ready_o || dc_req_valid_o)$fatal(1,"same-word load admission/wait");
+        tick();step();lsu_req_valid_i=0;
+        early_req_valid_i=1;early_req_tag_i=T'(5);early_req_addr_i=32'h10002000;
+        dc_commit_ready_i=0;commit_store_count_i=2;
+        #1;if(dc_early_valid_o || dc_req_valid_o)$fatal(1,"store word early/ordinary conflict");
+        tick();step();commit_store_count_i=0;early_req_valid_i=0;
+        repeat(3)begin
+            #1;if(lsu_store_drained_o || !dc_commit_valid_o || dc_commit_tag_o!=0 ||
+                dc_commit_data_o!=32'h10 || dc_req_valid_o)
+                $fatal(1,"committed store/backpressured load lost");
+            tick();step();
+        end
+        dc_commit_ready_i=1;
+        prep(0,32'h10002000,32'h10,0,0);
+        complete(64'h10,0,0,0,0);
+        if(commits-first_commit!=2 || !lsu_store_drained_o)
+            $fatal(1,"drained excludes younger uncommitted stores");
+        cancel_valid_i=1;cancel_tag_i=T'(2);tick();step();cancel_valid_i=0;
+        if(dc_commit_valid_o)$fatal(1,"uncommitted cancellation escaped");
+        commit_served=commits;
+        // Cancellation cannot revoke an already committed record held at D$.
+        issue(32'h2023,32'h10002010,64'h55,T'(0));
+        prep(0,32'h10002010,0,0,0);complete(0,0,0,0,0);
+        dc_commit_ready_i=0;authorize();cancel_valid_i=1;cancel_tag_i=0;
+        tick();step();cancel_valid_i=0;
+        #1;if(!dc_commit_valid_o || lsu_store_drained_o || dc_commit_data_o!=32'h55)
+            $fatal(1,"cancellation revoked committed store");
+        dc_commit_ready_i=1;beat_done(0,32'h55,0,0);done(0,0,0);
+        if(FORMAT==2)begin
+            issue(32'h3027,32'h10002018,64'h1122334455667788,T'(0));
+            prep(0,32'h10002018,0,0,0);prep(1,32'h1000201c,0,0,0);
+            complete(0,0,0,0,0);authorize();
+            beat_done(0,32'h55667788,0,0);beat_done(1,32'h11223344,0,0);done(0,0,0);
+        end
     endtask
     // External one-cycle D$ and early responders; expected values depend on request addresses.
     task automatic early_stream(input bit middle_miss);
@@ -374,8 +501,8 @@ module tb # (parameter FORMAT = 2);
         sent = 0;
         received = 0;
         queries = 1;
-        // With four tags, do not issue query 7 while the failed query 3 is still live.
-        query_limit = middle_miss && FORMAT == 0 ? 7 : 8;
+        // The fixed v0.3 tag namespace covers all eight early-query instances.
+        query_limit = 8;
         elapsed = 0;
         early_hits = 0;
         query_addr = 32'h10000300;
@@ -638,6 +765,21 @@ module tb # (parameter FORMAT = 2);
         end
         early_stream(0);
         early_stream(1);
+        cached_store_stream();
+        store_queue_boundaries();
+        // BE1: a registered older execution request wins its first read-port cycle.
+        step();lsu_req_valid_i=1;lsu_req_instr_i=32'h2023;
+        lsu_req_addr_i=32'h10000500;lsu_req_store_data_i=B'(32'h12345678);
+        lsu_req_tag_i=T'(1);early_req_valid_i=1;early_req_tag_i=T'(2);
+        early_req_addr_i=32'h10000540;#1;
+        if(!dc_req_valid_o || dc_early_valid_o || !dc_req_store_o)
+            $fatal(1,"younger early query displaced older store first execution cycle");
+        tick();step();lsu_req_valid_i=0;early_req_valid_i=0;
+        tick();step();
+        if(!early_resp_valid_o || early_resp_hit_o || early_resp_tag_o!=T'(2))
+            $fatal(1,"younger conflicting query needs fixed failed response");
+        prep(0,32'h10000500,0,0,0);complete(0,0,0,0,0);
+        authorize();beat_done(0,32'h12345678,0,0);
         // A downstream request remains stable until D$ accepts it.
         dc_req_ready_i = 0;
         issue(32'h2003, 32'h10000004, 0, T'(1));

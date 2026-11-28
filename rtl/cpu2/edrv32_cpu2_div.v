@@ -13,7 +13,7 @@ module edrv32_cpu2_div #(
     // Age-selected issue request.
     input wire div_req_valid_i,
     output wire div_req_ready_o,
-    input wire [(FPU_FORMAT == "NONE" ? 2 : FPU_FORMAT == "F" ? 3 : 4)-1:0] div_req_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] div_req_tag_i,
     input wire [31:0] div_req_instr_i,
     input wire [31:0] div_req_src1_i,
     input wire [31:0] div_req_src2_i,
@@ -21,7 +21,7 @@ module edrv32_cpu2_div #(
     // Local completion source; integer results are zero extended in FD.
     output wire div_complete_valid_o,
     input wire div_complete_ready_i,
-    output wire [(FPU_FORMAT == "NONE" ? 2 : FPU_FORMAT == "F" ? 3 : 4)-1:0] div_complete_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] div_complete_tag_o,
     output wire [(FPU_FORMAT == "FD" ? 64 : 32)-1:0] div_complete_data_o,
     output wire [4:0] div_complete_flags_o,
     output wire div_complete_exception_o,
@@ -29,11 +29,11 @@ module edrv32_cpu2_div #(
     output wire [31:0] div_complete_tval_o,
 
     // C05: compare distances from the current head, including the cancel boundary.
-    input wire [(FPU_FORMAT == "NONE" ? 2 : FPU_FORMAT == "F" ? 3 : 4)-1:0] age_head_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] age_head_i,
     input wire cancel_valid_i,
-    input wire [(FPU_FORMAT == "NONE" ? 2 : FPU_FORMAT == "F" ? 3 : 4)-1:0] cancel_tag_i
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] cancel_tag_i
 );
-    localparam TAG_WIDTH = FPU_FORMAT == "NONE" ? 2 : FPU_FORMAT == "F" ? 3 : 4;
+    localparam TAG_WIDTH = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam DATA_WIDTH = FPU_FORMAT == "FD" ? 64 : 32;
     wire [TAG_WIDTH-1:0] cancel_distance_w;
     wire [TAG_WIDTH-1:0] request_distance_w;

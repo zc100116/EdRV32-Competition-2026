@@ -11,87 +11,87 @@ module edrv32_cpu2_alu #(
     input wire lsu_complete_device_i,
     // Frozen early return: data was captured locally by LSU before operand capture.
     input wire early_resp_valid_i,
-    input wire [(FPU_FORMAT=="FD" ? 4 : FPU_FORMAT=="F" ? 3 : 2)-1:0] early_resp_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] early_resp_tag_i,
     input wire early_resp_hit_i,
     input wire [31:0] early_resp_data_i,
     input wire wb0_valid_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] wb0_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] wb0_tag_i,
     input wire [31:0] wb0_data_i,
     input wire wb1_valid_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] wb1_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] wb1_tag_i,
     input wire [31:0] wb1_data_i,
     input wire clk_i,
     input wire rst_n_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] age_head_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] age_head_i,
     input wire cancel_valid_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] cancel_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] cancel_tag_i,
     input wire execute0_valid_i,
     output wire execute0_ready_o,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute0_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute0_tag_i,
     input wire [32-1:0] execute0_pc_i,
     input wire [32-1:0] execute0_instr_i,
     input wire [32-1:0] execute0_src1_i,
     input wire [32-1:0] execute0_src2_i,
     input wire [32-1:0] execute0_imm_i,
     input wire execute0_late_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute0_source1_tag_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute0_source2_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute0_source1_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute0_source2_tag_i,
     input wire execute0_source1_wait_i,
     input wire execute0_source2_wait_i,
     input wire execute1_valid_i,
     output wire execute1_ready_o,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute1_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute1_tag_i,
     input wire [32-1:0] execute1_pc_i,
     input wire [32-1:0] execute1_instr_i,
     input wire [32-1:0] execute1_src1_i,
     input wire [32-1:0] execute1_src2_i,
     input wire [32-1:0] execute1_imm_i,
     input wire execute1_late_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute1_source1_tag_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] execute1_source2_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute1_source1_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] execute1_source2_tag_i,
     input wire execute1_source1_wait_i,
     input wire execute1_source2_wait_i,
     input wire alu0_complete_valid_i,
     input wire alu0_complete_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] alu0_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] alu0_complete_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] alu0_complete_data_i,
     input wire alu1_complete_valid_i,
     input wire alu1_complete_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] alu1_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] alu1_complete_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] alu1_complete_data_i,
     input wire branch_complete_valid_i,
     input wire branch_complete_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] branch_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] branch_complete_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] branch_complete_data_i,
     input wire mul_complete_valid_i,
     input wire mul_complete_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] mul_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] mul_complete_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] mul_complete_data_i,
     input wire div_complete_valid_i,
     input wire div_complete_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] div_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] div_complete_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] div_complete_data_i,
     input wire lsu_complete_valid_i,
     input wire lsu_complete_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] lsu_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] lsu_complete_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] lsu_complete_data_i,
     input wire csr_complete_valid_i,
     input wire csr_complete_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] csr_complete_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] csr_complete_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] csr_complete_data_i,
     input wire fp_resp_valid_i,
     input wire fp_resp_ready_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] fp_resp_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] fp_resp_tag_i,
     input wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] fp_resp_data_i,
     output wire alu0_complete_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] alu0_complete_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] alu0_complete_tag_o,
     output wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] alu0_complete_data_o,
     output wire [5-1:0] alu0_complete_flags_o,
     output wire alu0_complete_exception_o,
     output wire [4-1:0] alu0_complete_cause_o,
     output wire [32-1:0] alu0_complete_tval_o,
     output wire alu1_complete_valid_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] alu1_complete_tag_o,
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] alu1_complete_tag_o,
     output wire [((|(FPU_FORMAT ^ "FD")) ? 32 : 64)-1:0] alu1_complete_data_o,
     output wire [5-1:0] alu1_complete_flags_o,
     output wire alu1_complete_exception_o,
@@ -99,7 +99,7 @@ module edrv32_cpu2_alu #(
     output wire [32-1:0] alu1_complete_tval_o,
     output wire [1:0] debug_mem_valid_o
 );
-    localparam T = (FPU_FORMAT == "NONE") ? 2 : (FPU_FORMAT == "F") ? 3 : 4;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     localparam B = (FPU_FORMAT == "FD") ? 64 : 32;
     generate
         if (ISSUE_WIDTH > 0) begin : g_pipe0
@@ -140,9 +140,12 @@ module edrv32_cpu2_alu #(
             wire input_cancel_w = execute0_valid_i && cancel_valid_i &&
                 (input_age_w >= cancel_age_w);
             wire ex_early_w = ex_valid_r && !ex_late_r;
-            wire mem_ready_w = mem_valid_r && !mem_wait1_r && !mem_wait2_r;
-            assign execute0_ready_o = ex_late_r ? !mem_valid_r : !skid_valid_r;
-            wire transfer_w = ex_valid_r && ex_late_r && !mem_valid_r;
+            // Both operand choices below come from local/LSU registers, never D$ RAM.
+            wire mem_ready_w = mem_valid_r && (!mem_wait1_r || mem_source1_early_w) &&
+                (!mem_wait2_r || mem_source2_early_w);
+            assign execute0_ready_o = ex_late_r ?
+                (!mem_valid_r || (mem_ready_w && !skid_valid_r)) : !skid_valid_r;
+            wire transfer_w = ex_valid_r && ex_late_r;
             reg lock_valid_r;
             reg [T-1:0] lock_tag_r;
             wire candidate_skid_w = skid_valid_r &&
@@ -175,7 +178,9 @@ module edrv32_cpu2_alu #(
             wire ex_done_w = select_ex_w && alu0_complete_ready_i;
             wire skid_done_w = select_skid_w && alu0_complete_ready_i;
             wire mem_done_w = select_mem_w && alu0_complete_ready_i;
-            wire stash_w = ex_early_w && !skid_valid_r && !ex_done_w;
+            // Reuse the EX result skid when a ready MEM slot is replaced under backpressure.
+            wire stash_mem_w = transfer_w && mem_valid_r && !mem_done_w && !mem_cancel_w;
+            wire stash_w = (ex_early_w && !skid_valid_r && !ex_done_w) || stash_mem_w;
             wire ex_hit1_w;
             wire [31:0] ex_capture1_w;
             wire ex_source1_early_w = early_resp_valid_i && early_resp_hit_i &&
@@ -393,20 +398,24 @@ module edrv32_cpu2_alu #(
                     ex_result_w = ex_a_w + ex_imm_r;
                 end
             end
+            wire [31:0] mem_operand1_w = mem_wait1_r && mem_source1_early_w ?
+                early_resp_data_i : mem_src1_r;
+            wire [31:0] mem_operand2_w = mem_wait2_r && mem_source2_early_w ?
+                early_resp_data_i : mem_src2_r;
             wire [31:0] mem_b_w = (mem_instr_r[6:0] == 7'h13) ?
-                mem_imm_r : mem_src2_r;
+                mem_imm_r : mem_operand2_w;
             reg [31:0] mem_a_w;
             reg [31:0] mem_result_w;
             always @(*) begin
-                mem_a_w = mem_src1_r;
+                mem_a_w = mem_operand1_w;
                 mem_result_w = 32'd0;
                 if ((mem_instr_r[6:0] == 7'h33) &&
                     (mem_instr_r[31:25] == 7'h10)) begin
                     case (mem_instr_r[14:12])
-                        3'd2: mem_a_w = mem_src1_r << 1;
-                        3'd4: mem_a_w = mem_src1_r << 2;
-                        3'd6: mem_a_w = mem_src1_r << 3;
-                        default: mem_a_w = mem_src1_r;
+                        3'd2: mem_a_w = mem_operand1_w << 1;
+                        3'd4: mem_a_w = mem_operand1_w << 2;
+                        3'd6: mem_a_w = mem_operand1_w << 3;
+                        default: mem_a_w = mem_operand1_w;
                     endcase
                 end
                 case (mem_instr_r[14:12])
@@ -456,8 +465,8 @@ module edrv32_cpu2_alu #(
             end
             always @(posedge clk_i) begin
                 if (stash_w) begin
-                    skid_tag_r <= ex_tag_r;
-                    skid_data_r <= ex_result_w;
+                    skid_tag_r <= stash_mem_w ? mem_tag_r : ex_tag_r;
+                    skid_data_r <= stash_mem_w ? mem_result_w : ex_result_w;
                 end
                 if (transfer_w) begin
                     mem_tag_r <= ex_tag_r;
@@ -536,9 +545,12 @@ module edrv32_cpu2_alu #(
             wire input_cancel_w = execute1_valid_i && cancel_valid_i &&
                 (input_age_w >= cancel_age_w);
             wire ex_early_w = ex_valid_r && !ex_late_r;
-            wire mem_ready_w = mem_valid_r && !mem_wait1_r && !mem_wait2_r;
-            assign execute1_ready_o = ex_late_r ? !mem_valid_r : !skid_valid_r;
-            wire transfer_w = ex_valid_r && ex_late_r && !mem_valid_r;
+            // Both operand choices below come from local/LSU registers, never D$ RAM.
+            wire mem_ready_w = mem_valid_r && (!mem_wait1_r || mem_source1_early_w) &&
+                (!mem_wait2_r || mem_source2_early_w);
+            assign execute1_ready_o = ex_late_r ?
+                (!mem_valid_r || (mem_ready_w && !skid_valid_r)) : !skid_valid_r;
+            wire transfer_w = ex_valid_r && ex_late_r;
             reg lock_valid_r;
             reg [T-1:0] lock_tag_r;
             wire candidate_skid_w = skid_valid_r &&
@@ -571,7 +583,9 @@ module edrv32_cpu2_alu #(
             wire ex_done_w = select_ex_w && alu1_complete_ready_i;
             wire skid_done_w = select_skid_w && alu1_complete_ready_i;
             wire mem_done_w = select_mem_w && alu1_complete_ready_i;
-            wire stash_w = ex_early_w && !skid_valid_r && !ex_done_w;
+            // Reuse the EX result skid when a ready MEM slot is replaced under backpressure.
+            wire stash_mem_w = transfer_w && mem_valid_r && !mem_done_w && !mem_cancel_w;
+            wire stash_w = (ex_early_w && !skid_valid_r && !ex_done_w) || stash_mem_w;
             wire ex_hit1_w;
             wire [31:0] ex_capture1_w;
             wire ex_source1_early_w = early_resp_valid_i && early_resp_hit_i &&
@@ -789,20 +803,24 @@ module edrv32_cpu2_alu #(
                     ex_result_w = ex_a_w + ex_imm_r;
                 end
             end
+            wire [31:0] mem_operand1_w = mem_wait1_r && mem_source1_early_w ?
+                early_resp_data_i : mem_src1_r;
+            wire [31:0] mem_operand2_w = mem_wait2_r && mem_source2_early_w ?
+                early_resp_data_i : mem_src2_r;
             wire [31:0] mem_b_w = (mem_instr_r[6:0] == 7'h13) ?
-                mem_imm_r : mem_src2_r;
+                mem_imm_r : mem_operand2_w;
             reg [31:0] mem_a_w;
             reg [31:0] mem_result_w;
             always @(*) begin
-                mem_a_w = mem_src1_r;
+                mem_a_w = mem_operand1_w;
                 mem_result_w = 32'd0;
                 if ((mem_instr_r[6:0] == 7'h33) &&
                     (mem_instr_r[31:25] == 7'h10)) begin
                     case (mem_instr_r[14:12])
-                        3'd2: mem_a_w = mem_src1_r << 1;
-                        3'd4: mem_a_w = mem_src1_r << 2;
-                        3'd6: mem_a_w = mem_src1_r << 3;
-                        default: mem_a_w = mem_src1_r;
+                        3'd2: mem_a_w = mem_operand1_w << 1;
+                        3'd4: mem_a_w = mem_operand1_w << 2;
+                        3'd6: mem_a_w = mem_operand1_w << 3;
+                        default: mem_a_w = mem_operand1_w;
                     endcase
                 end
                 case (mem_instr_r[14:12])
@@ -852,8 +870,8 @@ module edrv32_cpu2_alu #(
             end
             always @(posedge clk_i) begin
                 if (stash_w) begin
-                    skid_tag_r <= ex_tag_r;
-                    skid_data_r <= ex_result_w;
+                    skid_tag_r <= stash_mem_w ? mem_tag_r : ex_tag_r;
+                    skid_data_r <= stash_mem_w ? mem_result_w : ex_result_w;
                 end
                 if (transfer_w) begin
                     mem_tag_r <= ex_tag_r;

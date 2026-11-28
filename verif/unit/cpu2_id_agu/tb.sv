@@ -1,6 +1,6 @@
 // Self-checking CV04 RF/WB eligibility and actual-issue query association.
 module tb #(parameter ISSUE_WIDTH = 2, parameter [31:0] FPU_FORMAT = "NONE");
-    localparam T = FPU_FORMAT=="NONE" ? 2 : FPU_FORMAT=="F" ? 3 : 4;
+    localparam T = ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3;
     reg clk_i=0;
     reg rst_n_i=0;
     always #5 clk_i=~clk_i;

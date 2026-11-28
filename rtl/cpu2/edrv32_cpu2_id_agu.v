@@ -16,7 +16,7 @@ module edrv32_cpu2_id_agu #(
     input wire [4:0] id_rs1_i,
     input wire [4:0] id_candidates_i,
     input wire [31:0] id_imm_i,
-    input wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] id_tag_i,
+    input wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] id_tag_i,
     input wire rs1_pending_i,
     // Committed values, forwarded before the address adder.
     input wire wb0_valid_i,
@@ -30,7 +30,7 @@ module edrv32_cpu2_id_agu #(
     output wire [31:0] id_addr_o,
     output wire early_req_valid_o,
     output wire [31:0] early_req_addr_o,
-    output wire [(FPU_FORMAT>"FD"?2:FPU_FORMAT>"F"?4:3)-1:0] early_req_tag_o
+    output wire [(ISSUE_WIDTH==2||FPU_FORMAT=="FD"?4:3)-1:0] early_req_tag_o
 );
     wire [31:0] bank0_data_w;
     wire [31:0] bank1_data_w;
