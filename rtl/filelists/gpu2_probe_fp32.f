@@ -5,6 +5,7 @@
 ../tech/edrv32_ram_gpu2_queue.v
 ../gpu2/edrv32_gpu2_fp32_lz24.v
 ../gpu2/edrv32_gpu2_fp32_lz77.v
+../gpu2/edrv32_gpu2_fp32_lz56.v
 ../gpu2/edrv32_gpu2_fp32_scalar.v
 ../gpu2/edrv32_gpu2_fp32_add.v
 ../gpu2/edrv32_gpu2_fp32.v

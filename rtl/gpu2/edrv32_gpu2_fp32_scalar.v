@@ -66,8 +66,8 @@ module edrv32_gpu2_fp32_scalar (
     // Each metadata array has one writer; data are never reset.
     reg [31:0] special_data_r [0:8];
     reg special_r [0:8];
-    reg product_sign_r [0:5];
-    reg addend_sign_r [0:5];
+    reg product_sign_r [0:6];
+    reg addend_sign_r [0:6];
     reg product_zero_r [0:5];
     reg addend_zero_r [0:1];
     integer metadata_idx;
@@ -93,7 +93,7 @@ module edrv32_gpu2_fp32_scalar (
         end
         product_sign_r[0] <= product_sign_w;
         addend_sign_r[0] <= c_w[31];
-        for (metadata_idx = 1; metadata_idx < 6; metadata_idx = metadata_idx + 1) begin
+        for (metadata_idx = 1; metadata_idx < 7; metadata_idx = metadata_idx + 1) begin
             product_sign_r[metadata_idx] <= product_sign_r[metadata_idx-1];
             addend_sign_r[metadata_idx] <= addend_sign_r[metadata_idx-1];
         end
@@ -107,12 +107,10 @@ module edrv32_gpu2_fp32_scalar (
     wire [23:0] s2_b_w;
     wire [23:0] s2_c_w;
     wire signed [9:0] s2_product_exp_w;
-    wire signed [9:0] s2_delta_w;
     assign s2_a_w = s1_a_r << s1_a_lz_r;
     assign s2_b_w = s1_b_r << s1_b_lz_r;
     assign s2_c_w = s1_c_r << s1_c_lz_r;
     assign s2_product_exp_w = s1_a_exp_r + s1_b_exp_r;
-    assign s2_delta_w = s1_c_exp_r - s2_product_exp_w;
     wire [47:0] s5_product_w;
     edrv32_apm_gpu2_u24xu24 u_product (
         .clk_i(clk_i),
@@ -121,140 +119,138 @@ module edrv32_gpu2_fp32_scalar (
         .b_i(s2_b_w),
         .product_o(s5_product_w)
     );
+    wire signed [9:0] s2_product_top_w;
+    wire signed [9:0] s2_base_w;
+    wire [9:0] s2_product_delta_w;
+    wire [9:0] s2_c_delta_w;
+    assign s2_product_top_w = s2_product_exp_w + 10'sd1;
+    assign s2_base_w = product_zero_r[0] ? s1_c_exp_r
+        : addend_zero_r[0] || s2_product_top_w >= s1_c_exp_r
+            ? s2_product_top_w : s1_c_exp_r;
+    assign s2_product_delta_w = s2_base_w - s2_product_top_w;
+    assign s2_c_delta_w = s2_base_w - s1_c_exp_r;
     reg [23:0] s2_c_r;
-    reg signed [9:0] s2_delta_r;
-    reg signed [9:0] base_exp_r [2:6];
-    reg far_r [2:5];
+    reg [5:0] s2_c_shift_r;
+    reg [5:0] product_shift_r [2:5];
+    reg signed [9:0] base_exp_r [2:7];
     integer align_idx;
     always @(posedge clk_i) begin
         s2_c_r <= s2_c_w;
-        s2_delta_r <= s2_delta_w;
-        far_r[2] <= ((s2_delta_w > 10'sd27) || product_zero_r[0])
-            && !addend_zero_r[0];
-        base_exp_r[2] <= (((s2_delta_w > 10'sd27) || product_zero_r[0])
-            && !addend_zero_r[0]) ? s1_c_exp_r - 10'sd27 : s2_product_exp_w;
+        s2_c_shift_r <= s2_c_delta_w > 10'd55 ? 6'd56 : s2_c_delta_w[5:0];
+        product_shift_r[2] <= product_zero_r[0] || s2_product_delta_w > 10'd55
+            ? 6'd56 : s2_product_delta_w[5:0];
+        base_exp_r[2] <= s2_base_w;
         for (align_idx = 3; align_idx < 6; align_idx = align_idx + 1)
-            far_r[align_idx] <= far_r[align_idx-1];
-        for (align_idx = 3; align_idx < 7; align_idx = align_idx + 1)
+            product_shift_r[align_idx] <= product_shift_r[align_idx-1];
+        for (align_idx = 3; align_idx < 8; align_idx = align_idx + 1)
             base_exp_r[align_idx] <= base_exp_r[align_idx-1];
     end
-    wire [6:0] s3_shift_w;
-    wire s3_right_w;
-    wire signed [9:0] s3_right_shift_w;
-    assign s3_right_w = s2_delta_r < -10'sd25 && !product_zero_r[1];
-    assign s3_right_shift_w = -10'sd25 - s2_delta_r;
-    assign s3_shift_w = far_r[2] || product_zero_r[1] ? 7'd52
-        : s3_right_w ? (s3_right_shift_w > 10'sd76 ? 7'd77 : s3_right_shift_w[6:0])
-        : 7'd25 + s2_delta_r[6:0];
-    wire [76:0] s3_input_w;
-    wire [76:0] s3_low_w;
-    assign s3_input_w = {53'b0, s2_c_r};
-    assign s3_low_w = s3_right_w ? s3_input_w >> s3_shift_w[2:0]
-        : s3_input_w << s3_shift_w[2:0];
-    reg [76:0] s3_c_r;
-    reg [6:3] s3_shift_r;
-    reg s3_right_r;
-    reg s3_sticky_r;
+    wire [55:0] s3_c_input_w;
+    wire [55:0] s3_c_shift_w;
+    wire s3_sticky_w;
+    assign s3_c_input_w = {1'b0, s2_c_r, 31'b0};
+    assign s3_c_shift_w = s3_c_input_w >> s2_c_shift_r[2:0];
+    assign s3_sticky_w = |(s3_c_input_w & ~(56'hffffffffffffff << s2_c_shift_r[2:0]));
+    reg [55:0] s3_c_r;
+    reg [5:3] s3_c_shift_r;
     always @(posedge clk_i) begin
-        s3_c_r <= s3_low_w;
-        s3_shift_r <= s3_shift_w[6:3];
-        s3_right_r <= s3_right_w;
-        s3_sticky_r <= s3_right_w
-            && (|(s3_input_w & ~(77'h1fffffffffffffffffff << s3_shift_w[2:0])));
+        s3_c_r <= {s3_c_shift_w[55:1], s3_c_shift_w[0] | s3_sticky_w};
+        s3_c_shift_r <= s2_c_shift_r[5:3];
     end
-    wire [76:0] s4_shift_w;
+    wire [55:0] s4_c_shift_w;
     wire s4_sticky_w;
-    assign s4_shift_w = s3_right_r ? s3_c_r >> {s3_shift_r, 3'b0}
-        : s3_c_r << {s3_shift_r, 3'b0};
-    assign s4_sticky_w = s3_sticky_r || (s3_right_r
-        && (|(s3_c_r & ~(77'h1fffffffffffffffffff << {s3_shift_r, 3'b0}))));
-    reg [76:0] s4_c_r;
-    reg [76:0] s5_c_r;
+    assign s4_c_shift_w = s3_c_r >> {s3_c_shift_r, 3'b0};
+    assign s4_sticky_w = |(s3_c_r & ~(56'hffffffffffffff << {s3_c_shift_r, 3'b0}));
+    reg [55:0] s4_c_r;
+    reg [55:0] s5_c_r;
+    reg [55:0] s6_c_r;
     always @(posedge clk_i) begin
-        s4_c_r <= {s4_shift_w[76:1], s4_shift_w[0] | s4_sticky_w};
+        s4_c_r <= {s4_c_shift_w[55:1], s4_c_shift_w[0] | s4_sticky_w};
         s5_c_r <= s4_c_r;
+        s6_c_r <= s5_c_r;
     end
-    wire [76:0] s6_product_w;
+    wire [55:0] s6_product_input_w;
+    wire [55:0] s6_product_shift_w;
+    wire s6_product_sticky_w;
+    assign s6_product_input_w = {1'b0, s5_product_w, 7'b0};
+    assign s6_product_shift_w = s6_product_input_w >> product_shift_r[5];
+    assign s6_product_sticky_w = |(s6_product_input_w
+        & ~(56'hffffffffffffff << product_shift_r[5]));
+    reg [55:0] s6_product_r;
+    always @(posedge clk_i) begin
+        s6_product_r <= {s6_product_shift_w[55:1],
+            s6_product_shift_w[0] | s6_product_sticky_w};
+    end
     wire opposite_w;
-    assign s6_product_w = product_zero_r[4] ? 77'b0 : far_r[5] ? 77'b1
-        : {27'b0, s5_product_w, 2'b0};
-    assign opposite_w = product_sign_r[4] != addend_sign_r[4];
-    reg [77:0] s6_forward_r;
-    reg [76:0] s6_reverse_r;
+    assign opposite_w = product_sign_r[5] != addend_sign_r[5];
+    reg [56:0] s7_forward_r;
+    reg [55:0] s7_reverse_r;
     always @(posedge clk_i) begin
-        s6_forward_r <= opposite_w ? {1'b0, s6_product_w} - {1'b0, s5_c_r}
-            : {1'b0, s6_product_w} + {1'b0, s5_c_r};
-        s6_reverse_r <= s5_c_r - s6_product_w;
+        s7_forward_r <= opposite_w ? {1'b0, s6_product_r} - {1'b0, s6_c_r}
+            : {1'b0, s6_product_r} + {1'b0, s6_c_r};
+        s7_reverse_r <= s6_c_r - s6_product_r;
     end
-    wire [76:0] s7_magnitude_w;
-    wire [6:0] s7_lz_w;
-    assign s7_magnitude_w = s6_forward_r[77] ? s6_reverse_r : s6_forward_r[76:0];
-    edrv32_gpu2_fp32_lz77 u_lz_sum (
-        .data_i(s7_magnitude_w),
-        .count_o(s7_lz_w)
+    wire [55:0] s8_magnitude_w;
+    wire [6:0] s8_lz_w;
+    assign s8_magnitude_w = s7_forward_r[56] ? s7_reverse_r : s7_forward_r[55:0];
+    edrv32_gpu2_fp32_lz56 u_lz_sum (
+        .data_i(s8_magnitude_w),
+        .count_o(s8_lz_w)
     );
-    wire signed [9:0] s7_exp_w;
-    wire signed [9:0] s7_limit_w;
-    assign s7_exp_w = base_exp_r[6] + 10'sd28 - $signed({3'b0, s7_lz_w});
-    assign s7_limit_w = base_exp_r[6] + 10'sd154;
-    reg [76:0] s7_magnitude_r;
-    reg signed [9:0] s7_exp_r;
-    reg [6:0] s7_shift_r;
-    reg s7_right_r;
-    reg s7_sign_r;
-    reg s7_zero_r;
-    always @(posedge clk_i) begin
-        s7_magnitude_r <= s7_magnitude_w;
-        s7_exp_r <= s7_exp_w;
-        s7_right_r <= s7_limit_w < 0;
-        s7_shift_r <= s7_limit_w < 0 ? (s7_limit_w < -10'sd76 ? 7'd77
-            : -s7_limit_w[6:0]) : s7_exp_w < -10'sd126
-                ? s7_limit_w[6:0] : s7_lz_w;
-        s7_zero_r <= !(|s7_magnitude_w);
-        s7_sign_r <= !(|s7_magnitude_w)
-            ? product_sign_r[5] && addend_sign_r[5]
-            : s6_forward_r[77] ? addend_sign_r[5] : product_sign_r[5];
-    end
-    wire [76:0] s8_shift_w;
-    wire s8_sticky_w;
-    assign s8_shift_w = s7_right_r ? s7_magnitude_r >> s7_shift_r
-        : s7_magnitude_r << s7_shift_r;
-    assign s8_sticky_w = s7_right_r
-        && (|(s7_magnitude_r & ~(77'h1fffffffffffffffffff << s7_shift_r)));
-    reg [23:0] s8_mantissa_r;
-    reg s8_increment_r;
+    wire signed [9:0] s8_exp_w;
+    wire signed [9:0] s8_limit_w;
+    assign s8_exp_w = base_exp_r[7] + 10'sd1 - $signed({3'b0, s8_lz_w});
+    assign s8_limit_w = base_exp_r[7] + 10'sd127;
+    reg [55:0] s8_magnitude_r;
     reg signed [9:0] s8_exp_r;
+    reg [5:0] s8_shift_r;
+    reg s8_right_r;
     reg s8_sign_r;
     reg s8_zero_r;
     always @(posedge clk_i) begin
-        s8_mantissa_r <= s8_shift_w[76:53];
-        s8_increment_r <= s8_shift_w[52]
-            && (s8_shift_w[53] || (|s8_shift_w[51:0]) || s8_sticky_w);
-        s8_exp_r <= s7_exp_r < -10'sd126 ? -10'sd126 : s7_exp_r;
-        s8_sign_r <= s7_sign_r;
-        s8_zero_r <= s7_zero_r;
+        s8_magnitude_r <= s8_magnitude_w;
+        s8_exp_r <= s8_exp_w;
+        s8_right_r <= s8_limit_w < 0;
+        s8_shift_r <= s8_limit_w < 0 ? (s8_limit_w < -10'sd55 ? 6'd56
+            : -s8_limit_w[5:0]) : s8_exp_w < -10'sd126
+                ? s8_limit_w[5:0] : s8_lz_w[5:0];
+        s8_zero_r <= !(|s8_magnitude_w);
+        s8_sign_r <= !(|s8_magnitude_w)
+            ? product_sign_r[6] && addend_sign_r[6]
+            : s7_forward_r[56] ? addend_sign_r[6] : product_sign_r[6];
     end
-    reg [24:0] s9_rounded_r;
+    wire [55:0] s9_shift_w;
+    wire s9_sticky_w;
+    assign s9_shift_w = s8_right_r ? s8_magnitude_r >> s8_shift_r
+        : s8_magnitude_r << s8_shift_r;
+    assign s9_sticky_w = s8_right_r
+        && (|(s8_magnitude_r & ~(56'hffffffffffffff << s8_shift_r)));
+    reg [23:0] s9_mantissa_r;
+    reg s9_increment_r;
     reg signed [9:0] s9_exp_r;
     reg s9_sign_r;
     reg s9_zero_r;
     always @(posedge clk_i) begin
-        s9_rounded_r <= {1'b0, s8_mantissa_r} + {24'b0, s8_increment_r};
-        s9_exp_r <= s8_exp_r;
+        s9_mantissa_r <= s9_shift_w[55:32];
+        s9_increment_r <= s9_shift_w[31]
+            && (s9_shift_w[32] || (|s9_shift_w[30:0]) || s9_sticky_w);
+        s9_exp_r <= s8_exp_r < -10'sd126 ? -10'sd126 : s8_exp_r;
         s9_sign_r <= s8_sign_r;
         s9_zero_r <= s8_zero_r;
     end
+    wire [24:0] s10_rounded_w;
     wire signed [9:0] s10_exp_w;
     wire [7:0] s10_biased_w;
-    assign s10_exp_w = s9_exp_r + $signed({9'b0, s9_rounded_r[24]});
+    assign s10_rounded_w = {1'b0, s9_mantissa_r} + {24'b0, s9_increment_r};
+    assign s10_exp_w = s9_exp_r + $signed({9'b0, s10_rounded_w[24]});
     assign s10_biased_w = s10_exp_w[7:0] + 8'd127;
     always @(posedge clk_i) begin
         result_o <= special_r[8] ? special_data_r[8]
             : s9_zero_r ? {s9_sign_r, 31'b0}
             : s10_exp_w > 10'sd127 ? {s9_sign_r, 8'hff, 23'b0}
-            : {s9_sign_r, s9_rounded_r[24] ? s10_biased_w
-                : s9_rounded_r[23] ? s10_biased_w : 8'b0,
-                s9_rounded_r[24] ? s9_rounded_r[23:1] : s9_rounded_r[22:0]};
+            : {s9_sign_r, s10_rounded_w[24] ? s10_biased_w
+                : s10_rounded_w[23] ? s10_biased_w : 8'b0,
+                s10_rounded_w[24] ? s10_rounded_w[23:1] : s10_rounded_w[22:0]};
     end
     reg tap_special_r [0:5];
     reg [31:0] tap_special_data_r [0:5];

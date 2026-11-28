@@ -1,0 +1,8 @@
+name: gpu2_fp32_full
+top: tb
+files: files.f
+simulator: verilator
+timeout: 300
+pass: PASS
+tier: full
+runner: python3 verif/unit/gpu2_fp32/run_all.py --full
