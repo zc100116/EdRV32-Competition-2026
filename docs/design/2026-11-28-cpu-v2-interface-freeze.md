@@ -463,6 +463,8 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 
 **WB 拍边界（I04/I01/I02）。** `wb{j}_*`、`fp_wb_*` 是 commit 的寄存 WB 级输出：退休沿 t（`retire_count` 释放队头的同一沿）把退休项的 valid/rd/data 及新增 `wb{j}_tag`、`fp_wb_tag`（T）打入 WB 寄存器；周期 t+1 这些寄存值出现在端口上，沿 t+1 RF/LVT/FP RF 架构写入、IB 候选更新（"当沿架构写"指 WB 寄存值所在拍的结束沿）。周期 t+1 内 RF 用 WB 寄存值显式转发（CPU5.2，沿 RF 探针）。副本 `wb{j}_valid_copy/rd_copy` 与主口在同一退休沿各自寄存。MEM 等待源与 rs3 补读在沿 t+1 按 `wb{j}_tag`/`fp_wb_tag` 捕获 WB 数据——与架构写同沿，即"同沿 WB 数据供等待源"；被释放的 tag 最早在沿 t+1 重新分配、沿 t+2 之后才可能完成，不会混淆。issue 的 rs3 补读改用 `fp_wb_tag`，不再接 `retire_count`（取代上文"rs3 补读捕获"一段）。WB 级只装已退休项，不受取消影响。
 
+**F2 纠正 trace（I01）。** frontend→top 增 `f2_redirect_valid`1、`f2_redirect_pc`32（被纠正字 PC）、`f2_redirect_target`32（新取指 PC）、`f2_redirect_cause`2（1 方向、3 非控制），为注册的 F2 纠正当拍；top 转成 `trace_redirect_*`，stage 固定 1，tag 填 0（未分配完成 tag）。只供 trace。
+
 ## 影响
 
 审核通过后需修改CPU spec2.2/2.3、3、4、5、6及9的C01–C09；FPU spec2.4、3、4、5.1/5.4/5.5及9的F01/F02/F04/F05；CPU testplan2/4/6/7的T02/T03及对应CV02–CV14；FPU testplan4/6/7的FT01/FT03及FV10–FV15。C10、F03/F06与FT03中的未测数值继续待定；旧cpu/cache规格不改，外部总线无差异。
