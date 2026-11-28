@@ -479,7 +479,7 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 
 **trace 目的域编码（V01）。** `trace_rd_domain` 每条 2 位：0 无写、1 整数、2 FP，同 allocate dest 编码；整数写 x0 记 0，FP f0 记 2。
 
-**FP 单精度单元端口（F02）。** fma32/convert/short 只用 `FPU_FORMAT` 派生 T；源固定 32 位、只保留实际使用的源（fma32 src1/2/3、convert src1/int_src、short src1/2），NaN-boxing 检查与扩展由 fpu_top 完成；握手/响应/取消字段照表。
+**FP 单精度单元端口（F02；convert/short 由 F04 修订）。** fma32 只用 `FPU_FORMAT` 派生 T、源固定 32 位；convert/short 的源/结果为 B 位（F 32、FD 64），承担全部 .S/.D 转换与短操作；各单元只保留实际使用的源（fma32 src1/2/3、convert src1/int_src、short src1/2），NaN-boxing 检查与扩展由 fpu_top 完成；握手/响应/取消字段照表。
 
 **FP 单元完成背压（F02）。** 单元输出设 2 项 skid；流水使能（含 APM 包装新增的 `enable_i` 接 APM 时钟使能）是由 skid 占用算出的**寄存**信号，按规格 5.1 区域复制（根 ≤8、叶 ≤16）；`unit_req_ready` 用同一寄存使能。不得把下游 `unit_resp_ready` 组合接到流水使能或 req_ready。无背压时 II1。
 
