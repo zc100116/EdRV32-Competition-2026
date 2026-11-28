@@ -1,0 +1,11 @@
++incdir+../../../rtl/include
+../../../rtl/tech/edrv32_apm_gpu2_head.v
+../../../rtl/tech/edrv32_apm_gpu2_shift16.v
+../../../rtl/tech/edrv32_apm_gpu2_u24xu24.v
+../../../rtl/tech/edrv32_ram_gpu2_queue.v
+../../../rtl/gpu2/edrv32_gpu2_fp32_lz24.v
+../../../rtl/gpu2/edrv32_gpu2_fp32_lz77.v
+../../../rtl/gpu2/edrv32_gpu2_fp32_scalar.v
+../../../rtl/gpu2/edrv32_gpu2_fp32_add.v
+../../../rtl/gpu2/edrv32_gpu2_fp32.v
+tb_vec.sv

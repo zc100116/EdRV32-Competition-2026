@@ -1,0 +1,11 @@
++incdir+../include
+../tech/edrv32_apm_gpu2_head.v
+../tech/edrv32_apm_gpu2_shift16.v
+../tech/edrv32_apm_gpu2_u24xu24.v
+../tech/edrv32_ram_gpu2_queue.v
+../gpu2/edrv32_gpu2_fp32_lz24.v
+../gpu2/edrv32_gpu2_fp32_lz77.v
+../gpu2/edrv32_gpu2_fp32_scalar.v
+../gpu2/edrv32_gpu2_fp32_add.v
+../gpu2/edrv32_gpu2_fp32.v
+../../fpga/rtl/edrv32_fpga_probe_gpu2_fp32_top.v

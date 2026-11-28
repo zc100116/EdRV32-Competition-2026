@@ -1,0 +1,2 @@
+# GPU v2 FP32 probe: 220 MHz, 10% margin over the 200 MHz design point.
+create_clock -name {clk_gpu2_fp32} [get_ports {clk_i}] -period {4.545} -waveform {0.000 2.272}
