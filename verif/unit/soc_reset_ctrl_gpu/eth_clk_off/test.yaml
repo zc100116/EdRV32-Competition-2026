@@ -1,0 +1,9 @@
+top: tb
+files: files.f
+defines:
+parameters:
+software:
+timeout: 60
+pass: PASS
+tier: smoke full
+simulator: verilator iverilog
