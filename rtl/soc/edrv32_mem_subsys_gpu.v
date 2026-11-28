@@ -165,6 +165,25 @@ module edrv32_mem_subsys_gpu (
     output wire irq_mem_xbar_o
 );
 
+    // Register the complete no-backpressure DDR return together at the mem entrance.
+    reg ddr_rvalid_r;
+    reg [3:0] ddr_rid_r;
+    reg [255:0] ddr_rdata_r;
+    reg [1:0] ddr_rresp_r;
+    reg ddr_rlast_r;
+    always @(posedge clk_mem_i or negedge rst_mem_core_n_i) begin
+        if (!rst_mem_core_n_i) ddr_rvalid_r <= 1'b0;
+        else ddr_rvalid_r <= ddr_rvalid_i;
+    end
+    always @(posedge clk_mem_i) begin
+        if (ddr_rvalid_i) begin
+            ddr_rid_r <= ddr_rid_i;
+            ddr_rdata_r <= ddr_rdata_i;
+            ddr_rresp_r <= ddr_rresp_i;
+            ddr_rlast_r <= ddr_rlast_i;
+        end
+    end
+
     // SoC 5.3: one preserved reset copy per destination region.
     wire [2:0] rst_mem_regs_n_w;
     wire rst_sys_gateway_n_w;
@@ -481,11 +500,11 @@ module edrv32_mem_subsys_gpu (
         .ddr_arlen_o(ddr_arlen_o),
         .ddr_arvalid_o(ddr_arvalid_o),
         .ddr_arready_i(ddr_arready_i),
-        .ddr_rid_i(ddr_rid_i),
-        .ddr_rdata_i(ddr_rdata_i),
-        .ddr_rresp_i(ddr_rresp_i),
-        .ddr_rlast_i(ddr_rlast_i),
-        .ddr_rvalid_i(ddr_rvalid_i),
+        .ddr_rid_i(ddr_rid_r),
+        .ddr_rdata_i(ddr_rdata_r),
+        .ddr_rresp_i(ddr_rresp_r),
+        .ddr_rlast_i(ddr_rlast_r),
+        .ddr_rvalid_i(ddr_rvalid_r),
 
         // Media APB control registers.
         .apb_paddr_i(xbar_apb_paddr_i),

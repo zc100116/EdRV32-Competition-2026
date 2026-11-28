@@ -380,3 +380,20 @@ for stem in ['aud','rbuf']:
 
 状态：已实现；本次范围的单元回归和静态检查完成。PDS 物理时序，特别是上述返回仲裁
 余段，以及完整系统的上板测试留待后续板级任务。
+
+## R-8：clk_mem 跨区路径寄存（2026-11-28）
+
+- P3 的 DRM 读出后增加一级 elastic 寄存器，原 skid 接受下游反压；负载、ID、last 和描述符槽号同拍前进。
+  sent/端口在途与 ring credit 仍在实际 P3 握手后释放，增加 1 拍延迟，连续 beat 仍可每拍一个（事务边界多 1 拍）。
+- GPU mem 子系统入口把 DDR R 的 valid、ID、data、resp、last 一起寄存，切断 PHY valid 到 RAM 写使能/available 的路径；
+  增加 1 拍延迟，无反压且每拍接受一个返回。到 xbar 上游 P3 增加 2 拍，其他 xbar 端口增加 1 拍。
+- 板级适配器 mem_ready 输出到 SoC 之间用 clk_mem 寄存电平，增加 1 拍初始化延迟；不使用依赖该信号的 mem 复位。
+- DDR 网关 64 位 lane mux 后、异步 FIFO 写入前增加一级 elastic 寄存器；增加 1 拍，连续 beat 仍可每拍一个。
+  CDC FIFO、端口及事务顺序不变；上述带宽为结构吞吐能力，最终频率/布线收益待 PDS 实测。
+- 协调者取消任务第 4 条：ETH 已有 setup 本地寄存，本次 ETH/APB 桥保持原实现。
+- 本机验证（本节所在提交）：`python3 tools/regress.py full --path verif/unit/mem_xbar_gpu -j 1`；
+  `python3 tools/regress.py smoke --path verif/unit/mem_ddr_gw -j 1` 及同目录 `full`；未运行 SoC 仿真。
+- Lint：`verilator --lint-only -Wall +define+SIM_MODE --top-module edrv32_mem_subsys_gpu -F rtl/filelists/mem_subsys_gpu.f`；
+  GPU 顶层以 `tools.regress.expand_files(Path('rtl/filelists/gpu_soc.f'))` 展开去重后用同样选项检查；ETH 单文件 `-Wall`。
+  风格：`python3 tools/check/verilog_style.py` 检查完整 GPU SoC 文件列表及板级顶层。
+- 结果：mem_xbar_gpu full 4 PASS；mem_ddr_gw full 8 PASS、smoke 2 PASS；全部风格/lint 0 告警。

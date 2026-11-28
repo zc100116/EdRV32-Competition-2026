@@ -98,6 +98,26 @@ module edrv32_mem_ddr_gw (
     wire bridge_rlast_w;
     wire bridge_rvalid_w;
     wire bridge_rready_w;
+    reg fifo_rvalid_r;
+    reg [63:0] fifo_rdata_r;
+    reg [3:0] fifo_rid_r;
+    reg [1:0] fifo_rresp_r;
+    reg fifo_rlast_r;
+    wire fifo_rready_w;
+    // Register the lane mux before the remote asynchronous FIFO write port.
+    assign bridge_rready_w = !fifo_rvalid_r || fifo_rready_w;
+    always @(posedge clk_mem_i or negedge rst_mem_n_i[0]) begin
+        if (!rst_mem_n_i[0]) fifo_rvalid_r <= 1'b0;
+        else if (bridge_rready_w) fifo_rvalid_r <= bridge_rvalid_w;
+    end
+    always @(posedge clk_mem_i) begin
+        if (bridge_rvalid_w && bridge_rready_w) begin
+            fifo_rdata_r <= bridge_rdata_w;
+            fifo_rid_r <= bridge_rid_w;
+            fifo_rresp_r <= bridge_rresp_w;
+            fifo_rlast_r <= bridge_rlast_w;
+        end
+    end
     reg read_busy_r;
     reg write_busy_r;
     wire source_arready_w;
@@ -186,12 +206,12 @@ module edrv32_mem_ddr_gw (
         .m_axi_arburst_o(bridge_arburst_w),
         .m_axi_arvalid_o(bridge_arvalid_w),
         .m_axi_arready_i(bridge_arready_w),
-        .m_axi_rid_i(bridge_rid_w),
-        .m_axi_rdata_i(bridge_rdata_w),
-        .m_axi_rresp_i(bridge_rresp_w),
-        .m_axi_rlast_i(bridge_rlast_w),
-        .m_axi_rvalid_i(bridge_rvalid_w),
-        .m_axi_rready_o(bridge_rready_w)
+        .m_axi_rid_i(fifo_rid_r),
+        .m_axi_rdata_i(fifo_rdata_r),
+        .m_axi_rresp_i(fifo_rresp_r),
+        .m_axi_rlast_i(fifo_rlast_r),
+        .m_axi_rvalid_i(fifo_rvalid_r),
+        .m_axi_rready_o(fifo_rready_w)
     );
 
     localparam [1:0] S_READ_IDLE = 2'd0;
