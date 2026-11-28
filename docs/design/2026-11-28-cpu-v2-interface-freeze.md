@@ -498,6 +498,7 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 | D02/D03 BTB 读写时序 | BTB 查询只旁路已登记的 pending 写项，不旁路当拍 EX 训练（与模型 query 读沿前旧项一致，缩短 F1） |
 | D01 store 与 miss/维护 | 已准备可缓存 store 记录的是准备时的命中 way；D$ miss 或维护在已准备 store 存在时不得替换/失效行：miss 启动前等待已准备记录与 lsu_store_drained，miss 或维护已启动时年轻可缓存 store 的响应不置 prepared，保留上下文在其后重放。命中流不加拍、不加端口 |
 | D01 store 与 APB 维护 | D$ 接受改变 valid/way 的维护（APB invalidate/clean-invalidate）时，仍 pending 的可缓存 store 记为 stale；其 dc_commit 在 ready 前按保存地址重查，必要时重新写分配。已退休 store 在该路径上的填充 AXI 错误按 wb_err/cache_irq 异步上报，不回 dc_done。FENCE/FENCE.I 的 clean 不改 valid/way |
+| D$ 读口年龄仲裁 | 已登记的较老普通执行请求优先于年轻 early 查询；同拍冲突的 early 查询固定回 hit0（年轻 load 走普通访问），成功 early 复用仍并行；选择来自已登记状态 |
 | D05 MUL / D07 W1 短 load / D08 CSR | 按规格 5.2 延迟表实现：MUL 消费者 EX 间隔 4；单发射合格且命中短 load 间隔 1（early 捕获结果在下一拍作为源寄存值供 ID/EX，不组合反馈 hit）；CSR 读 2 且有序边界不多于模型 II3 |
 
 ## 影响

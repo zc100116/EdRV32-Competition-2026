@@ -249,7 +249,7 @@ FPU内部 top→fma32/fma64/divsqrt/convert/short 使用 `unit_req_valid/ready/i
 | dc_fence_done | D$→commit | 1 | 已接受fence完成脉冲，无错误旁路 |
 | dc_wb_event / dc_miss_event | D$→CSR | 各1 | 写回AW/新miss事件，非请求等待拍数 |
 
-D$寄存准入需预留同步RAM返回及发现miss后一拍的已接受请求槽；不沿旧核静默丢第二请求。early占用读口时不再接受另一普通读，选择来自已登记的端口预约；其后实际请求 `dc_req_early=1` 时重用捕获结果，失败则普通访问本地顺延。缓存响应device只是准备阶段，LSU不把它当完成数据；提交头授权后才发设备AXI，最终dc_done后才退休。可缓存store直到提交不改架构内存。LSU store队列必须保存已准备未提交及已提交未排空的可缓存store beat，4项（M02模型扫描：两宽三负载相对无限队列损失≤0.07%，2项最高11%，docs/reports/2026-11-28-perf-cpu2-store-queue.md）；已提交项按序每拍至多一项经dc_commit排入写缓冲，取消只清未提交项。年轻load（含early查询）与队列中任一项同字时，不得复用early结果，必须在LSU本地等待这些项排入写缓冲后再走普通访问，由写缓冲按字节合并；load返回路径不增加队列合并。队列满时只有store不能接收（ready来自寄存计数）。FENCE/维护必须等已提交队列项和写缓冲都空（lsu_store_drained）。
+D$寄存准入需预留同步RAM返回及发现miss后一拍的已接受请求槽；不沿旧核静默丢第二请求。读口按年龄仲裁：已登记的较老普通请求优先，同拍冲突的年轻early查询返回hit0；early占用读口时不再接受另一普通读，选择来自已登记的端口预约；其后实际请求 `dc_req_early=1` 时重用捕获结果，失败则普通访问本地顺延。缓存响应device只是准备阶段，LSU不把它当完成数据；提交头授权后才发设备AXI，最终dc_done后才退休。可缓存store直到提交不改架构内存。LSU store队列必须保存已准备未提交及已提交未排空的可缓存store beat，4项（M02模型扫描：两宽三负载相对无限队列损失≤0.07%，2项最高11%，docs/reports/2026-11-28-perf-cpu2-store-queue.md）；已提交项按序每拍至多一项经dc_commit排入写缓冲，取消只清未提交项。年轻load（含early查询）与队列中任一项同字时，不得复用early结果，必须在LSU本地等待这些项排入写缓冲后再走普通访问，由写缓冲按字节合并；load返回路径不增加队列合并。队列满时只有store不能接收（ready来自寄存计数）。FENCE/维护必须等已提交队列项和写缓冲都空（lsu_store_drained）。
 
 ### 3.8 前端与 I$、维护控制
 
