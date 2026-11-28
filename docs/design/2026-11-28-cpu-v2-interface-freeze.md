@@ -477,6 +477,10 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 
 **CSR 读改写原子性（I04）。** CSRRS/RC/RW 的写值以本条 `csr_req` 返回的旧值为基（与 rd 一致），CSR 模块保存该基值到 `csr_commit`；issue 已保证 CSR 单发且等更老项到有序边界，同时只有一条未提交 CSR。
 
+**trace 目的域编码（V01）。** `trace_rd_domain` 每条 2 位：0 无写、1 整数、2 FP，同 allocate dest 编码；整数写 x0 记 0，FP f0 记 2。
+
+**FP 单精度单元端口（F02）。** fma32/convert/short 只用 `FPU_FORMAT` 派生 T；源固定 32 位、只保留实际使用的源（fma32 src1/2/3、convert src1/int_src、short src1/2），NaN-boxing 检查与扩展由 fpu_top 完成；握手/响应/取消字段照表。
+
 ## 影响
 
 审核通过后需修改CPU spec2.2/2.3、3、4、5、6及9的C01–C09；FPU spec2.4、3、4、5.1/5.4/5.5及9的F01/F02/F04/F05；CPU testplan2/4/6/7的T02/T03及对应CV02–CV14；FPU testplan4/6/7的FT01/FT03及FV10–FV15。C10、F03/F06与FT03中的未测数值继续待定；旧cpu/cache规格不改，外部总线无差异。

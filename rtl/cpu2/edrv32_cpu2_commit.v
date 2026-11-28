@@ -450,7 +450,9 @@ module edrv32_cpu2_commit #(
     assign trace_pc_w[31:0] = head0_pc_i;
     assign trace_instr_w[31:0] = head0_trace_instr_i;
     assign trace_rd_w[4:0] = head0_rd_i;
-    assign trace_rd_domain_w[1:0] = head0_dest_i;
+    // x0 integer writes report domain 0 (no write); FP f0 stays 2.
+    assign trace_rd_domain_w[1:0] =
+        (head0_dest_i == 2'd1 && head0_rd_i == 5'd0) ? 2'd0 : head0_dest_i;
     assign trace_rd_data_w[63:0] = {{(64-B){1'b0}}, retire_data0_w};
     assign trace_flags_w[4:0] = head0_flags_i;
     assign trace_mem_valid_w[0] = retire0_w && (head0_trace_instr_i[6:0] == 7'h03 ||
@@ -467,7 +469,9 @@ module edrv32_cpu2_commit #(
             assign trace_pc_w[63:32] = head1_pc_i;
             assign trace_instr_w[63:32] = head1_trace_instr_i;
             assign trace_rd_w[9:5] = head1_rd_i;
-            assign trace_rd_domain_w[3:2] = head1_dest_i;
+            // x0 integer writes report domain 0 (no write); FP f0 stays 2.
+            assign trace_rd_domain_w[3:2] =
+                (head1_dest_i == 2'd1 && head1_rd_i == 5'd0) ? 2'd0 : head1_dest_i;
             assign trace_rd_data_w[127:64] = {{(64-B){1'b0}}, retire_data1_w};
             assign trace_flags_w[9:5] = head1_flags_i;
             assign trace_mem_valid_w[1] = retire1_w && (head1_trace_instr_i[6:0] == 7'h03 ||
