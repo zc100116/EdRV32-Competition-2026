@@ -453,6 +453,10 @@ completion 收到 `branch_redirect_valid` 时，若该 tag 之后有存活项，
 
 **完成队列 PC（I04，用户 2026-11-28 确认）。** PC 在分配沿由 `allocate{j}_pc` 写 PC 宏，`*_complete` 不加 pc；无 rd 项仍占一个完成写槽（写 done/异常记录），模型口径不变。
 
+**early 与普通请求共读口（I05）。** 两者都由 LSU 发出，仲裁在 LSU 内完成，D$ 不另加预约端口：`dc_early_valid` 有效的拍，LSU 不新拉起普通读 `dc_req_valid`（early 优先，符合 CPU5.5"early 占用读口时不再接受另一普通读"）；若普通请求上一拍已拉起、仍在等待（valid 必须保持），本拍 early 让出读口，固定下一拍返回 `dc_early_hit=00`，该 load 走普通访问。`dc_req_ready` 仍只来自登记容量。实际请求 `dc_req_early=1` 只在紧接的下一拍被接受时复用 early 结果，否则按普通访问。
+
+**空队列下一 PC（I04）。** `branch_complete` 增 `branch_complete_next_pc`32（不跳为 PC+4）；completion 每 bank 用一份 `edrv32_ram_cpu2_completion` 保存，随完成记录写入，给出 `head{j}_next_pc`；commit 退休控制类用它更新 `next_pc_r`，非控制类用 PC+4。
+
 ## 影响
 
 审核通过后需修改CPU spec2.2/2.3、3、4、5、6及9的C01–C09；FPU spec2.4、3、4、5.1/5.4/5.5及9的F01/F02/F04/F05；CPU testplan2/4/6/7的T02/T03及对应CV02–CV14；FPU testplan4/6/7的FT01/FT03及FV10–FV15。C10、F03/F06与FT03中的未测数值继续待定；旧cpu/cache规格不改，外部总线无差异。
