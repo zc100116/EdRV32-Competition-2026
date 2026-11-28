@@ -1,0 +1,12 @@
+# FV08: stdlib Fraction/isqrt; seed S=3875, D=3907; F and FD.
+top: tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+simulator: verilator
+timeout: 120
+pass: PASS
+tier: smoke
+group: verif/unit/cpu2_fpu_divsqrt
+runner: python3 verif/unit/cpu2_fpu_divsqrt/run.py smoke
