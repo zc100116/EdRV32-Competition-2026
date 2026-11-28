@@ -27,21 +27,27 @@ def main():
     with output.open('w') as stream:
         for base, mode in (('small', 'early-div'), ('full', 'radix4-early')):
             divs = divider_cycles(directory, program, trace, mode, complete_schedule=True)
-            for entries in (None, 4, 8, 12, 16):
+            cases = [(False, False, None), (True, False, None)] + [
+                (head, early, n) for head in (False, True) for early in (False, True)
+                for n in (4, 8, 12, 16)]
+            for head, same_cycle, entries in cases:
                 options = dict(BASES[base])
                 if base == 'full':
-                    options.update(direction_predictor=RamTage(4, 256), second_level=True,
+                    options.update(direction_predictor=RamTage(4, 512), second_level=True,
                                    unaligned_fetch=True)
                 result = simulate(program, trace, symbols['start_time'], symbols['stop_time'],
                                   'V3s', **options, division_cycles=divs,
                                   frontend_probe=IcacheProbe(1), frontend_registered_margin=True,
-                                  completion_entries=entries, completion_addresses=addresses)
-                result.update(workload=args.workload, base=base, capacity=entries)
+                                  completion_entries=entries, completion_addresses=addresses,
+                                  completion_same_cycle_credit=same_cycle,
+                                  completion_head_authorization=head)
+                result.update(workload=args.workload, base=base, capacity=entries,
+                              credit_same_cycle=same_cycle, head_authorization=head)
                 if args.workload == 'coremark':
                     result['coremark_per_mhz'] = 1e7 / result['cycles']
                 stream.write(json.dumps(result) + '\n')
                 stream.flush()
-                print(base, entries, result['cycles'], flush=True)
+                print(base, entries, head, same_cycle, result['cycles'], flush=True)
 
 
 if __name__ == '__main__':

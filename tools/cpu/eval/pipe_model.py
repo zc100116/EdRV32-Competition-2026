@@ -66,11 +66,12 @@ STORE_HEAD_CYCLES = 2
 class CompletionWindow:
     """CPU5.1: ordered entries, registered done and next-cycle freed credit."""
 
-    def __init__(self, capacity, width):
-        self.capacity = capacity
+    def __init__(self, capacity, width, same_cycle_credit=False):
+        self.capacity = capacity if capacity else float('inf')
         self.width = width
+        self.same_cycle_credit = same_cycle_credit
         self.entries = deque()
-        self.credit = capacity
+        self.credit = self.capacity
         self.sequence = 0
 
     def allocate(self, record, tick, latency, side_effect=False, beats=1):
@@ -98,6 +99,8 @@ class CompletionWindow:
                 entry[2] = False
                 break
             retired.append(self.entries.popleft()[0])
+        if self.same_cycle_credit:
+            self.credit += len(retired)
         return retired
 
     def cancel_after(self, record):
@@ -362,7 +365,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
              ideal_pairing=False,
              fetch_bytes=None, queue_depth=None, prediction_capture=None,
              fixed_predictions=None, unaligned_fetch=False, load_merge=None,
-             completion_entries=None, completion_addresses=None):
+             completion_entries=None, completion_addresses=None, completion_same_cycle_credit=False,
+             completion_head_authorization=False):
     if fusion:
         program, trace = fuse_program(program, trace, fusion, begin, end)
     changes = INORDER_VARIANTS.get(variant, {})
@@ -397,7 +401,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                         loads=0, adjacent_load_base=0, serial_pairs=0,
                         cache_instructions=0, cache_hits=0, branches=0, direction_misses=0,
                         f2_corrections=0, control_misses=0)
-    window = CompletionWindow(completion_entries, issue_width) if completion_entries else None
+    window = (CompletionWindow(completion_entries, issue_width, completion_same_cycle_credit)
+              if completion_entries or completion_head_authorization else None)
     window_stalls = 0
     retired_instructions = 0
     last_writes = {}
@@ -1020,7 +1025,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 beats = 2 if inst.bits & 0x7f in {0x07, 0x27} and (
                     (inst.bits >> 12) & 7) == 3 else 1
                 window.allocate(record, tick, latency + int(decode_split),
-                                inst.kind == 'store' or device or beats == 2, beats)
+                                completion_head_authorization and (
+                                    inst.kind == 'store' or device or beats == 2), beats)
 
         # F2 can append the arriving hit and drain two instructions into IB in the same cycle.
         decision = m_redirect or redirect or d_redirect
@@ -1310,7 +1316,9 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     if fusion or window:
         result['instructions'] = retired_instructions
     if window:
-        result.update(completion_entries=completion_entries, completion_stall_cycles=window_stalls)
+        result.update(completion_entries=completion_entries, completion_stall_cycles=window_stalls,
+                      completion_same_cycle_credit=completion_same_cycle_credit,
+                      completion_head_authorization=completion_head_authorization)
     result.update(experimental)
     result['predictor_bits'] = predictor.direction.bits if predictor.direction else 2 * pht
     result['ipc'] = result['instructions'] / result['cycles']

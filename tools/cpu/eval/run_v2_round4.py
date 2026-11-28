@@ -48,7 +48,9 @@ def main():
     parser.add_argument('--input-root', type=Path, default=Path('build/v017/input'))
     parser.add_argument('--zba-root', type=Path, default=Path('build/cpu-v2/isa/zba'))
     parser.add_argument('--output', type=Path)
-    parser.add_argument('--completion-entries', type=int, default=4)
+    parser.add_argument('--completion-entries', type=int, default=0)
+    parser.add_argument('--completion-same-cycle-credit', action='store_true')
+    parser.add_argument('--completion-head-authorization', action='store_true')
     args = parser.parse_args()
     output = args.output or Path('build/cpu-v2-round4') / (args.workload + '.jsonl')
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -83,7 +85,9 @@ def main():
                                       'V3s', **options, frontend_probe=IcacheProbe(1),
                                       frontend_registered_margin=True,
                                       completion_entries=args.completion_entries,
-                                      completion_addresses=addresses)
+                                      completion_addresses=addresses,
+                                      completion_same_cycle_credit=args.completion_same_cycle_credit,
+                                      completion_head_authorization=args.completion_head_authorization)
                     result.update(instructions=instructions, ipc=instructions / result['cycles'])
                     if merge:
                         result['merge'] = dict(candidates=merge.candidates, merged=merge.merged,

@@ -29,15 +29,20 @@ def resources():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('workload', choices=('coremark', 'vision', 'render'))
-    parser.add_argument('--completion-entries', type=int, default=4)
+    parser.add_argument('--completion-entries', type=int, default=0)
+    parser.add_argument('--completion-same-cycle-credit', action='store_true')
+    parser.add_argument('--completion-head-authorization', action='store_true')
     args = parser.parse_args()
     directory = Path('build/cpu-v2/isa/zba') / args.workload
     program, symbols, trace = program_and_trace(directory)
-    addresses = memory_trace(directory, program, trace) if args.completion_entries else None
+    addresses = memory_trace(directory, program, trace) if (args.completion_entries or
+                                                               args.completion_head_authorization) else None
     divs = divider_cycles(directory, program, trace, 'early-div', complete_schedule=True)
     result = simulate(program, trace, symbols['start_time'], symbols['stop_time'],
                       'V3s', **BASES['small'], division_cycles=divs,
                       completion_entries=args.completion_entries, completion_addresses=addresses,
+                      completion_same_cycle_credit=args.completion_same_cycle_credit,
+                      completion_head_authorization=args.completion_head_authorization,
                       frontend_probe=IcacheProbe(1), frontend_registered_margin=True)
     instructions = trace.index(symbols['stop_time']) - trace.index(symbols['start_time'])
     result.update(workload=args.workload, name='single-small-zba', instructions=instructions,

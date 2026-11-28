@@ -41,6 +41,34 @@ class Pipeline(unittest.TestCase):
         self.assertEqual(window.edge(3), records[2:])
         self.assertEqual(window.credit, 2)
 
+    def test_completion_retirement_edge_credit(self):
+        window = CompletionWindow(4, 2, same_cycle_credit=True)
+        records = [Record(instruction(pc), False, False, 0, 0, ()) for pc in range(4)]
+        for record in records[:2]:
+            window.allocate(record, 0, 1)
+        window.edge(1)
+        for record in records[2:]:
+            window.allocate(record, 1, 1)
+        self.assertEqual(window.edge(2), records[:2])
+        self.assertEqual(window.credit, 2)
+        stream = [instruction(pc) for pc in range(0, 1200, 4)]
+        options = dict(perfect_frontend=True, perfect_prediction=True)
+        original = run(stream, 'V3s', **options)
+        self.assertEqual(run(stream, 'V3s', completion_entries=0, **options), original)
+        early = run(stream, 'V3s', completion_entries=4,
+                    completion_same_cycle_credit=True, **options)
+        self.assertAlmostEqual(early['ipc'], 2, delta=.02)
+
+    def test_completion_unbounded_head_authorization_is_separate(self):
+        stream = [instruction(pc, 'store') for pc in range(0, 80, 4)]
+        options = dict(perfect_frontend=True, perfect_prediction=True)
+        baseline = run(stream, 'V3s', **options)
+        head_only = run(stream, 'V3s', completion_head_authorization=True, **options)
+        self.assertEqual(baseline['cycles'], 20)
+        self.assertEqual(head_only['instructions'], 20)
+        self.assertEqual(head_only['cycles'], 57)
+        self.assertEqual(head_only['completion_stall_cycles'], 0)
+
     def test_completion_order_width_and_cancellation(self):
         window = CompletionWindow(8, 1)
         records = [Record(instruction(pc), False, False, 0, 0, ()) for pc in range(3)]
